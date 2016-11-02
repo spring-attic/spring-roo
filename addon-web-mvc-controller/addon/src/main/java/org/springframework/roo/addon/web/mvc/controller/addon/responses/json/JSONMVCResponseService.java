@@ -184,4 +184,14 @@ public class JSONMVCResponseService implements ControllerMVCResponseService {
   public String getControllerNameModifier() {
     return CONTROLLER_NAME_MODIFIER;
   }
+
+  @Override
+  public boolean requiresJsonDeserializer() {
+    return true;
+  }
+
+  @Override
+  public boolean requiresJsonMixin() {
+    return true;
+  }
 }

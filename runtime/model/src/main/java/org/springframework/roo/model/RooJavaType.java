@@ -17,6 +17,10 @@ public final class RooJavaType {
       "org.springframework.roo.addon.dod.annotations.RooDataOnDemand");
   public static final JavaType ROO_DB_MANAGED = new JavaType(
       "org.springframework.roo.addon.dbre.annotations.RooDbManaged");
+  public static final JavaType ROO_DESERIALIZER = new JavaType(
+      "org.springframework.roo.addon.web.mvc.controller.annotations.config.RooDeserializer");
+  public static final JavaType ROO_DOMAIN_MODEL_MODULE = new JavaType(
+      "org.springframework.roo.addon.web.mvc.controller.annotations.config.RooDomainModelModule");
   public static final JavaType ROO_EQUALS = new JavaType(
       "org.springframework.roo.addon.javabean.annotations.RooEquals");
   public static final JavaType ROO_GWT_LOCATOR = new JavaType(
@@ -41,6 +45,8 @@ public final class RooJavaType {
       "org.springframework.roo.addon.jsf.converter.RooJsfConverter");
   public static final JavaType ROO_JSF_MANAGED_BEAN = new JavaType(
       "org.springframework.roo.addon.jsf.managedbean.RooJsfManagedBean");
+  public static final JavaType ROO_JSON_MIXIN = new JavaType(
+      "org.springframework.roo.addon.web.mvc.controller.annotations.config.RooJsonMixin");
   public static final JavaType ROO_MONGO_ENTITY = new JavaType(
       "org.springframework.roo.addon.layers.repository.mongo.RooMongoEntity");
   public static final JavaType ROO_NEO4J_ENTITY = new JavaType(
@@ -106,9 +112,6 @@ public final class RooJavaType {
 
   public static final JavaType ROO_WEB_MVC_CONFIGURATION = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.config.RooWebMvcConfiguration");
-  public static final JavaType ROO_WEB_MVC_JSON_CONFIGURATION =
-      new JavaType(
-          "org.springframework.roo.addon.web.mvc.controller.annotations.config.RooWebMvcJSONConfiguration");
   public static final JavaType ROO_JSON = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.responses.json.RooJSON");
   public static final JavaType ROO_THYMELEAF = new JavaType(

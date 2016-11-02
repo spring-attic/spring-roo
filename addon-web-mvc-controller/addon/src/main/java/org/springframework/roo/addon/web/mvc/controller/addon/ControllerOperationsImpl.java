@@ -16,10 +16,13 @@ import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.Relation
 import org.springframework.roo.addon.layers.service.addon.ServiceLocator;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.plural.addon.PluralService;
+import org.springframework.roo.addon.web.mvc.controller.addon.config.EntityDeserializerAnnotationValues;
+import org.springframework.roo.addon.web.mvc.controller.addon.config.EntityDeserializerMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.config.JSONMixinAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProvider;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
-import org.springframework.roo.addon.web.mvc.controller.annotations.config.RooWebMvcJSONConfiguration;
+import org.springframework.roo.addon.web.mvc.controller.annotations.config.RooDomainModelModule;
 import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -28,6 +31,7 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -185,31 +189,13 @@ public class ControllerOperationsImpl implements ControllerOperations {
     }
 
     // Create JSON configuration class
-    createJsonConfigurationClass(module);
+    createDomainModelModule(module);
 
     // Create Roo Validator classes
     createClassFromTemplate(module, "CollectionValidator-template._java", "CollectionValidator",
         "validation");
     createClassFromTemplate(module, "ValidatorAdvice-template._java", "ValidatorAdvice",
         "validation");
-
-    // Create Roo JSON converters
-    createClassFromTemplate(module, "BindingErrorException-template._java",
-        "BindingErrorException", "http.converter.json");
-    createClassFromTemplate(module, "BindingResultSerializer-template._java",
-        "BindingResultSerializer", "http.converter.json");
-    createClassFromTemplate(module, "ConversionServiceBeanSerializerModifier-template._java",
-        "ConversionServiceBeanSerializerModifier", "http.converter.json");
-    createClassFromTemplate(module, "ConversionServicePropertySerializer-template._java",
-        "ConversionServicePropertySerializer", "http.converter.json");
-    createClassFromTemplate(module, "DataBinderBeanDeserializerModifier-template._java",
-        "DataBinderBeanDeserializerModifier", "http.converter.json");
-    createClassFromTemplate(module, "DataBinderDeserializer-template._java",
-        "DataBinderDeserializer", "http.converter.json");
-    createClassFromTemplate(module, "FieldErrorSerializer-template._java", "FieldErrorSerializer",
-        "http.converter.json");
-    createClassFromTemplate(module, "ExceptionHandlerAdvice-template._java",
-        "ExceptionHandlerAdvice", "http.converter.json");
 
     // Adding spring.jackson.serialization.indent-output property
     getApplicationConfigService().addProperty(module.getModuleName(),
@@ -253,41 +239,39 @@ public class ControllerOperationsImpl implements ControllerOperations {
   }
 
   /**
-   * Create WebMvcJSONConfiguration.java class and adds it
-   * {@link RooWebMvcJSONConfiguration} annotation
+   * Create DomainModelModule.java class and adds it
+   * {@link RooDomainModelModule} annotation
    *
    * @param module
    *            the Pom where configuration classes should be installed
    */
-  private void createJsonConfigurationClass(Pom module) {
+  private void createDomainModelModule(Pom module) {
 
-    // Create WebMvcJSONConfiguration.java class
-    JavaType webMvcJSONConfiguration =
-        new JavaType(String.format("%s.config.WebMvcJSONConfiguration", module.getGroupId()),
+    // Create DomainModelModule.java class
+    JavaType domainModelModule =
+        new JavaType(String.format("%s.config.jackson.DomainModelModule", module.getGroupId()),
             module.getModuleName());
 
-    Validate.notNull(webMvcJSONConfiguration.getModule(),
+    Validate.notNull(domainModelModule.getModule(),
         "ERROR: Module name is required to generate a valid JavaType");
 
-    final String webMvcJSONConfigurationIdentifier =
-        getPathResolver().getCanonicalPath(webMvcJSONConfiguration.getModule(), Path.SRC_MAIN_JAVA,
-            webMvcJSONConfiguration);
+    final String domainModelModuleIdentifier =
+        getPathResolver().getCanonicalPath(domainModelModule.getModule(), Path.SRC_MAIN_JAVA,
+            domainModelModule);
 
     // Check if file already exists
-    if (!getFileManager().exists(webMvcJSONConfigurationIdentifier)) {
+    if (!getFileManager().exists(domainModelModuleIdentifier)) {
 
       // Creating class builder
       final String mid =
-          PhysicalTypeIdentifier.createIdentifier(webMvcJSONConfiguration, getPathResolver()
-              .getPath(webMvcJSONConfigurationIdentifier));
+          PhysicalTypeIdentifier.createIdentifier(domainModelModule,
+              getPathResolver().getPath(domainModelModuleIdentifier));
       final ClassOrInterfaceTypeDetailsBuilder typeBuilder =
-          new ClassOrInterfaceTypeDetailsBuilder(mid, PUBLIC, webMvcJSONConfiguration,
+          new ClassOrInterfaceTypeDetailsBuilder(mid, PUBLIC, domainModelModule,
               PhysicalTypeCategory.CLASS);
 
-      // Generating @RooWebMvcConfiguration annotation
-      final AnnotationMetadataBuilder annotationMetadata =
-          new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_MVC_JSON_CONFIGURATION);
-      typeBuilder.addAnnotation(annotationMetadata.build());
+      // Generating @RooDomainModelModule annotation
+      typeBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_DOMAIN_MODEL_MODULE));
 
       // Write new class disk
       getTypeManagementService().createOrUpdateTypeOnDisk(typeBuilder.build());
@@ -483,20 +467,163 @@ public class ControllerOperationsImpl implements ControllerOperations {
       return;
     }
 
+    // Check if requires Deserializer
+    if (responseType.requiresJsonDeserializer()) {
+      boolean requiresDeserailizer = false;
+      for (FieldMetadata relationField : entityMetadata.getRelationsAsChild().values()) {
+        // Only de [ANY-TO-ONE] relations requires Deseralizer
+        if (isAnyToOneRelation(relationField)) {
+          requiresDeserailizer = true;
+          break;
+        }
+      }
+      if (requiresDeserailizer) {
+        createJsonDeserializerIfDontExists(entity, itemController.getModule());
+      }
+    }
+
+    if (responseType.requiresJsonMixin()) {
+      createJsonMixinIfDontExists(entity, itemController.getModule());
+    }
+
     // Check multimodule project
     if (getProjectOperations().isMultimoduleProject()) {
       getProjectOperations().addModuleDependency(collectionController.getModule(),
           service.getModule());
       getProjectOperations().addModuleDependency(itemController.getModule(), service.getModule());
-
     }
 
   }
 
-  public void updateControllerWithResponseType(JavaType controller,
-      ControllerMVCResponseService responseType) {
-    // Delegates on the provided responseType to annotate the controller.
-    responseType.annotate(controller);
+  /**
+   * Return true if field is annotated with @OneToOne or @ManyToOne JPA annotation
+   *
+   * @param field
+   * @return
+   */
+  private boolean isAnyToOneRelation(FieldMetadata field) {
+    return field.getAnnotation(JpaJavaType.MANY_TO_ONE) != null
+        || field.getAnnotation(JpaJavaType.ONE_TO_ONE) != null;
+  }
+
+  /**
+   * Create the Json Mixin utility class (annotated with @RooJsonMixin) for target Entity
+   * if it isn't created yet.
+   *
+   * @param entity
+   * @param module
+   */
+  private void createJsonMixinIfDontExists(JavaType entity, String module) {
+    Set<ClassOrInterfaceTypeDetails> allJsonMixin =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_JSON_MIXIN);
+
+    JSONMixinAnnotationValues values;
+    for (ClassOrInterfaceTypeDetails mixin : allJsonMixin) {
+      values = new JSONMixinAnnotationValues(mixin);
+
+      if (entity.equals(values.getEntity())) {
+        // Found mixing. Nothing to do.
+        return;
+      }
+    }
+
+    // Not found. Create class
+    List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    annotations = new ArrayList<AnnotationMetadataBuilder>();
+    AnnotationMetadataBuilder mixinAnnotation =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_JSON_MIXIN);
+    mixinAnnotation.addClassAttribute("entity", entity);
+    annotations.add(mixinAnnotation);
+
+    JavaPackage packageToUse = getDefaultControllerPackage();
+    JavaType mixinClass =
+        new JavaType(String.format("%s.%sJsonMixin", packageToUse.getFullyQualifiedPackageName(),
+            entity.getSimpleTypeName()), module);
+
+    final LogicalPath mixinPath = getPathResolver().getPath(module, Path.SRC_MAIN_JAVA);
+    final String resourceIdentifierItem =
+        getTypeLocationService().getPhysicalTypeCanonicalPath(mixinClass, mixinPath);
+    final String declaredByMetadataIdItem =
+        PhysicalTypeIdentifier.createIdentifier(mixinClass,
+            getPathResolver().getPath(resourceIdentifierItem));
+    ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataIdItem, Modifier.PUBLIC
+            + Modifier.ABSTRACT, mixinClass, PhysicalTypeCategory.CLASS);
+    cidBuilder.setAnnotations(annotations);
+
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+  }
+
+  /**
+   * Create the Json Desearializer utility class (annotated with @RooDeserializer) for target Entity
+   * if it isn't created yet.
+   *
+   * @param entity
+   * @param module
+   */
+  private void createJsonDeserializerIfDontExists(JavaType entity, String module) {
+    Set<ClassOrInterfaceTypeDetails> allDeserializer =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_DESERIALIZER);
+
+    EntityDeserializerAnnotationValues values;
+    for (ClassOrInterfaceTypeDetails deserializer : allDeserializer) {
+      values = new EntityDeserializerAnnotationValues(deserializer);
+
+      if (entity.equals(values.getEntity())) {
+        // Found mixing. Nothing to do.
+        return;
+      }
+    }
+
+    // Not found. Create class
+    List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    annotations = new ArrayList<AnnotationMetadataBuilder>();
+    AnnotationMetadataBuilder mixinAnnotation =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_DESERIALIZER);
+    mixinAnnotation.addClassAttribute("entity", entity);
+    annotations.add(mixinAnnotation);
+
+    JavaPackage packageToUse = getDefaultControllerPackage();
+    JavaType mixinClass =
+        new JavaType(String.format("%s.%sDeserializer",
+            packageToUse.getFullyQualifiedPackageName(), entity.getSimpleTypeName()), module);
+
+    final LogicalPath mixinPath = getPathResolver().getPath(module, Path.SRC_MAIN_JAVA);
+    final String resourceIdentifierItem =
+        getTypeLocationService().getPhysicalTypeCanonicalPath(mixinClass, mixinPath);
+    final String declaredByMetadataIdItem =
+        PhysicalTypeIdentifier.createIdentifier(mixinClass,
+            getPathResolver().getPath(resourceIdentifierItem));
+    ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataIdItem, Modifier.PUBLIC,
+            mixinClass, PhysicalTypeCategory.CLASS);
+    cidBuilder.setAnnotations(annotations);
+
+
+    // Create fields and constructor and field to avoid AspectJ compiler problem
+    ClassOrInterfaceTypeDetails serviceDetails = getServiceLocator().getService(entity);
+    Validate.notNull(serviceDetails, "Can't found service for Entity %s",
+        entity.getFullyQualifiedTypeName());
+
+    FieldMetadata serviceField =
+        EntityDeserializerMetadata.getFieldFor(declaredByMetadataIdItem, serviceDetails.getType());
+    FieldMetadata conversionServiceField =
+        EntityDeserializerMetadata.getFieldFor(declaredByMetadataIdItem,
+            SpringJavaType.CONVERSION_SERVICE);
+    cidBuilder.addField(serviceField);
+    cidBuilder.addField(conversionServiceField);
+
+    ConstructorMetadata constructor =
+        EntityDeserializerMetadata.getConstructor(declaredByMetadataIdItem, serviceField,
+            conversionServiceField);
+    cidBuilder.addConstructor(constructor);
+
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+
   }
 
   /**

@@ -969,4 +969,14 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
   public String getControllerNameModifier() {
     return CONTROLLER_NAME_MODIFIER;
   }
+
+  @Override
+  public boolean requiresJsonDeserializer() {
+    return true;
+  }
+
+  @Override
+  public boolean requiresJsonMixin() {
+    return true;
+  }
 }
