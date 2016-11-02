@@ -115,11 +115,11 @@
             <div id="mainnav" class="navbar-collapse collapse">
 
               <!-- Language select -->
-              <div data-layout-include="fragments/languages :: languages">
+              <ul class="nav navbar-nav navbar-right upper-nav languages" data-layout-include="fragments/languages :: languages">
                 <!-- Content replaced by the session template fragment language.html
                 -->
                 <span>Language data</span>
-              </div>
+              </ul>
 
            </div>
 
