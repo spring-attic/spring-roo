@@ -72,8 +72,8 @@ service --all
 // Generate web layer
 web mvc setup
 web mvc controller --all
-// web mvc view setup --type THYMELEAF
-// web mvc controller --all --responseType THYMELEAF
+web mvc view setup --type THYMELEAF
+web mvc controller --all --responseType THYMELEAF
 
 
 web mvc language --code es
