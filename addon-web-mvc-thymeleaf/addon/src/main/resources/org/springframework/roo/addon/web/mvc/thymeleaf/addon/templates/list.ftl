@@ -516,9 +516,12 @@
                   'searchable': false,
                   'render': function ( data, type, full, meta ) {
                       var baseUrl = [[@{${entity.configuration.controllerPath}/}]];
-                      return '<a role="button" class="btn-action showInfo" href="' + baseUrl + data + '" data-th-text=${r"#{"}label_show${r"}"}>Show</a>' +
-                      '<a role="button" class="btn-action edit" href="' + baseUrl + data + '/edit-form" data-th-text=${r"#{"}label_edit${r"}"}>Edit</a>' +
-                      '<a role="button" class="btn-action delete" data-th-text=${r"#{"}label_delete${r"}"} onclick="javascript:jQuery.delete${entityName}Modal(' + data + ')">Delete</a>'
+                      var showLabel = ${r"/*[[#{label_show}]]*/"} "Show";
+                      var editLabel = ${r"/*[[#{label_edit}]]*/"} "Edit";
+                      var deleteLabel = ${r"/*[[#{label_delete}]]*/"} "Delete";
+                      return '<a role="button" class="btn-action showInfo" href="' + baseUrl + data + '"}>' + showLabel + '</a>' +
+                      '<a role="button" class="btn-action edit" href="' + baseUrl + data + '/edit-form">' + editLabel + '</a>' +
+                      '<a role="button" class="btn-action delete" onclick="javascript:jQuery.delete${entityName}Modal(' + data + ')">' + deleteLabel + '</a>'
                   }
                 }
               ]
@@ -552,19 +555,22 @@
                        jQuery('#confirmDelete${entityName}Modal').modal('hide');
 
                        /** Refresh Datatables */
+                       var infoDeletedItems = ${r"/*[[#{info_deleted_items_number(1)}]]*/"} "1 removed item";
                        jQuery('#${entity.entityItemId}-table').DataTable().ajax.reload();
                        jQuery('#delete${entityName}ModalBody').empty();
-                       jQuery('#delete${entityName}ModalBody').append('<p data-th-text="|${r"#{info_deleted_items_number(1)}"}|" >1 removed item</p>');
+                       jQuery('#delete${entityName}ModalBody').append('<p>' + infoDeletedItems + '</p>');
                        jQuery('#delete${entityName}Modal').modal();
 
                      },
                      error: function(jqXHR) {
+                       var errorRelationLabel = ${r"/*[[#{error_deleting_item_with_relationships}]]*/"} "To delete the selected item, must delete its related elements before.";
+                       var errorDeletingLabel = ${r"/*[[#{error_deleting_item}]]*/"} "Error deleting selected item.";
                        jQuery('#confirmDelete${entityName}Modal').modal('hide');
                        jQuery('#delete${entityName}ModalBody').empty();
                        if(jqXHR.status == 428){
-                         jQuery('#delete${entityName}ModalBody').append('<p data-th-text="|${r"#{error_deleting_item_with_relationships}"}|" >To delete the selected item, must delete its related elements before.</p>');
+                         jQuery('#delete${entityName}ModalBody').append('<p>' + errorRelationLabel + '</p>');
                        } else {
-                         jQuery('#delete${entityName}ModalBody').append('<p data-th-text="|${r"#{error_deleting_item}"}|" >Error deleting selected item.</p>');
+                         jQuery('#delete${entityName}ModalBody').append('<p>' + errorDeletingLabel + '</p>');
                        }
                        jQuery('#delete${entityName}Modal').modal('show');
                      }
