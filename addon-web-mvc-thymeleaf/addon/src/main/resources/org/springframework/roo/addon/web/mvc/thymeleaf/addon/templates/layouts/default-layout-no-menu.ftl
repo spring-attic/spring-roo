@@ -55,16 +55,14 @@
   <body id="body">
 
      <header role="banner">
-        <div data-layout-include="fragments/header :: header">
+        <nav class="navbar navbar-inverse navbar-static-top" data-layout-include="fragments/menu :: menu-languages">
+          <!-- Content replaced by the menu template fragment menu.html -->
+          <span>Application menu</span>
+        </nav>
+        <div class="bg-header" data-layout-include="fragments/header :: header">
           <!-- Content replaced by the header template fragment header.html -->
           <h1>Sample page header for direct display of the template</h1>
         </div>
-
-        <div data-layout-include="fragments/menu :: menu-languages">
-          <!-- Content replaced by the menu template fragment menu.html -->
-          <span>Application menu</span>
-        </div>
-
     </header>
 
     <div class="container bg-container">
