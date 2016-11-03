@@ -15,32 +15,32 @@
        data-th-remove="all"/>
     <title data-th-text="|${r"#{"}label_login${r"}"}- ${projectName}|">Login- ${projectName}</title>
 
-    <!-- Bootstrap -->
+    <!--/* Bootstrap */-->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
       data-th-remove="all"></link>
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <!--/* IE10 viewport hack for Surface/desktop Windows 8 bug */-->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
       data-th-remove="all"></link>
-    <!-- Font Awesome -->
+    <!--/* Font Awesome */-->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
       data-th-remove="all"/>
-    <!-- Bootswatch CSS custom -->
+    <!--/* Bootswatch CSS custom */-->
     <link rel="stylesheet" type="text/css"
       href="../static/public/css/theme.css"
       data-th-remove="all"/>
-    <!-- Roo CSS -->
+    <!--/* Roo CSS */-->
     <link rel="stylesheet" type="text/css"
       href="../static/public/css/springroo.css"
       data-th-remove="all"/>
-   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    <!--/* HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries */-->
+    <!--/* WARNING: Respond.js doesn't work if you view the page via file:// */-->
+    <!--/*[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js" data-th-remove="all"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js" data-th-remove="all"></script>
+    <![endif]*/-->
 
   </head>
 <#if userManagedComponents?has_content && userManagedComponents["body"]??>
@@ -72,7 +72,7 @@
 
             <!-- menu -->
             <div id="mainnav" class="navbar-collapse collapse">
-              <!-- Language -->
+              <!--/* Language */-->
               <ul class="nav navbar-nav navbar-right upper-nav languages">
                 <li class="dropdown">
                   <a class="dropdown-toggle" data-toggle="dropdown" role="button"
@@ -109,10 +109,10 @@
       </header>
       <!-- /HEADER -->
 
-      <!--Main container-->
+      <!-- Main container -->
       <div class="container bg-container">
 
-        <!--Content-->
+        <!-- Content -->
         <section data-layout-fragment="content">
 
           <div class="container content">
@@ -183,10 +183,10 @@
                </div>
             </div>
           </div>
-          <!--/content-->
         </section>
+       <!-- content -->
     </div>
-    <!--container-->
+    <!-- container -->
 
    <footer class="container">
       <div class="row">

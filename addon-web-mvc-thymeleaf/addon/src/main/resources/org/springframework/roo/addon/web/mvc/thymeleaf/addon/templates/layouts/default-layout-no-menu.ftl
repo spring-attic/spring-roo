@@ -66,6 +66,7 @@
     </header>
 
     <div class="container bg-container">
+      <!-- content -->
       <section data-layout-fragment="content">
         <!-- Content replaced by the content fragment of the page displayed -->
         <h2>Sample static body for direct display of the template</h2>
@@ -75,6 +76,7 @@
           Praesent scelerisque neque neque, ac elementum quam dignissim interdum.
           Phasellus et placerat elit.</p>
       </section>
+      <!-- /content -->
     </div>
 
     <footer class="container" data-layout-include="fragments/footer :: footer">
