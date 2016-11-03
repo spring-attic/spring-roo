@@ -75,14 +75,8 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support</artifactId>
         </dependency>
-        <!-- Annotations -->
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.email.annotations</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -96,5 +90,5 @@
         <target.jar.directory>${basedir}/../../target/all</target.jar.directory>
         <main.basedir>${basedir}/../..</main.basedir>
     </properties>
-    
+
 </project>

@@ -32,6 +32,10 @@ public class SpringletsJavaType {
   public static final JavaType SPRINGLETS_DATATABLES = new JavaType(
       "io.springlets.data.web.datatables.Datatables");
 
+  public static final JavaType SPRINGLETS_MAIL_RECEIVER_SERVICE = new JavaType(
+      "io.springlets.mail.MailReceiverService");
+
+
   /**
    * Constructor is private to prevent instantiation
    */

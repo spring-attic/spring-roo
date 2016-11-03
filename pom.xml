@@ -22,7 +22,7 @@
     <description>Spring Roo is a next-generation rapid application development tool for Java developers. It focuses on higher productivity, stock-standard Java APIs, high usability, avoiding engineering trade-offs and facilitating easy Roo removal.</description>
     <inceptionYear>2009</inceptionYear>
     <modules>
-        <!-- NB: Update the <dependencyManagement> section in this pom.xml if you 
+        <!-- NB: Update the <dependencyManagement> section in this pom.xml if you
             add/remove/rename any module below! -->
         <!-- ROO Core -->
         <module>runtime</module>
@@ -50,14 +50,14 @@
         <module>addon-cache</module>
         <module>addon-webflow</module>
         <module>annotations</module>
+        <module>addon-email</module>
         <!-- Web UI -->
         <module>web-ui</module>
-        
+
         <!-- Excluded modules on Spring Roo 2.0.M2 -->
         <!-- <module>addon-tailor</module>
         <module>addon-cloud</module>
         <module>addon-jms</module>
-        <module>addon-email</module>
         <module>addon-web-selenium</module>
         <module>addon-jdbc</module>
         <module>addon-dbre</module>
@@ -782,7 +782,7 @@
                 <artifactId>org.springframework.roo.url.stream</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <!-- Test-scoped dependencies (not OSGi, but not included in any assemblies 
+            <!-- Test-scoped dependencies (not OSGi, but not included in any assemblies
                 either) -->
             <dependency>
                 <groupId>junit</groupId>
@@ -982,7 +982,7 @@
                             </goals>
                         </execution>
                     </executions>
-                </plugin>               
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -1042,7 +1042,7 @@
             </build>
         </profile>
         <profile>
-            <!-- 
+            <!--
             Profile to prevent errors if Spring Roo is compiled using Java 8
             http://stackoverflow.com/questions/15886209/maven-is-not-working-in-java-8-when-javadoc-tags-are-incomplete
             -->

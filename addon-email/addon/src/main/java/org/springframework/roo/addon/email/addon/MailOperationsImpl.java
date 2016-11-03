@@ -1,76 +1,85 @@
 package org.springframework.roo.addon.email.addon;
 
+import static java.lang.reflect.Modifier.PRIVATE;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
-import static org.springframework.roo.model.SpringJavaType.MAIL_SENDER;
 
-import java.io.File;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
+import org.springframework.roo.project.Property;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.email.annotations.RooSimpleMailMessageConfig;
-import org.springframework.roo.addon.propfiles.PropFileOperations;
-import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.Dependency;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.Element;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link MailOperationsImpl}.
- * 
+ *
  * @author Stefan Schmidt
  * @author Juan Carlos García
+ * @author Manuel Iborra
  * @since 1.0
  */
 @Component
 @Service
 public class MailOperationsImpl implements MailOperations {
 
-
   private static final Logger LOGGER = HandlerUtils.getLogger(MailOperationsImpl.class);
 
-  private static final String SPRING_BOOT_STARTER_MAIL = "spring-boot-starter-mail";
-  private static final int PRIVATE_TRANSIENT = Modifier.PRIVATE | Modifier.TRANSIENT;
-  private static final String TEMPLATE_MESSAGE_FIELD = "templateMessage";
+  // Dependencies
+  private static final Dependency DEPENDENCY_SPRING_CONTEXT_SUPPORT = new Dependency(
+      "org.springframework", "spring-context-support", null);
+
+  private static final Dependency DEPENDENCY_SPRING_BOOT_STARTER_MAIL = new Dependency(
+      "org.springframework.boot", "spring-boot-starter-mail", null);
+
+  private static final Dependency DEPENDENCY_SPRINGLETS_STARTER_MAIL = new Dependency(
+      "io.springlets", "springlets-boot-starter-mail", "${springlets.version}");
+
+  private static final Dependency DEPENDENCY_SPRINGLETS_MAIL = new Dependency("io.springlets",
+      "springlets-mail", "${springlets.version}");
+
+  // Properties
+  private static final Property PROPERTY_SPRINGLETS_VERSION = new Property("springlets.version",
+      "1.0.0.BUILD-SNAPSHOT");
+
+  private static final String SEND_MAIL_PREFIX = "spring.mail";
+
+  private static final String RECEIVE_MAIL_PREFIX = "springlets.mail.receiver";
 
   private BundleContext context;
 
-  private PathResolver pathResolver;
-  private ProjectOperations projectOperations;
-  private PropFileOperations propFileOperations;
-  private TypeLocationService typeLocationService;
-  private TypeManagementService typeManagementService;
+  private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
 
   protected void activate(final ComponentContext cContext) {
     this.context = cContext.getBundleContext();
+    this.serviceInstaceManager.activate(this.context);
   }
 
   @Override
@@ -79,367 +88,279 @@ public class MailOperationsImpl implements MailOperations {
   }
 
   @Override
-  public boolean isManageEmailAvailable() {
-    return getProjectOperations().isFocusedProjectAvailable()
-        && getProjectOperations().isFeatureInstalled("email");
-  }
+  public void installSendEmailSupport(String host, String port, String protocol, String username,
+      String password, Boolean starttls, String jndiName, String profile, Pom module,
+      JavaType service, boolean force) {
 
-  @Override
-  public void installEmail(final String hostServer, final MailProtocol protocol, final String port,
-      final String encoding, final String username, final String password) {
-    Validate.notBlank(hostServer, "Host server name required");
+    // Include spring-boot-starter-mail in module
+    getProjectOperations().addDependency(module.getModuleName(),
+        DEPENDENCY_SPRING_BOOT_STARTER_MAIL);
 
-    // Including Spring Boot Mail Starter
-    includeSpringBootStarter(getProjectOperations().getFocusedModuleName());
+    // check if exists any property
+    if (getApplicationConfigService().existsSpringConfigFile(module.getModuleName(), profile)
+        && areDefinedSendEmailProperties(module.getModuleName(), profile) && !force) {
 
-    // Including Spring Boot configuration properties
-    final Map<String, String> props = new HashMap<String, String>();
+      // Send error message to user. He needs to set --force parameter
+      String profileStr = "profile " + profile;
+      if (profile == null) {
+        profileStr = "default profile";
+      }
 
-    if (StringUtils.isNotBlank(hostServer)) {
-      props.put("spring.mail.host", hostServer);
+      String moduleStr = " and module " + module.getModuleName();
+      if (StringUtils.isEmpty(module.getModuleName())) {
+        moduleStr = "";
+      }
+      LOGGER.log(Level.INFO, String.format("There are defined the mail properties to %s"
+          + "%s. Using this command with '--force' " + "will overwrite the current values.",
+          profileStr, moduleStr));
+
+    } else {
+      Map<String, String> propertiesFormattedToInsert =
+          getSendEmailPropertiesFormattedToInsert(host, port, protocol, username, password,
+              starttls, jndiName);
+
+      // Set properties in file
+      getApplicationConfigService().addProperties(module.getModuleName(),
+          propertiesFormattedToInsert, profile, force);
     }
 
-    if (protocol != null) {
-      props.put("spring.mail.protocol", protocol.getProtocol());
-    }
+    if (service != null) {
 
-    if (StringUtils.isNotBlank(port)) {
-      props.put("spring.mail.port", port);
-    }
+      // Add dependency spring-context-support to the module of the selected Service
+      getProjectOperations().addDependency(service.getModule(), DEPENDENCY_SPRING_CONTEXT_SUPPORT);
 
-    if (StringUtils.isNotBlank(encoding)) {
-      props.put("spring.mail.default-encoding", encoding);
-    }
+      // Add JavaMailSender to service
+      final ClassOrInterfaceTypeDetails serviceTypeDetails =
+          getTypeLocationService().getTypeDetails(service);
+      Validate.isTrue(serviceTypeDetails != null, "Cannot locate source for '%s'",
+          service.getFullyQualifiedTypeName());
 
-    if (StringUtils.isNotBlank(username)) {
-      props.put("spring.mail.username", username);
-    }
-
-    if (StringUtils.isNotBlank(password)) {
-      props.put("spring.mail.password", password);
-    }
-
-    /*        getPropFileOperations().addProperties(Path.SRC_MAIN_RESOURCES
-                    .getModulePathId(getProjectOperations().getFocusedModuleName()),
-                    "application.properties", props, true, true);*/
-  }
-
-
-  @Override
-  public void configureTemplateMessage(String from, String subject) {
-
-    // Generating template message 
-    int modifier = Modifier.PUBLIC;
-    JavaType target =
-        new JavaType(getProjectOperations().getFocusedTopLevelPackage()
-            .getFullyQualifiedPackageName().concat(".config.SimpleMailMessageConfig"));
-    final String declaredByMetadataId =
-        PhysicalTypeIdentifier.createIdentifier(target,
-            getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
-    File targetFile =
-        new File(getTypeLocationService().getPhysicalTypeCanonicalPath(declaredByMetadataId));
-
-    if (!targetFile.exists()) {
-      // Prepare class builder
+      final String declaredByMetadataId = serviceTypeDetails.getDeclaredByMetadataId();
       final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-          new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, target,
-              PhysicalTypeCategory.CLASS);
+          new ClassOrInterfaceTypeDetailsBuilder(serviceTypeDetails);
 
-      // Including @Configuration annotation
-      cidBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType(
-          "org.springframework.context.annotation.Configuration")));
-
-      // Including @RooSimpleMailMessageConfig 
-      cidBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType(
-          RooSimpleMailMessageConfig.class)));
+      // Create the field
+      cidBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId, PRIVATE, Arrays
+          .asList(new AnnotationMetadataBuilder(AUTOWIRED)), new JavaSymbolName("mailSender"),
+          SpringJavaType.JAVA_MAIL_SENDER));
 
       getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
     }
+  }
 
-    // Including Spring Boot configuration properties
-    final Map<String, String> props = new HashMap<String, String>();
-
-    if (StringUtils.isNotBlank(from)) {
-      props.put("email.from", from);
+  private Map<String, String> getSendEmailPropertiesFormattedToInsert(String host, String port,
+      String protocol, String username, String password, Boolean starttls, String jndiName) {
+    String starttlsStr = String.valueOf(starttls);
+    if (starttls == null) {
+      starttlsStr = null;
     }
 
-    if (StringUtils.isNotBlank(subject)) {
-      props.put("email.subject", subject);
-    }
-
-    /*        getPropFileOperations().addProperties(Path.SRC_MAIN_RESOURCES
-                    .getModulePathId(getProjectOperations().getFocusedModuleName()),
-                    "application.properties", props, true, true);*/
-
+    Map<String, String> props = new HashMap<String, String>();
+    props.put("spring.mail.host", StringUtils.stripToEmpty(host));
+    props.put("spring.mail.port", StringUtils.stripToEmpty(port));
+    props.put("spring.mail.protocol", StringUtils.stripToEmpty(protocol));
+    props.put("spring.mail.username", StringUtils.stripToEmpty(username));
+    props.put("spring.mail.password", StringUtils.stripToEmpty(password));
+    props.put("spring.mail.properties.mail.smtp.starttls.enable",
+        StringUtils.stripToEmpty(starttlsStr));
+    props.put("spring.mail.jndi-name", StringUtils.stripToEmpty(jndiName));
+    return props;
   }
 
   @Override
-  public void injectEmailTemplate(final JavaType targetType, final JavaSymbolName fieldName,
-      final boolean async) {
-    Validate.notNull(targetType, "Java type required");
-    Validate.notNull(fieldName, "Field name required");
+  public void installReceiveEmailSupport(String host, String port, String protocol,
+      String username, String password, Boolean starttls, String jndiName, String profile,
+      Pom module, JavaType service, boolean force) {
 
-    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-    annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
+    // Include springlets-boot-starter-mail in module
+    getProjectOperations()
+        .addDependency(module.getModuleName(), DEPENDENCY_SPRINGLETS_STARTER_MAIL);
 
-    // Obtain the physical type and its mutable class details
-    final String declaredByMetadataId =
-        getTypeLocationService().getPhysicalTypeIdentifier(targetType);
-    final ClassOrInterfaceTypeDetails existing =
-        getTypeLocationService().getTypeDetails(targetType);
-    if (existing == null) {
-      LOGGER.warning("Aborting: Unable to find metadata for target type '"
-          + targetType.getFullyQualifiedTypeName() + "'");
-      return;
+    // Include property version
+    getProjectOperations().addProperty("", PROPERTY_SPRINGLETS_VERSION);
+
+    // check if exists any property
+    if (getApplicationConfigService().existsSpringConfigFile(module.getModuleName(), profile)
+        && areDefinedReceiveEmailProperties(module.getModuleName(), profile) && !force) {
+
+      // Send error message to user. He needs to set --force parameter
+      String profileStr = "profile " + profile;
+      if (profile == null) {
+        profileStr = "default profile";
+      }
+
+      String moduleStr = " and module " + module.getModuleName();
+      if (StringUtils.isEmpty(module.getModuleName())) {
+        moduleStr = "";
+      }
+      LOGGER.log(Level.INFO, String.format("There are defined the mail properties to %s"
+          + "%s. Using this command with '--force' " + "will overwrite the current values.",
+          profileStr, moduleStr));
+
+    } else {
+      Map<String, String> propertiesFormattedToInsert =
+          getReceiveEmailPropertiesFormattedToInsert(host, port, protocol, username, password,
+              starttls, jndiName);
+
+      // Set properties in file
+      getApplicationConfigService().addProperties(module.getModuleName(),
+          propertiesFormattedToInsert, profile, force);
     }
-    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-        new ClassOrInterfaceTypeDetailsBuilder(existing);
 
-    // Add the MailSender field
-    final FieldMetadataBuilder mailSenderFieldBuilder =
-        new FieldMetadataBuilder(declaredByMetadataId, PRIVATE_TRANSIENT, annotations, fieldName,
-            MAIL_SENDER);
-    cidBuilder.addField(mailSenderFieldBuilder);
+    if (service != null) {
 
-    // Add the "sendMessage" method
-    cidBuilder.addMethod(getSendMethod(fieldName, async, declaredByMetadataId, cidBuilder));
-    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+      // Add dependency springlets-mail to the module of the selected Service
+      if (!service.getModule().equals(StringUtils.EMPTY)) {
+        getProjectOperations().addDependency(service.getModule(), DEPENDENCY_SPRINGLETS_MAIL);
+      }
+
+      // Add MailReceiverService to service
+      final ClassOrInterfaceTypeDetails serviceTypeDetails =
+          getTypeLocationService().getTypeDetails(service);
+      Validate.isTrue(serviceTypeDetails != null, "Cannot locate source for '%s'",
+          service.getFullyQualifiedTypeName());
+
+      final String declaredByMetadataId = serviceTypeDetails.getDeclaredByMetadataId();
+      final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+          new ClassOrInterfaceTypeDetailsBuilder(serviceTypeDetails);
+
+      // Create the field
+      cidBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId, PRIVATE, Arrays
+          .asList(new AnnotationMetadataBuilder(AUTOWIRED)), new JavaSymbolName("mailReceiver"),
+          SpringletsJavaType.SPRINGLETS_MAIL_RECEIVER_SERVICE));
+
+      getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
+  }
+
+  private Map<String, String> getReceiveEmailPropertiesFormattedToInsert(String host, String port,
+      String protocol, String username, String password, Boolean starttls, String jndiName) {
+    String starttlsStr = String.valueOf(starttls);
+    if (starttls == null) {
+      starttlsStr = null;
+    }
+
+    Map<String, String> props = new HashMap<String, String>();
+    props.put("springlets.mail.receiver.host", StringUtils.stripToEmpty(host));
+    props.put("springlets.mail.receiver.port", StringUtils.stripToEmpty(port));
+    props.put("springlets.mail.receiver.protocol", StringUtils.stripToEmpty(protocol));
+    props.put("springlets.mail.receiver.username", StringUtils.stripToEmpty(username));
+    props.put("springlets.mail.receiver.password", StringUtils.stripToEmpty(password));
+    props.put("springlets.mail.receiver.starttls.enable", StringUtils.stripToEmpty(starttlsStr));
+    props.put("springlets.mail.receiver.jndi.name", StringUtils.stripToEmpty(jndiName));
+    return props;
+  }
+
+  private ApplicationConfigService getApplicationConfigService() {
+    return serviceInstaceManager.getServiceInstance(this, ApplicationConfigService.class);
+  }
+
+  private boolean areDefinedReceiveEmailProperties(String moduleName, String profile) {
+    return !getApplicationConfigService().getPropertyKeys(moduleName, RECEIVE_MAIL_PREFIX, true,
+        profile).isEmpty();
+  }
+
+  private boolean areDefinedSendEmailProperties(String moduleName, String profile) {
+    return !getApplicationConfigService().getPropertyKeys(moduleName, SEND_MAIL_PREFIX, true,
+        profile).isEmpty();
+  }
+
+  public List<String> getAllServiceImpl(String currentService) {
+
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    Collection<ClassOrInterfaceTypeDetails> services =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_SERVICE_IMPL);
+
+    for (ClassOrInterfaceTypeDetails service : services) {
+      String replacedValue = replaceTopLevelPackageString(service, currentService);
+      allPossibleValues.add(replacedValue);
+    }
+
+    if (allPossibleValues.isEmpty()) {
+      LOGGER
+          .log(
+              Level.INFO,
+              String
+                  .format("INFO: There aren't services availables. Use 'service' commands to generate any."));
+      allPossibleValues.add("");
+    }
+
+    return allPossibleValues;
   }
 
   /**
-   * Generates the "send email" method to be added to the domain type
-   * 
-   * @param mailSenderName the name of the MailSender field (required)
-   * @param async whether to send the email asynchronously
-   * @param targetClassMID the MID of the class to receive the method
-   * @param mutableTypeDetails the type to which the method is being added
-   *            (required)
-   * @return a non-<code>null</code> method
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
+   * TopLevelPackage
+   *
+   * @param cid
+   *            ClassOrInterfaceTypeDetails of a JavaType
+   * @param currentText
+   *            String current text for option value
+   * @return the String representing a JavaType with its name shortened
    */
-  private MethodMetadataBuilder getSendMethod(final JavaSymbolName mailSenderName,
-      final boolean async, final String targetClassMID,
-      final ClassOrInterfaceTypeDetailsBuilder cidBuilder) {
-    /*final String contextPath = getApplicationContextPath();
-    final Document document = XmlUtils.readXml(fileManager
-            .getInputStream(contextPath));
-    final Element root = document.getDocumentElement();
+  private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText) {
+    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
+    String javaTypeString = "";
+    String topLevelPackageString = "";
 
-    // Make a builder for the created method's body
-    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+    // Add module value to topLevelPackage when necessary
+    if (StringUtils.isNotBlank(cid.getType().getModule())
+        && !cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())) {
 
-    // Collect the types and names of the created method's parameters
-    final PairList<AnnotatedJavaType, JavaSymbolName> parameters = new PairList<AnnotatedJavaType, JavaSymbolName>();
+      // Target module is not focused
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else if (StringUtils.isNotBlank(cid.getType().getModule())
+        && cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())
+        && (currentText.startsWith(cid.getType().getModule()) || cid.getType().getModule()
+            .startsWith(currentText)) && StringUtils.isNotBlank(currentText)) {
 
-    if (getSimpleMailMessageBean(root) == null) {
-        // There's no SimpleMailMessage bean; use a local variable
-        bodyBuilder.appendFormalLine(SIMPLE_MAIL_MESSAGE
-                .getFullyQualifiedTypeName()
-                + " "
-                + LOCAL_MESSAGE_VARIABLE
-                + " = new "
-                + SIMPLE_MAIL_MESSAGE.getFullyQualifiedTypeName() + "();");
-        // Set the from address
-        parameters.add(STRING, new JavaSymbolName("mailFrom"));
-        bodyBuilder.appendFormalLine(LOCAL_MESSAGE_VARIABLE
-                + ".setFrom(mailFrom);");
-        // Set the subject
-        parameters.add(STRING, new JavaSymbolName("subject"));
-        bodyBuilder.appendFormalLine(LOCAL_MESSAGE_VARIABLE
-                + ".setSubject(subject);");
-    }
-    else {
-        // A SimpleMailMessage bean exists; auto-wire it into the entity and
-        // use it as a template
-        final List<AnnotationMetadataBuilder> smmAnnotations = Arrays
-                .asList(new AnnotationMetadataBuilder(AUTOWIRED));
-        final FieldMetadataBuilder smmFieldBuilder = new FieldMetadataBuilder(
-                targetClassMID, PRIVATE_TRANSIENT, smmAnnotations,
-                new JavaSymbolName(TEMPLATE_MESSAGE_FIELD),
-                SIMPLE_MAIL_MESSAGE);
-        cidBuilder.addField(smmFieldBuilder);
-        // Use the injected bean as a template (for thread safety)
-        bodyBuilder.appendFormalLine(SIMPLE_MAIL_MESSAGE
-                .getFullyQualifiedTypeName()
-                + " "
-                + LOCAL_MESSAGE_VARIABLE
-                + " = new "
-                + SIMPLE_MAIL_MESSAGE.getFullyQualifiedTypeName()
-                + "("
-                + TEMPLATE_MESSAGE_FIELD + ");");
-    }
-
-    // Set the to address
-    parameters.add(STRING, new JavaSymbolName("mailTo"));
-    bodyBuilder
-            .appendFormalLine(LOCAL_MESSAGE_VARIABLE + ".setTo(mailTo);");
-
-    // Set the message body
-    parameters.add(STRING, new JavaSymbolName("message"));
-    bodyBuilder.appendFormalLine(LOCAL_MESSAGE_VARIABLE
-            + ".setText(message);");
-
-    bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine(mailSenderName + ".send("
-            + LOCAL_MESSAGE_VARIABLE + ");");
-
-    final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
-            targetClassMID, Modifier.PUBLIC, new JavaSymbolName(
-                    "sendMessage"), JavaType.VOID_PRIMITIVE,
-            parameters.getKeys(), parameters.getValues(), bodyBuilder);
-
-    if (async) {
-        if (DomUtils.findFirstElementByName("task:annotation-driven", root) == null) {
-            // Add asynchronous email support to the application
-            if (StringUtils.isBlank(root.getAttribute("xmlns:task"))) {
-                // Add the "task" namespace to the Spring config file
-                root.setAttribute("xmlns:task", SPRING_TASK_NS);
-                root.setAttribute("xsi:schemaLocation",
-                        root.getAttribute("xsi:schemaLocation") + "  "
-                                + SPRING_TASK_NS + " " + SPRING_TASK_XSD);
-            }
-            root.appendChild(new XmlElementBuilder(
-                    "task:annotation-driven", document).addAttribute(
-                    "executor", "asyncExecutor").build());
-            root.appendChild(new XmlElementBuilder("task:executor",
-                    document).addAttribute("id", "asyncExecutor")
-                    .addAttribute("pool-size", "${executor.poolSize}")
-                    .build());
-            // Write out the new Spring config file
-            fileManager.createOrUpdateTextFileIfRequired(contextPath,
-                    XmlUtils.nodeToString(document), false);
-            // Update the email properties file
-            propFileOperations.addPropertyIfNotExists(
-                    pathResolver.getFocusedPath(Path.SPRING_CONFIG_ROOT),
-                    "email.properties", "executor.poolSize", "10", true);
-        }
-        methodBuilder.addAnnotation(new AnnotationMetadataBuilder(ASYNC));
-    }
-    return methodBuilder;*/
-    return null;
-  }
-
-  /**
-   * Method to include Spring Boot Mail starter
-   * 
-   * @param moduleName
-   */
-  private void includeSpringBootStarter(final String moduleName) {
-    final Element configuration = XmlUtils.getConfiguration(getClass());
-
-    final List<Dependency> dependencies = new ArrayList<Dependency>();
-    final List<Element> emailDependencies =
-        XmlUtils.findElements("/configuration/email/dependencies/dependency", configuration);
-    for (final Element dependencyElement : emailDependencies) {
-      dependencies.add(new Dependency(dependencyElement));
-    }
-    getProjectOperations().addDependencies(moduleName, dependencies);
-  }
-
-  public PathResolver getPathResolver() {
-    if (pathResolver == null) {
-      // Get all Services implement PathResolver interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(PathResolver.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          pathResolver = (PathResolver) context.getService(ref);
-          return pathResolver;
-        }
-        return null;
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load PathResolver on MailOperationsImpl.");
-        return null;
-      }
+      // Target module is focused but user wrote it
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
     } else {
-      return pathResolver;
+
+      // Not multimodule project
+      topLevelPackageString =
+          getProjectOperations().getFocusedTopLevelPackage().getFullyQualifiedPackageName();
     }
-  }
 
-  public ProjectOperations getProjectOperations() {
-    if (projectOperations == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+    // Autocomplete with abbreviate or full qualified mode
+    String auxString =
+        javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
+            topLevelPackageString, "~"));
+    if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
+        && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
 
-        for (ServiceReference<?> ref : references) {
-          projectOperations = (ProjectOperations) context.getService(ref);
-          return projectOperations;
-        }
-        return null;
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on MailOperationsImpl.");
-        return null;
-      }
+      // Value is for autocomplete only or user wrote abbreviate value
+      javaTypeString = auxString;
     } else {
-      return projectOperations;
+
+      // Value could be for autocomplete or for validation
+      javaTypeString = String.format("%s%s", javaTypeString, javaTypeFullyQualilfiedName);
     }
+
+    return javaTypeString;
   }
 
-  public PropFileOperations getPropFileOperations() {
-    if (propFileOperations == null) {
-      // Get all Services implement PropFileOperations interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(PropFileOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          propFileOperations = (PropFileOperations) context.getService(ref);
-          return propFileOperations;
-        }
-        return null;
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load PropFileOperations on MailOperationsImpl.");
-        return null;
-      }
-    } else {
-      return propFileOperations;
-    }
+  // Methods to obtain OSGi Services
+  private ProjectOperations getProjectOperations() {
+    return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
   }
 
-  public TypeLocationService getTypeLocationService() {
-    if (typeLocationService == null) {
-      // Get all Services implement TypeLocationService interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeLocationService = (TypeLocationService) context.getService(ref);
-          return typeLocationService;
-        }
-        return null;
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on MailOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeLocationService;
-    }
+  private TypeLocationService getTypeLocationService() {
+    return serviceInstaceManager.getServiceInstance(this, TypeLocationService.class);
   }
 
-  public TypeManagementService getTypeManagementService() {
-    if (typeManagementService == null) {
-      // Get all Services implement TypeManagementService interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(TypeManagementService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeManagementService = (TypeManagementService) context.getService(ref);
-          return typeManagementService;
-        }
-        return null;
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on MailOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeManagementService;
-    }
+  private TypeManagementService getTypeManagementService() {
+    return serviceInstaceManager.getServiceInstance(this, TypeManagementService.class);
   }
-
 
   // FEATURE METHODS
 
@@ -451,15 +372,10 @@ public class MailOperationsImpl implements MailOperations {
   @Override
   public boolean isInstalledInModule(String moduleName) {
     Pom currentPom = getProjectOperations().getPomFromModuleName(moduleName);
-    Set<Dependency> dependencies = currentPom.getDependencies();
-    Iterator<Dependency> it = dependencies.iterator();
-    while (it.hasNext()) {
-      Dependency dependency = it.next();
-      if (dependency.getArtifactId().equals(SPRING_BOOT_STARTER_MAIL)) {
-        return true;
-      }
-    }
-    return false;
+    List<Dependency> dependencies = new ArrayList<Dependency>();
+    dependencies.add(DEPENDENCY_SPRING_BOOT_STARTER_MAIL);
+    dependencies.add(DEPENDENCY_SPRINGLETS_STARTER_MAIL);
+    return currentPom.isAllDependenciesRegistered(dependencies);
   }
 
 }

@@ -83,6 +83,8 @@ public final class SpringJavaType {
       "org.springframework.web.filter.HiddenHttpMethodFilter");
   public static final JavaType HTTP_HEADERS = new JavaType("org.springframework.http.HttpHeaders");
   public static final JavaType HTTP_STATUS = new JavaType("org.springframework.http.HttpStatus");
+  public static final JavaType JAVA_MAIL_SENDER = new JavaType(
+      "org.springframework.mail.javamail.JavaMailSender");
   public static final JavaType JAVA_MAIL_SENDER_IMPL = new JavaType(
       "org.springframework.mail.javamail.JavaMailSenderImpl");
   public static final JavaType JMS_OPERATIONS = new JavaType(
