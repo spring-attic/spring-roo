@@ -239,6 +239,11 @@ div.dataTables_wrapper div.dataTables_filter {
 .dt-buttons.btn-group.col-sm-6{
   padding-left: 0;
 }
+div.dataTables_wrapper div.dataTables_filter,
+div.dataTables_wrapper div.dt-buttons.btn-group{
+  padding-top: 1em;
+}
+
 
 /*--SHOW-------------*/
 
