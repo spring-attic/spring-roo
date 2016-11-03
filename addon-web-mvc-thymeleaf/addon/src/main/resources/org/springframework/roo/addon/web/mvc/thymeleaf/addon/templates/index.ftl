@@ -60,18 +60,8 @@
       <!-- Header -->
       <header role="banner">
 
-        <!--Banner -->
-        <div class="bg-header">
-          <div class="jumbotron bg-banner">
-              <div class="container">
-                <h1 class="project-name">${projectName}</h1>
-                <p class="project-tagline" data-th-text="${r"#{"}info_homepage_project${r"}"}">Hello, this is your home page.</p>
-              </div>
-          </div>
-        </div>
-
         <!-- Main navbar -->
-        <nav class="navbar navbar-inverse navbar-fixed-top">
+        <nav class="navbar navbar-inverse navbar-static-top">
          <div class="container">
 
             <!-- navbar-header -->
@@ -165,6 +155,16 @@
            </div>
           </div>
         </nav>
+
+        <!--Banner -->
+        <div class="bg-header">
+          <div class="jumbotron bg-banner">
+              <div class="container">
+                <h1 class="project-name">${projectName}</h1>
+                <p class="project-tagline" data-th-text="${r"#{"}info_homepage_project${r"}"}">Hello, this is your home page.</p>
+              </div>
+          </div>
+        </div>
 
       </header>
 
