@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" data-layout-decorator="layouts/default-layout">
+
+<!-- CONTENT -->
+<!-- Only the inner content of the following tag "section" is included within the template, 
+        in the section "content" -->
+<section data-layout-fragment="content">
+  <div class="container-fluid content">
+
+    <h1 id="title" data-th-text="#{__WEBFLOW-ID___state2_title}">Title</h1>
+
+    <!-- FORM -->
+    <form class="form-horizontal validate" method="POST">
+      <input type="hidden" name="_method" value="PUT" />
+
+      <fieldset>
+        <!-- Form fields here -->
+      </fieldset>
+      <div class="form-group">
+        <div class="col-md-12">
+          <div class="pull-left">
+            <button type="submit" class="btn btn-default" id="cancel"
+              name="_eventId_cancel" onclick="location.href='view-state-1.html'"
+              data-th-text="#{label_reset}">Cancel</button>
+          </div>
+          <div class="pull-right">
+            <button type="submit" class="btn btn-primary" id="success"
+              name="_eventId_success" data-th-text="#{label_submit}">Continue</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+</html>

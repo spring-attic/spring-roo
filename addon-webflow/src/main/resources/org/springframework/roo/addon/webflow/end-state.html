@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" data-layout-decorator="layouts/default-layout">
+
+<!-- CONTENT -->
+<!-- Only the inner content of the following tag "section" is included within the template, 
+        in the section "content" -->
+<section data-layout-fragment="content">
+  <div class="container-fluid content">
+
+    <div class="well">
+      <h1 id="title" data-th-text="#{__WEBFLOW-ID___end_state_title}">End of web
+        flow title</h1>
+      <p data-th-utext="#{__WEBFLOW-ID___end_state_message}">End of web flow
+        message</p>
+      <p>
+        <a class="btn btn-primary" href="/" role="button"
+          data-th-utext="#{label_back}"> Back to Index</a>
+      </p>
+    </div>
+
+  </div>
+</section>
+</html>
