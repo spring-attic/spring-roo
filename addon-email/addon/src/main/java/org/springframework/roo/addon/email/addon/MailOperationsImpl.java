@@ -246,8 +246,8 @@ public class MailOperationsImpl implements MailOperations {
     props.put("springlets.mail.receiver.protocol", StringUtils.stripToEmpty(protocol));
     props.put("springlets.mail.receiver.username", StringUtils.stripToEmpty(username));
     props.put("springlets.mail.receiver.password", StringUtils.stripToEmpty(password));
-    props.put("springlets.mail.receiver.starttls.enable", StringUtils.stripToEmpty(starttlsStr));
-    props.put("springlets.mail.receiver.jndi.name", StringUtils.stripToEmpty(jndiName));
+    props.put("springlets.mail.receiver.starttls-enable", StringUtils.stripToEmpty(starttlsStr));
+    props.put("springlets.mail.receiver.jndi-name", StringUtils.stripToEmpty(jndiName));
     return props;
   }
 
