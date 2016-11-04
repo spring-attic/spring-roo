@@ -153,6 +153,8 @@ public final class SpringJavaType {
       "org.springframework.transaction.annotation.Propagation");
   public static final JavaType PRIMARY = new JavaType(
       "org.springframework.context.annotation.Primary");
+  public static final JavaType PROFILE = new JavaType(
+      "org.springframework.context.annotation.Profile");
   public static final JavaType PUT_MAPPING = new JavaType(
       "org.springframework.web.bind.annotation.PutMapping");
   public static final JavaType REDIRECT_ATTRIBUTES = new JavaType(

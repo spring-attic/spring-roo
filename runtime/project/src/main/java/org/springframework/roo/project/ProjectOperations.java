@@ -2,6 +2,7 @@ package org.springframework.roo.project;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.maven.Pom;
@@ -11,6 +12,7 @@ import org.springframework.roo.project.maven.Pom;
  *
  * @author Ben Alex
  * @author Paula Navarro
+ * @author Juan Carlos García
  * @since 1.0
  */
 public interface ProjectOperations {
@@ -128,12 +130,109 @@ public interface ProjectOperations {
    * @param moduleName the name of the module to act upon (required)
    * @param plugin the plugin where add the package (required)
    * @param executionId the id of the plugin execution where add the package (required)
+   * @param packageName the package to add (required)
    * @param addToPluginManagement boolean that indicates if the new Plugin
    * 		should be included into pluginManagement element or not.
-   * @param packageName the package to add (required)
    */
   void addPackageToPluginExecution(final String moduleName, final Plugin plugin,
       String executionId, final String packageName, boolean addToPluginManagement);
+
+  /**
+   * Attempts to add the specified element into the specified plugin execution. 
+   * If the element already exists or the execution does not exist in the specified plugin, the
+   * method silently returns. Otherwise the element is added.
+   * <p>
+   * By default, includes the provided element into pluginManagement
+   * element.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param moduleName the name of the module to act upon (required)
+   * @param plugin the plugin where add the package (required)
+   * @param executionId the id of the plugin execution where add the package (required)
+   * @param parentElementName the parentElement name that should be included inside configuration element
+   * @param elementName the element name that should be included inside the parentElementName provided before
+   * @param elementValue the value to add (required)
+   */
+  void addElementToPluginExecution(final String moduleName, final Plugin plugin,
+      String executionId, String parentElementName, String elementName, final String elementValue);
+
+  /**
+   * Attempts to add the specified element into the specified plugin execution. 
+   * If the element already exists or the execution does not exist in the specified plugin, the
+   * method silently returns. Otherwise the element is added.
+   * <p>
+   * By default, includes the provided element into pluginManagement
+   * element.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param moduleName the name of the module to act upon (required)
+   * @param plugin the plugin where add the package (required)
+   * @param executionId the id of the plugin execution where add the package (required)
+   * @param parentElementName the parentElement name that should be included inside configuration element
+   * @param elementName the element name that should be included inside the parentElementName provided before
+   * @param elementValue the value to add (required)
+   * @param addToPluginManagement boolean that indicates if the new element
+   * 		should be included into pluginManagement element or not.
+
+   */
+  void addElementToPluginExecution(final String moduleName, final Plugin plugin,
+      String executionId, String parentElementName, String elementName, final String elementValue,
+      boolean addToPluginManagement);
+
+  /**
+   * Attempts to add the specified element into the specified plugin execution. 
+   * If the element already exists or the execution does not exist in the specified plugin, the
+   * method silently returns. Otherwise the element is added.
+   * <p>
+   * By default, includes the provided element into pluginManagement
+   * element.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param moduleName the name of the module to act upon (required)
+   * @param plugin the plugin where add the package (required)
+   * @param executionId the id of the plugin execution where add the package (required)
+   * @param parentElementName the parentElement name that should be included inside configuration element
+   * @param elementName the element name that should be included inside the parentElementName provided before
+   * @param elementValues the values to add (required)
+   */
+  void addElementToPluginExecution(final String moduleName, final Plugin plugin,
+      String executionId, String parentElementName, String elementName,
+      final Map<String, String> elementValues);
+
+  /**
+   * Attempts to add the specified element into the specified plugin execution. 
+   * If the element already exists or the execution does not exist in the specified plugin, the
+   * method silently returns. Otherwise the element is added.
+   * <p>
+   * By default, includes the provided element into pluginManagement
+   * element.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param moduleName the name of the module to act upon (required)
+   * @param plugin the plugin where add the package (required)
+   * @param executionId the id of the plugin execution where add the package (required)
+   * @param parentElementName the parentElement name that should be included inside configuration element
+   * @param elementName the element name that should be included inside the parentElementName provided before
+   * @param elementValues the values to add (required)
+   * @param addToPluginManagement boolean that indicates if the new element
+   * 		should be included into pluginManagement element or not.
+
+   */
+  void addElementToPluginExecution(final String moduleName, final Plugin plugin,
+      String executionId, String parentElementName, String elementName,
+      final Map<String, String> elementValues, boolean addToPluginManagement);
 
   /**
    * Attempts to add the specified dependencies. If all the dependencies
