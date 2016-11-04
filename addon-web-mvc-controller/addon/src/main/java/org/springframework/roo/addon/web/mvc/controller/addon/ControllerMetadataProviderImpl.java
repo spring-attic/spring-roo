@@ -37,9 +37,11 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
@@ -192,29 +194,33 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
 
 
 
-    RelationInfo detailsFieldInfo = null;
-    JavaType detailsService = null;
-    ServiceMetadata detailsServiceMetadata = null;
+    List<RelationInfo> detailsFieldInfo = null;
+    Map<JavaType, ServiceMetadata> detailsServiceMetadata = null;
 
     if (type == ControllerType.DETAIL) {
-      // TODO
       // generate detail info object
       detailsFieldInfo = getControllerDetailInfo(governorPhysicalTypeMetadata, entityMetadata);
 
-      // Getting related service
-      ClassOrInterfaceTypeDetails detailsServiceDetails =
-          getServiceLocator().getService(detailsFieldInfo.childType);
-      detailsService = detailsServiceDetails.getType();
-      final String detailServiceMetadataId =
-          ServiceMetadata.createIdentifier(detailsServiceDetails);
-      registerDependency(detailServiceMetadataId, metadataIdentificationString);
-      detailsServiceMetadata = getMetadataService().get(detailServiceMetadataId);
+      detailsServiceMetadata = new TreeMap<JavaType, ServiceMetadata>();
 
+      for (RelationInfo info : detailsFieldInfo) {
+        if (detailsServiceMetadata.containsKey(info.childType)) {
+          continue;
+        }
+
+        // Getting related service
+        ClassOrInterfaceTypeDetails detailsServiceDetails =
+            getServiceLocator().getService(info.childType);
+        String detailServiceMetadataId = ServiceMetadata.createIdentifier(detailsServiceDetails);
+        registerDependency(detailServiceMetadataId, metadataIdentificationString);
+        ServiceMetadata curMetadata = getMetadataService().get(detailServiceMetadataId);
+        detailsServiceMetadata.put(info.childType, curMetadata);
+      }
     }
 
     return new ControllerMetadata(metadataIdentificationString, aspectName, controllerValues,
-        governorPhysicalTypeMetadata, entity, entityMetadata, service, detailsService, path, type,
-        serviceMetadata, detailsServiceMetadata, detailsFieldInfo);
+        governorPhysicalTypeMetadata, entity, entityMetadata, service, path, type, serviceMetadata,
+        detailsServiceMetadata, detailsFieldInfo);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
@@ -239,7 +245,7 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
    *
    * @return Information about detail
    */
-  private RelationInfo getControllerDetailInfo(
+  private List<RelationInfo> getControllerDetailInfo(
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final JpaEntityMetadata entityMetadata) {
     final JavaType controller =
@@ -257,18 +263,36 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
 
     Validate.isTrue(StringUtils.isNotBlank(relationField),
         "ERROR: In %s controller, @RooDetail annotation must have relationField value", controller);
-    final RelationInfo info = entityMetadata.getRelationInfos().get(relationField);
 
-    Validate.notNull(info,
-        "ERROR: In %s controller, @RooDetail.relationField '%s' not found on '%s' entity",
-        controller, relationField, entityMetadata.getDestination());
+    String[] relationPath = StringUtils.split(relationField, '.');
 
-    Validate
-        .isTrue(
-            info.cardinality == Cardinality.ONE_TO_MANY
-                || info.cardinality == Cardinality.MANY_TO_MANY,
-            "ERROR: In %s controller, @RooDetail.relationField '%s' has unsupported type (%s) on '%s' entity: should be ONE_TO_MANY or MANY_TO_MANY",
-            controller, relationField, info.cardinality.name(), entityMetadata.getDestination());
+
+
+    final List<RelationInfo> info = new ArrayList<JpaEntityMetadata.RelationInfo>();
+
+    RelationInfo curInfo;
+    JpaEntityMetadata curEntity = entityMetadata;
+    for (String relName : relationPath) {
+      curInfo = null;
+      if (curEntity.getRelationInfos() != null) {
+        curInfo = curEntity.getRelationInfos().get(relName);
+      }
+
+      Validate
+          .notNull(
+              curEntity.getRelationInfos(),
+              "ERROR: In %s controller, @RooDetail: Invalid value '%s': Can't get relation information about '%s' on %s entity",
+              controller, relationField, relName, curEntity.getDestination());
+      Validate
+          .isTrue(
+              curInfo.cardinality == Cardinality.ONE_TO_MANY
+                  || curInfo.cardinality == Cardinality.MANY_TO_MANY,
+              "ERROR: In %s controller, @RooDetail '%s' [%s] has unsupported type (%s) on '%s' entity: should be ONE_TO_MANY or MANY_TO_MANY",
+              controller, relName, relationField, curInfo.cardinality.name(),
+              curEntity.getDestination());
+      info.add(curInfo);
+    }
+
 
     return info;
   }

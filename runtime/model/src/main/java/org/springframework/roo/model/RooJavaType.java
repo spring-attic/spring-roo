@@ -23,14 +23,19 @@ public final class RooJavaType {
       "org.springframework.roo.addon.web.mvc.controller.annotations.config.RooDomainModelModule");
   public static final JavaType ROO_EQUALS = new JavaType(
       "org.springframework.roo.addon.javabean.annotations.RooEquals");
+  @Deprecated
   public static final JavaType ROO_GWT_LOCATOR = new JavaType(
       "org.springframework.roo.addon.gwt.RooGwtLocator");
+  @Deprecated
   public static final JavaType ROO_GWT_MIRRORED_FROM = new JavaType(
       "org.springframework.roo.addon.gwt.RooGwtMirroredFrom");
+  @Deprecated
   public static final JavaType ROO_GWT_PROXY = new JavaType(
       "org.springframework.roo.addon.gwt.RooGwtProxy");
+  @Deprecated
   public static final JavaType ROO_GWT_REQUEST = new JavaType(
       "org.springframework.roo.addon.gwt.RooGwtRequest");
+  @Deprecated
   public static final JavaType ROO_GWT_UNMANAGED_REQUEST = new JavaType(
       "org.springframework.roo.addon.gwt.RooGwtUnmanagedRequest");
   public static final JavaType ROO_IDENTIFIER = new JavaType(
@@ -39,32 +44,41 @@ public final class RooJavaType {
       "org.springframework.roo.addon.test.annotations.RooIntegrationTest");
   public static final JavaType ROO_JAVA_BEAN = new JavaType(
       "org.springframework.roo.addon.javabean.annotations.RooJavaBean");
+  @Deprecated
   public static final JavaType ROO_JSF_APPLICATION_BEAN = new JavaType(
       "org.springframework.roo.addon.jsf.application.RooJsfApplicationBean");
+  @Deprecated
   public static final JavaType ROO_JSF_CONVERTER = new JavaType(
       "org.springframework.roo.addon.jsf.converter.RooJsfConverter");
+  @Deprecated
   public static final JavaType ROO_JSF_MANAGED_BEAN = new JavaType(
       "org.springframework.roo.addon.jsf.managedbean.RooJsfManagedBean");
   public static final JavaType ROO_JSON_MIXIN = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.config.RooJsonMixin");
+  @Deprecated
   public static final JavaType ROO_MONGO_ENTITY = new JavaType(
       "org.springframework.roo.addon.layers.repository.mongo.RooMongoEntity");
+  @Deprecated
   public static final JavaType ROO_NEO4J_ENTITY = new JavaType(
       "org.springframework.roo.addon.layers.repository.neo4j.RooNeo4jEntity");
   public static final JavaType ROO_OPERATIONS = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.RooOperations");
+  @Deprecated
   public static final JavaType ROO_OP4J =
       new JavaType("org.springframework.roo.addon.op4j.RooOp4j");
   public static final JavaType ROO_PLURAL = new JavaType(
       "org.springframework.roo.addon.plural.annotations.RooPlural");
+  @Deprecated
   public static final JavaType ROO_REPOSITORY_MONGO = new JavaType(
       "org.springframework.roo.addon.layers.repository.mongo.RooMongoRepository");
   public static final JavaType ROO_REPOSITORY_NEO4J = new JavaType(
       "org.springframework.roo.addon.layers.repository.neo4j.RooNeo4jRepository");
   public static final JavaType ROO_SERIALIZABLE = new JavaType(
       "org.springframework.roo.addon.javabean.annotations.RooSerializable");
+  @Deprecated
   public static final JavaType ROO_SOLR_SEARCHABLE = new JavaType(
       "org.springframework.roo.addon.solr.RooSolrSearchable");
+  @Deprecated
   public static final JavaType ROO_SOLR_WEB_SEARCHABLE = new JavaType(
       "org.springframework.roo.addon.solr.RooSolrWebSearchable");
   public static final JavaType ROO_TO_STRING = new JavaType(
@@ -73,8 +87,7 @@ public final class RooJavaType {
       "org.springframework.roo.classpath.operations.jsr303.RooUploadedFile");
   public static final JavaType ROO_SEARCH = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.finder.RooSearch");
-  public static final JavaType ROO_WEB_JSON = new JavaType(
-      "org.springframework.roo.addon.web.mvc.controller.annotations.json.RooWebJson");
+  @Deprecated
   public static final JavaType ROO_WEB_SCAFFOLD = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.scaffold.RooWebScaffold");
 
@@ -121,43 +134,6 @@ public final class RooJavaType {
   public static final JavaType ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION =
       new JavaType(
           "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooWebMvcThymeleafUIConfiguration");
-  public static final JavaType ROO_THYMELEAF_DATATABLES_DATA = new JavaType(
-      "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafDatatablesData");
-  public static final JavaType ROO_THYMELEAF_DATATABLES_PAGEABLE_HANDLER =
-      new JavaType(
-          "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafDatatablesPageableHandler");
-  public static final JavaType ROO_THYMELEAF_DATATABLES_PAGEABLE = new JavaType(
-      "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafDatatablesPageable");
-  public static final JavaType ROO_THYMELEAF_DATATABLES_SORT_HANDLER =
-      new JavaType(
-          "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafDatatablesSortHandler");
-  public static final JavaType ROO_THYMELEAF_DATATABLES_SORT = new JavaType(
-      "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafDatatablesSort");
-  public static final JavaType ROO_GLOBAL_SEARCH_HANDLER = new JavaType(
-      "org.springframework.roo.addon.web.mvc.controller.annotations.RooGlobalSearchHandler");
-
-  //Roo JSON converter annotations
-  public static final JavaType ROO_JSON_BINDING_ERROR_EXCEPTION =
-      new JavaType(
-          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONBindingErrorException");
-  public static final JavaType ROO_JSON_BINDING_RESULT_SERIALIZER =
-      new JavaType(
-          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONBindingResultSerializer");
-  public static final JavaType ROO_JSON_CONVERSION_SERVICE_BEAN_SERIALIZER_MODIFIER =
-      new JavaType(
-          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONConversionServiceBeanSerializerModifier");
-  public static final JavaType ROO_JSON_CONVERSION_SERVICE_PROPERTY_SERIALIZER =
-      new JavaType(
-          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONConversionServicePropertySerializer");
-  public static final JavaType ROO_JSON_DATA_BINDER_BEAN_DESERIALIZER_MODIFIER =
-      new JavaType(
-          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONDataBinderBeanDeserializerModifier");
-  public static final JavaType ROO_JSON_DATA_BINDER_DESERIALIZER =
-      new JavaType(
-          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONDataBinderDeserializer");
-  public static final JavaType ROO_JSON_FIELD_ERROR_SERIALIZER =
-      new JavaType(
-          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONFieldErrorSerializer");
 
   public static final JavaType ROO_ENUM_CONTROLLER_TYPE = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType");

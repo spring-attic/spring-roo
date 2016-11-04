@@ -77,3 +77,6 @@ web mvc controller --all --responseType THYMELEAF
 
 
 web mvc language --code es
+
+web mvc detail --entity ~.model.Customer --field orders
+web mvc detail --entity ~.model.Customer --field orders --responseType THYMELEAF

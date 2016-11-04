@@ -22,6 +22,8 @@ import org.springframework.roo.project.LogicalPath;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Metadata for {@link RooJsonMixin}.
@@ -31,6 +33,8 @@ import java.util.List;
  */
 public class JSONMixinMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
+  private static final JavaType JSON_DESERIALIZE = new JavaType(
+      "com.fasterxml.jackson.databind.annotation.JsonDeserialize");
   private static final JavaType JSON_IDENTITY_INFO = new JavaType(
       "com.fasterxml.jackson.annotation.JsonIdentityInfo");
   private static final JavaType JSON_IGNORE = new JavaType(
@@ -75,6 +79,7 @@ public class JSONMixinMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   private final JSONMixinAnnotationValues annotationValues;
   private final JpaEntityMetadata entityMetadata;
   private JavaSymbolName propertyIdGenerator;
+  private final Map<FieldMetadata, JavaType> jsonDeserializerByField;
 
   /**
    * Constructor
@@ -85,14 +90,17 @@ public class JSONMixinMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    *            contain a {@link ClassOrInterfaceTypeDetails} (required)
    * @param annotationValues
    * @param entityMetadata
+   * @param jsonDeserializerByEntity
    */
   public JSONMixinMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      JSONMixinAnnotationValues annotationValues, JpaEntityMetadata entityMetadata) {
+      JSONMixinAnnotationValues annotationValues, JpaEntityMetadata entityMetadata,
+      Map<FieldMetadata, JavaType> jsonDeserializerByField) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.annotationValues = annotationValues;
     this.entityMetadata = entityMetadata;
+    this.jsonDeserializerByField = jsonDeserializerByField;
 
     // Add @JsonIdentityInfo if has @OneToOne relation
     for (RelationInfo info : entityMetadata.getRelationInfos().values()) {
@@ -114,10 +122,23 @@ public class JSONMixinMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       }
     }
 
+    // Add deserializers
+    for (Entry<FieldMetadata, JavaType> entry : jsonDeserializerByField.entrySet()) {
+      ensureGovernorHasField(getDeseralizerFieldFor(entry.getKey(), entry.getValue()));
+    }
+
     // Build the ITD
     itdTypeDetails = builder.build();
   }
 
+
+  private FieldMetadataBuilder getDeseralizerFieldFor(FieldMetadata field, JavaType deserializer) {
+    AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(JSON_DESERIALIZE);
+    annotation.addClassAttribute("using", deserializer);
+
+    return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, Arrays.asList(annotation),
+        field.getFieldName(), field.getFieldType());
+  }
 
   private FieldMetadataBuilder getIgnoreFieldFor(FieldMetadata field) {
     return new FieldMetadataBuilder(getId(), Modifier.PRIVATE,

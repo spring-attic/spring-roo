@@ -116,8 +116,13 @@ public class EntityDeserializerMetadata extends AbstractItdTypeDetailsProvidingM
     ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(JSON_COMPONENT));
 
     // extends JsonObjectDeserializer<Entity>
-    ensureGovernorExtends(JavaType.wrapperOf(JSON_OBJECT_DESERIALIZER,
-        entityMetadata.getDestination()));
+    /*
+     * Moved to java as there were compilation problems when Mixin
+     * uses @JsonDeserialize(using=EntityDeserializer.class) annotation
+     * (requires extend of JsonDeseralizer)
+     */
+    //    ensureGovernorExtends(JavaType.wrapperOf(JSON_OBJECT_DESERIALIZER,
+    //        entityMetadata.getDestination()));
 
     this.serviceField = getFieldFor(getId(), serviceMetadata.getDestination());
     ensureGovernorHasField(new FieldMetadataBuilder(serviceField));

@@ -13,8 +13,12 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.operations.Cardinality;
@@ -22,14 +26,17 @@ import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -166,13 +173,53 @@ public class JSONMixinMetadataProviderImpl extends AbstractMemberDiscoveringItdM
       // not ready for this metadata yet
       return null;
     }
-
     // register metadata dependency
     registerDependency(entityId, metadataIdentificationString);
 
-    return new JSONMixinMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, values, entityMetadata);
 
+    Map<FieldMetadata, JavaType> jsonDeserializerByEntity = new HashMap<FieldMetadata, JavaType>();
+    for (FieldMetadata field : entityMetadata.getRelationsAsChild().values()) {
+      if (isAnyToOneRelation(field)) {
+
+        JavaType parentEntity = field.getFieldType();
+        JavaType entityDeserializer = getEntityDeserializerFor(parentEntity);
+        Validate.notNull(entityDeserializer,
+            "Can't locate class with @%s.entity=%s required for %s entity Json Mixin (%s)",
+            RooJavaType.ROO_DESERIALIZER, parentEntity, entity.getFullyQualifiedTypeName(),
+            mixinType.getFullyQualifiedTypeName());
+        jsonDeserializerByEntity.put(field, entityDeserializer);
+      }
+    }
+
+    return new JSONMixinMetadata(metadataIdentificationString, aspectName,
+        governorPhysicalTypeMetadata, values, entityMetadata, jsonDeserializerByEntity);
+
+  }
+
+  private JavaType getEntityDeserializerFor(JavaType entity) {
+    Set<ClassOrInterfaceTypeDetails> deserializers =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_DESERIALIZER);
+
+    for (ClassOrInterfaceTypeDetails deserializer : deserializers) {
+      AnnotationMetadata annotation = deserializer.getAnnotation(RooJavaType.ROO_DESERIALIZER);
+      AnnotationAttributeValue<JavaType> annotationValue = annotation.getAttribute("entity");
+      if (entity.equals(annotationValue.getValue())) {
+        return deserializer.getType();
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Return true if field is annotated with @OneToOne or @ManyToOne JPA annotation
+   *
+   * @param field
+   * @return
+   */
+  private boolean isAnyToOneRelation(FieldMetadata field) {
+    return field.getAnnotation(JpaJavaType.MANY_TO_ONE) != null
+        || field.getAnnotation(JpaJavaType.ONE_TO_ONE) != null;
   }
 
   public String getProvidesType() {

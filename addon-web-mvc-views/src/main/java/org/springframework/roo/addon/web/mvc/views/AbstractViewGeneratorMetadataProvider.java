@@ -39,6 +39,7 @@ import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -135,6 +136,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     JavaType viewType = viewGenerationService.getType();
     JavaType itemController = null;
     JavaType collectionController = null;
+    final JavaPackage controllerPackage = controllerDetail.getType().getPackage();
     if (controllerMetadata.getType() != ControllerType.ITEM) {
       // Locate ItemController
       Collection<ClassOrInterfaceTypeDetails> itemControllers =
@@ -145,7 +147,6 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
         return null;
       } else {
         // Get controller with the same package
-        JavaPackage controllerPackage = controllerDetail.getType().getPackage();
         for (ClassOrInterfaceTypeDetails controller : itemControllers) {
           if (controllerPackage.equals(controller.getType().getPackage())) {
             itemController = controller.getType();
@@ -168,7 +169,6 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
         return null;
       } else {
         // Get controller with the same package
-        JavaPackage controllerPackage = controllerDetail.getType().getPackage();
         for (ClassOrInterfaceTypeDetails controller : collectionControllers) {
           if (controllerPackage.equals(controller.getType().getPackage())) {
             collectionController = controller.getType();
@@ -178,6 +178,21 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
         Validate.notNull(collectionController,
             "ERROR: Can't find ITEM-type controller related to controller '%s'", controllerDetail
                 .getType().getFullyQualifiedTypeName());
+      }
+    }
+    List<ClassOrInterfaceTypeDetails> detailsControllers = null;
+    if (controllerMetadata.getType() == ControllerType.COLLECTION) {
+      // Locate Details controllers
+      Collection<ClassOrInterfaceTypeDetails> detailsControllersToCheck =
+          getControllerLocator().getControllers(entity, ControllerType.DETAIL, viewType);
+      List<ClassOrInterfaceTypeDetails> found = new ArrayList<ClassOrInterfaceTypeDetails>();
+      for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
+        if (controllerPackage.equals(controller.getType().getPackage())) {
+          found.add(controller);
+        }
+      }
+      if (!found.isEmpty()) {
+        detailsControllers = Collections.unmodifiableList(found);
       }
     }
 
@@ -258,18 +273,24 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
 
 
     final String module = controllerDetail.getType().getModule();
-    // Add list view
-    viewGenerationService.addListView(module, entityMemberDetails, ctx);
 
-    // Add show view
-    viewGenerationService.addShowView(module, entityMemberDetails, ctx);
+    if (controllerMetadata.getType() == ControllerType.COLLECTION) {
+      // Add list view
+      viewGenerationService.addListView(module, entityMemberDetails, ctx);
+      if (!entityMetadata.isReadOnly()) {
+        // If not readOnly, add create view
+        viewGenerationService.addCreateView(module, entityMemberDetails, ctx);
+      }
+    } else if (controllerMetadata.getType() == ControllerType.ITEM) {
+      // Add show view
+      viewGenerationService.addShowView(module, entityMemberDetails, ctx);
 
-    if (!entityMetadata.isReadOnly()) {
-      // If not readOnly, add create view
-      viewGenerationService.addCreateView(module, entityMemberDetails, ctx);
-
-      // If not readOnly, add update view
-      viewGenerationService.addUpdateView(module, entityMemberDetails, ctx);
+      if (!entityMetadata.isReadOnly()) {
+        // If not readOnly, add update view
+        viewGenerationService.addUpdateView(module, entityMemberDetails, ctx);
+      }
+    } else if (controllerMetadata.getType() == ControllerType.DETAIL) {
+      viewGenerationService.addListView(module, entityMemberDetails, ctx);
     }
 
     // Add finder views

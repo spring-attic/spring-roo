@@ -25,6 +25,11 @@ import org.springframework.roo.support.logging.HandlerUtils;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
@@ -43,19 +48,22 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
       .create(PROVIDES_TYPE_STRING);
 
   private final JavaType service;
-  private final JavaType detailsService;
   private final ControllerType type;
   private final JavaType entity;
   private final JavaType identifierType;
   private final ServiceMetadata serviceMetadata;
-  private final FieldMetadata detailsServiceField;
-  private final ServiceMetadata detailsServiceMetadata;
+  private final Map<JavaType, FieldMetadata> detailsServiceField;
+  private final Map<JavaType, ServiceMetadata> detailsServiceMetadata;
   private final String path;
   private final String requestMappingValue;
   private final FieldMetadata identifierField;
   private final JpaEntityMetadata entityMetadata;
-  private final RelationInfo detailsFieldInfo;
+  private final List<RelationInfo> detailsFieldInfo;
   private final FieldMetadata serviceField;
+  private final FieldMetadata lastDetailsServiceField;
+  private final JavaType lastDetailsService;
+  private final JavaType lastDetailsEntity;
+  private final RelationInfo lastDetailsInfo;
 
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
@@ -120,29 +128,31 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
   public ControllerMetadata(final String identifier, final JavaType aspectName,
       ControllerAnnotationValues controllerValues,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType entity,
-      final JpaEntityMetadata entityMetadata, final JavaType service,
-      final JavaType detailsService, final String path, final ControllerType type,
-      ServiceMetadata serviceMetadata, ServiceMetadata detailsServiceMetadata,
-      RelationInfo detailsFieldInfo) {
+      final JpaEntityMetadata entityMetadata, final JavaType service, final String path,
+      final ControllerType type, ServiceMetadata serviceMetadata,
+      Map<JavaType, ServiceMetadata> detailsServiceMetadata, List<RelationInfo> detailsFieldInfo) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.type = type;
     this.service = service;
     this.serviceMetadata = serviceMetadata;
-    this.detailsService = detailsService;
     this.detailsServiceMetadata = detailsServiceMetadata;
     this.entity = entity;
     this.entityMetadata = entityMetadata;
     this.identifierField = entityMetadata.getCurrentIndentifierField();
     this.identifierType = identifierField.getFieldType();
     this.path = path;
-    this.detailsFieldInfo = detailsFieldInfo;
+    if (detailsFieldInfo == null) {
+      this.detailsFieldInfo = null;
+    } else {
+      this.detailsFieldInfo = Collections.unmodifiableList(detailsFieldInfo);
+    }
 
     switch (this.type) {
       case ITEM:
         this.requestMappingValue =
             StringUtils.lowerCase(path).concat(
-                "/{" + identifierField.getFieldName().getSymbolName() + " }");
+                "/{" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "}");
         break;
       case COLLECTION:
         this.requestMappingValue = StringUtils.lowerCase(path);
@@ -151,12 +161,16 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
         this.requestMappingValue = StringUtils.lowerCase(path).concat("/search");
         break;
       case DETAIL:
-        Validate.notNull(detailsFieldInfo, "Missing details information for %s",
-            governorPhysicalTypeMetadata.getType());
-        this.requestMappingValue =
-            StringUtils.lowerCase(path).concat(
-                "/{" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "}/"
-                    + detailsFieldInfo.fieldName);
+        Validate.isTrue(detailsFieldInfo != null & detailsFieldInfo.size() > 0,
+            "Missing details information for %s", governorPhysicalTypeMetadata.getType());
+        StringBuilder sbuilder = new StringBuilder(path);
+        JavaType curEntity = entity;
+        for (RelationInfo info : detailsFieldInfo) {
+          sbuilder.append("/{" + StringUtils.uncapitalize(curEntity.getSimpleTypeName()) + "}/"
+              + info.fieldName);
+          curEntity = info.childType;
+        }
+        this.requestMappingValue = sbuilder.toString();
         break;
       default:
         throw new IllegalArgumentException(String.format("Unsupported @%s.type '%s' on %s",
@@ -167,82 +181,31 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     this.serviceField = getFieldFor(this.service);
     ensureGovernorHasField(new FieldMetadataBuilder(serviceField));
 
+    Map<JavaType, FieldMetadata> detailServiceFields = new TreeMap<JavaType, FieldMetadata>();
+    FieldMetadata curServiceField;
     if (this.type == ControllerType.DETAIL) {
       // Adding service field
-      this.detailsServiceField = getFieldFor(this.detailsService);
-      ensureGovernorHasField(new FieldMetadataBuilder(detailsServiceField));
+      for (Entry<JavaType, ServiceMetadata> entry : detailsServiceMetadata.entrySet()) {
+        curServiceField = getFieldFor(entry.getValue().getDestination());
+        ensureGovernorHasField(new FieldMetadataBuilder(curServiceField));
+        detailServiceFields.put(entry.getKey(), curServiceField);
+      }
+      this.detailsServiceField = Collections.unmodifiableMap(detailServiceFields);
+      this.lastDetailsInfo = detailsFieldInfo.get(detailServiceFields.size() - 1);
+      this.lastDetailsEntity = lastDetailsInfo.childType;
+      this.lastDetailsService = detailServiceFields.get(lastDetailsEntity).getFieldType();
+      this.lastDetailsServiceField = detailServiceFields.get(lastDetailsService);
     } else {
+      this.lastDetailsInfo = null;
+      this.lastDetailsEntity = null;
+      this.lastDetailsService = null;
+      this.lastDetailsServiceField = null;
       this.detailsServiceField = null;
     }
 
     // Build the ITD
     itdTypeDetails = builder.build();
   }
-
-  /**
-   * This method returns the controller constructor
-   *
-   * @return
-   */
-  /*
-  private ConstructorMetadata getConstructor() {
-
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // Generating constructor
-    ConstructorMetadataBuilder constructor = new ConstructorMetadataBuilder(getId());
-    constructor.setModifier(Modifier.PUBLIC);
-    constructor.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.AUTOWIRED));
-    if (this.type == ControllerType.DETAIL) {
-
-      // Getting serviceFieldName
-      String serviceFieldName =
-          getServiceField(this.controllerDetailInfo.getService()).getFieldName().getSymbolName();
-
-      // Getting parentServiceFieldName
-      String parentServiceFieldName =
-          getServiceField(this.controllerDetailInfo.getParentService()).getFieldName()
-              .getSymbolName();
-
-      // Adding parameters
-      constructor
-          .addParameter(parentServiceFieldName, this.controllerDetailInfo.getParentService());
-      constructor.addParameter(serviceFieldName, this.controllerDetailInfo.getService());
-
-      // Generating body
-      bodyBuilder.appendFormalLine(String.format("this.%s = %s;", parentServiceFieldName,
-          parentServiceFieldName));
-      bodyBuilder.appendFormalLine(String.format("this.%s = %s;", serviceFieldName,
-          serviceFieldName));
-
-    } else {
-      // Getting serviceFieldName
-      String serviceFieldName = getServiceField().getFieldName().getSymbolName();
-
-      // Adding parameters
-      constructor.addParameter(serviceFieldName, service);
-      for (JavaType detailService : detailsServices) {
-        constructor.addParameter(getServiceDetailField(detailService).getFieldName()
-            .getSymbolName(), detailService);
-      }
-
-      // Generating body
-      bodyBuilder.appendFormalLine(String.format("this.%s = %s;", serviceFieldName,
-          serviceFieldName));
-      for (JavaType detailService : detailsServices) {
-        bodyBuilder.appendFormalLine(String.format("this.%s = %s;",
-            getServiceDetailField(detailService).getFieldName().getSymbolName(),
-            getServiceDetailField(detailService).getFieldName().getSymbolName()));
-      }
-    }
-
-    // Adding body
-    constructor.setBodyBuilder(bodyBuilder);
-
-    return constructor.build();
-  }
-  */
-
 
   /**
    * This method returns service field included on controller that it
@@ -261,116 +224,6 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     return new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
         new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), service).build();
   }
-
-  /**
-   * This method returns the model attribute method
-   *
-   * @return
-   */
-  /*
-  private MethodMetadataBuilder getModelAttributeMethod() {
-
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    AnnotationMetadataBuilder pathVariable =
-        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
-    pathVariable.addStringAttribute("value", "id");
-    parameterTypes.add(new AnnotatedJavaType(this.identifierType, pathVariable.build()));
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("id"));
-
-    JavaSymbolName methodName = new JavaSymbolName("get".concat(this.entity.getSimpleTypeName()));
-
-    // Check if method exists
-    if (governorHasMethod(methodName,
-        AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes))) {
-      return new MethodMetadataBuilder(getGovernorMethod(methodName,
-          AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes)));
-    }
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // return entityNameService.findOne(id);
-    // Getting serviceFieldName
-    String serviceFieldName = getServiceField().getFieldName().getSymbolName();
-
-    // Getting findOneMethod
-    MethodMetadata serviceFindOneMethod = serviceMetadata.getCurrentFindOneMethod();
-
-    bodyBuilder.appendFormalLine(String.format("return this.%s.%s(id);", serviceFieldName,
-        serviceFindOneMethod.getMethodName()));
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodMetadataBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, this.entity,
-            parameterTypes, parameterNames, bodyBuilder);
-
-    // Adding annotations
-    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE));
-    methodMetadataBuilder.setAnnotations(annotations);
-
-    return methodMetadataBuilder;
-  }
-  */
-
-  /**
-   * This method returns the model attribute method
-   *
-   * @return
-   */
-  /*
-  public MethodMetadataBuilder getModelAttributeMethod(JavaType entity, JavaType identifierType,
-      JavaType service) {
-
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    AnnotationMetadataBuilder pathVariable =
-        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
-    pathVariable.addStringAttribute("value", "id");
-    parameterTypes.add(new AnnotatedJavaType(identifierType, pathVariable.build()));
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("id"));
-
-    JavaSymbolName methodName = new JavaSymbolName("get".concat(entity.getSimpleTypeName()));
-
-    // Check if method exists
-    if (governorHasMethod(methodName,
-        AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes))) {
-      return new MethodMetadataBuilder(getGovernorMethod(methodName,
-          AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes)));
-    }
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // return entityNameService.findOne(id);
-    // Getting serviceFieldName
-    String serviceFieldName = getServiceField(service).getFieldName().getSymbolName();
-
-    // Getting findOneMethod
-    MethodMetadata serviceFindOneMethod = serviceMetadata.getCurrentFindOneMethod();
-
-    bodyBuilder.appendFormalLine(String.format("return this.%s.%s(id);", serviceFieldName,
-        serviceFindOneMethod.getMethodName()));
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodMetadataBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, parameterTypes,
-            parameterNames, bodyBuilder);
-
-    // Adding annotations
-    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE));
-    methodMetadataBuilder.setAnnotations(annotations);
-
-    return methodMetadataBuilder;
-  }*/
 
   @Override
   public String toString() {
@@ -396,10 +249,6 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     return this.service;
   }
 
-  public JavaType getDetailsService() {
-    return detailsService;
-  }
-
   public String getPath() {
     return this.path;
   }
@@ -412,7 +261,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     return identifierType;
   }
 
-  public RelationInfo getDetailsFieldInfo() {
+  public List<RelationInfo> getDetailsFieldInfo() {
     return detailsFieldInfo;
   }
 
@@ -420,11 +269,41 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     return requestMappingValue;
   }
 
-  public FieldMetadata getDetailsServiceField() {
+  public Map<JavaType, FieldMetadata> getDetailsServiceFields() {
     return detailsServiceField;
+  }
+
+  public FieldMetadata getDetailsServiceFields(JavaType entityType) {
+    if (entity.equals(entityType)) {
+      return serviceField;
+    }
+    return getDetailsServiceFields().get(entityType);
+  }
+
+  public RelationInfo getLastDetailsInfo() {
+    return lastDetailsInfo;
+  }
+
+  public FieldMetadata getLastDetailServiceField() {
+    return lastDetailsServiceField;
+  }
+
+  public JavaType getLastDetailService() {
+    return lastDetailsService;
+  }
+
+  public JavaType getLastDetailEntity() {
+    return lastDetailsEntity;
   }
 
   public FieldMetadata getServiceField() {
     return serviceField;
+  }
+
+  public ServiceMetadata getSericeMetadataForEntity(JavaType entityType) {
+    if (entity.equals(entityType)) {
+      return serviceMetadata;
+    }
+    return detailsServiceMetadata.get(entityType);
   }
 }
