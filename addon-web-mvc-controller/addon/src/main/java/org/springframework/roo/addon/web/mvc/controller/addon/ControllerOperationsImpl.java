@@ -2,6 +2,19 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import static java.lang.reflect.Modifier.PUBLIC;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -38,6 +51,7 @@ import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
@@ -60,19 +74,6 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.FileUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Implementation of {@link ControllerOperations}.
@@ -1115,7 +1116,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
               RooJavaType.ROO_CONTROLLER);
 
       for (ClassOrInterfaceTypeDetails controller : controllers) {
-        String name = replaceTopLevelPackageString(controller, currentController);
+        String name =
+            getClasspathOperations().replaceTopLevelPackageString(controller, currentController);
         if (currentController.equals(name)) {
 
           // Get the entity associated
@@ -1148,7 +1150,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
               RooJavaType.ROO_SERVICE);
 
       for (ClassOrInterfaceTypeDetails service : services) {
-        String name = replaceTopLevelPackageString(service, currentService);
+        String name =
+            getClasspathOperations().replaceTopLevelPackageString(service, currentService);
         if (currentService.equals(name)) {
           servicesToPublish.add(service);
           break;
@@ -1203,7 +1206,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
         if (notGeneratedByRoo) {
           StringBuffer methodNameBuffer = new StringBuffer("");
           if (StringUtils.isEmpty(currentService)) {
-            methodNameBuffer.append(replaceTopLevelPackage(serviceToPublish)).append(".");
+            methodNameBuffer.append(
+                getClasspathOperations().replaceTopLevelPackage(serviceToPublish)).append(".");
           }
 
           methodNameBuffer.append(method.getMethodName().getSymbolName());
@@ -1230,100 +1234,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
       }
     }
     return serviceMethodsToPublish;
-  }
-
-
-  /**
-   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
-   * TopLevelPackage
-   *
-   * @param cid
-   *            ClassOrInterfaceTypeDetails of a JavaType
-   * @param currentText
-   *            String current text for option value
-   * @return the String representing a JavaType with its name shortened
-   */
-  public String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText) {
-    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
-    String javaTypeString = "";
-    String topLevelPackageString = "";
-
-    // Add module value to topLevelPackage when necessary
-    if (StringUtils.isNotBlank(cid.getType().getModule())
-        && !cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())) {
-
-      // Target module is not focused
-      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
-      topLevelPackageString =
-          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
-              .getFullyQualifiedPackageName();
-    } else if (StringUtils.isNotBlank(cid.getType().getModule())
-        && cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())
-        && (currentText.startsWith(cid.getType().getModule()) || cid.getType().getModule()
-            .startsWith(currentText)) && StringUtils.isNotBlank(currentText)) {
-
-      // Target module is focused but user wrote it
-      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
-      topLevelPackageString =
-          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
-              .getFullyQualifiedPackageName();
-    } else {
-
-      // Not multimodule project
-      topLevelPackageString =
-          getProjectOperations().getFocusedTopLevelPackage().getFullyQualifiedPackageName();
-    }
-
-    // Autocomplete with abbreviate or full qualified mode
-    String auxString =
-        javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
-            topLevelPackageString, "~"));
-    if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
-        && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
-
-      // Value is for autocomplete only or user wrote abbreviate value
-      javaTypeString = auxString;
-    } else {
-
-      // Value could be for autocomplete or for validation
-      javaTypeString = String.format("%s%s", javaTypeString, javaTypeFullyQualilfiedName);
-    }
-
-    return javaTypeString;
-  }
-
-
-  /**
-   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
-   * TopLevelPackage
-   *
-   * @param cid
-   *            ClassOrInterfaceTypeDetails of a JavaType
-   *
-   * @return the String representing a JavaType with its name shortened
-   */
-  public String replaceTopLevelPackage(ClassOrInterfaceTypeDetails cid) {
-    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
-    String javaTypeString = "";
-    String topLevelPackageString = "";
-
-    // Add module value to topLevelPackage when necessary
-    if (StringUtils.isNotBlank(cid.getType().getModule())) {
-
-      // Target module is not focused
-      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
-      topLevelPackageString =
-          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
-              .getFullyQualifiedPackageName();
-    } else {
-
-      // Not multimodule project
-      topLevelPackageString =
-          getProjectOperations().getFocusedTopLevelPackage().getFullyQualifiedPackageName();
-    }
-
-    return javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
-        topLevelPackageString, "~"));
   }
 
 
@@ -1458,6 +1368,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
   private ControllerLocator getControllerLocator() {
     return serviceInstaceManager.getServiceInstance(this, ControllerLocator.class);
+  }
+
+  private ClasspathOperations getClasspathOperations() {
+    return serviceInstaceManager.getServiceInstance(this, ClasspathOperations.class);
   }
 
 }

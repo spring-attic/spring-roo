@@ -2,6 +2,7 @@ package org.springframework.roo.classpath.operations;
 
 import java.util.Set;
 
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
@@ -81,4 +82,28 @@ public interface ClasspathOperations {
   void focus(final JavaType type);
 
   boolean isProjectAvailable();
+
+  /**
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
+   * TopLevelPackage
+   *
+   * @param cid
+   *            ClassOrInterfaceTypeDetails of a JavaType
+   * @param currentText
+   *            String current text for option value
+   * @return the String representing a JavaType with its name shortened
+   */
+  public String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText);
+
+  /**
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
+   * TopLevelPackage
+   *
+   * @param cid
+   *            ClassOrInterfaceTypeDetails of a JavaType
+   *
+   * @return the String representing a JavaType with its name shortened
+   */
+  public String replaceTopLevelPackage(ClassOrInterfaceTypeDetails cid);
+
 }

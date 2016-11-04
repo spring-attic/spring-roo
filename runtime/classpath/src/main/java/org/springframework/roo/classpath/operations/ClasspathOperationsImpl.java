@@ -12,6 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -255,5 +256,99 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
   @Override
   public boolean isProjectAvailable() {
     return projectOperations.isFocusedProjectAvailable();
+  }
+
+  /**
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
+   * TopLevelPackage
+   *
+   * @param cid
+   *            ClassOrInterfaceTypeDetails of a JavaType
+   * @param currentText
+   *            String current text for option value
+   * @return the String representing a JavaType with its name shortened
+   */
+  public String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText) {
+    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
+    String javaTypeString = "";
+    String topLevelPackageString = "";
+
+    // Add module value to topLevelPackage when necessary
+    if (StringUtils.isNotBlank(cid.getType().getModule())
+        && !cid.getType().getModule().equals(projectOperations.getFocusedModuleName())) {
+
+      // Target module is not focused
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          projectOperations.getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else if (StringUtils.isNotBlank(cid.getType().getModule())
+        && cid.getType().getModule().equals(projectOperations.getFocusedModuleName())
+        && (currentText.startsWith(cid.getType().getModule()) || cid.getType().getModule()
+            .startsWith(currentText)) && StringUtils.isNotBlank(currentText)) {
+
+      // Target module is focused but user wrote it
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          projectOperations.getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else {
+
+      // Not multimodule project
+      topLevelPackageString =
+          projectOperations.getFocusedTopLevelPackage().getFullyQualifiedPackageName();
+    }
+
+    // Autocomplete with abbreviate or full qualified mode
+    String auxString =
+        javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
+            topLevelPackageString, "~"));
+    if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
+        && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
+
+      // Value is for autocomplete only or user wrote abbreviate value
+      javaTypeString = auxString;
+    } else {
+
+      // Value could be for autocomplete or for validation
+      javaTypeString = String.format("%s%s", javaTypeString, javaTypeFullyQualilfiedName);
+    }
+
+    return javaTypeString;
+  }
+
+
+  /**
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
+   * TopLevelPackage
+   *
+   * @param cid
+   *            ClassOrInterfaceTypeDetails of a JavaType
+   *
+   * @return the String representing a JavaType with its name shortened
+   */
+  @Override
+  public String replaceTopLevelPackage(ClassOrInterfaceTypeDetails cid) {
+    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
+    String javaTypeString = "";
+    String topLevelPackageString = "";
+
+    // Add module value to topLevelPackage when necessary
+    if (StringUtils.isNotBlank(cid.getType().getModule())) {
+
+      // Target module is not focused
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          projectOperations.getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else {
+
+      // Not multimodule project
+      topLevelPackageString =
+          projectOperations.getFocusedTopLevelPackage().getFullyQualifiedPackageName();
+    }
+
+    return javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
+        topLevelPackageString, "~"));
   }
 }
