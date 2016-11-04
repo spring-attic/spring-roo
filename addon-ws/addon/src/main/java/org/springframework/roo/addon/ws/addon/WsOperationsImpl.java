@@ -120,16 +120,24 @@ public class WsOperationsImpl implements WsOperations {
     }
 
     // Getting module from the .wsdl file
-    String wsdlModuleName = getModuleFromWsdlLocation(wsdlLocation).getModuleName();
+    final Pom wsdlModule = getModuleFromWsdlLocation(wsdlLocation);
+    final String wsdlModuleName = wsdlModule.getModuleName();
     // Getting the wsdlName without the module
-    String wsdlName = getWsdlNameWithoutModule(wsdlLocation);
+    final String wsdlName = getWsdlNameWithoutModule(wsdlLocation);
 
     // Getting wsdl absolute path from the provided wsdlLocation
-    String wsdlPath = getWsdlAbsolutePathFromWsdlName(wsdlLocation);
+    final String wsdlPath = getWsdlAbsolutePathFromWsdlName(wsdlLocation);
 
     // Check if provided .wsdl exists
     Validate.isTrue(getFileManager().exists(wsdlPath),
         "ERROR: You must provide an existing .wsdl file.");
+
+    // To prevent compilation errors, is necessary to include dependencies between 
+    // the configClass module and the .wsdl module
+    if (wsdlModuleName != configClass.getModule()) {
+      getProjectOperations().addDependency(configClass.getModule(),
+          new Dependency(wsdlModule.getGroupId(), wsdlModule.getArtifactId(), null));
+    }
 
     // Check if provided configClass exists or should be generated
     boolean isNewConfigClass = false;
@@ -376,6 +384,9 @@ public class WsOperationsImpl implements WsOperations {
           sb.append(LINE_SEPARATOR);
           sb.append(LINE_SEPARATOR);
           LOGGER.log(Level.INFO, sb.toString());
+          // Changing focus to the module where the .wsdl file is located
+          getProjectOperations().setModule(wsdlModule);
+          // executing mvn generate-sources command
           getMavenOperations().executeMvnCommand("generate-sources");
         } catch (InterruptedException e) {
           e.printStackTrace();
@@ -563,12 +574,12 @@ public class WsOperationsImpl implements WsOperations {
    */
   private void includeDependenciesAndPluginsForWsClient(String wsdlName, String wsdlModuleName) {
     // Include CXF property if not exists
-    getProjectOperations().addProperty(wsdlModuleName, CXF_PROPERTY);
+    getProjectOperations().addProperty("", CXF_PROPERTY);
     getProjectOperations().addDependency(wsdlModuleName, CXF_RT_FRONTEND_JAXWS_DEPENDENCY);
     getProjectOperations().addDependency(wsdlModuleName, CXF_RT_TRANSPORTS_HTTP_DEPENDENCY);
 
     // Include TracEE dependencies if not exists
-    getProjectOperations().addProperty(wsdlModuleName, TRACEE_PROPERTY);
+    getProjectOperations().addProperty("", TRACEE_PROPERTY);
     getProjectOperations().addDependency(wsdlModuleName, TRACEE_CXF_DEPENDENCY);
 
 
