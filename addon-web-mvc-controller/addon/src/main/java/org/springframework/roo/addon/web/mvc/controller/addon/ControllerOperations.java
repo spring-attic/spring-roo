@@ -131,29 +131,6 @@ public interface ControllerOperations extends Feature {
   public List<String> getAllMethodsToPublish(String currentService, String currentController);
 
   /**
-   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
-   * TopLevelPackage
-   *
-   * @param cid
-   *            ClassOrInterfaceTypeDetails of a JavaType
-   * @param currentText
-   *            String current text for option value
-   * @return the String representing a JavaType with its name shortened
-   */
-  public String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText);
-
-  /**
-   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
-   * TopLevelPackage
-   *
-   * @param cid
-   *            ClassOrInterfaceTypeDetails of a JavaType
-   *
-   * @return the String representing a JavaType with its name shortened
-   */
-  public String replaceTopLevelPackage(ClassOrInterfaceTypeDetails cid);
-
-  /**
    * Generate the operations selected in the controller indicated
    *
    * @param controller Controller where the operations will be created

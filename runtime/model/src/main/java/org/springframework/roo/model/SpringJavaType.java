@@ -83,6 +83,8 @@ public final class SpringJavaType {
       "org.springframework.web.filter.HiddenHttpMethodFilter");
   public static final JavaType HTTP_HEADERS = new JavaType("org.springframework.http.HttpHeaders");
   public static final JavaType HTTP_STATUS = new JavaType("org.springframework.http.HttpStatus");
+  public static final JavaType JAVA_MAIL_SENDER = new JavaType(
+      "org.springframework.mail.javamail.JavaMailSender");
   public static final JavaType JAVA_MAIL_SENDER_IMPL = new JavaType(
       "org.springframework.mail.javamail.JavaMailSenderImpl");
   public static final JavaType JMS_OPERATIONS = new JavaType(
@@ -151,6 +153,8 @@ public final class SpringJavaType {
       "org.springframework.transaction.annotation.Propagation");
   public static final JavaType PRIMARY = new JavaType(
       "org.springframework.context.annotation.Primary");
+  public static final JavaType PROFILE = new JavaType(
+      "org.springframework.context.annotation.Profile");
   public static final JavaType PUT_MAPPING = new JavaType(
       "org.springframework.web.bind.annotation.PutMapping");
   public static final JavaType REDIRECT_ATTRIBUTES = new JavaType(

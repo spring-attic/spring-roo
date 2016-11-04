@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +53,7 @@ import org.w3c.dom.NodeList;
     referenceInterface = Feature.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public abstract class AbstractProjectOperations implements ProjectOperations {
 
+  private static final String DEFAULT_VALUE_TEXT = "VALUE_TEXT";
   static final String ADDED = "added";
   static final String CHANGED = "changed";
   static final String REMOVED = "removed";
@@ -298,14 +300,51 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     addPackageToPluginExecution(moduleName, plugin, executionId, packageName, true);
   }
 
-
   @Override
   public void addPackageToPluginExecution(final String moduleName, final Plugin plugin,
       String executionId, final String packageName, boolean addToPluginManagement) {
+    // Delegates in generic addElementToPluginExecution
+    addElementToPluginExecution(moduleName, plugin, executionId, "packages", "package",
+        packageName, addToPluginManagement);
+  }
+
+  @Override
+  public void addElementToPluginExecution(final String moduleName, final Plugin plugin,
+      String executionId, String parentElementName, String elementName, final String elementValue) {
+    addElementToPluginExecution(moduleName, plugin, executionId, parentElementName, elementName,
+        elementValue, true);
+  }
+
+  @Override
+  public void addElementToPluginExecution(final String moduleName, final Plugin plugin,
+      String executionId, String parentElementName, String elementName, String elementValue,
+      boolean addToPluginManagement) {
+    Map<String, String> elementValues = new HashMap<String, String>();
+    elementValues.put(DEFAULT_VALUE_TEXT, elementValue);
+    addElementToPluginExecution(moduleName, plugin, executionId, parentElementName, elementName,
+        elementValues, addToPluginManagement);
+  }
+
+
+  @Override
+  public void addElementToPluginExecution(final String moduleName, final Plugin plugin,
+      String executionId, String parentElementName, String elementName,
+      Map<String, String> elementValues) {
+    addElementToPluginExecution(moduleName, plugin, executionId, parentElementName, elementName,
+        elementValues, true);
+  }
+
+  @Override
+  public void addElementToPluginExecution(final String moduleName, final Plugin plugin,
+      String executionId, String parentElementName, String elementName,
+      Map<String, String> elementValues, boolean addToPluginManagement) {
+
     Validate.isTrue(isProjectAvailable(moduleName), "Package modification prohibited at this time");
     Validate.notNull(executionId, "Execution id required");
     Validate.notNull(plugin, "Plugin required");
-    Validate.notNull(packageName, "Package required");
+    Validate.notNull(parentElementName, "parentElementName required");
+    Validate.notNull(elementName, "elementName required");
+    Validate.notNull(elementValues, "elementValues required");
 
     String descriptionOfChange;
     final Pom parentPom = getPomFromModuleName("");
@@ -356,34 +395,76 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         for (final Execution execution : existingPlugin.getExecutions()) {
           if (executionId.equals(execution.getId()) && execution.getConfiguration() != null) {
 
-            // Check if package is already added
-            final Element packagesElement =
-                DomUtils.createChildIfNotExists("packages", execution.getConfiguration()
+            // Check if element is already added
+            final Element elementsElement =
+                DomUtils.createChildIfNotExists(parentElementName, execution.getConfiguration()
                     .getConfiguration(), document);
 
-            final List<Element> existingPackages =
-                XmlUtils.findElements("package", packagesElement);
+            final List<Element> existingElements =
+                XmlUtils.findElements(elementName, elementsElement);
 
-            for (Element existingPackage : existingPackages) {
-              final String pack = DomUtils.getTextContent(existingPackage, "");
-              if (pack.equals(packageName)) {
-                return;
+            for (Element existingElement : existingElements) {
+              for (Entry<String, String> element : elementValues.entrySet()) {
+                if (elementValues.size() == 1 && element.getKey().equals(DEFAULT_VALUE_TEXT)) {
+                  final String elem = DomUtils.getTextContent(existingElement, "");
+                  if (elem.equals(element.getValue())) {
+                    return;
+                  }
+                } else {
+                  Element childElement =
+                      DomUtils.getChildElementByTagName(existingElement, element.getKey());
+                  if (childElement != null
+                      && DomUtils.getTextContent(childElement, "").equals(element.getValue())) {
+                    return;
+                  }
+                }
               }
             }
 
             // No such package; add it
-            descriptionOfChange = highlight(ADDED + " package") + " '" + packageName + "'";
+            Element newParentElement = null;
+            for (Entry<String, String> element : elementValues.entrySet()) {
+              descriptionOfChange =
+                  highlight(ADDED + " " + elementName + "/" + element.getKey()) + " '"
+                      + element.getValue() + "'";
 
-            if (!isSamePom && addToPluginManagement) {
-              packagesElement.appendChild(XmlUtils.createTextElement(parentDocument, "package",
-                  packageName));
-              fileManager.createOrUpdateTextFileIfRequired(parentPom.getPath(),
-                  XmlUtils.nodeToString(parentDocument), descriptionOfChange, false);
-            } else {
-              packagesElement.appendChild(XmlUtils.createTextElement(document, "package",
-                  packageName));
-              fileManager.createOrUpdateTextFileIfRequired(pom.getPath(),
-                  XmlUtils.nodeToString(document), descriptionOfChange, false);
+              if (elementValues.size() == 1 && element.getKey().equals(DEFAULT_VALUE_TEXT)) {
+                if (!isSamePom && addToPluginManagement) {
+                  elementsElement.appendChild(XmlUtils.createTextElement(parentDocument,
+                      elementName, element.getValue()));
+                  fileManager.createOrUpdateTextFileIfRequired(parentPom.getPath(),
+                      XmlUtils.nodeToString(parentDocument), descriptionOfChange, false);
+                } else {
+                  elementsElement.appendChild(XmlUtils.createTextElement(document, elementName,
+                      element.getValue()));
+                  fileManager.createOrUpdateTextFileIfRequired(pom.getPath(),
+                      XmlUtils.nodeToString(document), descriptionOfChange, false);
+                }
+              } else {
+                if (!isSamePom && addToPluginManagement) {
+                  if (newParentElement == null) {
+                    newParentElement =
+                        DomUtils.createChildIfNotExists(elementName, execution.getConfiguration()
+                            .getConfiguration(), parentDocument);
+                    elementsElement.appendChild(newParentElement);
+                  }
+                  newParentElement.appendChild(XmlUtils.createTextElement(parentDocument,
+                      element.getKey(), element.getValue()));
+                  fileManager.createOrUpdateTextFileIfRequired(parentPom.getPath(),
+                      XmlUtils.nodeToString(parentDocument), descriptionOfChange, false);
+                } else {
+                  if (newParentElement == null) {
+                    newParentElement =
+                        DomUtils.createChildIfNotExists(elementName, execution.getConfiguration()
+                            .getConfiguration(), document);
+                    elementsElement.appendChild(newParentElement);
+                  }
+                  newParentElement.appendChild(XmlUtils.createTextElement(document,
+                      element.getKey(), element.getValue()));
+                  fileManager.createOrUpdateTextFileIfRequired(pom.getPath(),
+                      XmlUtils.nodeToString(document), descriptionOfChange, false);
+                }
+              }
             }
           }
         }
@@ -1553,5 +1634,4 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
       }
     }
   }
-
 }

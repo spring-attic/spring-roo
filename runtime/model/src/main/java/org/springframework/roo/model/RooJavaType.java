@@ -141,6 +141,15 @@ public final class RooJavaType {
   public static final JavaType ROO_ENUM_RELATION_TYPE = new JavaType(
       "org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType");
 
+  public static final JavaType ROO_WS_CLIENTS = new JavaType(
+      "org.springframework.roo.addon.ws.annotations.RooWsClients");
+
+  public static final JavaType ROO_WS_CLIENT = new JavaType(
+      "org.springframework.roo.addon.ws.annotations.RooWsClient");
+
+  public static final JavaType ROO_ENUM_SOAP_BINDING_TYPE = new JavaType(
+      "org.springframework.roo.addon.ws.annotations.SoapBindingType");
+
   /**
    * Constructor is private to prevent instantiation
    */

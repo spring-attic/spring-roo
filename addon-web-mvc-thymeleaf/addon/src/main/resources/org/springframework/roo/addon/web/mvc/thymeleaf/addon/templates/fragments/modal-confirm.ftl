@@ -36,11 +36,11 @@
                   <div class="pull-left">
                     <button type="reset" class="btn btn-default"
                       data-th-onclick="'jQuery(\'#' + ${r"${id}"} + 'Modal\').modal(\'hide\');'"
-                      data-th-text="${r"#{"}label_reset}">Cancel</button>
+                      data-th-text="${r"#{label_reset}"}>Cancel</button>
                   </div>
                   <div class="pull-right">
                     <button type="button" class="btn btn-primary"
-                      data-th-text="${r"#{"}label_submit}" data-th-onclick="${r"${onclickCallback}"}"
+                      data-th-text="${r"#{label_submit}"}" data-th-onclick="${r"${onclickCallback}"}"
                       >Submit</button>
                   </div>
                 </div>

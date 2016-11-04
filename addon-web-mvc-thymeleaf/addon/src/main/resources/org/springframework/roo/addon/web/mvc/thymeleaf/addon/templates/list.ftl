@@ -24,17 +24,17 @@
 
  <title data-th-text="|${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"} - ${projectName}|">List ${entityName} - ${projectName}</title>
 
- <!-- Bootstrap -->
+ <!--/* Bootstrap */-->
  <link rel="stylesheet" type="text/css"
    href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
    data-th-remove="all"></link>
 
- <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+ <!--/* IE10 viewport hack for Surface/desktop Windows 8 bug */-->
  <link rel="stylesheet" type="text/css"
    href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
    data-th-remove="all"></link>
 
- <!-- Font Awesome -->
+ <!--/* Font Awesome */-->
  <link rel="stylesheet" type="text/css"
    href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
    data-th-remove="all"/>
@@ -65,22 +65,22 @@
    rel="stylesheet" type="text/css"
    href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css"></link>
 
- <!-- Bootswatch CSS custom -->
+ <!--/* Bootswatch CSS custom */-->
  <link rel="stylesheet" type="text/css"
    href="../../static/public/css/theme.css"
    data-th-remove="all"/>
 
- <!-- Roo CSS -->
+ <!--/* Roo CSS */-->
  <link rel="stylesheet" type="text/css"
     href="../../static/public/css/springroo.css"
     data-th-remove="all"/>
 
- <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
- <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
- <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
- <![endif]-->
+ <!--/* HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries */-->
+ <!--/* WARNING: Respond.js doesn't work if you view the page via file:// */-->
+ <!--/*[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js" data-th-remove="all"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js" data-th-remove="all"></script>
+ <![endif]*/-->
 
 </head>
 
@@ -92,18 +92,8 @@
     <!-- HEADER -->
     <header role="banner">
 
-        <!-- BANNER -->
-        <div class="bg-header">
-          <div class="jumbotron bg-banner">
-              <div class="container">
-                <h1 class="project-name">${projectName}</h1>
-                <p class="project-tagline" data-th-text="${r"#{"}info_homepage_project${r"}"}">Hello, this is your home page.</p>
-              </div>
-          </div>
-        </div>
-
         <!-- Main navbar -->
-        <nav class="navbar navbar-inverse navbar-fixed-top">
+        <nav class="navbar navbar-inverse navbar-static-top">
          <div class="container">
 
             <!-- navbar-header -->
@@ -197,6 +187,16 @@
            </div>
           </div>
         </nav>
+
+        <!-- BANNER -->
+        <div class="bg-header">
+          <div class="jumbotron bg-banner">
+              <div class="container">
+                <h1 class="project-name">${projectName}</h1>
+                <p class="project-tagline" data-th-text="${r"#{"}info_homepage_project${r"}"}">Hello, this is your home page.</p>
+              </div>
+          </div>
+        </div>
 
     </header>
     <!-- /HEADER -->
@@ -378,6 +378,8 @@
         </div>
 
       </section>
+      <!-- /CONTENT-->
+
     </div>
     <!-- /CONTAINER-->
 
@@ -425,11 +427,11 @@
   <script type="text/javascript" charset="utf8"
     src="https://code.jquery.com/jquery-1.12.3.js"></script>
 
-  <!-- Bootstrap -->
+  <!--/* Bootstrap */-->
   <script type="text/javascript"
     src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.js"></script>
 
-  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <!--/* IE10 viewport hack for Surface/desktop Windows 8 bug */-->
   <script type="text/javascript" charset="utf8"
     src="../../static/public/js/ie10-viewport-bug-workaround.js"></script>
 
@@ -516,9 +518,12 @@
                   'searchable': false,
                   'render': function ( data, type, full, meta ) {
                       var baseUrl = [[@{${entity.configuration.controllerPath}/}]];
-                      return '<a role="button" class="btn-action showInfo" href="' + baseUrl + data + '" data-th-text=${r"#{"}label_show${r"}"}>Show</a>' +
-                      '<a role="button" class="btn-action edit" href="' + baseUrl + data + '/edit-form" data-th-text=${r"#{"}label_edit${r"}"}>Edit</a>' +
-                      '<a role="button" class="btn-action delete" data-th-text=${r"#{"}label_delete${r"}"} onclick="javascript:jQuery.delete${entityName}Modal(' + data + ')">Delete</a>'
+                      var showLabel = ${r"/*[[#{label_show}]]*/"} "Show";
+                      var editLabel = ${r"/*[[#{label_edit}]]*/"} "Edit";
+                      var deleteLabel = ${r"/*[[#{label_delete}]]*/"} "Delete";
+                      return '<a role="button" class="btn-action showInfo" href="' + baseUrl + data + '"}>' + showLabel + '</a>' +
+                      '<a role="button" class="btn-action edit" href="' + baseUrl + data + '/edit-form">' + editLabel + '</a>' +
+                      '<a role="button" class="btn-action delete" onclick="javascript:jQuery.delete${entityName}Modal(' + data + ')">' + deleteLabel + '</a>'
                   }
                 }
               ]
@@ -552,19 +557,22 @@
                        jQuery('#confirmDelete${entityName}Modal').modal('hide');
 
                        /** Refresh Datatables */
+                       var infoDeletedItems = ${r"/*[[#{info_deleted_items_number(1)}]]*/"} "1 removed item";
                        jQuery('#${entity.entityItemId}-table').DataTable().ajax.reload();
                        jQuery('#delete${entityName}ModalBody').empty();
-                       jQuery('#delete${entityName}ModalBody').append('<p data-th-text="|${r"#{info_deleted_items_number(1)}"}|" >1 removed item</p>');
+                       jQuery('#delete${entityName}ModalBody').append('<p>' + infoDeletedItems + '</p>');
                        jQuery('#delete${entityName}Modal').modal();
 
                      },
                      error: function(jqXHR) {
+                       var errorRelationLabel = ${r"/*[[#{error_deleting_item_with_relationships}]]*/"} "To delete the selected item, must delete its related elements before.";
+                       var errorDeletingLabel = ${r"/*[[#{error_deleting_item}]]*/"} "Error deleting selected item.";
                        jQuery('#confirmDelete${entityName}Modal').modal('hide');
                        jQuery('#delete${entityName}ModalBody').empty();
                        if(jqXHR.status == 428){
-                         jQuery('#delete${entityName}ModalBody').append('<p data-th-text="|${r"#{error_deleting_item_with_relationships}"}|" >To delete the selected item, must delete its related elements before.</p>');
+                         jQuery('#delete${entityName}ModalBody').append('<p>' + errorRelationLabel + '</p>');
                        } else {
-                         jQuery('#delete${entityName}ModalBody').append('<p data-th-text="|${r"#{error_deleting_item}"}|" >Error deleting selected item.</p>');
+                         jQuery('#delete${entityName}ModalBody').append('<p>' + errorDeletingLabel + '</p>');
                        }
                        jQuery('#delete${entityName}Modal').modal('show');
                      }

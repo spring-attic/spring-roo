@@ -12,10 +12,8 @@
     Only the internal content of the following div is included within
     the template, in menu fragment
     -->
-    <div data-layout-fragment="menu">
+    <nav class="navbar navbar-inverse navbar-static-top" data-layout-fragment="menu">
 
-        <!-- Main navbar -->
-        <nav class="navbar navbar-inverse navbar-fixed-top">
          <div class="container">
 
             <div class="navbar-header">
@@ -86,17 +84,14 @@
            </div>
 
           </div>
-        </nav>
-
-    </div>
+    </nav>
 
     <!--
     Only the internal content of the following div is included within
     the template, in menu-languages fragment
     -->
-    <div data-layout-fragment="menu-languages">
-        <!-- Main navbar -->
-        <nav class="navbar navbar-inverse navbar-fixed-top">
+    <nav class="navbar navbar-inverse navbar-static-top" data-layout-fragment="menu-languages">
+
          <div class="container">
 
             <div class="navbar-header">
@@ -124,9 +119,7 @@
            </div>
 
           </div>
-        </nav>
-
-    </div>
+    </nav>
 
   </body>
   </#if>

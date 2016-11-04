@@ -15,32 +15,32 @@
        data-th-remove="all"/>
     <title data-th-text="|${r"#{"}label_login${r"}"}- ${projectName}|">Login- ${projectName}</title>
 
-    <!-- Bootstrap -->
+    <!--/* Bootstrap */-->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
       data-th-remove="all"></link>
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <!--/* IE10 viewport hack for Surface/desktop Windows 8 bug */-->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
       data-th-remove="all"></link>
-    <!-- Font Awesome -->
+    <!--/* Font Awesome */-->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
       data-th-remove="all"/>
-    <!-- Bootswatch CSS custom -->
+    <!--/* Bootswatch CSS custom */-->
     <link rel="stylesheet" type="text/css"
       href="../static/public/css/theme.css"
       data-th-remove="all"/>
-    <!-- Roo CSS -->
+    <!--/* Roo CSS */-->
     <link rel="stylesheet" type="text/css"
       href="../static/public/css/springroo.css"
       data-th-remove="all"/>
-   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    <!--/* HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries */-->
+    <!--/* WARNING: Respond.js doesn't work if you view the page via file:// */-->
+    <!--/*[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js" data-th-remove="all"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js" data-th-remove="all"></script>
+    <![endif]*/-->
 
   </head>
 <#if userManagedComponents?has_content && userManagedComponents["body"]??>
@@ -51,18 +51,8 @@
       <!-- HEADER -->
       <header role="banner">
 
-        <!-- BANNER -->
-        <div class="bg-header">
-          <div class="jumbotron bg-banner">
-              <div class="container">
-                <h1 class="project-name">${projectName}</h1>
-                <p class="project-tagline" data-th-text="${r"#{"}info_homepage_project${r"}"}">Hello, this is your home page.</p>
-              </div>
-          </div>
-        </div>
-
         <!-- Main navbar -->
-        <nav class="navbar navbar-inverse navbar-fixed-top">
+        <nav class="navbar navbar-inverse navbar-static-top">
          <div class="container">
             <!-- navbar-header -->
             <div class="navbar-header">
@@ -82,7 +72,7 @@
 
             <!-- menu -->
             <div id="mainnav" class="navbar-collapse collapse">
-              <!-- Language -->
+              <!--/* Language */-->
               <ul class="nav navbar-nav navbar-right upper-nav languages">
                 <li class="dropdown">
                   <a class="dropdown-toggle" data-toggle="dropdown" role="button"
@@ -106,13 +96,23 @@
           </div>
         </nav>
 
+        <!-- BANNER -->
+        <div class="bg-header">
+          <div class="jumbotron bg-banner">
+              <div class="container">
+                <h1 class="project-name">${projectName}</h1>
+                <p class="project-tagline" data-th-text="${r"#{"}info_homepage_project${r"}"}">Hello, this is your home page.</p>
+              </div>
+          </div>
+        </div>
+
       </header>
       <!-- /HEADER -->
 
-      <!--Main container-->
+      <!-- Main container -->
       <div class="container bg-container">
 
-        <!--Content-->
+        <!-- Content -->
         <section data-layout-fragment="content">
 
           <div class="container content">
@@ -152,7 +152,7 @@
                    <label for="username" class="col-md-3 control-label" data-th-text="${r"#{label_login_username}"}">Username</label>
                    <div class="col-md-6">
                     <input id="username" name="username" type="text"
-                        class="form-control" placeholder="Username"
+                        class="form-control" placeholder="${r"#{label_login_username}"}"
                         data-th-placeholder="${r"#{label_login_username}"}" data-toggle="tooltip"
                         aria-describedby="usernameStatus" />
                     <span data-th-classappend="${r"${param.error}"}? 'glyphicon glyphicon-remove form-control-feedback'"
@@ -165,7 +165,7 @@
                    <label for="password" class="col-md-3 control-label" data-th-text="${r"#{label_login_password}"}">Password</label>
                    <div class="col-md-6">
                     <input id="password" name="password" type="password"
-                        class="form-control" placeholder="Password" data-th-placeholder="${r"#{label_login_password}"}"
+                        class="form-control" placeholder="${r"#{label_login_password}"}" data-th-placeholder="${r"#{label_login_password}"}"
                         data-toggle="tooltip" aria-describedby="passwordStatus" />
                     <span data-th-classappend="${r"${param.error}"}? 'glyphicon glyphicon-remove form-control-feedback'"
                         class="glyphicon glyphicon-remove form-control-feedback" data-th-if="${r"${param.error}"}"
@@ -183,10 +183,10 @@
                </div>
             </div>
           </div>
-          <!--/content-->
         </section>
+       <!-- content -->
     </div>
-    <!--container-->
+    <!-- container -->
 
    <footer class="container">
       <div class="row">

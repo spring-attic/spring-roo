@@ -3,9 +3,17 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE;
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -18,13 +26,15 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
-import org.springframework.roo.converters.LastUsed;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -37,15 +47,7 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 /**
  * This class provides necessary commands to be able to include Spring MVC on
@@ -69,17 +71,11 @@ public class ControllerCommands implements CommandMarker {
   private Map<String, ControllerMVCResponseService> responseTypes =
       new HashMap<String, ControllerMVCResponseService>();
 
-  private ControllerOperations controllerOperations;
-  private ProjectOperations projectOperations;
-  private TypeLocationService typeLocationService;
-  private Converter<JavaType> javaTypeConverter;
-  @Reference
-  private MemberDetailsScanner memberDetailsScanner;
-  @Reference
-  private LastUsed lastUsed;
+  private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
+    serviceInstaceManager.activate(this.context);
   }
 
   /**
@@ -248,7 +244,7 @@ public class ControllerCommands implements CommandMarker {
             RooJavaType.ROO_JPA_ENTITY);
     for (ClassOrInterfaceTypeDetails entity : entities) {
       if (!entity.isAbstract()) {
-        String name = getControllerOperations().replaceTopLevelPackageString(entity, currentText);
+        String name = getClasspathOperations().replaceTopLevelPackageString(entity, currentText);
         if (!results.contains(name)) {
           results.add(name);
         }
@@ -485,7 +481,7 @@ public class ControllerCommands implements CommandMarker {
             RooJavaType.ROO_JPA_ENTITY);
 
     for (ClassOrInterfaceTypeDetails entity : entities) {
-      String name = getControllerOperations().replaceTopLevelPackageString(entity, currentText);
+      String name = getClasspathOperations().replaceTopLevelPackageString(entity, currentText);
       if (!results.contains(name)) {
         results.add(name);
       }
@@ -540,7 +536,7 @@ public class ControllerCommands implements CommandMarker {
             RooJavaType.ROO_JPA_ENTITY);
 
     for (ClassOrInterfaceTypeDetails entity : entities) {
-      if (getControllerOperations().replaceTopLevelPackageString(entity,
+      if (getClasspathOperations().replaceTopLevelPackageString(entity,
           entity.getType().getModule()).equals(currentEntity)) {
         if (includeChildren) {
           // Get the entity where search the fields
@@ -672,7 +668,7 @@ public class ControllerCommands implements CommandMarker {
       ClassOrInterfaceTypeDetails paternEntity, String field[], int level) {
     ClassOrInterfaceTypeDetails entity = paternEntity;
     MemberDetails entityDetails =
-        memberDetailsScanner.getMemberDetails(paternEntity.getType().getSimpleTypeName(),
+        getMemberDetailsScanner().getMemberDetails(paternEntity.getType().getSimpleTypeName(),
             paternEntity);
     List<FieldMetadata> fields = entityDetails.getFields();
     for (FieldMetadata entityField : fields) {
@@ -705,7 +701,7 @@ public class ControllerCommands implements CommandMarker {
     List<String> results = new ArrayList<String>();
 
     MemberDetails entityDetails =
-        memberDetailsScanner.getMemberDetails(entity.getType().getSimpleTypeName(), entity);
+        getMemberDetailsScanner().getMemberDetails(entity.getType().getSimpleTypeName(), entity);
     List<FieldMetadata> fields = entityDetails.getFields();
 
     for (FieldMetadata field : fields) {
@@ -740,7 +736,7 @@ public class ControllerCommands implements CommandMarker {
             RooJavaType.ROO_CONTROLLER);
 
     for (ClassOrInterfaceTypeDetails controller : controllers) {
-      String name = getControllerOperations().replaceTopLevelPackageString(controller, currentText);
+      String name = getClasspathOperations().replaceTopLevelPackageString(controller, currentText);
       if (!results.contains(name)) {
         results.add(name);
       }
@@ -765,7 +761,7 @@ public class ControllerCommands implements CommandMarker {
             RooJavaType.ROO_SERVICE);
 
     for (ClassOrInterfaceTypeDetails service : services) {
-      String name = getControllerOperations().replaceTopLevelPackageString(service, currentText);
+      String name = getClasspathOperations().replaceTopLevelPackageString(service, currentText);
       if (!results.contains(name)) {
         results.add(name);
       }
@@ -919,105 +915,32 @@ public class ControllerCommands implements CommandMarker {
 
   // Gets OSGi Services
 
-  public TypeLocationService getTypeLocationService() {
-    if (typeLocationService == null) {
-      // Get all Services implement TypeLocationService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeLocationService = (TypeLocationService) this.context.getService(ref);
-          return typeLocationService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on ControllerCommands.");
-        return null;
-      }
-    } else {
-      return typeLocationService;
-    }
+  public ControllerOperations getControllerOperations() {
+    return serviceInstaceManager.getServiceInstance(this, ControllerOperations.class);
   }
 
   public ProjectOperations getProjectOperations() {
-    if (projectOperations == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          projectOperations = (ProjectOperations) this.context.getService(ref);
-          return projectOperations;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on ControllerCommands.");
-        return null;
-      }
-    } else {
-      return projectOperations;
-    }
+    return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
   }
 
-  public ControllerOperations getControllerOperations() {
-    if (controllerOperations == null) {
-      // Get all Services implement ControllerOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ControllerOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          controllerOperations = (ControllerOperations) this.context.getService(ref);
-          return controllerOperations;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ControllerOperations on ControllerCommands.");
-        return null;
-      }
-    } else {
-      return controllerOperations;
-    }
+  public PathResolver getPathResolver() {
+    return serviceInstaceManager.getServiceInstance(this, PathResolver.class);
   }
 
-  /**
-   * This method obtains JavaType converter to be able to obtain JavaType from
-   * strings
-   *
-   * @return
-   */
-  public Converter<JavaType> getJavaTypeConverter() {
-    if (javaTypeConverter == null) {
-      // Get all Services implement Converter<JavaType> interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(Converter.class.getName(), null);
+  public FileManager getFileManager() {
+    return serviceInstaceManager.getServiceInstance(this, FileManager.class);
+  }
 
-        for (ServiceReference<?> ref : references) {
-          Converter<?> converter = (Converter<?>) this.context.getService(ref);
-          if (converter.supports(JavaType.class, "")) {
-            javaTypeConverter = (Converter<JavaType>) converter;
-            return javaTypeConverter;
-          }
-        }
+  public TypeLocationService getTypeLocationService() {
+    return serviceInstaceManager.getServiceInstance(this, TypeLocationService.class);
+  }
 
-        return null;
+  public ClasspathOperations getClasspathOperations() {
+    return serviceInstaceManager.getServiceInstance(this, ClasspathOperations.class);
+  }
 
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load Converter<JavaType> on ControllerCommands.");
-        return null;
-      }
-    } else {
-      return javaTypeConverter;
-    }
+  public MemberDetailsScanner getMemberDetailsScanner() {
+    return serviceInstaceManager.getServiceInstance(this, MemberDetailsScanner.class);
   }
 
 }

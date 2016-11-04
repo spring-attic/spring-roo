@@ -54,19 +54,18 @@
   <body id="body">
 
      <header role="banner">
-        <div data-layout-include="fragments/header :: header">
+        <nav class="navbar navbar-inverse navbar-static-top" data-layout-include="fragments/menu :: menu">
+          <!-- Content replaced by the menu template fragment menu.html -->
+          <span>Application menu</span>
+        </nav>
+        <div class="bg-header" data-layout-include="fragments/header :: header">
           <!-- Content replaced by the header template fragment header.html -->
           <h1>Sample page header for direct display of the template</h1>
         </div>
-
-        <div data-layout-include="fragments/menu :: menu">
-          <!-- Content replaced by the menu template fragment menu.html -->
-          <span>Application menu</span>
-        </div>
-
     </header>
 
     <div class="container bg-container">
+      <!-- content -->
       <section data-layout-fragment="content">
         <!-- Content replaced by the content fragment of the page displayed -->
         <h2>Sample static body for direct display of the template</h2>
@@ -76,6 +75,7 @@
           Praesent scelerisque neque neque, ac elementum quam dignissim interdum.
           Phasellus et placerat elit.</p>
       </section>
+      <!-- /content -->
     </div>
 
     <footer class="container" data-layout-include="fragments/footer :: footer">

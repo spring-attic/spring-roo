@@ -2,7 +2,6 @@
 
 body {
   background-color: #f1f1f1;
-  padding-top: 53px;
   color: rgba(13,13,13,.65);
   line-height: 1.8;
   letter-spacing: .01em;
@@ -32,7 +31,6 @@ section {padding: 1em 0}
 
 /*--NAVBAR-------------*/
 
-a.navbar-brand {}
 .navbar-header .organization-logo {vertical-align: middle; padding: 0.2em 1em;}
 .navbar-header .application-name { color: #34302d;}
 .navbar-header .application-name strong {}
@@ -86,6 +84,7 @@ footer p{
 
 body .bg-header{ display: none;}
 body.home .bg-header{ display: block;}
+body.home .navbar {  margin-bottom: 0px;}
 
 .jumbotron {
   min-height: 6.5em;
@@ -240,6 +239,11 @@ div.dataTables_wrapper div.dataTables_filter {
 .dt-buttons.btn-group.col-sm-6{
   padding-left: 0;
 }
+div.dataTables_wrapper div.dataTables_filter,
+div.dataTables_wrapper div.dt-buttons.btn-group{
+  padding-top: 1em;
+}
+
 
 /*--SHOW-------------*/
 
@@ -409,12 +413,31 @@ table.dataTable.no-footer {
 }
 
 @media (max-width: 768px) {
-	.jumbotron .project-name{font-size: 3em;}
+  .jumbotron .project-name{font-size: 3em;}
+
+  /* navbar fixes */
+  .navbar-nav#entitiesMenuEntries {
+      max-width: 410px;
+  }
 }
 
 @media (max-width: 992px){
   .navbar-nav.upper-nav > li > a {padding: 15px 5px}
 
+}
+
+@media (min-width: 1024px){
+  /* navbar fixes */
+  .navbar-nav#entitiesMenuEntries {
+      max-width: 80%;
+  }
+}
+
+@media (min-width: 1100px){
+  /* navbar fixes */
+  .navbar-nav#entitiesMenuEntries {
+      max-width: 50%;
+  }
 }
 
 

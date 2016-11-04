@@ -189,7 +189,7 @@ public class DataBinderDeserializer extends BeanDeserializerBase {
    * @param parser JSON parser
    * @param ctxt context
    * @param prefix array dataBinder path
-   * @return
+   * @return a Map with deserialized array data
    * @throws IOException
    * @throws JsonProcessingException
    */
@@ -232,7 +232,7 @@ public class DataBinderDeserializer extends BeanDeserializerBase {
    * @param ctxt
    * @param token current token
    * @param prefix property dataBinder path
-   * @return
+   * @return a Map with deserialized JSON properties
    * @throws IOException
    * @throws JsonProcessingException
    */
