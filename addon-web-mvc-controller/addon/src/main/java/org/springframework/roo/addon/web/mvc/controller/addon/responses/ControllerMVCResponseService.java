@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.responses;
 
+import org.springframework.roo.addon.web.mvc.controller.annotations.config.RooDeserializer;
+import org.springframework.roo.addon.web.mvc.controller.annotations.config.RooJsonMixin;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Feature;
 import org.springframework.roo.project.maven.Pom;
@@ -82,5 +84,21 @@ public interface ControllerMVCResponseService extends Feature {
    * @return
    */
   String getControllerNameModifier();
+
+  /**
+   * Informs if response type requires Json Deserializer classes
+   *
+   * @return true if requires class
+   * @see RooDeserializer
+   */
+  boolean requiresJsonDeserializer();
+
+  /**
+   * Informs if response type requires Json Mixin classes
+   *
+   * @return true if requires class
+   * @see RooJsonMixin
+   */
+  boolean requiresJsonMixin();
 
 }

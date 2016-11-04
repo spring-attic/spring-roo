@@ -12,7 +12,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
@@ -21,7 +20,6 @@ import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -97,51 +95,6 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
   }
 
   /**
-   * This method returns addArgumentResolvers() method annotated with @Override
-   *
-   * @return MethodMetadata that contains all information about addArgumentResolvers
-   * method.
-   */
-  public MethodMetadata getAddArgumentResolvers() {
-    // Define method name
-    JavaSymbolName methodName = new JavaSymbolName("addArgumentResolvers");
-
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType("java.util.List", 0,
-        DataType.TYPE, null, Arrays.asList(new JavaType(
-            "org.springframework.web.method.support.HandlerMethodArgumentResolver")))));
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("argumentResolvers"));
-
-    MethodMetadata existingMethod =
-        getGovernorMethod(methodName,
-            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-    if (existingMethod != null) {
-      return existingMethod;
-    }
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // argumentResolvers.add(globalSearchResolver());
-    bodyBuilder.appendFormalLine("argumentResolvers.add(globalSearchResolver());");
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
-            parameterTypes, parameterNames, bodyBuilder);
-
-    // Add @Override annotation
-    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(JavaType.OVERRIDE));
-
-    return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
-  }
-
-  /**
    * Method that generates "validator" method.
    *
    * @return MethodMetadata
@@ -190,7 +143,7 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
    *
    * @return MethodMetadata
    */
-  public MethodMetadata getLocaleResolver(String defaultLanguage) {
+  private MethodMetadata getLocaleResolver(String defaultLanguage) {
 
     // Define method name
     JavaSymbolName methodName = new JavaSymbolName("localeResolver");
@@ -245,7 +198,7 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
    *
    * @return MethodMetadata
    */
-  public MethodMetadata getLocaleChangeInterceptor() {
+  private MethodMetadata getLocaleChangeInterceptor() {
 
     // Define method name
     JavaSymbolName methodName = new JavaSymbolName("localeChangeInterceptor");
@@ -295,7 +248,7 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
    *
    * @return MethodMetadata
    */
-  public MethodMetadata getAddInterceptors() {
+  private MethodMetadata getAddInterceptors() {
 
     // Define method name
     JavaSymbolName methodName = new JavaSymbolName("addInterceptors");
@@ -319,49 +272,6 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     bodyBuilder.appendFormalLine("registry.addInterceptor(localeChangeInterceptor());");
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
-            parameterTypes, parameterNames, bodyBuilder);
-
-    // Add Bean annotation
-    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(JavaType.OVERRIDE));
-
-    return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
-  }
-
-  /**
-   * Method that generates "addViewControllers" method.
-   *
-   * @return MethodMetadata
-   */
-  public MethodMetadata getAddViewControllers() {
-
-    // Define method name
-    JavaSymbolName methodName = new JavaSymbolName("addViewControllers");
-
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType(
-        "org.springframework.web.servlet.config.annotation.ViewControllerRegistry")));
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("registry"));
-
-    if (governorHasMethod(methodName,
-        AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes))) {
-      return getGovernorMethod(methodName,
-          AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-    }
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    bodyBuilder
-        .appendFormalLine("registry.addViewController(\"/accessibility\").setViewName(\"accessibility\");");
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =

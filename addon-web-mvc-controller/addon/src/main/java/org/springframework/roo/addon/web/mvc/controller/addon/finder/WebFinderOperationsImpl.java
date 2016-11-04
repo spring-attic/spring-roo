@@ -1,11 +1,14 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.finder;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
+import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderMethod;
+import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.PartTree;
 import org.springframework.roo.addon.layers.service.addon.ServiceLocator;
 import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerLocator;
@@ -40,6 +43,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -112,7 +116,8 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
     RepositoryJpaMetadata repositoryMetadata = repositoryJpaLocator.getRepositoryMetadata(entity);
 
     // Get finders in @RooRepositoryJpa
-    List<String> entityFinders = repositoryMetadata.getDeclaredFinderNames();
+    // List<String> entityFinders = repositoryMetadata.getDeclaredFinderNames();
+    List<String> entityFinders = getFindersWhichCanBePublish(repositoryMetadata, responseType);
 
     // Check if specified finder methods exists in associated repository
     for (String finder : queryMethods) {
@@ -227,6 +232,26 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 
     // Write changes to disk
     typeManagementService.createOrUpdateTypeOnDisk(controllerBuilder.build());
+  }
+
+  @Override
+  public List<String> getFindersWhichCanBePublish(RepositoryJpaMetadata repositoryMetadata,
+      ControllerMVCResponseService responseType) {
+    // Just support finders in custom
+    List<String> finders = new ArrayList<String>();
+    for (Pair<FinderMethod, PartTree> item : repositoryMetadata.getFindersToAddInCustom()) {
+      finders.add(item.getKey().getMethodName().getSymbolName());
+    }
+    Collections.sort(finders);
+    return finders;
+  }
+
+  @Override
+  public List<String> getFindersWhichCanBePublish(JavaType entity,
+      ControllerMVCResponseService responseType) {
+    RepositoryJpaMetadata repositoryMetadata = repositoryJpaLocator.getRepositoryMetadata(entity);
+    // Just support finders in custom
+    return getFindersWhichCanBePublish(repositoryMetadata, responseType);
   }
 
   @Override

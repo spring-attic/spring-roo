@@ -23,14 +23,11 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.Jsr303JavaType;
 import org.springframework.roo.model.SpringEnumDetails;
 import org.springframework.roo.model.SpringJavaType;
@@ -41,6 +38,8 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Metadata for {@link RooThymeleaf}.
@@ -57,15 +56,8 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE).build();
   private static final JavaSymbolName LIST_URI_METHOD_NAME = new JavaSymbolName("listURI");
   private static final JavaSymbolName SHOW_URI_METHOD_NAME = new JavaSymbolName("showURI");
-  private static final AnnotationMetadata ANN_METADATA_REQUEST_BODY =
-      new AnnotationMetadataBuilder(SpringJavaType.REQUEST_BODY).build();
   private static final AnnotationMetadata ANN_METADATA_VALID = new AnnotationMetadataBuilder(
       Jsr303JavaType.VALID).build();
-  private static final JavaSymbolName PAGEABLE_NAME = new JavaSymbolName("pageable");
-  private static final JavaSymbolName GLOBAL_SEARCH_NAME = new JavaSymbolName("globalSearch");
-  private static final JavaSymbolName CONSUMES_SYMBOL_NAME = new JavaSymbolName("consumes");
-  private static final JavaSymbolName VALUE_SYMBOL_NAME = new JavaSymbolName("value");
-  private static final JavaSymbolName PRODUCES_SYMBOL_NAME = new JavaSymbolName("produces");
 
   private static final String PROVIDES_TYPE_STRING = ThymeleafMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
@@ -105,6 +97,10 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   private final MethodMetadata populateFormMethod;
   private final MethodMetadata populateFormatsMethod;
 
+  // Details Methods
+  private final Map<RelationInfo, MethodMetadata> modelAttributeDetailsMethod;
+  private final MethodMetadata listDatatablesDetailsMethod;
+
   //
   //  private MethodMetadata listFormMethod;
   //  private MethodMetadata deleteJSONMethod;
@@ -120,6 +116,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   private final JavaType collectionController;
   private final List<FieldMetadata> dateTimeFields;
   private final List<FieldMetadata> enumFields;
+
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -233,6 +230,8 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
         this.deleteMethod = null;
         this.showMethod = null;
         this.showURIMethod = null;
+        this.modelAttributeDetailsMethod = null;
+        this.listDatatablesDetailsMethod = null;
         break;
 
       case ITEM:
@@ -260,6 +259,8 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
         this.createMethod = null;
         this.createFormMethod = null;
         this.initBinderMethod = null;
+        this.modelAttributeDetailsMethod = null;
+        this.listDatatablesDetailsMethod = null;
 
         break;
       case SEARCH:
@@ -280,11 +281,27 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
         this.showURIMethod = null;
         this.populateFormMethod = null;
         this.populateFormatsMethod = null;
+        this.modelAttributeDetailsMethod = null;
+        this.listDatatablesDetailsMethod = null;
         break;
 
       case DETAIL:
-        // TODO
 
+        this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
+        Map<RelationInfo, MethodMetadata> modelAtributeDetailsMethod =
+            new TreeMap<RelationInfo, MethodMetadata>();
+        for (int i = 0; i < controllerMetadata.getDetailsFieldInfo().size() - 1; i++) {
+          RelationInfo info = controllerMetadata.getDetailsFieldInfo().get(i);
+          JavaType entityType = info.childType;
+          MethodMetadata method =
+              addAndGet(
+                  getModelAttributeMethod(info.fieldName,
+                      controllerMetadata.getSericeMetadataForEntity(entityType), controllerMetadata
+                          .getDetailsServiceFields().get(entityType)), allMethods);
+          modelAtributeDetailsMethod.put(info, method);
+        }
+        this.modelAttributeDetailsMethod = Collections.unmodifiableMap(modelAtributeDetailsMethod);
+        this.listDatatablesDetailsMethod = addAndGet(getListDatatablesDetailMethod(), allMethods);
         this.listMethod = null;
         this.listURIMethod = null;
         this.listDatatablesJSONMethod = null;
@@ -292,7 +309,6 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
         this.createFormMethod = null;
         this.initBinderMethod = null;
 
-        this.modelAttributeMethod = null;
         this.editFormMethod = null;
         this.updateMethod = null;
         this.deleteMethod = null;
@@ -326,20 +342,19 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   }
 
   private AnnotationMetadataBuilder getRequestMappingAnnotation() {
-    List<AnnotationAttributeValue<?>> requestMappingAttributes =
-        new ArrayList<AnnotationAttributeValue<?>>();
+    AnnotationMetadataBuilder annotationBuilder =
+        new AnnotationMetadataBuilder(SpringJavaType.REQUEST_MAPPING);
 
-    String path = controllerMetadata.getPath();
-    if (type == ControllerType.ITEM) {
-      path = path + "/{" + entityItemName + "}";
-    }
     // Adding path attribute
-    requestMappingAttributes.add(new StringAttributeValue(VALUE_SYMBOL_NAME, path));
+    annotationBuilder.addStringAttribute("value", controllerMetadata.getRequestMappingValue());
 
-    requestMappingAttributes.add(new EnumAttributeValue(PRODUCES_SYMBOL_NAME,
-        SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE));
+    // Add name attribute
+    annotationBuilder.addStringAttribute("name", getDestination().getSimpleTypeName());
 
-    return new AnnotationMetadataBuilder(SpringJavaType.REQUEST_MAPPING, requestMappingAttributes);
+    //Add produces
+    annotationBuilder.addEnumAttribute("produces", SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE);
+
+    return annotationBuilder;
   }
 
 
@@ -357,19 +372,23 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     bodyBuilder
         .appendFormalLine(String.format("this.%s = %s;", serviceFieldName, serviceFieldName));
 
+
     if (this.type == ControllerType.DETAIL) {
 
-      // Getting parentServiceFieldName
-      String childServiceFieldName =
-          controllerMetadata.getDetailsServiceField().getFieldName().getSymbolName();
+      for (FieldMetadata serviceField : controllerMetadata.getDetailsServiceFields().values()) {
 
-      // Adding parameters
-      constructor.addParameter(childServiceFieldName, controllerMetadata.getDetailsService());
+        // Getting parentServiceFieldName
+        String childServiceFieldName = serviceField.getFieldName().getSymbolName();
 
-      // Generating body
-      bodyBuilder.appendFormalLine(String.format("this.%s = %s;", childServiceFieldName,
-          childServiceFieldName));
+        // Adding parameters
+        constructor.addParameter(childServiceFieldName, serviceField.getFieldType());
+
+        // Generating body
+        bodyBuilder.appendFormalLine(String.format("this.%s = %s;", childServiceFieldName,
+            childServiceFieldName));
+      }
     }
+
 
     String messageSourceName = messageSourceField.getFieldName().getSymbolName();
     constructor.addParameter(messageSourceName, messageSourceField.getFieldType());
@@ -470,17 +489,37 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * @return MethodMetadata
    */
   private MethodMetadata getModelAttributeMethod() {
+    return getModelAttributeMethod(StringUtils.uncapitalize(entity.getSimpleTypeName()),
+        serviceMetadata, controllerMetadata.getServiceField());
+  }
 
+  /**
+   * This method provides the method to add to manage a model attribute from a
+   * path variable
+   *
+   * @param pathVariable
+   * @param serviceMetadata
+   * @param serviceField
+   * @return MethodMetadata
+   */
+  private MethodMetadata getModelAttributeMethod(String pathVariable,
+      ServiceMetadata serviceMetadata, FieldMetadata serviceField) {
     // Define methodName
-    final JavaSymbolName methodName = new JavaSymbolName("get" + entity.getSimpleTypeName());
+    final JavaSymbolName methodName =
+        new JavaSymbolName("get" + StringUtils.capitalize(pathVariable));
 
-    final List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    AnnotationMetadataBuilder pathVariable =
+    final JavaType idType =
+        serviceMetadata.getCurrentFindOneMethod().getParameterTypes().get(0).getJavaType();
+    final JavaSymbolName idName =
+        serviceMetadata.getCurrentFindOneMethod().getParameterNames().get(0);
+    final JavaType entityType = serviceMetadata.getCurrentFindOneMethod().getReturnType();
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    AnnotationMetadataBuilder pathVariableAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
-    pathVariable.addStringAttribute("value", entityItemName);
-    parameterTypes.add(new AnnotatedJavaType(entityMetadata.getCurrentIndentifierField()
-        .getFieldType(), pathVariable.build()));
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JdkJavaType.LOCALE));
+    pathVariableAnnotation.addStringAttribute("value", StringUtils.uncapitalize(pathVariable));
+
+    parameterTypes.add(new AnnotatedJavaType(idType, pathVariableAnnotation.build()));
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -489,39 +528,34 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       return existingMethod;
     }
 
-
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName(entityIdentifier));
-    parameterNames.add(new JavaSymbolName("locale"));
+    parameterNames.add(idName);
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // Customer customer = customerService.findOne(id);
-    bodyBuilder.appendFormalLine("%s %s = %s.%s(%s);", getNameOfJavaType(entity), entityItemName,
-        controllerMetadata.getServiceField().getFieldName(), serviceMetadata
-            .getCurrentFindOneMethod().getMethodName(), entityIdentifier);
+    bodyBuilder.appendFormalLine("%s %s = %s.%s(%s);", getNameOfJavaType(entityType), pathVariable,
+        serviceField.getFieldName(), serviceMetadata.getCurrentFindOneMethod().getMethodName(),
+        idName);
 
     // if (customer == null) {
-    //   String message = messageSource.getMessage("error_customerNotFound", null, locale);
-    //   throw new NotFoundException(message);
+    //   throw new NotFoundException("Customer not found");
     // }
-    bodyBuilder.appendFormalLine("if (%s == null) {", entityItemName);
+    bodyBuilder.appendFormalLine("if (%s == null) {", pathVariable);
     bodyBuilder.indent();
     bodyBuilder.appendFormalLine(
-        "String message = %s.getMessage(\"error_customerNotFound\", null, locale);",
-        messageSourceField.getFieldName());
-    bodyBuilder.appendFormalLine("throw new %s(message);",
+        "throw new %s(String.format(\"%s with identifier '%%s' not found\",%s));",
         getNameOfJavaType(SpringletsJavaType.SPRINGLETS_NOT_FOUND_EXCEPTION),
-        entity.getSimpleTypeName(), entityIdentifier);
+        entityType.getSimpleTypeName(), idName);
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
 
     // return customer;
-    bodyBuilder.appendFormalLine("return %s;", entityItemName);
+    bodyBuilder.appendFormalLine("return %s;", pathVariable);
 
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entity, parameterTypes,
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, parameterTypes,
             parameterNames, bodyBuilder);
 
     methodBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE)
@@ -606,7 +640,12 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @GetMapping annotation
-    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING));
+    AnnotationMetadataBuilder getMappingAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING);
+    getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    annotations.add(getMappingAnnotation);
+
+    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY));
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -653,6 +692,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     AnnotationMetadataBuilder getMapping =
         new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING);
     getMapping.addStringAttribute("value", "/create-form");
+    getMapping.addStringAttribute("name", methodName.getSymbolName());
     annotations.add(getMapping);
 
     // Generate body
@@ -710,7 +750,10 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @RequestMapping annotation
-    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.POST_MAPPING));
+    AnnotationMetadataBuilder postMappingAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.POST_MAPPING);
+    postMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    annotations.add(postMappingAnnotation);
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -786,7 +829,10 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @PutMapping annotation
-    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.PUT_MAPPING));
+    AnnotationMetadataBuilder putMappingAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.PUT_MAPPING);
+    putMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    annotations.add(putMappingAnnotation);
 
     // Generate body
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -862,7 +908,10 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @RequestMapping annotation
-    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.DELETE_MAPPING));
+    AnnotationMetadataBuilder deleteMapping =
+        new AnnotationMetadataBuilder(SpringJavaType.DELETE_MAPPING);
+    deleteMapping.addStringAttribute("name", methodName.getSymbolName());
+    annotations.add(deleteMapping);
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -1373,6 +1422,8 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
         new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING);
     getMappingAnnotation.addEnumAttribute("produces", SpringletsJavaType.SPRINGLETS_DATATABLES,
         "MEDIA_TYPE");
+    getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    // getMappingAnnotation.addStringAttribute("value", "/dt");
     annotations.add(getMappingAnnotation);
 
     // Adding @ResponseBody annotation
@@ -1460,6 +1511,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     AnnotationMetadataBuilder getMapping =
         new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING);
     getMapping.addStringAttribute("value", "/edit-form");
+    getMapping.addStringAttribute("name", methodName.getSymbolName());
     annotations.add(getMapping);
 
     // Generate body
@@ -1598,7 +1650,10 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @RequestMapping annotation
-    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING));
+    AnnotationMetadataBuilder getMappingAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING);
+    getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    annotations.add(getMappingAnnotation);
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -1665,215 +1720,47 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   }
 
   /**
-   * This method provides detail list method using Thymeleaf response type
-   *
-   * @return MethodMetadata
-   */
-  private MethodMetadata getListDetailMethod() {
-    // TODO
-    return null;
-    /*
-    // First of all, check if exists other method with the same
-    // @RequesMapping to generate
-    MethodMetadata existingMVCMethod = getControllerMVCService().getMVCMethodByRequestMapping(
-        controller.getType(), SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
-        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
-    if (existingMVCMethod != null
-        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
-      return existingMVCMethod;
-    }
-
-    // Define methodName
-    final JavaSymbolName methodName = new JavaSymbolName(
-        "list".concat(this.controllerDetailInfo.getEntity().getSimpleTypeName()));
-
-    // Create PageableDefault annotation
-    AnnotationMetadataBuilder pageableDefaultAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.PAGEABLE_DEFAULT);
-
-    String sortFieldName = "";
-    MemberDetails entityDetails = getMemberDetails(
-        getTypeLocationService().getTypeDetails(this.controllerDetailInfo.getEntity()));
-    List<FieldMetadata> fields = entityDetails.getFields();
-    for (FieldMetadata field : fields) {
-      if (field.getAnnotation(new JavaType("javax.persistence.Id")) != null) {
-        sortFieldName = field.getFieldName().getSymbolName();
-      }
-    }
-    if (!sortFieldName.isEmpty()) {
-      pageableDefaultAnnotation.addStringAttribute("sort", sortFieldName);
-    }
-
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    AnnotationMetadataBuilder modelAttributeAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
-    parameterTypes.add(new AnnotatedJavaType(this.controllerDetailInfo.getParentEntity(),
-        modelAttributeAnnotation.build()));
-    parameterTypes.add(new AnnotatedJavaType(SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH));
-    parameterTypes
-        .add(new AnnotatedJavaType(SpringJavaType.PAGEABLE, pageableDefaultAnnotation.build()));
-
-    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName(
-        StringUtils.uncapitalize(this.controllerDetailInfo.getParentEntity().getSimpleTypeName())));
-    parameterNames.add(new JavaSymbolName("search"));
-    parameterNames.add(new JavaSymbolName("pageable"));
-
-    // Adding annotations
-    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-
-    // Adding @RequestMapping annotation
-    annotations.add(
-        getControllerMVCService().getRequestMappingAnnotation(SpringEnumDetails.REQUEST_METHOD_GET,
-            "", null, null, SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, ""));
-
-    // Adding @ResponseBody annotation
-    AnnotationMetadataBuilder responseBodyAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
-    annotations.add(responseBodyAnnotation);
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // Get finder method
-    ClassOrInterfaceTypeDetails serviceDetails =
-        getTypeLocationService().getTypeDetails(this.controllerDetailInfo.getService());
-
-    final LogicalPath serviceLogicalPath =
-        PhysicalTypeIdentifier.getPath(serviceDetails.getDeclaredByMetadataId());
-    final String serviceMetadataKey =
-        ServiceMetadata.createIdentifier(serviceDetails.getType(), serviceLogicalPath);
-    final ServiceMetadata serviceMetadata =
-        (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
-
-    // Get parent field
-    FieldMetadata parentRelationField = null;
-    MemberDetails memberDetails = getMemberDetails(this.controllerDetailInfo.getParentEntity());
-    List<FieldMetadata> parentFields = memberDetails.getFields();
-    for (FieldMetadata parentField : parentFields) {
-      if (parentField.getFieldName().getSymbolName()
-          .equals(this.controllerDetailInfo.getParentReferenceFieldName())) {
-        AnnotationMetadata oneToManyAnnotation = parentField.getAnnotation(JpaJavaType.ONE_TO_MANY);
-        if (oneToManyAnnotation != null && (parentField.getFieldType().getFullyQualifiedTypeName()
-            .equals(JavaType.LIST.getFullyQualifiedTypeName())
-            || parentField.getFieldType().getFullyQualifiedTypeName()
-                .equals(JavaType.SET.getFullyQualifiedTypeName()))) {
-          parentRelationField = parentField;
-          break;
-        }
-      }
-    }
-
-    Validate.notNull(parentRelationField,
-        String.format("ERROR: '%s' must have a field related to '%s'",
-            this.controllerDetailInfo.getParentEntity().getSimpleTypeName(),
-            this.controllerDetailInfo.getEntity().getSimpleTypeName()));
-
-    // Generating returnType
-    Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllDefinedMethods =
-        serviceMetadata.getReferencedFieldsFindAllDefinedMethods();
-    AnnotationAttributeValue<Object> attributeMappedBy =
-        parentRelationField.getAnnotation(JpaJavaType.ONE_TO_MANY).getAttribute("mappedBy");
-
-    Validate.notNull(attributeMappedBy,
-        String.format("ERROR: The field '%s' of '%s' must have 'mappedBy' value",
-            parentRelationField.getFieldName(),
-            this.controllerDetailInfo.getParentEntity().getSimpleTypeName()));
-
-    String mappedBy = (String) attributeMappedBy.getValue();
-    MethodMetadata findByMethod = null;
-    Iterator<Entry<FieldMetadata, MethodMetadata>> it =
-        referencedFieldsFindAllDefinedMethods.entrySet().iterator();
-    while (it.hasNext()) {
-      Entry<FieldMetadata, MethodMetadata> finder = it.next();
-      if (finder.getKey().getFieldName().getSymbolName().equals(mappedBy)) {
-        findByMethod = finder.getValue();
-        break;
-      }
-    }
-
-    JavaType returnType = findByMethod.getReturnType();
-    List<JavaType> returnParameterTypes = returnType.getParameters();
-    StringBuffer returnTypeParamsString = new StringBuffer();
-    for (int i = 0; i < returnParameterTypes.size(); i++) {
-      addTypeToImport(returnParameterTypes.get(i));
-      if (i > 0) {
-        returnTypeParamsString.append(",");
-      }
-      returnTypeParamsString.append(returnParameterTypes.get(i).getSimpleTypeName());
-
-      // Add module dependency
-      getTypeLocationService().addModuleDependency(this.controller.getType().getModule(),
-          returnParameterTypes.get(i));
-    }
-
-    // Page<ENTITYREL> entityrelplural =
-    // entityRelNameService.findAllByENTITYNAME(ENTITYNAME, search,
-    // pageable);
-    bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(%s, search, pageable);",
-        addTypeToImport(returnType).getSimpleTypeName(), returnTypeParamsString,
-        StringUtils.uncapitalize(StringUtils.lowerCase(Noun
-            .pluralOf(this.controllerDetailInfo.getEntity().getSimpleTypeName(), Locale.ENGLISH))),
-        getServiceDetailField(this.controllerDetailInfo.getService()).getFieldName()
-            .getSymbolNameUnCapitalisedFirstLetter(),
-        findByMethod.getMethodName(),
-        StringUtils.uncapitalize(this.controllerDetailInfo.getParentEntity().getSimpleTypeName())));
-
-    // return entityrelplural;
-    bodyBuilder.appendFormalLine(
-        String.format("return %s;", StringUtils.uncapitalize(StringUtils.lowerCase(Noun.pluralOf(
-            this.controllerDetailInfo.getEntity().getSimpleTypeName(), Locale.ENGLISH)))));
-
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
-            returnType, parameterTypes, parameterNames, bodyBuilder);
-    methodBuilder.setAnnotations(annotations);
-    return methodBuilder.build();
-    */
-  }
-
-  /**
    * This method provides detail datatables list method using Thymeleaf
    * response type
    *
    * @return MethodMetadata
    */
   private MethodMetadata getListDatatablesDetailMethod() {
-    // TODO
-    return null;
-    /*
-
-    // First of all, check if exists other method with the same
-    // @RequesMapping to generate
-    MethodMetadata existingMVCMethod = getControllerMVCService().getMVCMethodByRequestMapping(
-        controller.getType(), SpringEnumDetails.REQUEST_METHOD_GET, "", null, "",
-        "application/vnd.datatables+json", "");
-    if (existingMVCMethod != null
-        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
-      return existingMVCMethod;
-    }
+    RelationInfo detailsInfo = controllerMetadata.getLastDetailsInfo();
+    final ServiceMetadata detailsServiceMetadata =
+        controllerMetadata.getSericeMetadataForEntity(detailsInfo.childType);
+    final MethodMetadata findAllMethod =
+        detailsServiceMetadata.getRefencedFieldFindAllDefinedMethod(detailsInfo.mappedBy);
+    final MethodMetadata countByDetailMethod =
+        detailsServiceMetadata.getCountByReferenceFieldDefinedMethod(detailsInfo.mappedBy);
+    final FieldMetadata detailsServiceField =
+        controllerMetadata.getDetailsServiceFields(detailsInfo.childType);
 
     // Define methodName
-    final JavaSymbolName methodName = new JavaSymbolName(
-        "list".concat(this.controllerDetailInfo.getEntity().getSimpleTypeName()));
+    final JavaSymbolName methodName =
+        new JavaSymbolName("list" + StringUtils.capitalize(detailsInfo.fieldName));
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    AnnotationMetadataBuilder modelAttributeAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
-    parameterTypes.add(new AnnotatedJavaType(this.controllerDetailInfo.getParentEntity(),
-        modelAttributeAnnotation.build()));
-    parameterTypes
-        .add(AnnotatedJavaType.convertFromJavaType(SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH));
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.datatablesPageable));
+    parameterTypes.add(new AnnotatedJavaType(
+        findAllMethod.getParameterTypes().get(0).getJavaType(), AnnotationMetadataBuilder
+            .getInstance(SpringJavaType.MODEL_ATTRIBUTE)));
+    parameterTypes.add(new AnnotatedJavaType(SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE));
     AnnotationMetadataBuilder requestParamAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.REQUEST_PARAM);
     requestParamAnnotation.addStringAttribute("value", "draw");
     parameterTypes.add(new AnnotatedJavaType(JavaType.INT_OBJECT, requestParamAnnotation.build()));
 
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName(
-        StringUtils.uncapitalize(this.controllerDetailInfo.getParentEntity().getSimpleTypeName())));
+    final JavaSymbolName parentParamName = findAllMethod.getParameterNames().get(0);
+    parameterNames.add(parentParamName);
     parameterNames.add(new JavaSymbolName("search"));
     parameterNames.add(new JavaSymbolName("pageable"));
     parameterNames.add(new JavaSymbolName("draw"));
@@ -1881,116 +1768,67 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // Adding annotations
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
-    // Adding @RequestMapping annotation
-    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_GET, "", null, "", "application/vnd.datatables+json", ""));
+    // Adding @GetMapping annotation
+    AnnotationMetadataBuilder getMappingAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING);
+    getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    getMappingAnnotation.addEnumAttribute("produces", SpringletsJavaType.SPRINGLETS_DATATABLES,
+        "MEDIA_TYPE");
+    annotations.add(getMappingAnnotation);
 
     // Adding @ResponseBody annotation
     AnnotationMetadataBuilder responseBodyAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
-    annotations.add(responseBodyAnnotation);
+    annotations.add(responseBodyAnnotation);;
+
+    // Generating returnType
+    JavaType serviceReturnType = findAllMethod.getReturnType();
+    JavaType dataReturnType =
+        JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_DATATABLES_DATA, serviceReturnType
+            .getParameters().get(0));
+    JavaType returnType = JavaType.wrapperOf(SpringJavaType.RESPONSE_ENTITY, dataReturnType);
+
+    // TODO
+    // Add module dependency
+    //getTypeLocationService().addModuleDependency(this.controller.getType().getModule(),
+    //    returnParameterTypes.get(i));
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // Page<ENTITYRELNAME> entityrelplural = listENTITYREL(entityName,
-    // search, pageable);
-    bodyBuilder.appendFormalLine(String.format("%s<%s> %s = list%s(%s, search, pageable);",
-        addTypeToImport(SpringJavaType.PAGE).getSimpleTypeName(),
-        this.controllerDetailInfo.getEntity().getSimpleTypeName(),
-        StringUtils.lowerCase(Noun
-            .pluralOf(this.controllerDetailInfo.getEntity().getSimpleTypeName(), Locale.ENGLISH)),
-        this.controllerDetailInfo.getEntity().getSimpleTypeName(),
-        StringUtils.uncapitalize(this.controllerDetailInfo.getParentEntity().getSimpleTypeName())));
+    final String itemsName = StringUtils.uncapitalize(detailsInfo.fieldName);
 
-    // Get finder method
-    ClassOrInterfaceTypeDetails serviceDetails =
-        getTypeLocationService().getTypeDetails(this.controllerDetailInfo.getService());
+    // Page<CustomerOrder> orders = customerOrderService.findByCustomer(customer, globalSearch, pageable);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine("%s %s = %s.%s(%s, search, pageable);",
+        getNameOfJavaType(serviceReturnType), itemsName, detailsServiceField.getFieldName(),
+        findAllMethod.getMethodName(), parentParamName);
 
-    final LogicalPath serviceLogicalPath =
-        PhysicalTypeIdentifier.getPath(serviceDetails.getDeclaredByMetadataId());
-    final String serviceMetadataKey =
-        ServiceMetadata.createIdentifier(serviceDetails.getType(), serviceLogicalPath);
-    final ServiceMetadata serviceMetadata =
-        (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
+    final String totalVarName = "total" + StringUtils.capitalize(itemsName) + "Count";
 
-    // Get parent field
-    FieldMetadata parentRelationField = null;
-    MemberDetails memberDetails = getMemberDetails(this.controllerDetailInfo.getParentEntity());
-    List<FieldMetadata> parentFields = memberDetails.getFields();
-    for (FieldMetadata parentField : parentFields) {
-      if (parentField.getFieldName().getSymbolName()
-          .equals(this.controllerDetailInfo.getParentReferenceFieldName())) {
-        AnnotationMetadata oneToManyAnnotation = parentField.getAnnotation(JpaJavaType.ONE_TO_MANY);
-        if (oneToManyAnnotation != null && (parentField.getFieldType().getFullyQualifiedTypeName()
-            .equals(JavaType.LIST.getFullyQualifiedTypeName())
-            || parentField.getFieldType().getFullyQualifiedTypeName()
-                .equals(JavaType.SET.getFullyQualifiedTypeName()))) {
-          parentRelationField = parentField;
-          break;
-        }
-      }
-    }
 
-    Validate.notNull(parentRelationField,
-        String.format("ERROR: '%s' must have a field related to '%s'",
-            this.controllerDetailInfo.getParentEntity().getSimpleTypeName(),
-            this.controllerDetailInfo.getEntity().getSimpleTypeName()));
+    //  totalOrdersCount = customerOrderService.countByCustomer(customer);
+    bodyBuilder.appendFormalLine("%s %s = %s.%s(%s);",
+        getNameOfJavaType(countByDetailMethod.getReturnType()), totalVarName,
+        detailsServiceField.getFieldName(), countByDetailMethod.getMethodName(), parentParamName);
 
-    // Generating returnType
-    Map<FieldMetadata, MethodMetadata> referencedCountDefinedMethods =
-        serviceMetadata.getCountByReferenceFieldDefinedMethod();
-    AnnotationAttributeValue<Object> attributeMappedBy =
-        parentRelationField.getAnnotation(JpaJavaType.ONE_TO_MANY).getAttribute("mappedBy");
 
-    Validate.notNull(attributeMappedBy,
-        String.format("ERROR: The field '%s' of '%s' must have 'mappedBy' value",
-            parentRelationField.getFieldName(),
-            this.controllerDetailInfo.getParentEntity().getSimpleTypeName()));
+    // DatatablesData<CustomerOrder> data =  new DatatablesData<CustomerOrder>(orders, totalOrderCount, draw);
+    bodyBuilder.appendFormalLine("%s data =  new %s(%s, %s, draw);",
+        getNameOfJavaType(dataReturnType), getNameOfJavaType(dataReturnType), itemsName,
+        totalVarName);
 
-    String mappedBy = (String) attributeMappedBy.getValue();
-    MethodMetadata searchCountMethod = null;
-    Iterator<Entry<FieldMetadata, MethodMetadata>> it =
-        referencedCountDefinedMethods.entrySet().iterator();
-    while (it.hasNext()) {
-      Entry<FieldMetadata, MethodMetadata> countMethod = it.next();
-      if (countMethod.getKey().getFieldName().getSymbolName().equals(mappedBy)) {
-        searchCountMethod = countMethod.getValue();
-        break;
-      }
-    }
-
-    // long allAvailableEntityRelPlural =
-    // entityRelNameService.countByENTITYNAMEPLURALContains(entityName);
-    bodyBuilder.appendFormalLine(String.format("long allAvailable%s = %s.%s(%s);",
-        Noun.pluralOf(this.controllerDetailInfo.getEntity().getSimpleTypeName(), Locale.ENGLISH),
-        getServiceDetailField(this.controllerDetailInfo.getService()).getFieldName()
-            .getSymbolNameUnCapitalisedFirstLetter(),
-        searchCountMethod.getMethodName(),
-        StringUtils.uncapitalize(this.controllerDetailInfo.getParentEntity().getSimpleTypeName())));
-
-    // return new DatatablesData<ENTITYRELNAME>(entityrelplural,
-    // allAvailableENTITYRELNAME, draw);
-    bodyBuilder.appendFormalLine(String.format("return new %s<%s>(%s, allAvailable%s, draw);",
-        addTypeToImport(this.datatablesDataType).getSimpleTypeName(),
-        this.controllerDetailInfo.getEntity().getSimpleTypeName(),
-        StringUtils.lowerCase(Noun
-            .pluralOf(this.controllerDetailInfo.getEntity().getSimpleTypeName(), Locale.ENGLISH)),
-        Noun.pluralOf(this.controllerDetailInfo.getEntity().getSimpleTypeName(), Locale.ENGLISH)));
-
-    // Generating returnType
-    JavaType returnType = new JavaType(this.datatablesDataType.getFullyQualifiedTypeName(), 0,
-        DataType.TYPE, null, Arrays.asList(this.controllerDetailInfo.getEntity()));
+    // return ResponseEntity.ok(datatablesData);
+    bodyBuilder.appendFormalLine("return %s.ok(data);",
+        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY));
 
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
-            returnType, parameterTypes, parameterNames, bodyBuilder);
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, parameterTypes,
+            parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
-    */
   }
-
 
 
   /*

@@ -1,46 +1,57 @@
-package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
-
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
+package org.springframework.roo.addon.web.mvc.controller.addon.config;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
 /**
- * Implementation of {@link WebMvcThymeleafUIConfigurationMetadata}.
- * 
- * @author Juan Carlos García
+ * Implementation of {@link DomainModelModuleMetadataProvider}.
+ *
+ * @author Jose Manuel Vivó
  * @since 2.0
  */
 @Component
 @Service
-public class WebMvcThymeleafUIConfigurationMetadataProviderImpl extends
-    AbstractMemberDiscoveringItdMetadataProvider implements
-    WebMvcThymeleafUIConfigurationMetadataProvider {
+public class JSONMixinMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider
+    implements DomainModelModuleMetadataProvider {
 
   protected final static Logger LOGGER = HandlerUtils
-      .getLogger(WebMvcThymeleafUIConfigurationMetadataProviderImpl.class);
+      .getLogger(JSONMixinMetadataProviderImpl.class);
 
   private final Map<JavaType, String> domainTypeToServiceMidMap =
       new LinkedHashMap<JavaType, String>();
@@ -53,14 +64,14 @@ public class WebMvcThymeleafUIConfigurationMetadataProviderImpl extends
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION} as additional 
+   * <li>Registers {@link RooJavaType#ROO_DOMAIN_MODEL_MODULE} as additional
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
    */
   @Override
-  @SuppressWarnings("unchecked")
   protected void activate(final ComponentContext cContext) {
+    super.activate(cContext);
     context = cContext.getBundleContext();
     super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
@@ -68,13 +79,13 @@ public class WebMvcThymeleafUIConfigurationMetadataProviderImpl extends
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
-    addMetadataTrigger(RooJavaType.ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION);
+    addMetadataTrigger(RooJavaType.ROO_JSON_MIXIN);
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -84,7 +95,7 @@ public class WebMvcThymeleafUIConfigurationMetadataProviderImpl extends
         getProvidesType());
     this.registryTracker.close();
 
-    removeMetadataTrigger(RooJavaType.ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION);
+    removeMetadataTrigger(RooJavaType.ROO_JSON_MIXIN);
 
     CustomDataKeyDecorator keyDecorator = this.keyDecoratorTracker.getService();
     keyDecorator.unregisterMatchers(getClass());
@@ -93,20 +104,18 @@ public class WebMvcThymeleafUIConfigurationMetadataProviderImpl extends
 
   @Override
   protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-    return WebMvcThymeleafUIConfigurationMetadata.createIdentifier(javaType, path);
+    return JSONMixinMetadata.createIdentifier(javaType, path);
   }
 
   @Override
   protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-    final JavaType javaType =
-        WebMvcThymeleafUIConfigurationMetadata.getJavaType(metadataIdentificationString);
-    final LogicalPath path =
-        WebMvcThymeleafUIConfigurationMetadata.getPath(metadataIdentificationString);
+    final JavaType javaType = JSONMixinMetadata.getJavaType(metadataIdentificationString);
+    final LogicalPath path = JSONMixinMetadata.getPath(metadataIdentificationString);
     return PhysicalTypeIdentifier.createIdentifier(javaType, path);
   }
 
   public String getItdUniquenessFilenameSuffix() {
-    return "Thymeleaf_Configuration";
+    return "JSONMixin";
   }
 
   @Override
@@ -137,40 +146,84 @@ public class WebMvcThymeleafUIConfigurationMetadataProviderImpl extends
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
-    // Looking for a valid DatatablesSortHandlerMethodArgumentResolver
-    JavaType datatablesSortHandler = null;
-    Set<ClassOrInterfaceTypeDetails> datatablesSortHandlerClasses =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_THYMELEAF_DATATABLES_SORT_HANDLER);
-    if (datatablesSortHandlerClasses.isEmpty()) {
-      throw new RuntimeException(
-          "ERROR: DatatablesSortHandlerMethodArgumentResolver class doesn't exists or has been deleted.");
+    final JSONMixinAnnotationValues values =
+        new JSONMixinAnnotationValues(governorPhysicalTypeMetadata);
+    final JavaType mixinType = governorPhysicalTypeMetadata.getType();
+
+    final JavaType entity = values.getEntity();
+
+    final ClassOrInterfaceTypeDetails entityDetails =
+        getTypeLocationService().getTypeDetails(entity);
+
+    Validate.notNull(entityDetails, "Can't get details of '%s' defined on '%s.@%s.entity'",
+        entity.getFullyQualifiedTypeName(), mixinType,
+        RooJavaType.ROO_JSON_MIXIN.getSimpleTypeName());
+
+    Validate
+        .notNull(
+            entityDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY),
+            "Class '%s' defined on '%s.@%s.entity' has no @%s annotation. Only JPA entities can set as mixin",
+            entity.getFullyQualifiedTypeName(), mixinType,
+            RooJavaType.ROO_JSON_MIXIN.getSimpleTypeName());
+
+    final String entityId = JpaEntityMetadata.createIdentifier(entityDetails);
+    final JpaEntityMetadata entityMetadata = getMetadataService().get(entityId);
+
+    if (entityMetadata == null) {
+      // not ready for this metadata yet
+      return null;
     }
-    Iterator<ClassOrInterfaceTypeDetails> sortHandlerIterator =
-        datatablesSortHandlerClasses.iterator();
-    while (sortHandlerIterator.hasNext()) {
-      datatablesSortHandler = sortHandlerIterator.next().getType();
-      break;
+    // register metadata dependency
+    registerDependency(entityId, metadataIdentificationString);
+
+
+    Map<FieldMetadata, JavaType> jsonDeserializerByEntity = new HashMap<FieldMetadata, JavaType>();
+    for (FieldMetadata field : entityMetadata.getRelationsAsChild().values()) {
+      if (isAnyToOneRelation(field)) {
+
+        JavaType parentEntity = field.getFieldType();
+        JavaType entityDeserializer = getEntityDeserializerFor(parentEntity);
+        Validate.notNull(entityDeserializer,
+            "Can't locate class with @%s.entity=%s required for %s entity Json Mixin (%s)",
+            RooJavaType.ROO_DESERIALIZER, parentEntity, entity.getFullyQualifiedTypeName(),
+            mixinType.getFullyQualifiedTypeName());
+        jsonDeserializerByEntity.put(field, entityDeserializer);
+      }
     }
 
-    // Looking for a valid DatatablesPageableHandlerMethodArgumentResolver
-    JavaType datatablesPageableHandler = null;
-    Set<ClassOrInterfaceTypeDetails> datatablesPageableHandlerClasses =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_THYMELEAF_DATATABLES_PAGEABLE_HANDLER);
-    if (datatablesPageableHandlerClasses.isEmpty()) {
-      throw new RuntimeException(
-          "ERROR: DatatablesPageableHandlerMethodArgumentResolver class doesn't exists or has been deleted.");
-    }
-    Iterator<ClassOrInterfaceTypeDetails> pageableHandlerIterator =
-        datatablesPageableHandlerClasses.iterator();
-    while (pageableHandlerIterator.hasNext()) {
-      datatablesPageableHandler = pageableHandlerIterator.next().getType();
-      break;
-    }
+    return new JSONMixinMetadata(metadataIdentificationString, aspectName,
+        governorPhysicalTypeMetadata, values, entityMetadata, jsonDeserializerByEntity);
 
-    return new WebMvcThymeleafUIConfigurationMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, datatablesPageableHandler, datatablesSortHandler);
+  }
+
+  private JavaType getEntityDeserializerFor(JavaType entity) {
+    Set<ClassOrInterfaceTypeDetails> deserializers =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_DESERIALIZER);
+
+    for (ClassOrInterfaceTypeDetails deserializer : deserializers) {
+      AnnotationMetadata annotation = deserializer.getAnnotation(RooJavaType.ROO_DESERIALIZER);
+      AnnotationAttributeValue<JavaType> annotationValue = annotation.getAttribute("entity");
+      if (entity.equals(annotationValue.getValue())) {
+        return deserializer.getType();
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Return true if field is annotated with @OneToOne or @ManyToOne JPA annotation
+   *
+   * @param field
+   * @return
+   */
+  private boolean isAnyToOneRelation(FieldMetadata field) {
+    return field.getAnnotation(JpaJavaType.MANY_TO_ONE) != null
+        || field.getAnnotation(JpaJavaType.ONE_TO_ONE) != null;
+  }
+
+  public String getProvidesType() {
+    return JSONMixinMetadata.getMetadataIdentiferType();
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
@@ -184,9 +237,4 @@ public class WebMvcThymeleafUIConfigurationMetadataProviderImpl extends
       getMetadataDependencyRegistry().registerDependency(upstreamDependency, downStreamDependency);
     }
   }
-
-  public String getProvidesType() {
-    return WebMvcThymeleafUIConfigurationMetadata.getMetadataIdentiferType();
-  }
-
 }

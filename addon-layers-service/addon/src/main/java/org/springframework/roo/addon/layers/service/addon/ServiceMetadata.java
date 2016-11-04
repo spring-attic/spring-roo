@@ -853,6 +853,46 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   }
 
   /**
+   * Return findAll method for a reference field.
+   *
+   * For example y this Service points to Pet
+   *  getRefencedFieldFindAllDefineMethod("owner") will return
+   *  the method "findPetsByOwner"
+   *
+   * @param fieldName
+   * @return
+   */
+  public MethodMetadata getRefencedFieldFindAllDefinedMethod(String fieldName) {
+    for (Entry<FieldMetadata, MethodMetadata> entry : this.referencedFieldsFindAllDefinedMethods
+        .entrySet()) {
+      if (entry.getKey().getFieldName().getSymbolName().equals(fieldName)) {
+        return entry.getValue();
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Return countBy method for a reference field.
+   *
+   * For example y this Service points to Pet
+   *  getCountByReferenceFieldDefinedMethod("owner") will return
+   *  the method "countByOwner"
+   *
+   * @param fieldName
+   * @return
+   */
+  public MethodMetadata getCountByReferenceFieldDefinedMethod(String fieldName) {
+    for (Entry<FieldMetadata, MethodMetadata> entry : this.countByReferenceFieldDefinedMethod
+        .entrySet()) {
+      if (entry.getKey().getFieldName().getSymbolName().equals(fieldName)) {
+        return entry.getValue();
+      }
+    }
+    return null;
+  }
+
+  /**
    * Method that returns the finder methos.
    *
    * @return a list of finder methods
@@ -976,5 +1016,6 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   public Set<MethodMetadata> getAllMethods() {
     return allMethods;
   }
+
 
 }

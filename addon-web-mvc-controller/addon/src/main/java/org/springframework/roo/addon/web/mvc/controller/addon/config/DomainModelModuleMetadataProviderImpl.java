@@ -1,10 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.config;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -13,31 +9,39 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
 /**
- * Implementation of {@link WebMvcJSONConfigurationMetadataProvider}.
- * 
- * @author Sergio Clares
+ * Implementation of {@link DomainModelModuleMetadataProvider}.
+ *
+ * @author Jose Manuel Vivó
  * @since 2.0
  */
 @Component
 @Service
-public class WebMvcJSONConfigurationMetadataProviderImpl extends
-    AbstractMemberDiscoveringItdMetadataProvider implements WebMvcJSONConfigurationMetadataProvider {
+public class DomainModelModuleMetadataProviderImpl extends
+    AbstractMemberDiscoveringItdMetadataProvider implements DomainModelModuleMetadataProvider {
 
   protected final static Logger LOGGER = HandlerUtils
-      .getLogger(WebMvcJSONConfigurationMetadataProviderImpl.class);
+      .getLogger(DomainModelModuleMetadataProviderImpl.class);
 
   private final Map<JavaType, String> domainTypeToServiceMidMap =
       new LinkedHashMap<JavaType, String>();
@@ -50,13 +54,14 @@ public class WebMvcJSONConfigurationMetadataProviderImpl extends
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_WEB_MVC_JSON_CONFIGURATION} as additional 
+   * <li>Registers {@link RooJavaType#ROO_DOMAIN_MODEL_MODULE} as additional
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
    */
   @Override
   protected void activate(final ComponentContext cContext) {
+    super.activate(cContext);
     context = cContext.getBundleContext();
     super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
@@ -64,13 +69,13 @@ public class WebMvcJSONConfigurationMetadataProviderImpl extends
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
-    addMetadataTrigger(RooJavaType.ROO_WEB_MVC_JSON_CONFIGURATION);
+    addMetadataTrigger(RooJavaType.ROO_DOMAIN_MODEL_MODULE);
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -80,7 +85,7 @@ public class WebMvcJSONConfigurationMetadataProviderImpl extends
         getProvidesType());
     this.registryTracker.close();
 
-    removeMetadataTrigger(RooJavaType.ROO_WEB_MVC_JSON_CONFIGURATION);
+    removeMetadataTrigger(RooJavaType.ROO_DOMAIN_MODEL_MODULE);
 
     CustomDataKeyDecorator keyDecorator = this.keyDecoratorTracker.getService();
     keyDecorator.unregisterMatchers(getClass());
@@ -89,19 +94,18 @@ public class WebMvcJSONConfigurationMetadataProviderImpl extends
 
   @Override
   protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-    return WebMvcJSONConfigurationMetadata.createIdentifier(javaType, path);
+    return DomainModelModuleMetadata.createIdentifier(javaType, path);
   }
 
   @Override
   protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-    final JavaType javaType =
-        WebMvcJSONConfigurationMetadata.getJavaType(metadataIdentificationString);
-    final LogicalPath path = WebMvcJSONConfigurationMetadata.getPath(metadataIdentificationString);
+    final JavaType javaType = DomainModelModuleMetadata.getJavaType(metadataIdentificationString);
+    final LogicalPath path = DomainModelModuleMetadata.getPath(metadataIdentificationString);
     return PhysicalTypeIdentifier.createIdentifier(javaType, path);
   }
 
   public String getItdUniquenessFilenameSuffix() {
-    return "WebMvcJSONConfiguration";
+    return "DomainModelModule";
   }
 
   @Override
@@ -132,23 +136,69 @@ public class WebMvcJSONConfigurationMetadataProviderImpl extends
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
-    // Find package where JSON converters where installed
-    Set<JavaType> types =
-        getTypeLocationService().findTypesWithAnnotation(
-            RooJavaType.ROO_JSON_BINDING_RESULT_SERIALIZER);
-    JavaPackage convertersJavaPackage = null;
-    for (JavaType type : types) {
-      convertersJavaPackage = type.getPackage();
-    }
-    Validate.notNull(convertersJavaPackage,
-        "Couldn't find any type with needed %s annotation in JSONMetadataProviderImpl",
-        RooJavaType.ROO_JSON_BINDING_RESULT_SERIALIZER.getFullyQualifiedTypeName());
+    AnnotationMetadata annotation =
+        governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getAnnotation(
+            RooJavaType.ROO_DOMAIN_MODEL_MODULE);
 
-    return new WebMvcJSONConfigurationMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, convertersJavaPackage);
+    Map<JavaType, JavaType> mixins = new HashMap<JavaType, JavaType>();
+
+    Set<ClassOrInterfaceTypeDetails> allJsonMixin =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_JSON_MIXIN);
+
+    JSONMixinAnnotationValues values;
+    JavaType entity, previousMixin;
+    ClassOrInterfaceTypeDetails entityDetails;
+    for (ClassOrInterfaceTypeDetails mixin : allJsonMixin) {
+      values = new JSONMixinAnnotationValues(mixin);
+
+      entity = values.getEntity();
+
+      entityDetails = getTypeLocationService().getTypeDetails(entity);
+
+      Validate.notNull(entityDetails, "Can't get details of '%s' defined on '%s.@%s.entity'",
+          entity.getFullyQualifiedTypeName(), mixin.getType(),
+          RooJavaType.ROO_JSON_MIXIN.getSimpleTypeName());
+
+      Validate
+          .notNull(
+              entityDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY),
+              "Class '%s' defined on '%s.@%s.entity' has no @%s annotation. Only JPA entities can set as mixin",
+              entity.getFullyQualifiedTypeName(), mixin.getType(),
+              RooJavaType.ROO_JSON_MIXIN.getSimpleTypeName());
+
+      previousMixin = mixins.put(entity, mixin.getType());
+
+      // Check than there isn't any previous mixin definition for current entity
+      Validate.isTrue(previousMixin == null,
+          "Found two classes annotates with @%s.entity = %s: %s and %s",
+          RooJavaType.ROO_JSON_MIXIN.getSimpleTypeName(), entity.getFullyQualifiedTypeName(),
+          mixin.getType(), previousMixin);
+
+      // register metadata dependency
+      registerDependency(JSONMixinMetadata.createIdentifier(mixin), metadataIdentificationString);
+
+
+    }
+
+
+    return new DomainModelModuleMetadata(metadataIdentificationString, aspectName,
+        governorPhysicalTypeMetadata, mixins);
   }
 
   public String getProvidesType() {
-    return WebMvcJSONConfigurationMetadata.getMetadataIdentiferType();
+    return DomainModelModuleMetadata.getMetadataIdentiferType();
+  }
+
+  private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
+
+    if (getMetadataDependencyRegistry() != null
+        && StringUtils.isNotBlank(upstreamDependency)
+        && StringUtils.isNotBlank(downStreamDependency)
+        && !upstreamDependency.equals(downStreamDependency)
+        && !MetadataIdentificationUtils.getMetadataClass(downStreamDependency).equals(
+            MetadataIdentificationUtils.getMetadataClass(upstreamDependency))) {
+      getMetadataDependencyRegistry().registerDependency(upstreamDependency, downStreamDependency);
+    }
   }
 }

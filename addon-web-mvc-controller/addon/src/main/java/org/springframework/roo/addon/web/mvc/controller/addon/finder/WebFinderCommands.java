@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.finder;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -10,6 +11,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
+import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderMethod;
+import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.PartTree;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -179,7 +182,7 @@ public class WebFinderCommands implements CommandMarker {
               JavaType.class, "");
 
       // Get finders
-      finders = getFinders(entity);
+      finders = getFinders(entity, null);
     }
 
     if (finders.isEmpty()) {
@@ -371,7 +374,7 @@ public class WebFinderCommands implements CommandMarker {
       if (queryMethod != null) {
         queryMethods.add(queryMethod);
       } else {
-        queryMethods = getFinders(entity);
+        queryMethods = getFinders(entity, controllerResponseType);
       }
       webFinderOperations.createOrUpdateSearchControllerForEntity(entity, queryMethods,
           controllerResponseType, controllerPackage, pathPrefix);
@@ -442,12 +445,12 @@ public class WebFinderCommands implements CommandMarker {
    *
    * @param entity the JavaType representing the entity whose finder names should
    *            be returned.
+   * @param controllerResponseType (can be null)
    * @return a List<String> with the finder names.
    */
-  public List<String> getFinders(JavaType entity) {
-    RepositoryJpaMetadata repositoryJpaMetadata =
-        repositoryJpaLocator.getRepositoryMetadata(entity);
-    return repositoryJpaMetadata.getDeclaredFinderNames();
+  public List<String> getFinders(JavaType entity,
+      ControllerMVCResponseService controllerResponseType) {
+    return webFinderOperations.getFindersWhichCanBePublish(entity, controllerResponseType);
   }
 
   /**

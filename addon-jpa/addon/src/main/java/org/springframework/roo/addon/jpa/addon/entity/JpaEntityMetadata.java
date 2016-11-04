@@ -247,8 +247,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
       // Store info in temporal maps
       info =
-          new RelationInfo(fieldName, addMethod, removeMethod, cardinality, childType, field,
-              mappedBy, relationType);
+          new RelationInfo(getDestination(), fieldName, addMethod, removeMethod, cardinality,
+              childType, field, mappedBy, relationType);
       fieldInfosTemporal.put(fieldName, info);
       // Use ChildType+childField as keys to avoid overried values
       // (the same mappedBy on many relations. Ej. Order.customer and Invoice.customer)
@@ -1463,6 +1463,11 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     public final Cardinality cardinality;
 
     /**
+     * Parent (current) item type
+     */
+    public final JavaType entityType;
+
+    /**
      * Child item type
      */
     public final JavaType childType;
@@ -1494,10 +1499,12 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
      * @param mappedBy
      * @param type
      */
-    protected RelationInfo(final String fieldName, final MethodMetadata addMethod,
-        final MethodMetadata removeMethod, final Cardinality cardinality, final JavaType childType,
-        final FieldMetadata fieldMetadata, final String mappedBy, final JpaRelationType type) {
+    protected RelationInfo(final JavaType entityType, final String fieldName,
+        final MethodMetadata addMethod, final MethodMetadata removeMethod,
+        final Cardinality cardinality, final JavaType childType, final FieldMetadata fieldMetadata,
+        final String mappedBy, final JpaRelationType type) {
       super();
+      this.entityType = entityType;
       this.fieldName = fieldName;
       this.addMethod = addMethod;
       this.removeMethod = removeMethod;
