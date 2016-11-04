@@ -400,6 +400,55 @@ public class WsOperationsImpl implements WsOperations {
   }
 
   @Override
+  public void addSEI(JavaType service, JavaType sei, JavaType endpointClass, JavaType configClass,
+      String profile, boolean force) {
+
+    Validate.notNull(service, "ERROR: Provide a valid service");
+    Validate.notNull(sei, "ERROR: Provide a valid sei");
+
+    // Check if provided SEI is located in an application module
+    if (!isLocatedInApplicationModule(sei) && !force) {
+      LOGGER.log(Level.INFO, "ERROR: The provided SEI is not located in an application module.");
+      return;
+    }
+
+    // Check if the configClass is located in an application module
+    if (configClass != null && !isLocatedInApplicationModule(configClass) && !force) {
+      LOGGER.log(Level.INFO,
+          "ERROR: The provided config class is not located in an application module.");
+      return;
+    }
+
+    // If developer has not specify any EndPoint class is necessary to generate 
+    // new one inside the provided SEI module using the provided SEI name and 'Endpoint' suffix.
+    if (endpointClass == null) {
+      endpointClass =
+          new JavaType(String.format("%sEndpoint", sei.getFullyQualifiedTypeName()),
+              sei.getModule());
+    }
+
+    // If developer has not specify any configuration class is necessary to generate a
+    // new one inside the provided SEI module using the provided SEI name and 'Configuration' suffix
+    if (configClass == null) {
+      configClass =
+          new JavaType(String.format("%sConfiguration", sei.getFullyQualifiedTypeName()),
+              sei.getModule());
+    }
+
+    // Include necessary dependencies
+    includeDependenciesAndPluginsForSei(sei.getModule());
+
+    // Include the necessary properties using the provided profile
+    getApplicationConfigService().addProperty(sei.getModule(), "cxf.path", "/services", profile,
+        true);
+    getApplicationConfigService().addProperty(sei.getModule(), "cxf.servlet.load-on-startup", "-1",
+        profile, true);
+
+    // TO BE CONTINUE...
+
+  }
+
+  @Override
   public Pom getModuleFromWsdlLocation(String wsdlLocation) {
     // Separate the wsdlLocation and the module
     String[] wsdlLocationParts = wsdlLocation.split(":");
@@ -601,6 +650,24 @@ public class WsOperationsImpl implements WsOperations {
     wsdlLocationProperties.put("wsdlLocation", "classpath:" + wsdlName);
     getProjectOperations().addElementToPluginExecution(wsdlModuleName, cxfPlugin,
         "generate-sources", "wsdlOptions", "wsdlOption", wsdlLocationProperties);
+  }
+
+  /**
+   * This method includes the TracEE and CXF dependencies. Also, include the CXF starter
+   * 
+   * @param moduleName
+   *            the module where the dependencies will be included
+   */
+  private void includeDependenciesAndPluginsForSei(String moduleName) {
+    // Include CXF property if not exists
+    getProjectOperations().addProperty("", CXF_PROPERTY);
+    getProjectOperations().addDependency(moduleName, CXF_STARTER_DEPENDENCY);
+
+    // Include TracEE dependencies if not exists
+    getProjectOperations().addProperty("", TRACEE_PROPERTY);
+    getProjectOperations().addDependency(moduleName, TRACEE_JAXWS_DEPENDENCY);
+    getProjectOperations().addDependency(moduleName, TRACEE_CXF_DEPENDENCY);
+
   }
 
   /**

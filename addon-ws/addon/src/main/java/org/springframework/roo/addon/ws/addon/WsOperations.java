@@ -43,6 +43,21 @@ public interface WsOperations {
       SoapBindingType bindingType, String serviceUrl, String profile);
 
   /**
+   * This method includes new Service Endpoint Interface and its implementation in
+   * the generated project.
+   * 
+   * @param service JavaType annotated with @RooService
+   * @param sei JavaType of the new interface to be generated
+   * @param endpointClass JavaType of the new endpoint class to be generated
+   * @param configClass JavaType with the existing or new configuration class to register the new
+   * 		generated enpoint
+   * @param profile the profile to be used
+   * @param force indicates if the developer wants to force the operation
+   */
+  void addSEI(JavaType service, JavaType sei, JavaType endpointClass, JavaType configClass,
+      String profile, boolean force);
+
+  /**
    * This method obtains the module where the .wsdl is located.
    * 
    * @param wsdlLocation that includes the .wsdl file name and 

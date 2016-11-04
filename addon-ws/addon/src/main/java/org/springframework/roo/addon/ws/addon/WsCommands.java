@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -11,7 +12,11 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.ws.annotations.SoapBindingType;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -52,7 +57,7 @@ public class WsCommands implements CommandMarker {
    * 
    * @return true if it is available and false if not.
    */
-  @CliAvailabilityIndicator(value = {"ws client"})
+  @CliAvailabilityIndicator(value = {"ws client", "ws endpoint"})
   public boolean areWsCommandsAvailable() {
     return getWsOperations().areWsCommandsAvailable();
   }
@@ -120,6 +125,14 @@ public class WsCommands implements CommandMarker {
     return true;
   }
 
+  /**
+   * This method is an autocomplete indicator of 'ws client' command.
+   * 
+   * It provides all existing endpoints inside the provided .wsdl file.
+   * 
+   * @param context
+   * @return
+   */
   @CliOptionAutocompleteIndicator(
       command = "ws client",
       param = "endpoint",
@@ -187,8 +200,6 @@ public class WsCommands implements CommandMarker {
     return true;
   }
 
-
-
   /**
    * This method defines the "ws client" command.
    * 
@@ -237,6 +248,170 @@ public class WsCommands implements CommandMarker {
 
   }
 
+  /**
+   * This method is an autocomplete indicator of the 'ws endpoint' command.
+   * 
+   * This method provides all existing classes annotated with @RooService
+   * 
+   * @param context
+   * @return
+   */
+  @CliOptionAutocompleteIndicator(
+      command = "ws endpoint",
+      param = "service",
+      help = "--service parameter should be autocomplete with some existing class annotated with @RooService.")
+  public List<String> existingServicesInterfaces(ShellContext context) {
+
+    // Getting currentText
+    String currentText = context.getParameters().get("service");
+
+    List<String> existingServicesInterfaces = new ArrayList<String>();
+    Set<ClassOrInterfaceTypeDetails> allServices =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_SERVICE);
+
+    for (ClassOrInterfaceTypeDetails service : allServices) {
+      String name = getClasspathOperations().replaceTopLevelPackageString(service, currentText);
+      if (!existingServicesInterfaces.contains(name)) {
+        existingServicesInterfaces.add(name);
+      }
+    }
+
+    return existingServicesInterfaces;
+  }
+
+  /**
+   * This method is a visibility indicator of 'sei' parameter from
+   * the 'ws endpoint' command.
+   * 
+   * --sei parameter is not visible if --service parameter has not been specified
+   * or if --service parameter has been specified with empty value
+   * 
+   * @param context
+   * @return
+   */
+  @CliOptionVisibilityIndicator(command = "ws endpoint", params = "sei",
+      help = "--sei parameter is not visible if --service parameter has not been specified "
+          + "or if --service parameter has been specified with empty value.")
+  public boolean isSEIParameterVisible(ShellContext context) {
+    // Getting current value of --service parameter
+    String serviceValue = context.getParameters().get("service");
+    if (StringUtils.isEmpty(serviceValue)) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * This method is an autocomplete indicator for 'sei' parameter
+   * of the 'ws endpoint' command.
+   * 
+   * It only provides the existing modules in the generated project
+   * to make easy the SEI specification
+   * 
+   * @param context
+   * @return
+   */
+  @CliOptionAutocompleteIndicator(command = "ws endpoint", param = "sei",
+      help = "--sei parameter should be a new class. You must not provide an existing class.",
+      validate = false)
+  public List<String> getAllModulesForSei(ShellContext context) {
+
+    List<String> availableModules = new ArrayList<String>();
+
+    Collection<String> modules = getProjectOperations().getModuleNames();
+    for (String moduleName : modules) {
+      availableModules.add(moduleName.concat(":"));
+    }
+    return availableModules;
+  }
+
+  /**
+   * This method is a visibility indicator for --class and --config parameter
+   * of the 'ws endpoint' command.
+   * 
+   * @param context
+   * @return
+   */
+  @CliOptionVisibilityIndicator(
+      command = "ws endpoint",
+      params = {"class", "config"},
+      help = "--class parameter and --config parameter are not available if --sei parameter has not been specified")
+  public boolean areClassAndConfigVisible(ShellContext context) {
+    // Getting current value of --sei parameter 
+    String seiValue = context.getParameters().get("sei");
+    if (StringUtils.isEmpty(seiValue)) {
+      return false;
+    }
+    return true;
+  }
+
+
+  /**
+   * This method is an autocomplete indicator for 'class' parameter
+   * of the 'ws endpoint' command.
+   * 
+   * It only provides the existing modules in the generated project
+   * to make easy the class specification
+   * 
+   * @param context
+   * @return
+   */
+  @CliOptionAutocompleteIndicator(command = "ws endpoint", param = "class",
+      help = "--class parameter should be a new class. You must not provide an existing class.",
+      validate = false)
+  public List<String> getAllModulesForClass(ShellContext context) {
+
+    List<String> availableModules = new ArrayList<String>();
+
+    Collection<String> modules = getProjectOperations().getModuleNames();
+    for (String moduleName : modules) {
+      availableModules.add(moduleName.concat(":"));
+    }
+    return availableModules;
+  }
+
+  /**
+   * This method defines the "ws endpoint" command.
+   * 
+   * Delegates on WsOperations to create the new SEIs and its implementarions. Also
+   * install the necessary dependencies and configuration classes.
+   * 
+   * @param service JavaType annotated with @RooService
+   * @param sei JavaType of the new interface to be generated
+   * @param endpointClass JavaType of the new endpoint class to be generated
+   * @param configClass JavaType with the existing or new configuration class to register the new
+   * 		generated enpoint
+   * @param context provides the profile to be used
+   */
+  @CliCommand(value = "ws endpoint",
+      help = "Generates a new Service Endpoint Interface (SEI) and its implementation.")
+  public void addSEI(
+      @CliOption(key = "service", mandatory = true,
+          help = "Existing service annotated with @RooService that will be used to generate "
+              + "the new SEI. The new generated SEI will include all defined operations in "
+              + "the provided service interface.") JavaType service,
+      @CliOption(key = "sei", mandatory = true,
+          help = "New Service Endpoint Interface to generate. It's not possible to indicate "
+              + "an existing class.") JavaType sei,
+      @CliOption(key = "class", mandatory = false,
+          help = "New class that will implement the new generated SEI. If not specified, "
+              + "a new implementation class will be generated in the same module using the "
+              + "SEI name and the 'Endpoint' suffix.") JavaType endpointClass,
+      @CliOption(
+          key = "config",
+          mandatory = false,
+          help = "Configuration class that will register the new endpoint. You could specify an "
+              + "existing @Configuration class or indicates a new one to be generated. If not specified, "
+              + "a new @Configuration class will be generated in the same module using the "
+              + "SEI name and the 'Configuration' suffix.") JavaType configClass,
+      ShellContext context) {
+
+    // Delegates on WsOperations to create new SEI
+    getWsOperations().addSEI(service, sei, endpointClass, configClass, context.getProfile(),
+        context.isForce());
+  }
+
   // Obtaining OSGi services using ServiceInstaceManager utility
 
   public WsOperations getWsOperations() {
@@ -255,5 +430,12 @@ public class WsCommands implements CommandMarker {
     return serviceInstaceManager.getServiceInstance(this, FileManager.class);
   }
 
+  public TypeLocationService getTypeLocationService() {
+    return serviceInstaceManager.getServiceInstance(this, TypeLocationService.class);
+  }
+
+  public ClasspathOperations getClasspathOperations() {
+    return serviceInstaceManager.getServiceInstance(this, ClasspathOperations.class);
+  }
 
 }
