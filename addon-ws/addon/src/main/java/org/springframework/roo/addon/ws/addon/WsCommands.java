@@ -321,7 +321,9 @@ public class WsCommands implements CommandMarker {
 
     Collection<String> modules = getProjectOperations().getModuleNames();
     for (String moduleName : modules) {
-      availableModules.add(moduleName.concat(":"));
+      if (StringUtils.isNotBlank(moduleName)) {
+        availableModules.add(moduleName.concat(":"));
+      }
     }
     return availableModules;
   }
@@ -366,7 +368,9 @@ public class WsCommands implements CommandMarker {
 
     Collection<String> modules = getProjectOperations().getModuleNames();
     for (String moduleName : modules) {
-      availableModules.add(moduleName.concat(":"));
+      if (StringUtils.isNotBlank(moduleName)) {
+        availableModules.add(moduleName.concat(":"));
+      }
     }
     return availableModules;
   }

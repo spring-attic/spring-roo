@@ -150,6 +150,15 @@ public final class RooJavaType {
   public static final JavaType ROO_ENUM_SOAP_BINDING_TYPE = new JavaType(
       "org.springframework.roo.addon.ws.annotations.SoapBindingType");
 
+  public static final JavaType ROO_SEI = new JavaType(
+      "org.springframework.roo.addon.ws.annotations.RooSei");
+
+  public static final JavaType ROO_SEI_IMPL = new JavaType(
+      "org.springframework.roo.addon.ws.annotations.RooSeiImpl");
+
+  public static final JavaType ROO_WS_ENDPOINTS = new JavaType(
+      "org.springframework.roo.addon.ws.annotations.RooWsEndpoints");
+
   /**
    * Constructor is private to prevent instantiation
    */
