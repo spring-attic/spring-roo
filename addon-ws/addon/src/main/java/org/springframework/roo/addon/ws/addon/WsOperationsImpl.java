@@ -20,7 +20,10 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.ws.annotations.RooSei;
+import org.springframework.roo.addon.ws.annotations.RooSeiImpl;
 import org.springframework.roo.addon.ws.annotations.RooWsClients;
+import org.springframework.roo.addon.ws.annotations.RooWsEndpoints;
 import org.springframework.roo.addon.ws.annotations.SoapBindingType;
 import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.ModuleFeatureName;
@@ -34,6 +37,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
+import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
@@ -435,6 +439,21 @@ public class WsOperationsImpl implements WsOperations {
               sei.getModule());
     }
 
+    // Check if some the provided classes that should be generated already exists
+    if (getTypeLocationService().getTypeDetails(sei) != null) {
+      LOGGER.log(Level.INFO,
+          "ERROR: The provided SEI already exists. Specify a different one using"
+              + " --sei parameter.");
+      return;
+    }
+
+    if (getTypeLocationService().getTypeDetails(endpointClass) != null) {
+      LOGGER.log(Level.INFO,
+          "ERROR: The provided Endpoint class already exists. Specify a different one using"
+              + " --class parameter.");
+      return;
+    }
+
     // Include necessary dependencies
     includeDependenciesAndPluginsForSei(sei.getModule());
 
@@ -444,7 +463,90 @@ public class WsOperationsImpl implements WsOperations {
     getApplicationConfigService().addProperty(sei.getModule(), "cxf.servlet.load-on-startup", "-1",
         profile, true);
 
-    // TO BE CONTINUE...
+    // Generate the new SEI
+    final String seiIdentifier =
+        getPathResolver().getCanonicalPath(sei.getModule(), Path.SRC_MAIN_JAVA, sei);
+    final String midSEI =
+        PhysicalTypeIdentifier.createIdentifier(sei, getPathResolver().getPath(seiIdentifier));
+    ClassOrInterfaceTypeDetailsBuilder cidBuilderSEI =
+        new ClassOrInterfaceTypeDetailsBuilder(midSEI, Modifier.PUBLIC, sei,
+            PhysicalTypeCategory.INTERFACE);
+    // Create new @RooWsEndpoint annotation
+    AnnotationMetadataBuilder seiAnnotation =
+        new AnnotationMetadataBuilder(new JavaType(RooSei.class));
+    // Including service parameter to @RooSei annotation
+    seiAnnotation.addClassAttribute("service", service);
+    // Include new @RooSei annotation
+    cidBuilderSEI.addAnnotation(seiAnnotation);
+
+    // Write SEI class on disk
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilderSEI.build());
+
+    // Generate the new Endpoint
+    final String endpointIdentifier =
+        getPathResolver().getCanonicalPath(endpointClass.getModule(), Path.SRC_MAIN_JAVA,
+            endpointClass);
+    final String midEndpoint =
+        PhysicalTypeIdentifier.createIdentifier(endpointClass,
+            getPathResolver().getPath(endpointIdentifier));
+    ClassOrInterfaceTypeDetailsBuilder cidBuilderEndpoint =
+        new ClassOrInterfaceTypeDetailsBuilder(midEndpoint, Modifier.PUBLIC, endpointClass,
+            PhysicalTypeCategory.CLASS);
+    // Create new @RooSeiImpl annotation
+    AnnotationMetadataBuilder endpointAnnotation =
+        new AnnotationMetadataBuilder(new JavaType(RooSeiImpl.class));
+    // Include sei parameter to @RooSeiImpl annotation
+    endpointAnnotation.addClassAttribute("sei", sei);
+    // Include new @RooSeiImpl annotation
+    cidBuilderEndpoint.addAnnotation(endpointAnnotation);
+
+    // Write endpoint class on disk
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilderEndpoint.build());
+
+    // Check if configuration class exists. If exists, check if is already annotated and update it.
+    // If not exists, create a new one
+    ClassOrInterfaceTypeDetails configClassDetails =
+        getTypeLocationService().getTypeDetails(configClass);
+    if (configClassDetails != null) {
+      // TODO Update configuration class
+    } else {
+      // Create the specified configuration class and annotate it with necessary information
+      final String configClassIdentifier =
+          getPathResolver().getCanonicalPath(configClass.getModule(), Path.SRC_MAIN_JAVA,
+              configClass);
+      final String mid =
+          PhysicalTypeIdentifier.createIdentifier(configClass,
+              getPathResolver().getPath(configClassIdentifier));
+      ClassOrInterfaceTypeDetailsBuilder cidBuilderConfig =
+          new ClassOrInterfaceTypeDetailsBuilder(mid, Modifier.PUBLIC, configClass,
+              PhysicalTypeCategory.CLASS);
+
+      // Create new @RooWsEndpoints annotation and include the new endpoint 
+      // as endpoints attribute
+      List<AnnotationAttributeValue<?>> endpoints = new ArrayList<AnnotationAttributeValue<?>>();
+      ClassAttributeValue endPointAttributeValue =
+          new ClassAttributeValue(new JavaSymbolName("value"), endpointClass);
+      endpoints.add(endPointAttributeValue);
+      ArrayAttributeValue<AnnotationAttributeValue<?>> newEndpoints =
+          new ArrayAttributeValue<AnnotationAttributeValue<?>>(new JavaSymbolName("endpoints"),
+              endpoints);
+      AnnotationMetadataBuilder wsEndpointsAnnotation =
+          new AnnotationMetadataBuilder(new JavaType(RooWsEndpoints.class));
+      wsEndpointsAnnotation.addAttribute(newEndpoints);
+
+      // Include new @RooWsEndpoints annotation
+      cidBuilderConfig.addAnnotation(wsEndpointsAnnotation);
+
+      // Include @Profile annotation with the provided profile. This annotation
+      // doesn't exists yet, because we're generating a new @Configuration class
+      if (StringUtils.isNotEmpty(profile)) {
+        wsEndpointsAnnotation.addStringAttribute("profile", profile);
+      }
+
+      // Write config class on disk
+      getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilderConfig.build());
+
+    }
 
   }
 
