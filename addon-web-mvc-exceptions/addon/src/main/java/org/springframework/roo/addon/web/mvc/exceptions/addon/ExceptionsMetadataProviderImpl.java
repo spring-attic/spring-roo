@@ -4,7 +4,6 @@ import static org.springframework.roo.model.RooJavaType.ROO_EXCEPTION_HANDLERS;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -20,13 +19,10 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
@@ -35,7 +31,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
 * Implementation of {@link ExceptionsMetadataProvider}
