@@ -196,6 +196,11 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
     List<MethodMetadata> finders = new ArrayList<MethodMetadata>();
     List<MethodMetadata> countMethods = new ArrayList<MethodMetadata>();
 
+    if (repositoryMetadata == null) {
+      // Can't generate metadata yet
+      return null;
+    }
+
 
     // Add dependencies between modules
     for (MethodMetadata finder : repositoryMetadata.getFindersGenerated()) {

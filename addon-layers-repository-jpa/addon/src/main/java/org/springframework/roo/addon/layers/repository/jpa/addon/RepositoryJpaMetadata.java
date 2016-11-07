@@ -486,6 +486,18 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
   }
 
   @Override
+  public int hashCode() {
+    // override hashCode to propagate changes in non-modifies-itd changes
+    // (as finders which will generate on RepositoryCustom
+    int result = super.hashCode();
+    result = +findersToAddInCustom.size();
+    for (Pair<FinderMethod, PartTree> finder : findersToAddInCustom) {
+      result = +finder.getLeft().getMethodName().hashCode();
+    }
+    return result;
+  }
+
+  @Override
   public String toString() {
     final ToStringBuilder builder = new ToStringBuilder(this);
     builder.append("identifier", getId());

@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 /**
@@ -71,7 +72,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private final MethodMetadata createBatchMethod;
   private final MethodMetadata updateBatchMethod;
   private final MethodMetadata deleteBatchMethod;
-  private final List<MethodMetadata> finderMethods;
+  private final Map<String, MethodMetadata> finderMethods;
   private final MethodMetadata modelAttributeMethod;
   private final ControllerType type;
   private final ConstructorMetadata constructor;
@@ -141,13 +142,14 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    * @param compositionRelationOneToOne
    *            list with pairs of {@link RelationInfo} and related child entity {@link JpaEntityMetadata}
    * @param itemController
+   * @param findersToAdd
    */
   public JSONMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       ControllerMetadata controllerMetadata, ServiceMetadata serviceMetadata,
       JpaEntityMetadata entityMetadata, String entityPlural, String entityIdentifierPlural,
       final List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne,
-      final JavaType itemController) {
+      final JavaType itemController, Map<String, MethodMetadata> findersToAdd) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.readOnly = entityMetadata.isReadOnly();
@@ -235,8 +237,13 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
         break;
       case SEARCH:
-        this.finderMethods = new ArrayList<MethodMetadata>();
-        // TODO
+        Map<String, MethodMetadata> tmpFinders = new TreeMap<String, MethodMetadata>();
+        MethodMetadata finderMethod;
+        for (Entry<String, MethodMetadata> finder : findersToAdd.entrySet()) {
+          finderMethod = getFinderMethodForFinderInService(finder.getKey(), finder.getValue());
+          tmpFinders.put(finder.getKey(), addAndGet(finderMethod, allMethods));
+        }
+        this.finderMethods = Collections.unmodifiableMap(tmpFinders);
 
         this.listMethod = null;
         this.listURIMethod = null;
@@ -300,6 +307,76 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Build the ITD
     itdTypeDetails = builder.build();
+  }
+
+  /**
+   * Generates a finder method which delegates on entity service to get result
+   *
+   * @param finderName
+   * @param serviceFinderMethod
+   * @return
+   */
+  private MethodMetadata getFinderMethodForFinderInService(String finderName,
+      MethodMetadata serviceFinderMethod) {
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName(finderName);
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.addAll(serviceFinderMethod.getParameterTypes());
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    final List<String> parameterStrings = new ArrayList<String>();
+    for (JavaSymbolName param : serviceFinderMethod.getParameterNames()) {
+      parameterNames.add(param);
+      parameterStrings.add(param.getSymbolName());
+    }
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @GetMapping annotation
+    AnnotationMetadataBuilder getMappingAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING);
+    getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    getMappingAnnotation.addStringAttribute("value", "/" + finderName);
+    annotations.add(getMappingAnnotation);
+
+
+    // Generating returnType
+    JavaType serviceReturnType = serviceFinderMethod.getReturnType();
+    JavaType returnType = JavaType.wrapperOf(SpringJavaType.RESPONSE_ENTITY, serviceReturnType);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    final String itemNames = StringUtils.uncapitalize(this.entityPlural);
+
+    // Page<Customer> customers = customerService.findAll(formBean, globalSearch, pageable);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine("%s %s = %s.%s(%s);", getNameOfJavaType(serviceReturnType),
+        itemNames, controllerMetadata.getServiceField().getFieldName(),
+        serviceFinderMethod.getMethodName(), StringUtils.join(parameterStrings, ","));
+
+    // return ResponseEntity.status(HttpStatus.FOUND).body(customers);
+    bodyBuilder.appendFormalLine(String.format("return %s.status(%s.FOUND).body(%s);",
+        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY),
+        getNameOfJavaType(SpringJavaType.HTTP_STATUS), itemNames));
+
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, parameterTypes,
+            parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
   }
 
   private MethodMetadata getRemoveFromDetailsBatchMethod() {
@@ -1104,145 +1181,6 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   }
 
   /**
-   * This method provides a finder method using JSON response type
-   *
-   * @param finderMethod
-   *
-   * @return MethodMetadata
-   */
-  private MethodMetadata getFinderMethod(MethodMetadata finderMethod) {
-    // TODO
-    return null;
-    /*
-    final List<AnnotatedJavaType> originalParameterTypes = finderMethod.getParameterTypes();
-
-    // Get finder parameter names
-    final List<JavaSymbolName> originalParameterNames = finderMethod.getParameterNames();
-    List<String> stringParameterNames = new ArrayList<String>();
-    for (JavaSymbolName parameterName : originalParameterNames) {
-      stringParameterNames.add(parameterName.getSymbolName());
-    }
-
-    // Define methodName
-    final JavaSymbolName methodName = finderMethod.getMethodName();
-
-    // Define path
-    String path = "";
-    if (StringUtils.startsWith(methodName.getSymbolName(), "count")) {
-      path = StringUtils.uncapitalize(StringUtils.removeStart(methodName.getSymbolName(), "count"));
-    } else if (StringUtils.startsWith(methodName.getSymbolName(), "find")) {
-      path = StringUtils.uncapitalize(StringUtils.removeStart(methodName.getSymbolName(), "find"));
-    } else if (StringUtils.startsWith(methodName.getSymbolName(), "query")) {
-      path = StringUtils.uncapitalize(StringUtils.removeStart(methodName.getSymbolName(), "query"));
-    } else if (StringUtils.startsWith(methodName.getSymbolName(), "read")) {
-      path = StringUtils.uncapitalize(StringUtils.removeStart(methodName.getSymbolName(), "read"));
-    } else {
-      path = methodName.getSymbolName();
-    }
-
-    // Check if exists other method with the same @RequesMapping to generate
-    MethodMetadata existingMVCMethod =
-        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_GET, "/" + path, stringParameterNames, null,
-            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
-    if (existingMVCMethod != null
-        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
-      return existingMVCMethod;
-    }
-
-    // Get parameters
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    StringBuffer finderParamsString = new StringBuffer();
-    for (int i = 0; i < originalParameterTypes.size(); i++) {
-      if (originalParameterTypes.get(i).getJavaType().getSimpleTypeName().equals("GlobalSearch")) {
-        if (i > 0) {
-          finderParamsString.append(", ");
-        }
-        finderParamsString.append("null");
-        continue;
-      }
-
-      // Add @ModelAttribute if not Pageable type
-      if (!originalParameterTypes.get(i).getJavaType().getSimpleTypeName().equals("Pageable")) {
-        AnnotationMetadataBuilder requestParamAnnotation =
-            new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
-        requestParamAnnotation.addStringAttribute("value", originalParameterNames.get(i)
-            .getSymbolName());
-        parameterTypes.add(new AnnotatedJavaType(originalParameterTypes.get(i).getJavaType(),
-            requestParamAnnotation.build()));
-      } else {
-        parameterTypes.add(originalParameterTypes.get(i));
-      }
-      addTypeToImport(originalParameterTypes.get(i).getJavaType());
-      parameterNames.add(originalParameterNames.get(i));
-
-      // Build finder parameters String
-      if (i > 0) {
-        finderParamsString.append(", ");
-      }
-      finderParamsString.append(originalParameterNames.get(i));
-    }
-
-    // Adding annotations
-    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-
-    // Adding @RequestMapping annotation
-    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_GET, "/" + path, stringParameterNames, null,
-        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, ""));
-
-    // Adding @ResponseBody annotation
-    AnnotationMetadataBuilder responseBodyAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
-    annotations.add(responseBodyAnnotation);
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // Generating returnType
-    JavaType returnType = finderMethod.getReturnType();
-    List<JavaType> returnParameterTypes = returnType.getParameters();
-    StringBuffer returnTypeParamsString = new StringBuffer();
-    for (int i = 0; i < returnParameterTypes.size(); i++) {
-      addTypeToImport(returnParameterTypes.get(i));
-      if (i > 0) {
-        returnTypeParamsString.append(",");
-      }
-      returnTypeParamsString.append(returnParameterTypes.get(i).getSimpleTypeName());
-
-      // Add module dependency
-      getTypeLocationService().addModuleDependency(this.controller.getType().getModule(),
-          returnParameterTypes.get(i));
-    }
-
-    // ReturnType<ReturnTypeParams> entity =
-    // ENTITY_SERVICE_FIELD.FINDER_NAME(SEARCH_PARAMS);
-    bodyBuilder.newLine();
-    if (StringUtils.isEmpty(returnTypeParamsString)) {
-      bodyBuilder.appendFormalLine(String.format("%s returnObject = %s.%s(%s);",
-          addTypeToImport(returnType).getSimpleTypeName(), getServiceField().getFieldName(),
-          methodName, finderParamsString));
-    } else {
-      bodyBuilder.appendFormalLine(String.format("%s<%s> returnObject = %s.%s(%s);",
-          addTypeToImport(returnType).getSimpleTypeName(), returnTypeParamsString,
-          getServiceField().getFieldName(), methodName, finderParamsString));
-    }
-
-    // return returnObject;
-    bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine("return returnObject;");
-
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
-            returnType, parameterTypes, parameterNames, bodyBuilder);
-    methodBuilder.setAnnotations(annotations);
-
-    return methodBuilder.build();
-    */
-  }
-
-  /**
    * This method provides the "show" method using JSON response type
    *
    * @return MethodMetadata
@@ -1655,9 +1593,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   /**
    * Method that returns finder JSON methods
    *
-   * @return {@link List<MethodMetadata>}
+   * @return {@link Map<String,MethodMetadata>}
    */
-  public List<MethodMetadata> getCurrentFinderMethods() {
+  public Map<String, MethodMetadata> getCurrentFinderMethods() {
     return this.finderMethods;
   }
 

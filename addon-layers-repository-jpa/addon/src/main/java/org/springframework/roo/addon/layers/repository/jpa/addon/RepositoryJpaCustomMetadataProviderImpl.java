@@ -172,8 +172,9 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
 
     final ClassOrInterfaceTypeDetails repositoryClass =
         getRepositoryJpaLocator().getRepository(entity);
-    RepositoryJpaMetadata repositoryMetadata =
-        getMetadataService().get(RepositoryJpaMetadata.createIdentifier(repositoryClass));
+    final String repositoryMedatadataId = RepositoryJpaMetadata.createIdentifier(repositoryClass);
+    registerDependency(repositoryMedatadataId, metadataIdentificationString);
+    RepositoryJpaMetadata repositoryMetadata = getMetadataService().get(repositoryMedatadataId);
 
     // Add dependency between modules
     ClassOrInterfaceTypeDetails cid = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
