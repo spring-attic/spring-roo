@@ -889,8 +889,30 @@ $ java -jar name-exec.war
 NOTE: The provider dependencies are added only in "*exec.war" file.
 
 
+[[usingSpringRoo-generating-javadoc]]
+=== 6. Generating JavaDoc
+
+Spring Roo generated projects automatically include the "maven-javadoc-plugin" to generate project documentation following AsciiDoc syntax. This configuration it's done by using https://github.com/asciidoctor/asciidoclet["Asciidoclet"]. 
+
+To generate project's documentation you can follow the following steps:
+
+. Select the project from STS "Package Explorer".
+. Right click in the project and go to _Run As_ -> _Run Configurations..._
++
+image::sts-maven-run-configurations.png["images/sts-maven-run-configurations.png"]
++
+. In the window that will open, double click in _Maven Build_ from the list on the left side.
+. In the configuration window, specify "javadoc:aggregate" as Maven goal.
+. Specify project's root directory as "Base directory". You can easily do it by clicking _Workspace..._ and selecting the root module of your project.
++
+image::generate-javadoc-config.png["images/generate-javadoc-config.png"]
++
+. Apply configuration and close the window, or execute it directly with _Run_.
+. The generated JavaDoc will be in "[ROOT-PROJECT]/target/site/apidocs/".
+
+
 [[usingSpringRoo-remove-roo]]
-=== 6. Remove Roo
+=== 7. Remove Roo
 
 If you do decide to stop using Roo, it can be done in just a few minutes. There is no need to write any code or otherwise make significant changes. 
 
@@ -3316,6 +3338,8 @@ web mvc finder --package
 [[roo-without-ide]]
 == Using Spring Roo without IDE
 
+=== Installing Spring Roo
+
 Once you have met the initial link:#gettingStarted-requirements[requirements], you are ready to install
 Roo by following these steps:
 
@@ -3352,6 +3376,8 @@ If Roo logo appears, you have installed Roo successfully. For
 those curious, the "[rev RRR]" refers to the Git commit ID used to
 compile that particular build of Roo.
 
+=== Generating projects with Spring Roo
+
 You can create Northwind multimodule project executing the link:#script-command[script command]:
 
 [source,sh]
@@ -3360,6 +3386,15 @@ roo> script --file northwind-multimodule.roo
 ----
 
 This project is used as an link:#usingSpringRoo-northwind-script[example] in the documentation.
+
+=== Generating project's JavaDoc from command line
+
+To generate the project documentation using "maven-javadoc-plugin" just move to the project's root folder and execute:
+
+ mvn javadoc:aggregate
+
+This will work either in Linux or Windows, buy you must have Maven in your *PATH* variable.
+
 
 [appendix]
 [[resources]]
