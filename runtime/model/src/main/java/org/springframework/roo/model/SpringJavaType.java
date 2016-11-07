@@ -20,6 +20,8 @@ public final class SpringJavaType {
       "org.springframework.context.annotation.Import");
   public static final JavaType ANNOTATION_CONDITIONALONWEBAPPLICATION = new JavaType(
       "org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication");
+  public static final JavaType ANNOTATION_UTILS = new JavaType(
+      "org.springframework.core.annotation.AnnotationUtils");
   public static final JavaType ASSERT = new JavaType("org.springframework.util.Assert");
   public static final JavaType ASYNC = new JavaType(
       "org.springframework.scheduling.annotation.Async");
@@ -53,6 +55,8 @@ public final class SpringJavaType {
       "org.springframework.web.context.ContextLoaderListener");
   public static final JavaType CONTROLLER = new JavaType(
       "org.springframework.stereotype.Controller");
+  public static final JavaType CONTROLLER_ADVICE = new JavaType(
+      "org.springframework.web.bind.annotation.ControllerAdvice");
   public static final JavaType CONVERSION_SERVICE = new JavaType(
       "org.springframework.core.convert.ConversionService");
   public static final JavaType CONVERSION_SERVICE_EXPOSING_INTERCEPTOR = new JavaType(
@@ -70,6 +74,8 @@ public final class SpringJavaType {
       "org.springframework.web.servlet.DispatcherServlet");
   public static final JavaType ENABLE_CACHING = new JavaType(
       "org.springframework.cache.annotation.EnableCaching");
+  public static final JavaType EXCEPTION_HANDLER = new JavaType(
+      "org.springframework.web.bind.annotation.ExceptionHandler");
   public static final JavaType FLOW_HANDLER_MAPPING = new JavaType(
       "org.springframework.webflow.mvc.servlet.FlowHandlerMapping");
   public static final JavaType FORMATTER = new JavaType("org.springframework.format.Formatter");
@@ -173,6 +179,8 @@ public final class SpringJavaType {
       "org.springframework.web.bind.annotation.ResponseBody");
   public static final JavaType RESPONSE_ENTITY = new JavaType(
       "org.springframework.http.ResponseEntity");
+  public static final JavaType RESPONSE_STATUS = new JavaType(
+      "org.springframework.web.bind.annotation.ResponseStatus");
   public static final JavaType REST_CONTROLLER = new JavaType(
       "org.springframework.web.bind.annotation.RestController");
   public static final JavaType SPRING_BOOT_APPLICATION = new JavaType(

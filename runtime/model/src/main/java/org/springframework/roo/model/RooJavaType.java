@@ -127,6 +127,10 @@ public final class RooJavaType {
       "org.springframework.roo.addon.web.mvc.controller.annotations.config.RooWebMvcConfiguration");
   public static final JavaType ROO_JSON = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.responses.json.RooJSON");
+  public static final JavaType ROO_EXCEPTION_HANDLERS = new JavaType(
+      "org.springframework.roo.addon.web.mvc.exceptions.annotations.RooExceptionHandlers");
+  public static final JavaType ROO_EXCEPTION_HANDLER = new JavaType(
+      "org.springframework.roo.addon.web.mvc.exceptions.annotations.RooExceptionHandler");
   public static final JavaType ROO_THYMELEAF = new JavaType(
       "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleaf");
   public static final JavaType ROO_THYMELEAF_MAIN_CONTROLLER = new JavaType(
