@@ -19,6 +19,7 @@ import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorat
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
@@ -53,9 +54,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
   protected MetadataDependencyRegistryTracker registryTracker = null;
   protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
-
-  private JavaType datatablesDataType;
-  private JavaType datatablesPageable;
 
   private MVCViewGenerationService viewGenerationService;
 
@@ -154,12 +152,15 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
       String entityIdentifierPlural,
       List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne,
       JavaType itemController, JavaType collectionController, List<FieldMetadata> dateTimeFields,
-      List<FieldMetadata> enumFields) {
+      List<FieldMetadata> enumFields, Map<String, MethodMetadata> findersToAdd,
+      Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields,
+      Map<JavaType, List<FieldMetadata>> formBeansEnumFields) {
 
     return new ThymeleafMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
         entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
-        collectionController, dateTimeFields, enumFields);
+        collectionController, dateTimeFields, enumFields, findersToAdd, formBeansDateTimeFields,
+        formBeansEnumFields);
   }
 
   /**

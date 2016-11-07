@@ -12,6 +12,7 @@ import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerLocator;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.finder.SearchAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -20,6 +21,8 @@ import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorat
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.operations.Cardinality;
@@ -34,7 +37,9 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -233,25 +238,23 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
       }
     }
 
-
-
-    /*
-    List<MethodMetadata> findersToAdd = new ArrayList<MethodMetadata>();
+    Map<String, MethodMetadata> findersToAdd = new HashMap<String, MethodMetadata>();
 
     // Getting annotated finders
-    final SearchAnnotationValues annotationValues =
+    final SearchAnnotationValues searchAnnotationValues =
         new SearchAnnotationValues(governorPhysicalTypeMetadata);
 
     // Add finders only if controller is of search type
-    if (this.type == ControllerType.getControllerType(ControllerType.SEARCH.name())
-        && annotationValues != null && annotationValues.getFinders() != null) {
-      List<String> finders = new ArrayList<String>(Arrays.asList(annotationValues.getFinders()));
+    if (controllerMetadata.getType() == ControllerType.SEARCH && searchAnnotationValues != null
+        && searchAnnotationValues.getFinders() != null) {
+      List<String> finders =
+          new ArrayList<String>(Arrays.asList(searchAnnotationValues.getFinders()));
 
       // Search indicated finders in its related service
       for (MethodMetadata serviceFinder : serviceMetadata.getFinders()) {
-        if (finders.contains(serviceFinder.getMethodName().toString())) {
-          MethodMetadata finderMethod = getFinderMethod(serviceFinder);
-          findersToAdd.add(finderMethod);
+        String finderName = serviceFinder.getMethodName().getSymbolName();
+        if (finders.contains(finderName)) {
+          findersToAdd.put(finderName, serviceFinder);
 
           // Add dependencies between modules
           List<JavaType> types = new ArrayList<JavaType>();
@@ -268,7 +271,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
                 governorPhysicalTypeMetadata.getType().getModule(), parameter);
           }
 
-          finders.remove(serviceFinder.getMethodName().toString());
+          finders.remove(finderName);
         }
       }
 
@@ -279,11 +282,10 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
             service.getFullyQualifiedTypeName(), StringUtils.join(finders, ", ")));
       }
     }
-    */
 
     return new JSONMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata,
         controllerMetadata, serviceMetadata, entityMetadata, entityPlural, entityIdentifierPlural,
-        compositionRelationOneToOne, itemController);
+        compositionRelationOneToOne, itemController, findersToAdd);
 
   }
 

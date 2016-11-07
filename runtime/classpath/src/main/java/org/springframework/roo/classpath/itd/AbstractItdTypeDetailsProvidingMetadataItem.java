@@ -366,6 +366,9 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 
   @Override
   public int hashCode() {
+    if (itdTypeDetails != null) {
+      return itdTypeDetails.hashCode();
+    }
     return builder.build().hashCode();
   }
 

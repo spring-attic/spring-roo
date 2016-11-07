@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.finder;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
@@ -11,6 +12,7 @@ import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.F
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.PartTree;
 import org.springframework.roo.addon.layers.service.addon.ServiceLocator;
 import org.springframework.roo.addon.plural.addon.PluralService;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerLocator;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerOperations;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
@@ -143,16 +145,16 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 
     // Seek for search type controllers related to entity
     Collection<ClassOrInterfaceTypeDetails> entitySearchControllers =
-        getEntityRelatedSearchControllers(entity);
+        controllerLocator.getControllers(entity, ControllerType.SEARCH,
+            responseType.getAnnotation());
 
     // Check if any of the search controllers have the same pathPrefix.
     // If so, and controllerPackage is as well the same, update the controller.
     ClassOrInterfaceTypeDetails controllerToUpdateOrCreate = null;
     for (ClassOrInterfaceTypeDetails entitySearchController : entitySearchControllers) {
-      AnnotationMetadata controllerAnnotation =
-          entitySearchController.getAnnotation(RooJavaType.ROO_CONTROLLER);
-      if (controllerAnnotation.getAttribute("pathPrefix") != null
-          && controllerAnnotation.getAttribute("pathPrefix").getValue().equals(pathPrefix)) {
+      ControllerAnnotationValues controllerValues =
+          new ControllerAnnotationValues(entitySearchController);
+      if (StringUtils.equals(pathPrefix, controllerValues.getPathPrefix())) {
         if (controllerPackage.equals(entitySearchController.getType().getPackage())) {
 
           // The controller exists, so choose it for updating.
@@ -287,21 +289,11 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
                         entity.getSimpleTypeName()));
       }
 
-      List<String> entityFinders = repositoryMetadata.getDeclaredFinderNames();
-      if (entityFinders.isEmpty()) {
-        LOGGER
-            .log(
-                Level.INFO,
-                String
-                    .format(
-                        "Entity %s hasn't any finder associated and web "
-                            + "finder generation won't have effects. Use 'finder add' command to create finders.",
-                        entity.getSimpleTypeName()));
-      } else {
+      List<String> entityFinders = getFindersWhichCanBePublish(repositoryMetadata, responseType);
+      if (!entityFinders.isEmpty()) {
         this.createOrUpdateSearchControllerForEntity(entity, entityFinders, responseType,
             controllerPackage, pathPrefix);
       }
-
     }
   }
 
@@ -348,9 +340,9 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
       JavaPackage controllerPackage, String pathPrefix) {
     ClassOrInterfaceTypeDetailsBuilder controllerBuilder;
     JavaType searchController =
-        new JavaType(String.format("%s.%sSearchController",
-            controllerPackage.getFullyQualifiedPackageName(), pluralService.getPlural(entity)),
-            controllerPackage.getModule());
+        new JavaType(String.format("%s.%sSearch%sController",
+            controllerPackage.getFullyQualifiedPackageName(), pluralService.getPlural(entity),
+            responseType.getControllerNameModifier()), controllerPackage.getModule());
     final String physicalPath =
         PhysicalTypeIdentifier.createIdentifier(searchController,
             LogicalPath.getInstance(Path.SRC_MAIN_JAVA, controllerPackage.getModule()));
@@ -466,15 +458,5 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
       controllerBuilder.updateTypeAnnotation(searchAnnotationBuilder);
     }
     return findersAdded;
-  }
-
-  /**
-   * Returns all ControllerType.SEARCH controllers related to provided entity.
-   *
-   * @param entity the Javatype to which controllers should be related.
-   * @return a List<ClassOrInterfaceTypeDetails> with the related search controllers
-   */
-  private Collection<ClassOrInterfaceTypeDetails> getEntityRelatedSearchControllers(JavaType entity) {
-    return controllerLocator.getControllers(entity, ControllerType.SEARCH);
   }
 }

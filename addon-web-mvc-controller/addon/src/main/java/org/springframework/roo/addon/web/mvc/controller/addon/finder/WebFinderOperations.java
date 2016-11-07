@@ -1,16 +1,11 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.finder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
-import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderMethod;
-import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.PartTree;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
+
+import java.util.List;
 
 /**
  * Provides operations for Web MVC finder functionality.

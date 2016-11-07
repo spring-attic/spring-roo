@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 /**
@@ -101,6 +102,14 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   private final Map<RelationInfo, MethodMetadata> modelAttributeDetailsMethod;
   private final MethodMetadata listDatatablesDetailsMethod;
 
+  // Finder Methods
+  private final Map<String, MethodMetadata> finderDatatableMethods;
+  private final Map<String, MethodMetadata> finderFromMethods;
+
+  // TODO
+  // private final Map<String, MethodMetadata> finderListMethods;
+  // ????
+
   //
   //  private MethodMetadata listFormMethod;
   //  private MethodMetadata deleteJSONMethod;
@@ -116,6 +125,8 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   private final JavaType collectionController;
   private final List<FieldMetadata> dateTimeFields;
   private final List<FieldMetadata> enumFields;
+  private final Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields;
+  private final Map<JavaType, List<FieldMetadata>> formBeansEnumFields;
 
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
@@ -158,6 +169,8 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    *            the governor, which is expected to contain a
    *            {@link ClassOrInterfaceTypeDetails} (required)
    * @param collectionController
+   * @param formBeansEnumFields
+   * @param formBeansDateTimeFields
 
    */
   public ThymeleafMetadata(final String identifier, final JavaType aspectName,
@@ -166,7 +179,10 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       JpaEntityMetadata entityMetadata, String entityPlural, String entityIdentifierPlural,
       final List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne,
       final JavaType itemController, JavaType collectionController,
-      List<FieldMetadata> dateTimeFields, List<FieldMetadata> enumFields) {
+      List<FieldMetadata> dateTimeFields, List<FieldMetadata> enumFields,
+      Map<String, MethodMetadata> findersToAdd,
+      Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields,
+      Map<JavaType, List<FieldMetadata>> formBeansEnumFields) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
 
@@ -186,6 +202,8 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     this.collectionController = collectionController;
     this.dateTimeFields = Collections.unmodifiableList(dateTimeFields);
     this.enumFields = Collections.unmodifiableList(enumFields);
+    this.formBeansDateTimeFields = formBeansDateTimeFields;
+    this.formBeansEnumFields = formBeansEnumFields;
     this.viewsPath =
         controllerMetadata.getPath().startsWith("/") ? controllerMetadata.getPath().substring(1)
             : controllerMetadata.getPath();
@@ -232,6 +250,8 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
         this.showURIMethod = null;
         this.modelAttributeDetailsMethod = null;
         this.listDatatablesDetailsMethod = null;
+        this.finderDatatableMethods = null;
+        this.finderFromMethods = null;
         break;
 
       case ITEM:
@@ -261,10 +281,28 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
         this.initBinderMethod = null;
         this.modelAttributeDetailsMethod = null;
         this.listDatatablesDetailsMethod = null;
+        this.finderDatatableMethods = null;
+        this.finderFromMethods = null;
 
         break;
       case SEARCH:
-        // TODO
+        Map<String, MethodMetadata> tmpFindersDtt = new TreeMap<String, MethodMetadata>();
+        Map<String, MethodMetadata> tmpFinderForms = new TreeMap<String, MethodMetadata>();
+        MethodMetadata finderMethod,
+        finderFormMethod;
+        for (Entry<String, MethodMetadata> finder : findersToAdd.entrySet()) {
+          finderMethod =
+              getFinderDatatablesMethodForFinderInService(finder.getKey(), finder.getValue());
+          tmpFindersDtt.put(finder.getKey(), addAndGet(finderMethod, allMethods));
+
+          finderFormMethod =
+              getFinderFormMethodForFinderInService(finder.getKey(), finder.getValue());
+          tmpFindersDtt.put(finder.getKey(), addAndGet(finderFormMethod, allMethods));
+
+        }
+        this.finderDatatableMethods = Collections.unmodifiableMap(tmpFindersDtt);
+        this.finderFromMethods = Collections.unmodifiableMap(tmpFinderForms);
+        // FIXME We need more method to handle it... To Be Defined!!!
 
         this.listMethod = null;
         this.listURIMethod = null;
@@ -316,6 +354,8 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
         this.showURIMethod = null;
         this.populateFormMethod = null;
         this.populateFormatsMethod = null;
+        this.finderDatatableMethods = null;
+        this.finderFromMethods = null;
         break;
 
       default:
@@ -400,6 +440,146 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     return constructor.build();
 
+  }
+
+
+  /**
+   * Generates a finder method which delegates on entity service to get result
+   *
+   * @param finderName
+   * @param serviceFinderMethod
+   * @return
+   */
+  private MethodMetadata getFinderFormMethodForFinderInService(String finderName,
+      MethodMetadata serviceFinderMethod) {
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName(finderName);
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.MODEL));
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("model"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @GetMapping annotation
+    AnnotationMetadataBuilder getMappingAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING);
+    getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    getMappingAnnotation.addStringAttribute("value", "/" + finderName);
+    annotations.add(getMappingAnnotation);
+
+    // Form Bean is always the firs parameter of finder
+    final JavaType formBean = serviceFinderMethod.getParameterTypes().get(0).getJavaType();
+
+    // Generate body
+    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    buildPopulateFormatBody(bodyBuilder, formBeansDateTimeFields.get(formBean));
+
+    final List<FieldMetadata> enumFileds = formBeansEnumFields.get(formBean);
+    if (enumFileds != null && !enumFileds.isEmpty()) {
+      buildPopulateEnumsBody(bodyBuilder, formBeansEnumFields.get(formBean));
+    }
+
+
+    // return new ModelAndView("customers/findByFirstNameLastName");
+    bodyBuilder.appendFormalLine("return new %s(\"%s/%s\");",
+        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath, finderName);
+
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            SpringJavaType.MODEL_AND_VIEW, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+
+
+  /**
+   * Generates a finder method which delegates on entity service to get result
+   *
+   * @param finderName
+   * @param serviceFinderMethod
+   * @return
+   */
+  private MethodMetadata getFinderDatatablesMethodForFinderInService(String finderName,
+      MethodMetadata serviceFinderMethod) {
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName(finderName);
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.addAll(serviceFinderMethod.getParameterTypes());
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    final List<String> parameterStrings = new ArrayList<String>();
+    for (JavaSymbolName param : serviceFinderMethod.getParameterNames()) {
+      parameterNames.add(param);
+      parameterStrings.add(param.getSymbolName());
+    }
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @GetMapping annotation
+    AnnotationMetadataBuilder getMappingAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING);
+    getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    getMappingAnnotation.addStringAttribute("value", "/" + finderName);
+    getMappingAnnotation.addEnumAttribute("produces", SpringletsJavaType.SPRINGLETS_DATATABLES,
+        "MEDIA_TYPE");
+    annotations.add(getMappingAnnotation);
+
+    // Adding @ResoponseBody
+    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY));
+
+    // Generating returnType
+    JavaType serviceReturnType = serviceFinderMethod.getReturnType();
+    JavaType returnType = JavaType.wrapperOf(SpringJavaType.RESPONSE_ENTITY, serviceReturnType);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    final String itemNames = StringUtils.uncapitalize(this.entityPlural);
+
+    // Page<Customer> customers = customerService.findAll(formBean, globalSearch, pageable);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine("%s %s = %s.%s(%s);", getNameOfJavaType(serviceReturnType),
+        itemNames, controllerMetadata.getServiceField().getFieldName(),
+        serviceFinderMethod.getMethodName(), StringUtils.join(parameterStrings, ","));
+
+    // return ResponseEntity.status(HttpStatus.FOUND).body(customers);
+    bodyBuilder.appendFormalLine(String.format("return %s.status(%s.FOUND).body(%s);",
+        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY),
+        getNameOfJavaType(SpringJavaType.HTTP_STATUS), itemNames));
+
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, parameterTypes,
+            parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
   }
 
   /**
@@ -1334,10 +1514,36 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
+    buildPopulateFormatBody(bodyBuilder, dateTimeFields);
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
+            parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * Build method body which populate in model all required formats for a form based on dateTimeField
+   * of a type.
+   *
+   * Also populate current locale in model.
+   *
+   * @param bodyBuilder
+   * @param dateTimeFields dateTime fields (optional could be empty or null)
+   */
+  private void buildPopulateFormatBody(InvocableMemberBodyBuilder bodyBuilder,
+      List<FieldMetadata> dateTimeFields) {
     // Always save locale
     bodyBuilder.appendFormalLine(
         "model.addAttribute(\"application_locale\", %s.getLocale().getLanguage());",
         getNameOfJavaType(SpringJavaType.LOCALE_CONTEXT_HOLDER));
+
+    if (dateTimeFields == null || dateTimeFields.isEmpty()) {
+      // All done;
+      return;
+    }
 
     // Getting all enum types from provided entity
     for (FieldMetadata field : dateTimeFields) {
@@ -1372,13 +1578,6 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       }
 
     }
-
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
-            parameterTypes, parameterNames, bodyBuilder);
-    methodBuilder.setAnnotations(annotations);
-
-    return methodBuilder.build();
   }
 
 
@@ -1702,6 +1901,24 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // populateFormats(model);
     bodyBuilder.appendFormalLine("%s(model);", populateFormatsMethod.getMethodName());
 
+    buildPopulateEnumsBody(bodyBuilder, enumFields);
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
+            parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * Build method body which populate enum field of a entity into model
+   *
+   * @param bodyBuilder
+   * @param enumFields
+   */
+  private void buildPopulateEnumsBody(InvocableMemberBodyBuilder bodyBuilder,
+      List<FieldMetadata> enumFields) {
     // Getting all enum types from provided entity
     for (FieldMetadata field : enumFields) {
       // model.addAttribute("enumField",
@@ -1710,13 +1927,6 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
           field.getFieldName(), getNameOfJavaType(JavaType.ARRAYS),
           getNameOfJavaType(field.getFieldType()));
     }
-
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
-            parameterTypes, parameterNames, bodyBuilder);
-    methodBuilder.setAnnotations(annotations);
-
-    return methodBuilder.build();
   }
 
   /**
