@@ -37,6 +37,7 @@
         <module>addon-dod</module>
         <module>addon-backup</module>
         <module>addon-web-mvc-controller</module>
+        <module>addon-web-mvc-exceptions</module>
         <module>addon-web-mvc-views</module>
         <module>addon-web-mvc-thymeleaf</module>
         <module>addon-web-mvc-i18n</module>
@@ -564,6 +565,16 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.web.mvc.exceptions.addon</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.web.mvc.exceptions.annotations</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.backup</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -793,7 +804,7 @@
                 <artifactId>org.springframework.roo.addon.ws.annotations</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <!-- Test-scoped dependencies (not OSGi, but not included in any assemblies 
+            <!-- Test-scoped dependencies (not OSGi, but not included in any assemblies
                 either) -->
             <dependency>
                 <groupId>junit</groupId>
