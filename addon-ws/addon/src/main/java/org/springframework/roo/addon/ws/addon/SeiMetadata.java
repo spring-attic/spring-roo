@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -108,7 +108,7 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Initialize collections
     seiMethodsFromServiceMethods = new HashMap<MethodMetadata, MethodMetadata>();
-    seiMethods = new HashMap<MethodMetadata, MethodMetadata>();
+    seiMethods = new TreeMap<MethodMetadata, MethodMetadata>();
 
     // Include @WebService annotation
     AnnotationMetadataBuilder webServiceAnnotation =
@@ -163,8 +163,8 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     List<AnnotatedJavaType> parameterTypes = serviceMethod.getParameterTypes();
     List<JavaSymbolName> parameterNames = serviceMethod.getParameterNames();
 
-    // Is necessary to change the method name to prevent errors
     // Obtain parameterList
+    // Is necessary to change the method name to prevent errors
     String paramList = "";
     for (JavaSymbolName param : parameterNames) {
       paramList = paramList.concat(param.getSymbolNameCapitalisedFirstLetter()).concat("And");
