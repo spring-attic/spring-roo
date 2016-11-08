@@ -2,11 +2,11 @@ package org.springframework.roo.addon.ws.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_WS_ENDPOINTS;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -160,8 +160,8 @@ public class WsEndpointsMetadataProviderImpl extends AbstractMemberDiscoveringIt
 
     Iterator<?> valuesIt = values.iterator();
 
-    Map<JavaType, JavaType> endpointsAndSeis = new HashMap<JavaType, JavaType>();
-    Map<JavaType, JavaType> endpointsAndServices = new HashMap<JavaType, JavaType>();
+    Map<JavaType, JavaType> endpointsAndSeis = new TreeMap<JavaType, JavaType>();
+    Map<JavaType, JavaType> endpointsAndServices = new TreeMap<JavaType, JavaType>();
 
     while (valuesIt.hasNext()) {
       ClassAttributeValue endpointAttr = (ClassAttributeValue) valuesIt.next();

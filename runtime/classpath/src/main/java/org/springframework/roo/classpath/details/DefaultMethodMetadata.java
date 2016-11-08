@@ -15,10 +15,11 @@ import org.springframework.roo.model.JavaType;
  * Default implementation of {@link MethodMetadata}.
  *
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata implements
-    MethodMetadata {
+    MethodMetadata, Comparable<DefaultMethodMetadata> {
 
   private final JavaSymbolName methodName;
   private final JavaType returnType;
@@ -94,5 +95,10 @@ public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata imple
     builder.append("customData", getCustomData());
     builder.append("body", getBody());
     return builder.toString();
+  }
+
+  @Override
+  public int compareTo(DefaultMethodMetadata method) {
+    return this.getMethodName().getSymbolName().compareTo(method.getMethodName().getSymbolName());
   }
 }

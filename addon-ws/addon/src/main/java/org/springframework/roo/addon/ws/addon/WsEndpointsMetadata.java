@@ -380,7 +380,7 @@ public class WsEndpointsMetadata extends AbstractItdTypeDetailsProvidingMetadata
     FieldMetadataBuilder loggger =
         new FieldMetadataBuilder(getId(), Modifier.PRIVATE + Modifier.STATIC + Modifier.FINAL,
             new JavaSymbolName("LOGGER"), new JavaType("org.slf4j.Logger"), String.format(
-                "%s.getLogger(%s.class);",
+                "%s.getLogger(%s.class)",
                 getNameOfJavaType(new JavaType("org.slf4j.LoggerFactory")),
                 getNameOfJavaType(this.governor)));
 
