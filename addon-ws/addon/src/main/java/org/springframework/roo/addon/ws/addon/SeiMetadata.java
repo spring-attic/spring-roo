@@ -2,6 +2,7 @@ package org.springframework.roo.addon.ws.addon;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,9 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
@@ -152,10 +155,35 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     }
 
     // If not exists, generate it and cache it.
+
+    // Obtain the necessary elements from service method
+    JavaSymbolName methodName = serviceMethod.getMethodName();
+    JavaType returnType = serviceMethod.getReturnType();
+    List<AnnotatedJavaType> parameterTypes = serviceMethod.getParameterTypes();
+    List<JavaSymbolName> parameterNames = serviceMethod.getParameterNames();
+
+    // Annotate parameter types with @WebParam
+    List<AnnotatedJavaType> annotatedParameterTypes = new ArrayList<AnnotatedJavaType>();
+    for (int i = 0; i < parameterTypes.size(); i++) {
+      Collection<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+      // Getting parameter type and parameter name
+      AnnotatedJavaType paramType = parameterTypes.get(i);
+      JavaSymbolName paramName = parameterNames.get(i);
+      // Creating @WebParam annotation
+      AnnotationMetadataBuilder webParamAnnotation =
+          new AnnotationMetadataBuilder(JavaType.WEB_PARAM);
+      webParamAnnotation.addStringAttribute("name", paramName.toString());
+      webParamAnnotation.addStringAttribute("targetNamespace", "");
+      annotations.add(webParamAnnotation.build());
+      // Creating new parameter type annotated with @WebParam
+      AnnotatedJavaType annotatedParam =
+          new AnnotatedJavaType(paramType.getJavaType(), annotations);
+      annotatedParameterTypes.add(annotatedParam);
+    }
+
     MethodMetadataBuilder seiMethod =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT,
-            serviceMethod.getMethodName(), serviceMethod.getReturnType(),
-            serviceMethod.getParameterTypes(), serviceMethod.getParameterNames(), null);
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
+            returnType, annotatedParameterTypes, parameterNames, null);
 
     // Include @RequestWrapper annotation
     AnnotationMetadataBuilder requestWrapperAnnotation =
