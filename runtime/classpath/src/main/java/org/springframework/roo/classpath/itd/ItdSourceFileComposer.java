@@ -714,6 +714,7 @@ public class ItdSourceFileComposer {
 
       if (isInterfaceMethod) {
         append(";");
+        this.newLine(false);
       } else {
         append(" {");
         this.newLine(false);

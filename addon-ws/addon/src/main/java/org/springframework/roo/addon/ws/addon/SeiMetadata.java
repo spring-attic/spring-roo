@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -46,8 +47,8 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private ClassOrInterfaceTypeDetails sei;
   private final JavaType service;
   private final List<MethodMetadata> serviceMethods;
-  private List<MethodMetadata> seiMethods;
-  private Map<MethodMetadata, MethodMetadataBuilder> seiMethodsFromServiceMethods;
+  private Map<MethodMetadata, MethodMetadata> seiMethods;
+  private Map<MethodMetadata, MethodMetadata> seiMethodsFromServiceMethods;
 
   private JavaType wsdlDocumentationType = new JavaType(
       "org.apache.cxf.annotations.WSDLDocumentation");
@@ -106,8 +107,8 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     this.serviceMethods = serviceMethods;
 
     // Initialize collections
-    seiMethodsFromServiceMethods = new HashMap<MethodMetadata, MethodMetadataBuilder>();
-    seiMethods = new ArrayList<MethodMetadata>();
+    seiMethodsFromServiceMethods = new HashMap<MethodMetadata, MethodMetadata>();
+    seiMethods = new HashMap<MethodMetadata, MethodMetadata>();
 
     // Include @WebService annotation
     AnnotationMetadataBuilder webServiceAnnotation =
@@ -130,7 +131,8 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Include the same methods as the provided service
     for (MethodMetadata serviceMethod : serviceMethods) {
-      ensureGovernorHasMethod(getSEIMethodFromServiceMethod(serviceMethod));
+      ensureGovernorHasMethod(new MethodMetadataBuilder(
+          getSEIMethodFromServiceMethod(serviceMethod)));
     }
 
     // Build the ITD
@@ -146,7 +148,7 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    * 
    * @return MethodMetadataBuilder that contains all the information about the new SEI method.
    */
-  private MethodMetadataBuilder getSEIMethodFromServiceMethod(MethodMetadata serviceMethod) {
+  private MethodMetadata getSEIMethodFromServiceMethod(MethodMetadata serviceMethod) {
 
     // Check if already exists the method
     if (seiMethodsFromServiceMethods.get(serviceMethod) != null) {
@@ -160,6 +162,26 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     JavaType returnType = serviceMethod.getReturnType();
     List<AnnotatedJavaType> parameterTypes = serviceMethod.getParameterTypes();
     List<JavaSymbolName> parameterNames = serviceMethod.getParameterNames();
+
+    // Is necessary to change the method name to prevent errors
+    // Obtain parameterList
+    String paramList = "";
+    for (JavaSymbolName param : parameterNames) {
+      paramList = paramList.concat(param.getSymbolNameCapitalisedFirstLetter()).concat("And");
+    }
+
+    if (StringUtils.isNotBlank(paramList)) {
+
+      // Before to update, check if is a finder
+      if (methodName.toString().startsWith("findBy")) {
+        methodName = new JavaSymbolName("find");
+      } else if (methodName.toString().startsWith("countBy")) {
+        methodName = new JavaSymbolName("count");
+      }
+
+      paramList = paramList.substring(0, paramList.length() - "And".length());
+      methodName = new JavaSymbolName(methodName.toString().concat("By").concat(paramList));
+    }
 
     // Annotate parameter types with @WebParam
     List<AnnotatedJavaType> annotatedParameterTypes = new ArrayList<AnnotatedJavaType>();
@@ -262,10 +284,10 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     wsdlDocumentationCollectionAnnotation.addAttribute(newDocumentations);
     seiMethod.addAnnotation(wsdlDocumentationCollectionAnnotation);
 
-    seiMethodsFromServiceMethods.put(serviceMethod, seiMethod);
-    seiMethods.add(seiMethod.build());
+    seiMethodsFromServiceMethods.put(serviceMethod, seiMethod.build());
+    seiMethods.put(seiMethod.build(), serviceMethod);
 
-    return seiMethod;
+    return seiMethod.build();
   }
 
   @Override
@@ -288,8 +310,7 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     return this.serviceMethods;
   }
 
-  public List<MethodMetadata> getSeiMethods() {
+  public Map<MethodMetadata, MethodMetadata> getSeiMethods() {
     return this.seiMethods;
   }
-
 }

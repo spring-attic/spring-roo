@@ -416,35 +416,6 @@ public class WsOperationsImpl implements WsOperations {
         getTypeLocationService().getTypeDetails(service);
     Validate.notNull(serviceTypeDetails, "ERROR: Provide an existing service");
 
-    // Check if provided service contains more than one method with the same name only
-    // if --force parameter has false value
-    if (!force) {
-      MemberDetails serviceDetails =
-          getMemberDetailsScanner().getMemberDetails(getClass().getName(), serviceTypeDetails);
-      for (MethodMetadata method : serviceDetails.getMethods()) {
-        // Obtain all methods with the same name
-        List<MethodMetadata> sameMethods = serviceDetails.getMethods(method.getMethodName());
-        // If exists more than one method with the same name in the provided service, show
-        // an error indicating that 
-        if (sameMethods.size() > 1) {
-          LOGGER
-              .log(
-                  Level.INFO,
-                  String
-                      .format(
-                          "ERROR: A service method with name ['%s'] already exists in the "
-                              + "provided service '%s'. Although it's legal to overload methods in WSDL, WS-I "
-                              + "basic profile disallows this feature. JAX-WS, CXF and Spring claims to be compliant "
-                              + "with basic profile, so please fix the method names in the specified target service "
-                              + "and execute the command again. However, if you still want to generate the endpoint, use "
-                              + "the --force parameter to ignore this validation.",
-                          method.getMethodName(), service.getSimpleTypeName()));
-          return;
-        }
-      }
-    }
-
-
     // Check if provided SEI is located in an application module
     if (!isLocatedInApplicationModule(sei) && !force) {
       LOGGER.log(Level.INFO, "ERROR: The provided SEI is not located in an application module.");
@@ -457,8 +428,6 @@ public class WsOperationsImpl implements WsOperations {
           "ERROR: The provided config class is not located in an application module.");
       return;
     }
-
-
 
     // Check if provided configClass exists or should be generated
     boolean isNewConfigClass = false;
