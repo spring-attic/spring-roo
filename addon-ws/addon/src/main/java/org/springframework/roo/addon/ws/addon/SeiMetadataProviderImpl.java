@@ -166,9 +166,15 @@ public class SeiMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadat
         getMemberDetailsScanner().getMemberDetails(getClass().getName(), serviceTypeDetails);
 
     // Registering dependency between ServiceMetadata and this one, to be able to
-    // update Endpoint if service changes
+    // update Endpoint if service .aj file changes
     final String serviceMetadataKey = ServiceMetadata.createIdentifier(serviceTypeDetails);
     registerDependency(serviceMetadataKey, metadataIdentificationString);
+
+    // Register dependency between Service PhysicalTypeMetadata and this one,
+    // to be able to update Endpoint if service .java file changes 
+    final String servicePhysicalTypeKey =
+        PhysicalTypeIdentifier.createIdentifier(serviceTypeDetails);
+    registerDependency(servicePhysicalTypeKey, metadataIdentificationString);
 
     return new SeiMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata,
         cid, serviceType, serviceDetails.getMethods());
