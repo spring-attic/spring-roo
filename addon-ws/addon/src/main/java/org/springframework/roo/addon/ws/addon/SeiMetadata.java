@@ -2,7 +2,6 @@ package org.springframework.roo.addon.ws.addon;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,7 +164,7 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Annotate parameter types with @WebParam
     List<AnnotatedJavaType> annotatedParameterTypes = new ArrayList<AnnotatedJavaType>();
     for (int i = 0; i < parameterTypes.size(); i++) {
-      Collection<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+      List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
       // Getting parameter type and parameter name
       AnnotatedJavaType paramType = parameterTypes.get(i);
       JavaSymbolName paramName = parameterNames.get(i);
