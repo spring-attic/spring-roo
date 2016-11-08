@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.jms;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
@@ -12,6 +13,7 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -20,29 +22,35 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static java.lang.reflect.Modifier.PRIVATE;
+import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
+
 /**
  * Provides JMS configuration operations.
  *
  * @author Stefan Schmidt
  * @author Alan Stewart
+ * @author Manuel Iborra
  * @since 1.0
  */
 @Component
@@ -52,13 +60,25 @@ public class JmsOperationsImpl implements JmsOperations {
   private static final Logger LOGGER = HandlerUtils.getLogger(JmsOperations.class);
 
   private static final String JMS_PROPERTY_DESTINATION_NAME_PREFIX = "jms.destination.";
+  //private static final String SPRINGLETS_JMS_PROPERTY_DESTINATION_NAME_PREFIX = "springlets.jms.destination.";
   private static final String JMS_PROPERTY_DESTINATION_NAME_SUFIX = ".name";
+  private static final String JMS_VAR_DESTINATION_NAME_PREFIX = "destination";
+  private static final String JMS_VAR_DESTINATION_NAME_SUFIX = "Name";
   private static final String JMS_PROPERTY_JNDI_NAME = "spring.jms.jndi-name";
   private static final String JNDI_PREFIX = "java:comp/env/";
 
   // Dependencies
   private static final Dependency DEPENDENCY_JMS = new Dependency("org.springframework",
       "spring-jms", null);
+  private static final Dependency DEPENDENCY_SPRINGLETS_STARTER_JMS = new Dependency(
+      "io.springlets", "springlets-boot-starter-jms", "${springlets.version}");
+
+  private static final Dependency DEPENDENCY_SPRINGLETS_JMS = new Dependency("io.springlets",
+      "springlets-jms", "${springlets.version}");
+
+  // Properties
+  private static final Property PROPERTY_SPRINGLETS_VERSION = new Property("springlets.version",
+      "1.0.0.BUILD-SNAPSHOT");
 
   private BundleContext context;
 
@@ -107,40 +127,14 @@ public class JmsOperationsImpl implements JmsOperations {
               + "to overwrite the current service.", service));
     }
 
-    // Transform properties values
+    // Set destionation property name
     String destinationNamePropertyName =
         JMS_PROPERTY_DESTINATION_NAME_PREFIX.concat(destinationName.replaceAll("/", ".")).concat(
             JMS_PROPERTY_DESTINATION_NAME_SUFIX);
 
-    // Check and add profile properties
-    if (jndiConnectionFactory != null) {
-      if (getApplicationConfigService().existsSpringConfigFile(service.getModule(), profile)) {
-        String propertyJndiName =
-            getApplicationConfigService().getProperty(service.getModule(), JMS_PROPERTY_JNDI_NAME,
-                profile);
-        if (propertyJndiName != null && !force) {
-          throw new IllegalArgumentException(
-              String
-                  .format("JNDI Connection Factory for JMS already exists and cannot be created. "
-                      + "Using this command with '--force' will overwrite the current value."));
-        }
-      }
-
-      // add 'java:comp/env' prefix to properties if don't have it.
-      if (!jndiConnectionFactory.startsWith(JNDI_PREFIX)) {
-        jndiConnectionFactory = JNDI_PREFIX.concat(jndiConnectionFactory);
-      }
-      getApplicationConfigService().addProperty(service.getModule(), JMS_PROPERTY_JNDI_NAME,
-          jndiConnectionFactory, profile, true);
-
-      if (!destinationName.startsWith(JNDI_PREFIX)) {
-        destinationName = JNDI_PREFIX.concat(destinationName);
-      }
-    }
-
-    // Set property destinationName in file
-    getApplicationConfigService().addProperty(service.getModule(), destinationNamePropertyName,
-        destinationName, profile, true);
+    // Set properties
+    setProperties(destinationName, destinationNamePropertyName, jndiConnectionFactory,
+        service.getModule(), profile, force);
 
     // Create service
     createReceiverJmsService(service, destinationNamePropertyName);
@@ -213,7 +207,7 @@ public class JmsOperationsImpl implements JmsOperations {
     // Adding annotations
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
-    // Adding @PutMapping annotation
+    // Adding @JmsListener annotation
     AnnotationMetadataBuilder jmsListenerAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.JMS_LISTENER);
     jmsListenerAnnotation.addStringAttribute("destination", "${".concat(destinationProperty)
@@ -237,18 +231,129 @@ public class JmsOperationsImpl implements JmsOperations {
   }
 
   @Override
-  public void addJmsSender(String name, Pom module, JavaType service, ShellContext shellContext) {
-    // Add jms springlets dependecy
+  public void addJmsSender(String destinationName, JavaType service, String jndiConnectionFactory,
+      String profile, boolean force) {
 
-    // Check if service exist
-    if (true) {
+    // Check that module included in destionationName is an application module
+    String module = "";
+    String destination = "";
+    if (getProjectOperations().isMultimoduleProject()) {
+      int charSeparation = destinationName.indexOf(":");
+      if (charSeparation > 0 && destinationName.length() > charSeparation) {
+        module = destinationName.substring(0, charSeparation);
+        destination = destinationName.substring(charSeparation + 1, destinationName.length());
+        Collection<String> moduleNames =
+            getTypeLocationService().getModuleNames(ModuleFeatureName.APPLICATION);
+        if (!moduleNames.contains(module)) {
+          // error, is necessary select an application module
+          throw new IllegalArgumentException(String.format(
+              "Module '%s' must be of application type. Select one in --destinationName parameter",
+              module));
+        }
 
-      // Add instance of service JMS
-    } else {
-
-      // Create method
+      } else {
+        // error, is necessary select an application module and destination
+        throw new IllegalArgumentException(
+            String
+                .format("--destinationName parameter must be composed by [module application]:[destination]."));
+      }
     }
 
+    // Add jms springlets dependecies
+    getProjectOperations().addDependency(service.getModule(), DEPENDENCY_SPRINGLETS_JMS);
+
+    // Include springlets-boot-starter-mail in module
+    getProjectOperations().addDependency(module, DEPENDENCY_SPRINGLETS_STARTER_JMS);
+
+    // Include property version
+    getProjectOperations().addProperty("", PROPERTY_SPRINGLETS_VERSION);
+
+    // Add instance of springlets service to service defined by parameter
+    // Add JavaMailSender to service
+    final ClassOrInterfaceTypeDetails serviceTypeDetails =
+        getTypeLocationService().getTypeDetails(service);
+    Validate.isTrue(serviceTypeDetails != null, "Cannot locate source for '%s'",
+        service.getFullyQualifiedTypeName());
+
+    final String declaredByMetadataId = serviceTypeDetails.getDeclaredByMetadataId();
+    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(serviceTypeDetails);
+
+    // Create service field
+    cidBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId, PRIVATE, Arrays
+        .asList(new AnnotationMetadataBuilder(AUTOWIRED)), new JavaSymbolName("jmsSendingService"),
+        SpringletsJavaType.SPRINGLETS_JMS_SENDING_SERVICE));
+
+
+    // Set destionation property name
+    String destinationNamePropertyName =
+        JMS_PROPERTY_DESTINATION_NAME_PREFIX.concat(destination.replaceAll("/", ".")).concat(
+            JMS_PROPERTY_DESTINATION_NAME_SUFIX);
+
+    String destionationNameVar =
+        JMS_VAR_DESTINATION_NAME_PREFIX.concat(destination.replaceAll("/", "_")).concat(
+            JMS_VAR_DESTINATION_NAME_SUFIX);
+
+    // Adding @Value annotation
+    AnnotationMetadataBuilder valueAnnotation = new AnnotationMetadataBuilder(SpringJavaType.VALUE);
+    valueAnnotation.addStringAttribute("value", "${".concat(destinationNamePropertyName)
+        .concat("}"));
+
+    // Add instance of destination name
+    cidBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId, PRIVATE, Arrays
+        .asList(valueAnnotation), new JavaSymbolName(destionationNameVar), JavaType.STRING));
+
+    // Write both, springlets service and destination instance
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+
+    // Set properties
+    setProperties(destination, destinationNamePropertyName, jndiConnectionFactory, module, profile,
+        force);
+
+  }
+
+  /**
+   * Set properties in corresponding properties profile file
+   *
+   * @param destinationName Value of destinationName property
+   * @param destinationNamePropertyName Name of destinationName property
+   * @param jndiConnectionFactory Value of 'spring.jms.jndi-name' property
+   * @param module Application module where the properties file is located
+   * @param profile The profile where the properties will be set
+   * @param force Indicate if the properties will be overwritten
+   */
+  private void setProperties(String destinationName, String destinationNamePropertyName,
+      String jndiConnectionFactory, String module, String profile, boolean force) {
+
+    // Check and add profile properties
+    if (jndiConnectionFactory != null) {
+      if (getApplicationConfigService().existsSpringConfigFile(module, profile)) {
+        String propertyJndiName =
+            getApplicationConfigService().getProperty(module, JMS_PROPERTY_JNDI_NAME, profile);
+        if (propertyJndiName != null && !force) {
+          throw new IllegalArgumentException(
+              String
+                  .format("JNDI Connection Factory for JMS already exists and cannot be created. "
+                      + "Using this command with '--force' will overwrite the current value."));
+        }
+      }
+
+      // add 'java:comp/env' prefix to properties if don't have it.
+      if (!jndiConnectionFactory.startsWith(JNDI_PREFIX)) {
+        jndiConnectionFactory = JNDI_PREFIX.concat(jndiConnectionFactory);
+      }
+
+      getApplicationConfigService().addProperty(module, JMS_PROPERTY_JNDI_NAME,
+          jndiConnectionFactory, profile, true);
+
+      if (!destinationName.startsWith(JNDI_PREFIX)) {
+        destinationName = JNDI_PREFIX.concat(destinationName);
+      }
+    }
+
+    // Set property destinationName in file
+    getApplicationConfigService().addProperty(module, destinationNamePropertyName, destinationName,
+        profile, true);
   }
 
   // Methods to obtain OSGi Services

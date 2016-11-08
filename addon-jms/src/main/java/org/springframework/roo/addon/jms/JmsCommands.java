@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.jms;
 
-import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -13,7 +11,6 @@ import org.springframework.roo.converters.JavaPackageConverter;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -26,6 +23,7 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -123,7 +121,7 @@ public class JmsCommands implements CommandMarker {
           help = "The name of the JMS destination") final String destinationName,
       @CliOption(key = "service", mandatory = true,
           help = "The service where include the method that receive JMS messages") final JavaType service,
-      @CliOption(key = {"jndiConnectionFactory"}, mandatory = false,
+      @CliOption(key = {"jndiConnectionFactory"}, mandatory = true,
           help = "The jndi name where the JMS receiver configuration has been defined") final String jndiConnectionFactory,
       @CliOption(key = {"profile"}, mandatory = false,
           help = "The profile where the properties will be set") final String profile,
@@ -132,21 +130,39 @@ public class JmsCommands implements CommandMarker {
         shellContext.isForce());
   }
 
+  @CliOptionAutocompleteIndicator(command = "jms sender", param = "destinationName",
+      validate = false, includeSpaceOnFinish = false,
+      help = "--destinationName parameter composed by application module and destination name")
+  public List<String> returnApplicationModules(ShellContext shellContext) {
+
+    List<String> applicationModules = new ArrayList<String>();
+
+    Collection<String> moduleNames =
+        typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION);
+
+    for (String moduleName : moduleNames) {
+      applicationModules.add(moduleName.concat(":"));
+    }
+
+    return applicationModules;
+  }
+
   @CliCommand(value = "jms sender", help = "Create an JMS receiver")
   public void addJmsSender(
-      @CliOption(key = {"destinationName"}, mandatory = true, help = "The name of the destination") final String name,
       @CliOption(
-          key = "module",
+          key = {"destinationName"},
           mandatory = true,
-          help = "The application module where to install the jms receiver configuration. This option is available if there is more than one application module "
-              + "(mandatory if the focus is not set in application module)",
-          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
-      @CliOption(key = "service", mandatory = false,
+          help = "The name of the JMS destination. Composed by application module and destination name") final String destinationName,
+      @CliOption(key = "service", mandatory = true,
           help = "The service where include the method that receive JMS messages") final JavaType service,
+      @CliOption(key = {"jndiConnectionFactory"}, mandatory = true,
+          help = "The jndi name where the JMS receiver configuration has been defined") final String jndiConnectionFactory,
+      @CliOption(key = {"profile"}, mandatory = false,
+          help = "The profile where the properties will be set") final String profile,
       ShellContext shellContext) {
 
-    // TODO
-    jmsOperations.addJmsSender(name, module, service, shellContext);
+    jmsOperations.addJmsSender(destinationName, service, jndiConnectionFactory, profile,
+        shellContext.isForce());
   }
 
 }
