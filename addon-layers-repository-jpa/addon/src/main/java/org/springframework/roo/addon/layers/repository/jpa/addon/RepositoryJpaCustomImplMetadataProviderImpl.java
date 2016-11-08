@@ -200,6 +200,11 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     RepositoryJpaMetadata repositoryMetadata =
         getRepositoryJpaLocator().getRepositoryMetadata(entity);
 
+    if (repositoryMetadata == null) {
+      // Can't generate it jet
+      return null;
+    }
+
     // Register downstream dependency for RepositoryJpaCustomImplMetadata to update projection
     // finders implementations
     String repositoryCustomMetadataKey =

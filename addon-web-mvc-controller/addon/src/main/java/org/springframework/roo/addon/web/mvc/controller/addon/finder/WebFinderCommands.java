@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.finder;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -10,9 +9,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
-import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
-import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderMethod;
-import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.PartTree;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -34,6 +30,7 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,11 +66,12 @@ public class WebFinderCommands implements CommandMarker {
   private Map<String, ControllerMVCResponseService> responseTypes =
       new HashMap<String, ControllerMVCResponseService>();
   private Converter<JavaType> javaTypeConverter;
-  private TypeLocationService typeLocationService;
-  private ProjectOperations projectOperations;
+
+  private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
+    serviceInstaceManager.activate(this.context);
   }
 
   @CliAvailabilityIndicator({"web mvc finder"})
@@ -492,26 +490,8 @@ public class WebFinderCommands implements CommandMarker {
   }
 
   public ProjectOperations getProjectOperations() {
-    if (projectOperations == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+    return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
 
-        for (ServiceReference<?> ref : references) {
-          projectOperations = (ProjectOperations) this.context.getService(ref);
-          return projectOperations;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on ControllerCommands.");
-        return null;
-      }
-    } else {
-      return projectOperations;
-    }
   }
 
   /**
@@ -523,52 +503,22 @@ public class WebFinderCommands implements CommandMarker {
   @SuppressWarnings("unchecked")
   public Converter<JavaType> getJavaTypeConverter() {
     if (javaTypeConverter == null) {
-      // Get all Services implement Converter<JavaType> interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(Converter.class.getName(), null);
+      javaTypeConverter =
+          (Converter<JavaType>) serviceInstaceManager.getServiceInstance(this, Converter.class,
+              new ServiceInstaceManager.Matcher<Converter>() {
+                @Override
+                public boolean match(Converter service) {
+                  return service.supports(JavaType.class, "");
+                }
+              });
 
-        for (ServiceReference<?> ref : references) {
-          Converter<?> converter = (Converter<?>) this.context.getService(ref);
-          if (converter.supports(JavaType.class, "")) {
-            javaTypeConverter = (Converter<JavaType>) converter;
-            return javaTypeConverter;
-          }
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load Converter<JavaType> on WebFinderCommands.");
-        return null;
-      }
-    } else {
-      return javaTypeConverter;
     }
+    return javaTypeConverter;
   }
 
 
   public TypeLocationService getTypeLocationService() {
-    if (typeLocationService == null) {
-      // Get all Services implement TypeLocationService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeLocationService = (TypeLocationService) this.context.getService(ref);
-          return typeLocationService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on ControllerCommands.");
-        return null;
-      }
-    } else {
-      return typeLocationService;
-    }
+    return serviceInstaceManager.getServiceInstance(this, TypeLocationService.class);
   }
 
 }

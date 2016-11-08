@@ -1055,7 +1055,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
         ControllerAnnotationValues values = new ControllerAnnotationValues(existingController);
         AnnotationAttributeValue<String> relationFieldAttr =
             existingController.getAnnotation(RooJavaType.ROO_DETAIL).getAttribute("relationField");
-        if (pathPrefix.equals(values.getPathPrefix())) {
+        if (StringUtils.equals(pathPrefix, values.getPathPrefix())) {
           if (relationFieldAttr == null) {
             LOGGER.warning(String.format(
                 "Controller %s is defined as @%.type = DETAIL but @%s is missing!",

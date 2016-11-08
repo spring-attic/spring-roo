@@ -553,3 +553,6 @@ web mvc detail --entity model:~.Category --responseType THYMELEAF --field produc
 web mvc detail --entity model:~.Product --field purchaseOrders --responseType THYMELEAF
 web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions
 web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions.cities
+
+// Add finders
+web mvc finder --all --responseType THYMELEAF

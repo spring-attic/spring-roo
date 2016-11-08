@@ -26,7 +26,7 @@ import org.springframework.roo.support.util.CollectionUtils;
  * Provides a basic {@link #hashCode()} that is used for detecting significant
  * changes in {@link AbstractItdMetadataProvider} and avoiding downstream
  * notifications accordingly.
- * 
+ *
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Juan Carlos García
@@ -55,11 +55,13 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
   private final Set<JavaType> registeredImports = new HashSet<JavaType>();
   private final Set<JavaType> declarePrecedence = new LinkedHashSet<JavaType>();
 
+  private Integer hashCode;
+
 
   /**
    * Constructor (package protected to enforce the use of the corresponding
    * builder)
-   * 
+   *
    * @param customData
    * @param declaredByMetadataId
    * @param modifier
@@ -186,15 +188,18 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 
   @Override
   public int hashCode() {
-    int hash =
-        aspect.hashCode() * governor.getName().hashCode() * governor.getModifier()
-            * governor.getCustomData().hashCode() * PHYSICAL_TYPE_CATEGORY.hashCode()
-            * (privilegedAspect ? 2 : 3);
-    hash *= includeCustomDataHash(declaredConstructors);
-    hash *= includeCustomDataHash(declaredFields);
-    hash *= includeCustomDataHash(declaredMethods);
-    hash *= new ItdSourceFileComposer(this).getOutput().hashCode();
-    return hash;
+    if (hashCode == null) {
+      int hash =
+          aspect.hashCode() * governor.getName().hashCode() * governor.getModifier()
+              * governor.getCustomData().hashCode() * PHYSICAL_TYPE_CATEGORY.hashCode()
+              * (privilegedAspect ? 2 : 3);
+      hash *= includeCustomDataHash(declaredConstructors);
+      hash *= includeCustomDataHash(declaredFields);
+      hash *= includeCustomDataHash(declaredMethods);
+      hash *= new ItdSourceFileComposer(this).getOutput().hashCode();
+      this.hashCode = hash;
+    }
+    return hashCode;
   }
 
   public boolean implementsAny(final JavaType... types) {

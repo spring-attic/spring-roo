@@ -55,7 +55,12 @@ field set --fieldName pets --type ~.domain.Pet --mappedBy owner --notNull false 
 repository jpa --all --package ~.repository
 service --all --apiPackage ~.service.api --implPackage ~.service.impl
 
-finder add --entity ~.domain.Pet --name findByNameAndWeight
+dto --class ~.domain.PetFindByNameAndWeight
+field string --fieldName name
+field number --fieldName weight --type java.lang.Float
+finder add --entity ~.domain.Pet --name findByNameAndWeight --formBean ~.domain.PetFindByNameAndWeight
+
+
 finder add --entity ~.domain.Pet --name findByOwner
 finder add --entity ~.domain.Pet --name findBySendRemindersAndWeightLessThan
 finder add --entity ~.domain.Pet --name findByTypeAndNameLike
@@ -69,6 +74,7 @@ web mvc view setup --type THYMELEAF
 web mvc controller --all --responseType JSON
 web mvc controller --all --responseType THYMELEAF
 web mvc detail --all --responseType THYMELEAF
+web mvc finder --all --responseType THYMELEAF
 
 web mvc language --code es
 

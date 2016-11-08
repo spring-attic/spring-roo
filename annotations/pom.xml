@@ -63,6 +63,11 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.web.mvc.controller.annotations</artifactId>
         </dependency>
+        <!-- Roo Web MVC Exceptions Annotations -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.web.mvc.exceptions.annotations</artifactId>
+        </dependency>
         <!-- Roo Web MVC Thymeleaf Annotations -->
         <dependency>
             <groupId>org.springframework.roo</groupId>
@@ -83,12 +88,12 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.ws.annotations</artifactId>
         </dependency>
-        
+
         <!-- Excluded annotations on Spring Roo 2.0.M2 -->
         <!-- <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.dbre.annotations</artifactId>
         </dependency>-->
-        
+
     </dependencies>
 </project>

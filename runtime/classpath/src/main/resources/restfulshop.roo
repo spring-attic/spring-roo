@@ -67,7 +67,10 @@ repository jpa --all --package ~.repository
 service --all
 
 // Generate finders
-// TODO
+dto --class ~.model.CustomerFindByFirstNameAndLastName
+field string --fieldName firstName
+field string --fieldName lastName
+finder add --entity ~.model.Customer --name findByFirstNameAndLastName --formBean ~.model.CustomerFindByFirstNameAndLastName
 
 // Generate web layer
 web mvc setup
@@ -80,3 +83,7 @@ web mvc language --code es
 
 web mvc detail --entity ~.model.Customer --field orders
 web mvc detail --entity ~.model.Customer --field orders --responseType THYMELEAF
+
+
+web mvc finder --entity ~.model.Customer
+web mvc finder --entity ~.model.Customer --responseType THYMELEAF

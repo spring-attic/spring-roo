@@ -14,6 +14,7 @@ import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerLocator;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.finder.SearchAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperationsImpl;
@@ -22,6 +23,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.operations.Cardinality;
@@ -40,7 +42,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This abstract class will be extended by MetadataProviders focused on
@@ -98,6 +102,9 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
    * @param aspectName
    * @param metadataIdentificationString
    * @param collectionController
+   * @param findersToAdd
+   * @param formBeansEnumFields
+   * @param formBeansDateTimeFields
    *
    * @return ItdTypeDetailsProvidingMetadataItem
    */
@@ -108,7 +115,9 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
       String entityIdentifierPlural,
       List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne,
       JavaType itemController, JavaType collectionController, List<FieldMetadata> dateTimeFields,
-      List<FieldMetadata> enumFields);
+      List<FieldMetadata> enumFields, Map<String, MethodMetadata> findersToAdd,
+      Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields,
+      Map<JavaType, List<FieldMetadata>> formBeansEnumFields);
 
   protected void fillContext(ViewContext ctx) {
     // To be overridden if needed
@@ -247,9 +256,75 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
       }
     }
 
-    //  TODO Finders
-    List<MethodMetadata> finders = null;
+    List<FieldMetadata> dateTimeFields = getDateTimeFields(entityMemberDetails);
+    List<FieldMetadata> enumFields = getEnumFields(entityMemberDetails);
 
+    Map<String, MethodMetadata> findersToAdd = new HashMap<String, MethodMetadata>();
+    Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields =
+        new HashMap<JavaType, List<FieldMetadata>>();
+    Map<JavaType, List<FieldMetadata>> formBeansEnumFields =
+        new HashMap<JavaType, List<FieldMetadata>>();
+
+    // Getting annotated finders
+    final SearchAnnotationValues searchAnnotationValues =
+        new SearchAnnotationValues(governorPhysicalTypeMetadata);
+
+    // Add finders only if controller is of search type
+    if (controllerMetadata.getType() == ControllerType.SEARCH && searchAnnotationValues != null
+        && searchAnnotationValues.getFinders() != null) {
+      List<String> finders =
+          new ArrayList<String>(Arrays.asList(searchAnnotationValues.getFinders()));
+
+      // Search indicated finders in its related service
+      for (MethodMetadata serviceFinder : serviceMetadata.getFinders()) {
+        String finderName = serviceFinder.getMethodName().getSymbolName();
+        if (finders.contains(finderName)) {
+          findersToAdd.put(finderName, serviceFinder);
+
+          // FormBean parameters is always the first finder parameter
+          JavaType formBean = serviceFinder.getParameterTypes().get(0).getJavaType();
+
+          // Get dateTime and Enum of formBean
+          MemberDetails formBeanDetails = getMemberDetails(formBean);
+
+          List<FieldMetadata> formBeanDateTimeFields = getDateTimeFields(formBeanDetails);
+          List<FieldMetadata> formBeanEnumFields = getEnumFields(formBeanDetails);
+
+          if (!formBeanDateTimeFields.isEmpty()) {
+            formBeansDateTimeFields.put(formBean, formBeanDateTimeFields);
+          }
+
+          if (!formBeanEnumFields.isEmpty()) {
+            formBeansEnumFields.put(formBean, formBeanEnumFields);
+          }
+
+
+          // Add dependencies between modules
+          List<JavaType> types = new ArrayList<JavaType>();
+          types.add(serviceFinder.getReturnType());
+          types.addAll(serviceFinder.getReturnType().getParameters());
+
+          for (AnnotatedJavaType parameter : serviceFinder.getParameterTypes()) {
+            types.add(parameter.getJavaType());
+            types.addAll(parameter.getJavaType().getParameters());
+          }
+
+          for (JavaType parameter : types) {
+            getTypeLocationService().addModuleDependency(
+                governorPhysicalTypeMetadata.getType().getModule(), parameter);
+          }
+
+          finders.remove(finderName);
+        }
+      }
+
+      // Check all finders have its service method
+      if (!finders.isEmpty()) {
+        throw new IllegalArgumentException(String.format(
+            "ERROR: Service %s does not have these finder methods: %s ",
+            service.getFullyQualifiedTypeName(), StringUtils.join(finders, ", ")));
+      }
+    }
 
 
     // Fill view context
@@ -383,13 +458,12 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     final String javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails);
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
-    List<FieldMetadata> dateTimeFields = getDateTimeFields(entityMemberDetails);
-    List<FieldMetadata> enumFields = getEnumFields(entityMemberDetails);
 
     return createMetadataInstance(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
         entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
-        collectionController, dateTimeFields, enumFields);
+        collectionController, dateTimeFields, enumFields, findersToAdd, formBeansDateTimeFields,
+        formBeansEnumFields);
   }
 
   private List<FieldMetadata> getEnumFields(MemberDetails entityMemberDetails) {

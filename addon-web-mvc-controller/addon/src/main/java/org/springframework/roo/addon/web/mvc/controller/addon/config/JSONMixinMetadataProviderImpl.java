@@ -2,12 +2,10 @@ package org.springframework.roo.addon.web.mvc.controller.addon.config;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
-import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -18,10 +16,8 @@ import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
@@ -31,12 +27,10 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
@@ -177,7 +171,8 @@ public class JSONMixinMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     registerDependency(entityId, metadataIdentificationString);
 
 
-    Map<FieldMetadata, JavaType> jsonDeserializerByEntity = new HashMap<FieldMetadata, JavaType>();
+    Map<FieldMetadata, JavaType> jsonDeserializerByEntity =
+        new TreeMap<FieldMetadata, JavaType>(FieldMetadata.COMPARATOR_BY_NAME);
     for (FieldMetadata field : entityMetadata.getRelationsAsChild().values()) {
       if (isAnyToOneRelation(field)) {
 
