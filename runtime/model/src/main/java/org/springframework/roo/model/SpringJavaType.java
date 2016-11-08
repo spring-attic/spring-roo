@@ -75,7 +75,7 @@ public final class SpringJavaType {
   public static final JavaType ENABLE_CACHING = new JavaType(
       "org.springframework.cache.annotation.EnableCaching");
   public static final JavaType ENABLE_JMS = new JavaType(
-	      "org.springframework.jms.annotation.EnableJms");
+      "org.springframework.jms.annotation.EnableJms");
   public static final JavaType EXCEPTION_HANDLER = new JavaType(
       "org.springframework.web.bind.annotation.ExceptionHandler");
   public static final JavaType FLOW_HANDLER_MAPPING = new JavaType(
