@@ -423,6 +423,56 @@ public class WsOperationsImpl implements WsOperations {
       return;
     }
 
+    // Check if provided configClass exists or should be generated
+    boolean isNewConfigClass = false;
+    ClassOrInterfaceTypeDetails configClassDetails =
+        getTypeLocationService().getTypeDetails(configClass);
+    if (configClassDetails == null) {
+      isNewConfigClass = true;
+    }
+
+    // If exists, is necessary to check if is a configuration class and if it has some specific profile.
+    // If it have it, it should match with the provided one the provided one
+    if (!isNewConfigClass) {
+
+      MemberDetails configClassMemberDetails =
+          getMemberDetailsScanner().getMemberDetails(getClass().getName(), configClassDetails);
+      AnnotationMetadata configurationAnnotation =
+          configClassMemberDetails.getAnnotation(SpringJavaType.CONFIGURATION);
+      if (configurationAnnotation == null) {
+        LOGGER
+            .log(
+                Level.INFO,
+                "ERROR: The provided class is not annotated with @Configuration so is not possible to include Web Service client configuration on it."
+                    + "Specify other configuration class that contains @Configuration annotation or specify a not existing class to generate it.");
+        return;
+      }
+
+      if (StringUtils.isNotEmpty(profile)) {
+        AnnotationMetadata profileAnnotation =
+            configClassMemberDetails.getAnnotation(SpringJavaType.PROFILE);
+        if (profileAnnotation != null) {
+          String profiles = (String) profileAnnotation.getAttribute("value").getValue();
+          String[] definedProfiles = profiles.split(",");
+          boolean profileExists = false;
+          for (String definedProfile : definedProfiles) {
+            if (definedProfile.equals(profile)) {
+              profileExists = true;
+            }
+          }
+
+          if (!profileExists) {
+            LOGGER.log(Level.INFO,
+                "ERROR: The provided configuration class doesn't work in the provided profile. "
+                    + "Use a different configuration class or use a different profile.");
+            return;
+          }
+        }
+      }
+
+    }
+
+
     // If developer has not specify any EndPoint class is necessary to generate 
     // new one inside the provided SEI module using the provided SEI name and 'Endpoint' suffix.
     if (endpointClass == null) {
@@ -503,12 +553,91 @@ public class WsOperationsImpl implements WsOperations {
     // Write endpoint class on disk
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilderEndpoint.build());
 
-    // Check if configuration class exists. If exists, check if is already annotated and update it.
+    // If configuration class exists, check if is already annotated and update it.
     // If not exists, create a new one
-    ClassOrInterfaceTypeDetails configClassDetails =
-        getTypeLocationService().getTypeDetails(configClass);
-    if (configClassDetails != null) {
-      // TODO Update configuration class
+    ClassOrInterfaceTypeDetailsBuilder cidBuilderConfig = null;
+    if (!isNewConfigClass) {
+      // Obtain builder from the existing class
+      cidBuilderConfig = new ClassOrInterfaceTypeDetailsBuilder(configClassDetails);
+
+      // Check if already have @RooWsEndpoints annotation
+      AnnotationMetadataBuilder wsEndpointsAnnotation =
+          cidBuilderConfig.getDeclaredTypeAnnotation(RooJavaType.ROO_WS_ENDPOINTS);
+      if (wsEndpointsAnnotation != null) {
+
+        // Update the existing one
+        AnnotationAttributeValue<?> existingEndPoints =
+            wsEndpointsAnnotation.build().getAttribute("endpoints");
+        List<?> values = (List<?>) existingEndPoints.getValue();
+
+        if (values != null) {
+
+          // Check if the provided endpoint exists yet in this config class
+          Iterator<?> it = values.iterator();
+          boolean alreadyManaged = false;
+          while (it.hasNext()) {
+            ClassAttributeValue existingEndPointAttr = (ClassAttributeValue) it.next();
+            JavaType existingEndPoint = existingEndPointAttr.getValue();
+            if (existingEndPoint.getFullyQualifiedTypeName().equals(
+                endpointClass.getFullyQualifiedTypeName())) {
+              alreadyManaged = true;
+            }
+          }
+
+          // If endpoint already exists, show an error indicating that this endpoint is already managed
+          if (alreadyManaged) {
+            LOGGER.log(Level.INFO,
+                "ERROR: The provided endpoint is already defined in the provided configuration class. "
+                    + "Specify some different configuration class.");
+            return;
+          } else {
+            // Update existing annotation with the new endPoint
+            Iterator<?> iterator = values.iterator();
+            List<AnnotationAttributeValue<?>> endpoints =
+                new ArrayList<AnnotationAttributeValue<?>>();
+            while (iterator.hasNext()) {
+              ClassAttributeValue existingEndPoint = (ClassAttributeValue) iterator.next();
+              endpoints.add(existingEndPoint);
+            }
+
+            // Create @RooWsEndpoints annotation
+            ClassAttributeValue newEndpoint =
+                new ClassAttributeValue(new JavaSymbolName("value"), endpointClass);
+            endpoints.add(newEndpoint);
+
+            ArrayAttributeValue<AnnotationAttributeValue<?>> newEndpoints =
+                new ArrayAttributeValue<AnnotationAttributeValue<?>>(
+                    new JavaSymbolName("endpoints"), endpoints);
+            wsEndpointsAnnotation.addAttribute(newEndpoints);
+          }
+
+        }
+
+
+      } else {
+        // If not exists, add it with the new elements
+        wsEndpointsAnnotation = new AnnotationMetadataBuilder(new JavaType(RooWsEndpoints.class));
+
+        // Generate new list of endpoints
+        List<AnnotationAttributeValue<?>> endpoints = new ArrayList<AnnotationAttributeValue<?>>();
+        ClassAttributeValue newEndpoint =
+            new ClassAttributeValue(new JavaSymbolName("value"), endpointClass);
+        endpoints.add(newEndpoint);
+        ArrayAttributeValue<AnnotationAttributeValue<?>> newEndpoints =
+            new ArrayAttributeValue<AnnotationAttributeValue<?>>(new JavaSymbolName("endpoints"),
+                endpoints);
+        wsEndpointsAnnotation.addAttribute(newEndpoints);
+
+        // Check if is necessary to include profile attribute
+        if (StringUtils.isNotEmpty(profile)) {
+          wsEndpointsAnnotation.addStringAttribute("profile", profile);
+        }
+
+        // Include new @RooWsEndpoints annotation
+        cidBuilderConfig.addAnnotation(wsEndpointsAnnotation);
+      }
+
+
     } else {
       // Create the specified configuration class and annotate it with necessary information
       final String configClassIdentifier =
@@ -517,7 +646,7 @@ public class WsOperationsImpl implements WsOperations {
       final String mid =
           PhysicalTypeIdentifier.createIdentifier(configClass,
               getPathResolver().getPath(configClassIdentifier));
-      ClassOrInterfaceTypeDetailsBuilder cidBuilderConfig =
+      cidBuilderConfig =
           new ClassOrInterfaceTypeDetailsBuilder(mid, Modifier.PUBLIC, configClass,
               PhysicalTypeCategory.CLASS);
 
@@ -543,10 +672,10 @@ public class WsOperationsImpl implements WsOperations {
         wsEndpointsAnnotation.addStringAttribute("profile", profile);
       }
 
-      // Write config class on disk
-      getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilderConfig.build());
-
     }
+
+    // Write config class on disk
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilderConfig.build());
 
   }
 

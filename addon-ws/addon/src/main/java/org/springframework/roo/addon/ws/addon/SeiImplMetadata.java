@@ -158,6 +158,7 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     }
     // Creating new constructor
     ConstructorMetadataBuilder constructorMethod = new ConstructorMetadataBuilder(getId());
+    constructorMethod.setModifier(Modifier.PUBLIC);
     constructorMethod.addParameter(getServiceField().getFieldName()
         .getSymbolNameUnCapitalisedFirstLetter(), getServiceField().getFieldType());
     // Generating constructor body
