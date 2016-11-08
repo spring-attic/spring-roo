@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.webflow;
 
+import org.springframework.roo.model.JavaType;
+
 /**
  * Interface for {@link WebFlowOperationsImpl}.
  * 
@@ -20,10 +22,11 @@ public interface WebFlowOperations {
    * 
    * @param flowName the name of the flow to install
    * @param moduleName the module where install the flow
+   * @param klass the class used to mainly bind flow views
    * @throws IllegalStateException if the directory for the flow already
    *             exists.
    */
-  void installWebFlow(String flowName, String moduleName);
+  void installWebFlow(String flowName, String moduleName, JavaType klass);
 
   boolean isWebFlowInstallationPossible();
 }

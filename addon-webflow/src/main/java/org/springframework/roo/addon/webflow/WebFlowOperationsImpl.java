@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.webflow;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -12,6 +13,7 @@ import org.springframework.roo.addon.web.mvc.i18n.components.I18nSupport;
 import org.springframework.roo.addon.web.mvc.i18n.languages.EnglishLanguage;
 import org.springframework.roo.addon.web.mvc.thymeleaf.addon.ThymeleafMVCViewResponseService;
 import org.springframework.roo.classpath.operations.AbstractOperations;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
@@ -23,6 +25,9 @@ import org.springframework.roo.support.ant.AntPathMatcher;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.FileUtils;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,7 +103,7 @@ public class WebFlowOperationsImpl extends AbstractOperations implements WebFlow
    * See {@link WebFlowOperations#installWebFlow(String, String)}.
    */
   @Override
-  public void installWebFlow(final String flowName, final String moduleName) {
+  public void installWebFlow(final String flowName, final String moduleName, JavaType klass) {
     this.flowName = flowName.toLowerCase();
 
     // Add WebFlow project configuration
@@ -114,8 +119,8 @@ public class WebFlowOperationsImpl extends AbstractOperations implements WebFlow
     // Copy Web Flow template views and *-flow.xml to project
     Map<String, String> replacements = new HashMap<String, String>();
     replacements.put("__WEBFLOW-ID__", this.flowName);
-    copyDirectoryContents("*.html", targetDirectory, replacements);
-    createWebFlowFromTemplate(targetDirectory);
+    copyDirectoryContents("*.html", targetDirectory, replacements, klass);
+    createWebFlowFromTemplate(targetDirectory, replacements, klass);
 
     // Add localized messages for Web Flow labels
     addLocalizedMessages(moduleName);
@@ -223,20 +228,77 @@ public class WebFlowOperationsImpl extends AbstractOperations implements WebFlow
   }
 
   /**
+   * Add model object to each flow view, using flowScope and "model" attribute
+   * 
+   * @param inputStream the InputStream the file whose contents should be modified
+   * @param modelObject the object used to create the element's attribute values
+   * 
+   * @return the Document representing the file to write
+   */
+  private Document addModelObjectToFlow(InputStream inputStream, JavaType modelObject) {
+    Document document = XmlUtils.readXml(inputStream);
+    Element documentElement = document.getDocumentElement();
+
+    // Find first view state
+    Element firstViewState = XmlUtils.findFirstElement("//view-state", documentElement);
+
+    // Set model object name to use
+    String modelObjectName = StringUtils.uncapitalize(modelObject.getSimpleTypeName());
+
+    // Create 'on-start' element
+    Element onStartElement = document.createElement("on-start");
+    Element setElement = document.createElement("set");
+    setElement.setAttribute("name", String.format("flowScope.%s", modelObjectName));
+    setElement.setAttribute("value",
+        String.format("new %s()", modelObject.getFullyQualifiedTypeName()));
+    onStartElement.appendChild(setElement);
+
+    // Insert the element
+    documentElement.insertBefore(onStartElement, documentElement.getFirstChild());
+
+    // Add model attribute to views
+    List<Element> viewElements = XmlUtils.findElements("//view-state", documentElement);
+    for (Element element : viewElements) {
+      element.setAttribute("model", modelObjectName);
+    }
+
+    return document;
+  }
+
+  /**
    * Creates a new *-flow.xml for a given flow name and target directory, following
    * the default template.
    *
    * @param targetDirectory the directory path where create the file.
-   * @param flowName the flow name prefix.
+   * @param replacements the map with String replacements to do in the template
    */
-  private void createWebFlowFromTemplate(String targetDirectory) {
+  private void createWebFlowFromTemplate(String targetDirectory, Map<String, String> replacements,
+      JavaType modelObject) {
     String fileIdentifier = targetDirectory.concat(String.format("/%s-flow.xml", this.flowName));
     InputStream inputStream = FileUtils.getInputStream(this.getClass(), "flow-template.xml");
 
     // Create new file in project with specific name
     OutputStream outputStream = fileManager.createFile(fileIdentifier).getOutputStream();
     try {
-      IOUtils.copy(inputStream, outputStream);
+      String contents = IOUtils.toString(inputStream);
+
+      // Do replacements if needed
+      if (!replacements.isEmpty()) {
+        for (Entry<String, String> entry : replacements.entrySet()) {
+          contents = contents.replace(entry.getKey(), entry.getValue());
+        }
+        inputStream = IOUtils.toInputStream(contents);
+      }
+
+      if (modelObject != null) {
+
+        // Add model object (if any) to flow
+        XmlUtils.writeXml(outputStream, addModelObjectToFlow(inputStream, modelObject));
+      } else {
+
+        // Copy input to output file
+        IOUtils.copy(inputStream, outputStream);
+      }
     } catch (IOException e) {
       throw new IllegalStateException(String.format("Unable to create '%s'", fileIdentifier), e);
     }
@@ -264,7 +326,7 @@ public class WebFlowOperationsImpl extends AbstractOperations implements WebFlow
    * @param replacements the Map with replacements to do in the content
    */
   public void copyDirectoryContents(final String sourceAntPath, String targetDirectory,
-      Map<String, String> replacements) {
+      Map<String, String> replacements, JavaType modelObject) {
     Validate.notBlank(sourceAntPath, "Source path required");
     Validate.notBlank(targetDirectory, "Target directory required");
 
@@ -289,6 +351,14 @@ public class WebFlowOperationsImpl extends AbstractOperations implements WebFlow
       final String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
       try {
         String contents = IOUtils.toString(url);
+
+        // Add model object to view form
+        if (modelObject != null && contents.contains("data-th-action=\"${flowExecutionUrl}\"")) {
+          contents =
+              StringUtils.replace(contents, "data-th-action=\"${flowExecutionUrl}\"", String
+                  .format("data-th-action=\"${flowExecutionUrl}\" data-th-object=\"${%s}\"",
+                      StringUtils.uncapitalize(modelObject.getSimpleTypeName())));
+        }
 
         // Do replacements if necessary
         if (doReplacements) {

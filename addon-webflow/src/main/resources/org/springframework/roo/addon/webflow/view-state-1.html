@@ -10,8 +10,7 @@
     <h1 id="title" data-th-text="#{__WEBFLOW-ID___state1_title}">Title</h1>
 
     <!-- FORM -->
-    <form class="form-horizontal validate" method="POST">
-      <input type="hidden" name="_method" value="PUT" />
+    <form class="form-horizontal validate" method="POST" data-th-action="${flowExecutionUrl}">
 
       <fieldset>
         <!-- Form fields here -->
