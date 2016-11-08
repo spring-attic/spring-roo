@@ -1,23 +1,38 @@
 package org.springframework.roo.addon.jms;
 
-import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
+import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.classpath.ModuleFeatureName;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.converters.JavaPackageConverter;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
+import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.Completion;
+import org.springframework.roo.shell.Converter;
+import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Commands for the 'install jms' add-on to be used by the ROO shell.
- * 
+ * Commands for the 'JMS' add-on to be used by the ROO shell.
+ *
  * @author Stefan Schmidt
+ * @author Manuel Iborra
  * @since 1.0
  */
 @Component
@@ -28,63 +43,110 @@ public class JmsCommands implements CommandMarker {
   private JmsOperations jmsOperations;
   @Reference
   private StaticFieldConverter staticFieldConverter;
+  @Reference
+  private TypeLocationService typeLocationService;
+  @Reference
+  private ProjectOperations projectOperations;
+  @Reference
+  private PathResolver pathResolver;
+
+  private ServiceInstaceManager serviceManager = new ServiceInstaceManager();
+
+  // ------------ OSGi component attributes ----------------
+  private BundleContext context;
 
   protected void activate(final ComponentContext context) {
-    staticFieldConverter.add(JmsProvider.class);
-    staticFieldConverter.add(JmsDestinationType.class);
-  }
-
-  @CliCommand(value = "jms listener class", help = "Create an asynchronous JMS consumer")
-  public void addJmsListener(
-      @CliOption(key = "class", mandatory = true, help = "The name of the class to create") final JavaType typeName,
-      @CliOption(key = {"destinationName"}, mandatory = false,
-          unspecifiedDefaultValue = "myDestination", specifiedDefaultValue = "myDestination",
-          help = "The name of the destination") final String name,
-      @CliOption(key = {"destinationType"}, mandatory = false, unspecifiedDefaultValue = "QUEUE",
-          specifiedDefaultValue = "QUEUE", help = "The type of the destination") final JmsDestinationType type) {
-
-    jmsOperations.addJmsListener(typeName, name, type);
+    this.context = context.getBundleContext();
+    this.serviceManager.activate(this.context);
   }
 
   protected void deactivate(final ComponentContext context) {
-    staticFieldConverter.remove(JmsProvider.class);
-    staticFieldConverter.remove(JmsDestinationType.class);
+    this.context = null;
+    this.serviceManager.deactivate();
   }
 
-  @CliCommand(value = "field jms template",
-      help = "Insert a JmsOperations field into an existing type")
-  public void injectJmsProducer(
-      @CliOption(key = {"", "fieldName"}, mandatory = false,
-          specifiedDefaultValue = "jmsOperations", unspecifiedDefaultValue = "jmsOperations",
-          help = "The name of the field to add") final JavaSymbolName fieldName,
-      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
-          optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
-      @CliOption(key = "async", mandatory = false, unspecifiedDefaultValue = "false",
-          specifiedDefaultValue = "true",
-          help = "Indicates if the injected method should be executed asynchronously") final boolean async) {
+  /**
+   * Returns {@link JavaPackageConverter} if available.
+   *
+   * @return a list with {@link Converter} that match with
+   *         JavaPackageConverter (usually one).
+   */
+  private List<Converter> getJavaPackageConverterService() {
+    return this.serviceManager.getServiceInstance(this, Converter.class,
+        new ServiceInstaceManager.Matcher<Converter>() {
 
-    jmsOperations.injectJmsTemplate(typeName, fieldName, async);
+          @Override
+          public boolean match(Converter service) {
+            if (service instanceof JavaPackageConverter) {
+              return true;
+            }
+            return false;
+          }
+
+        });
   }
 
-  @CliCommand(value = "jms setup", help = "Install a JMS provider into your project")
-  public void installJms(
-      @CliOption(key = {"provider"}, mandatory = true, help = "The persistence provider to support") final JmsProvider jmsProvider,
-      @CliOption(key = {"destinationName"}, mandatory = false,
-          unspecifiedDefaultValue = "myDestination", specifiedDefaultValue = "myDestination",
-          help = "The name of the destination") final String name,
-      @CliOption(key = {"destinationType"}, mandatory = false, unspecifiedDefaultValue = "QUEUE",
-          specifiedDefaultValue = "QUEUE", help = "The type of the destination") final JmsDestinationType type) {
-
-    jmsOperations.installJms(jmsProvider, name, type);
-  }
-
-  @CliAvailabilityIndicator({"field jms template", "jms listener class"})
-  public boolean isInsertJmsAvailable() {
-    return jmsOperations.isManageJmsAvailable();
-  }
-
-  @CliAvailabilityIndicator("jms setup")
-  public boolean isInstallJmsAvailable() {
+  @CliAvailabilityIndicator("jms receiver")
+  public boolean isInstallJmsReceiverAvailable() {
     return jmsOperations.isJmsInstallationPossible();
   }
+
+  @CliOptionAutocompleteIndicator(
+      command = "jms receiver",
+      param = "service",
+      validate = false,
+      includeSpaceOnFinish = false,
+      help = "--service parameter parameter is the service where will be added the support to send emails")
+  public List<String> returnApplicationPackages(ShellContext shellContext) {
+
+    List<String> applicationPackages = new ArrayList<String>();
+
+    // Get only application modules
+    StringBuffer matcher = new StringBuffer("feature[");
+    matcher.append(ModuleFeatureName.APPLICATION).append("]");
+
+    JavaPackageConverter converter = (JavaPackageConverter) getJavaPackageConverterService().get(0);
+    List<Completion> completions = new ArrayList<Completion>();
+    converter.getAllPossibleValues(completions, String.class,
+        shellContext.getParameters().get("service"), matcher.toString(), null);
+
+    for (Completion completion : completions) {
+      applicationPackages.add(completion.getValue());
+    }
+
+    return applicationPackages;
+  }
+
+  @CliCommand(value = "jms receiver", help = "Create an JMS receiver")
+  public void addJmsReceiver(
+      @CliOption(key = {"destinationName"}, mandatory = true,
+          help = "The name of the JMS destination") final String destinationName,
+      @CliOption(key = "service", mandatory = true,
+          help = "The service where include the method that receive JMS messages") final JavaType service,
+      @CliOption(key = {"jndiConnectionFactory"}, mandatory = false,
+          help = "The jndi name where the JMS receiver configuration has been defined") final String jndiConnectionFactory,
+      @CliOption(key = {"profile"}, mandatory = false,
+          help = "The profile where the properties will be set") final String profile,
+      ShellContext shellContext) {
+    jmsOperations.addJmsReceiver(destinationName, service, jndiConnectionFactory, profile,
+        shellContext.isForce());
+  }
+
+  @CliCommand(value = "jms sender", help = "Create an JMS receiver")
+  public void addJmsSender(
+      @CliOption(key = {"destinationName"}, mandatory = true, help = "The name of the destination") final String name,
+      @CliOption(
+          key = "module",
+          mandatory = true,
+          help = "The application module where to install the jms receiver configuration. This option is available if there is more than one application module "
+              + "(mandatory if the focus is not set in application module)",
+          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
+      @CliOption(key = "service", mandatory = false,
+          help = "The service where include the method that receive JMS messages") final JavaType service,
+      ShellContext shellContext) {
+
+    // TODO
+    jmsOperations.addJmsSender(name, module, service, shellContext);
+  }
+
 }

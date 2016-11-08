@@ -246,7 +246,7 @@ public class MailCommands implements CommandMarker {
       @CliOption(
           key = "service",
           mandatory = false,
-          help = "The service where include an instance of JavaMailSender, which is a service that have methods to send emails") final JavaType service,
+          help = "The service where include an instance of MailReceiverService, which is a service that have methods to receive emails") final JavaType service,
       ShellContext shellContext) {
 
     mailOperations.installReceiveEmailSupport(host, port, protocol, username, password, starttls,

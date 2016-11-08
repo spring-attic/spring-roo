@@ -53,13 +53,13 @@
         <module>addon-ws</module>
         <module>annotations</module>
         <module>addon-email</module>
+        <module>addon-jms</module>
         <!-- Web UI -->
         <module>web-ui</module>
 
         <!-- Excluded modules on Spring Roo 2.0.M2 -->
         <!-- <module>addon-tailor</module>
         <module>addon-cloud</module>
-        <module>addon-jms</module>
         <module>addon-web-selenium</module>
         <module>addon-jdbc</module>
         <module>addon-dbre</module>
