@@ -8,7 +8,7 @@
 	<!-- <persistence-context />  -->
 	
 	<!-- Secure this flow for only the specified roles below -->
-    <!-- <secured attributes="ROLE_ADMIN, ROLE_EMPLOYEE, ..." /> -->
+    <!-- <secured attributes="ROLE_ADMIN, ROLE_USER" /> -->
 
     <!-- A sample view state -->
     <view-state id="view-state-1" view="__WEBFLOW-ID__/view-state-1">

@@ -254,7 +254,8 @@ public class WebFlowOperationsImpl extends AbstractOperations implements WebFlow
     onStartElement.appendChild(setElement);
 
     // Insert the element
-    documentElement.insertBefore(onStartElement, documentElement.getFirstChild());
+    documentElement.insertBefore(onStartElement, firstViewState.getPreviousSibling()
+        .getPreviousSibling());
 
     // Add model attribute to views
     List<Element> viewElements = XmlUtils.findElements("//view-state", documentElement);

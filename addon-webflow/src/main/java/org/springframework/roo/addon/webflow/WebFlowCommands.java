@@ -1,29 +1,38 @@
 package org.springframework.roo.addon.webflow;
 
+import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
+import org.springframework.roo.shell.CliOptionMandatoryIndicator;
 import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ShellContext;
+import org.springframework.roo.shell.SimpleParser;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
-import javax.ws.rs.core.GenericEntity;
+import java.util.logging.Logger;
 
 /**
  * Commands for the 'web flow' add-on to be used by the Roo shell.
@@ -37,6 +46,8 @@ import javax.ws.rs.core.GenericEntity;
 @Service
 public class WebFlowCommands implements CommandMarker {
 
+  private static final Logger LOGGER = HandlerUtils.getLogger(SimpleParser.class);
+
   @Reference
   private WebFlowOperations webFlowOperations;
 
@@ -46,9 +57,25 @@ public class WebFlowCommands implements CommandMarker {
   @Reference
   private TypeLocationService typeLocationService;
 
+  @Reference
+  private PathResolver pathResolver;
+
+  @Reference
+  private FileManager fileManager;
+
   @CliAvailabilityIndicator("web flow")
   public boolean isInstallWebFlowAvailable() {
     return webFlowOperations.isWebFlowInstallationPossible();
+  }
+
+  @CliOptionMandatoryIndicator(command = "web flow", params = "module")
+  public boolean isModuleRequired(ShellContext shellContext) {
+    Pom module = projectOperations.getFocusedModule();
+    if (!isModuleVisible(shellContext)
+        || typeLocationService.hasModuleFeature(module, ModuleFeatureName.APPLICATION)) {
+      return false;
+    }
+    return true;
   }
 
   @CliOptionAutocompleteIndicator(command = "web flow", param = "module",
@@ -62,42 +89,62 @@ public class WebFlowCommands implements CommandMarker {
   @CliOptionVisibilityIndicator(command = "web flow", params = {"module"},
       help = "--module option is not visible when the project is a multimodule project.")
   public boolean isModuleVisible(ShellContext shellContext) {
-    if (projectOperations.isMultimoduleProject()) {
+    if (typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION).size() > 1) {
       return true;
     }
     return false;
   }
 
   @CliOptionAutocompleteIndicator(command = "web flow", param = "class",
-      help = "You should specify an existing class name for option '--class'.")
+      help = "You should specify an existing and serializable class for option " + "'--class'.",
+      validate = false)
   public List<String> getClassPossibleValues(ShellContext shellContext) {
 
     // Get current value of class
     String currentText = shellContext.getParameters().get("class");
     List<String> allPossibleValues = new ArrayList<String>();
 
-    // Add all modules to completions list
-    Collection<String> modules = projectOperations.getModuleNames();
-    for (String module : modules) {
-      if (StringUtils.isNotBlank(module)
-          && !module.equals(projectOperations.getFocusedModule().getModuleName())) {
-        allPossibleValues.add(module.concat(LogicalPath.MODULE_PATH_SEPARATOR).concat("~."));
-      }
-    }
-
     // Getting all existing entities
     Set<ClassOrInterfaceTypeDetails> domainClassesInProject =
         typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY,
             RooJavaType.ROO_DTO);
-    for (ClassOrInterfaceTypeDetails entity : domainClassesInProject) {
-      String name = replaceTopLevelPackageString(entity, currentText);
-      if (!allPossibleValues.contains(name)) {
-        allPossibleValues.add(name);
+    for (ClassOrInterfaceTypeDetails classDetails : domainClassesInProject) {
+
+      // Check if class implements serializable (needed for WebFlow)
+      boolean isSerializable = false;
+
+      // First, chech for @RooSerializable
+      if (classDetails.getAnnotation(RooJavaType.ROO_SERIALIZABLE) != null) {
+        isSerializable = true;
+      }
+
+      // Check for the explicit 'implements Serializable'
+      if (!isSerializable) {
+        List<JavaType> implementsTypes = classDetails.getImplementsTypes();
+        for (JavaType type : implementsTypes) {
+          if (type.equals(JdkJavaType.SERIALIZABLE)) {
+            isSerializable = true;
+            break;
+          }
+        }
+      }
+
+      if (isSerializable) {
+
+        // Add to possible values
+        String name = replaceTopLevelPackageString(classDetails, currentText);
+        if (!allPossibleValues.contains(name)) {
+          allPossibleValues.add(name);
+        }
       }
     }
 
-    // Always add base package
-    allPossibleValues.add("~.");
+    if (allPossibleValues.isEmpty()) {
+
+      // Any entity or DTO in project is serializable
+      LOGGER.info("Any auto-complete value offered because the project hasn't any entity "
+          + "or DTO which implement Serializable");
+    }
 
     return allPossibleValues;
   }
@@ -106,17 +153,31 @@ public class WebFlowCommands implements CommandMarker {
       help = "Install Spring Web Flow configuration artifacts into your project")
   public void addWebFlow(@CliOption(key = {"flowName"}, mandatory = true,
       help = "The name for your web flow") final String flowName, @CliOption(key = {"module"},
-      mandatory = false, help = "The name for your web flow") String moduleName, @CliOption(
+      mandatory = true, help = "The name for your web flow", unspecifiedDefaultValue = ".",
+      optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module, @CliOption(
       key = {"class"}, mandatory = false,
       help = "The class used to create the model object this flow is mainly "
-          + "bound to. Can be an entity or a DTO") final JavaType klass) {
+          + "bound to. Can be an entity or a DTO and must be serializable.") final JavaType klass) {
 
-    if (moduleName == null) {
+    if (module == null) {
 
       // Get focused module
-      moduleName = projectOperations.getFocusedModuleName();
+      module = projectOperations.getFocusedModule();
     }
-    webFlowOperations.installWebFlow(flowName, moduleName, klass);
+
+    // Check if exists other entity with the same name
+    if (klass != null) {
+      final String fiilePathIdentifier =
+          pathResolver.getCanonicalPath(klass.getModule(), Path.SRC_MAIN_JAVA, klass);
+      if (!fileManager.exists(fiilePathIdentifier)) {
+        throw new IllegalArgumentException(String.format(
+            "Class '%s' doesn't exist. Try to use a different class name on "
+                + "--class parameter. You can use 'dto' or 'entity jpa' command to "
+                + "create it. It needs to be serializable.", klass));
+      }
+    }
+
+    webFlowOperations.installWebFlow(flowName, module.getModuleName(), klass);
   }
 
   /**
