@@ -24,8 +24,8 @@ public class DetailEntityItem extends EntityItem {
    * @param suffixId
    *            used to generate field id
    */
-  public DetailEntityItem(String fieldName, String suffixId) {
-    super("", suffixId);
+  public DetailEntityItem(String fieldName, String suffixId, boolean readOnly) {
+    super("", suffixId, readOnly);
     this.fieldName = fieldName;
     this.fieldNameCapitalized = StringUtils.capitalize(fieldName);
     this.tabLinkCode = null;

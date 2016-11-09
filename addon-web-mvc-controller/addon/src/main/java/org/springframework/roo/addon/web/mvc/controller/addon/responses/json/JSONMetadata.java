@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.responses.json;
 
+import static org.springframework.roo.model.SpringJavaType.RESPONSE_ENTITY;
+import static org.springframework.roo.model.SpringJavaType.GET_MAPPING;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
@@ -343,8 +346,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @GetMapping annotation
-    AnnotationMetadataBuilder getMappingAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING);
+    AnnotationMetadataBuilder getMappingAnnotation = new AnnotationMetadataBuilder(GET_MAPPING);
     getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
     getMappingAnnotation.addStringAttribute("value", "/" + finderName);
     annotations.add(getMappingAnnotation);
@@ -352,7 +354,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Generating returnType
     JavaType serviceReturnType = serviceFinderMethod.getReturnType();
-    JavaType returnType = JavaType.wrapperOf(SpringJavaType.RESPONSE_ENTITY, serviceReturnType);
+    JavaType returnType = JavaType.wrapperOf(RESPONSE_ENTITY, serviceReturnType);
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -367,8 +369,8 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // return ResponseEntity.status(HttpStatus.FOUND).body(customers);
     bodyBuilder.appendFormalLine(String.format("return %s.status(%s.FOUND).body(%s);",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY),
-        getNameOfJavaType(SpringJavaType.HTTP_STATUS), itemNames));
+        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS),
+        itemNames));
 
 
     MethodMetadataBuilder methodBuilder =
@@ -427,13 +429,11 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             .getParameterNames().get(1));
 
     // return ResponseEntity.ok().build();
-    bodyBuilder.appendFormalLine("return %s.ok().build();",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY));
+    bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            JavaType.wrapperWilcard(SpringJavaType.RESPONSE_ENTITY), parameterTypes,
-            parameterNames, bodyBuilder);
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
@@ -486,13 +486,11 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         .get(1));
 
     // return ResponseEntity.ok().build();
-    bodyBuilder.appendFormalLine("return %s.ok().build();",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY));
+    bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            JavaType.wrapperWilcard(SpringJavaType.RESPONSE_ENTITY), parameterTypes,
-            parameterNames, bodyBuilder);
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
@@ -509,13 +507,17 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Define methodName
     final JavaSymbolName methodName = removeFromMethod.getMethodName();
+    JavaSymbolName itemsName = removeFromMethod.getParameterNames().get(1);
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(new AnnotatedJavaType(removeFromMethod.getParameterTypes().get(0)
         .getJavaType(), AnnotationMetadataBuilder.getInstance(SpringJavaType.MODEL_ATTRIBUTE)));
+    AnnotationMetadataBuilder pathVariableAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
+    pathVariableAnnotation.addStringAttribute("value", itemsName.getSymbolName());
+
     parameterTypes.add(new AnnotatedJavaType(removeFromMethod.getParameterTypes().get(1)
-        .getJavaType().getParameters().get(0), AnnotationMetadataBuilder
-        .getInstance(SpringJavaType.REQUEST_BODY)));
+        .getJavaType().getParameters().get(0), pathVariableAnnotation.build()));
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -541,16 +543,14 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // customerService.addToOrders(customer, Collections.singleton(order));
     bodyBuilder.appendFormalLine("%s.%s(%s,%s.singleton(%s));", detailsServiceField.getFieldName(),
         removeFromMethod.getMethodName(), removeFromMethod.getParameterNames().get(0),
-        getNameOfJavaType(JavaType.COLLECTIONS), removeFromMethod.getParameterNames().get(1));
+        getNameOfJavaType(JavaType.COLLECTIONS), itemsName);
 
     // return ResponseEntity.ok().build();
-    bodyBuilder.appendFormalLine("return %s.ok().build();",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY));
+    bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            JavaType.wrapperWilcard(SpringJavaType.RESPONSE_ENTITY), parameterTypes,
-            parameterNames, bodyBuilder);
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
@@ -567,14 +567,17 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Define methodName
     final JavaSymbolName methodName = addToMethod.getMethodName();
+    JavaSymbolName itemsName = addToMethod.getParameterNames().get(1);
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(new AnnotatedJavaType(addToMethod.getParameterTypes().get(0).getJavaType(),
         AnnotationMetadataBuilder.getInstance(SpringJavaType.MODEL_ATTRIBUTE)));
-    parameterTypes
-        .add(new AnnotatedJavaType(addToMethod.getParameterTypes().get(1).getJavaType()
-            .getParameters().get(0), AnnotationMetadataBuilder
-            .getInstance(SpringJavaType.REQUEST_BODY)));
+    AnnotationMetadataBuilder pathVariableAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
+    pathVariableAnnotation.addStringAttribute("value", itemsName.getSymbolName());
+
+    parameterTypes.add(new AnnotatedJavaType(addToMethod.getParameterTypes().get(1).getJavaType()
+        .getParameters().get(0), pathVariableAnnotation.build()));
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -585,7 +588,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Adding annotations
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
-    // Adding @GetMapping annotation
+    // Adding @PostMapping annotation
     AnnotationMetadataBuilder postMappingAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.POST_MAPPING);
     postMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
@@ -600,16 +603,14 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // customerService.addToOrders(customer, Collections.singleton(order));
     bodyBuilder.appendFormalLine("%s.%s(%s,%s.singleton(%s));", detailsServiceField.getFieldName(),
         addToMethod.getMethodName(), addToMethod.getParameterNames().get(0),
-        getNameOfJavaType(JavaType.COLLECTIONS), addToMethod.getParameterNames().get(1));
+        getNameOfJavaType(JavaType.COLLECTIONS), itemsName);
 
     // return ResponseEntity.ok().build();
-    bodyBuilder.appendFormalLine("return %s.ok().build();",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY));
+    bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            JavaType.wrapperWilcard(SpringJavaType.RESPONSE_ENTITY), parameterTypes,
-            parameterNames, bodyBuilder);
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
@@ -652,8 +653,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @GetMapping annotation
-    AnnotationMetadataBuilder getMappingAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING);
+    AnnotationMetadataBuilder getMappingAnnotation = new AnnotationMetadataBuilder(GET_MAPPING);
     getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
     annotations.add(getMappingAnnotation);
 
@@ -661,7 +661,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Generating returnType
     JavaType serviceReturnType = findAllMethod.getReturnType();
-    JavaType returnType = JavaType.wrapperOf(SpringJavaType.RESPONSE_ENTITY, serviceReturnType);
+    JavaType returnType = JavaType.wrapperOf(RESPONSE_ENTITY, serviceReturnType);
 
     // TODO
     // Add module dependency
@@ -681,8 +681,8 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // return ResponseEntity.status(HttpStatus.FOUND).body(customers);
     bodyBuilder.appendFormalLine(String.format("return %s.status(%s.FOUND).body(%s);",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY),
-        getNameOfJavaType(SpringJavaType.HTTP_STATUS), itemNames));
+        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS),
+        itemNames));
 
 
     MethodMetadataBuilder methodBuilder =
@@ -923,8 +923,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     bodyBuilder.indent();
     // return ResponseEntity.status(HttpStatus.CONFLICT).build();
     bodyBuilder.appendFormalLine("return %s.status(%s.CONFLICT).build();",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY),
-        getNameOfJavaType(SpringJavaType.HTTP_STATUS));
+        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS));
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
 
@@ -935,8 +934,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
     bodyBuilder.indent();
     bodyBuilder.appendFormalLine("return %s.status(%s.CONFLICT).body(result);",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY),
-        getNameOfJavaType(SpringJavaType.HTTP_STATUS));
+        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS));
 
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
@@ -955,12 +953,11 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // return ResponseEntity.created(showURI.toUri()).build();
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine("return %s.created(showURI.toUri()).build();",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY));
+        getNameOfJavaType(RESPONSE_ENTITY));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            JavaType.wrapperWilcard(SpringJavaType.RESPONSE_ENTITY), parameterTypes,
-            parameterNames, bodyBuilder);
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
@@ -1017,8 +1014,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
     bodyBuilder.indent();
     bodyBuilder.appendFormalLine("return %s.status(%s.CONFLICT).body(result);",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY),
-        getNameOfJavaType(SpringJavaType.HTTP_STATUS));
+        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS));
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
 
@@ -1042,13 +1038,11 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         .getFieldName(), entityItemName);
 
     // return ResponseEntity.ok().build();
-    bodyBuilder.appendFormalLine("return %s.ok().build();",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY));
+    bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            JavaType.wrapperWilcard(SpringJavaType.RESPONSE_ENTITY), parameterTypes,
-            parameterNames, bodyBuilder);
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
@@ -1096,13 +1090,11 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         serviceMetadata.getCurrentDeleteMethod().getMethodName(), entityItemName);
 
     // return ResponseEntity.ok().build();
-    bodyBuilder.appendFormalLine("return %s.ok().build();",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY));
+    bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            JavaType.wrapperWilcard(SpringJavaType.RESPONSE_ENTITY), parameterTypes,
-            parameterNames, bodyBuilder);
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
@@ -1139,8 +1131,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @GetMapping annotation
-    AnnotationMetadataBuilder getMappingAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING);
+    AnnotationMetadataBuilder getMappingAnnotation = new AnnotationMetadataBuilder(GET_MAPPING);
     getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
     annotations.add(getMappingAnnotation);
 
@@ -1148,7 +1139,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     final MethodMetadata findAllMethod = serviceMetadata.getCurrentFindAllWithGlobalSearchMethod();
     // Generating returnType
     JavaType serviceReturnType = findAllMethod.getReturnType();
-    JavaType returnType = JavaType.wrapperOf(SpringJavaType.RESPONSE_ENTITY, serviceReturnType);
+    JavaType returnType = JavaType.wrapperOf(RESPONSE_ENTITY, serviceReturnType);
 
     // TODO
     // Add module dependency
@@ -1168,8 +1159,8 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // return ResponseEntity.status(HttpStatus.FOUND).body(customers);
     bodyBuilder.appendFormalLine(String.format("return %s.status(%s.FOUND).body(%s);",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY),
-        getNameOfJavaType(SpringJavaType.HTTP_STATUS), itemNames));
+        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS),
+        itemNames));
 
 
     MethodMetadataBuilder methodBuilder =
@@ -1209,8 +1200,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @GetMapping annotation
-    AnnotationMetadataBuilder getMappingAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING);
+    AnnotationMetadataBuilder getMappingAnnotation = new AnnotationMetadataBuilder(GET_MAPPING);
     getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
     annotations.add(getMappingAnnotation);
 
@@ -1219,13 +1209,12 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // return ResponseEntity.status(HttpStatus.FOUND).body(customer);
     bodyBuilder.appendFormalLine("return %s.status(%s.FOUND).body(%s);",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY),
-        getNameOfJavaType(SpringJavaType.HTTP_STATUS), entityItemName);
+        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS),
+        entityItemName);
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            JavaType.wrapperWilcard(SpringJavaType.RESPONSE_ENTITY), parameterTypes,
-            parameterNames, bodyBuilder);
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
@@ -1278,8 +1267,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
     bodyBuilder.indent();
     bodyBuilder.appendFormalLine("return %s.status(%s.CONFLICT).body(result);",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY),
-        getNameOfJavaType(SpringJavaType.HTTP_STATUS));
+        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS));
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
 
@@ -1292,12 +1280,11 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // return ResponseEntity.created(listURI().toUri()).build();
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine("return %s.created(%s().toUri()).build();",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY), LIST_URI_METHOD_NAME);
+        getNameOfJavaType(RESPONSE_ENTITY), LIST_URI_METHOD_NAME);
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            JavaType.wrapperWilcard(SpringJavaType.RESPONSE_ENTITY), parameterTypes,
-            parameterNames, bodyBuilder);
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
@@ -1350,8 +1337,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
     bodyBuilder.indent();
     bodyBuilder.appendFormalLine("return %s.status(%s.CONFLICT).body(result);",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY),
-        getNameOfJavaType(SpringJavaType.HTTP_STATUS));
+        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS));
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
 
@@ -1363,13 +1349,11 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // return ResponseEntity.ok().build();
     bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine("return %s.ok().build();",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY));
+    bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            JavaType.wrapperWilcard(SpringJavaType.RESPONSE_ENTITY), parameterTypes,
-            parameterNames, bodyBuilder);
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
@@ -1424,13 +1408,11 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // return ResponseEntity.ok().build();
     bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine("return %s.ok().build();",
-        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY));
+    bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            JavaType.wrapperWilcard(SpringJavaType.RESPONSE_ENTITY), parameterTypes,
-            parameterNames, bodyBuilder);
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();

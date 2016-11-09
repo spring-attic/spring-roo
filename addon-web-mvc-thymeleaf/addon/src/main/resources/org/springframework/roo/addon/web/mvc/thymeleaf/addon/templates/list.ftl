@@ -221,20 +221,29 @@
             <#else>
               <table id="${entity.entityItemId}-table"
                    class="table table-striped table-hover table-bordered"
+                   data-datatables="true"
                    data-row-id="${entity.configuration.identifierField}"
                    data-select="single"
                    data-z="${entity.z}"
                    data-order="[[ 0, &quot;asc&quot; ]]"
-                   data-th-attr="data-create-url=@{${entity.configuration.controllerPath}/create-form/}">
+                   data-data-load-url="${r"${(#mvc.url('"}${mvcCollectionControllerName}${r"#"}${mvcMethodName_datatables}${r"')).build()}"}"
+                   data-data-show-url="${r"${(#mvc.url('"}${mvcItemControllerName}${r"#"}${mvcMethodName_show}${r"')).buildAndExpand('_ID_')}"}"
+                   <#if entity.readOnly == false>
+                   data-data-create-url="${r"${(#mvc.url('"}${mvcCollectionControllerName}${r"#"}${mvcMethodName_createForm}${r"')).build()}"}"
+                   data-data-edit-url="${r"${(#mvc.url('"}${mvcItemControllerName}${r"#"}${mvcMethodName_editForm}${r"')).buildAndExpand('_ID_')}"}"
+                   data-data-delete-url="${r"${(#mvc.url('"}${mvcItemControllerName}${r"#"}${mvcMethodName_remove}${r"')).buildAndExpand('_ID_')}"}"
+                   </#if>
+                   >
                 <caption data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">${entityName} List</caption>
                 <thead>
                   <tr>
                     <#list fields as field>
                     <#if field.type != "LIST">
-                    <th data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</th>
+                    <th data-data="${field.fieldName}" data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</th>
                     </#if>
                     </#list>
-                    <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
+                    <th data-data="${entity.configuration.identifierField}" data-orderable="false" data-searchable="false"
+                         class="dttools" data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
                   </tr>
                 </thead>
                 <tbody data-th-remove="all">
@@ -248,6 +257,10 @@
                   </tr>
                 </tbody>
               </table>
+              <!-- content replaced by modal-confirm fragment of modal-confirm.html -->
+              <div data-th-replace="fragments/modal-confirm-delete :: modalConfirmDelete(tableId='${entity.entityItemId}-table',
+                  title=${r"#{"}label_delete_entity(${r"#{"}label_category${r"}"})${r"}"}, message=${r"#{"}info_delete_item_confirm${r"}"}, baseUrl = @{${controllerPath}/})">
+              </div>
             </#if>
           </div>
           <!-- /TABLE -->
@@ -340,43 +353,6 @@
 
         </div>
         <!-- /CONTENT-->
-
-        <!-- MODAL -->
-        <div
-          data-layout-include="fragments/modal-confirm :: modalConfirm(id='confirmDelete${entityName}',
-            title=${r"#{"}label_delete_entity(${r"#{"}${entityLabel}})}, message=${r"#{"}info_delete_item_confirm},
-            onclickCallback='javascript:loading();javascript:jQuery.delete${entityName}();')">
-            <!-- content replaced by modal-confirm fragment of modal-confirm.html -->
-        </div>
-
-        <div
-          data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=${r"#{"}label_delete_entity(${r"#{"}${entityLabel}})}, message=${r"#{"}info_deleted_items_number(1)})">
-
-          <script type="text/javascript">
-              function openDeleteModal(){
-                jQuery('#staticModal').modal();
-              }
-            </script>
-
-          <div class="modal fade" id="staticModal" tabindex="-1" role="dialog"
-            aria-labelledby="staticModalLabel">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal"
-                    aria-label="${r"#{"}label_close${r"}"}">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                  <h2 class="modal-title" id="staticModalLabel" data-th-text="${r"#{"}label_delete${r"}"}">Delete</h2>
-                </div>
-                <div class="modal-body" id="staticModalBody">
-                  <p data-th-text="${r"#{"}label_message${r"}"}">Message</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
       </section>
       <!-- /CONTENT-->
 
@@ -447,15 +423,8 @@
   <!-- Javascript fragment -->
   <div data-layout-fragment="javascript">
 
-    <!-- Progress bar -->
-    <script type="text/javascript">
-      function loading() {
-        jQuery('.progress').removeClass('hide');
-      }
-     </script>
-
-     <!-- Datatables fragment -->
-     <div data-layout-include="fragments/js/datatables :: datatables">
+       <!-- Datatables fragment -->
+     <div data-th-replace="fragments/js/datatables :: datatables-js">
 
        <!-- Datatables scripts ONLY for HTML templates
             Content replaced by the datatables template fragment datatables.html
@@ -494,200 +463,12 @@
           src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.js"
           data-th-src="@{/webjars/datatables.net-select/1.1.2/js/dataTables.select.js}"></script>
 
+
+        <script type="text/javascript" charset="utf8"
+          src="/js/datatables-locale.js"></script>
+        <script type="text/javascript" charset="utf8"
+          src="/public/js/datatables-defaults.js"></script>
     </div>
-
-
-    <!-- Datatables page configs -->
-    <#if entity.javascriptCode["${entity.entityItemId}-table-javascript"]??>
-      ${entity.javascriptCode["${entity.entityItemId}-table-javascript"]}
-    <#else>
-      <script type="text/javascript" data-th-inline="javascript" id="${entity.entityItemId}-table-javascript" data-z="${entity.z}">
-       var ${entityName}Table;
-       jQuery(document).ready( function () {
-          ${entityName}Table = jQuery('#${entity.entityItemId}-table').DataTable({
-              'ajax': function (data, callback, settings) {
-                    loadData(data, callback, settings, [[@{${entity.configuration.controllerPath}/}]], this);
-                },
-              'columns': [
-                <#list fields as field>
-                { 'data': '${field.fieldName}' },
-                </#list>
-                {
-                  'data': '${entity.configuration.identifierField}',
-                  'orderable': false,
-                  'searchable': false,
-                  'render': function ( data, type, full, meta ) {
-                      var baseUrl = [[@{${entity.configuration.controllerPath}/}]];
-                      var showLabel = ${r"/*[[#{label_show}]]*/"} "Show";
-                      var editLabel = ${r"/*[[#{label_edit}]]*/"} "Edit";
-                      var deleteLabel = ${r"/*[[#{label_delete}]]*/"} "Delete";
-                      return '<a role="button" class="btn-action showInfo" href="' + baseUrl + data + '"}>' + showLabel + '</a>' +
-                      '<a role="button" class="btn-action edit" href="' + baseUrl + data + '/edit-form">' + editLabel + '</a>' +
-                      '<a role="button" class="btn-action delete" onclick="javascript:jQuery.delete${entityName}Modal(' + data + ')">' + deleteLabel + '</a>'
-                  }
-                }
-              ]
-          });
-
-          jQuery.extend({
-             'current${entityName}Id': undefined,
-             'delete${entityName}Modal' : function(${entity.configuration.identifierField}) {
-                   jQuery.current${entityName}Id = ${entity.configuration.identifierField};
-                   if (jQuery.current${entityName}Id) {
-                     jQuery('#confirmDelete${entityName}Modal').modal('show');
-                   }
-             },
-             'delete${entityName}': function() {
-                 var baseUrl = [[@{${entity.configuration.controllerPath}/}]];
-                 <#if isSecurityEnabled == true>
-                  var token = jQuery("meta[name='_csrf']");
-                  var header = jQuery("meta[name='_csrf_header']");
-                 </#if>
-                 jQuery.ajax({
-                     url: baseUrl + jQuery.current${entityName}Id,
-                     type: 'DELETE',
-                     <#if isSecurityEnabled == true>
-                     beforeSend : function(request) {
-                        if(token != null && token.length > 0 && header != null && header.length > 0) {
-                          request.setRequestHeader(header.attr("content"), token.attr("content"));
-                        }
-                     },
-                     </#if>
-                     success: function(result) {
-                       jQuery('#confirmDelete${entityName}Modal').modal('hide');
-
-                       /** Refresh Datatables */
-                       var infoDeletedItems = ${r"/*[[#{info_deleted_items_number(1)}]]*/"} "1 removed item";
-                       jQuery('#${entity.entityItemId}-table').DataTable().ajax.reload();
-                       jQuery('#delete${entityName}ModalBody').empty();
-                       jQuery('#delete${entityName}ModalBody').append('<p>' + infoDeletedItems + '</p>');
-                       jQuery('#delete${entityName}Modal').modal();
-
-                     },
-                     error: function(jqXHR) {
-                       var errorRelationLabel = ${r"/*[[#{error_deleting_item_with_relationships}]]*/"} "To delete the selected item, must delete its related elements before.";
-                       var errorDeletingLabel = ${r"/*[[#{error_deleting_item}]]*/"} "Error deleting selected item.";
-                       jQuery('#confirmDelete${entityName}Modal').modal('hide');
-                       jQuery('#delete${entityName}ModalBody').empty();
-                       if(jqXHR.status == 428){
-                         jQuery('#delete${entityName}ModalBody').append('<p>' + errorRelationLabel + '</p>');
-                       } else {
-                         jQuery('#delete${entityName}ModalBody').append('<p>' + errorDeletingLabel + '</p>');
-                       }
-                       jQuery('#delete${entityName}Modal').modal('show');
-                     }
-                  });
-             }
-           });
-        });
-        </script>
-      </#if>
-
-     <#if details?size != 0>
-     	<#assign firstDetail = true>
-         <#list details as detail>
-         <#if detail.javascriptCode["${detail.entityItemId}-table-javascript"]??>
-           ${detail.javascriptCode["${detail.entityItemId}-table-javascript"]}
-         <#else>
-           <script type="text/javascript" data-th-inline="javascript" id="${detail.entityItemId}-table-javascript" data-z="${detail.z}">
-           jQuery(document).ready( function () {
-             <#if firstDetail == false>
-             	function initialize${detail.fieldNameCapitalized}Table() {
-             </#if>
-               jQuery('#${detail.entityItemId}-table').DataTable({
-                 'buttons' : [
-                  {
-                        'extend' : 'colvis',
-                        'className' : 'btn-action'
-                  },
-                  {
-                        'extend' : 'pageLength',
-                        'className' : 'btn-action'
-                  }
-                ],
-                'columns': [
-                  <#list detail.configuration.referenceFieldFields as referencedFieldField>
-                  <#if referencedFieldField != entityName>
-                    { 'data': '${referencedFieldField.fieldName}' },
-                  </#if>
-                  </#list>
-                  {
-                    'data': '${detail.configuration.identifierField}',
-                    'orderable': false,
-                    'searchable': false,
-                    'render': function ( data, type, full, meta ) {
-                        return '';
-                    }
-                  }
-                ]
-            });
-              <#if firstDetail == false>
-         }
-              	jQuery('#${detail.entityItemId}-tab').on('shown.bs.tab', function (e) {
-				if (jQuery.fn.DataTable.isDataTable('#${detail.entityItemId}-table') === false) {
-					initialize${detail.fieldNameCapitalized}Table();
-					var url${detail.fieldNameCapitalized} = jQuery.${detail.fieldNameCapitalized}BaseUrl();
-					if (url${detail.fieldNameCapitalized}) {
-						jQuery('#${detail.entityItemId}-table').DataTable().ajax.url(urlPruebaPets).load();
-					}
-				}
-  			});
-              </#if>
-              jQuery.extend({
-                'current${entityName}Id': undefined,
-                '${detail.fieldNameCapitalized}BaseUrl': function() {
-                  if(jQuery.current${entityName}Id) {
-                    return [[@{${entity.configuration.controllerPath}/}]] + jQuery.current${entityName}Id + '${detail.configuration.controllerPath}/';
-                  }
-                  return undefined;
-                },
-                'create${detail.fieldNameCapitalized}Url': function() {
-                  if(jQuery.current${entityName}Id) {
-                    return jQuery.${detail.fieldNameCapitalized}BaseUrl() + jQuery.createUri + '/';
-                  }
-                  return undefined;
-                },
-                'update${detail.fieldNameCapitalized}Url': function(${detail.fieldNameCapitalized}Id) {
-                  if(jQuery.current${entityName}Id) {
-                    return jQuery.${detail.fieldNameCapitalized}BaseUrl() + ${detail.fieldNameCapitalized}Id + '/'+ jQuery.editUri + '/';
-                  }
-                  return undefined;
-                },
-                'delete${detail.fieldNameCapitalized}Url': function(${detail.fieldNameCapitalized}Id) {
-                  if(jQuery.current${entityName}Id) {
-                    return jQuery.${detail.fieldNameCapitalized}BaseUrl() + ${detail.fieldNameCapitalized}Id + '/'+ jQuery.deleteUri + '/';
-                  }
-                  return undefined;
-                }
-              });
-         	<#assign firstDetail = false>
-         	});
-          </script>
-          </#if>
-         </#list>
-       <#if entity.javascriptCode["${entity.entityItemId}-table-javascript-firstdetail"]??>
-          ${entity.javascriptCode["${entity.entityItemId}-table-javascript-firstdetail"]}
-       <#else>
-         <script type="text/javascript" data-th-inline="javascript" id="${entity.entityItemId}-table-javascript-firstdetail" data-z="${entity.z}">
-       jQuery(document).ready( function () {
-         ${entityName}Table.on( 'select', function ( e, dt, type, indexes ) {
-            if ( type === 'row' ) {
-              var new${entityName}Id = ${entityName}Table.rows( indexes ).ids()[0];
-              if (jQuery.current${entityName}Id != new${entityName}Id) {
-                jQuery.current${entityName}Id = new${entityName}Id;
-                <#list details as detail>
-                  var url${detail.fieldNameCapitalized} = jQuery.${detail.fieldNameCapitalized}BaseUrl();
-                  if (jQuery.fn.DataTable.isDataTable('#${detail.entityItemId}-table') === true) {
-                 	jQuery('#${detail.entityItemId}-table').DataTable().ajax.url( url${detail.fieldNameCapitalized} ).load();
-                }
-                </#list>
-              }
-            }
-          });
-          });
-        </script>
-     </#if>
-   </#if>
 
   </div>
 

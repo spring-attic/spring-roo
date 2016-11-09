@@ -1,24 +1,12 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
-
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
 import org.springframework.roo.addon.web.mvc.i18n.languages.EnglishLanguage;
-import org.springframework.roo.addon.web.mvc.views.MVCViewGenerationService;
 import org.springframework.roo.addon.web.mvc.views.ViewContext;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -29,10 +17,8 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuil
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.operations.AbstractOperations;
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
@@ -42,7 +28,14 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.FileUtils;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Implementation of ControllerMVCResponseService that provides
@@ -63,18 +56,21 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
   private static final String RESPONSE_TYPE = "THYMELEAF";
   private static final String CONTROLLER_NAME_MODIFIER = "Thymeleaf";
 
-  private final Dependency starterThymeleafDependency = new Dependency("org.springframework.boot",
-      "spring-boot-starter-thymeleaf", null);
-  private final Dependency layoutThymeleafDependency = new Dependency("nz.net.ultraq.thymeleaf",
-      "thymeleaf-layout-dialect", null);
+  private static final Dependency STARTER_THYMELEAF_DEPENDENCY = new Dependency(
+      "org.springframework.boot", "spring-boot-starter-thymeleaf", null);
+  private static final Dependency LAYOUT_THYMELEAF_DEPENDENCY = new Dependency(
+      "nz.net.ultraq.thymeleaf", "thymeleaf-layout-dialect", null);
+  private static final Dependency DATA_THYMELEAF_DEPENDENCY = new Dependency(
+      "com.github.mxab.thymeleaf.extras", "thymeleaf-extras-data-attribute",
+      "${thymeleaf-data-dialect.version}");
 
-  private ProjectOperations projectOperations;
-  private TypeLocationService typeLocationService;
-  private TypeManagementService typeManagementService;
-  private PathResolver pathResolver;
-  private FileManager fileManager;
-  private MVCViewGenerationService viewGenerationService;
-  private I18nOperations i18nOperations;
+  private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
+
+  @Override
+  protected void activate(final ComponentContext cContext) {
+    context = cContext.getBundleContext();
+    serviceInstaceManager.activate(context);
+  }
 
   /**
    * This operation returns the Feature name. In this case,
@@ -203,6 +199,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     getViewGenerationService().addMenu(module.getModuleName(), ctx);
     getViewGenerationService().addModal(module.getModuleName(), ctx);
     getViewGenerationService().addModalConfirm(module.getModuleName(), ctx);
+    getViewGenerationService().addModalConfirmDelete(module.getModuleName(), ctx);
     getViewGenerationService().addSessionLinks(module.getModuleName(), ctx);
     getViewGenerationService().addLanguages(module.getModuleName(), ctx);
     getViewGenerationService().addAccessibilityView(module.getModuleName(), ctx);
@@ -256,10 +253,13 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
   private void addThymeleafDependencies(Pom module) {
 
     // Add Thymeleaf starter
-    getProjectOperations().addDependency(module.getModuleName(), starterThymeleafDependency);
+    getProjectOperations().addDependency(module.getModuleName(), STARTER_THYMELEAF_DEPENDENCY);
 
     // Add Thymeleaf layout dialect
-    getProjectOperations().addDependency(module.getModuleName(), layoutThymeleafDependency);
+    getProjectOperations().addDependency(module.getModuleName(), LAYOUT_THYMELEAF_DEPENDENCY);
+
+    // Add Thymeleaf data dialect
+    getProjectOperations().addDependency(module.getModuleName(), DATA_THYMELEAF_DEPENDENCY);
 
     // ROO-3813: Use Thymeleaf 3.0 instead of the provided version by Spring IO
     // More info about Thymelead 3.0 using Spring Boot here
@@ -267,7 +267,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     getProjectOperations().addProperty("", new Property("thymeleaf.version", "3.0.0.RELEASE"));
     getProjectOperations().addProperty("",
         new Property("thymeleaf-layout-dialect.version", "2.0.0"));
-
+    getProjectOperations().addProperty("", new Property("thymeleaf-data-dialect.version", "2.0.1"));
   }
 
   /**
@@ -368,7 +368,9 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
 
     // copy all necessary scripts inside SRC_MAIN_RESOURCES/templates/fragments/js
     copyDirectoryContents("templates/fragments/js/*.html",
-        pathResolver.getIdentifier(resourcesPath, "/templates/fragments/js"), true);
+        getPathResolver().getIdentifier(resourcesPath, "/templates/fragments/js"), true);
+    copyDirectoryContents("templates/fragments/js/*.js",
+        getPathResolver().getIdentifier(resourcesPath, "/templates/fragments/js"), true);
   }
 
   /**
@@ -382,7 +384,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
    */
   private void addThymeleafDatatablesResources(Pom module) {
     // Add WebMVCThymeleafUIConfiguration config class
-    addWebMVCThymeleafUIConfigurationClass(module);
+    addWebMVCThymeleafUIConfiguration(module);
   }
 
   /**
@@ -391,55 +393,27 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
    *
    * @param module
    */
-  private void addWebMVCThymeleafUIConfigurationClass(Pom module) {
+  private void addWebMVCThymeleafUIConfiguration(Pom module) {
 
     // Check if already exists other main controller annotated with @RooWebMvcThymeleafUIConfiguration
-    Set<ClassOrInterfaceTypeDetails> webMvcUIConfiguration =
+    Set<ClassOrInterfaceTypeDetails> webMvcConfigurationSet =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION);
-    if (webMvcUIConfiguration != null && !webMvcUIConfiguration.isEmpty()) {
-      return;
+            RooJavaType.ROO_WEB_MVC_CONFIGURATION);
+    if (webMvcConfigurationSet == null || webMvcConfigurationSet.isEmpty()) {
+      throw new RuntimeException(String.format(
+          "ERROR: Can't found configuration class annotated with @%s.",
+          RooJavaType.ROO_WEB_MVC_CONFIGURATION));
     }
 
-    // If not, define new JavaType
-    JavaType thymeleafUiConfig =
-        new JavaType(String.format("%s.config.WebMvcThymeleafUIConfiguration",
-            getProjectOperations().getTopLevelPackage(module.getModuleName())),
-            module.getModuleName());
+    ClassOrInterfaceTypeDetails webMvcConfiguration = webMvcConfigurationSet.iterator().next();
 
-    // Check that new JavaType doesn't exists
-    ClassOrInterfaceTypeDetails thymeleafUiConfigDetails =
-        getTypeLocationService().getTypeDetails(thymeleafUiConfig);
+    AnnotationMetadataBuilder thymeleaftConfigurationAnnotation =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION);
 
-    if (thymeleafUiConfigDetails != null) {
-      AnnotationMetadata webMvcUIConfigAnnotation =
-          thymeleafUiConfigDetails.getAnnotation(getMainControllerAnnotation());
-      // Maybe, this config class already exists
-      if (webMvcUIConfigAnnotation != null) {
-        return;
-      } else {
-        throw new RuntimeException(
-            "ERROR: You are trying to generate more than one WebMvcThymeleafUIConfiguration.");
-      }
-    }
+    ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(webMvcConfiguration);;
 
-    ClassOrInterfaceTypeDetailsBuilder cidBuilder = null;
-    final LogicalPath path =
-        getPathResolver().getPath(thymeleafUiConfig.getModule(), Path.SRC_MAIN_JAVA);
-    final String resourceIdentifier =
-        getTypeLocationService().getPhysicalTypeCanonicalPath(thymeleafUiConfig, path);
-    final String declaredByMetadataId =
-        PhysicalTypeIdentifier.createIdentifier(thymeleafUiConfig,
-            getPathResolver().getPath(resourceIdentifier));
-
-    List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-    annotations.add(new AnnotationMetadataBuilder(
-        RooJavaType.ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION));
-
-    cidBuilder =
-        new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC,
-            thymeleafUiConfig, PhysicalTypeCategory.CLASS);
-    cidBuilder.setAnnotations(annotations);
+    cidBuilder.addAnnotation(thymeleaftConfigurationAnnotation);
 
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
   }
@@ -453,6 +427,9 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     String rootModuleName = "";
 
     List<Dependency> dependencies = new ArrayList<Dependency>();
+
+    // Add WebJar locator dependency
+    dependencies.add(new Dependency("org.webjars", "webjars-locator", null));
 
     //Add Bootstrap WebJar
     getProjectOperations().addProperty(rootModuleName, new Property("bootstrap.version", "3.3.6"));
@@ -530,7 +507,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     dependencies.add(new Dependency("org.webjars.bower", "momentjs", "${momentjs.version}"));
 
     // Add Select2 WebJar
-    getProjectOperations().addProperty(rootModuleName, new Property("select2.version", "4.0.2"));
+    getProjectOperations().addProperty(rootModuleName, new Property("select2.version", "4.0.3"));
     dependencies.add(new Dependency("org.webjars.bower", "select2", "${select2.version}"));
 
     // Add Select2 Bootstrap Theme WebJar
@@ -551,9 +528,9 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
    */
   private boolean hasThymeleafDependencies(String moduleName) {
     if (!getProjectOperations().getPomFromModuleName(moduleName)
-        .getDependenciesExcludingVersion(starterThymeleafDependency).isEmpty()
+        .getDependenciesExcludingVersion(STARTER_THYMELEAF_DEPENDENCY).isEmpty()
         && !getProjectOperations().getPomFromModuleName(moduleName)
-            .getDependenciesExcludingVersion(layoutThymeleafDependency).isEmpty()) {
+            .getDependenciesExcludingVersion(LAYOUT_THYMELEAF_DEPENDENCY).isEmpty()) {
       return true;
     }
 
@@ -562,168 +539,28 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
 
   // Getting OSGi services
 
-  public ProjectOperations getProjectOperations() {
-    if (projectOperations == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          projectOperations = (ProjectOperations) this.context.getService(ref);
-          return projectOperations;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on ThymeleafMVCViewResponseService.");
-        return null;
-      }
-    } else {
-      return projectOperations;
-    }
+  private ProjectOperations getProjectOperations() {
+    return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
   }
 
-  public TypeLocationService getTypeLocationService() {
-    if (typeLocationService == null) {
-      // Get all Services implement TypeLocationService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeLocationService = (TypeLocationService) this.context.getService(ref);
-          return typeLocationService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on ThymeleafMVCViewResponseService.");
-        return null;
-      }
-    } else {
-      return typeLocationService;
-    }
+  private TypeLocationService getTypeLocationService() {
+    return serviceInstaceManager.getServiceInstance(this, TypeLocationService.class);
   }
 
-  public TypeManagementService getTypeManagementService() {
-    if (typeManagementService == null) {
-      // Get all Services implement TypeManagementService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeManagementService = (TypeManagementService) this.context.getService(ref);
-          return typeManagementService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeManagementService on ThymeleafMVCViewResponseService.");
-        return null;
-      }
-    } else {
-      return typeManagementService;
-    }
+  private TypeManagementService getTypeManagementService() {
+    return serviceInstaceManager.getServiceInstance(this, TypeManagementService.class);
   }
 
-  public PathResolver getPathResolver() {
-    if (pathResolver == null) {
-      // Get all Services implement PathResolver interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(PathResolver.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          pathResolver = (PathResolver) this.context.getService(ref);
-          return pathResolver;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load PathResolver on ThymeleafMVCViewResponseService.");
-        return null;
-      }
-    } else {
-      return pathResolver;
-    }
+  private PathResolver getPathResolver() {
+    return serviceInstaceManager.getServiceInstance(this, PathResolver.class);
   }
 
-  public FileManager getFileManager() {
-    if (fileManager == null) {
-      // Get all Services implement FileManager interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(FileManager.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          fileManager = (FileManager) this.context.getService(ref);
-          return fileManager;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load FileManager on ThymeleafMVCViewResponseService.");
-        return null;
-      }
-    } else {
-      return fileManager;
-    }
-  }
-
-  public MVCViewGenerationService getViewGenerationService() {
-    if (viewGenerationService == null) {
-      // Get all Services implement MVCViewGenerationService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(MVCViewGenerationService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          MVCViewGenerationService service =
-              (MVCViewGenerationService) this.context.getService(ref);
-          if (service.getName().equals(getName())) {
-            viewGenerationService = service;
-            return viewGenerationService;
-          }
-        }
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load MVCViewGenerationService on ThymeleafMVCViewResponseService.");
-        return null;
-      }
-    } else {
-      return viewGenerationService;
-    }
+  private ThymeleafViewGeneratorService getViewGenerationService() {
+    return serviceInstaceManager.getServiceInstance(this, ThymeleafViewGeneratorService.class);
   }
 
   public I18nOperations getI18nOperations() {
-    if (i18nOperations == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(I18nOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          i18nOperations = (I18nOperations) this.context.getService(ref);
-          return i18nOperations;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on ThymeleafMvcViewResponseService.");
-        return null;
-      }
-    } else {
-      return i18nOperations;
-    }
+    return serviceInstaceManager.getServiceInstance(this, I18nOperations.class);
   }
 
   @Override

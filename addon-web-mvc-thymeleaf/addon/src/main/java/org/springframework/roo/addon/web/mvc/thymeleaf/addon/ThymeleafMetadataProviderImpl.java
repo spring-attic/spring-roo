@@ -10,8 +10,10 @@ import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
+import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.views.AbstractViewGeneratorMetadataProvider;
 import org.springframework.roo.addon.web.mvc.views.MVCViewGenerationService;
+import org.springframework.roo.addon.web.mvc.views.ViewContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -20,12 +22,9 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -43,8 +42,8 @@ import java.util.logging.Logger;
  */
 @Component
 @Service
-public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadataProvider implements
-    ThymeleafMetadataProvider {
+public class ThymeleafMetadataProviderImpl extends
+    AbstractViewGeneratorMetadataProvider<ThymeleafMetadata> implements ThymeleafMetadataProvider {
 
   protected final static Logger LOGGER = HandlerUtils
       .getLogger(ThymeleafMetadataProviderImpl.class);
@@ -54,8 +53,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
   protected MetadataDependencyRegistryTracker registryTracker = null;
   protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
-
-  private MVCViewGenerationService viewGenerationService;
 
   /**
    * This service is being activated so setup it:
@@ -145,52 +142,52 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   @Override
-  protected ItdTypeDetailsProvidingMetadataItem createMetadataInstance(
-      String metadataIdentificationString, JavaType aspectName,
-      PhysicalTypeMetadata governorPhysicalTypeMetadata, ControllerMetadata controllerMetadata,
-      ServiceMetadata serviceMetadata, JpaEntityMetadata entityMetadata, String entityPlural,
-      String entityIdentifierPlural,
+  protected ThymeleafMetadata createMetadataInstance(String metadataIdentificationString,
+      JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata,
+      ControllerMetadata controllerMetadata, ServiceMetadata serviceMetadata,
+      JpaEntityMetadata entityMetadata, String entityPlural, String entityIdentifierPlural,
       List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne,
       JavaType itemController, JavaType collectionController, List<FieldMetadata> dateTimeFields,
       List<FieldMetadata> enumFields, Map<String, MethodMetadata> findersToAdd,
       Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields,
-      Map<JavaType, List<FieldMetadata>> formBeansEnumFields) {
+      Map<JavaType, List<FieldMetadata>> formBeansEnumFields, ViewContext ctx) {
 
-    return new ThymeleafMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
-        entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
-        collectionController, dateTimeFields, enumFields, findersToAdd, formBeansDateTimeFields,
-        formBeansEnumFields);
-  }
+    final ThymeleafMetadata metadata =
+        new ThymeleafMetadata(metadataIdentificationString, aspectName,
+            governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
+            entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
+            collectionController, dateTimeFields, enumFields, findersToAdd,
+            formBeansDateTimeFields, formBeansEnumFields);
 
-  /**
-   * Returns the value of the mapped by attribute for OneToMany relations only
-   * if it matches with the referenced side field name.
-   *
-   * @param entityFields
-   * @param field
-   * @param fieldNameOnReferenceSide
-   * @return a String with field name on the reference side if matches with
-   *         provided field on the owning side.
-   */
-  private String getMappedByField(List<FieldMetadata> entityFields, FieldMetadata field,
-      String fieldNameOnReferenceSide) {
-    String fieldName = null;
-    for (FieldMetadata entityField : entityFields) {
-
-      if (entityField.getFieldType().equals(field.getFieldType())) {
-        AnnotationMetadata oneToManyAnnotation = entityField.getAnnotation(JpaJavaType.ONE_TO_MANY);
-        if (oneToManyAnnotation != null
-            && oneToManyAnnotation.getAttribute("mappedBy") != null
-            && oneToManyAnnotation.getAttribute("mappedBy").getValue()
-                .equals(fieldNameOnReferenceSide)) {
-          fieldName = entityField.getFieldName().getSymbolName();
-          break;
-        }
-        // TODO: Implement the same for ManyToMany relations
-      }
+    ctx.addExtraParameter("mvcControllerName", metadata.getMvcControllerName());
+    if (controllerMetadata.getType() == ControllerType.COLLECTION) {
+      ctx.addExtraParameter("mvcCollectionControllerName", metadata.getMvcControllerName());
+    } else {
+      ctx.addExtraParameter("mvcCollectionControllerName",
+          ThymeleafMetadata.getMvcControllerName(collectionController));
     }
-    return fieldName;
+    if (controllerMetadata.getType() == ControllerType.ITEM) {
+      ctx.addExtraParameter("mvcItemControllerName", metadata.getMvcControllerName());
+    } else {
+      ctx.addExtraParameter("mvcItemControllerName",
+          ThymeleafMetadata.getMvcControllerName(itemController));
+    }
+    ctx.addExtraParameter("mvcMethodName_datatables",
+        ThymeleafMetadata.LIST_DATATABLES_METHOD_NAME.getSymbolName());
+    ctx.addExtraParameter("mvcMethodName_createForm",
+        ThymeleafMetadata.CREATE_FORM_METHOD_NAME.getSymbolName());
+    ctx.addExtraParameter("mvcMethodName_show", ThymeleafMetadata.SHOW_METHOD_NAME.getSymbolName());
+    ctx.addExtraParameter("mvcMethodName_editForm",
+        ThymeleafMetadata.EDIT_FORM_METHOD_NAME.getSymbolName());
+    ctx.addExtraParameter("mvcMethodName_remove",
+        ThymeleafMetadata.DELETE_METHOD_NAME.getSymbolName());
+    ctx.addExtraParameter("mvcMethodName_list", ThymeleafMetadata.LIST_METHOD_NAME.getSymbolName());
+    ctx.addExtraParameter("mvcMethodName_update",
+        ThymeleafMetadata.UPDATE_METHOD_NAME.getSymbolName());
+
+    // TODO finder names
+
+    return metadata;
   }
 
   public String getProvidesType() {

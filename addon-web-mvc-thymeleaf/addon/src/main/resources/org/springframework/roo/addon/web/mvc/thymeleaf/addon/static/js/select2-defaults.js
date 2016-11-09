@@ -1,64 +1,49 @@
-(function(jQuery){
-	
-		jQuery('.dropdown-select-simple').select2({
-			debug: false,
-			theme: "bootstrap"
-		});
+// IIFE - Immediately Invoked Function Expression
+(function(extendSelect2) {
 
-		jQuery('.dropdown-select-ajax').select2({
-			debug: false,
-			theme: "bootstrap",
-			ajax: {
-				    data: function (params) {
-				      // set search params names to match with GlobalSearch and Pageable arguments
-				      var query = {
-				        "search[value]": params.term,
-				        "page": params.page -1,
-				      }
-				      return query;
-				    },
-			    	// parse the results into the format expected by Select2.
-				    processResults: function (data, page) {
+  // The global jQuery object is passed as a parameter
+  extendSelect2(window.jQuery, window, document);
 
-				    	// entity attribute names are specified using the Select2 options 
-				    	// feature that are setted using data-* attributes in each <select> element
-			            var idField = this.options.get('idField');
-			            var txtFields = this.options.get('textFields');
-			            var fields = txtFields.split(",");
+}(function($, window, document) {
 
-				    	// parse the results into the format expected by Select2.
-				    	// The results are inside a Page object, so we have to iterate
-				    	// over the entities in the content attribute.
-			            var results = [];
-			            jQuery.each(data.content, function(i, entity) {
-			            	var id = entity[idField];
-			            	var text = "";
+  // The $ is now locally scoped, it won't collide with other libraries 
 
-			            	// compose the text to be rendered from the specified
-			            	// entity fields
-			            	jQuery.each(fields, function(i, fieldName) {
-				            	text = text.concat(" ", entity[fieldName]); 
-				            });
+  // Listen for the jQuery ready event on the document
+  // READY EVENT BEGIN
+  $(function() {
+   
+    // The DOM is ready!
+    //console.log('The DOM is ready');
 
-			            	// Select2 assumes the data is an array of {id:"",text:""}
-			                results.push(
-			                {
-			                	'id': id, 
-			                	'text': text
-			                }
-			                );
-			            });
+    // Init select simple
+    $('.dropdown-select-simple').select2({
+      debug : false,
+      theme : 'bootstrap',
+      allowClear : true,
+    });
 
-			            // calc page info
-		                var morePages = !data.last;
+    // Init select with AJAX search
+    $('.dropdown-select-ajax').select2({
+      debug : false,
+      theme : 'bootstrap',
+      allowClear : true,
+      ajax : {
+        data : function(params) {
+          // set search params names to match with GlobalSearch and
+          // Pageable arguments
+          var query = {
+            'search[value]' : params.term,
+            'page' : params.page - 1,
+          };
+          return query;
+        }
+      }
+    });    
+  });
+   
+  // READY EVENT END
+  //console.log('The DOM may not be ready');
+   
+  // The rest of code goes here!
+}));
 
-			            return {
-			                results: results,
-			                pagination: {
-		                      more: morePages
-			                }
-			            };
-			        },
-		  },
-		});
-})(jQuery);

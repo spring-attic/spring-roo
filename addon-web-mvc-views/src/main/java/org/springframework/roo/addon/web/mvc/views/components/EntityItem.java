@@ -22,6 +22,7 @@ public class EntityItem {
   private String codeManaged;
   private Map<String, Object> configuration;
   protected int z;
+  private boolean readOnly;
 
   /**
    *
@@ -38,10 +39,11 @@ public class EntityItem {
    *            used to generate field id
    */
   public EntityItem(String entityName, String identifierField, String controllerPath,
-      String suffixId) {
+      String suffixId, boolean readOnly) {
     this.entityName = entityName;
     this.userManaged = false;
     this.codeManaged = "";
+    this.readOnly = readOnly;
     this.javascriptCode = new HashMap<String, String>();
     this.configuration = new HashMap<String, Object>();
     this.configuration.put("identifierField", identifierField);
@@ -52,10 +54,11 @@ public class EntityItem {
     this.z = calculateZ();
   }
 
-  public EntityItem(String entityName, String suffixId) {
+  public EntityItem(String entityName, String suffixId, boolean readOnly) {
     this.entityName = entityName;
     this.userManaged = false;
     this.codeManaged = "";
+    this.readOnly = readOnly;
     this.javascriptCode = new HashMap<String, String>();
     this.configuration = new HashMap<String, Object>();
     buildId(suffixId);
@@ -163,6 +166,7 @@ public class EntityItem {
     this.configuration = configuration;
   }
 
-
-
+  public boolean getReadOnly() {
+    return this.readOnly;
+  }
 }

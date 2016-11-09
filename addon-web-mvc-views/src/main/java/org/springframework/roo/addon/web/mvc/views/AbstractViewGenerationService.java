@@ -1,22 +1,11 @@
 package org.springframework.roo.addon.web.mvc.views;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperationsImpl;
@@ -44,6 +33,18 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  *
@@ -99,14 +100,17 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   private static final String FINDER_SUFFIX = "finder";
 
   @Override
-  public void addListView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
+  public void addListView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, java.util.List<? extends AbstractViewMetadata> detailsControllers,
+      ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = entityDetails.getFields();
+    List<FieldMetadata> entityFields = entity.getFields();
     List<FieldItem> fields =
         getFieldViewItems(entityFields, ctx.getEntityName(), true, ctx, TABLE_SUFFIX);
     List<DetailEntityItem> details =
-        getDetailsFieldViewItems(entityDetails, ctx.getEntityName(), ctx, DETAIL_SUFFIX);
+        getDetailsFieldViewItems(entity, entityMetadata, ctx.getEntityName(), detailsControllers,
+            ctx, DETAIL_SUFFIX);
 
     // Process elements to generate
     DOC newDoc = null;
@@ -118,7 +122,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     EntityItem entityItem =
         new EntityItem(ctx.getEntityName(), ctx.getIdentifierField(), ctx.getControllerPath(),
-            TABLE_SUFFIX);
+            TABLE_SUFFIX, entityMetadata.isReadOnly());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
@@ -136,7 +140,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addShowView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
+  public void addShowView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
     List<FieldMetadata> entityFields = entityDetails.getFields();
@@ -171,7 +176,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addCreateView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
+  public void addCreateView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
     List<FieldMetadata> entityFields = entityDetails.getFields();
@@ -200,7 +206,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addUpdateView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
+  public void addUpdateView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
     List<FieldMetadata> entityFields = entityDetails.getFields();
@@ -229,8 +236,9 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addFinderFormView(String moduleName, MemberDetails entityDetails, String finderName,
-      List<FieldMetadata> fieldsToAdd, ViewContext ctx) {
+  public void addFinderFormView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entityDetails, String finderName, List<FieldMetadata> fieldsToAdd,
+      ViewContext ctx) {
 
     // Getting entity fields that should be included on view
     List<FieldItem> fields =
@@ -274,8 +282,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addFinderListView(String moduleName, MemberDetails returnTypeDetails,
-      String finderName, ViewContext ctx) {
+  public void addFinderListView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails returnTypeDetails, String finderName, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
     List<FieldMetadata> entityFields = returnTypeDetails.getFields();
@@ -308,7 +316,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     EntityItem entityItem =
         new EntityItem(ctx.getEntityName(), ctx.getIdentifierField(), ctx.getControllerPath(),
-            FINDER_SUFFIX);
+            FINDER_SUFFIX, entityMetadata.isReadOnly());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
@@ -878,79 +886,61 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
    * @return List that contains FieldMetadata that will be added to the view.
    */
   protected List<DetailEntityItem> getDetailsFieldViewItems(MemberDetails entityDetails,
-      String entityName, ViewContext ctx, String suffixId) {
-    // Getting entity fields
-    List<FieldMetadata> entityFields = entityDetails.getFields();
+      JpaEntityMetadata entityMetadata, String entityName,
+      List<? extends AbstractViewMetadata> detailControllers, ViewContext ctx, String suffixId) {
 
     List<DetailEntityItem> detailFieldViewItems = new ArrayList<DetailEntityItem>();
-    for (FieldMetadata entityField : entityFields) {
-      // Exclude id and version fields
-      if (entityField.getAnnotation(JpaJavaType.ID) == null
-          && entityField.getAnnotation(JpaJavaType.VERSION) == null) {
-
+    if (detailControllers != null) {
+      for (AbstractViewMetadata detailController : detailControllers) {
+        // TODO
+        /*
         // Generating new FieldItem element
         DetailEntityItem detailItem =
             new DetailEntityItem(entityField.getFieldName().getSymbolName(), suffixId);
 
-        // Calculate fieldType
-        JavaType type = entityField.getFieldType();
+        // Getting base type
+        JavaType referencedField = type.getBaseType();
+        ClassOrInterfaceTypeDetails referencedFieldDetails =
+            getTypeLocationService().getTypeDetails(referencedField);
 
-        // Check if is a referenced field
-        if (type.getFullyQualifiedTypeName().equals("java.util.Set")
-            || type.getFullyQualifiedTypeName().equals("java.util.List")) {
-          // Getting base type
-          JavaType referencedField = type.getBaseType();
-          ClassOrInterfaceTypeDetails referencedFieldDetails =
-              getTypeLocationService().getTypeDetails(referencedField);
+        if (referencedFieldDetails != null
+            && referencedFieldDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
 
-          if (referencedFieldDetails != null
-              && referencedFieldDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
+          //fieldItem.setType(FieldTypes.LIST.toString());
 
-            //fieldItem.setType(FieldTypes.LIST.toString());
+          // Saving necessary configuration
+          detailItem.addConfigurationElement("referencedFieldType",
+              referencedField.getSimpleTypeName());
 
-            // Saving necessary configuration
-            detailItem.addConfigurationElement("referencedFieldType",
-                referencedField.getSimpleTypeName());
+          // Getting identifier field
+          List<FieldMetadata> identifierFields =
+              getPersistenceMemberLocator().getIdentifierFields(referencedField);
+          detailItem.addConfigurationElement("identifierField",
+              identifierFields.get(0).getFieldName().getSymbolName());
 
-            // Getting identifier field
-            List<FieldMetadata> identifierFields =
-                getPersistenceMemberLocator().getIdentifierFields(referencedField);
-            detailItem.addConfigurationElement("identifierField", identifierFields.get(0)
-                .getFieldName().getSymbolName());
+          detailItem.addConfigurationElement("controllerPath",
+              "/" + entityField.getFieldName().getSymbolName().toLowerCase());
 
-            detailItem.addConfigurationElement("controllerPath", "/"
-                + entityField.getFieldName().getSymbolName().toLowerCase());
+          // Getting referencedfield label plural
+          detailItem.addConfigurationElement("referencedFieldLabel",
+              FieldItem.buildLabel(entityName, entityField.getFieldName().getSymbolName()));
 
-            // Getting referencedfield label plural
-            detailItem.addConfigurationElement("referencedFieldLabel",
-                FieldItem.buildLabel(entityName, entityField.getFieldName().getSymbolName()));
+          // Getting all referenced fields
+          List<FieldMetadata> referencedFields = getMemberDetailsScanner()
+              .getMemberDetails(getClass().toString(), referencedFieldDetails).getFields();
+          detailItem.addConfigurationElement("referenceFieldFields",
+              getFieldViewItems(referencedFields,
+                  entityName + "." + entityField.getFieldName().getSymbolName(), true, ctx,
+                  StringUtils.EMPTY));
 
-            // Getting all referenced fields
-            List<FieldMetadata> referencedFields =
-                getMemberDetailsScanner().getMemberDetails(getClass().toString(),
-                    referencedFieldDetails).getFields();
-            detailItem.addConfigurationElement(
-                "referenceFieldFields",
-                getFieldViewItems(referencedFields, entityName + "."
-                    + entityField.getFieldName().getSymbolName(), true, ctx, StringUtils.EMPTY));
 
-          } else {
-            // Ignore set or list which base types are not entity
-            // field
-            continue;
-          }
-
-        } else {
-          // Ignore not details fields
-          continue;
-        }
-
-        detailFieldViewItems.add(detailItem);
+          detailFieldViewItems.add(detailItem);
+         */
       }
     }
-
     return detailFieldViewItems;
   }
+
 
   /**
    * This method obtains all necessary configuration to be able to work with

@@ -1,180 +1,66 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8" />
+  <head>
+  <meta charset="UTF-8"></meta>
   <title>Session info</title>
 </head>
 <body>
-  <!--
+
+
+	<!--
     Only the inner content of the following div is included
     within the template, in the section "datatables"
     -->
-  <div data-layout-fragment="datatables">
+	<div data-th-fragment="datatables-js">
 
-    <!-- Modal to show loading errors -->
-    <div data-layout-include="fragments/modal :: modal(id='datatablesError',
-          title=#{info_error}, message=#{error_datatables_loading})">
-    </div>
+		<!-- Modal to show loading errors -->
+		<div
+			data-th-replace="fragments/modal :: modal(tableId = 'test', id='datatablesError',
+          title=#{info_error}, body = ~{::errorBody})">
+      <p data-th-text="#{error_datatables_loading}" data-th-fragment="errorBody">Error</p>
+		</div>
 
-    <!-- Datatables -->
-    <script type="text/javascript" charset="utf8"
-      src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.js"
-      data-th-src="@{/webjars/datatables/1.10.11/media/js/jquery.dataTables.js}"></script>
-    <script type="text/javascript" charset="utf8"
-      src="https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.js"
-      data-th-src="@{/webjars/datatables.net-bs/1.10.11/js/dataTables.bootstrap.js}"></script>
-    <!-- Datatables responsive plugin -->
-    <script type="text/javascript" charset="utf8"
-      src="https://cdn.datatables.net/responsive/2.0.2/js/dataTables.responsive.js"
-      data-th-src="@{/webjars/datatables.net-responsive/2.0.2/js/dataTables.responsive.js}"></script>
-    <script type="text/javascript" charset="utf8"
-      src="https://cdn.datatables.net/responsive/2.0.2/js/responsive.bootstrap.js"
-      data-th-src="@{/webjars/datatables.net-responsive-bs/2.0.2/js/responsive.bootstrap.js}"></script>
-    <!-- Datatables buttons plugins -->
-    <script type="text/javascript" charset="utf8"
-      src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.js"
-      data-th-src="@{/webjars/datatables.net-buttons/1.1.2/js/dataTables.buttons.js}"></script>
-    <script type="text/javascript" charset="utf8"
-      src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.js"
-      data-th-src="@{/webjars/datatables.net-buttons-bs/1.1.2/js/buttons.bootstrap.js}"></script>
-    <script type="text/javascript" charset="utf8"
-      src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.colVis.js"
-      data-th-src="@{/webjars/datatables.net-buttons/1.1.2/js/buttons.colVis.js}"></script>
-    <script type="text/javascript" charset="utf8"
-      src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.flash.js"
-      data-th-src="@{/webjars/datatables.net-buttons/1.1.2/js/buttons.flash.js}"></script>
-    <script type="text/javascript" charset="utf8"
-      src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.js"
-      data-th-src="@{/webjars/datatables.net-buttons/1.1.2/js/buttons.html5.js}"></script>
-    <!-- Datatables select plugin -->
-    <script type="text/javascript" charset="utf8"
-      src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.js"
-      data-th-src="@{/webjars/datatables.net-select/1.1.2/js/dataTables.select.js}"></script>
+		<!-- Datatables -->
+		<script type="text/javascript" charset="utf8"
+			src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.js"
+			data-th-src="@{/webjars/datatables/media/js/jquery.dataTables.js}"></script>
+		<script type="text/javascript" charset="utf8"
+			src="https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.js"
+			data-th-src="@{/webjars/datatables.net-bs/js/dataTables.bootstrap.js}"></script>
+		<!-- Datatables responsive plugin -->
+		<script type="text/javascript" charset="utf8"
+			src="https://cdn.datatables.net/responsive/2.0.2/js/dataTables.responsive.js"
+			data-th-src="@{/webjars/datatables.net-responsive/js/dataTables.responsive.js}"></script>
+		<script type="text/javascript" charset="utf8"
+			src="https://cdn.datatables.net/responsive/2.0.2/js/responsive.bootstrap.js"
+			data-th-src="@{/webjars/datatables.net-responsive-bs/js/responsive.bootstrap.js}"></script>
+		<!-- Datatables buttons plugins -->
+		<script type="text/javascript" charset="utf8"
+			src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.js"
+			data-th-src="@{/webjars/datatables.net-buttons/js/dataTables.buttons.js}"></script>
+		<script type="text/javascript" charset="utf8"
+			src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.js"
+			data-th-src="@{/webjars/datatables.net-buttons-bs/js/buttons.bootstrap.js}"></script>
+		<script type="text/javascript" charset="utf8"
+			src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.colVis.js"
+			data-th-src="@{/webjars/datatables.net-buttons/js/buttons.colVis.js}"></script>
+		<script type="text/javascript" charset="utf8"
+			src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.flash.js"
+			data-th-src="@{/webjars/datatables.net-buttons/js/buttons.flash.js}"></script>
+		<script type="text/javascript" charset="utf8"
+			src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.js"
+			data-th-src="@{/webjars/datatables.net-buttons/js/buttons.html5.js}"></script>
+		<!-- Datatables select plugin -->
+		<script type="text/javascript" charset="utf8"
+			src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.js"
+			data-th-src="@{/webjars/datatables.net-select/js/dataTables.select.js}"></script>
 
-    <script type="text/javascript" data-th-inline="javascript">
-    jQuery.extend( jQuery.fn.dataTable.ext.classes, {
-      "sFilter": "dataTables_filter col-sm-6",
-      "sInfo": "dataTables_info col-sm-6",
-      "sPaging": "dataTables_paginate col-sm-6 paging_", /* Note that the type is postfixed */
-      "sProcessing": "dataTables_processing progress-bar progress-bar-striped active"
-    });
-    jQuery.extend(jQuery.fn.dataTable.ext.buttons, {
-        'add': function ( dt, conf ) {
-          return {
-            'action' : function(e, dt, node, config) {
-              var jQueryTable = $(dt.table().node());
-              var urlFunction = jQueryTable.data('create-url-function');
-              var url = urlFunction ? jQuery[urlFunction]() : jQueryTable.data('create-url');
-              if (url) {
-                location.href = url;
-              }
-            },
-            'className' : 'btn-action add',
-            'text': dt.i18n( 'buttons.add', 'Add' )
-          };
-        }
-      });
-      jQuery.extend(jQuery.fn.dataTable.defaults, {
-        'ajax' : {
-          'headers' : {
-            'Accept' : 'application/vnd.datatables+json'
-          },
-        },
-        'fnInitComplete': function(oSettings, json) {
-          this.DataTable().on( 'select', function ( e, dt, type, indexes ) {
-            if ( type === 'row' ) {
-              var rowSelectedId = jQuery(this).DataTable().rows( indexes ).ids()[0];
-              jQuery(this).DataTable().state.loaded().rowSelectedId = rowSelectedId;
-              jQuery(this).DataTable().state.save();
-            }
-          });
-          if(!jQuery(this).DataTable().state.loaded()){
-            oSettings.oLoadedState = jQuery(this).DataTable().state();
-          }
-        },
-        'stateSaveParams': function (settings, data) {
-          if(this.DataTable().state.loaded()){
-            var rowSelectedId = this.DataTable().state.loaded().rowSelectedId;
-            if(rowSelectedId){
-              data.rowSelectedId = rowSelectedId;
-            }
-          }
-        },
-        'buttons' : {
-          'dom': {
-             'container': {
-               'className': 'dt-buttons btn-group col-sm-6'
-             }
-           },
-        'buttons' : [
-            'add',
-            {
-            'extend' : 'colvis',
-            'className' : 'btn-action',
-            },
-            {
-            'extend' : 'pageLength',
-            'className' : 'btn-action',
-            },
-          ]
-        },
-        'columnDefs': [ {
-            'targets':  '_all',
-            'render': {
-                'display': jQuery.fn.dataTable.render.text()
-            }
-        } ],
-        'deferRender' : true,
-        'dom' : 'Bfrtip',
-        'processing' : true,
-        'responsive' : true,
-        'serverSide' : true,
-        'stateSave' : true,
-        // multilingual texts definitions, adding some to those already provided
-        // default by Datatables
-        'language': {
-          'buttons': {
-            'add': /*[[#{label_datatables_add}]]*/ 'Add',
-            'colvis': /*[[#{label_datatables_columns}]]*/ 'Columns',
-            'pageLength': /*[[#{label_datatables_showRows}]]*/ 'Show %d rows'
-          },
-          'select': {
-            'rows': {
-              _: /*[[#{label_datatables_selectedRows}]]*/ '%d selected rows',
-              0: "",
-              1: /*[[#{label_datatables_selectedRow}]]*/ '1 selected row'
-            }
-          },
-          'decimal':         /*[[#{label_datatables_decimal}]]*/ '.',
-          'emptyTable':      /*[[#{label_datatables_emptyTable}]]*/ 'No data available in table',
-          'info':            /*[[#{label_datatables_info}]]*/ 'Showing _START_ to _END_ of _TOTAL_ entries',
-          'infoEmpty':       /*[[#{label_datatables_infoEmpty}]]*/ 'Showing 0 to 0 of 0 entries',
-          'infoFiltered':    /*[[#{label_datatables_infoFiltered}]]*/ '(filtered from _MAX_ total entries)',
-          'infoPostFix':     /*[[#{label_datatables_infoPostFix}]]*/ '',
-          'thousands':       /*[[#{label_datatables_thousands}]]*/ '',
-          'lengthMenu':      /*[[#{label_datatables_lengthMenu}]]*/ 'Show _MENU_ entries',
-          'loadingRecords':  /*[[#{label_datatables_loadingRecords}]]*/ 'Loading...',
-          'processing':      /*[[#{label_datatables_processing}]]*/ 'Processing...',
-          'search':          /*[[#{label_datatables_search}]]*/ 'Search:',
-          'zeroRecords':     /*[[#{label_datatables_zeroRecords}]]*/ ' No matching records found',
-          'paginate': {
-             'first':       /*[[#{label_datatables_first}]]*/ 'First',
-              'last':        /*[[#{label_datatables_last}]]*/ 'Last',
-              'next':        /*[[#{label_datatables_next}]]*/ 'Next',
-              'previous':    /*[[#{label_datatables_previous}]]*/ 'Previous'
-          },
-          'aria': {
-              'sortAscending':   /*[[#{label_datatables_sortAscending}]]*/ ': activate to sort column ascending',
-              'sortDescending':  /*[[#{label_datatables_sortDescending}]]*/ ': activate to sort column descending'
-          }
-        },
-      });
-      jQuery.extend({
-        'createUri': 'create-form',
-        'editUri': 'edit-form',
-        'deleteUri': 'delete-form'
-      });
-    </script>
-  </div>
+  <script type="text/javascript" charset="utf8" 
+          src="../js/datatables-locale.js" 
+          data-th-src="@{/js/datatables-locale.js}"></script>
+  <script type="text/javascript" charset="utf8" 
+          src="../../static/public/js/datatables-defaults.js"
+          data-th-src="@{/public/js/datatables-defaults.js}"></script>
+	</div>
 </body>
 </html>

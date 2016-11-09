@@ -57,7 +57,7 @@ import java.util.Map;
  * @since 2.0
  */
 @Component(componentAbstract = true)
-public abstract class AbstractViewGeneratorMetadataProvider extends
+public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractViewMetadata> extends
     AbstractMemberDiscoveringItdMetadataProvider {
 
   protected ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
@@ -108,16 +108,15 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
    *
    * @return ItdTypeDetailsProvidingMetadataItem
    */
-  protected abstract ItdTypeDetailsProvidingMetadataItem createMetadataInstance(
-      String metadataIdentificationString, JavaType aspectName,
-      PhysicalTypeMetadata governorPhysicalTypeMetadata, ControllerMetadata controllerMetadata,
-      ServiceMetadata serviceMetadata, JpaEntityMetadata entityMetadata, String entityPlural,
-      String entityIdentifierPlural,
+  protected abstract T createMetadataInstance(String metadataIdentificationString,
+      JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata,
+      ControllerMetadata controllerMetadata, ServiceMetadata serviceMetadata,
+      JpaEntityMetadata entityMetadata, String entityPlural, String entityIdentifierPlural,
       List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne,
       JavaType itemController, JavaType collectionController, List<FieldMetadata> dateTimeFields,
       List<FieldMetadata> enumFields, Map<String, MethodMetadata> findersToAdd,
       Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields,
-      Map<JavaType, List<FieldMetadata>> formBeansEnumFields);
+      Map<JavaType, List<FieldMetadata>> formBeansEnumFields, ViewContext ctx);
 
   protected void fillContext(ViewContext ctx) {
     // To be overridden if needed
@@ -173,36 +172,39 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
       Collection<ClassOrInterfaceTypeDetails> collectionControllers =
           getControllerLocator().getControllers(entity, ControllerType.COLLECTION, viewType);
 
-      if (collectionControllers.isEmpty()) {
-        // We can't create metadata "Jet"
-        return null;
-      } else {
-        // Get controller with the same package
-        for (ClassOrInterfaceTypeDetails controller : collectionControllers) {
-          if (controllerPackage.equals(controller.getType().getPackage())) {
-            collectionController = controller.getType();
-            break;
-          }
+      // Get controller with the same package
+      for (ClassOrInterfaceTypeDetails controller : collectionControllers) {
+        if (controllerPackage.equals(controller.getType().getPackage())) {
+          collectionController = controller.getType();
+          break;
         }
-        Validate.notNull(collectionController,
-            "ERROR: Can't find ITEM-type controller related to controller '%s'", controllerDetail
-                .getType().getFullyQualifiedTypeName());
       }
+      Validate.notNull(collectionController,
+          "ERROR: Can't find Collection-type controller related to controller '%s'",
+          controllerDetail.getType().getFullyQualifiedTypeName());
     }
-    List<ClassOrInterfaceTypeDetails> detailsControllers = null;
+    List<T> detailsControllers = null;
     if (controllerMetadata.getType() == ControllerType.COLLECTION) {
       // Locate Details controllers
       Collection<ClassOrInterfaceTypeDetails> detailsControllersToCheck =
           getControllerLocator().getControllers(entity, ControllerType.DETAIL, viewType);
-      List<ClassOrInterfaceTypeDetails> found = new ArrayList<ClassOrInterfaceTypeDetails>();
+      List<T> found = new ArrayList<T>();
       for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
         if (controllerPackage.equals(controller.getType().getPackage())) {
-          found.add(controller);
+          // Get view metadata
+          T detailViewMetadata = getMetadataService().get(createLocalIdentifier(controller));
+          if (detailViewMetadata == null) {
+            // Can't generate metadata YET!!
+            return null;
+          }
+
+          found.add(detailViewMetadata);
         }
       }
       if (!found.isEmpty()) {
         detailsControllers = Collections.unmodifiableList(found);
       }
+
     }
 
 
@@ -327,6 +329,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     }
 
 
+
     // Fill view context
     ViewContext ctx = new ViewContext();
     ctx.setControllerPath(controllerMetadata.getPath());
@@ -343,6 +346,13 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
       ctx.setSecurityEnabled(true);
     }
 
+    T viewMetadata =
+        createMetadataInstance(metadataIdentificationString, aspectName,
+            governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
+            entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
+            collectionController, dateTimeFields, enumFields, findersToAdd,
+            formBeansDateTimeFields, formBeansEnumFields, ctx);
+
     // Call Abstract Method fillContext to fill context with view provider custom implementation
     fillContext(ctx);
 
@@ -351,21 +361,23 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
 
     if (controllerMetadata.getType() == ControllerType.COLLECTION) {
       // Add list view
-      viewGenerationService.addListView(module, entityMemberDetails, ctx);
+      viewGenerationService.addListView(module, entityMetadata, entityMemberDetails,
+          detailsControllers, ctx);
       if (!entityMetadata.isReadOnly()) {
         // If not readOnly, add create view
-        viewGenerationService.addCreateView(module, entityMemberDetails, ctx);
+        viewGenerationService.addCreateView(module, entityMetadata, entityMemberDetails, ctx);
       }
     } else if (controllerMetadata.getType() == ControllerType.ITEM) {
       // Add show view
-      viewGenerationService.addShowView(module, entityMemberDetails, ctx);
+      viewGenerationService.addShowView(module, entityMetadata, entityMemberDetails, ctx);
 
       if (!entityMetadata.isReadOnly()) {
         // If not readOnly, add update view
-        viewGenerationService.addUpdateView(module, entityMemberDetails, ctx);
+        viewGenerationService.addUpdateView(module, entityMetadata, entityMemberDetails, ctx);
       }
     } else if (controllerMetadata.getType() == ControllerType.DETAIL) {
-      viewGenerationService.addListView(module, entityMemberDetails, ctx);
+      // TODO this should do nothing as it's used in collection list
+      //viewGenerationService.addListView(module, entityMetadata, entityMemberDetails, ctx);
     }
 
     // Add finder views
@@ -459,11 +471,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
 
-    return createMetadataInstance(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
-        entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
-        collectionController, dateTimeFields, enumFields, findersToAdd, formBeansDateTimeFields,
-        formBeansEnumFields);
+    return viewMetadata;
   }
 
   private List<FieldMetadata> getEnumFields(MemberDetails entityMemberDetails) {

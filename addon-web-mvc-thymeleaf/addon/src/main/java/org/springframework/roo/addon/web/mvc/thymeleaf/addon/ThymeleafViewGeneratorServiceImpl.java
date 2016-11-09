@@ -33,11 +33,13 @@ import java.util.Map;
  * views with Thymeleaf components and structure.
  *
  * @author Juan Carlos García
+ * @author Jose Manuel Vivó
  * @since 2.0
  */
 @Component
 @Service
-public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationService<Document> {
+public class ThymeleafViewGeneratorServiceImpl extends
+    AbstractFreeMarkerViewGenerationService<Document> implements ThymeleafViewGeneratorService {
 
   private static final String SPRING_ROO_THYMELEAF_TEMPLATES_LOCATION =
       "spring.roo.thymeleaf.templates-location";
@@ -80,7 +82,7 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
 
   @Override
   public Class<?> getResourceLoaderClass() {
-    return ThymeleafViewGenerator.class;
+    return ThymeleafViewGeneratorServiceImpl.class;
   }
 
   @Override
@@ -270,4 +272,24 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
         getTemplatesLocation().concat("/").concat("fields"), true);
   }
 
+  @Override
+  public void addModalConfirmDelete(String moduleName, ViewContext ctx) {
+    // Process elements to generate
+    Document newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getFragmentsFolder(moduleName).concat("/modal-confirm-delete").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge("fragments/modal-confirm-delete", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("fragments/modal-confirm-delete", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
 }

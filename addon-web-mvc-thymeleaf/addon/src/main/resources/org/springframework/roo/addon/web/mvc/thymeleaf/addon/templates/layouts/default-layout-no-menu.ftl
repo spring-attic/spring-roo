@@ -18,7 +18,7 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
-      data-th-href="@{/webjars/bootstrap/3.3.6/dist/css/bootstrap.css}"></link>
+      data-th-href="@{/webjars/bootstrap/dist/css/bootstrap.css}"></link>
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <link rel="stylesheet" type="text/css"
@@ -28,7 +28,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
-      data-th-href="@{/webjars/font-awesome/4.6.2/css/font-awesome.min.css}"/>
+      data-th-href="@{/webjars/font-awesome/css/font-awesome.min.css}"/>
 
     <!-- Bootswatch CSS custom -->
     <link rel="stylesheet" type="text/css"
@@ -90,12 +90,12 @@
     <!-- JQuery -->
     <script type="text/javascript" charset="utf8"
       src="https://code.jquery.com/jquery-1.12.3.js"
-      data-th-src="@{/webjars/jquery/1.12.3/dist/jquery.js}"></script>
+      data-th-src="@{/webjars/jquery/dist/jquery.js}"></script>
 
     <!-- Bootstrap -->
     <script type="text/javascript"
       src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.js"
-      data-th-src="@{/webjars/bootstrap/3.3.6/dist/js/bootstrap.js}"></script>
+      data-th-src="@{/webjars/bootstrap/dist/js/bootstrap.js}"></script>
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="../../static/public/js/ie10-viewport-bug-workaround.js"
@@ -105,10 +105,10 @@
     <!-- MomentJS - date format -->
     <script
        src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.js"
-       data-th-src="@{/webjars/momentjs/2.13.0/moment.js}">
+       data-th-src="@{/webjars/momentjs/moment.js}">
       </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/locale/es.js"
-      data-th-src="@{/webjars/momentjs/2.13.0/locale/}+ ${r"${#"}locale.language${r"}"}+'.js'"
+      data-th-src="@{/webjars/momentjs/locale/}+ ${r"${#"}locale.language${r"}"}+'.js'"
       data-th-if="${r"${#"}locale.language${r"}"} != 'en' and ${r"${#"}locale.language${r"}"} != 'es'">
       </script>
     <script src="../../static/public/js/moment-locale-es.js"

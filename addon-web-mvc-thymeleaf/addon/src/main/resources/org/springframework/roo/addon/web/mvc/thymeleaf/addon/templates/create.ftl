@@ -42,8 +42,8 @@
 
     <!-- Select2 -->
     <link rel="stylesheet" type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.css"
-      data-th-href="@{/webjars/select2/4.0.2/dist/css/select2.css}"/>
+      href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css"
+      data-th-href="@{/webjars/select2/4.0.3/dist/css/select2.css}"/>
     <link rel="stylesheet" type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.7/select2-bootstrap.css"
       data-th-href="@{/webjars/select2-bootstrap-theme/0.1.0-beta.7/dist/select2-bootstrap.css}"/>

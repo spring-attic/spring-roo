@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.views;
 
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
@@ -73,70 +74,82 @@ public interface MVCViewGenerationService {
    * and the provided context
    *
    * @param moduleName module where list view will be added
+   * @param entityMetadata entity metadata which contains information about it
    * @param entity Details of an entity to be able to generate view
+   * @param detailsControllers list of related details controller to include
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addListView(String moduleName, MemberDetails entity, ViewContext ctx);
+  void addListView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
+      List<? extends AbstractViewMetadata> detailsControllers, ViewContext ctx);
 
   /**
    * This operation will add a show view using entityDetails
    * and the provided context
    *
    * @param moduleName module where show view will be added
+   * @param entityMetadata entity metadata which contains information about it
    * @param entity Details of an entity to be able to generate view
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addShowView(String moduleName, MemberDetails entity, ViewContext ctx);
+  void addShowView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
+      ViewContext ctx);
 
   /**
    * This operation will add a create view using entityDetails
    * and the provided context
    *
    * @param moduleName module where create view will be added
+   * @param entityMetadata entity metadata which contains information about it
    * @param entity Details of an entity to be able to generate view
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addCreateView(String moduleName, MemberDetails entity, ViewContext ctx);
+  void addCreateView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
+      ViewContext ctx);
 
   /**
    * This operation will add an update view using entityDetails
    * and the provided context
    *
    * @param moduleName module where update view will be added
+   * @param entityMetadata entity metadata which contains information about it
    * @param entity Details of an entity to be able to generate view
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addUpdateView(String moduleName, MemberDetails entity, ViewContext ctx);
+  void addUpdateView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
+      ViewContext ctx);
 
   /**
    * This operation will add a finder form view using entityDetails and the
    * provided context
    *
    * @param moduleName the module where finder form view will be added
+   * @param entityMetadata entity metadata which contains information about it
    * @param entity the details of an entity to be able to generate view
    * @param finderName the name of the finder for which this form will be created
    * @param fieldsToAdd
    * @param ctx the ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addFinderFormView(String moduleName, MemberDetails entity, String finderName,
-      List<FieldMetadata> fieldsToAdd, ViewContext ctx);
+  void addFinderFormView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
+      String finderName, List<FieldMetadata> fieldsToAdd, ViewContext ctx);
 
   /**
    * This operation will add a finder list view using entityDetails and the
    * provided context. This view will show finder result list
    *
    * @param moduleName the module where finder list view will be added
+   * @param entityMetadata entity metadata which contains information about it
    * @param entity the details of an entity to be able to generate view
    * @param finderName the name of the finder for which this form will be created
    * @param ctx the ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addFinderListView(String moduleName, MemberDetails entity, String finderName, ViewContext ctx);
+  void addFinderListView(String moduleName, JpaEntityMetadata entityMetadada, MemberDetails entity,
+      String finderName, ViewContext ctx);
 
   /**
    * This operation will add the application index view using
