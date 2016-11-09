@@ -1,5 +1,18 @@
 package org.springframework.roo.addon.webflow;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.Properties;
+import java.util.Set;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -7,13 +20,19 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.javabean.annotations.RooJavaBean;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.i18n.components.I18n;
 import org.springframework.roo.addon.web.mvc.i18n.components.I18nSupport;
 import org.springframework.roo.addon.web.mvc.i18n.languages.EnglishLanguage;
 import org.springframework.roo.addon.web.mvc.thymeleaf.addon.ThymeleafMVCViewResponseService;
+import org.springframework.roo.addon.web.mvc.thymeleaf.addon.ThymeleafMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.operations.AbstractOperations;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
@@ -28,16 +47,6 @@ import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
 
 /**
  * Provides Web Flow configuration operations.
@@ -125,7 +134,23 @@ public class WebFlowOperationsImpl extends AbstractOperations implements WebFlow
     // Add localized messages for Web Flow labels
     addLocalizedMessages(moduleName);
 
-    // TODO: update menu
+    // Getting all thymeleaf controllers
+    Set<ClassOrInterfaceTypeDetails> thymeleafControllers =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_THYMELEAF);
+    if (thymeleafControllers.isEmpty()) {
+      LOGGER
+          .log(Level.INFO,
+              "WARNING: Menu view has not been updated because doesn't exists any Thymeleaf controller.");
+      return;
+    }
+
+    // Update menu calling to the thymeleaf Metadata of the annotated @RooThymeleaf
+    Iterator<ClassOrInterfaceTypeDetails> it = thymeleafControllers.iterator();
+    ClassOrInterfaceTypeDetails thymeleafController = it.next();
+    String controllerMetadataKey = ThymeleafMetadata.createIdentifier(thymeleafController);
+    getMetadataService().evictAndGet(controllerMetadataKey);
+
   }
 
   /**
@@ -179,6 +204,8 @@ public class WebFlowOperationsImpl extends AbstractOperations implements WebFlow
           // Prefix with flow name
           key = String.format("%s_%s", this.flowName.toLowerCase(), key);
           newProperties.put(key, value);
+          newProperties.put("label_".concat(this.flowName.toLowerCase()),
+              StringUtils.capitalize(this.flowName));
         }
         propFilesManagerService.addProperties(resourcesPath,
             String.format("messages_%s.properties", i18n.getLocale()), newProperties, true, true);
@@ -214,6 +241,8 @@ public class WebFlowOperationsImpl extends AbstractOperations implements WebFlow
         // Prefix with flow name
         key = String.format("%s_%s", this.flowName.toLowerCase(), key);
         newProperties.put(key, value);
+        newProperties.put("label_".concat(this.flowName.toLowerCase()),
+            StringUtils.capitalize(this.flowName));
       }
       propFilesManagerService.addProperties(resourcesPath, "messages.properties", newProperties,
           true, true);
@@ -414,5 +443,13 @@ public class WebFlowOperationsImpl extends AbstractOperations implements WebFlow
           }
 
         });
+  }
+
+  public MetadataService getMetadataService() {
+    return this.serviceManager.getServiceInstance(this, MetadataService.class);
+  }
+
+  public TypeLocationService getTypeLocationService() {
+    return this.serviceManager.getServiceInstance(this, TypeLocationService.class);
   }
 }
