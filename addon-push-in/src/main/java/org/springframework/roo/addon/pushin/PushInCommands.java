@@ -141,9 +141,10 @@ public class PushInCommands implements CommandMarker {
     // Getting all introduces parameters
     Map<String, String> specifiedParameters = context.getParameters();
 
+    String specifiedClass = specifiedParameters.get("class");
+
     // Check if class parameter has been specified
-    if (specifiedParameters.containsKey("class")) {
-      String specifiedClass = specifiedParameters.get("class");
+    if (StringUtils.isNotEmpty(specifiedClass)) {
       JavaType klass =
           getJavaTypeConverter().convertFromText(specifiedClass, JavaType.class, PROJECT);
 

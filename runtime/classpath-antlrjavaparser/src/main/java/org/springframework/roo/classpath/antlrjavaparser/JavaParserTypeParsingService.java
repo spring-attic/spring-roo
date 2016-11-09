@@ -32,6 +32,9 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ImportMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
+import org.springframework.roo.classpath.details.comments.CommentStructure.CommentLocation;
+import org.springframework.roo.classpath.details.comments.JavadocComment;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
@@ -40,6 +43,7 @@ import org.springframework.roo.model.JavaType;
 import com.github.antlrjavaparser.ASTHelper;
 import com.github.antlrjavaparser.JavaParser;
 import com.github.antlrjavaparser.ParseException;
+import com.github.antlrjavaparser.api.Comment;
 import com.github.antlrjavaparser.api.CompilationUnit;
 import com.github.antlrjavaparser.api.ImportDeclaration;
 import com.github.antlrjavaparser.api.PackageDeclaration;
@@ -344,6 +348,30 @@ public class JavaParserTypeParsingService implements TypeParsingService {
     for (final AnnotationMetadata candidate : cid.getAnnotations()) {
       JavaParserAnnotationMetadataBuilder.addAnnotationToList(compilationUnitServices, annotations,
           candidate);
+    }
+
+    // ROO-3834: Generating default Javadoc inside class if class doesn't contains JavaDoc
+    List<Comment> classComments = compilationUnit.getComments();
+    if (classComments == null || classComments.isEmpty()) {
+      CommentStructure defaultCommentStructure = new CommentStructure();
+
+      String defaultComment =
+          "/**\n * = ".concat(cid.getType().getSimpleTypeName()).concat(
+              "\n *\n * TODO Auto-generated class documentation\n *\n */\n");
+
+      defaultCommentStructure.addComment(new JavadocComment(defaultComment),
+          CommentLocation.BEGINNING);
+
+      if (annotations.isEmpty()) {
+        JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(typeDeclaration,
+            defaultCommentStructure);
+      } else {
+        // If exists some annotation, include comment before the existing annotations
+        AnnotationExpr firstAnnotation = annotations.get(0);
+        JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(firstAnnotation,
+            defaultCommentStructure);
+      }
+
     }
 
     // Add enum constants and interfaces

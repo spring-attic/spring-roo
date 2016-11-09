@@ -545,6 +545,8 @@ public class PushInOperationsImpl implements PushInOperations {
             method.getMethodName(), method.getReturnType(), method.getParameterTypes(),
             method.getParameterNames(), bodyBuilder);
     methodBuilder.setAnnotations(method.getAnnotations());
+    // ROO-3834: Including default comment structure during push-in
+    methodBuilder.setCommentStructure(method.getCommentStructure());
 
     return methodBuilder.build();
   }

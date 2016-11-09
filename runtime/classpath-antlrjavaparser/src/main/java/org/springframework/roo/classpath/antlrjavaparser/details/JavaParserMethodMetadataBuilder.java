@@ -275,6 +275,23 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
         }
     }*/
 
+    if (method.getCommentStructure() != null) {
+
+      // if the field has annotations, add JavaDoc comments to the first
+      // annotation
+      if (annotations != null && annotations.size() > 0) {
+        AnnotationExpr firstAnnotation = annotations.get(0);
+
+        JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(firstAnnotation,
+            method.getCommentStructure());
+
+        // Otherwise, add comments to the field declaration line
+      } else {
+        JavaParserCommentMetadataBuilder
+            .updateCommentsToJavaParser(d, method.getCommentStructure());
+      }
+    }
+
     // Add the method to the end of the compilation unit
     members.add(d);
   }
