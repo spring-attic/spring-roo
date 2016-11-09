@@ -429,6 +429,22 @@ public class WsOperationsImpl implements WsOperations {
       return;
     }
 
+    // If developer has not specify any EndPoint class is necessary to generate 
+    // new one inside the provided SEI module using the provided SEI name and 'Endpoint' suffix.
+    if (endpointClass == null) {
+      endpointClass =
+          new JavaType(String.format("%sEndpoint", sei.getFullyQualifiedTypeName()),
+              sei.getModule());
+    }
+
+    // If developer has not specify any configuration class is necessary to generate a
+    // new one inside the provided SEI module using the provided SEI name and 'Configuration' suffix
+    if (configClass == null) {
+      configClass =
+          new JavaType(String.format("%sConfiguration", sei.getFullyQualifiedTypeName()),
+              sei.getModule());
+    }
+
     // Check if provided configClass exists or should be generated
     boolean isNewConfigClass = false;
     ClassOrInterfaceTypeDetails configClassDetails =
@@ -478,22 +494,6 @@ public class WsOperationsImpl implements WsOperations {
 
     }
 
-
-    // If developer has not specify any EndPoint class is necessary to generate 
-    // new one inside the provided SEI module using the provided SEI name and 'Endpoint' suffix.
-    if (endpointClass == null) {
-      endpointClass =
-          new JavaType(String.format("%sEndpoint", sei.getFullyQualifiedTypeName()),
-              sei.getModule());
-    }
-
-    // If developer has not specify any configuration class is necessary to generate a
-    // new one inside the provided SEI module using the provided SEI name and 'Configuration' suffix
-    if (configClass == null) {
-      configClass =
-          new JavaType(String.format("%sConfiguration", sei.getFullyQualifiedTypeName()),
-              sei.getModule());
-    }
 
     // Check if some the provided classes that should be generated already exists
     if (getTypeLocationService().getTypeDetails(sei) != null) {
