@@ -20,7 +20,7 @@ entity jpa --class ~.Region --table NW_REGIONS --sequenceName NW_REGIONS_REGION_
 
 // Not read-only entities
 entity jpa --class ~.Category --table NW_CATEGORIES --sequenceName NW_CATEGORIES_CATEGORY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CATEGORY_ID --versionField version --versionType long --versionColumn VERSION
-entity jpa --class ~.CustomerOrder --table NW_CUSTOMER_ORDERS --sequenceName NW_CUSTOMER_ORDERS_CUSTOMER_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CUSTOMER_ORDER_ID --versionField version --versionType long --versionColumn VERSION --serializable
+entity jpa --class ~.CustomerOrder --table NW_CUSTOMER_ORDERS --sequenceName NW_CUSTOMER_ORDERS_CUSTOMER_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CUSTOMER_ORDER_ID --versionField version --versionType long --versionColumn VERSION
 entity jpa --class ~.OrderDetail --table NW_ORDER_DETAILS --sequenceName NW_ORDER_DETAILS_ORDER_DETAIL_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn ORDER_DETAIL_ID --versionField version --versionType long --versionColumn VERSION
 entity jpa --class ~.Party --table NW_PARTIES --sequenceName NW_PARTIES_PARTY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PARTY_ID --versionField version --versionType long --versionColumn VERSION --inheritanceType JOINED
 entity jpa --class ~.Product --table NW_PRODUCTS --sequenceName NW_PRODUCTS_PRODUCT_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PRODUCT_ID --versionField version --versionType long --versionColumn VERSION
@@ -530,10 +530,6 @@ jpa audit add --entity model:~.Category --createdDateColumn CREATED_DATE --modif
 
 // Install THYMELEAF view
 web mvc view setup --type THYMELEAF
-
-
-// Create Web Flow to create customer orders
-web flow --flowName createOrder --class model:~.CustomerOrder
 
 
 // Add necessary controllers
