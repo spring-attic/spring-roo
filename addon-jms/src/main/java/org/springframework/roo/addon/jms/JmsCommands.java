@@ -91,10 +91,10 @@ public class JmsCommands implements CommandMarker {
 
   @CliOptionAutocompleteIndicator(
       command = "jms receiver",
-      param = "service",
+      param = "endpoint",
       validate = false,
       includeSpaceOnFinish = false,
-      help = "--service parameter parameter is the service where will be added the support to send emails")
+      help = "--endpoint parameter parameter is the service where will be added the support to send emails")
   public List<String> returnApplicationPackages(ShellContext shellContext) {
 
     List<String> applicationPackages = new ArrayList<String>();
@@ -106,7 +106,7 @@ public class JmsCommands implements CommandMarker {
     JavaPackageConverter converter = (JavaPackageConverter) getJavaPackageConverterService().get(0);
     List<Completion> completions = new ArrayList<Completion>();
     converter.getAllPossibleValues(completions, String.class,
-        shellContext.getParameters().get("service"), matcher.toString(), null);
+        shellContext.getParameters().get("endpoint"), matcher.toString(), null);
 
     for (Completion completion : completions) {
       applicationPackages.add(completion.getValue());
@@ -119,15 +119,20 @@ public class JmsCommands implements CommandMarker {
   public void addJmsReceiver(
       @CliOption(key = {"destinationName"}, mandatory = true,
           help = "The name of the JMS destination") final String destinationName,
-      @CliOption(key = "service", mandatory = true,
-          help = "The service where include the method that receive JMS messages") final JavaType service,
+      @CliOption(key = "endpoint", mandatory = true,
+          help = "The service where include the method that receive JMS messages") final JavaType endpointService,
       @CliOption(key = {"jndiConnectionFactory"}, mandatory = true,
           help = "The jndi name where the JMS receiver configuration has been defined") final String jndiConnectionFactory,
       @CliOption(key = {"profile"}, mandatory = false,
           help = "The profile where the properties will be set") final String profile,
       ShellContext shellContext) {
-    jmsOperations.addJmsReceiver(destinationName, service, jndiConnectionFactory, profile,
+    jmsOperations.addJmsReceiver(destinationName, endpointService, jndiConnectionFactory, profile,
         shellContext.isForce());
+  }
+
+  @CliAvailabilityIndicator("jms sender")
+  public boolean isInstallJmsSenderAvailable() {
+    return jmsOperations.isJmsInstallationPossible();
   }
 
   @CliOptionAutocompleteIndicator(command = "jms sender", param = "destinationName",
@@ -137,11 +142,12 @@ public class JmsCommands implements CommandMarker {
 
     List<String> applicationModules = new ArrayList<String>();
 
-    Collection<String> moduleNames =
-        typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION);
-
-    for (String moduleName : moduleNames) {
-      applicationModules.add(moduleName.concat(":"));
+    if (projectOperations.isMultimoduleProject()) {
+      Collection<String> moduleNames =
+          typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION);
+      for (String moduleName : moduleNames) {
+        applicationModules.add(moduleName.concat(":"));
+      }
     }
 
     return applicationModules;

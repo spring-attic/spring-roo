@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.jms;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -61,9 +62,9 @@ public class JmsOperationsImpl implements JmsOperations {
 
   private static final String JMS_PROPERTY_DESTINATION_NAME_PREFIX = "jms.destination.";
   //private static final String SPRINGLETS_JMS_PROPERTY_DESTINATION_NAME_PREFIX = "springlets.jms.destination.";
-  private static final String JMS_PROPERTY_DESTINATION_NAME_SUFIX = ".name";
+  private static final String JMS_PROPERTY_DESTINATION_NAME_SUFIX = ".jndi-name";
   private static final String JMS_VAR_DESTINATION_NAME_PREFIX = "destination";
-  private static final String JMS_VAR_DESTINATION_NAME_SUFIX = "Name";
+  private static final String JMS_VAR_DESTINATION_NAME_SUFIX = "JndiName";
   private static final String JMS_PROPERTY_JNDI_NAME = "spring.jms.jndi-name";
   private static final String JNDI_PREFIX = "java:comp/env/";
 
@@ -94,14 +95,14 @@ public class JmsOperationsImpl implements JmsOperations {
   }
 
   @Override
-  public void addJmsReceiver(String destinationName, JavaType service,
+  public void addJmsReceiver(String destinationName, JavaType endpointService,
       String jndiConnectionFactory, String profile, boolean force) {
 
     boolean isApplicationModule = false;
     // Check that the module of the service is type application
     Collection<Pom> modules = getTypeLocationService().getModules(ModuleFeatureName.APPLICATION);
     for (Pom pom : modules) {
-      if (pom.getModuleName().equals(service.getModule())) {
+      if (pom.getModuleName().equals(endpointService.getModule())) {
         isApplicationModule = true;
       }
     }
@@ -117,30 +118,32 @@ public class JmsOperationsImpl implements JmsOperations {
 
     // Check if Service already exists and --force is included
     final String serviceFilePathIdentifier =
-        getPathResolver().getCanonicalPath(service.getModule(), Path.SRC_MAIN_JAVA, service);
+        getPathResolver().getCanonicalPath(endpointService.getModule(), Path.SRC_MAIN_JAVA,
+            endpointService);
     if (getFileManager().exists(serviceFilePathIdentifier) && force) {
       getFileManager().delete(serviceFilePathIdentifier);
     } else if (getFileManager().exists(serviceFilePathIdentifier)) {
       throw new IllegalArgumentException(String.format(
-          "Service '%s' already exists and cannot be created. Try to use a "
-              + "different name on --service parameter or use this command with '--force' "
-              + "to overwrite the current service.", service));
+          "Endpoint '%s' already exists and cannot be created. Try to use a "
+              + "different name on --endpoint parameter or use this command with '--force' "
+              + "to overwrite the current service.", endpointService));
     }
 
     // Set destionation property name
-    String destinationNamePropertyName =
-        JMS_PROPERTY_DESTINATION_NAME_PREFIX.concat(destinationName.replaceAll("/", ".")).concat(
-            JMS_PROPERTY_DESTINATION_NAME_SUFIX);
+    StringBuffer destinationNamePropertyName =
+        new StringBuffer(JMS_PROPERTY_DESTINATION_NAME_PREFIX);
+    destinationNamePropertyName.append(destinationName.replaceAll("/", "."));
+    destinationNamePropertyName.append(JMS_PROPERTY_DESTINATION_NAME_SUFIX);
 
     // Set properties
-    setProperties(destinationName, destinationNamePropertyName, jndiConnectionFactory,
-        service.getModule(), profile, force);
+    setProperties(destinationName, destinationNamePropertyName.toString(), jndiConnectionFactory,
+        endpointService.getModule(), profile, force);
 
     // Create service
-    createReceiverJmsService(service, destinationNamePropertyName);
+    createReceiverJmsService(endpointService, destinationNamePropertyName.toString());
 
     // Add jms dependecy in module
-    getProjectOperations().addDependency(service.getModule(), DEPENDENCY_JMS);
+    getProjectOperations().addDependency(endpointService.getModule(), DEPENDENCY_JMS);
 
     // Add annotation @EnableJms to application class of the module
     Set<ClassOrInterfaceTypeDetails> applicationClasses =
@@ -148,7 +151,7 @@ public class JmsOperationsImpl implements JmsOperations {
             SpringJavaType.SPRING_BOOT_APPLICATION);
     for (ClassOrInterfaceTypeDetails applicationClass : applicationClasses) {
 
-      if (applicationClass.getType().getModule().equals(service.getModule())) {
+      if (applicationClass.getType().getModule().equals(endpointService.getModule())) {
 
         // Check if annotation exists
         boolean annotationNotExists = true;
@@ -284,31 +287,42 @@ public class JmsOperationsImpl implements JmsOperations {
         .asList(new AnnotationMetadataBuilder(AUTOWIRED)), new JavaSymbolName("jmsSendingService"),
         SpringletsJavaType.SPRINGLETS_JMS_SENDING_SERVICE));
 
-
     // Set destionation property name
-    String destinationNamePropertyName =
-        JMS_PROPERTY_DESTINATION_NAME_PREFIX.concat(destination.replaceAll("/", ".")).concat(
-            JMS_PROPERTY_DESTINATION_NAME_SUFIX);
+    StringBuffer destinationNamePropertyName =
+        new StringBuffer(JMS_PROPERTY_DESTINATION_NAME_PREFIX);
+    destinationNamePropertyName.append(destination.replaceAll("/", "."));
+    destinationNamePropertyName.append(JMS_PROPERTY_DESTINATION_NAME_SUFIX);
 
-    String destionationNameVar =
-        JMS_VAR_DESTINATION_NAME_PREFIX.concat(destination.replaceAll("/", "_")).concat(
-            JMS_VAR_DESTINATION_NAME_SUFIX);
+    StringBuffer destionationNameVar = new StringBuffer(JMS_VAR_DESTINATION_NAME_PREFIX);
+    if (destination.contains("/")) {
+
+      // Delete char '/' and each word
+      String[] destinationNameArray = destination.split("/");
+      for (String destinationFragment : destinationNameArray) {
+        destionationNameVar.append(StringUtils.capitalize(destinationFragment));
+      }
+
+    } else {
+      destionationNameVar.append(StringUtils.capitalize(destination));
+    }
+    destionationNameVar.append(JMS_VAR_DESTINATION_NAME_SUFIX);
 
     // Adding @Value annotation
     AnnotationMetadataBuilder valueAnnotation = new AnnotationMetadataBuilder(SpringJavaType.VALUE);
-    valueAnnotation.addStringAttribute("value", "${".concat(destinationNamePropertyName)
+    valueAnnotation.addStringAttribute("value", "${".concat(destinationNamePropertyName.toString())
         .concat("}"));
 
     // Add instance of destination name
     cidBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId, PRIVATE, Arrays
-        .asList(valueAnnotation), new JavaSymbolName(destionationNameVar), JavaType.STRING));
+        .asList(valueAnnotation), new JavaSymbolName(destionationNameVar.toString()),
+        JavaType.STRING));
 
     // Write both, springlets service and destination instance
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
     // Set properties
-    setProperties(destination, destinationNamePropertyName, jndiConnectionFactory, module, profile,
-        force);
+    setProperties(destination, destinationNamePropertyName.toString(), jndiConnectionFactory,
+        module, profile, force);
 
   }
 
