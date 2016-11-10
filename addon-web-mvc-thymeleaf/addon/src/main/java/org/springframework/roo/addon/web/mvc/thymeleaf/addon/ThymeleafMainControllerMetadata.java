@@ -125,11 +125,13 @@ public class ThymeleafMainControllerMetadata extends AbstractItdTypeDetailsProvi
     // Adding annotations
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
-    // Adding @GetMapping annotation
-    AnnotationMetadataBuilder getMapping =
-        new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING);
-    getMapping.addStringAttribute("value", "/js/{template}.js");
-    annotations.add(getMapping);
+    // Adding @RequestMapping annotation
+    AnnotationMetadataBuilder requestMapping =
+        new AnnotationMetadataBuilder(SpringJavaType.REQUEST_MAPPING);
+    requestMapping.addStringAttribute("value", "/js/{template}.js");
+    getNameOfJavaType(SpringJavaType.REQUEST_METHOD);
+    requestMapping.addEnumAttribute("method", SpringJavaType.REQUEST_METHOD, "GET");
+    annotations.add(requestMapping);
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
