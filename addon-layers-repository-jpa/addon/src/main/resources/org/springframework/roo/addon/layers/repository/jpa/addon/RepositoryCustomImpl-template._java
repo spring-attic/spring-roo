@@ -4,9 +4,18 @@ import io.springlets.data.jpa.repository.support.QueryDslRepositorySupportExt;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
 import __ENTITY_IMPORT__;
 
+/**
+ * = __REPOSITORY_CUSTOM_IMPL__
+ *
+ * TODO Auto-generated class documentation
+ *
+ */ 
 @RooJpaRepositoryCustomImpl(repository = __REPOSITORY_CUSTOM_INTERFACE__.class)
 public class __REPOSITORY_CUSTOM_IMPL__ extends QueryDslRepositorySupportExt<__ENTITY_NAME__> {
 
+    /**
+     * TODO Auto-generated constructor documentation
+     */
     __REPOSITORY_CUSTOM_IMPL__() {
         super(__ENTITY_NAME__.class);
     }
