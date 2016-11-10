@@ -16,6 +16,9 @@ import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
+import org.springframework.roo.classpath.details.comments.CommentStructure.CommentLocation;
+import org.springframework.roo.classpath.details.comments.JavadocComment;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.JavaSymbolName;
@@ -39,6 +42,7 @@ import com.github.antlrjavaparser.api.type.Type;
  * Java Parser implementation of {@link ConstructorMetadata}.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public class JavaParserConstructorMetadataBuilder implements Builder<ConstructorMetadata> {
@@ -194,7 +198,7 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
     // ROO-3834: Append Javadoc
     if (constructor.getCommentStructure() != null) {
 
-      // if the field has annotations, add JavaDoc comments to the first
+      // if the constructor has annotations, add JavaDoc comments to the first
       // annotation
       if (annotations != null && annotations.size() > 0) {
         AnnotationExpr firstAnnotation = annotations.get(0);
@@ -206,6 +210,36 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
       } else {
         JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(d,
             constructor.getCommentStructure());
+      }
+    } else {
+      // ROO-3834: Include default documentation
+      CommentStructure defaultCommentStructure = new CommentStructure();
+
+      // Getting params list
+      String paramsListComment = "";
+      for (JavaSymbolName param : constructor.getParameterNames()) {
+        paramsListComment =
+            paramsListComment.concat(" * @param ").concat(param.getSymbolName()).concat("\n");
+      }
+
+      String defaultComment =
+          "/**\n * TODO Auto-generated constructor documentation\n *\n".concat(paramsListComment)
+              .concat(" */\n");
+
+      defaultCommentStructure.addComment(new JavadocComment(defaultComment),
+          CommentLocation.BEGINNING);
+
+      // if the constructor has annotations, add JavaDoc comments to the first
+      // annotation
+      if (annotations != null && annotations.size() > 0) {
+        AnnotationExpr firstAnnotation = annotations.get(0);
+
+        JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(firstAnnotation,
+            defaultCommentStructure);
+
+        // Otherwise, add comments to the constructor declaration line
+      } else {
+        JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(d, defaultCommentStructure);
       }
     }
 

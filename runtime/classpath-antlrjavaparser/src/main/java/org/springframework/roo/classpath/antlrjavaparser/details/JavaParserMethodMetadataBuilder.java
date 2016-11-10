@@ -281,7 +281,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
     // ROO-3834: Append Javadoc
     if (method.getCommentStructure() != null) {
 
-      // if the field has annotations, add JavaDoc comments to the first
+      // if the method has annotations, add JavaDoc comments to the first
       // annotation
       if (annotations != null && annotations.size() > 0) {
         AnnotationExpr firstAnnotation = annotations.get(0);
@@ -289,10 +289,54 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
         JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(firstAnnotation,
             method.getCommentStructure());
 
-        // Otherwise, add comments to the field declaration line
+        // Otherwise, add comments to the method declaration line
       } else {
         JavaParserCommentMetadataBuilder
             .updateCommentsToJavaParser(d, method.getCommentStructure());
+      }
+    } else {
+      // ROO-3834: Include default documentation
+      CommentStructure defaultCommentStructure = new CommentStructure();
+
+      // Getting params list
+      String paramsListComment = "";
+      for (JavaSymbolName param : method.getParameterNames()) {
+        paramsListComment =
+            paramsListComment.concat(" * @param ").concat(param.getSymbolName()).concat("\n");
+      }
+
+      // Getting return
+      String returnComment = "";
+      if (method.getReturnType() != JavaType.VOID_PRIMITIVE) {
+        returnComment =
+            " * @return ".concat(method.getReturnType().getSimpleTypeName()).concat("\n");
+      }
+
+      // Getting throws
+      String throwsComment = "";
+      for (JavaType throwsType : method.getThrowsTypes()) {
+        throwsComment =
+            throwsComment.concat(" * @throws ").concat(throwsType.getSimpleTypeName()).concat("\n");
+      }
+
+      String defaultComment =
+          "/**\n * TODO Auto-generated method documentation\n *\n".concat(paramsListComment)
+              .concat(returnComment).concat(throwsComment).concat(" */\n");
+
+      defaultCommentStructure.addComment(new JavadocComment(defaultComment),
+          CommentLocation.BEGINNING);
+
+      // if the method has annotations, add JavaDoc comments to the first
+      // annotation
+      if (annotations != null && annotations.size() > 0) {
+        AnnotationExpr firstAnnotation = annotations.get(0);
+
+        JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(firstAnnotation,
+            defaultCommentStructure);
+
+        // Otherwise, add comments to the method declaration line
+      } else {
+        JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(d, defaultCommentStructure);
       }
     }
 
