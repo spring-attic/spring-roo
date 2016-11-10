@@ -17,6 +17,9 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
+import org.springframework.roo.classpath.details.comments.CommentStructure.CommentLocation;
+import org.springframework.roo.classpath.details.comments.JavadocComment;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.JavaSymbolName;
@@ -275,6 +278,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
         }
     }*/
 
+    // ROO-3834: Append Javadoc
     if (method.getCommentStructure() != null) {
 
       // if the field has annotations, add JavaDoc comments to the first

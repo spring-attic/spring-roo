@@ -3,9 +3,20 @@ package __PACKAGE__;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * = __PROJECT_NAME__Application
+ *
+ * TODO Auto-generated class documentation
+ *
+ */
 @SpringBootApplication
 public class __PROJECT_NAME__Application {
 
+    /**
+     * TODO Auto-generated method documentation
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         SpringApplication.run(__PROJECT_NAME__Application.class, args);
     }

@@ -13,6 +13,8 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.roo.addon.web.mvc.controller.annotations.RooCollectionValidator;
 
 /**
+ * = CollectionValidator
+ * 
  * Spring {@link Validator} that iterates over the elements of a {@link Collection} and run the 
  * validation process for each of them individually.
  * 
@@ -21,13 +23,27 @@ import org.springframework.roo.addon.web.mvc.controller.annotations.RooCollectio
 @RooCollectionValidator
 public class CollectionValidator implements Validator {
 
+  /**
+   * TODO Auto-generated attribute documentation
+   */
   private final Validator validator;
 
+  /**
+   * TODO Auto-generated constructor documentation
+   *
+   * @param validatorFactory
+   */ 
   @Autowired
   public CollectionValidator(LocalValidatorFactoryBean validatorFactory) {
     this.validator = validatorFactory;
   }
 
+  /**
+   * TODO Auto-generated method documentation
+   *
+   * @param clazz
+   * @return boolean
+   */
   @Override
   public boolean supports(Class<?> clazz) {
     return Collection.class.isAssignableFrom(clazz);
