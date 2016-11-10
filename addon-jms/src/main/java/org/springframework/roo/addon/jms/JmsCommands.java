@@ -135,18 +135,24 @@ public class JmsCommands implements CommandMarker {
     return jmsOperations.isJmsInstallationPossible();
   }
 
-  @CliOptionAutocompleteIndicator(command = "jms sender", param = "destinationName",
-      validate = false, includeSpaceOnFinish = false,
-      help = "--destinationName parameter composed by application module and destination name")
+  @CliOptionAutocompleteIndicator(
+      command = "jms sender",
+      param = "destinationName",
+      validate = false,
+      includeSpaceOnFinish = false,
+      help = "--destinationName parameter composed by application type module and destination name. If focus module is application type, will be selected by default")
   public List<String> returnApplicationModules(ShellContext shellContext) {
 
     List<String> applicationModules = new ArrayList<String>();
 
-    if (projectOperations.isMultimoduleProject()) {
-      Collection<String> moduleNames =
-          typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION);
+    Collection<String> moduleNames =
+        typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION);
+    if (projectOperations.isMultimoduleProject() && moduleNames.size() > 1) {
+      String focusedModuleName = projectOperations.getFocusedModuleName();
       for (String moduleName : moduleNames) {
-        applicationModules.add(moduleName.concat(":"));
+        if (!focusedModuleName.equals(moduleName)) {
+          applicationModules.add(moduleName.concat(":"));
+        }
       }
     }
 
@@ -158,16 +164,16 @@ public class JmsCommands implements CommandMarker {
       @CliOption(
           key = {"destinationName"},
           mandatory = true,
-          help = "The name of the JMS destination. Composed by application module and destination name") final String destinationName,
-      @CliOption(key = "service", mandatory = true,
-          help = "The service where include the method that receive JMS messages") final JavaType service,
+          help = "The name of the JMS destination. Composed by application type module and destination name. If only have one application type module or focused module is the application module that you want to use, don't include it, only write destination name") final String destinationName,
+      @CliOption(key = "class", mandatory = true,
+          help = "The class where include the method that receive JMS messages") final JavaType classSelected,
       @CliOption(key = {"jndiConnectionFactory"}, mandatory = true,
           help = "The jndi name where the JMS receiver configuration has been defined") final String jndiConnectionFactory,
       @CliOption(key = {"profile"}, mandatory = false,
           help = "The profile where the properties will be set") final String profile,
       ShellContext shellContext) {
 
-    jmsOperations.addJmsSender(destinationName, service, jndiConnectionFactory, profile,
+    jmsOperations.addJmsSender(destinationName, classSelected, jndiConnectionFactory, profile,
         shellContext.isForce());
   }
 
