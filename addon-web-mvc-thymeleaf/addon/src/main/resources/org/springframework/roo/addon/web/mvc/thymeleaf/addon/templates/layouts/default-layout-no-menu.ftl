@@ -105,7 +105,7 @@
     <!-- MomentJS - date format -->
     <script
        src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.js"
-       data-th-src="@{/webjars/momentjs/moment.js}">
+       data-th-src="@{/webjars/momentjs/moment.min.js}">
       </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/locale/es.js"
       data-th-src="@{/webjars/momentjs/locale/}+ ${r"${#"}locale.language${r"}"}+'.js'"
