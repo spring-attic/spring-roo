@@ -234,36 +234,76 @@ public class JmsOperationsImpl implements JmsOperations {
   }
 
   @Override
-  public void addJmsSender(String destinationName, JavaType service, String jndiConnectionFactory,
-      String profile, boolean force) {
+  public void addJmsSender(String destinationName, JavaType classSelected,
+      String jndiConnectionFactory, String profile, boolean force) {
 
     // Check that module included in destionationName is an application module
     String module = "";
     String destination = "";
     if (getProjectOperations().isMultimoduleProject()) {
-      int charSeparation = destinationName.indexOf(":");
-      if (charSeparation > 0 && destinationName.length() > charSeparation) {
-        module = destinationName.substring(0, charSeparation);
-        destination = destinationName.substring(charSeparation + 1, destinationName.length());
-        Collection<String> moduleNames =
-            getTypeLocationService().getModuleNames(ModuleFeatureName.APPLICATION);
-        if (!moduleNames.contains(module)) {
-          // error, is necessary select an application module
-          throw new IllegalArgumentException(String.format(
-              "Module '%s' must be of application type. Select one in --destinationName parameter",
-              module));
-        }
+      Collection<String> moduleNames =
+          getTypeLocationService().getModuleNames(ModuleFeatureName.APPLICATION);
 
+      // if only have one module, select this, else check the parameter
+      if (moduleNames.size() > 1) {
+
+        // user select a module
+        if (destinationName.contains(":")) {
+          int charSeparation = destinationName.indexOf(":");
+          if (charSeparation > 0 && destinationName.length() > charSeparation) {
+            module = destinationName.substring(0, charSeparation);
+            destination = destinationName.substring(charSeparation + 1, destinationName.length());
+            if (!moduleNames.contains(module)) {
+
+              // error, is necessary select an application module
+              throw new IllegalArgumentException(
+                  String
+                      .format(
+                          "Module '%s' must be of application type. Select one in --destinationName parameter",
+                          module));
+            }
+
+          } else {
+
+            // error, is necessary select an application module and destination
+            throw new IllegalArgumentException(
+                String
+                    .format("--destinationName parameter must be composed by [application type module]:[destination] or focus module must be application type module and only write the destination name"));
+          }
+        } else {
+
+          // module not selected, check if focus module is application type
+          Pom focusedModule = getProjectOperations().getFocusedModule();
+          if (getTypeLocationService().hasModuleFeature(focusedModule,
+              ModuleFeatureName.APPLICATION)) {
+            module = focusedModule.getModuleName();
+            destination = destinationName;
+          } else {
+            throw new IllegalArgumentException(
+                String
+                    .format("--destinationName parameter must be composed by [application type module]:[destination] or focus module must be application type module and only write the destination name"));
+
+          }
+        }
       } else {
-        // error, is necessary select an application module and destination
-        throw new IllegalArgumentException(
-            String
-                .format("--destinationName parameter must be composed by [module application]:[destination]."));
+
+        if (moduleNames.isEmpty()) {
+
+          // error, is necessary select an application module
+          throw new IllegalArgumentException(
+              String.format("Is necessary to have at least an application type module."));
+
+        } else {
+          module = moduleNames.iterator().next();
+          destination = destinationName;
+        }
       }
+    } else {
+      destination = destinationName;
     }
 
     // Add jms springlets dependecies
-    getProjectOperations().addDependency(service.getModule(), DEPENDENCY_SPRINGLETS_JMS);
+    getProjectOperations().addDependency(classSelected.getModule(), DEPENDENCY_SPRINGLETS_JMS);
 
     // Include springlets-boot-starter-mail in module
     getProjectOperations().addDependency(module, DEPENDENCY_SPRINGLETS_STARTER_JMS);
@@ -274,9 +314,9 @@ public class JmsOperationsImpl implements JmsOperations {
     // Add instance of springlets service to service defined by parameter
     // Add JavaMailSender to service
     final ClassOrInterfaceTypeDetails serviceTypeDetails =
-        getTypeLocationService().getTypeDetails(service);
+        getTypeLocationService().getTypeDetails(classSelected);
     Validate.isTrue(serviceTypeDetails != null, "Cannot locate source for '%s'",
-        service.getFullyQualifiedTypeName());
+        classSelected.getFullyQualifiedTypeName());
 
     final String declaredByMetadataId = serviceTypeDetails.getDeclaredByMetadataId();
     final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
