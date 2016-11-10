@@ -3,14 +3,14 @@ project setup --topLevelPackage com.springsource.petclinic
 jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 
 enum type --class ~.reference.PetType
-enum constant --name Dog
-enum constant --name Cat
-enum constant --name Bird
+enum constant --name DOG
+enum constant --name CAT
+enum constant --name BIRD
 
 enum type --class ~.reference.Specialty
-enum constant --name Cardiology
-enum constant --name Dentistry
-enum constant --name Nutrition
+enum constant --name CARDIOLOGY
+enum constant --name DENTISTRY
+enum constant --name NUTRITION
 
 entity jpa --class ~.domain.Pet --sequenceName PET_SEQ
 entity jpa --class ~.domain.Visit --sequenceName VISIT_SEQ
