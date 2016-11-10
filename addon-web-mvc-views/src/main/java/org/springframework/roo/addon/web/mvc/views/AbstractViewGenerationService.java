@@ -573,7 +573,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       MenuEntry menuEntry =
           new MenuEntry(entity.getSimpleTypeName(), path, pathPrefix, FieldItem.buildLabel(
               entity.getSimpleTypeName(), ""), FieldItem.buildLabel(entity.getSimpleTypeName(),
-              "plural"), finderNamesAndPaths);
+              "plural"), finderNamesAndPaths, false);
       String keyThatRepresentsEntry = pathPrefix.concat(entity.getSimpleTypeName());
 
       // Add new menu entry to menuEntries list if doesn't exist
@@ -586,6 +586,21 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       } else {
         mapMenuEntries.put(keyThatRepresentsEntry, menuEntry);
       }
+    }
+
+    // Also, check web flow views in the views folder
+    String viewsFolder = getViewsFolder(moduleName);
+    List<String> webFlowViews = getWebFlowViewsFromDir(viewsFolder, null);
+
+    // After obtain the webFlow views, add them to the menu
+    for (String webFlowView : webFlowViews) {
+
+      // Creating the menu entry
+      MenuEntry menuEntry =
+          new MenuEntry(webFlowView, webFlowView, "", FieldItem.buildLabel(webFlowView, ""),
+              FieldItem.buildLabel(webFlowView, "plural"), null, true);
+
+      mapMenuEntries.put(webFlowView, menuEntry);
     }
 
     // First of all, generate a list of MenuEntries based on existing
@@ -615,6 +630,33 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     // Write newDoc on disk
     writeDoc(newDoc, viewName);
 
+  }
+
+  /**
+   * THis method obtains the WebFlow views generated in the project.
+   * 
+   * @param viewsFolder
+   * @param views
+   * @return
+   */
+  private List<String> getWebFlowViewsFromDir(String viewsFolder, List<String> views) {
+
+    if (views == null) {
+      views = new ArrayList<String>();
+    }
+
+    File viewsDir = new File(viewsFolder);
+    File[] allElements = viewsDir.listFiles();
+    for (File element : allElements) {
+      if (element.isDirectory()) {
+        getWebFlowViewsFromDir(element.getAbsolutePath(), views);
+      } else if (element.getName().endsWith("-flow.xml")) {
+        String flowName = element.getName().replaceAll("-flow.xml", "");
+        views.add(flowName);
+      }
+    }
+
+    return views;
   }
 
   @Override

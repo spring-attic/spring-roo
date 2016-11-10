@@ -22,7 +22,7 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
       data-th-remove="all"/>
 
-    <title data-th-text="|${r"#{"}label_search_entity(${r"#{"}${entityLabel}${r"}"})${r"}"} - ${projectName}|">${entityName} Search - ${projectName}</title>
+    <title data-th-text="|${r"#{"}label_search_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}|">${entityName} Search - Spring Roo application</title>
 
     <!--/* Bootstrap */-->
     <link rel="stylesheet" type="text/css"

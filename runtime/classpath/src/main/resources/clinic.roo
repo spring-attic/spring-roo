@@ -83,3 +83,7 @@ security setup --provider DEFAULT
 // FIXME!! Re-enable audit when Springlets contains audit starter
 // jpa audit setup
 // jpa audit add --entity ~.domain.Owner
+
+// Generate new SOAP Services that will be available under "/services" URL
+ws endpoint --service ~.service.api.OwnerService --sei ~.ws.api.OwnerWebService --class ~.ws.endpoint.OwnerWebServiceEndpoint --config ~.config.WsEndpointsConfiguration
+ws endpoint --service ~.service.api.PetService --sei ~.ws.api.PetWebService --class ~.ws.endpoint.PetWebServiceEndpoint --config ~.config.WsEndpointsConfiguration

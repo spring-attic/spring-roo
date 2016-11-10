@@ -74,6 +74,10 @@ public final class SpringJavaType {
       "org.springframework.web.servlet.DispatcherServlet");
   public static final JavaType ENABLE_CACHING = new JavaType(
       "org.springframework.cache.annotation.EnableCaching");
+  public static final JavaType ENABLE_JMS = new JavaType(
+      "org.springframework.jms.annotation.EnableJms");
+  public static final JavaType ENABLE_WEB_SECURITY = new JavaType(
+      "org.springframework.security.config.annotation.web.configuration.EnableWebSecurity");
   public static final JavaType EXCEPTION_HANDLER = new JavaType(
       "org.springframework.web.bind.annotation.ExceptionHandler");
   public static final JavaType FLOW_HANDLER_MAPPING = new JavaType(
@@ -93,6 +97,8 @@ public final class SpringJavaType {
       "org.springframework.mail.javamail.JavaMailSender");
   public static final JavaType JAVA_MAIL_SENDER_IMPL = new JavaType(
       "org.springframework.mail.javamail.JavaMailSenderImpl");
+  public static final JavaType JMS_LISTENER = new JavaType(
+      "org.springframework.jms.annotation.JmsListener");
   public static final JavaType JMS_OPERATIONS = new JavaType(
       "org.springframework.jms.core.JmsOperations");
   public static final JavaType JMS_TEMPLATE = new JavaType(

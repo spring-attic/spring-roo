@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -46,7 +47,7 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   private final ClassOrInterfaceTypeDetails endpoint;
   private final JavaType sei;
   private final JavaType service;
-  private final List<MethodMetadata> seiMethods;
+  private final Map<MethodMetadata, MethodMetadata> seiMethods;
   private List<MethodMetadata> endpointMethods;
   private Map<MethodMetadata, MethodMetadataBuilder> endpointMethodsFromSeiMethods;
 
@@ -101,7 +102,7 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   public SeiImplMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       ClassOrInterfaceTypeDetails endpoint, JavaType sei, JavaType service,
-      List<MethodMetadata> seiMethods) {
+      Map<MethodMetadata, MethodMetadata> seiMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.endpoint = endpoint;
@@ -138,8 +139,9 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     ensureGovernorHasConstructor(new ConstructorMetadataBuilder(getConstructor()));
 
     // Implements SEI Methods
-    for (MethodMetadata seiMethod : seiMethods) {
-      ensureGovernorHasMethod(getEndpointMethodFromSEIMethod(seiMethod));
+    for (Entry<MethodMetadata, MethodMetadata> seiMethod : seiMethods.entrySet()) {
+      ensureGovernorHasMethod(getEndpointMethodFromSEIMethod(seiMethod.getKey(),
+          seiMethod.getValue()));
     }
 
     // Build the ITD
@@ -158,6 +160,7 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     }
     // Creating new constructor
     ConstructorMetadataBuilder constructorMethod = new ConstructorMetadataBuilder(getId());
+    constructorMethod.setModifier(Modifier.PUBLIC);
     constructorMethod.addParameter(getServiceField().getFieldName()
         .getSymbolNameUnCapitalisedFirstLetter(), getServiceField().getFieldType());
     // Generating constructor body
@@ -195,10 +198,12 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * This method caches the generated methods
    * 
    * @param seiMethod defined in a SEI interface
+   * @param serviceMethod where this enpoint should delegate
    * 
    * @return MethodMetadataBuilder that contains all the information about the new Endpoint method.
    */
-  private MethodMetadataBuilder getEndpointMethodFromSEIMethod(MethodMetadata seiMethod) {
+  private MethodMetadataBuilder getEndpointMethodFromSEIMethod(MethodMetadata seiMethod,
+      MethodMetadata serviceMethod) {
 
     // Check if already exists the method
     if (endpointMethodsFromSeiMethods.get(seiMethod) != null) {
@@ -225,7 +230,7 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
     bodyBuilder.appendFormalLine("%s%s.%s(%s);",
         seiMethod.getReturnType() != JavaType.VOID_PRIMITIVE ? "return " : "", getServiceField()
-            .getFieldName(), seiMethod.getMethodName().getSymbolName(), parametersList);
+            .getFieldName(), serviceMethod.getMethodName().getSymbolName(), parametersList);
 
     endpointMethod.setBodyBuilder(bodyBuilder);
 
@@ -247,7 +252,7 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     return builder.toString();
   }
 
-  public List<MethodMetadata> getSeiMethods() {
+  public Map<MethodMetadata, MethodMetadata> getSeiMethods() {
     return this.seiMethods;
   }
 

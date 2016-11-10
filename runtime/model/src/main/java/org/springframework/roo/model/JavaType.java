@@ -78,10 +78,12 @@ public class JavaType implements Comparable<JavaType> {
   public static final JavaType ITERATOR = new JavaType("java.lang.Iterator");
   public static final JavaType ARRAYS = new JavaType("java.util.Arrays");
   public static final JavaType COLLECTIONS = new JavaType("java.util.Collections");
+  public static final JavaType ARRAY_LIST = new JavaType("java.util.ArrayList");
 
   // javax types
   public static final JavaType REQUEST_WRAPPER = new JavaType("javax.xml.ws.RequestWrapper");
   public static final JavaType RESPONSE_WRAPPER = new JavaType("javax.xml.ws.ResponseWrapper");
+  public static final JavaType ENDPOINT = new JavaType("javax.xml.ws.Endpoint");
   public static final JavaType WEB_METHOD = new JavaType("javax.jws.WebMethod");
   public static final JavaType WEB_PARAM = new JavaType("javax.jws.WebParam");
   public static final JavaType WEB_RESULT = new JavaType("javax.jws.WebResult");

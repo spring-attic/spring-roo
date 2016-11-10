@@ -2,12 +2,6 @@ package org.springframework.roo.addon.pushin;
 
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -32,6 +26,12 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Commands for the 'push-in' add-on to be used by the ROO shell.
@@ -141,9 +141,10 @@ public class PushInCommands implements CommandMarker {
     // Getting all introduces parameters
     Map<String, String> specifiedParameters = context.getParameters();
 
+    String specifiedClass = specifiedParameters.get("class");
+
     // Check if class parameter has been specified
-    if (specifiedParameters.containsKey("class")) {
-      String specifiedClass = specifiedParameters.get("class");
+    if (StringUtils.isNotEmpty(specifiedClass)) {
       JavaType klass =
           getJavaTypeConverter().convertFromText(specifiedClass, JavaType.class, PROJECT);
 

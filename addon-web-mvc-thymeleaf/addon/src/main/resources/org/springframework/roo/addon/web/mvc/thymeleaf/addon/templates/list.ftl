@@ -22,7 +22,8 @@
  <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
     data-th-remove="all"/>
 
- <title data-th-text="|${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"} - ${projectName}|">List ${entityName} - ${projectName}</title>
+ <title data-th-text="|${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}|">
+ List ${entityName} - ${projectName} - SpringRoo Application</title>
 
  <!--/* Bootstrap */-->
  <link rel="stylesheet" type="text/css"

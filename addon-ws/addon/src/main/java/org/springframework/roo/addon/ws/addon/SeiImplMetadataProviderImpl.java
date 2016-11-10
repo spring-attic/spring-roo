@@ -2,6 +2,7 @@ package org.springframework.roo.addon.ws.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_SEI_IMPL;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,6 @@ import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -21,11 +21,11 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
@@ -168,14 +168,17 @@ public class SeiImplMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
             PhysicalTypeIdentifier.getPath(seiTypeDetails.getDeclaredByMetadataId()));
     final SeiMetadata seiMetadata = (SeiMetadata) getMetadataService().get(seiMetadataId);
 
+    // Getting SEI methods from service and save it
+    Map<MethodMetadata, MethodMetadata> seiMethods = seiMetadata.getSeiMethods();
+
     // Registering dependency between SeiMetadata and this one, to be able to
     // update Endpoint if SEI changes
     final String seiMetadataKey = SeiMetadata.createIdentifier(seiTypeDetails);
     registerDependency(seiMetadataKey, metadataIdentificationString);
 
+
     return new SeiImplMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, endpoint, seiType, seiMetadata.getService(),
-        seiMetadata.getSeiMethods());
+        governorPhysicalTypeMetadata, endpoint, seiType, seiMetadata.getService(), seiMethods);
   }
 
   protected void registerDependency(final String upstreamDependency,

@@ -17,7 +17,7 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
       data-th-remove="all"/>
 
-    <title data-th-text="|${r"#{"}label_error${r"}"} - ${projectName}|">Error - ${projectName}</title>
+    <title data-th-text="|${r"#{"}label_error${r"}"}|">Error - Spring Roo application</title>
 
     <!--/* Bootstrap */-->
     <link rel="stylesheet" type="text/css"

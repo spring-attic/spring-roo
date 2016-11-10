@@ -15,7 +15,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.DeclaredFieldAnnotationDetails;
 import org.springframework.roo.classpath.details.DeclaredMethodAnnotationDetails;
-import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -248,6 +247,29 @@ public class ItdSourceFileComposer {
 
     content = true;
     for (final FieldMetadata field : fields) {
+
+      // ROO-3447: Append comments if exists
+      CommentStructure commentStructure = field.getCommentStructure();
+      if (commentStructure != null) {
+        List<AbstractComment> fieldComments = commentStructure.getBeginComments();
+        String comment = "";
+        for (AbstractComment fieldComment : fieldComments) {
+          comment = comment.concat(fieldComment.getComment() + "\n");
+        }
+
+        String[] commentLines = comment.split("\n");
+        appendFormalLine("/**");
+        for (String commentLine : commentLines) {
+          appendFormalLine(" * ".concat(commentLine));
+        }
+        appendFormalLine(" */");
+      } else {
+        // ROO-3834: Append default Javadoc if not exists a comment structure
+        appendFormalLine("/**");
+        appendFormalLine(" * TODO Auto-generated attribute documentation");
+        appendFormalLine(" */");
+      }
+
       // Append annotations
       for (final AnnotationMetadata annotation : field.getAnnotations()) {
         appendIndent();
@@ -646,6 +668,28 @@ public class ItdSourceFileComposer {
           appendFormalLine(" * ".concat(commentLine));
         }
         appendFormalLine(" */");
+      } else {
+        // ROO-3834: Append default Javadoc if not exists a comment structure
+        appendFormalLine("/**");
+        appendFormalLine(" * TODO Auto-generated method documentation");
+        appendFormalLine(" * ");
+
+        // Include method params
+        for (JavaSymbolName param : method.getParameterNames()) {
+          appendFormalLine(" * @param ".concat(param.getSymbolName()));
+        }
+
+        // Include return type
+        if (method.getReturnType() != JavaType.VOID_PRIMITIVE) {
+          appendFormalLine(" * @return ".concat(method.getReturnType().getSimpleTypeName()));
+        }
+
+        // Include throws
+        for (JavaType throwsType : method.getThrowsTypes()) {
+          appendFormalLine(" * @throws ".concat(throwsType.getSimpleTypeName()));
+        }
+
+        appendFormalLine(" */");
       }
 
       // Append annotations
@@ -714,6 +758,7 @@ public class ItdSourceFileComposer {
 
       if (isInterfaceMethod) {
         append(";");
+        this.newLine(false);
       } else {
         append(" {");
         this.newLine(false);

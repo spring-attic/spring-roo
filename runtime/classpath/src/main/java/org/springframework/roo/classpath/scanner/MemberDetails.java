@@ -44,6 +44,7 @@ import org.springframework.roo.model.JavaType;
  * </ul>
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.1
  */
 public interface MemberDetails {
@@ -100,6 +101,16 @@ public interface MemberDetails {
    * @since 1.2.0
    */
   MethodMetadata getMethod(JavaSymbolName methodName);
+
+  /**
+   * Locates all methods with the name presented.
+   * 
+   * @param methodName the method name to locate (can be <code>null</code>)
+   * @return all located methods with the same name, or <code>null</code> if the method name
+   *         is <code>null</code> or such a method cannot be found.
+   * @since 2.0
+   */
+  List<MethodMetadata> getMethods(JavaSymbolName methodName);
 
   /**
    * Locates a method with the name and parameter signature presented.

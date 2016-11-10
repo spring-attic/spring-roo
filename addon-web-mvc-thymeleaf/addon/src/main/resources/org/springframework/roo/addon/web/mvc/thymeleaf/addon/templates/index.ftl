@@ -17,7 +17,8 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
        data-th-remove="all"/>
 
-    <title data-th-text="${r"${projectName}"}">${projectName}</title>
+    <!--Title inicio -->
+    <title data-th-text="${r"#{welcome_label}"}">Welcome - SpringRoo Application</title>
 
     <!--/* Bootstrap */-->
     <link rel="stylesheet" type="text/css"

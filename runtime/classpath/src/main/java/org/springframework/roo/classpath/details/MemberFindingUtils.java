@@ -20,6 +20,7 @@ import org.springframework.roo.model.JavaType;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Andrew Swan
+ * @author Juan Carlos García
  * @since 1.0
  */
 public final class MemberFindingUtils {
@@ -146,6 +147,34 @@ public final class MemberFindingUtils {
       if (method.getMethodName().equals(methodName)) {
         return method;
       }
+    }
+    return null;
+  }
+
+  /**
+   * Locates all methods on the specified {@link MemberHoldingTypeDetails} based
+   * on the method name.
+   * 
+   * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to
+   *            search; can be <code>null</code>
+   * @param methodName to locate; can be <code>null</code>
+   * @return the list of methods, or <code>null</code> if the given name was
+   *         <code>null</code> or it was simply not found
+   */
+  public static List<MethodMetadata> getDeclaredMethods(
+      final MemberHoldingTypeDetails memberHoldingTypeDetails, final JavaSymbolName methodName) {
+    if (memberHoldingTypeDetails == null) {
+      return null;
+    }
+    List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
+    for (final MethodMetadata method : memberHoldingTypeDetails.getDeclaredMethods()) {
+      if (method.getMethodName().equals(methodName)) {
+        methods.add(method);
+      }
+    }
+
+    if (!methods.isEmpty()) {
+      return methods;
     }
     return null;
   }

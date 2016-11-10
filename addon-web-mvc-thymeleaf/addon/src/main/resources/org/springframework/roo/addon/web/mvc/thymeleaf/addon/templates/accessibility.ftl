@@ -17,7 +17,7 @@
     <link rel="apple-touch-icon" href="../static/public/img/apple-touch-icon.png"
       data-th-remove="all"/>
 
-    <title data-th-text="|${r"#{"}label_accessibility${r"}"}- ${projectName}|">Accessibility - ${projectName}</title>
+    <title data-th-text="|${r"#{"}label_accessibility${r"}"}|">Accessibility - Spring Roo application</title>
 
     <!--/* Bootstrap */-->
     <link rel="stylesheet" type="text/css"

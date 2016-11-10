@@ -35,6 +35,9 @@ public class SpringletsJavaType {
   public static final JavaType SPRINGLETS_MAIL_RECEIVER_SERVICE = new JavaType(
       "io.springlets.mail.MailReceiverService");
 
+  public static final JavaType SPRINGLETS_JMS_SENDING_SERVICE = new JavaType(
+      "io.springlets.jms.JmsMessageSenderService");
+
 
   /**
    * Constructor is private to prevent instantiation

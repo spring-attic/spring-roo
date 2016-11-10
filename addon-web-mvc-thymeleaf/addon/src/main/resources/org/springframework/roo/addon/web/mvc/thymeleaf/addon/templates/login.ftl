@@ -13,7 +13,7 @@
        data-th-remove="all"/>
     <link rel="apple-touch-icon" href="../public/img/apple-touch-icon.png"
        data-th-remove="all"/>
-    <title data-th-text="|${r"#{"}label_login${r"}"}- ${projectName}|">Login- ${projectName}</title>
+    <title data-th-text="|${r"#{"}label_login${r"}"}|">Login- Spring Roo application</title>
 
     <!--/* Bootstrap */-->
     <link rel="stylesheet" type="text/css"

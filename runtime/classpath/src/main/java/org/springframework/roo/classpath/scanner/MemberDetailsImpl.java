@@ -94,6 +94,17 @@ public class MemberDetailsImpl implements MemberDetails {
     return null;
   }
 
+  public List<MethodMetadata> getMethods(final JavaSymbolName methodName) {
+    for (final MemberHoldingTypeDetails memberHoldingTypeDetails : details) {
+      final List<MethodMetadata> md =
+          MemberFindingUtils.getDeclaredMethods(memberHoldingTypeDetails, methodName);
+      if (md != null && !md.isEmpty()) {
+        return md;
+      }
+    }
+    return null;
+  }
+
   public MethodMetadata getMethod(final JavaSymbolName methodName, final List<JavaType> parameters) {
     for (final MemberHoldingTypeDetails memberHoldingTypeDetails : details) {
       final MethodMetadata md =

@@ -1,20 +1,9 @@
 package org.springframework.roo.addon.pushin;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -37,10 +26,21 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Operations for the 'push-in' add-on.
@@ -57,15 +57,12 @@ public class PushInOperationsImpl implements PushInOperations {
 
   protected void activate(final ComponentContext cContext) {
     this.context = cContext.getBundleContext();
+    serviceManager.activate(this.context);
   }
 
   private static final Logger LOGGER = HandlerUtils.getLogger(PushInOperationsImpl.class);
 
-  private ProjectOperations projectOperations;
-  private TypeLocationService typeLocationService;
-  private MemberDetailsScanner memberDetailsScanner;
-  private TypeManagementService typeManagementService;
-  private PathResolver pathResolver;
+  private ServiceInstaceManager serviceManager = new ServiceInstaceManager();
 
   @Override
   public boolean isPushInCommandAvailable() {
@@ -76,16 +73,35 @@ public class PushInOperationsImpl implements PushInOperations {
   public List<Object> pushInAll(boolean writeOnDisk, boolean force) {
 
     List<Object> pushedElements = new ArrayList<Object>();
+    List<JavaPackage> projectPackages = new ArrayList<JavaPackage>();
 
     // Getting all JavaTypes on current project
     for (String moduleName : getProjectOperations().getModuleNames()) {
+
+      // ROO-3833: Push-in all following a specific order to avoid 
+      // metadata dependencies errors
+      List<JavaPackage> packagesForModule =
+          getTypeLocationService().getPackagesForModule(
+              getProjectOperations().getPomFromModuleName(moduleName));
+      for (JavaPackage modulePackage : packagesForModule) {
+        projectPackages.add(modulePackage);
+      }
+
       Collection<JavaType> allDeclaredTypes =
           getTypeLocationService().getTypesForModule(
               getProjectOperations().getPomFromModuleName(moduleName));
 
-      for (JavaType declaredType : allDeclaredTypes) {
-        // Push-in all content from .aj files to .java files
-        pushedElements.addAll(pushInClass(declaredType, writeOnDisk, force));
+      if (!force) {
+        for (JavaType declaredType : allDeclaredTypes) {
+
+          // Push-in all content from .aj files to .java files
+          pushedElements.addAll(pushInClass(declaredType, writeOnDisk, force));
+        }
+      } else {
+        for (JavaPackage modulePackage : packagesForModule) {
+          pushIn(modulePackage, null, null, writeOnDisk);
+          getFileManager().scan();
+        }
       }
     }
 
@@ -529,6 +545,8 @@ public class PushInOperationsImpl implements PushInOperations {
             method.getMethodName(), method.getReturnType(), method.getParameterTypes(),
             method.getParameterNames(), bodyBuilder);
     methodBuilder.setAnnotations(method.getAnnotations());
+    // ROO-3834: Including default comment structure during push-in
+    methodBuilder.setCommentStructure(method.getCommentStructure());
 
     return methodBuilder.build();
   }
@@ -599,133 +617,57 @@ public class PushInOperationsImpl implements PushInOperations {
   }
 
   /**
-   * Method to obtain projectOperation service implementation
+   * Method to obtain ProjectOperation service implementation
    * 
    * @return
    */
   public ProjectOperations getProjectOperations() {
-    if (projectOperations == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          projectOperations = (ProjectOperations) context.getService(ref);
-          return projectOperations;
-        }
-        return null;
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on PushInOperationsImpl.");
-        return null;
-      }
-    } else {
-      return projectOperations;
-    }
+    return serviceManager.getServiceInstance(this, ProjectOperations.class);
   }
 
   /**
-   * Method to obtain typeLocationService service implementation
+   * Method to obtain TypeLocationService service implementation
    * 
    * @return
    */
   public TypeLocationService getTypeLocationService() {
-    if (typeLocationService == null) {
-      // Get all Services implement TypeLocationService interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeLocationService = (TypeLocationService) context.getService(ref);
-          return typeLocationService;
-        }
-        return null;
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on PushInOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeLocationService;
-    }
+    return serviceManager.getServiceInstance(this, TypeLocationService.class);
   }
 
   /**
-   * Method to obtain memberDetailsScanner service implementation
+   * Method to obtain MemberDetailsScanner service implementation
    * 
    * @return
    */
   public MemberDetailsScanner getMemberDetailsScanner() {
-    if (memberDetailsScanner == null) {
-      // Get all Services implement MemberDetailsScanner interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          memberDetailsScanner = (MemberDetailsScanner) context.getService(ref);
-          return memberDetailsScanner;
-        }
-        return null;
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load MemberDetailsScanner on PushInOperationsImpl.");
-        return null;
-      }
-    } else {
-      return memberDetailsScanner;
-    }
+    return serviceManager.getServiceInstance(this, MemberDetailsScanner.class);
   }
 
   /**
-   * Method to obtain typeManagementService service implementation
+   * Method to obtain TypeManagementService service implementation
    * 
    * @return
    */
   public TypeManagementService getTypeManagementService() {
-    if (typeManagementService == null) {
-      // Get all Services implement TypeManagementService interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(TypeManagementService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeManagementService = (TypeManagementService) context.getService(ref);
-          return typeManagementService;
-        }
-        return null;
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeManagementService on PushInOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeManagementService;
-    }
+    return serviceManager.getServiceInstance(this, TypeManagementService.class);
   }
 
   /**
-   * Method to obtain pathResolver service implementation
+   * Method to obtain PathResolver service implementation
    * 
    * @return
    */
   public PathResolver getPathResolver() {
-    if (pathResolver == null) {
-      // Get all Services implement PathResolver interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(PathResolver.class.getName(), null);
+    return serviceManager.getServiceInstance(this, PathResolver.class);
+  }
 
-        for (ServiceReference<?> ref : references) {
-          pathResolver = (PathResolver) context.getService(ref);
-          return pathResolver;
-        }
-        return null;
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load PathResolver on PushInOperationsImpl.");
-        return null;
-      }
-    } else {
-      return pathResolver;
-    }
+  /**
+   * Method to obtain FileManager service implementation
+   * 
+   * @return
+   */
+  public FileManager getFileManager() {
+    return serviceManager.getServiceInstance(this, FileManager.class);
   }
 
 }
