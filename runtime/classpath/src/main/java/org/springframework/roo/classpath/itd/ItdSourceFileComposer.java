@@ -116,6 +116,34 @@ public class ItdSourceFileComposer {
       Validate.isTrue(constructor.getParameterTypes().size() == constructor.getParameterNames()
           .size(), "Mismatched parameter names against parameter types");
 
+      // ROO-3447: Append comments if exists
+      CommentStructure commentStructure = constructor.getCommentStructure();
+      if (commentStructure != null) {
+        List<AbstractComment> constructorComments = commentStructure.getBeginComments();
+        String comment = "";
+        for (AbstractComment constructorComment : constructorComments) {
+          comment = comment.concat(constructorComment.getComment() + "\n");
+        }
+
+        String[] commentLines = comment.split("\n");
+        appendFormalLine("/**");
+        for (String commentLine : commentLines) {
+          appendFormalLine(" * ".concat(commentLine));
+        }
+        appendFormalLine(" */");
+      } else {
+        // ROO-3834: Append default Javadoc if not exists a comment structure
+        appendFormalLine("/**");
+        appendFormalLine(" * TODO Auto-generated constructor documentation");
+        appendFormalLine(" * ");
+
+        // Include constructor params
+        for (JavaSymbolName param : constructor.getParameterNames()) {
+          appendFormalLine(" * @param ".concat(param.getSymbolName()));
+        }
+        appendFormalLine(" */");
+      }
+
       // Append annotations
       for (final AnnotationMetadata annotation : constructor.getAnnotations()) {
         appendIndent();

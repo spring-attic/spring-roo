@@ -191,6 +191,24 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
       }
     }
 
+    // ROO-3834: Append Javadoc
+    if (constructor.getCommentStructure() != null) {
+
+      // if the field has annotations, add JavaDoc comments to the first
+      // annotation
+      if (annotations != null && annotations.size() > 0) {
+        AnnotationExpr firstAnnotation = annotations.get(0);
+
+        JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(firstAnnotation,
+            constructor.getCommentStructure());
+
+        // Otherwise, add comments to the field declaration line
+      } else {
+        JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(d,
+            constructor.getCommentStructure());
+      }
+    }
+
     // Add the constructor to the end of the compilation unit
     members.add(d);
   }
