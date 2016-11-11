@@ -1,5 +1,14 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -16,6 +25,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -32,14 +42,6 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
 /**
  * Metadata for {@link RooJpaRepositoryCustomImpl}.
  *
@@ -49,6 +51,7 @@ import java.util.TreeMap;
  */
 public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
+  private static final String CONSTANT_SEPARATOR = "_";
   private static final String PROVIDES_TYPE_STRING = RepositoryJpaCustomImplMetadata.class
       .getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
@@ -70,6 +73,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
   final private Map<JavaType, Boolean> typesAreProjections;
   final private JavaType entityQtype;
   final private JpaEntityMetadata entityMetadata;
+
+  private Map<String, FieldMetadata> constantsForFields;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -156,6 +161,9 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     // Get inner parameter of default return type (enclosed inside Page);
     this.defaultReturnType = defaultReturnType;
+
+    // Initialize constants for fields map
+    constantsForFields = new HashMap<String, FieldMetadata>();
 
     // Get repository that needs to be implemented
     ensureGovernorImplements(annotationValues.getRepository());
@@ -278,8 +286,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       while (iterator.hasNext()) {
         FieldMetadata field = iterator.next();
         String fieldName = field.getFieldName().getSymbolName();
-        mappingBuilderLine.append(String.format("\n\t\t\t.map(\"%s\", %s.%s)", fieldName,
-            entityVariable, fieldName));
+        mappingBuilderLine.append(String.format("\n\t\t\t.map(%s, %s.%s)",
+            getConstantForField(fieldName), entityVariable, fieldName));
       }
     } else {
 
@@ -288,8 +296,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       Iterator<Pair<String, String>> iterator = projectionFields.iterator();
       while (iterator.hasNext()) {
         Entry<String, String> entry = iterator.next();
-        mappingBuilderLine.append(String.format("\n\t\t\t.map(\"%s\", %s)", entry.getKey(),
-            entry.getValue()));
+        mappingBuilderLine.append(String.format("\n\t\t\t.map(%s, %s)",
+            getConstantForField(entry.getKey()), entry.getValue()));
       }
     }
     mappingBuilderLine.append(";");
@@ -313,14 +321,63 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     // instance
   }
 
+
   /**
-   * Builds the query return sentence
-   *
-   * @param bodyBuilder ITD boidy builder
-   * @param pageable the Page implementation variable name
-   * @param entityVariable the name of the variable owning the query
-   * @param projection the projection expression for returning the query
+   * This method returns the associated constant to the provided
+   * fieldName. 
+   * 
+   * If doesn't exists any constat defined to the provided fieldName
+   * this method will create a new one.
+   * 
+   * If exists, this method will return the constant.
+   * 
+   * @param fieldName
+   * @return
    */
+  private JavaSymbolName getConstantForField(String fieldName) {
+    Validate.notEmpty(fieldName, "ERROR: You must provide a valid fieldName to be able to generate"
+        + " the finder content");
+
+    // If already created, return the existing constant associated 
+    // to this field
+    if (constantsForFields.get(fieldName) != null) {
+      return constantsForFields.get(fieldName).getFieldName();
+    }
+
+    // If not exists, generate it and then, return its name
+    String[] fieldNameParts = StringUtils.splitByCharacterTypeCamelCase(fieldName);
+    String constantName = "";
+    for (String part : fieldNameParts) {
+      constantName = constantName.concat(part).concat(CONSTANT_SEPARATOR);
+    }
+
+    Validate.notEmpty(constantName, "ERROR: Some error appears during field constant generation.");
+
+    // Creating the new constant name
+    JavaSymbolName constantSymbolName =
+        new JavaSymbolName(constantName.substring(0,
+            constantName.length() - CONSTANT_SEPARATOR.length()).toUpperCase());
+
+    // Creating field and adding it to the builder
+    FieldMetadataBuilder constantField =
+        new FieldMetadataBuilder(getId(), Modifier.PRIVATE + Modifier.STATIC + Modifier.FINAL,
+            constantSymbolName, JavaType.STRING, "\"".concat(fieldName).concat("\""));
+    ensureGovernorHasField(constantField);
+
+    // Cache it to prevent generate the same constant again
+    constantsForFields.put(fieldName, constantField.build());
+
+    return constantSymbolName;
+  }
+
+  /**
+     * Builds the query return sentence
+     *
+     * @param bodyBuilder ITD boidy builder
+     * @param pageable the Page implementation variable name
+     * @param entityVariable the name of the variable owning the query
+     * @param projection the projection expression for returning the query
+     */
   private void buildQueryResult(InvocableMemberBodyBuilder bodyBuilder, JavaSymbolName pageable,
       String entityVariable, JavaType projection, JavaType returnType) {
 
@@ -432,8 +489,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       while (iterator.hasNext()) {
         FieldMetadata field = iterator.next();
         String entityFieldName = field.getFieldName().getSymbolName();
-        mappingBuilderLine.append(String.format("\n\t\t\t.map(\"%s\", %s.%s)", entityFieldName,
-            entityVariable, entityFieldName));
+        mappingBuilderLine.append(String.format("\n\t\t\t.map(%s, %s.%s)",
+            getConstantForField(entityFieldName), entityVariable, entityFieldName));
       }
     } else {
 
@@ -442,8 +499,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       Iterator<Pair<String, String>> iterator = projectionFields.iterator();
       while (iterator.hasNext()) {
         Pair<String, String> entry = iterator.next();
-        mappingBuilderLine.append(String.format("\n\t\t\t.map(\"%s\", %s)", entry.getKey(),
-            entry.getValue()));
+        mappingBuilderLine.append(String.format("\n\t\t\t.map(%s, %s)",
+            getConstantForField(entry.getKey()), entry.getValue()));
       }
     }
     mappingBuilderLine.append(";");
@@ -536,8 +593,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       while (iterator.hasNext()) {
         FieldMetadata field = iterator.next();
         String fieldName = field.getFieldName().getSymbolName();
-        mappingBuilderLine.append(String.format("\n\t\t\t.map(\"%s\", %s.%s)", fieldName,
-            entityVariable, fieldName));
+        mappingBuilderLine.append(String.format("\n\t\t\t.map(%s, %s.%s)",
+            getConstantForField(fieldName), entityVariable, fieldName));
       }
     } else {
 
@@ -546,8 +603,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       Iterator<Pair<String, String>> iterator = projectionFields.iterator();
       while (iterator.hasNext()) {
         Entry<String, String> entry = iterator.next();
-        mappingBuilderLine.append(String.format("\n\t\t\t.map(\"%s\", %s)", entry.getKey(),
-            entry.getValue()));
+        mappingBuilderLine.append(String.format("\n\t\t\t.map(%s, %s)",
+            getConstantForField(entry.getKey()), entry.getValue()));
       }
     }
     mappingBuilderLine.append(";");
