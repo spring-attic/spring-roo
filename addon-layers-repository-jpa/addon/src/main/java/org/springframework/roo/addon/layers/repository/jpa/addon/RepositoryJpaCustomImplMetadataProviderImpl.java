@@ -3,6 +3,15 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM;
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -16,7 +25,6 @@ import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.FinderOperations;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.FinderOperationsImpl;
-import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderParameter;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.PartTree;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -45,14 +53,6 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.logging.Logger;
 
 /**
  * Implementation of {@link RepositoryJpaCustomImplMetadataProvider}.
@@ -439,6 +439,33 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
       // Exclude id fields
       if (field.getAnnotation(JpaJavaType.ID) != null
           || field.getAnnotation(JpaJavaType.EMBEDDED_ID) != null) {
+        continue;
+      }
+
+      // Exclude static fields
+      int staticFinal = Modifier.STATIC + Modifier.FINAL;
+      int publicStatic = Modifier.PUBLIC + Modifier.STATIC;
+      int publicStaticFinal = Modifier.PUBLIC + Modifier.STATIC + Modifier.FINAL;
+      int privateStatic = Modifier.PRIVATE + Modifier.STATIC;
+      int privateStaticFinal = Modifier.PRIVATE + Modifier.STATIC + Modifier.FINAL;
+
+      if (field.getModifier() == Modifier.STATIC || field.getModifier() == staticFinal
+          || field.getModifier() == publicStatic || field.getModifier() == publicStaticFinal
+          || field.getModifier() == privateStatic || field.getModifier() == privateStaticFinal) {
+        continue;
+      }
+
+      // Exclude transient fields and annotated fields with @Transient
+      int transientFinal = Modifier.TRANSIENT + Modifier.FINAL;
+      int publicTransient = Modifier.PUBLIC + Modifier.TRANSIENT;
+      int publicTransientFinal = Modifier.PUBLIC + Modifier.TRANSIENT + Modifier.FINAL;
+      int privateTransient = Modifier.PRIVATE + Modifier.TRANSIENT;
+      int privateTransientFinal = Modifier.PRIVATE + Modifier.TRANSIENT + Modifier.FINAL;
+      if (field.getAnnotation(JpaJavaType.TRANSIENT) != null
+          || field.getModifier() == Modifier.TRANSIENT || field.getModifier() == transientFinal
+          || field.getModifier() == publicTransient || field.getModifier() == publicTransientFinal
+          || field.getModifier() == privateTransient
+          || field.getModifier() == privateTransientFinal) {
         continue;
       }
 

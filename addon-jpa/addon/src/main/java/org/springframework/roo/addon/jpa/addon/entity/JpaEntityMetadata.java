@@ -70,6 +70,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   private FieldMetadata identifierField;
   private FieldMetadata versionField;
   private ClassOrInterfaceTypeDetails entityDetails;
+  private FieldMetadata iterableToAddCantBeNullConstant;
+  private FieldMetadata iterableToRemoveCantBeNullConstant;
 
   private final Map<String, RelationInfo> relationInfos;
 
@@ -1087,9 +1089,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     importResolver.addImport(SpringJavaType.ASSERT);
 
     // Assert.notNull({param}, "The given Iterable of items to remove can't be null!");
-    builder.appendFormalLine(String.format(
-        "Assert.notNull(%s, \"The given Iterable of items to remove can't be null!\");",
-        parameterName));
+    builder.appendFormalLine(String.format("Assert.notNull(%s, %s);", parameterName,
+        getIterableToRemoveCantBeNullConstant()));
 
     // for ({childType} item : {param}) {
     builder.appendFormalLine(String.format("for (%s item : %s) {", childType.getSimpleTypeName(),
@@ -1134,9 +1135,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     importResolver.addImport(SpringJavaType.ASSERT);
 
     // Assert.notNull({param}, "The given Iterable of items to remove can't be null!");
-    builder.appendFormalLine(String.format(
-        "Assert.notNull(%s, \"The given Iterable of items to remove can't be null!\");",
-        parameterName));
+    builder.appendFormalLine(String.format("Assert.notNull(%s, %s);", parameterName,
+        getIterableToRemoveCantBeNullConstant()));
 
     // for ({childType} item : {param}) {
     builder.appendFormalLine(String.format("for (%s item : %s) {", childType.getSimpleTypeName(),
@@ -1300,9 +1300,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     importResolver.addImport(SpringJavaType.ASSERT);
 
     // Assert.notNull({param}, "The given Iterable of items to add can't be null!");
-    builder.appendFormalLine(String
-        .format("Assert.notNull(%s, \"The given Iterable of items to add can't be null!\");",
-            parameterName));
+    builder.appendFormalLine(String.format("Assert.notNull(%s, %s);", parameterName,
+        getIterableToAddCantBeNullConstant()));
 
     // for ({childType} item : {param}) {
     builder.appendFormalLine(String.format("for (%s item : %s) {", childType.getSimpleTypeName(),
@@ -1322,15 +1321,65 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   }
 
   /**
-   * Build add method body for ManyToMany relation
-   *
-   * @param field
-   * @param mappedBy
-   * @param parameterName
-   * @param childType
-   * @param builder
-   * @param importResolver
+   * This method obtains the constant that contains the message 
+   * "The given Iterable of items to add can't be null!".
+   * 
+   * @return name of the generated constant
    */
+  private JavaSymbolName getIterableToAddCantBeNullConstant() {
+
+    // Check if iterableCantBeNullConstant already exists
+    if (iterableToAddCantBeNullConstant != null) {
+      return iterableToAddCantBeNullConstant.getFieldName();
+    }
+
+    // If not exists, generate a new one and include into builder
+    FieldMetadataBuilder constant =
+        new FieldMetadataBuilder(getId(), Modifier.PRIVATE + Modifier.STATIC + Modifier.FINAL,
+            new JavaSymbolName("ITERABLE_TO_ADD_CANT_BE_NULL_MESSAGE"), JavaType.STRING,
+            "\"The given Iterable of items to add can't be null!\"");
+    ensureGovernorHasField(constant);
+
+    iterableToAddCantBeNullConstant = constant.build();
+
+    return iterableToAddCantBeNullConstant.getFieldName();
+  }
+
+  /**
+   * This method obtains the constant that contains the message 
+   * "The given Iterable of items to remove can't be null!".
+   * 
+   * @return name of the generated constant
+   */
+  private JavaSymbolName getIterableToRemoveCantBeNullConstant() {
+
+    // Check if iterableCantBeNullConstant already exists
+    if (iterableToRemoveCantBeNullConstant != null) {
+      return iterableToRemoveCantBeNullConstant.getFieldName();
+    }
+
+    // If not exists, generate a new one and include into builder
+    FieldMetadataBuilder constant =
+        new FieldMetadataBuilder(getId(), Modifier.PRIVATE + Modifier.STATIC + Modifier.FINAL,
+            new JavaSymbolName("ITERABLE_TO_REMOVE_CANT_BE_NULL_MESSAGE"), JavaType.STRING,
+            "\"The given Iterable of items to add can't be null!\"");
+    ensureGovernorHasField(constant);
+
+    iterableToRemoveCantBeNullConstant = constant.build();
+
+    return iterableToRemoveCantBeNullConstant.getFieldName();
+  }
+
+  /**
+     * Build add method body for ManyToMany relation
+     *
+     * @param field
+     * @param mappedBy
+     * @param parameterName
+     * @param childType
+     * @param builder
+     * @param importResolver
+     */
   private void buildAddManyToManyBody(final FieldMetadata field, final String mappedBy,
       final JavaSymbolName parameterName, final JavaType childType,
       final InvocableMemberBodyBuilder builder, ImportRegistrationResolver importResolver) {
@@ -1348,9 +1397,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     importResolver.addImport(SpringJavaType.ASSERT);
 
     // Assert.notNull({param}, "The given Iterable of items to add can't be null!");
-    builder.appendFormalLine(String
-        .format("Assert.notNull(%s, \"The given Iterable of items to add can't be null!\");",
-            parameterName));
+    builder.appendFormalLine(String.format("Assert.notNull(%s, %s);", parameterName,
+        getIterableToAddCantBeNullConstant()));
 
     // for ({childType} item : {param}) {
     builder.appendFormalLine(String.format("for (%s item : %s) {", childType.getSimpleTypeName(),
