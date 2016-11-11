@@ -112,6 +112,9 @@ public class ControllerOperationsImpl implements ControllerOperations {
       "1.0.0.BUILD-SNAPSHOT");
   private static final Dependency SPRINGLETS_WEB_STARTER = new Dependency("io.springlets",
       "springlets-boot-starter-web", "${springlets.version}");
+  private static final Property TRACEE_PROPERTY = new Property("tracee.version", "1.1.2");
+  private static final Dependency TRACEE_SPRINGMVC = new Dependency("io.tracee.binding",
+      "tracee-springmvc", "${tracee.version}");
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
@@ -156,6 +159,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
     getProjectOperations().addDependency(module.getModuleName(),
         new Dependency("joda-time", "joda-time", null));
 
+    // Add TracEE dependency and property
+    getProjectOperations().addProperty("", TRACEE_PROPERTY);
+    getProjectOperations().addDependency(module.getModuleName(), TRACEE_SPRINGMVC);
+
+
     // Include Springlets Starter project dependencies and properties
     getProjectOperations().addProperty("", SPRINGLETS_VERSION_PROPERTY);
 
@@ -164,8 +172,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     // Create WebMvcConfiguration.java class
     JavaType webMvcConfiguration =
-        new JavaType(String.format("%s.config.WebMvcConfiguration", module.getGroupId()),
-            module.getModuleName());
+        new JavaType(String.format("%s.config.WebMvcConfiguration", getTypeLocationService()
+            .getTopLevelPackageForModule(module)), module.getModuleName());
 
     Validate.notNull(webMvcConfiguration.getModule(),
         "ERROR: Module name is required to generate a valid JavaType");
@@ -255,8 +263,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     // Create DomainModelModule.java class
     JavaType domainModelModule =
-        new JavaType(String.format("%s.config.jackson.DomainModelModule", module.getGroupId()),
-            module.getModuleName());
+        new JavaType(String.format("%s.config.jackson.DomainModelModule", getTypeLocationService()
+            .getTopLevelPackageForModule(module)), module.getModuleName());
 
     Validate.notNull(domainModelModule.getModule(),
         "ERROR: Module name is required to generate a valid JavaType");
@@ -698,7 +706,9 @@ public class ControllerOperationsImpl implements ControllerOperations {
     // Set package
     String packageName = null;
     if (StringUtils.isNotBlank(packageLastElement)) {
-      packageName = String.format("%s.%s", module.getGroupId(), packageLastElement);
+      packageName =
+          String.format("%s.%s", getTypeLocationService().getTopLevelPackageForModule(module),
+              packageLastElement);
     } else {
       packageName = module.getGroupId();
     }

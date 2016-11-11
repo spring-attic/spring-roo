@@ -34,6 +34,8 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
   private static final String PROVIDES_TYPE_STRING = WebMvcConfigurationMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
+  private static final JavaType TRACEE_INTERCEPTOR_JAVATYPE = new JavaType(
+      "io.tracee.binding.springmvc.TraceeInterceptor");
 
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
@@ -272,6 +274,10 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     bodyBuilder.appendFormalLine("registry.addInterceptor(localeChangeInterceptor());");
+
+    // Add TracEE interceptor
+    bodyBuilder.appendFormalLine("registry.addInterceptor(new %s());",
+        getNameOfJavaType(TRACEE_INTERCEPTOR_JAVATYPE));
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
