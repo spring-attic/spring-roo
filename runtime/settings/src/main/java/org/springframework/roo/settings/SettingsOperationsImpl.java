@@ -67,7 +67,8 @@ public class SettingsOperationsImpl implements SettingsOperations {
         getProjectSettingsService().removeProperty(name);
 
       } else {
-        LOGGER.log(Level.INFO, "WARNING: Property {0} is not defined on current settings", name);
+        LOGGER.log(Level.INFO,
+            String.format("WARNING: Property '%s' is not defined on current settings", name));
       }
     } else {
       LOGGER
