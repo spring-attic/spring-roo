@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.security.addon.security.providers;
 
-import java.lang.reflect.Modifier;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -8,19 +7,8 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.application.config.ApplicationConfigService;
-import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.TypeManagementService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
-import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
