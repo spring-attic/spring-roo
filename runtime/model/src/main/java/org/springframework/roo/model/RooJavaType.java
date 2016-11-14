@@ -163,6 +163,9 @@ public final class RooJavaType {
   public static final JavaType ROO_WS_ENDPOINTS = new JavaType(
       "org.springframework.roo.addon.ws.annotations.RooWsEndpoints");
 
+  public static final JavaType ROO_JAXB_ENTITY = new JavaType(
+      "org.springframework.roo.addon.ws.annotations.jaxb.RooJaxbEntity");
+
   /**
    * Constructor is private to prevent instantiation
    */

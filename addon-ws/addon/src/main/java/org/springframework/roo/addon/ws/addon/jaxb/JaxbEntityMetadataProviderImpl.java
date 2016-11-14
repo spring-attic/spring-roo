@@ -1,33 +1,37 @@
-package org.springframework.roo.addon.ws.addon;
+package org.springframework.roo.addon.ws.addon.jaxb;
 
-import static org.springframework.roo.model.RooJavaType.ROO_SEI_IMPL;
+import static org.springframework.roo.model.RooJavaType.ROO_JAXB_ENTITY;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
@@ -35,17 +39,18 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 /**
- * Implementation of {@link SeiImplMetadataProvider}.
+ * Implementation of {@link JaxbEntityMetadataProvider}.
  *
  * @author Juan Carlos García
  * @since 2.0
  */
 @Component
 @Service
-public class SeiImplMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider
-    implements SeiImplMetadataProvider {
+public class JaxbEntityMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider
+    implements JaxbEntityMetadataProvider {
 
-  protected final static Logger LOGGER = HandlerUtils.getLogger(SeiImplMetadataProviderImpl.class);
+  protected final static Logger LOGGER = HandlerUtils
+      .getLogger(JaxbEntityMetadataProviderImpl.class);
 
   private final Map<JavaType, String> domainTypeToServiceMidMap =
       new LinkedHashMap<JavaType, String>();
@@ -61,7 +66,7 @@ public class SeiImplMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_CONTROLLER} as additional JavaType
+   * <li>Registers {@link RooJavaType#ROO_JAXB_ENTITY} as additional JavaType
    * that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -77,7 +82,7 @@ public class SeiImplMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
-    addMetadataTrigger(ROO_SEI_IMPL);
+    addMetadataTrigger(ROO_JAXB_ENTITY);
   }
 
   /**
@@ -93,7 +98,7 @@ public class SeiImplMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
         getProvidesType());
     this.registryTracker.close();
 
-    removeMetadataTrigger(ROO_SEI_IMPL);
+    removeMetadataTrigger(ROO_JAXB_ENTITY);
 
     CustomDataKeyDecorator keyDecorator = this.keyDecoratorTracker.getService();
     keyDecorator.unregisterMatchers(getClass());
@@ -102,18 +107,18 @@ public class SeiImplMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 
   @Override
   protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-    return SeiImplMetadata.createIdentifier(javaType, path);
+    return JaxbEntityMetadata.createIdentifier(javaType, path);
   }
 
   @Override
   protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-    final JavaType javaType = SeiImplMetadata.getJavaType(metadataIdentificationString);
-    final LogicalPath path = SeiImplMetadata.getPath(metadataIdentificationString);
+    final JavaType javaType = JaxbEntityMetadata.getJavaType(metadataIdentificationString);
+    final LogicalPath path = JaxbEntityMetadata.getPath(metadataIdentificationString);
     return PhysicalTypeIdentifier.createIdentifier(javaType, path);
   }
 
   public String getItdUniquenessFilenameSuffix() {
-    return "WS_Endpoint";
+    return "Jaxb_Entity";
   }
 
   @Override
@@ -144,40 +149,58 @@ public class SeiImplMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
-    // Getting annotated class details
-    ClassOrInterfaceTypeDetails endpoint =
-        governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-    AnnotationMetadata seiImplAnnotation = endpoint.getAnnotation(ROO_SEI_IMPL);
+    // Getting the annotated entity type
+    JavaType annotatedEntity = governorPhysicalTypeMetadata.getType();
 
-    AnnotationAttributeValue<?> seiAttr = seiImplAnnotation.getAttribute(new JavaSymbolName("sei"));
+    // Getting the entity details
+    ClassOrInterfaceTypeDetails entityDetails =
+        getTypeLocationService().getTypeDetails(annotatedEntity);
 
-    Validate.notNull(seiAttr,
-        "ERROR: You must provide a valid SEI to be able to generate a Endpoint.");
+    // Getting the plural
+    String entityPlural = getPluralService().getPlural(entityDetails);
 
-    // Getting SEI from annotation
-    JavaType seiType = (JavaType) seiAttr.getValue();
+    // Getting JavaBean Metadata
+    String javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails);
+    JavaBeanMetadata javaBeanMetadata =
+        (JavaBeanMetadata) getMetadataService().get(javaBeanMetadataKey);
 
-    // Getting SEI details
-    ClassOrInterfaceTypeDetails seiTypeDetails = getTypeLocationService().getTypeDetails(seiType);
+    // Getting JpaEntity Metadata
+    String jpaEntityMetadataKey = JpaEntityMetadata.createIdentifier(entityDetails);
+    JpaEntityMetadata jpaEntityMetadata =
+        (JpaEntityMetadata) getMetadataService().get(jpaEntityMetadataKey);
 
-    // Getting SEI Metadata
-    final String seiMetadataId =
-        SeiMetadata.createIdentifier(seiTypeDetails.getType(),
-            PhysicalTypeIdentifier.getPath(seiTypeDetails.getDeclaredByMetadataId()));
-    final SeiMetadata seiMetadata = (SeiMetadata) getMetadataService().get(seiMetadataId);
+    // Getting the @OneToMany and @ManyToOne getters
+    Map<String, String> entityNames = new HashMap<String, String>();
+    List<MethodMetadata> oneToManyGetters = new ArrayList<MethodMetadata>();
+    List<MethodMetadata> manyToOneGetters = new ArrayList<MethodMetadata>();
+    for (FieldMetadata field : entityDetails.getDeclaredFields()) {
+      // Getting getter for the oneToMany field
+      MethodMetadata getter = javaBeanMetadata.getAccesorMethod(field);
+      if (getter != null
+          && (field.getAnnotation(JpaJavaType.ONE_TO_MANY) != null || field
+              .getAnnotation(JpaJavaType.MANY_TO_MANY) != null)) {
+        String getterTypeName =
+            getter.getReturnType().getBaseType().getSimpleTypeName().toLowerCase();
+        oneToManyGetters.add(getter);
+        entityNames.put(getterTypeName, getPluralService().getPlural(getterTypeName));
+      } else if (getter != null && field.getAnnotation(JpaJavaType.MANY_TO_ONE) != null) {
+        String getterTypeName = getter.getReturnType().getSimpleTypeName().toLowerCase();
+        manyToOneGetters.add(getter);
+        entityNames.put(getterTypeName, getPluralService().getPlural(getterTypeName));
+      }
+    }
 
-    // Getting SEI methods from service and save it
-    Map<MethodMetadata, MethodMetadata> seiMethods = seiMetadata.getSeiMethods();
+    // Getting the identifier accessor only if the annotated class doesn't have
+    // parent
+    MethodMetadata identifierAccessor = null;
+    if (jpaEntityMetadata != null && jpaEntityMetadata.getParent() == null) {
+      identifierAccessor = jpaEntityMetadata.getIdentifierAccessor().build();
+    }
 
-    // Registering dependency between SeiMetadata and this one, to be able to
-    // update Endpoint if SEI changes
-    final String seiMetadataKey = SeiMetadata.createIdentifier(seiTypeDetails);
-    registerDependency(seiMetadataKey, metadataIdentificationString);
-
-
-    return new SeiImplMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, getProjectOperations().getTopLevelPackage(""), endpoint,
-        seiType, seiMetadata.getService(), seiMethods);
+    return new JaxbEntityMetadata(metadataIdentificationString, aspectName,
+        governorPhysicalTypeMetadata, getProjectOperations().getTopLevelPackage(""),
+        annotatedEntity, entityPlural, identifierAccessor, oneToManyGetters, manyToOneGetters,
+        entityNames);
   }
 
   protected void registerDependency(final String upstreamDependency,
@@ -194,7 +217,7 @@ public class SeiImplMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
   }
 
   public String getProvidesType() {
-    return SeiImplMetadata.getMetadataIdentiferType();
+    return JaxbEntityMetadata.getMetadataIdentiferType();
   }
 
   // OSGI Services
@@ -202,5 +225,8 @@ public class SeiImplMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
     return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
   }
 
+  protected PluralService getPluralService() {
+    return serviceInstaceManager.getServiceInstance(this, PluralService.class);
+  }
 
 }

@@ -33,7 +33,7 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -47,6 +47,7 @@ import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -416,6 +417,22 @@ public class WsOperationsImpl implements WsOperations {
         getTypeLocationService().getTypeDetails(service);
     Validate.notNull(serviceTypeDetails, "ERROR: Provide an existing service");
 
+    // Check if provided service is annotated with @RooService
+    AnnotationMetadata serviceAnnotation =
+        serviceTypeDetails.getAnnotation(RooJavaType.ROO_SERVICE);
+    Validate
+        .notNull(serviceAnnotation, "ERROR: Provide a valid service annotated with @RooService");
+
+    // Check if provided service has a related entity 
+    AnnotationAttributeValue<JavaType> entityAttr = serviceAnnotation.getAttribute("entity");
+    Validate.notNull(entityAttr,
+        "ERROR: The provided service is annotated with @RooService but doesn't "
+            + "contains the 'entity' attribute");
+    JavaType relatedEntity = entityAttr.getValue();
+    Validate.notNull(relatedEntity,
+        "ERROR: The provided service is annotated with @RooService but doesn't "
+            + "contains a valid entity in the 'entity' attribute");
+
     // Check if provided SEI is located in an application module
     if (!isLocatedInApplicationModule(sei) && !force) {
       LOGGER.log(Level.INFO, "ERROR: The provided SEI is not located in an application module.");
@@ -683,6 +700,112 @@ public class WsOperationsImpl implements WsOperations {
     // Write config class on disk
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilderConfig.build());
 
+    // After create the SEI and the Endpoint, is necessary to annotate related entity with
+    // some JAX-B annotations if has not been annotated before
+
+    ClassOrInterfaceTypeDetails entityDetails =
+        getTypeLocationService().getTypeDetails(relatedEntity);
+    if (entityDetails != null) {
+      // Annotate the entity with @RooJaxbEntity. If this entity has a super class or that 
+      // super class has another super class, etc. is necessary to annotate it too.
+      annotateClassIfNeeded(entityDetails);
+      // Also, is necessary to annotate @OneToMany, @ManyToOne and @ManyToMany fields detected in 
+      // this class and in the super classes.
+      annotateRelatedFieldsIfNeeded(entityDetails);
+    }
+
+  }
+
+  /**
+   * This method annotates the provided class with @RooJaxbEntity. If this class extends
+   * other classes, and that classes annotates other classes, etc. 
+   * this method will annotate them.
+   * 
+   * @param entityDetails
+   */
+  private void annotateClassIfNeeded(ClassOrInterfaceTypeDetails entityDetails) {
+    List<JavaType> extendsTypes = entityDetails.getExtendsTypes();
+    for (JavaType extendsType : extendsTypes) {
+      ClassOrInterfaceTypeDetails extendsTypeDetails =
+          getTypeLocationService().getTypeDetails(extendsType);
+      if (extendsTypeDetails != null
+          && extendsTypeDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
+
+        // If annotation has not been included before, add it.
+        if (extendsTypeDetails.getAnnotation(RooJavaType.ROO_JAXB_ENTITY) == null) {
+          ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+              new ClassOrInterfaceTypeDetailsBuilder(extendsTypeDetails);
+          // Include @RooJaxbEntity annotation
+          AnnotationMetadataBuilder jaxbEntityAnnotation =
+              new AnnotationMetadataBuilder(RooJavaType.ROO_JAXB_ENTITY);
+          cidBuilder.addAnnotation(jaxbEntityAnnotation);
+
+          // Write entity class on disk
+          getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+        }
+
+
+        // Repeat the same process until all super classes 
+        // have been annotated
+        if (!extendsTypeDetails.getExtendsTypes().isEmpty()) {
+          annotateClassIfNeeded(extendsTypeDetails);
+        }
+      }
+    }
+
+    // If annotation has not been included before, add it.
+    if (entityDetails.getAnnotation(RooJavaType.ROO_JAXB_ENTITY) == null) {
+      ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+          new ClassOrInterfaceTypeDetailsBuilder(entityDetails);
+      // Include @RooJaxbEntity annotation
+      AnnotationMetadataBuilder jaxbEntityAnnotation =
+          new AnnotationMetadataBuilder(RooJavaType.ROO_JAXB_ENTITY);
+      cidBuilder.addAnnotation(jaxbEntityAnnotation);
+
+      // Write entity class on disk
+      getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
+
+  }
+
+  /**
+   * This method annotates the provided class with @RooJaxbEntity. If this class extends
+   * other classes, and that classes annotates other classes, etc. 
+   * this method will annotate them.
+   * 
+   * @param entityDetails
+   */
+  private void annotateRelatedFieldsIfNeeded(ClassOrInterfaceTypeDetails entityDetails) {
+    // Getting details of the provided entity
+    MemberDetails memberDetails =
+        getMemberDetailsScanner().getMemberDetails(getClass().getName(), entityDetails);
+    // Getting all its fields
+    for (FieldMetadata entityField : memberDetails.getFields()) {
+      // If is a relation field, should be annotated
+      if (entityField.getAnnotation(JpaJavaType.ONE_TO_ONE) != null
+          || entityField.getAnnotation(JpaJavaType.ONE_TO_MANY) != null
+          || entityField.getAnnotation(JpaJavaType.MANY_TO_ONE) != null
+          || entityField.getAnnotation(JpaJavaType.MANY_TO_MANY) != null) {
+
+
+        // Getting details of the annotated field
+        JavaType fieldType = entityField.getFieldType();
+
+        if (fieldType.isCommonCollectionType()) {
+          fieldType = fieldType.getBaseType();
+          System.out.println(fieldType.toString());
+        }
+
+        ClassOrInterfaceTypeDetails fieldDetails =
+            getTypeLocationService().getTypeDetails(fieldType);
+
+        // If is a valid entity
+        if (fieldDetails != null && fieldDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
+          // Delegates in annotateClassIfNeeded to annotate the related class field
+          annotateClassIfNeeded(fieldDetails);
+        }
+      }
+    }
   }
 
   @Override

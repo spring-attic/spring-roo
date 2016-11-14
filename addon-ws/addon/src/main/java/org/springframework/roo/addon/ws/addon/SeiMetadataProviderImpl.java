@@ -31,6 +31,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
@@ -177,7 +178,8 @@ public class SeiMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadat
     registerDependency(servicePhysicalTypeKey, metadataIdentificationString);
 
     return new SeiMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata,
-        cid, serviceType, serviceDetails.getMethods());
+        getProjectOperations().getTopLevelPackage(""), cid, serviceType,
+        serviceDetails.getMethods());
   }
 
   protected void registerDependency(final String upstreamDependency,
@@ -198,5 +200,8 @@ public class SeiMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadat
   }
 
   // OSGI Services
+  protected ProjectOperations getProjectOperations() {
+    return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
+  }
 
 }

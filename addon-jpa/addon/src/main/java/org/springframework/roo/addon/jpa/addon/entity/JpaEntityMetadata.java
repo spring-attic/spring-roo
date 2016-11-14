@@ -337,7 +337,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    *
    * @return the accessor (never returns null)
    */
-  private MethodMetadataBuilder getIdentifierAccessor() {
+  public MethodMetadataBuilder getIdentifierAccessor() {
     if (parent != null) {
       return parent.getIdentifierAccessor();
     }
@@ -1477,6 +1477,13 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    */
   public FieldMetadata getCompositionRelationField() {
     return compositionRelationField;
+  }
+
+  /**
+   * @return metadata of the parent
+   */
+  public JpaEntityMetadata getParent() {
+    return this.parent;
   }
 
   /**

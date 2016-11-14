@@ -223,8 +223,19 @@ public class ItdSourceFileComposer {
 
     content = true;
 
-    appendIndent();
-    append("declare precedence: ");
+
+    // If only exists one aspect, means that 
+    // it should take the lower precedence.
+    if (aspects.size() == 1) {
+      appendFormalLine("/*");
+      appendFormalLine(" * This Aspect takes the lower precedence");
+      appendFormalLine(" */");
+      appendIndent();
+      append("declare precedence: *, ");
+    } else {
+      appendIndent();
+      append("declare precedence: ");
+    }
 
     List<String> aspectNames = new ArrayList<String>(aspects.size());
 
@@ -491,7 +502,8 @@ public class ItdSourceFileComposer {
       append("declare @method: ");
       append(Modifier.toString(methodDetails.getMethodMetadata().getModifier()));
       append(" ");
-      append(methodDetails.getMethodMetadata().getReturnType().getNameIncludingTypeParameters());
+      append(methodDetails.getMethodMetadata().getReturnType()
+          .getNameIncludingTypeParameters(false, resolver));
       append(" ");
       append(introductionTo.getSimpleTypeName());
       append(".");

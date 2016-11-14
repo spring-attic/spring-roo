@@ -131,19 +131,15 @@ public class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuild
     if (declaredMethodAnnotationDetails == null) {
       return;
     }
-    final JavaType declaredBy =
-        PhysicalTypeIdentifier.getJavaType(declaredMethodAnnotationDetails.getMethodMetadata()
-            .getDeclaredByMetadataId());
     final boolean hasAnnotation =
         MemberFindingUtils.getAnnotationOfType(declaredMethodAnnotationDetails.getMethodMetadata()
             .getAnnotations(), declaredMethodAnnotationDetails.getMethodAnnotation()
             .getAnnotationType()) != null;
     Validate.isTrue(!hasAnnotation,
-        "Method annotation '@%s' is already present on the target field '%s.%s' (ITD target '%s')",
+        "Method annotation '@%s' is already present on the target field '%s' (ITD target '%s')",
         declaredMethodAnnotationDetails.getMethodAnnotation().getAnnotationType()
-            .getSimpleTypeName(), declaredBy.getFullyQualifiedTypeName(),
-        declaredMethodAnnotationDetails.getMethodMetadata().getMethodName().getSymbolName(),
-        aspect.getFullyQualifiedTypeName());
+            .getSimpleTypeName(), declaredMethodAnnotationDetails.getMethodMetadata()
+            .getMethodName().getSymbolName(), aspect.getFullyQualifiedTypeName());
     methodAnnotations.add(declaredMethodAnnotationDetails);
   }
 
@@ -161,7 +157,7 @@ public class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuild
    */
   public void setDeclarePrecedence(JavaType... aspects) {
     if (aspects != null && aspects.length > 0) {
-      Validate.isTrue(aspects.length > 1, "precedence must contain, at least, 2 aspects");
+      Validate.isTrue(aspects.length >= 1, "precedence must contain, at least, 1 aspect");
     }
     CollectionUtils.populate(declarePrecedence, Arrays.asList(aspects));
   }

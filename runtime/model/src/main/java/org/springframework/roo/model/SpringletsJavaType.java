@@ -38,6 +38,16 @@ public class SpringletsJavaType {
   public static final JavaType SPRINGLETS_JMS_SENDING_SERVICE = new JavaType(
       "io.springlets.jms.JmsMessageSenderService");
 
+  // Adapters
+  public static final JavaType SPRINGLETS_GLOBAL_SEARCH_ADAPTER = new JavaType(
+      "io.springlets.data.domain.jaxb.GlobalSearchAdapter");
+  public static final JavaType SPRINGLETS_ITERABLE_ADAPTER = new JavaType(
+      "io.springlets.data.domain.jaxb.IterableAdapter");
+  public static final JavaType SPRINGLETS_PAGE_ADAPTER = new JavaType(
+      "io.springlets.data.domain.jaxb.PageAdapter");
+  public static final JavaType SPRINGLETS_PAGEABLE_ADAPTER = new JavaType(
+      "io.springlets.data.domain.jaxb.PageableAdapter");
+
 
   /**
    * Constructor is private to prevent instantiation
