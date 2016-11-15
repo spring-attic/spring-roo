@@ -81,8 +81,6 @@ public class JpaCommands implements CommandMarker {
   // Annotations
   private static final AnnotationMetadataBuilder ROO_EQUALS_BUILDER =
       new AnnotationMetadataBuilder(ROO_EQUALS);
-  private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER =
-      new AnnotationMetadataBuilder(ROO_JAVA_BEAN);
   private static final AnnotationMetadataBuilder ROO_SERIALIZABLE_BUILDER =
       new AnnotationMetadataBuilder(ROO_SERIALIZABLE);
   private static final AnnotationMetadataBuilder ROO_TO_STRING_BUILDER =
@@ -577,7 +575,13 @@ public class JpaCommands implements CommandMarker {
     // Create entity's annotations
     final List<AnnotationMetadataBuilder> annotationBuilder =
         new ArrayList<AnnotationMetadataBuilder>();
-    annotationBuilder.add(ROO_JAVA_BEAN_BUILDER);
+    final AnnotationMetadataBuilder javaBeanAnnotationBuilder =
+        new AnnotationMetadataBuilder(ROO_JAVA_BEAN);
+    if (readOnly) {
+      // ROO-3838: "ReadOnly" entities should not have setter methods.
+      javaBeanAnnotationBuilder.addBooleanAttribute("settersByDefault", false);
+    }
+    annotationBuilder.add(javaBeanAnnotationBuilder);
     annotationBuilder.add(ROO_TO_STRING_BUILDER);
     annotationBuilder.add(getEntityAnnotationBuilder(table, schema, catalog, identifierField,
         identifierColumn, identifierType, versionField, versionColumn, versionType,
