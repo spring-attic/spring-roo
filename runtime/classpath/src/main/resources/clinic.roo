@@ -80,6 +80,8 @@ web mvc language --code es
 
 security setup --provider DEFAULT
 
+security authorize --class ~.service.impl.OwnerServiceImpl --method delete.* --roles ADMIN
+
 // FIXME!! Re-enable audit when Springlets contains audit starter
 // jpa audit setup
 // jpa audit add --entity ~.domain.Owner

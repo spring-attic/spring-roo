@@ -241,11 +241,7 @@ public class SecurityCommands implements CommandMarker {
       return;
     }
 
-    // Calculate the @PreAuthorize annotation value by provided roles
-    String value = securityOperations.getSpringSecurityAnnotationValue(roles, usernames);
-
-    // Include the @PreAuthorize annotation with the calculated value
-    securityOperations.addPreAuthorizeAnnotation(klass, methodName, value);
+    securityOperations.generateAuthorizeAnnotations(klass, methodName, roles, usernames);
   }
 
   @CliAvailabilityIndicator("security filtering")
@@ -358,17 +354,7 @@ public class SecurityCommands implements CommandMarker {
       return;
     }
 
-    // Calculate the @PreFilter / @PostFilter annotation value by provided
-    // roles
-    String value = securityOperations.getSpringSecurityAnnotationValue(roles, usernames);
-
-    if (when.equals(PRE_FILTER)) {
-      // Include the @PreFilter annotation with the calculated value
-      securityOperations.addPreFilterAnnotation(klass, methodName, value);
-    } else if (when.equals(POST_FILTER)) {
-      // Include the @PostFilter annotation with the calculated value
-      securityOperations.addPostFilterAnnotation(klass, methodName, value);
-    }
+    securityOperations.generateFilterAnnotations(klass, methodName, roles, usernames, when);
   }
 
   /**

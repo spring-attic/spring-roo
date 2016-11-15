@@ -1,17 +1,19 @@
 package org.springframework.roo.addon.security.addon.security;
 
-import java.util.List;
-
 import org.springframework.roo.addon.security.addon.security.providers.SecurityProvider;
-import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.addon.security.annotations.RooSecurityAuthorizations;
+import org.springframework.roo.addon.security.annotations.RooSecurityFilter;
+import org.springframework.roo.addon.security.annotations.RooSecurityFilters;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Feature;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.maven.Pom;
 
+import java.util.List;
+
 /**
  * Interface for {@link SecurityOperationsImpl}.
- * 
+ *
  * @author Ben Alex
  * @author Sergio Clares
  * @author Juan Carlos García
@@ -24,7 +26,7 @@ public interface SecurityOperations extends Feature {
   /**
    * Defines install operation that will be used by implementations to install
    * the necessary components of Spring Security.
-   * 
+   *
    * @param type
    *            SecurityProvider type that will be install
    * @param module
@@ -37,7 +39,7 @@ public interface SecurityOperations extends Feature {
    * Defines getAllSecurityProviders operation that will be used by
    * implementations to get all security providers registered on the Spring
    * Roo Shell.
-   * 
+   *
    * @return List with the registered security providers on the Spring Roo
    *         Shell.
    */
@@ -46,42 +48,41 @@ public interface SecurityOperations extends Feature {
   /**
    * Defines getSpringSecurityAnnotationValue method that will be used by
    * implementations to calculate the value of the Spring Security Annotations
-   * 
-   * 
+   *
+   *
    * @param roles separated comma list with the roles to include in Spring Security annotation.
    * @param usernames separated comma list with the usernames to include in Spring Security annotation
-   * 
+   *
    * @return String with the value of the Spring Security annotation
    */
   String getSpringSecurityAnnotationValue(String roles, String usernames);
 
   /**
-   * Defines addPreAuthorizeAnnotation method that will be used by
-   * implementations to include @PreAuthorize annotation in service methods.
-   * 
-   * @param klass
-   * @param methodName
-   * @param value
+   * Defines {@link RooSecurityFilters} annotation that include one or many
+   * {@link RooSecurityFilter} annotations which will be used by
+   * implementations to include {@link PreFilter} or {@link PostFilter} annotations
+   * in service methods.
+   *
+   * @param klass Class where include the annotations
+   * @param methodName Method where apply the filter
+   * @param roles Roles to apply by the filter
+   * @param usernames Usernames to apply by the filter
+   * @param when Indicate the type of filter 'PRE' (@PreFilter) or 'POST' (@PostFilter)
    */
-  void addPreAuthorizeAnnotation(JavaType klass, String methodName, String value);
+  void generateFilterAnnotations(JavaType klass, String methodName, String roles, String usernames,
+      String when);
 
   /**
-   * Defines addPreFilterAnnotation method that will be used by
-   * implementations to include @PreFilter annotation in service methods.
-   * 
-   * @param klass
-   * @param methodName
-   * @param value
+   * Defines {@link RooSecurityAuthorizations} annotation that include one or many
+   * {@link RooSecurityAuthorization} annotations which will be used by
+   * implementations to include {@link PreAuthorize} annotations
+   * in service methods.
+   *
+   * @param klass Class where include the annotations
+   * @param methodName Method where apply the authorization
+   * @param roles Roles to apply by the authorization
+   * @param usernames Usernames that have authorization
    */
-  void addPreFilterAnnotation(JavaType klass, String methodName, String value);
-
-  /**
-   * Defines addPostFilterAnnotation method that will be used by
-   * implementations to include @PostFilter annotation in service methods.
-   * 
-   * @param klass
-   * @param methodName
-   * @param value
-   */
-  void addPostFilterAnnotation(JavaType klass, String methodName, String value);
+  void generateAuthorizeAnnotations(JavaType klass, String methodName, String roles,
+      String usernames);
 }

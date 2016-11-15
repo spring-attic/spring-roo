@@ -1,10 +1,5 @@
 package org.springframework.roo.addon.security.addon.security;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -15,23 +10,33 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.pushin.PushInOperations;
 import org.springframework.roo.addon.security.addon.security.providers.SecurityProvider;
+import org.springframework.roo.addon.security.annotations.RooSecurityAuthorization;
+import org.springframework.roo.addon.security.annotations.RooSecurityFilter;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.DefaultImportMetadata;
 import org.springframework.roo.classpath.details.DefaultMethodMetadata;
-import org.springframework.roo.classpath.details.ImportMetadata;
-import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
+import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
+import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.SpringJavaType;
-import org.springframework.roo.project.Dependency;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Provides security installation services.
@@ -48,9 +53,6 @@ import org.springframework.roo.support.logging.HandlerUtils;
 public class SecurityOperationsImpl implements SecurityOperations {
 
   protected final static Logger LOGGER = HandlerUtils.getLogger(SecurityOperationsImpl.class);
-
-  private static final Dependency SPRING_SECURITY_CORE = new Dependency(
-      "org.springframework.security", "spring-security-core", null);
 
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
@@ -76,6 +78,374 @@ public class SecurityOperationsImpl implements SecurityOperations {
     // on current project
     type.install(module);
   }
+
+  public void generateFilterAnnotations(JavaType klass, String methodName, String roles,
+      String usernames, String when) {
+
+    // Get methods to annotate.
+    // With the last parameter to false, we avoid that push in action occurs.
+    List<Object> pushedElements =
+        getPushInOperations().pushIn(klass.getPackage(), klass, methodName, false);
+
+    List<AnnotationAttributeValue<?>> rooSecurityFiltersToAdd =
+        new ArrayList<AnnotationAttributeValue<?>>();
+
+    for (Object pushedElement : pushedElements) {
+      if (pushedElement instanceof DefaultMethodMetadata) {
+        DefaultMethodMetadata method = (DefaultMethodMetadata) pushedElement;
+
+        // Get parameters
+        List<AnnotationAttributeValue<?>> lstParamTypes =
+            new ArrayList<AnnotationAttributeValue<?>>();
+        List<AnnotatedJavaType> parameterTypes = method.getParameterTypes();
+        Iterator<AnnotatedJavaType> iterParamTypes = parameterTypes.iterator();
+        while (iterParamTypes.hasNext()) {
+          ClassAttributeValue parameterAttributeValue =
+              new ClassAttributeValue(new JavaSymbolName("value"), iterParamTypes.next()
+                  .getJavaType());
+          lstParamTypes.add(parameterAttributeValue);
+        }
+
+        // Generate new annotations @RooSecurityFilter
+        NestedAnnotationAttributeValue newFilter =
+            new NestedAnnotationAttributeValue(new JavaSymbolName("value"),
+                getRooSecurityFilterAnnotation(method.getMethodName().getSymbolName(),
+                    lstParamTypes, roles, usernames, when).build());
+        rooSecurityFiltersToAdd.add(newFilter);
+      }
+    }
+
+    // Get actual values of @RooSecurityFilters
+    ClassOrInterfaceTypeDetails serviceDetails = getTypeLocationService().getTypeDetails(klass);
+    ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(serviceDetails);
+
+    // Check annotation @RooSecurityFilters to delete defined annotations
+    // that will be redefined
+    AnnotationMetadata annotationFilters =
+        serviceDetails.getAnnotation(RooJavaType.ROO_SECURITY_FILTERS);
+    AnnotationMetadataBuilder annotationFiltersMetadataBuilder;
+
+    if (annotationFilters != null) {
+
+      // Getting filters from annotation
+      AnnotationAttributeValue<?> attributeFilters = annotationFilters.getAttribute("filters");
+      List<?> values = (List<?>) attributeFilters.getValue();
+      if (values != null && !values.isEmpty()) {
+        Iterator<?> valuesIt = values.iterator();
+
+        while (valuesIt.hasNext()) {
+          NestedAnnotationAttributeValue filterAnnotation =
+              (NestedAnnotationAttributeValue) valuesIt.next();
+          if (checkRooSecurityFilterMaintainAnnotation(rooSecurityFiltersToAdd, filterAnnotation)) {
+
+            // Maintain annotation if 'method', 'parameters' or 'when' are different
+            rooSecurityFiltersToAdd.add(filterAnnotation);
+
+          }
+        }
+      }
+      annotationFiltersMetadataBuilder = new AnnotationMetadataBuilder(annotationFilters);
+
+      // remove annotation
+      cidBuilder.removeAnnotation(RooJavaType.ROO_SECURITY_FILTERS);
+
+    } else {
+
+      // Doesn't exist @RooSecurityFilters, create it
+      annotationFiltersMetadataBuilder =
+          new AnnotationMetadataBuilder(RooJavaType.ROO_SECURITY_FILTERS);
+    }
+
+
+    // Add filters attribute
+    ArrayAttributeValue<AnnotationAttributeValue<?>> newFilters =
+        new ArrayAttributeValue<AnnotationAttributeValue<?>>(new JavaSymbolName("filters"),
+            rooSecurityFiltersToAdd);
+    annotationFiltersMetadataBuilder.addAttribute(newFilters);
+
+    // Include new @RooSecurityFilters annotation
+    cidBuilder.addAnnotation(annotationFiltersMetadataBuilder);
+
+    // Write on disk
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+
+  }
+
+  /**
+   * Check if {@link RooSecurityFilter} annotation should be kept
+   * or should be replaced because is defined in the annotations list to add.
+   *
+   * @param rooSecurityFiltersToAdd Annotations list to add
+   * @param filterAnnotation Annotation to check
+   * @return
+   */
+  private boolean checkRooSecurityFilterMaintainAnnotation(
+      List<AnnotationAttributeValue<?>> rooSecurityFiltersToAdd,
+      NestedAnnotationAttributeValue filterAnnotation) {
+
+    boolean maintainAnnotation = true;
+
+    String annotationMethod =
+        (String) filterAnnotation.getValue().getAttribute("method").getValue();
+    List<?> annotationParameters =
+        (List<?>) filterAnnotation.getValue().getAttribute("parameters").getValue();
+    String annotationWhen = (String) filterAnnotation.getValue().getAttribute("when").getValue();
+
+    Iterator<AnnotationAttributeValue<?>> iterParamTypes = rooSecurityFiltersToAdd.iterator();
+    while (iterParamTypes.hasNext()) {
+      NestedAnnotationAttributeValue rooSecurityFilterToAdd =
+          (NestedAnnotationAttributeValue) iterParamTypes.next();
+      String annotationMethodToAdd =
+          (String) rooSecurityFilterToAdd.getValue().getAttribute("method").getValue();
+      List<?> annotationParametersToAdd =
+          (List<?>) rooSecurityFilterToAdd.getValue().getAttribute("parameters").getValue();
+      String annotationWhenToAdd =
+          (String) rooSecurityFilterToAdd.getValue().getAttribute("when").getValue();
+
+      boolean parametersAreEquals = true;
+      if (annotationParametersToAdd.size() != annotationParameters.size()) {
+        parametersAreEquals = false;
+      } else {
+        for (int i = 0; i < annotationParametersToAdd.size(); i++) {
+          ClassAttributeValue classAnnotationParametersToAdd =
+              (ClassAttributeValue) annotationParametersToAdd.get(i);
+          ClassAttributeValue classAnnotationParameters =
+              (ClassAttributeValue) annotationParameters.get(i);
+          if (!classAnnotationParametersToAdd.getValue().getSimpleTypeName()
+              .equals(classAnnotationParameters.getValue().getSimpleTypeName())) {
+            parametersAreEquals = false;
+            break;
+          }
+        }
+      }
+
+      if (annotationMethodToAdd.equals(annotationMethod)
+          && annotationWhenToAdd.equals(annotationWhen) && parametersAreEquals) {
+        maintainAnnotation = false;
+        break;
+      }
+    }
+
+    return maintainAnnotation;
+  }
+
+  /**
+   * This method provides {@link RooSecurityFilter} annotation with all the necessary
+   * attributes
+   *
+   * @param method Method to add the annotation
+   * @param lstParamTypes Parameter types of the method to add the annotation
+   * @param roles Roles to apply by the filter
+   * @param usernames Usernames apply by the filter
+   * @param when Indicate the type of filter 'PRE' (@PreFilter) or 'POST' (@PostFilter)
+   * @return the annotation created
+   */
+  private AnnotationMetadataBuilder getRooSecurityFilterAnnotation(final String method,
+      final List<AnnotationAttributeValue<?>> lstParamTypes, final String roles,
+      final String usernames, final String when) {
+    final List<AnnotationAttributeValue<?>> attributes =
+        new ArrayList<AnnotationAttributeValue<?>>();
+    attributes.add(new StringAttributeValue(new JavaSymbolName("method"), method));
+    ArrayAttributeValue<AnnotationAttributeValue<?>> newParameters =
+        new ArrayAttributeValue<AnnotationAttributeValue<?>>(new JavaSymbolName("parameters"),
+            lstParamTypes);
+    attributes.add(newParameters);
+    if (roles != null) {
+      attributes.add(new StringAttributeValue(new JavaSymbolName("roles"), roles));
+    }
+    if (usernames != null) {
+      attributes.add(new StringAttributeValue(new JavaSymbolName("usernames"), usernames));
+    }
+    attributes.add(new StringAttributeValue(new JavaSymbolName("when"), when));
+    return new AnnotationMetadataBuilder(RooJavaType.ROO_SECURITY_FILTER, attributes);
+  }
+
+  @Override
+  public void generateAuthorizeAnnotations(JavaType klass, String methodName, String roles,
+      String usernames) {
+
+    Validate.notNull(klass,
+        "ERROR: klass parameter is mandatory on 'generateAuthorizeAnnotations' method");
+    Validate.notNull(methodName,
+        "ERROR: method parameter is mandatory on 'generateAuthorizeAnnotations' method");
+
+    // Get methods to annotate.
+    // With the last parameter to false, we avoid that push in action occurs.
+    List<Object> pushedElements =
+        getPushInOperations().pushIn(klass.getPackage(), klass, methodName, false);
+
+    List<AnnotationAttributeValue<?>> rooSecurityAuthorizationsToAdd =
+        new ArrayList<AnnotationAttributeValue<?>>();
+
+    for (Object pushedElement : pushedElements) {
+      if (pushedElement instanceof DefaultMethodMetadata) {
+        DefaultMethodMetadata method = (DefaultMethodMetadata) pushedElement;
+
+        // Get parameters
+        List<AnnotationAttributeValue<?>> lstParamTypes =
+            new ArrayList<AnnotationAttributeValue<?>>();
+        List<AnnotatedJavaType> parameterTypes = method.getParameterTypes();
+        Iterator<AnnotatedJavaType> iterParamTypes = parameterTypes.iterator();
+        while (iterParamTypes.hasNext()) {
+          ClassAttributeValue parameterAttributeValue =
+              new ClassAttributeValue(new JavaSymbolName("value"), iterParamTypes.next()
+                  .getJavaType());
+          lstParamTypes.add(parameterAttributeValue);
+        }
+
+        // Generate new annotations @RooSecurityAuthorization
+        NestedAnnotationAttributeValue newFilter =
+            new NestedAnnotationAttributeValue(new JavaSymbolName("value"),
+                getRooSecurityAuthorizationsAnnotation(method.getMethodName().getSymbolName(),
+                    lstParamTypes, roles, usernames).build());
+        rooSecurityAuthorizationsToAdd.add(newFilter);
+      }
+    }
+
+    // Get actual values of @RooSecurityAuthorizations
+    ClassOrInterfaceTypeDetails serviceDetails = getTypeLocationService().getTypeDetails(klass);
+    ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(serviceDetails);
+
+    // Check annotation @RooSecurityAuthorizations to delete defined annotations
+    // that will be redefined
+    AnnotationMetadata annotationAuthorizations =
+        serviceDetails.getAnnotation(RooJavaType.ROO_SECURITY_AUTHORIZATIONS);
+    AnnotationMetadataBuilder annotationAuthorizationsMetadataBuilder;
+
+    if (annotationAuthorizations != null) {
+
+      // Getting authorizations from annotation
+      AnnotationAttributeValue<?> attributeAuthorizations =
+          annotationAuthorizations.getAttribute("authorizations");
+      List<?> values = (List<?>) attributeAuthorizations.getValue();
+      if (values != null && !values.isEmpty()) {
+        Iterator<?> valuesIt = values.iterator();
+
+        while (valuesIt.hasNext()) {
+          NestedAnnotationAttributeValue authorizationAnnotation =
+              (NestedAnnotationAttributeValue) valuesIt.next();
+          if (checkRooSecurityAuthorizationMaintainAnnotation(rooSecurityAuthorizationsToAdd,
+              authorizationAnnotation)) {
+
+            // Maintain annotation if 'method' or 'parameters' are different
+            rooSecurityAuthorizationsToAdd.add(authorizationAnnotation);
+
+          }
+        }
+      }
+      annotationAuthorizationsMetadataBuilder =
+          new AnnotationMetadataBuilder(annotationAuthorizations);
+
+      // remove annotation
+      cidBuilder.removeAnnotation(RooJavaType.ROO_SECURITY_AUTHORIZATIONS);
+
+    } else {
+
+      // Doesn't exist @RooSecurityAuthorizations, create it
+      annotationAuthorizationsMetadataBuilder =
+          new AnnotationMetadataBuilder(RooJavaType.ROO_SECURITY_AUTHORIZATIONS);
+    }
+
+    // Add authorizations attribute
+    ArrayAttributeValue<AnnotationAttributeValue<?>> newAuthorizations =
+        new ArrayAttributeValue<AnnotationAttributeValue<?>>(new JavaSymbolName("authorizations"),
+            rooSecurityAuthorizationsToAdd);
+    annotationAuthorizationsMetadataBuilder.addAttribute(newAuthorizations);
+
+    // Include new @RooSecurityAuthorizations annotation
+    cidBuilder.addAnnotation(annotationAuthorizationsMetadataBuilder);
+
+    // Write on disk
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+
+  }
+
+  /**
+   * This method provides {@link RooSecurityAuthorization} annotation with all the necessary
+   * attributes
+   *
+   * @param method Method to add the annotation
+   * @param lstParamTypes Parameter types of the method to add the annotation
+   * @param roles Roles to apply by the filter
+   * @param usernames Usernames apply by the filter
+   * @return the annotation created
+   */
+  private AnnotationMetadataBuilder getRooSecurityAuthorizationsAnnotation(final String method,
+      final List<AnnotationAttributeValue<?>> lstParamTypes, final String roles,
+      final String usernames) {
+    final List<AnnotationAttributeValue<?>> attributes =
+        new ArrayList<AnnotationAttributeValue<?>>();
+    attributes.add(new StringAttributeValue(new JavaSymbolName("method"), method));
+    ArrayAttributeValue<AnnotationAttributeValue<?>> newParameters =
+        new ArrayAttributeValue<AnnotationAttributeValue<?>>(new JavaSymbolName("parameters"),
+            lstParamTypes);
+    attributes.add(newParameters);
+    if (roles != null) {
+      attributes.add(new StringAttributeValue(new JavaSymbolName("roles"), roles));
+    }
+    if (usernames != null) {
+      attributes.add(new StringAttributeValue(new JavaSymbolName("usernames"), usernames));
+    }
+    return new AnnotationMetadataBuilder(RooJavaType.ROO_SECURITY_AUTHORIZATION, attributes);
+  }
+
+  /**
+   * Check if {@link RooSecurityAuthorization} annotation should be kept
+   * or should be replaced because is defined in the annotations list to add.
+   *
+   * @param rooSecurityAuthorizationsToAdd Annotations list to add
+   * @param authorizationAnnotation Annotation to check
+   * @return
+   */
+  private boolean checkRooSecurityAuthorizationMaintainAnnotation(
+      List<AnnotationAttributeValue<?>> rooSecurityAuthorizationsToAdd,
+      NestedAnnotationAttributeValue authorizationAnnotation) {
+
+    boolean maintainAnnotation = true;
+
+    String annotationMethod =
+        (String) authorizationAnnotation.getValue().getAttribute("method").getValue();
+    List<?> annotationParameters =
+        (List<?>) authorizationAnnotation.getValue().getAttribute("parameters").getValue();
+
+    Iterator<AnnotationAttributeValue<?>> iterParamTypes =
+        rooSecurityAuthorizationsToAdd.iterator();
+    while (iterParamTypes.hasNext()) {
+      NestedAnnotationAttributeValue rooSecurityAuthorizationToAdd =
+          (NestedAnnotationAttributeValue) iterParamTypes.next();
+      String annotationMethodToAdd =
+          (String) rooSecurityAuthorizationToAdd.getValue().getAttribute("method").getValue();
+      List<?> annotationParametersToAdd =
+          (List<?>) rooSecurityAuthorizationToAdd.getValue().getAttribute("parameters").getValue();
+
+      boolean parametersAreEquals = true;
+      if (annotationParametersToAdd.size() != annotationParameters.size()) {
+        parametersAreEquals = false;
+      } else {
+        for (int i = 0; i < annotationParametersToAdd.size(); i++) {
+          ClassAttributeValue classAnnotationParametersToAdd =
+              (ClassAttributeValue) annotationParametersToAdd.get(i);
+          ClassAttributeValue classAnnotationParameters =
+              (ClassAttributeValue) annotationParameters.get(i);
+          if (!classAnnotationParametersToAdd.getValue().getSimpleTypeName()
+              .equals(classAnnotationParameters.getValue().getSimpleTypeName())) {
+            parametersAreEquals = false;
+            break;
+          }
+        }
+      }
+
+      if (annotationMethodToAdd.equals(annotationMethod) && parametersAreEquals) {
+        maintainAnnotation = false;
+        break;
+      }
+    }
+
+    return maintainAnnotation;
+  }
+
 
   @Override
   public String getSpringSecurityAnnotationValue(String roles, String usernames) {
@@ -126,123 +496,6 @@ public class SecurityOperationsImpl implements SecurityOperations {
     }
 
     return value.trim();
-  }
-
-  @Override
-  public void addPreAuthorizeAnnotation(JavaType klass, String methodName, String value) {
-
-    Validate.notNull(klass,
-        "ERROR: klass parameter is mandatory on 'addPreAuthorizeAnnotation' method");
-    Validate.notNull(methodName,
-        "ERROR: method parameter is mandatory on 'addPreAuthorizeAnnotation' method");
-    Validate.notNull(value,
-        "ERROR: value parameter is mandatory on 'addPreAuthorizeAnnotation' method");
-
-    // Creating @PreAuthorize annotation
-    AnnotationMetadataBuilder annotationPreAuthorize =
-        new AnnotationMetadataBuilder(SpringJavaType.PRE_AUTHORIZE);
-    annotationPreAuthorize.addStringAttribute("value", value);
-
-    addSpringSecurityAnnotation(klass, methodName, annotationPreAuthorize);
-
-    // Add Spring Security dependency
-    getProjectOperations().addDependency(klass.getModule(), SPRING_SECURITY_CORE, false);
-
-  }
-
-  @Override
-  public void addPreFilterAnnotation(JavaType klass, String methodName, String value) {
-
-    Validate.notNull(klass,
-        "ERROR: klass parameter is mandatory on 'addPreFilterAnnotation' method");
-    Validate.notNull(methodName,
-        "ERROR: method parameter is mandatory on 'addPreFilterAnnotation' method");
-    Validate.notNull(value,
-        "ERROR: value parameter is mandatory on 'addPreFilterAnnotation' method");
-
-    // Creating @PreFilter annotation
-    AnnotationMetadataBuilder annotationPreAuthorize =
-        new AnnotationMetadataBuilder(SpringJavaType.PRE_FILTER);
-    annotationPreAuthorize.addStringAttribute("value", value);
-
-    addSpringSecurityAnnotation(klass, methodName, annotationPreAuthorize);
-
-    // Add Spring Security dependency
-    getProjectOperations().addDependency(klass.getModule(), SPRING_SECURITY_CORE, false);
-  }
-
-  @Override
-  public void addPostFilterAnnotation(JavaType klass, String methodName, String value) {
-
-    Validate.notNull(klass,
-        "ERROR: klass parameter is mandatory on 'addPostFilterAnnotation' method");
-    Validate.notNull(methodName,
-        "ERROR: method parameter is mandatory on 'addPostFilterAnnotation' method");
-    Validate.notNull(value,
-        "ERROR: value parameter is mandatory on 'addPostFilterAnnotation' method");
-
-    // Creating @PostFilter annotation
-    AnnotationMetadataBuilder annotationPreAuthorize =
-        new AnnotationMetadataBuilder(SpringJavaType.POST_FILTER);
-    annotationPreAuthorize.addStringAttribute("value", value);
-
-    addSpringSecurityAnnotation(klass, methodName, annotationPreAuthorize);
-
-  }
-
-  /**
-   * This method will annotate the provided method with the provided security annotation.
-   *
-   * @param klass Class that contains the method to annotate
-   * @param methodName the method to annotate
-   * @param annotation Spring Security annotation
-   */
-  private void addSpringSecurityAnnotation(JavaType klass, String methodName,
-      AnnotationMetadataBuilder annotation) {
-
-    Validate
-        .notNull(klass, "ERROR: klass parameter is mandatory on 'addSecurityAnnotation' method");
-    Validate.notNull(methodName,
-        "ERROR: method parameter is mandatory on 'addSecurityAnnotation' method");
-    Validate.notNull(annotation,
-        "ERROR: method parameter is mandatory on 'addSecurityAnnotation' method");
-
-    ClassOrInterfaceTypeDetails serviceDetails = getTypeLocationService().getTypeDetails(klass);
-    ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-        new ClassOrInterfaceTypeDetailsBuilder(serviceDetails);
-
-    // TODO: Analyze the possibility to decorate the generated code by other
-    // Metadatas. By now, we need to make a push-in operation of the selected
-    // method to annotate the code generated by other metadata.
-    List<Object> pushedElements =
-        getPushInOperations().pushIn(klass.getPackage(), klass, methodName, false);
-
-    if (pushedElements.isEmpty()) { // Means that method has been pushed before
-      // TODO: This is a problem related with the code maintaineance. It's not possible to
-      // maintain methods in .java, so when the method is pushed, is not possible to add new annotations.
-      // Is really necessary to analyze some alternative to decorate existing code generated by other
-      // metadatas.
-      LOGGER.log(Level.INFO,
-          "ERROR: This method has been moved to the .java file so it's not possible "
-              + "to maintain it. Include the Spring Security annotation manually.");
-    } else {
-      // Getting method to annotate
-      for (Object pushedElement : pushedElements) {
-        // Checking if the pushed element is a method
-        if (pushedElement.getClass().isAssignableFrom(DefaultMethodMetadata.class)) {
-          MethodMetadataBuilder method = new MethodMetadataBuilder((MethodMetadata) pushedElement);
-          method.addAnnotation(annotation);
-          cidBuilder.addMethod(method);
-        } else if (pushedElement.getClass().isAssignableFrom(DefaultImportMetadata.class)) {
-          // Checking if the pushed element is an import
-          ImportMetadata importElement = (ImportMetadata) pushedElement;
-          cidBuilder.add(importElement);
-        }
-      }
-    }
-
-    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
-
   }
 
   @Override
