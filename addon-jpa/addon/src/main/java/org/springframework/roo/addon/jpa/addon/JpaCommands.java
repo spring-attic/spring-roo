@@ -401,9 +401,6 @@ public class JpaCommands implements CommandMarker {
       @CliOption(key = "abstract", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
           help = "Whether the generated class should be marked as abstract") final boolean createAbstract,
-      @CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true",
-          unspecifiedDefaultValue = "false",
-          help = "Create automatic integration tests for this entity") final boolean testAutomatically,
       @CliOption(
           key = "table",
           mandatory = true,
@@ -540,31 +537,11 @@ public class JpaCommands implements CommandMarker {
       }
     }
 
-
-    if (testAutomatically && createAbstract) {
-      // We can't test an abstract class
-      throw new IllegalArgumentException(
-          "Automatic tests cannot be created for an abstract entity; remove the "
-              + "--testAutomatically or --abstract option");
-    }
-
-    if (testAutomatically && mappedSuperclass) {
-      // We can't test a mapped super class
-      throw new IllegalArgumentException(
-          "Automatic tests cannot be created for an Entity SuperClass (@MappedSuperclass); remove the "
-              + "--testAutomatically or --mappedSuperclass option");
-    }
-
     // Reject attempts to name the entity "Test", due to possible clashes
     // with data on demand (see ROO-50)
     // We will allow this to happen, though if the user insists on it via
     // --permitReservedWords (see ROO-666)
     if (!BeanInfoUtils.isEntityReasonablyNamed(name)) {
-      if (permitReservedWords && testAutomatically) {
-        throw new IllegalArgumentException(
-            "Entity name cannot contain 'Test' or 'TestCase' as you are requesting tests; "
-                + "remove --testAutomatically or rename the proposed entity");
-      }
       if (!permitReservedWords) {
         throw new IllegalArgumentException(
             "Entity name rejected as conflicts with test execution defaults; please remove "
@@ -605,10 +582,6 @@ public class JpaCommands implements CommandMarker {
     // Update entity identifier class if required (identifierClass should be only an embeddable class)
     if (!(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java."))) {
       jpaOperations.updateEmbeddableToIdentifier(identifierType, identifierField, identifierColumn);
-    }
-
-    if (testAutomatically) {
-      integrationTestOperations.newIntegrationTest(name);
     }
   }
 
