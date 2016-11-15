@@ -1,41 +1,41 @@
 //
-// Prerequisites:
+// Prerequisites & Installation (https://github.com/asciidoctor/asciidoctor-pdf)
 //
-//   ruby 1.9.3+
-//   asciidoctor     (use gem to install)
-//   asciidoctor-pdf (use gem to install)
+//   ruby 2.0.0+
+//   prawn 2.0.0+
+//
+//   asciidoctor
+//   asciidoctor-pdf 1.5.0.alpha.10
 //
 // Build the document:
-// ===================
 //
-// HTML5:
+// HTML5
 //
 //   $ asciidoctor -b html5 index.adoc
 //
-// HTML5 Asciidoctor:
 //   # Embed images in XHTML
-//   $ asciidoctor -b html5 -a index.adoc
+//   $ asciidoctor -b html5 -a data-uri index.adoc
 //
-// PDF Asciidoctor:
+// PDF
+//
 //   $ asciidoctor-pdf index.adoc
 //
-= {doctitle}
-:doctitle:	        Spring Roo - Reference Documentation
-:author: 		DISID Corporation S.L.
-:authorsite: 		www.disid.com
-:description: 		Spring Roo - Reference Documentation
-:version:		2.0.0.BUILD-SNAPSHOT
-:copyright: 		CC BY-NC-SA 3.0
-:doctype: 		book
-:keywords:		SpringRoo, Reference
-:imagesdir:		./images
+// Important: prawn and ruby < 2.0 will not work
+//
+
+= Spring Roo - Reference Documentation
+DISID CORPORATION S.L.
+:version: 2.0.0.M3
+:doctype: book
+:lang: es
+:source-highlighter: pygments
+:sectnums:
 :toc:
-:toc-placement:		left
-:toc-title:		Table of Contents
-:toclevels: 		5
-:numbered:
-:sectnumlevels:		5
-//:source-highlighter:  coderay
+:toclevels: 3
+:toc-placement: left
+:toc-title: Table of Contents
+:copyright: CC BY-NC-SA 3.0
+:imagesdir: ./images
 ifdef::backend-pdf[]
 :pdf-style:		asciidoctor
 :pagenums:
@@ -135,7 +135,7 @@ image::sts-add-installation-03.png["Roo support installed", width="50%"]
 In this tutorial you will learn to create a complete multimodule web application from scratch using Roo. The application we are going to develop will demonstrate many of the core features offered by Roo. In particular you will learn how to use the Roo shell.
 
 [[usingSpringRoo-usage-roo-shell]]
-=== 1. Using Roo shell
+=== 1. The Roo shell
 
 You can work with Roo simply by loading its "shell" and keep it running. You can interact with Roo via commands typed into the shell, but most of time you will just use your text editor or IDE as usual. As you make changes to your project, Roo intelligently determines what you are trying to do and takes care of doing it for you automatically. This usually involves automatically detecting file system changes you have made and then maintaining files in response. We say "maintaining files" because Roo is fully round-trip aware. This means you can change any code at any time, and Roo will notice it and will intelligently and automatically will make any change needed.
 
@@ -161,7 +161,7 @@ image::sts-select-roo-project.png["Select Roo Project", width="30%"]
 image::sts-roo-shell-hint.png["hint command", width="60%"]
 
 [[usingSpringRoo-build-multimodule-app]]
-=== 2. Build multimodule web application using Roo
+=== 2. Multimodule projects
 
 We will build an app step-by-step together in a relatively fast manner so that you can see how to typically use Roo in a multimodule project: 'Northwind'
 
