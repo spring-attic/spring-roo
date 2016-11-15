@@ -203,7 +203,8 @@
             <dependency>
                 <groupId>org.eclipse.equinox</groupId>
                 <artifactId>org.eclipse.equinox.region</artifactId>
-                <version>1.2.101.v20150831-1342</version>
+                <!--<version>1.2.101.v20150831-1342</version>-->
+                <version>1.1.0.v20120522-1841</version>
             </dependency>
 
             <!-- OSGi Metatype Service -->
