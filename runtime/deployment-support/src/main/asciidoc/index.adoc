@@ -942,19 +942,6 @@ font with any mandatory options you must specify when using the command.
 Most commands accept a large number of options, and all of the possible
 options for each command are presented in this appendix.
 
-[[addon-development-mode]]
-=== addon development mode
-
-Switches the system into addon development mode, getting a greater diagnostic
-information and gaining access to addon development commands.
-
-----------------
-addon development mode
-----------------
-
---enabled::
-  Activates addon development mode; default: 'true'
-
 === addon info bundle
 
 Provide information about a specific Spring Roo Add-on
@@ -2781,6 +2768,19 @@ metadata cache --maximumCapacity
 
 --maximumCapacity::
   The maximum number of metadata items to cache (mandatory)
+
+[[addon-development-mode]]
+=== addon development mode
+
+Switches the system into addon development mode, getting a greater diagnostic
+information and gaining access to addon development commands.
+
+----------------
+addon development mode
+----------------
+
+--enabled::
+  Activates addon development mode; default: 'true'
 
 === metadata for id
 
