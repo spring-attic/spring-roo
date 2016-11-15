@@ -176,6 +176,11 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
     registerDependency(repositoryMedatadataId, metadataIdentificationString);
     RepositoryJpaMetadata repositoryMetadata = getMetadataService().get(repositoryMedatadataId);
 
+    // This metadata is not available yet.
+    if (repositoryMetadata == null) {
+      return null;
+    }
+
     // Add dependency between modules
     ClassOrInterfaceTypeDetails cid = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
     String module = cid.getName().getModule();
