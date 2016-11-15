@@ -1032,9 +1032,6 @@ public class FieldCommands implements CommandMarker {
 
     // TODO support multiple cascade type
 
-    // Check if joinTable must have a specified value.
-    checkJoinTableNameMandatory(joinTable);
-
     getFieldCreatorProvider(typeName).createSetField(typeName, fieldType, fieldName,
         cardinality.getCardinality(), null, notNull, sizeMin, sizeMax, mappedBy, fetch, comment,
         joinTable, joinColumns, referencedColumns, inverseJoinColumns, inverseReferencedColumns,
@@ -1239,9 +1236,6 @@ public class FieldCommands implements CommandMarker {
               + "to those entities") Boolean orphanRemoval, ShellContext shellContext) {
 
     // TODO Support multiple cascade type
-
-    // Check if joinTable must have a specified value.
-    checkJoinTableNameMandatory(joinTable);
 
     getFieldCreatorProvider(typeName).createListField(typeName, fieldType, fieldName,
         cardinality.getCardinality(), null, notNull, sizeMin, sizeMax, mappedBy, fetch, comment,
@@ -1624,30 +1618,6 @@ public class FieldCommands implements CommandMarker {
                     "Field '%s' already exists and cannot be created. Try to use a "
                         + "different field name on --fieldName parameter or use --force parameter to overwrite it.",
                     fieldName));
-      }
-    }
-  }
-
-  /**
-   * Checks if exists some project setting that makes @JoinTable name mandatory. Throws
-   * an exception with a message if exists property {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME}
-   * on project settings and its value is "true". Else, continue.
-   *
-   * @param joinTable
-   */
-  private void checkJoinTableNameMandatory(String joinTable) {
-    if (joinTable == null) {
-      return;
-    } else {
-
-      // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on project settings
-      String requiredSchemaObjectName =
-          projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
-
-      if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
-        throw new IllegalArgumentException(
-            "It is mandatory to assign a specific table name for --joinTable. Please, "
-                + "assign it a table name.");
       }
     }
   }
