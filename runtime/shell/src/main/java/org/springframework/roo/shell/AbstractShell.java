@@ -480,10 +480,14 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
       help = "The file to locate and execute (mandatory)", mandatory = true) final File script,
       @CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "Display line numbers when executing the script") final boolean lineNumbers) {
+          help = "Display line numbers when executing the script") final boolean lineNumbers,
+      @CliOption(key = "ignoreLines", mandatory = false, 
+          help = "Comma-list of prefixes to ignore the lines that starts with any of the provided case-sensitive prefixes.") final String ignoreLines) {
 
     Validate.notNull(script, "Script file to parse is required");
     final double startedNanoseconds = System.nanoTime();
+
+    String[] ignoreLinesPrefixes = StringUtils.split(ignoreLines == null ? "" : ignoreLines, ",");
 
     final InputStream inputStream = openScript(script);
     try {
@@ -495,7 +499,18 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
         } else {
           logger.fine(line);
         }
-        if (!"".equals(line.trim())) {
+
+        // ROO-3836
+        boolean ignoreLine = StringUtils.startsWithAny(line,ignoreLinesPrefixes);
+        if(ignoreLine) {
+          if (lineNumbers) {
+            logger.fine("Ignoring line " + i + ": " + line);
+          } else {
+            logger.fine("Ignoring: " + line);
+          }
+        }
+
+        if (!"".equals(line.trim()) && !ignoreLine) {
           final boolean success = executeScriptLine(line);
           if (success && (line.trim().startsWith("q") || line.trim().startsWith("ex"))) {
             break;
