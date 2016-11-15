@@ -208,12 +208,14 @@ roo> jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 .Create domain entities for read-only operations by using "readOnly" parameter (link:#entity-jpa-command[entity jpa command])
 [source,sh]
 ----
-roo> entity jpa --class ~.City --table NORTHWIND_CITIES --sequenceName NORTHWIND_CITIES_CITY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CITY_ID --versionField version --versionType long --versionColumn VERSION --readOnly
+roo> entity jpa --class model:~.City --table NORTHWIND_CITIES --sequenceName NORTHWIND_CITIES_CITY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CITY_ID --versionField version --versionType long --versionColumn VERSION --readOnly
 
 roo> entity jpa --class ~.Country --table NORTHWIND_COUNTRIES --sequenceName NORTHWIND_COUNTRIES_COUNTRY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn COUNTRY_ID --versionField version --versionType long --versionColumn VERSION --readOnly
 
 roo> entity jpa --class ~.Region --table NORTHWIND_REGIONS --sequenceName NORTHWIND_REGIONS_REGION_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REGION_ID --versionField version --versionType long --versionColumn VERSION --readOnly
 ----
++
+Please, note that first command has module name in '--class' parameter to create the entity in that module and focus it. Spring Roo Shell will assist you with that if you try to autocomplete parameter values with 'TAB' (or 'Ctrl' + )
 
 .Create domain entities for not read-only operations (link:#entity-jpa-command[entity jpa command])
 [source,sh]
