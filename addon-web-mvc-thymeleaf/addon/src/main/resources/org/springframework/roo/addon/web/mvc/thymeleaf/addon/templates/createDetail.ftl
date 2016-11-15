@@ -200,7 +200,7 @@
           <#assign dconfig=detail.configuration>
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="${r"${"}(#mvc.url('${dconfig.mvnDetailControllerName}#${dconfig.mvcMethodName_createDetails}')).buildAndExpand(category.getId())}">
+            data-th-action="${r"${"}(#mvc.url('${dconfig.mvnDetailControllerName}#${dconfig.mvcMethodName_createDetails}')).buildAndExpand(${modelAttributeName}.${identifierField})}">
 
             <fieldset id="containerFields">
               <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${detail.configuration.entityLabel}})}">${detail.entityName} data </legend>

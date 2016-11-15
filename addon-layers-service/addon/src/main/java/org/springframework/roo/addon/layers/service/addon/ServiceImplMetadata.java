@@ -299,8 +299,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     bodyBuilder.indent();
     final String itemName = StringUtils.uncapitalize(childType.getSimpleTypeName());
     // {childType} {itemName} = iterator.next();
-    bodyBuilder
-        .appendFormalLine("%s %s = iterator.next();", childTypeNameJavaType, itemName);
+    bodyBuilder.appendFormalLine("%s %s = iterator.next();", childTypeNameJavaType, itemName);
 
     // if ({childListVariable}.contains({itemName})) {
     bodyBuilder.appendFormalLine("if (%s.contains(%s)) {", childListVariable, itemName);

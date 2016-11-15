@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.views;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -111,7 +112,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       MemberDetails entity, List<T> detailsControllers, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = entity.getFields();
+    List<FieldMetadata> entityFields = getPersistentFields(entity.getFields());
     List<FieldItem> fields =
         getFieldViewItems(entityFields, ctx.getEntityName(), true, ctx, TABLE_SUFFIX);
 
@@ -184,6 +185,22 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
   }
 
+  protected List<FieldMetadata> getPersistentFields(List<FieldMetadata> fields) {
+    List<FieldMetadata> result = new ArrayList<FieldMetadata>(fields.size());
+    for (FieldMetadata field : fields) {
+      int modifier = field.getModifier();
+      if (Modifier.isStatic(modifier) || Modifier.isFinal(modifier)
+          || Modifier.isTransient(modifier)) {
+        continue;
+      }
+      if (field.getAnnotation(JpaJavaType.TRANSIENT) != null) {
+        continue;
+      }
+      result.add(field);
+    }
+    return result;
+  }
+
   protected EntityItem createEntityItem(JpaEntityMetadata entityMetadata, ViewContext ctx,
       String suffix) {
     return new EntityItem(ctx.getEntityName(), ctx.getIdentifierField(), ctx.getControllerPath(),
@@ -195,15 +212,19 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = entityDetails.getFields();
+    List<FieldMetadata> entityFields = getPersistentFields(entityDetails.getFields());
     List<FieldItem> fields =
         getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
+
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
 
     // TODO: TO BE FIXED when implements details
     List<FieldItem> details = new ArrayList<FieldItem>();
     // getDetailsFieldViewItems(entityDetails, ctx.getEntityName(), ctx);
 
     ctx.addExtraParameter("details", details);
+    ctx.addExtraParameter("fields", fields);
+    ctx.addExtraParameter("entity", entityItem);
 
     // Process elements to generate
     DOC newDoc = null;
@@ -217,7 +238,6 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     if (existsFile(viewName)) {
       newDoc = merge("show", loadExistingDoc(viewName), ctx, fields);
     } else {
-      ctx.addExtraParameter("fields", fields);
       newDoc = process("show", ctx);
     }
 
@@ -231,9 +251,11 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = entityDetails.getFields();
+    List<FieldMetadata> entityFields = getPersistentFields(entityDetails.getFields());
     List<FieldItem> fields =
         getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
+
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
 
     // Process elements to generate
     DOC newDoc = null;
@@ -243,11 +265,13 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
         getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat("/create")
             .concat(getViewsExtension());
 
+    ctx.addExtraParameter("fields", fields);
+    ctx.addExtraParameter("entity", entityItem);
+
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
       newDoc = merge("create", loadExistingDoc(viewName), ctx, fields);
     } else {
-      ctx.addExtraParameter("fields", fields);
       newDoc = process("create", ctx);
     }
 
@@ -261,7 +285,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = entityDetails.getFields();
+    List<FieldMetadata> entityFields = getPersistentFields(entityDetails.getFields());
     List<FieldItem> fields =
         getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
 
@@ -273,11 +297,15 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
         getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat("/edit")
             .concat(getViewsExtension());
 
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
+
+    ctx.addExtraParameter("fields", fields);
+    ctx.addExtraParameter("entity", entityItem);
+
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
       newDoc = merge("edit", loadExistingDoc(viewName), ctx, fields);
     } else {
-      ctx.addExtraParameter("fields", fields);
       newDoc = process("edit", ctx);
     }
 
@@ -337,7 +365,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       MemberDetails returnTypeDetails, String finderName, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = returnTypeDetails.getFields();
+    List<FieldMetadata> entityFields = getPersistentFields(returnTypeDetails.getFields());
     List<FieldItem> fields =
         getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, StringUtils.EMPTY);
 
@@ -1022,8 +1050,8 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Getting all referenced fields
     List<FieldMetadata> referencedFields =
-        getMemberDetailsScanner().getMemberDetails(getClass().toString(), childEntityDetails)
-            .getFields();
+        getPersistentFields(getMemberDetailsScanner().getMemberDetails(getClass().toString(),
+            childEntityDetails).getFields());
     detailItem.addConfigurationElement(
         "referenceFieldFields",
         getFieldViewItems(referencedFields, entityName + "." + last.fieldName, true, ctx,
@@ -1104,7 +1132,8 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     String fieldTwo = "";
     MemberDetails referencedEntityDetails =
         getMemberDetailsScanner().getMemberDetails(getClass().toString(), typeDetails);
-    List<FieldMetadata> referencedEntityFields = referencedEntityDetails.getFields();
+    List<FieldMetadata> referencedEntityFields =
+        getPersistentFields(referencedEntityDetails.getFields());
     for (FieldMetadata referencedEntityField : referencedEntityFields) {
       // Exclude id and version fields
       // TODO: Check audit fields
