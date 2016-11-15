@@ -170,9 +170,7 @@ field string --fieldName phone --column PHONE
 field string --fieldName fax --column FAX
 field string --fieldName web --column WEB
 field set --fieldName products --type ~.Product --cardinality ONE_TO_MANY --mappedBy supplier
-
-// Temporary deactivated field with --joinTable and associated params
-//field set --fieldName stores --type ~.Store --cardinality MANY_TO_MANY --joinTable NW_SUPPLIER_STORES --joinColumns SUPPLIER --referencedColumns SUPPLIER_ID --inverseJoinColumns STORE --inverseReferencedColumns STORE_ID
+field set --fieldName stores --type ~.Store --cardinality MANY_TO_MANY --joinTable NW_SUPPLIER_STORES --joinColumns SUPPLIER --referencedColumns SUPPLIER_ID --inverseJoinColumns STORE --inverseReferencedColumns STORE_ID
 
 // Generate DTO's
 dto --class ~.ActiveCustomerOrder --immutable
