@@ -541,6 +541,7 @@ web mvc controller --entity model:~.Shipper --responseType THYMELEAF
 web mvc controller --entity model:~.SoldProduct --responseType THYMELEAF
 web mvc controller --entity model:~.Store --responseType THYMELEAF
 web mvc controller --entity model:~.Supplier --responseType THYMELEAF
+web mvc controller --entity model:~.PurchaseOrder --responseType THYMELEAF
 
 // Required controller to generate its detail
 web mvc controller --entity model:~.Region --responseType THYMELEAF
