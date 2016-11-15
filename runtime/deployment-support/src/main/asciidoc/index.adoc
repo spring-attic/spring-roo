@@ -937,19 +937,134 @@ roo> push-in --all --force
 [[application-development-command-index]]
 == Command Index for Application Development
 
-This appendix was automatically built from Roo 2.0.0.BUILD-SNAPSHOT
-
 Commands are listed in alphabetic order, and are shown in monospaced
 font with any mandatory options you must specify when using the command.
 Most commands accept a large number of options, and all of the possible
 options for each command are presented in this appendix.
 
-=== Addon Suite Commands
+[[addon-development-mode]]
+=== addon development mode
 
-Addon Suite Commands are contained in
-org.springframework.roo.addon.suite.AddonSuiteCommands.
+Switches the system into addon development mode, getting a greater diagnostic
+information and gaining access to addon development commands.
 
-==== addon suite install name
+----------------
+addon development mode
+----------------
+
+--enabled::
+  Activates addon development mode; default: 'true'
+
+=== addon info bundle
+
+Provide information about a specific Spring Roo Add-on
+
+--------------------------------------
+addon info bundle --bundleSymbolicName
+--------------------------------------
+
+--bundleSymbolicName::
+  The bundle symbolic name for the add-on of interest (mandatory)
+
+=== addon install bundle
+
+Install Spring Roo Add-on
+
+-----------------------------------------
+addon install bundle --bundleSymbolicName
+-----------------------------------------
+
+--bundleSymbolicName::
+  The bundle symbolic name for the add-on of interest (mandatory)
+
+=== addon install url
+
+Install Spring Roo Add-on using url
+
+-----------------------
+addon install url --url
+-----------------------
+
+--url::
+  The url for the add-on of interest (mandatory)
+
+=== addon list
+
+List all installed addons
+
+----------
+addon list
+----------
+
+This command does not accept any options.
+
+=== addon remove
+
+Remove Spring Roo Add-on
+
+---------------------------------
+addon remove --bundleSymbolicName
+---------------------------------
+
+--bundleSymbolicName::
+  The bundle symbolic name for the add-on of interest (mandatory)
+
+=== addon repository add
+
+Adds a new OBR Repository to Roo Shell
+
+--------------------------
+addon repository add --url
+--------------------------
+
+--url::
+  URL file that defines repository. Ex:
+  'http://localhost/repo/index.xml' (mandatory)
+
+=== addon repository introspect
+
+Introspects all installed OBR Repositories and list all their addons
+
+---------------------------
+addon repository introspect
+---------------------------
+
+This command does not accept any options.
+
+=== addon repository list
+
+Lists existing OBR Repositories
+
+---------------------
+addon repository list
+---------------------
+
+This command does not accept any options.
+
+=== addon repository remove
+
+Removes an existing OBR Repository from Roo Shell
+
+-----------------------------
+addon repository remove --url
+-----------------------------
+
+--url::
+  URL file that defines repository. Ex:
+  'http://localhost/repo/index.xml' (mandatory)
+
+=== addon search
+
+Search all known Spring Roo Add-ons
+
+------------------------------
+addon search --requiresCommand
+------------------------------
+
+--requiresCommand::
+  Only display add-ons in search results that offer this command (mandatory)
+
+=== addon suite install name
 
 Install some 'Roo Addon Suite' from installed OBR Repository
 
@@ -960,7 +1075,7 @@ addon suite install name --symbolicName
 --symbolicName::
   Name that identifies the 'Roo Addon Suite' (mandatory)
 
-==== addon suite install url
+=== addon suite install url
 
 Install some 'Roo Addon Suite' from URL
 
@@ -971,7 +1086,7 @@ addon suite install url --url
 --url::
   URL of Roo Addon Suite .esa file (mandatory)
 
-==== addon suite list
+=== addon suite list
 
 Lists all installed 'Roo Addon Suite'. If you want to list all available
 'Roo Addon Suites' on Repository, use --repository parameter
@@ -983,9 +1098,9 @@ addon suite list
 --repository::
   OBR Repository where the 'Roo Addon Suite' are located
 
-==== addon suite start
+=== addon suite start
 
-Start some installed 'Roo Addon Suite'
+Start some installed 'Roo Addon Suite'. By default, an installed 'Roo Addon Suite' is started automatically.
 
 --------------------------------
 addon suite start --symbolicName
@@ -994,7 +1109,7 @@ addon suite start --symbolicName
 --symbolicName::
   Name that identifies the 'Roo Addon Suite' (mandatory)
 
-==== addon suite stop
+=== addon suite stop
 
 Stop some started 'Roo Addon Suite'
 
@@ -1005,7 +1120,7 @@ addon suite stop --symbolicName
 --symbolicName::
   Name that identifies the 'Roo Addon Suite' (mandatory)
 
-==== addon suite uninstall
+=== addon suite uninstall
 
 Uninstall some installed 'Roo Addon Suite'
 
@@ -1016,45 +1131,31 @@ addon suite uninstall --symbolicName
 --symbolicName::
   Name that identifies the 'Roo Addon Suite' (mandatory)
 
-=== Backup Commands
-
-Backup Commands are contained in
-org.springframework.roo.addon.backup.BackupCommands.
-
 [[backup-command]]
-==== backup
+=== backup
 
-Backup your project to a zip file.
+Backup your project to a zip file located in root directory.
 
 ------
 backup
 ------
 
 This command does not accept any options.
-
-=== Cache Commands
-
-Cache Commands are contained in org.springframework.roo.addon.cache.CacheCommands.
         
-==== cache setup
+=== cache setup
             
-Installs support for intermediate memory. Users can specify different providers to use for managing it
+Installs support for using intermediate memory in generated project. Users can specify different providers to use for managing it.
             
 -----------
 cache setup
 ----------- 
                 
 --provider::                    
-  Parameter that indicates the provider to use for managing intermediate memory
+  Parameter that indicates the provider to use for managing intermediate memory.
 --profile::
   Parameter that indicates the name of the profile that will be applied.
 
-=== Classpath Commands
-
-Classpath Commands are contained in
-org.springframework.roo.classpath.operations.ClasspathCommands.
-
-==== class
+=== class
 
 Creates a new Java class source file in any project path
 
@@ -1063,9 +1164,9 @@ class --class
 -------------
 
 --class::
-  The name of the class to create (mandatory)
+  The fully qualified name of the class to create (mandatory). It could include module name if necessary.
 --rooAnnotations::
-  Whether the generated class should have common Roo annotations;
+  Whether the generated class should have common Roo annotations (@RooToString, @RooEquals and @RooSerializable);
   default if option present: 'true'; default if option not present:
   'false'
 --path::
@@ -1085,7 +1186,7 @@ class --class
 --force::
   Force command execution; default if option present: 'true'; default if option not present: 'false'
 
-==== constructor
+=== constructor
 
 Creates a class constructor
 
@@ -1094,284 +1195,14 @@ constructor
 -----------
 
 --class::
-  The name of the class to receive this constructor; default if option
+  The name of the class to receive this constructor. It could include module name if necessary; default if option
   not present: '*'
 --fields::
   The fields to include in the constructor. Multiple field names must be
   a double-quoted list separated by spaces
 
-[[[[enum-type-command]]]]
-==== enum constant
-
-Inserts a new enum constant into an enum
-
---------------------
-enum constant --name
---------------------
-
---class::
-  The name of the enum class to receive this field; default if option
-  not present: '*'
---name::
-  The name of the constant (mandatory)
---permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: 'true'; default if option not present: 'false'
-
-[[enum-type-command]]
-==== enum type
-
-Creates a new Java enum source file in any project path
-
------------------
-enum type --class
------------------
-
---class::
-  The name of the enum to create (mandatory)
---path::
-  Source directory to create the enum in; default:
-  'FOCUSED:SRC_MAIN_JAVA'
---permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: 'true'; default if option not present: 'false'
---force::
-  Force command execution; default if option present: 'true'; default if option not present: 'false'
-
-==== focus
-
-Changes focus to a different type
-
--------------
-focus --class
--------------
-
---class::
-  The type to focus on (mandatory)
-
-==== interface
-
-Creates a new Java interface source file in any project path
-
------------------
-interface --class
------------------
-
---class::
-  The name of the interface to create (mandatory)
---path::
-  Source directory to create the interface in; default:
-  'FOCUSED:SRC_MAIN_JAVA'
---permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: 'true'; default if option not present: 'false'
---force::
-  Force command execution; default if option present: 'true'; default if option not present: 'false'
-
-=== Controller Commands
-
-Controller Commands are contained in
-org.springframework.roo.addon.web.mvc.controller.addon.ControllerCommands.
-
-[[web-mvc-controller-command]]
-==== web mvc controller
-
-Generates new @RooController inside current project
-
-------------------
-web mvc controller
-------------------
-
---all::                    
-  Indicates if developer wants to generate controllers for every entity of current project. This param will be visible if 'entity' parameter has not been specified; default if option present: 'true'; default if option not present: 'false'                   
---entity::                    
-  Indicates the entity that new controller will be manage. This param will be visible if 'all' parameter has not been specified                   
---responseType::                    
-  Indicates the responseType to be used by generated controller. Depending of the selected responseType, generated methods and views will vary. This param will be visible if 'all' or 'entity' parameters have been specified; default: 'JSON'                    
---package::                    
-  Indicates which package should be used to include generated controllers. This param will be visible if 'all' or 'entity' parameters have been specified          
---pathPrefix::                    
-  Indicates @ResquestMapping prefix to be used on this controller. Is not necessary to specify '/'. Spring Roo shell will include it automatically. This param will be visible if 'all' or 'entity' parameters have been specified; default: ''
-
-[[web-mvc-detail-command]]
-==== web mvc detail
-
-Generates new @RooController inside current project
-
---------------
-web mvc detail
---------------          
-                
---all::                    
-  Indicates if developer wants to generate first detail controllers for every entity that has a controller of current project. This param will be visible if 'entity' parameter has not been specified; default if option present: 'true'; default if option not present: 'false'                           
---entity::                    
-  Indicates the entity on which the detail controller is generated. This param will be visible if 'all' parameter has not been specified 
---field::                    
-  Indicates the entity's field on which the detail controller is generated. This param will be visible if 'entity' parameter has been specified before; default: ''                  
---package::
-  Indicates which package has the controllers on which the detail controllers are generated. This param will be visible if 'all' or 'entity' parameters have been specified
---responseType::                    
-  Indicates the responseType to be used by generated controller. Depending of the selected responseType, generated methods and views will vary. This param will be visible if 'all' or 'entity' parameters have been specified; default: 'JSON'
-
-[[web-mvc-setup-command]]
-==== web mvc setup
-
-Includes Spring MVC on generated project
-
-----------------------
-web mvc setup --module
-----------------------
-
---module::
-  The application module where to install the persistence. This option is available if there is more than 
-  one application module (mandatory if the focus is not set in application module); default if option not present: '.' 
---appServer::
-  The server where deploy the application; default if option not
-  present: 'EMBEDDED'
-
-=== Creator Commands
-
-Creator Commands are contained in
-org.springframework.roo.addon.creator.CreatorCommands.
-
-==== addon create advanced
-
-Create a new advanced add-on for Spring Roo (commands + operations +
-metadata + trigger annotation + dependencies)
-
----------------------------------------
-addon create advanced --topLevelPackage
----------------------------------------
-
---topLevelPackage::
-  The top level package of the new addon (mandatory)
---description::
-  Description of your addon (surround text with double quotes)
---projectName::
-  Provide a custom project name (if not provided the top level package
-  name will be used instead)
-
-==== addon create i18n
-
-Create a new Internationalization add-on for Spring Roo
-
-------------------------------------------------------------
-addon create i18n --topLevelPackage --locale --messageBundle
-------------------------------------------------------------
-
---topLevelPackage::
-  The top level package of the new addon (mandatory)
---locale::
-  The locale abbreviation (ie: en, or more specific like en_AU, or
-  de_DE) (mandatory)
---messageBundle::
-  Fully qualified path to the messages_xx.properties file (mandatory)
---language::
-  The full name of the language (used as a label for the UI)
---flagGraphic::
-  Fully qualified path to flag xx.png file
---description::
-  Description of your addon (surround text with double quotes)
---projectName::
-  Provide a custom project name (if not provided the top level package
-  name will be used instead)
-
-==== addon create simple
-
-Create a new simple add-on for Spring Roo (commands + operations)
-
--------------------------------------
-addon create simple --topLevelPackage
--------------------------------------
-
---topLevelPackage::
-  The top level package of the new addon (mandatory)
---description::
-  Description of your addon (surround text with double quotes)
---projectName::
-  Provide a custom project name (if not provided the top level package
-  name will be used instead)
-
-==== addon create suite
-
-Create a new Spring Roo Addon Suite for Spring Roo (two sample addons +
-repository + suite generator)
-
-------------------------------------
-addon create suite --topLevelPackage
-------------------------------------
-
---topLevelPackage::
-  The top level package of all Spring Roo Addon Suite (mandatory)
---description::
-  Description of your Roo Addon Suite (surround text with double
-  quotes)
---projectName::
-  Provide a custom project name (if not provided the top level package
-  name will be used instead)
-
-==== addon create wrapper
-
-Create a new add-on for Spring Roo which wraps a maven artifact to
-create a OSGi compliant bundle
-
--------------------------------------------------------------------------------------------------
-addon create wrapper --topLevelPackage --groupId --artifactId --version --vendorName --licenseUrl
--------------------------------------------------------------------------------------------------
-
---topLevelPackage::
-  The top level package of the new wrapper bundle (mandatory)
---groupId::
-  Dependency group id (mandatory)
---artifactId::
-  Dependency artifact id (mandatory)
---version::
-  Dependency version (mandatory)
---vendorName::
-  Dependency vendor name (mandatory)
---licenseUrl::
-  Dependency license URL (mandatory)
---docUrl::
-  Dependency documentation URL
---description::
-  Description of the bundle (use keywords with #-tags for better search
-  integration)
---projectName::
-  Provide a custom project name (if not provided the top level package
-  name will be used instead)
---osgiImports::
-  Contents of Import-Package in OSGi manifest
-
-=== Data On Demand Commands
-
-Data On Demand Commands are contained in
-org.springframework.roo.addon.dod.addon.DataOnDemandCommands.
-
-==== dod
-
-Creates a new data on demand for the specified entity
-
-----
-dod
-----
-
---entity::
-  The entity which this data on demand class will create and modify as
-  required; default if option not present: '*'
---class::
-  The class which will be created to hold this data on demand provider
-  (defaults to the entity name + 'DataOnDemand')
---permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: 'true'; default if option not present: 'false'
-
-=== Dto Commands
-
-Dto Commands are contained in
-org.springframework.roo.addon.dto.addon.DtoCommands.
-
 [[dto-command]]
-==== dto
+=== dto
 
 Creates a new DTO class in SRC_MAIN_JAVA
 
@@ -1397,8 +1228,110 @@ dto --class
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
+=== embeddable
+
+Creates a new Java class source file with the JPA @Embeddable annotation
+in SRC_MAIN_JAVA
+
+------------------
+embeddable --class
+------------------
+
+--class::
+  The name of the class to create (mandatory)
+--serializable::
+  Whether the generated class should implement java.io.Serializable;
+  default if option present: 'true'; default if option not present:
+  'false'
+--permitReservedWords::
+  Indicates whether reserved words are ignored by Roo; default if option
+  present: 'true'; default if option not present: 'false'
+
+[[entity-jpa-command]]
+=== entity jpa
+
+Creates a new JPA persistent entity in SRC_MAIN_JAVA
+
+------------------
+entity jpa --class
+------------------
+
+* Mandatory:
+
+--class::
+  Name of the entity to create.
+
+* Conditional:
+
+All the following parameters are mandatory when 'spring.roo.jpa.require.schema-object-name' configuration setting exists and it's value is 'true'.
+
+--table::
+  The JPA table name to use for this entity.
+--identifierColumn::
+  The JPA identifier field column to use for this entity. 
+--versionField::
+  The JPA version field name to use for this entity.
+--versionColumn::
+  The JPA version field column to use for this entity.
+  This parameter is visible only when `--versionField` has been specified.
+--versionType::
+  The data type that will be used for the JPA version field.
+  This parameter is visible only when `--versionField` has been specified.
+--sequenceName::
+  The name of the sequence for incrementing sequence-driven primary
+--identifierStrategy::
+  The generation value strategy to be used ; default if option present: 'AUTO'.
+
+* Optional:
+
+--extends::
+  The superclass ; default if option not
+  present: 'java.lang.Object'
+--implements::
+  The interface to implement
+--abstract::
+  Whether the generated class should be marked as abstract; default if
+  option present: 'true'; default if option not present: 'false'
+--testAutomatically::
+  Create automatic integration tests for this entity; default if option
+  present: 'true'; default if option not present: 'false'
+--schema::
+  The JPA table schema name to use for this entity
+--catalog::
+  The JPA table catalog name to use for this entity
+--identifierField::
+  The JPA identifier field name to use for this entity
+--identifierType::
+  The data type that will be used for the JPA identifier field; default: 'java.lang.Long'
+--inheritanceType::
+  The JPA @Inheritance value (apply to base class)
+--mappedSuperclass::
+  Apply @MappedSuperclass for this entity; default if option present:
+  'true'; default if option not present: 'false'
+--equals::
+  Whether the generated class should implement equals and hashCode
+  methods; default if option present: 'true'; default if option not
+  present: 'false'
+--serializable::
+  Whether the generated class should implement java.io.Serializable;
+  default if option present: 'true'; default if option not present:
+  'false'
+--permitReservedWords::
+  Indicates whether reserved words are ignored by Roo; default if option
+  present: 'true'; default if option not present: 'false'
+--entityName::
+  The name used to refer to the entity in queries
+--readOnly::
+  Whether the generated entity should be used for read operations only.;
+  default if option present: 'true'; default if option not present:
+  'false'
+--plural::
+  Specify the plural of this new entity. If not provided, a calculated plural will be used by default
+--force::
+  Force command execution; default if option present: 'true'; default if option not present: 'false'
+
 [[entity-projection-command]]
-==== entity projection
+=== entity projection
 
 Creates new projection classes from entities in SRC_MAIN_JAVA
 
@@ -1421,12 +1354,45 @@ entity projection --entity --fields
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-=== Equals Commands
+[[enum-type-command]]
+=== enum constant
 
-Equals Commands are contained in
-org.springframework.roo.addon.javabean.addon.EqualsCommands.
+Inserts a new enum constant into an enum
 
-==== equals
+--------------------
+enum constant --name
+--------------------
+
+--class::
+  The name of the enum class to receive this field. It could include module name if necessary; default if option
+  not present: '*'
+--name::
+  The name of the constant (mandatory)
+--permitReservedWords::
+  Indicates whether reserved words are ignored by Roo; default if option
+  present: 'true'; default if option not present: 'false'
+
+[[enum-type-command]]
+=== enum type
+
+Creates a new Java enum source file in any project path
+
+-----------------
+enum type --class
+-----------------
+
+--class::
+  The name of the enum to create (mandatory). It could include module name if necessary.
+--path::
+  Source directory to create the enum in; default:
+  'FOCUSED:SRC_MAIN_JAVA'
+--permitReservedWords::
+  Indicates whether reserved words are ignored by Roo; default if option
+  present: 'true'; default if option not present: 'false'
+--force::
+  Force command execution; default if option present: 'true'; default if option not present: 'false'
+
+=== equals
 
 Add equals and hashCode methods to a class
 
@@ -1443,12 +1409,7 @@ equals
   The fields to exclude in the equals and hashcode methods. Multiple
   field names must be a double-quoted list separated by spaces
 
-=== Felix Delegator
-
-Felix Delegator are contained in
-org.springframework.roo.felix.FelixDelegator.
-
-==== exit
+=== exit
 
 Exits the shell. You can also use 'quit' command
 
@@ -1458,13 +1419,7 @@ exit
 
 This command does not accept any options. 
 
-[[field-commands]]
-=== Field Commands
-
-Field Commands are contained in
-org.springframework.roo.addon.field.addon.FieldCommands.
-
-==== field boolean
+=== field boolean
 
 Adds a private boolean field to an existing Java source file
 
@@ -1518,7 +1473,7 @@ field boolean --fieldName --class --column
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-==== field date
+=== field date
 
 Adds a private date field to an existing Java source file
 
@@ -1582,7 +1537,7 @@ field date --fieldName --type --class --column
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-==== field embedded
+=== field embedded
 
 Adds a private @Embedded field to an existing Java source file
 
@@ -1612,7 +1567,7 @@ field embedded --fieldName --type --class
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-==== field enum
+=== field enum
 
 Adds a private enum field to an existing Java source file
 
@@ -1659,7 +1614,7 @@ field enum --fieldName --type --class --column
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-==== field file
+=== field file
 
 Adds a byte array field for storing uploaded file contents
 (JSF-scaffolded UIs only)
@@ -1700,7 +1655,7 @@ field file --fieldName --class --contentType --column
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-==== field list
+=== field list
 
 Adds a private List field to an existing Java source file (eg the 'one'
 side of a many-to-one)
@@ -1770,7 +1725,7 @@ field list --fieldName --class --type --joinTable --joinColumns --referencedColu
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-==== field number
+=== field number
 
 Adds a private numeric field to an existing Java source file
 
@@ -1835,7 +1790,7 @@ field number --fieldName --type --class --column
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-==== field other
+=== field other
 
 Inserts a private field into the specified file
 
@@ -1883,7 +1838,7 @@ field other --fieldName --type --class --column
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-==== field reference
+=== field reference
 
 Adds a private reference field to an existing Java source file (eg the
 'many' side of a many-to-one)
@@ -1934,7 +1889,7 @@ field reference --fieldName --type --class --joinColumnName
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-==== field set
+=== field set
 
 Adds a private Set field to an existing Java source file (eg the 'one'
 side of a many-to-one)
@@ -2012,7 +1967,7 @@ field set --fieldName --class --type --joinTable --joinColumns --referencedColum
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-==== field string
+=== field string
 
 Adds a private string field to an existing Java source file
 
@@ -2071,13 +2026,8 @@ field string --fieldName --class --column
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-=== Finder Commands
-
-Finder Commands are contained in
-org.springframework.roo.addon.finder.addon.FinderCommands.
-
 [[finder-add-command]]
-==== finder add
+=== finder add
 
 Install a finder in the given target (must be an entity)
 
@@ -2098,13 +2048,19 @@ finder add --entity --name
   This option is not available if 'entity' parameter has not been specified before or if there are not exist any Projection 
   class associated. If not specified, it is used as type of response the  entity specified in the 'entity' parameter
 
-=== Help Commands
+=== focus
 
-Help Commands are contained in
-org.springframework.roo.felix.help.HelpCommands.
+Changes focus to a different type
+
+-------------
+focus --class
+-------------
+
+--class::
+  The type to focus on (mandatory). It could include module name if necessary.
 
 [[help-command]]
-==== help
+=== help
 
 Shows system help
 
@@ -2115,13 +2071,8 @@ help
 --command::
   Command name to provide help for
 
-=== Hint Commands
-
-Hint Commands are contained in
-org.springframework.roo.classpath.operations.HintCommands.
-
 [[hint-command]]
-==== hint
+=== hint
 
 Provides step-by-step hints and context-sensitive guidance
 
@@ -2132,57 +2083,27 @@ hint
 --topic::
   The topic for which advice should be provided
 
-=== I18n Commands
+=== interface
 
-I18n Commands are contained in
-org.springframework.roo.addon.web.mvc.i18n.I18nCommands.
+Creates a new Java interface source file in any project path
 
-[[i18n-command]]
-==== web mvc language
+-----------------
+interface --class
+-----------------
 
-Install new language in generated project. Also, could be used to specify the default language of the project.
-
---------------------------------
-web mvc language --code --module
---------------------------------
-
---code::
-  The language code for the desired bundle (mandatory)
---useAsDefault::
-  Indicates if selected language should be used as default on this application. By default false.; default: 'false'
---module::
-  The application module where to install message bundles. This option is not available if there is only one application module 
-  (mandatory if the focus is not set in application module); default if option not present: '.'
-
-=== Integration Test Commands
-
-Integration Test Commands are contained in
-org.springframework.roo.addon.test.addon.integration.IntegrationTestCommands.
-
-==== test integration
-
-Creates a new integration test for the specified entity
-
-----------------
-test integration
-----------------
-
---entity::
-  The name of the entity to create an integration test; default if
-  option not present: '*'
+--class::
+  The name of the interface to create (mandatory). It could include module name if necessary.
+--path::
+  Source directory to create the interface in; default:
+  'FOCUSED:SRC_MAIN_JAVA'
 --permitReservedWords::
   Indicates whether reserved words are ignored by Roo; default if option
   present: 'true'; default if option not present: 'false'
---transactional::
-  Indicates whether the created test cases should be run withing a
-  Spring transaction; default: 'true'
+--force::
+  Force command execution; default if option present: 'true'; default if option not present: 'false'
 
-[[jpa-audit-commands]]
-=== Jpa Audit Commands
-
-Jpa Audit Commands are contained in org.springframework.roo.addon.jpa.addon.audit.JpaAuditCommands.
-        
-==== jpa audit add
+[[jpa-audit-commands]]     
+=== jpa audit add
 
 Adds support for auditing a JPA entity
 
@@ -2206,7 +2127,7 @@ jpa audit add --entity --createdDateColumn --modifiedDateColumn --createdByColum
   configuration setting it’s 'true'. 
   See 'settings list' command) 
         
-==== jpa audit setup
+=== jpa audit setup
 
 Install audit support into your project
 
@@ -2217,112 +2138,7 @@ jpa audit setup --module
 --module::
   The application module where to install the persistence. This option is not available if there is only one application module (mandatory if the focus is not set in application module) ; default if option not present: '.' 
 
-=== Jpa Commands
-
-Jpa Commands are contained in
-org.springframework.roo.addon.jpa.addon.JpaCommands.
-
-==== embeddable
-
-Creates a new Java class source file with the JPA @Embeddable annotation
-in SRC_MAIN_JAVA
-
-------------------
-embeddable --class
-------------------
-
---class::
-  The name of the class to create (mandatory)
---serializable::
-  Whether the generated class should implement java.io.Serializable;
-  default if option present: 'true'; default if option not present:
-  'false'
---permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: 'true'; default if option not present: 'false'
-
-[[entity-jpa-command]]
-==== entity jpa
-
-Creates a new JPA persistent entity in SRC_MAIN_JAVA
-
-------------------------------------------------------------------------------------------------------------------------------
-entity jpa --class --table --identifierColumn --versionField --versionColumn --versionType --sequenceName --identifierStrategy
-------------------------------------------------------------------------------------------------------------------------------
-
---class::
-  Name of the entity to create (mandatory)
---extends::
-  The superclass ; default if option not
-  present: 'java.lang.Object'
---implements::
-  The interface to implement
---abstract::
-  Whether the generated class should be marked as abstract; default if
-  option present: 'true'; default if option not present: 'false'
---testAutomatically::
-  Create automatic integration tests for this entity; default if option
-  present: 'true'; default if option not present: 'false'
---table::
-  The JPA table name to use for this entity (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. 
-  See 'settings list' command)
---schema::
-  The JPA table schema name to use for this entity
---catalog::
-  The JPA table catalog name to use for this entity
---identifierField::
-  The JPA identifier field name to use for this entity
---identifierColumn::
-  The JPA identifier field column to use for this entity (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting 
-  it’s 'true'. See 'settings list' command)
---identifierType::
-  The data type that will be used for the JPA identifier field; default: 'java.lang.Long'
---versionField::
-  The JPA version field name to use for this entity (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting 
-  it’s 'true'. See 'settings list' command)
---versionColumn::
-  The JPA version field column to use for this entity. This option is available if 'versionField' option is set (mandatory 
-  if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)
---versionType::
-  The data type that will be used for the JPA version field. This option is available if 'versionField' option is set (mandatory 
-  if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command); default if option 
-  not present: 'java.lang.Integer'
---inheritanceType::
-  The JPA @Inheritance value (apply to base class)
---mappedSuperclass::
-  Apply @MappedSuperclass for this entity; default if option present:
-  'true'; default if option not present: 'false'
---equals::
-  Whether the generated class should implement equals and hashCode
-  methods; default if option present: 'true'; default if option not
-  present: 'false'
---serializable::
-  Whether the generated class should implement java.io.Serializable;
-  default if option present: 'true'; default if option not present:
-  'false'
---permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: 'true'; default if option not present: 'false'
---entityName::
-  The name used to refer to the entity in queries
---sequenceName::
-  The name of the sequence for incrementing sequence-driven primary
-  keys (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)
---identifierStrategy::
-  The generation value strategy to be used (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command); default if option present:
-  'AUTO'
---readOnly::
-  Whether the generated entity should be used for read operations only.;
-  default if option present: 'true'; default if option not present:
-  'false'
---plural::
-  Specify the plural of this new entity. If not provided, a calculated plural will be used by default
---force::
-  Force command execution; default if option present: 'true'; default if option not present: 'false'
---profile::
-  Parameter that indicates the name of the profile that will be applied
-
-==== jpa setup
+=== jpa setup
 
 Install or updates a JPA persistence provider in your project
 
@@ -2358,76 +2174,7 @@ jpa setup --provider --database --module
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-=== Maven Commands
-
-Maven Commands are contained in
-org.springframework.roo.project.MavenCommands.
-
-==== dependency add
-
-Adds a new dependency to the Maven project object model (POM)
-
------------------------------------------------
-dependency add --groupId --artifactId --version
------------------------------------------------
-
---groupId::
-  The group ID of the dependency (mandatory)
---artifactId::
-  The artifact ID of the dependency (mandatory)
---version::
-  The version of the dependency (mandatory)
---classifier::
-  The classifier of the dependency
---scope::
-  The scope of the dependency
-
-==== dependency remove
-
-Removes an existing dependency from the Maven project object model (POM)
-
---------------------------------------------------
-dependency remove --groupId --artifactId --version
---------------------------------------------------
-
---groupId::
-  The group ID of the dependency (mandatory)
---artifactId::
-  The artifact ID of the dependency (mandatory)
---version::
-  The version of the dependency (mandatory)
---classifier::
-  The classifier of the dependency
-
-==== maven repository add
-
-Adds a new repository to the Maven project object model (POM)
-
--------------------------------
-maven repository add --id --url
--------------------------------
-
---id::
-  The ID of the repository (mandatory)
---name::
-  The name of the repository
---url::
-  The URL of the repository (mandatory)
-
-==== maven repository remove
-
-Removes an existing repository from the Maven project object model (POM)
-
-----------------------------------
-maven repository remove --id --url
-----------------------------------
-
---id::
-  The ID of the repository (mandatory)
---url::
-  The URL of the repository (mandatory)
-
-==== module create
+=== module create
 
 Creates a new Maven module
 
@@ -2444,7 +2191,7 @@ module create --moduleName
   The artifact ID of this module; defaults: moduleName if not
   specified
 
-==== module focus
+=== module focus
 
 Changes focus to a different project module
 
@@ -2455,303 +2202,7 @@ module focus --moduleName
 --moduleName::
   The module to focus on (mandatory)
 
-==== perform assembly
-
-Executes the assembly goal via Maven
-
-----------------
-perform assembly
-----------------
-
-This command does not accept any options.
-
-==== perform clean
-
-Executes a full clean (including Eclipse files) via Maven
-
--------------
-perform clean
--------------
-
-This command does not accept any options.
-
-==== perform command
-
-Executes a user-specified Maven command
-
-------------------------------
-perform command --mavenCommand
-------------------------------
-
---mavenCommand::
-  User-specified Maven command (eg test:test)(mandatory)
-
-==== perform eclipse
-
-Sets up Eclipse configuration via Maven (only necessary if you have not
-installed the m2eclipse plugin in Eclipse)
-
----------------
-perform eclipse
----------------
-
-This command does not accept any options.
-
-[[perform-package-command]]
-==== perform package
-
-Packages the application using Maven, but does not execute any tests
-
----------------
-perform package
----------------
-
-This command does not accept any options.
-
-==== perform tests
-
-Executes the tests via Maven
-
--------------
-perform tests
--------------
-
-This command does not accept any options.
-
-=== Obr Add On Commands
-
-Obr Add On Commands are contained in
-org.springframework.roo.obr.addon.search.ObrAddOnCommands.
-
-==== addon info bundle
-
-Provide information about a specific Spring Roo Add-on
-
---------------------------------------
-addon info bundle --bundleSymbolicName
---------------------------------------
-
---bundleSymbolicName::
-  The bundle symbolic name for the add-on of interest (mandatory)
-
-==== addon install bundle
-
-Install Spring Roo Add-on
-
------------------------------------------
-addon install bundle --bundleSymbolicName
------------------------------------------
-
---bundleSymbolicName::
-  The bundle symbolic name for the add-on of interest (mandatory)
-
-==== addon install url
-
-Install Spring Roo Add-on using url
-
------------------------
-addon install url --url
------------------------
-
---url::
-  The url for the add-on of interest (mandatory)
-
-==== addon list
-
-List all installed addons
-
-----------
-addon list
-----------
-
-This command does not accept any options.
-
-==== addon remove
-
-Remove Spring Roo Add-on
-
----------------------------------
-addon remove --bundleSymbolicName
----------------------------------
-
---bundleSymbolicName::
-  The bundle symbolic name for the add-on of interest (mandatory)
-
-==== addon search
-
-Search all known Spring Roo Add-ons
-
-------------------------------
-addon search --requiresCommand
-------------------------------
-
---requiresCommand::
-  Only display add-ons in search results that offer this command (mandatory)
-
-=== Obr Repository Commands
-
-Obr Repository Commands are contained in
-org.springframework.roo.obr.addon.search.ObrRepositoryCommands.
-
-==== addon repository add
-
-Adds a new OBR Repository to Roo Shell
-
---------------------------
-addon repository add --url
---------------------------
-
---url::
-  URL file that defines repository. Ex:
-  'http://localhost/repo/index.xml' (mandatory)
-
-==== addon repository introspect
-
-Introspects all installed OBR Repositories and list all their addons
-
----------------------------
-addon repository introspect
----------------------------
-
-This command does not accept any options.
-
-==== addon repository list
-
-Lists existing OBR Repositories
-
----------------------
-addon repository list
----------------------
-
-This command does not accept any options.
-
-==== addon repository remove
-
-Removes an existing OBR Repository from Roo Shell
-
------------------------------
-addon repository remove --url
------------------------------
-
---url::
-  URL file that defines repository. Ex:
-  'http://localhost/repo/index.xml' (mandatory)
-
-=== Os Commands
-
-Os Commands are contained in
-org.springframework.roo.addon.oscommands.OsCommands.
-
-==== !
-
-Allows execution of operating system (OS) commands.
-
-----
-!
-----
-
---command::
-  The command to execute; default: ''
-
-=== Pgp Commands
-
-Pgp Commands are contained in
-org.springframework.roo.felix.pgp.PgpCommands.
-
-==== pgp automatic trust
-
-Indicates to automatically trust all keys encountered until the command
-is invoked again
-
--------------------
-pgp automatic trust
--------------------
-
-This command does not accept any options.
-
-==== pgp key view
-
-Downloads a remote key and displays it to the user (does not change any
-trusts)
-
---------------------
-pgp key view --keyId
---------------------
-
---keyId::
-  The key ID to view (eg 00B5050F or 0x00B5050F) (mandatory)
-
-==== pgp list trusted keys
-
-Lists the keys you currently trust and have not been revoked at the time
-last downloaded from a public key server
-
----------------------
-pgp list trusted keys
----------------------
-
-This command does not accept any options.
-
-==== pgp refresh all
-
-Refreshes all keys from public key servers
-
----------------
-pgp refresh all
----------------
-
-This command does not accept any options.
-
-==== pgp status
-
-Displays the status of the PGP environment
-
-----------
-pgp status
-----------
-
-This command does not accept any options.
-
-==== pgp trust
-
-Grants trust to a particular key ID
-
------------------
-pgp trust --keyId
------------------
-
---keyId::
-  The key ID to trust (eg 00B5050F or 0x00B5050F) (mandatory)
-
-==== pgp untrust
-
-Revokes your trust for a particular key ID
-
--------------------
-pgp untrust --keyId
--------------------
-
---keyId::
-  The key ID to remove trust from (eg 00B5050F or 0x00B5050F) (mandatory)
-
-=== Project Commands
-
-Project Commands are contained in
-org.springframework.roo.project.ProjectCommands.
-
-==== development mode
-
-Switches the system into development mode (greater diagnostic
-information)
-
-----------------
-development mode
-----------------
-
---enabled::
-  Activates development mode; default: 'true'
-
-==== project scan now
+=== project scan now
 
 Perform a manual file system scan
 
@@ -2761,7 +2212,7 @@ project scan now
 
 This command does not accept any options.
 
-==== project scan speed
+=== project scan speed
 
 Changes the file system scanning speed
 
@@ -2772,7 +2223,7 @@ project scan speed --ms
 --ms::
   The number of milliseconds between each scan (mandatory)
 
-==== project scan status
+=== project scan status
 
 Display file system scanning information
 
@@ -2782,7 +2233,7 @@ project scan status
 
 This command does not accept any options.
 
-==== project setup
+=== project setup
 
 Creates a new Maven project
 
@@ -2804,12 +2255,7 @@ project setup --topLevelPackage
   The Maven packaging of this project. This option is not available if 'multimodule' is specified; default if option not present:
   'jar'
 
-=== Prop File Commands
-
-Prop File Commands are contained in
-org.springframework.roo.addon.propfiles.PropFileCommands.
-
-==== property add
+=== property add
 
 Adds or updates a particular property from application config properties
 file.
@@ -2829,7 +2275,7 @@ property add --key --value --module
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-==== property list
+=== property list
 
 List all properties from application config properties file.
 
@@ -2844,7 +2290,7 @@ property list --module
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-==== property remove
+=== property remove
 
 Removes a particular property from application config properties file.
 
@@ -2861,12 +2307,7 @@ property remove --key --module
 --profile::
   Parameter that indicates the name of the profile that will be applied 
 
-=== Push In Commands
-
-Push In Commands are contained in
-org.springframework.roo.addon.pushin.PushInCommands.
-
-==== push-in
+=== push-in
 
 Push-in all methods, fields, annotations, imports, extends, etc..
 declared on ITDs to its .java files. You could specify --all parameter
@@ -2896,13 +2337,8 @@ push-in
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-=== Repository Jpa Commands
-
-Repository Jpa Commands are contained in
-org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaCommands.
-
 [[repository-jpa-command]]
-==== repository jpa
+=== repository jpa
 
 Generates new Spring Data repository for specified entity.
 
@@ -2925,12 +2361,7 @@ repository jpa --interface
 --package::
   The package where repositories will be generated. Not avalaible if 'all' parameter has not been specified before
 
-=== Security Commands
-
-Security Commands are contained in
-org.springframework.roo.addon.security.addon.security.SecurityCommands.
-
-==== security authorize
+=== security authorize
 
 Include @PreAuthorize annotation to an specific method.
             
@@ -2947,7 +2378,7 @@ security authorize --class --method
 --usernames::
   Comma separated list with all the usernames to add inside Spring Security annotation
         
-==== security filtering
+=== security filtering
 
 Include @PreFilter/@PostFilter annotation to an specific method.
 
@@ -2967,7 +2398,7 @@ security filtering --class --method
 --when::
   Indicates if filtering should be after or before to execute the operation. Depends of the specified value, @PreFilter annotation or @PostFilter annotation will be included.; default: 'PRE'
 
-==== security setup
+=== security setup
 
 Install Spring Security into your project
 
@@ -2980,13 +2411,8 @@ security setup --module
 --module::
   The application module where to install the persistence. Not available if there is only one application module (mandatory if the focus is not set in application module); default if option not present: '.' 
 
-=== Service Commands
-
-Service Commands are contained in
-org.springframework.roo.addon.layers.service.addon.ServiceCommands.
-
 [[service-command]]
-==== service
+=== service
 
 Creates new service interface and its implementation.
 
@@ -3012,12 +2438,7 @@ service --repository --interface
   The java package of the implementation classes for the interfaces. Not avalaible if 'all' parameter has not been specified before
 
 [[settings-commands]]
-=== Settings Commands
-
-Settings Commands are contained in
-org.springframework.roo.settings.SettingsCommands.
-
-==== settings add
+=== settings add
 
 Adds or updates a particular setting
 
@@ -3034,7 +2455,7 @@ settings add --name --value
 --profile::
   Parameter that indicates the name of the profile that will be applied
 
-==== settings list
+=== settings list
 
 Lists all settings added into configuration
 
@@ -3044,7 +2465,7 @@ settings list
 
 This command does not accept any options.
 
-==== settings remove
+=== settings remove
 
 Removes an specific setting from configuration
 
@@ -3055,13 +2476,26 @@ settings remove --name
 --name::
   The settings name that should be removed (mandatory)
 
-=== Unit Test Commands
+=== test integration
 
-Unit Test Commands are contained in
-org.springframework.roo.addon.test.addon.unit.UnitTestCommands.
+Creates a new integration test for the specified entity
+
+----------------
+test integration
+----------------
+
+--entity::
+  The name of the entity to create an integration test; default if
+  option not present: '*'
+--permitReservedWords::
+  Indicates whether reserved words are ignored by Roo; default if option
+  present: 'true'; default if option not present: 'false'
+--transactional::
+  Indicates whether the created test cases should be run withing a
+  Spring transaction; default: 'true'
 
 [[test-unit-command]]
-==== test unit
+=== test unit
 
 Creates a unit test class for the specified class
 
@@ -3075,46 +2509,47 @@ test unit --class
   Indicates whether reserved words are ignored by Roo; default if option
   present: 'true'; default if option not present: 'false'
 
-=== View Commands
+[[web-mvc-controller-command]]
+=== web mvc controller
 
-View Commands are contained in
-org.springframework.roo.addon.web.mvc.views.ViewCommands.
+Generates new @RooController's inside current project. The controllers should manage specific entities in the project.
 
-==== web mvc templates setup
+------------------
+web mvc controller
+------------------
 
-Includes view generation templates on current project. Will allow
-developers to customize view generation.
+--all::                    
+  Indicates if developer wants to generate controllers for every entity of current project. This param will be visible if 'entity' parameter has not been specified; default if option present: 'true'; default if option not present: 'false'                   
+--entity::                    
+  Indicates the entity that new controller will manage. This param will be visible if 'all' parameter has not been specified                   
+--responseType::                    
+  Indicates the responseType to be used by generated controller. Depending of the selected responseType, generated methods and views will vary. This param will be visible if 'all' or 'entity' parameters have been specified; default: 'JSON'                    
+--package::                    
+  Indicates which package should be used to include generated controllers. This param will be visible if 'all' or 'entity' parameters have been specified          
+--pathPrefix::                    
+  Indicates @ResquestMapping prefix to be used on this controller. Is not necessary to specify '/'. Spring Roo shell will include it automatically. This param will be visible if 'all' or 'entity' parameters have been specified; default: ''
 
-------------------------------
-web mvc templates setup --type
-------------------------------
+[[web-mvc-detail-command]]
+=== web mvc detail
 
---type::
-  View identifier of templates you want to install. Only installed views
-  are available (mandatory)
+Generates new @RooController's for relation fields which detail wants to be managed. It must be a @OneToMany field. Generated controllers will have @RooDetail with info about the parent entity.
 
-[[web-mvc-view-setup-command]]
-==== web mvc view setup
+--------------
+web mvc detail
+--------------          
+                
+--all::                    
+  Indicates if developer wants to generate first detail controllers for every entity that has a controller of current project. This param will be visible if 'entity' parameter has not been specified; default if option present: 'true'; default if option not present: 'false'                           
+--entity::                    
+  Indicates the entity on which the detail controller is generated. This param will be visible if 'all' parameter has not been specified 
+--field::                    
+  Indicates the entity's field on which the detail controller is generated. It must be a @OneToMany field. This param will be visible if 'entity' parameter has been specified before; default: ''                  
+--package::
+  Indicates which package has the controllers on which the detail controllers are generated. This param will be visible if 'all' or 'entity' parameters have been specified
+--responseType::                    
+  Indicates the responseType to be used by generated controller. Depending of the selected responseType, generated methods and views will vary. This param will be visible if 'all' or 'entity' parameters have been specified; default: 'JSON'
 
-Includes all necessary resources of provided responseType on generated
-project
-
-----------------------------------
-web mvc view setup --type --module
-----------------------------------
-
---type::
-  View identifier you want to install. Install your necessary views
-  before to be used on controller generation command (mandatory)
---module::
-  The application module where to install views. Not available if there is only one application module (mandatory if the focus is not set in application module); default if option not present: '.' 
-
-=== Web Finder Commands
-
-Web Finder Commands are contained in
-org.springframework.roo.addon.web.mvc.controller.addon.finder.WebFinderCommands.
-
-==== web mvc finder
+=== web mvc finder
 
 Adds @RooWebFinder annotation to MVC controller type
 
@@ -3135,17 +2570,208 @@ web mvc finder --package
 --pathPrefix::
   Indicates the default path value for accesing finder resources in controller, excluding first '/'. Not avalaible if 'all' or 'entity' parameters have not been specified before; default: ''
 
+[[i18n-command]]
+=== web mvc language
+
+Install new language in generated project. Also, could be used to specify the default language of the project.
+
+--------------------------------
+web mvc language --code --module
+--------------------------------
+
+--code::
+  The language code for the desired bundle (mandatory)
+--useAsDefault::
+  Indicates if selected language should be used as default on this application. By default false.; default: 'false'
+--module::
+  The application module where to install message bundles. This option is not available if there is only one application module 
+  (mandatory if the focus is not set in application module); default if option not present: '.'
+
+[[web-mvc-setup-command]]
+=== web mvc setup
+
+Includes Spring MVC on generated project
+
+----------------------
+web mvc setup --module
+----------------------
+
+--module::
+  The application module where to install the persistence. This option is available if there is more than 
+  one application module (mandatory if the focus is not set in application module); default if option not present: '.' 
+--appServer::
+  The server where deploy the application; default if option not
+  present: 'EMBEDDED'
+
+=== web mvc templates setup
+
+Includes view generation templates on current project. Will allow
+developers to customize view generation.
+
+------------------------------
+web mvc templates setup --type
+------------------------------
+
+--type::
+  View identifier of templates you want to install. Only installed views
+  are available (mandatory)
+
+[[web-mvc-view-setup-command]]
+=== web mvc view setup
+
+Includes all necessary resources of provided responseType on generated
+project
+
+----------------------------------
+web mvc view setup --type --module
+----------------------------------
+
+--type::
+  View identifier you want to install. Install your necessary views
+  before to be used on controller generation command (mandatory)
+--module::
+  The application module where to install views. Not available if there is only one application module (mandatory if the focus is not set in application module); default if option not present: '.' 
+
+
 
 [appendix]
 [[addon-development-command-index]]
 == Command Index for Add-on Development
 
-=== Metadata Commands
+These commands are specific for developing Spring Roo add-ons and will be only available if user enables the add-on "development mode" with link:#addon-development-mode[`addon development mode`] command.
 
-Metadata Commands are contained in
-org.springframework.roo.classpath.MetadataCommands.
+=== !
 
-==== metadata cache
+Allows execution of operating system (OS) commands.
+
+----
+!
+----
+
+--command::
+  The command to execute; default: ''
+
+=== !g
+
+Passes a command directly through to the Felix shell infrastructure
+
+----
+!g
+----
+
+--[default]::
+  The command to pass to Felix (WARNING: no validation or security
+  checks are performed); default: 'help'
+
+=== addon create advanced
+
+Create a new advanced add-on for Spring Roo (commands + operations +
+metadata + trigger annotation + dependencies)
+
+---------------------------------------
+addon create advanced --topLevelPackage
+---------------------------------------
+
+--topLevelPackage::
+  The top level package of the new addon (mandatory)
+--description::
+  Description of your addon (surround text with double quotes)
+--projectName::
+  Provide a custom project name (if not provided the top level package
+  name will be used instead)
+
+=== addon create i18n
+
+Create a new Internationalization add-on for Spring Roo
+
+------------------------------------------------------------
+addon create i18n --topLevelPackage --locale --messageBundle
+------------------------------------------------------------
+
+--topLevelPackage::
+  The top level package of the new addon (mandatory)
+--locale::
+  The locale abbreviation (ie: en, or more specific like en_AU, or
+  de_DE) (mandatory)
+--messageBundle::
+  Fully qualified path to the messages_xx.properties file (mandatory)
+--language::
+  The full name of the language (used as a label for the UI)
+--flagGraphic::
+  Fully qualified path to flag xx.png file
+--description::
+  Description of your addon (surround text with double quotes)
+--projectName::
+  Provide a custom project name (if not provided the top level package
+  name will be used instead)
+
+=== addon create simple
+
+Create a new simple add-on for Spring Roo (commands + operations)
+
+-------------------------------------
+addon create simple --topLevelPackage
+-------------------------------------
+
+--topLevelPackage::
+  The top level package of the new addon (mandatory)
+--description::
+  Description of your addon (surround text with double quotes)
+--projectName::
+  Provide a custom project name (if not provided the top level package
+  name will be used instead)
+
+=== addon create suite
+
+Create a new Spring Roo Addon Suite for Spring Roo (two sample addons +
+repository + suite generator)
+
+------------------------------------
+addon create suite --topLevelPackage
+------------------------------------
+
+--topLevelPackage::
+  The top level package of all Spring Roo Addon Suite (mandatory)
+--description::
+  Description of your Roo Addon Suite (surround text with double
+  quotes)
+--projectName::
+  Provide a custom project name (if not provided the top level package
+  name will be used instead)
+
+=== addon create wrapper
+
+Create a new add-on for Spring Roo which wraps a maven artifact to
+create a OSGi compliant bundle
+
+-------------------------------------------------------------------------------------------------
+addon create wrapper --topLevelPackage --groupId --artifactId --version --vendorName --licenseUrl
+-------------------------------------------------------------------------------------------------
+
+--topLevelPackage::
+  The top level package of the new wrapper bundle (mandatory)
+--groupId::
+  Dependency group id (mandatory)
+--artifactId::
+  Dependency artifact id (mandatory)
+--version::
+  Dependency version (mandatory)
+--vendorName::
+  Dependency vendor name (mandatory)
+--licenseUrl::
+  Dependency license URL (mandatory)
+--docUrl::
+  Dependency documentation URL
+--description::
+  Description of the bundle (use keywords with #-tags for better search
+  integration)
+--projectName::
+  Provide a custom project name (if not provided the top level package
+  name will be used instead)
+--osgiImports::
+  Contents of Import-Package in OSGi manifest
+
+=== metadata cache
 
 Shows detailed metadata for the indicated type
 
@@ -3156,7 +2782,7 @@ metadata cache --maximumCapacity
 --maximumCapacity::
   The maximum number of metadata items to cache (mandatory)
 
-==== metadata for id
+=== metadata for id
 
 Shows detailed information about the metadata item
 
@@ -3167,7 +2793,7 @@ metadata for id --metadataId
 --metadataId::
   The metadata ID (should start with MID:) (mandatory)
 
-==== metadata for module
+=== metadata for module
 
 Shows the ProjectMetadata for the indicated project module
 
@@ -3178,7 +2804,7 @@ metadata for module
 --module::
   The module for which to retrieve the metadata ; default: the focused module
 
-==== metadata for type
+=== metadata for type
 
 Shows detailed metadata for the indicated type
 
@@ -3190,7 +2816,7 @@ metadata for type --type
   The Java type for which to display metadata
   (mandatory)
 
-==== metadata status
+=== metadata status
 
 Shows metadata statistics
 
@@ -3200,7 +2826,7 @@ metadata status
 
 This command does not accept any options.
 
-==== metadata trace
+=== metadata trace
 
 Traces metadata event delivery notifications
 
@@ -3211,12 +2837,7 @@ metadata trace --level
 --level::
   The verbosity of notifications (0=none, 1=some, 2=all) (mandatory)
 
-=== Process Manager Diagnostics Listener
-
-Process Manager Diagnostics Listener are contained in
-org.springframework.roo.process.manager.internal.ProcessManagerDiagnosticsListener.
-
-==== process manager debug
+=== process manager debug
 
 Indicates if process manager debugging is desired. It is only available if 'development mode' is true.
 
@@ -3227,12 +2848,7 @@ process manager debug
 --enabled::
   Activates debug mode; default: 'true'
 
-=== Help Commands
-
-Help Commands are contained in
-org.springframework.roo.felix.help.HelpCommands.
-
-==== reference guide
+=== reference guide
 
 Writes the reference guide XML fragments (in DocBook format) into the
 current working directory. It is only available if 'development mode' is true.
@@ -3243,44 +2859,8 @@ reference guide
 
 This command does not accept any options.
 
-=== J Line Shell Component
-
-J Line Shell Component are contained in
-org.springframework.roo.shell.jline.osgi.JLineShellComponent.
-
-==== */
-
-
-End of block comment
-
-----
-*/
-----
-
-This command does not accept any options.
-
-==== /*
-
-Start of block comment
-
-----
-/*
-----
-
-This command does not accept any options.
-
-==== pass:[//]
-
-Inline comment markers (start of line only)
-
-----
-//
-----
-
-This command does not accept any options.
-
 [[script-command]]
-==== script
+=== script
 
 Parses the specified resource file and executes its commands
 
@@ -3294,7 +2874,7 @@ script --file
   Display line numbers when executing the script; default if option
   present: 'true'; default if option not present: 'false'
 
-==== system properties
+=== system properties
 
 Shows the shell's properties
 
@@ -3305,7 +2885,7 @@ system properties
 This command does not accept any options.
 
 [[version-command]]
-==== version
+=== version
 
 Displays shell version
 
@@ -3315,23 +2895,6 @@ version
 
 --[default]::
   Special version flags
-
-=== Felix Delegator
-
-Felix Delegator are contained in
-org.springframework.roo.felix.FelixDelegator.
-
-==== !g
-
-Passes a command directly through to the Felix shell infrastructure
-
-----
-!g
-----
-
---[default]::
-  The command to pass to Felix (WARNING: no validation or security
-  checks are performed); default: 'help'
 
 
 [appendix]

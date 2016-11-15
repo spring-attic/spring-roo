@@ -310,8 +310,9 @@ public class ControllerCommands implements CommandMarker {
    * @param package
    * @param pathPrefix
    */
-  @CliCommand(value = "web mvc controller",
-      help = "Generates new @RooController inside current project")
+  @CliCommand(
+      value = "web mvc controller",
+      help = "Generates new @RooController's inside current project. The controllers should manage specific entities in the project.")
   public void addController(
       @CliOption(
           key = "all",
@@ -596,8 +597,9 @@ public class ControllerCommands implements CommandMarker {
    * @param package
    * @param pathPrefix
    */
-  @CliCommand(value = "web mvc detail",
-      help = "Generates new @RooController inside current project")
+  @CliCommand(
+      value = "web mvc detail",
+      help = "Generates new @RooController's for relation fields which detail wants to be managed. It must be a @OneToMany field. Generated controllers will have @RooDetail with info about the parent entity")
   public void addDetailController(
       @CliOption(
           key = "all",
@@ -615,7 +617,7 @@ public class ControllerCommands implements CommandMarker {
           mandatory = false,
           specifiedDefaultValue = "",
           unspecifiedDefaultValue = "",
-          help = "Indicates the entity's field on which the detail controller is generated. This param will be visible if 'entity' parameter has been specified before. ") String field,
+          help = "Indicates the entity's field on which the detail controller is generated. It must be a @OneToMany field. This param will be visible if 'entity' parameter has been specified before. ") String field,
       @CliOption(
           key = "package",
           mandatory = false,

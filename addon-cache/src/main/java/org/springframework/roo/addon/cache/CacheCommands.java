@@ -93,7 +93,7 @@ public class CacheCommands implements CommandMarker {
    */
   @CliCommand(
       value = "cache setup",
-      help = "Installs support for intermediate memory. Users can specify different providers to use for managing it.")
+      help = "Installs support for using intermediate memory in generated project. Users can specify different providers to use for managing it.")
   public void cacheSetup(
       @CliOption(key = "provider", mandatory = false,
           help = "Parameter that indicates the provider to use for managing intermediate memory.") String provider,
