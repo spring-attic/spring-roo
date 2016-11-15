@@ -31,7 +31,7 @@ DISID CORPORATION S.L.
 :source-highlighter: pygments
 :sectnums:
 :toc:
-:toclevels: 3
+:toclevels: 5
 :toc-placement: left
 :toc-title: Table of Contents
 :copyright: CC BY-NC-SA 3.0
@@ -215,7 +215,7 @@ roo> entity jpa --class ~.Country --table NORTHWIND_COUNTRIES --sequenceName NOR
 roo> entity jpa --class ~.Region --table NORTHWIND_REGIONS --sequenceName NORTHWIND_REGIONS_REGION_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REGION_ID --versionField version --versionType long --versionColumn VERSION --readOnly
 ----
 +
-Please, note that first command has module name in '--class' parameter to create the entity in that module and focus it. Spring Roo Shell will assist you with that if you try to autocomplete parameter values with 'TAB' (or 'Ctrl' + )
+Please, note that first command has module name in '--class' parameter to create the entity in that module and focus it. Spring Roo Shell will assist you with that if you try to auto-complete parameter values with 'TAB' (or 'Ctrl' + )
 
 .Create domain entities for not read-only operations (link:#entity-jpa-command[entity jpa command])
 [source,sh]
@@ -934,8 +934,8 @@ roo> push-in --all --force
 ----
 
 [appendix]
-[[command-index]]
-== Command Index
+[[application-development-command-index]]
+== Command Index for Application Development
 
 This appendix was automatically built from Roo 2.0.0.BUILD-SNAPSHOT
 
@@ -1046,10 +1046,8 @@ cache setup
                 
 --provider::                    
   Parameter that indicates the provider to use for managing intermediate memory
---force::
-  Force command execution; default if option present: 'true'; default if option not present: 'false'
 --profile::
-  Parameter that indicates the name of the profile that will be applied
+  Parameter that indicates the name of the profile that will be applied.
 
 === Classpath Commands
 
@@ -1086,8 +1084,6 @@ class --class
   present: 'true'; default if option not present: 'false'
 --force::
   Force command execution; default if option present: 'true'; default if option not present: 'false'
---profile::
-  Parameter that indicates the name of the profile that will be applied
 
 ==== constructor
 
@@ -1141,8 +1137,6 @@ enum type --class
   present: 'true'; default if option not present: 'false'
 --force::
   Force command execution; default if option present: 'true'; default if option not present: 'false'
---profile::
-  Parameter that indicates the name of the profile that will be applied
 
 ==== focus
 
@@ -1173,8 +1167,6 @@ interface --class
   present: 'true'; default if option not present: 'false'
 --force::
   Force command execution; default if option present: 'true'; default if option not present: 'false'
---profile::
-  Parameter that indicates the name of the profile that will be applied
 
 === Controller Commands
 
@@ -1455,18 +1447,6 @@ equals
 
 Felix Delegator are contained in
 org.springframework.roo.felix.FelixDelegator.
-
-==== !g
-
-Passes a command directly through to the Felix shell infrastructure
-
-----
-!g
-----
-
---[default]::
-  The command to pass to Felix (WARNING: no validation or security
-  checks are performed); default: 'help'
 
 ==== exit
 
@@ -2135,17 +2115,6 @@ help
 --command::
   Command name to provide help for
 
-==== reference guide
-
-Writes the reference guide XML fragments (in DocBook format) into the
-current working directory. It is only available if 'development mode' is true.
-
----------------
-reference guide
----------------
-
-This command does not accept any options.
-
 === Hint Commands
 
 Hint Commands are contained in
@@ -2207,89 +2176,6 @@ test integration
 --transactional::
   Indicates whether the created test cases should be run withing a
   Spring transaction; default: 'true'
-
-=== J Line Shell Component
-
-J Line Shell Component are contained in
-org.springframework.roo.shell.jline.osgi.JLineShellComponent.
-
-==== */
-
-
-End of block comment
-
-----
-*/
-----
-
-This command does not accept any options.
-
-==== /*
-
-Start of block comment
-
-----
-/*
-----
-
-This command does not accept any options.
-
-==== pass:[//]
-
-Inline comment markers (start of line only)
-
-----
-//
-----
-
-This command does not accept any options.
-
-==== date
-
-Displays the local date and time
-
-----
-date
-----
-
-This command does not accept any options.
-
-[[script-command]]
-==== script
-
-Parses the specified resource file and executes its commands
-
--------------
-script --file
--------------
-
---file::
-  The file to locate and execute (mandatory)
---lineNumbers::
-  Display line numbers when executing the script; default if option
-  present: 'true'; default if option not present: 'false'
-
-==== system properties
-
-Shows the shell's properties
-
------------------
-system properties
------------------
-
-This command does not accept any options.
-
-[[version-command]]
-==== version
-
-Displays shell version
-
--------
-version
--------
-
---[default]::
-  Special version flags
 
 [[jpa-audit-commands]]
 === Jpa Audit Commands
@@ -2632,77 +2518,6 @@ perform tests
 
 This command does not accept any options.
 
-=== Metadata Commands
-
-Metadata Commands are contained in
-org.springframework.roo.classpath.MetadataCommands.
-
-==== metadata cache
-
-Shows detailed metadata for the indicated type
-
---------------------------------
-metadata cache --maximumCapacity
---------------------------------
-
---maximumCapacity::
-  The maximum number of metadata items to cache (mandatory)
-
-==== metadata for id
-
-Shows detailed information about the metadata item
-
-----------------------------
-metadata for id --metadataId
-----------------------------
-
---metadataId::
-  The metadata ID (should start with MID:) (mandatory)
-
-==== metadata for module
-
-Shows the ProjectMetadata for the indicated project module
-
--------------------
-metadata for module
--------------------
-
---module::
-  The module for which to retrieve the metadata ; default: the focused module
-
-==== metadata for type
-
-Shows detailed metadata for the indicated type
-
-------------------------
-metadata for type --type
-------------------------
-
---type::
-  The Java type for which to display metadata
-  (mandatory)
-
-==== metadata status
-
-Shows metadata statistics
-
----------------
-metadata status
----------------
-
-This command does not accept any options.
-
-==== metadata trace
-
-Traces metadata event delivery notifications
-
-----------------------
-metadata trace --level
-----------------------
-
---level::
-  The verbosity of notifications (0=none, 1=some, 2=all) (mandatory)
-
 === Obr Add On Commands
 
 Obr Add On Commands are contained in
@@ -2918,22 +2733,6 @@ pgp untrust --keyId
 
 --keyId::
   The key ID to remove trust from (eg 00B5050F or 0x00B5050F) (mandatory)
-
-=== Process Manager Diagnostics Listener
-
-Process Manager Diagnostics Listener are contained in
-org.springframework.roo.process.manager.internal.ProcessManagerDiagnosticsListener.
-
-==== process manager debug
-
-Indicates if process manager debugging is desired. It is only available if 'development mode' is true.
-
----------------------
-process manager debug
----------------------
-
---enabled::
-  Activates debug mode; default: 'true'
 
 === Project Commands
 
@@ -3335,6 +3134,205 @@ web mvc finder --package
    Indicates the package where generated controller will be located. If multimodule project, package must be in an application module (those with @SpringBootApplication class). Not avalaible if 'all' or 'entity' parameters have not been specified before (mandatory if project has more than one 'application' modules) ; default if option not present: '~.web' 
 --pathPrefix::
   Indicates the default path value for accesing finder resources in controller, excluding first '/'. Not avalaible if 'all' or 'entity' parameters have not been specified before; default: ''
+
+
+[appendix]
+[[addon-development-command-index]]
+== Command Index for Add-on Development
+
+=== Metadata Commands
+
+Metadata Commands are contained in
+org.springframework.roo.classpath.MetadataCommands.
+
+==== metadata cache
+
+Shows detailed metadata for the indicated type
+
+--------------------------------
+metadata cache --maximumCapacity
+--------------------------------
+
+--maximumCapacity::
+  The maximum number of metadata items to cache (mandatory)
+
+==== metadata for id
+
+Shows detailed information about the metadata item
+
+----------------------------
+metadata for id --metadataId
+----------------------------
+
+--metadataId::
+  The metadata ID (should start with MID:) (mandatory)
+
+==== metadata for module
+
+Shows the ProjectMetadata for the indicated project module
+
+-------------------
+metadata for module
+-------------------
+
+--module::
+  The module for which to retrieve the metadata ; default: the focused module
+
+==== metadata for type
+
+Shows detailed metadata for the indicated type
+
+------------------------
+metadata for type --type
+------------------------
+
+--type::
+  The Java type for which to display metadata
+  (mandatory)
+
+==== metadata status
+
+Shows metadata statistics
+
+---------------
+metadata status
+---------------
+
+This command does not accept any options.
+
+==== metadata trace
+
+Traces metadata event delivery notifications
+
+----------------------
+metadata trace --level
+----------------------
+
+--level::
+  The verbosity of notifications (0=none, 1=some, 2=all) (mandatory)
+
+=== Process Manager Diagnostics Listener
+
+Process Manager Diagnostics Listener are contained in
+org.springframework.roo.process.manager.internal.ProcessManagerDiagnosticsListener.
+
+==== process manager debug
+
+Indicates if process manager debugging is desired. It is only available if 'development mode' is true.
+
+---------------------
+process manager debug
+---------------------
+
+--enabled::
+  Activates debug mode; default: 'true'
+
+=== Help Commands
+
+Help Commands are contained in
+org.springframework.roo.felix.help.HelpCommands.
+
+==== reference guide
+
+Writes the reference guide XML fragments (in DocBook format) into the
+current working directory. It is only available if 'development mode' is true.
+
+---------------
+reference guide
+---------------
+
+This command does not accept any options.
+
+=== J Line Shell Component
+
+J Line Shell Component are contained in
+org.springframework.roo.shell.jline.osgi.JLineShellComponent.
+
+==== */
+
+
+End of block comment
+
+----
+*/
+----
+
+This command does not accept any options.
+
+==== /*
+
+Start of block comment
+
+----
+/*
+----
+
+This command does not accept any options.
+
+==== pass:[//]
+
+Inline comment markers (start of line only)
+
+----
+//
+----
+
+This command does not accept any options.
+
+[[script-command]]
+==== script
+
+Parses the specified resource file and executes its commands
+
+-------------
+script --file
+-------------
+
+--file::
+  The file to locate and execute (mandatory)
+--lineNumbers::
+  Display line numbers when executing the script; default if option
+  present: 'true'; default if option not present: 'false'
+
+==== system properties
+
+Shows the shell's properties
+
+-----------------
+system properties
+-----------------
+
+This command does not accept any options.
+
+[[version-command]]
+==== version
+
+Displays shell version
+
+-------
+version
+-------
+
+--[default]::
+  Special version flags
+
+=== Felix Delegator
+
+Felix Delegator are contained in
+org.springframework.roo.felix.FelixDelegator.
+
+==== !g
+
+Passes a command directly through to the Felix shell infrastructure
+
+----
+!g
+----
+
+--[default]::
+  The command to pass to Felix (WARNING: no validation or security
+  checks are performed); default: 'help'
+
 
 [appendix]
 [[roo-without-ide]]

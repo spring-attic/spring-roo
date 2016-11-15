@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -47,7 +46,6 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 import org.springframework.roo.shell.NaturalOrderComparator;
-import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -348,15 +346,6 @@ public class HelpServiceImpl implements HelpService {
 
           sb.append("Description:               ").append(cmd.help()).append(LINE_SEPARATOR);
 
-          String globalStatus = "DOESN'T ALLOW";
-          if (hasShellContextParameter(methodTarget.getMethod())) {
-            globalStatus = "ALLOWS";
-          }
-
-          sb.append("Global parameters:         ")
-              .append(
-                  String.format("This command %s to use global paramaters. (--force, etc..)",
-                      globalStatus)).append(LINE_SEPARATOR);
           sb.append("Command parameters:");
           sb.append(LINE_SEPARATOR);
           sb.append(LINE_SEPARATOR);
@@ -415,32 +404,6 @@ public class HelpServiceImpl implements HelpService {
           .warning("** Type 'hint' (without the quotes) and hit ENTER for step-by-step guidance **"
               + LINE_SEPARATOR);
     }
-  }
-
-  /**
-     * Checks if some method has the ShellContext parameter
-     * 
-     * @param method
-     * @return
-     */
-  private boolean hasShellContextParameter(Method method) {
-    int paramNumbers = method.getParameterTypes().length;
-    int shellContextPosition = 1;
-    for (Class<?> methodParameters : method.getParameterTypes()) {
-      if (methodParameters.isAssignableFrom(ShellContext.class)) {
-        if (shellContextPosition != paramNumbers) {
-          String msg =
-              String
-                  .format(
-                      "ShellContext parameter is on position '%s' but should be defined after all '@CliOption' parameters.",
-                      shellContextPosition);
-          throw new RuntimeException(msg);
-        }
-        return true;
-      }
-      shellContextPosition++;
-    }
-    return false;
   }
 
   private Collection<MethodTarget> locateTargets(final String buffer, final boolean strictMatching,
