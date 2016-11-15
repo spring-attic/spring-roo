@@ -83,6 +83,7 @@ web mvc language --code es
 
 web mvc detail --entity ~.model.Customer --field orders
 web mvc detail --entity ~.model.Customer --field orders --responseType THYMELEAF
+web mvc detail --entity ~.model.Category --field products --responseType THYMELEAF
 
 
 web mvc finder --entity ~.model.Customer

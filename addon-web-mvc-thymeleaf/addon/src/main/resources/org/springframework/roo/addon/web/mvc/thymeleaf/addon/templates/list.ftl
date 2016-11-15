@@ -1,3 +1,4 @@
+<#import "listDetails.ftl" as details>
 <!DOCTYPE html>
 <html lang="en" data-layout-decorator="layouts/default-layout">
 
@@ -213,7 +214,7 @@
   	   within the template, in the section "content"
           -->
 
-          <h1 data-th-text="${r"#{"}${entityLabelPlural}${r"}"}">${entityName}s</h1>
+          <h1 data-th-text="${r"#{"}${entityLabelPlural}}">${entityName}s</h1>
 
           <!--TABLE-->
           <div class="table-responsive" id="containerFields">
@@ -227,15 +228,15 @@
                    data-select="single"
                    data-z="${entity.z}"
                    data-order="[[ 0, &quot;asc&quot; ]]"
-                   data-data-load-url="${r"${(#mvc.url('"}${mvcCollectionControllerName}${r"#"}${mvcMethodName_datatables}${r"')).build()}"}"
-                   data-data-show-url="${r"${(#mvc.url('"}${mvcItemControllerName}${r"#"}${mvcMethodName_show}${r"')).buildAndExpand('_ID_')}"}"
+                   data-data-load-url="${r"${"}(#mvc.url('${mvcCollectionControllerName}#${mvcMethodName_datatables}')).build()}"
+                   data-data-show-url="${r"${"}(#mvc.url('${mvcItemControllerName}#${mvcMethodName_show}')).buildAndExpand('_ID_')}"
                    <#if entity.readOnly == false>
-                   data-data-create-url="${r"${(#mvc.url('"}${mvcCollectionControllerName}${r"#"}${mvcMethodName_createForm}${r"')).build()}"}"
-                   data-data-edit-url="${r"${(#mvc.url('"}${mvcItemControllerName}${r"#"}${mvcMethodName_editForm}${r"')).buildAndExpand('_ID_')}"}"
-                   data-data-delete-url="${r"${(#mvc.url('"}${mvcItemControllerName}${r"#"}${mvcMethodName_remove}${r"')).buildAndExpand('_ID_')}"}"
+                   data-data-create-url="${r"${"}(#mvc.url('${mvcCollectionControllerName}#${mvcMethodName_createForm}')).build()}"
+                   data-data-edit-url="${r"${"}(#mvc.url('${mvcItemControllerName}#${mvcMethodName_editForm}')).buildAndExpand('_ID_')}"
+                   data-data-delete-url="${r"${"}(#mvc.url('${mvcItemControllerName}#${mvcMethodName_remove}')).buildAndExpand('_ID_')}"
                    </#if>
                    >
-                <caption data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">${entityName} List</caption>
+                <caption data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}})}">${entityName} List</caption>
                 <thead>
                   <tr>
                     <#list fields as field>
@@ -254,106 +255,34 @@
                     <td>${field.fieldName}</td>
                     </#if>
                     </#list>
-                    <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
+                    <td data-th-text="${r"#{"}label_tools}">Tools</td>
                   </tr>
                 </tbody>
               </table>
               <!-- content replaced by modal-confirm fragment of modal-confirm.html -->
               <div data-th-replace="fragments/modal-confirm-delete :: modalConfirmDelete(tableId='${entity.entityItemId}-table',
-                  title=${r"#{"}label_delete_entity(${r"#{"}label_category${r"}"})${r"}"}, message=${r"#{"}info_delete_item_confirm${r"}"}, baseUrl = @{${controllerPath}/})">
+                  title=${r"#{"}label_delete_entity(${r"#{"}${entityLabelPlural}})}, message=${r"#{"}info_delete_item_confirm}, baseUrl = @{${controllerPath}/})">
               </div>
             </#if>
           </div>
           <!-- /TABLE -->
 
-          <#if details?size != 0>
-            <hr>
-            <ul class="nav nav-tabs" id="nav-tabs">
-            <#assign firstDetail=true>
-            <#list details as detail>
-              <#if firstDetail == true>
-                  <li class="active">
-                  <#if detail.tabLinkCode??>
-                    ${detail.tabLinkCode}
-                  <#else>
-                    <a id="${detail.entityItemId}-table-tab" data-toggle="tab" href="#detail-${detail.entityItemId}" data-z="${detail.z}">${detail.fieldNameCapitalized}</a>
-                  </#if>
-                  </li>
-                  <#assign firstDetail=false>
-                <#else>
-                    <li>
-                    <#if detail.tabLinkCode??>
-                      ${detail.tabLinkCode}
-                    <#else>
-                      <a id="${detail.entityItemId}-table-tab" data-toggle="tab" href="#detail-${detail.entityItemId}" data-z="${detail.z}">${detail.fieldNameCapitalized}</a>
-                    </#if>
-                    </li>
-                </#if>
+          <#if detailsLevels?size != 0>
+            <#list detailsLevels as detailsLevel>
+            <@details.section detailsLevel=detailsLevel/>
             </#list>
-            </ul>
-
-            <div class="tab-content" id="tab-content">
-                  <#assign firstDetail=true>
-                  <#list details as detail>
-                      <#if firstDetail == true>
-                          <div id="detail-${detail.entityItemId}" class="tab-pane active">
-                          <#assign firstDetail=false>
-                      <#else>
-                          <div id="detail-${detail.entityItemId}" class="tab-pane">
-                      </#if>
-                          <!--START TABLE-->
-                          <div class="table-responsive">
-                            <#if detail.userManaged>
-                              ${detail.codeManaged}
-                            <#else>
-                              <table id="${detail.entityItemId}-table"
-                                class="table table-striped table-hover table-bordered"
-                                data-z="${detail.z}"
-                                data-row-id="${detail.configuration.identifierField}" data-defer-loading="0"
-                                data-order="[[ 0, &quot;asc&quot; ]]"
-                                data-create-url-function="create${detail.configuration.referencedFieldType}Url">
-                                <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${detail.configuration.referencedFieldLabel}${r"}"})${r"}"}">${detail.fieldNameCapitalized} List</caption>
-                                <thead>
-                                  <tr>
-                                    <#list detail.configuration.referenceFieldFields as referencedFieldField>
-                                    <#if referencedFieldField != entityName>
-                                        <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
-                                    </#if>
-                                    </#list>
-                                    <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
-                                  </tr>
-                                </thead>
-                                <tbody data-th-remove="all">
-                                  <tr>
-                                    <#list detail.configuration.referenceFieldFields as referencedFieldField>
-                                    <#if referencedFieldField != entityName>
-                                        <td>${referencedFieldField.fieldName}</td>
-                                    </#if>
-                                    </#list>
-                                    <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
-                                  </tr>
-                                </tbody>
-                              </table>
-                            </#if>
-                          </div>
-                          <!--END TABLE-->
-                      </div>
-                    </#list>
-                </div>
-
           </#if>
 
           <div class="clearfix">
             <div class="pull-left">
               <a href="../index.html" class="btn btn-default" data-th-href="@{/}">
                  <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-                 <span data-th-text="${r"#{label_back}"}">Back</span>
+                 <span data-th-text="${r"#{"}label_back}">Back</span>
               </a>
             </div>
           </div>
 
         </div>
-        <!-- /CONTENT-->
       </section>
       <!-- /CONTENT-->
 

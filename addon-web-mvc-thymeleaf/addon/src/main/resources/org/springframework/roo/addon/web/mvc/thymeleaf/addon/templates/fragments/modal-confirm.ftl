@@ -13,10 +13,11 @@
     template, in the section modal
     -->
   <div
-    data-layout-fragment="modalConfirm(id, title, message, onclickCallback)"
+    data-th-fragment="modalConfirm(id, title, message, onclickCallback)"
     data-th-replace="${r"fragments/modal :: modal(id = ${id}, title = ${title}, message = ${message}, body = ~{::modalBody})"}">
 
-    <div class="modal-body" data-th-id="${r"${id}"} + 'ModalBody'">
+    <div class="modal-body" data-th-id="${r"${id}"} + 'ModalBody'"
+        data-th-fragment="modalBody">
 
       <p data-th-text="${r"${message}"}">Going to remove the selected
         element</p>
@@ -40,7 +41,7 @@
             <div class="pull-right">
               <button type="button" class="btn btn-primary"
                 data-th-text="${r"#{label_submit}"}" data-th-onclick="${r"${onclickCallback}"}"
-                >Submit</button>
+                >Accept</button>
             </div>
           </div>
         </div>

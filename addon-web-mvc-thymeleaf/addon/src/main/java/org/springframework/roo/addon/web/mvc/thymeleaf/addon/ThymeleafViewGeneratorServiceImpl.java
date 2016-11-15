@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -9,21 +13,22 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
+import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.views.ViewContext;
 import org.springframework.roo.addon.web.mvc.views.components.DetailEntityItem;
 import org.springframework.roo.addon.web.mvc.views.components.EntityItem;
 import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
 import org.springframework.roo.addon.web.mvc.views.components.MenuEntry;
 import org.springframework.roo.addon.web.mvc.views.template.engines.AbstractFreeMarkerViewGenerationService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.settings.project.ProjectSettingsService;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -39,7 +44,8 @@ import java.util.Map;
 @Component
 @Service
 public class ThymeleafViewGeneratorServiceImpl extends
-    AbstractFreeMarkerViewGenerationService<Document> implements ThymeleafViewGeneratorService {
+    AbstractFreeMarkerViewGenerationService<Document, ThymeleafMetadata> implements
+    ThymeleafViewGeneratorService {
 
   private static final String SPRING_ROO_THYMELEAF_TEMPLATES_LOCATION =
       "spring.roo.thymeleaf.templates-location";
@@ -133,7 +139,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
   @Override
   public Document mergeListView(String templateName, Document loadExistingDoc, ViewContext ctx,
-      EntityItem entity, List<FieldItem> fields, List<DetailEntityItem> details) {
+      EntityItem entity, List<FieldItem> fields, List<List<DetailEntityItem>> detailsLevels) {
 
     // Get field code if data-z attribute value is equals to user-managed
     Element elementField =
@@ -156,7 +162,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
     }
 
     // Check if has details because in this case it has a special javascript
-    if (!details.isEmpty()) {
+    if (!detailsLevels.isEmpty()) {
       Element elementJavascriptDetailField =
           loadExistingDoc.getElementById(entity.getEntityItemId().concat(
               "-table-javascript-firstdetail"));
@@ -169,43 +175,45 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     entity.setJavascriptCode(javascriptCode);
 
-    for (DetailEntityItem detail : details) {
+    for (List<DetailEntityItem> detailsLevel : detailsLevels) {
+      for (DetailEntityItem detail : detailsLevel) {
 
-      // Get detail code if data-z attribute value is equals to
-      // user-managed
-      Element elementDetail =
-          loadExistingDoc.getElementById(detail.getEntityItemId().concat("-table"));
-      if (elementDetail != null && elementDetail.hasAttr("data-z")
-          && elementDetail.attr("data-z").equals("user-managed")) {
-        detail.setUserManaged(true);
-        detail.setCodeManaged(elementDetail.outerHtml());
+        // Get detail code if data-z attribute value is equals to
+        // user-managed
+        Element elementDetail =
+            loadExistingDoc.getElementById(detail.getEntityItemId().concat("-table"));
+        if (elementDetail != null && elementDetail.hasAttr("data-z")
+            && elementDetail.attr("data-z").equals("user-managed")) {
+          detail.setUserManaged(true);
+          detail.setCodeManaged(elementDetail.outerHtml());
+        }
+
+        // Get javascript associated to field if data-z attribute value is
+        // equals to user-managed
+        Map<String, String> javascriptDetailCode = new HashMap<String, String>();
+        Element elementJavascriptDetailField =
+            loadExistingDoc.getElementById(detail.getEntityItemId().concat("-table-javascript"));
+        if (elementJavascriptDetailField != null && elementJavascriptDetailField.hasAttr("data-z")
+            && elementJavascriptDetailField.attr("data-z").equals("user-managed")) {
+          javascriptDetailCode.put(detail.getEntityItemId().concat("-table-javascript"),
+              elementJavascriptDetailField.outerHtml());
+        }
+
+        detail.setJavascriptCode(javascriptDetailCode);
+
+        Element elementTabCodeDetailField =
+            loadExistingDoc.getElementById(detail.getEntityItemId().concat("-table-tab"));
+        if (elementTabCodeDetailField != null && elementTabCodeDetailField.hasAttr("data-z")
+            && elementTabCodeDetailField.attr("data-z").equals("user-managed")) {
+          detail.setTabLinkCode(elementTabCodeDetailField.outerHtml());
+        }
+
       }
-
-      // Get javascript associated to field if data-z attribute value is
-      // equals to user-managed
-      Map<String, String> javascriptDetailCode = new HashMap<String, String>();
-      Element elementJavascriptDetailField =
-          loadExistingDoc.getElementById(detail.getEntityItemId().concat("-table-javascript"));
-      if (elementJavascriptDetailField != null && elementJavascriptDetailField.hasAttr("data-z")
-          && elementJavascriptDetailField.attr("data-z").equals("user-managed")) {
-        javascriptDetailCode.put(detail.getEntityItemId().concat("-table-javascript"),
-            elementJavascriptDetailField.outerHtml());
-      }
-
-      detail.setJavascriptCode(javascriptDetailCode);
-
-      Element elementTabCodeDetailField =
-          loadExistingDoc.getElementById(detail.getEntityItemId().concat("-table-tab"));
-      if (elementTabCodeDetailField != null && elementTabCodeDetailField.hasAttr("data-z")
-          && elementTabCodeDetailField.attr("data-z").equals("user-managed")) {
-        detail.setTabLinkCode(elementTabCodeDetailField.outerHtml());
-      }
-
     }
     ctx.addExtraParameter("userManagedComponents", mergeStructure(loadExistingDoc));
     ctx.addExtraParameter("entity", entity);
     ctx.addExtraParameter("fields", fields);
-    ctx.addExtraParameter("details", details);
+    ctx.addExtraParameter("detailsLevels", detailsLevels);
     Document newDoc = process(templateName, ctx);
     return newDoc;
   }
@@ -291,5 +299,133 @@ public class ThymeleafViewGeneratorServiceImpl extends
     // Write newDoc on disk
     writeDoc(newDoc, viewName);
 
+  }
+
+  @Override
+  protected DetailEntityItem createDetailEntityItem(ThymeleafMetadata detailController,
+      MemberDetails entityMembers, JpaEntityMetadata entityMetadata, String entityName,
+      ViewContext ctx, String detailSuffix, EntityItem rootEntity) {
+    DetailEntityItem item =
+        super.createDetailEntityItem(detailController, entityMembers, entityMetadata, entityName,
+            ctx, detailSuffix, rootEntity);
+    item.addConfigurationElement("mvnDetailControllerName", detailController.getMvcControllerName());
+    item.addConfigurationElement("mvcMethodName_datatablesDetails",
+        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.LIST_DATATABLES_DETAILS_METHOD_NAME));
+    item.addConfigurationElement("mvcMethodName_createFormDetails", ThymeleafMetadata
+        .getMvcMethodName(detailController.getCurrentCreateFormDetailsMethod().getMethodName()));
+    item.addConfigurationElement("mvcMethodName_createDetails", ThymeleafMetadata
+        .getMvcMethodName(detailController.getCurrentCreateDetailsMethod().getMethodName()));
+    item.addConfigurationElement("mvcMethodName_removeFromDetails", ThymeleafMetadata
+        .getMvcMethodName(detailController.getCurrentRemoveFromDetailsMethod().getMethodName()));
+
+    // Get target entity item controller
+    ClassOrInterfaceTypeDetails detailItemControllerCid =
+        getTypeLocationService().getTypeDetails(detailController.getDetailItemController());
+    ClassOrInterfaceTypeDetails detailCollectionControllerCid =
+        getTypeLocationService().getTypeDetails(detailController.getDetailCollectionController());
+    ThymeleafMetadata detailItemController =
+        getMetadataService().get(ThymeleafMetadata.createIdentifier(detailItemControllerCid));
+    ThymeleafMetadata detailCollectionController =
+        getMetadataService().get(ThymeleafMetadata.createIdentifier(detailCollectionControllerCid));
+
+    item.addConfigurationElement("mvnItemControllerName",
+        detailItemController.getMvcControllerName());
+    item.addConfigurationElement("mvcMethodName_show",
+        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.SHOW_METHOD_NAME));
+    item.addConfigurationElement("mvcMethodName_editForm",
+        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.EDIT_FORM_METHOD_NAME));
+
+    item.addConfigurationElement("mvnCollectionControllerName",
+        detailCollectionController.getMvcControllerName());
+    item.addConfigurationElement("mvcMethodName_select2",
+        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.SELECT2_METHOD_NAME));
+
+    return item;
+  }
+
+  @Override
+  public Map<String, String> getI18nLabels(MemberDetails entityMemberDetails, JavaType entity,
+      JpaEntityMetadata entityMetadata, ControllerMetadata controllerMetadata, String module,
+      ViewContext ctx) {
+    Map<String, String> labels =
+        super.getI18nLabels(entityMemberDetails, entity, entityMetadata, controllerMetadata,
+            module, ctx);
+    if (controllerMetadata.getType() == ControllerType.DETAIL) {
+      String key = getCreateDetailsSelect2PlaceholderLabelKey(controllerMetadata, ctx);
+
+      String value = "Select " + controllerMetadata.getLastDetailsInfo().fieldName + " to add";
+
+      labels.put(key, value);
+    }
+
+    return labels;
+  }
+
+  private String getCreateDetailsSelect2PlaceholderLabelKey(ControllerMetadata controllerMetadata,
+      ViewContext ctx) {
+    return "info_select_" + controllerMetadata.getDetailsPathAsString("_");
+  }
+
+  @Override
+  public void addDetailsViews(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, ControllerMetadata controllerMetadata, ThymeleafMetadata viewMetadata,
+      ViewContext ctx) {
+    super
+        .addDetailsViews(moduleName, entityMetadata, entity, controllerMetadata, viewMetadata, ctx);
+
+
+    addCreateDetailsView(moduleName, entityMetadata, entity, controllerMetadata, viewMetadata, ctx);
+
+  }
+
+  protected void addCreateDetailsView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, ControllerMetadata controllerMetadata, ThymeleafMetadata viewMetadata,
+      ViewContext ctx) {
+
+    // Process elements to generate
+    Document newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/")
+            .concat(controllerMetadata.getDetailsPathAsString("/")).concat("/create")
+            .concat(getViewsExtension());
+
+    // Get root entity metadata
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
+
+    DetailEntityItem detail =
+        createDetailEntityItem(viewMetadata, entity, entityMetadata, ctx.getEntityName(), ctx,
+            DETAIL_SUFFIX, entityItem);
+
+
+    detail.addConfigurationElement("entityLabel",
+        StringUtils.uncapitalize(FieldItem.buildLabel(detail.getEntityName(), "")));
+
+    ctx.addExtraParameter("entity", entityItem);
+    ctx.addExtraParameter("detail", detail);
+    ctx.addExtraParameter("select2_placeholder",
+        getCreateDetailsSelect2PlaceholderLabelKey(controllerMetadata, ctx));
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc =
+          mergeCreateDetailsView("createDetail", loadExistingDoc(viewName), ctx, entityItem, detail);
+    } else {
+      newDoc = process("createDetail", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+
+  }
+
+  private Document mergeCreateDetailsView(String string, Document loadExistingDoc, ViewContext ctx,
+      EntityItem entityItem, DetailEntityItem detail) {
+    // TODO
+    ctx.addExtraParameter("entity", entityItem);
+    ctx.addExtraParameter("detail", detail);
+    return process("createDetail", ctx);
   }
 }

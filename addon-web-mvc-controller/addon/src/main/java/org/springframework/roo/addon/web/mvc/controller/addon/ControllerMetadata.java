@@ -265,6 +265,24 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     return detailsFieldInfo;
   }
 
+  /**
+   * Return the string result to join {@link #getDetailsFieldInfo()} fieldName
+   * with provided separator string
+   *
+   * @param separator
+   * @return null if {@link #getDetailsFieldInfo()} == null, string
+   */
+  public String getDetailsPathAsString(String separator) {
+    if (detailsFieldInfo == null) {
+      return null;
+    }
+    List<String> fields = new ArrayList<String>();
+    for (RelationInfo info : detailsFieldInfo) {
+      fields.add(info.fieldName);
+    }
+    return StringUtils.join(fields, separator);
+  }
+
   public String getRequestMappingValue() {
     return requestMappingValue;
   }

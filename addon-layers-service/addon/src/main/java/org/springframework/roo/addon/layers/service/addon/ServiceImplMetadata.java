@@ -27,6 +27,7 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
@@ -188,6 +189,14 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
           entry.getValue());
     }
 
+    // Generating all setRelation methods that should be implemented
+    for (Entry<RelationInfo, MethodMetadata> entry : serviceMetadata.getSetRelationMethods()
+        .entrySet()) {
+      ensureGovernorHasMethod(
+          new MethodMetadataBuilder(getSetRelation(entry.getValue(), entry.getKey())),
+          entry.getValue());
+    }
+
     // Generating transactional methods that should be implemented
     for (MethodMetadata method : pendingTransactionalMethodToAdd) {
       ensureGovernorHasMethod(new MethodMetadataBuilder(getMethod(method, true)));
@@ -217,7 +226,6 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     final JavaSymbolName param0 = methodToBeImplemented.getParameterNames().get(0);
     final JavaType childType = relationInfo.childType;
     final FieldMetadata childServideField = requiredServiceFieldByEntity.get(childType);
-    final JpaEntityMetadata entityMetadata = null; //FIXME !!!
     final String parentFieldName = relationInfo.fieldName;
     final JavaSymbolName param1 = methodToBeImplemented.getParameterNames().get(1);
     final String repoField = repositoryFieldMetadata.getFieldName().getSymbolName();
@@ -247,6 +255,90 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     return getMethod(methodToBeImplemented, true, bodyBuilder);
   }
 
+
+
+  private MethodMetadata getSetRelation(MethodMetadata methodToBeImplemented,
+      RelationInfo relationInfo) {
+
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Prepare constants
+    final JavaSymbolName param0 = methodToBeImplemented.getParameterNames().get(0);
+    final JavaType childType = relationInfo.childType;
+    final FieldMetadata childServideField = requiredServiceFieldByEntity.get(childType);
+    final String childTypeNameJavaType = getNameOfJavaType(childType);
+    final JavaSymbolName param1 = methodToBeImplemented.getParameterNames().get(1);
+    final String repoField = repositoryFieldMetadata.getFieldName().getSymbolName();
+    final String saveMethod =
+        serviceMetadata.getCurrentSaveMethod().getMethodName().getSymbolName();
+
+
+    String childListVariable = "items";
+    // List<{childType}> {parentFieldName} = {childService}.findAll({param1});
+    JavaSymbolName childService = childServideField.getFieldName();
+    bodyBuilder.appendFormalLine("%s<%s> %s = %s.findAll(%s);", getNameOfJavaType(JavaType.LIST),
+        childTypeNameJavaType, childListVariable, childService, param1);
+
+
+    // Set<{childType}> currents = {param0}.get{rel.property}();
+    bodyBuilder.appendFormalLine("%s currents = %s.get%s();",
+        getNameOfJavaType(relationInfo.fieldMetadata.getFieldType()), param0,
+        relationInfo.fieldMetadata.getFieldName().getSymbolNameCapitalisedFirstLetter());
+
+
+    // Set<{childType}> toRemove = new HashSet<{childType}>({parentFieldName});
+    bodyBuilder.appendFormalLine("%s<%s> toRemove = new %s<%s>();",
+        getNameOfJavaType(JavaType.SET), childTypeNameJavaType,
+        getNameOfJavaType(JdkJavaType.HASH_SET), childTypeNameJavaType);
+
+    // for (Iterator<{childType}> iterator = current.iterator(); iterator.hasNext();) {
+    bodyBuilder.appendFormalLine(
+        "for (%s<%s> iterator = currents.iterator(); iterator.hasNext();) {",
+        getNameOfJavaType(JavaType.ITERATOR), childTypeNameJavaType);
+
+    bodyBuilder.indent();
+    final String itemName = StringUtils.uncapitalize(childType.getSimpleTypeName());
+    // {childType} {itemName} = iterator.next();
+    bodyBuilder
+        .appendFormalLine("%s %s = iterator.next();", childTypeNameJavaType, itemName);
+
+    // if ({childListVariable}.contains({itemName})) {
+    bodyBuilder.appendFormalLine("if (%s.contains(%s)) {", childListVariable, itemName);
+
+    bodyBuilder.indent();
+    // {childListVariable}.remove({itemName});
+    bodyBuilder.appendFormalLine("%s.remove(%s);", childListVariable, itemName);
+
+    bodyBuilder.indentRemove();
+    // } else {
+    bodyBuilder.appendFormalLine("} else {");
+
+    bodyBuilder.indent();
+
+    // toRemove.add(product);
+    bodyBuilder.appendFormalLine("toRemove.add(%s);", itemName);
+
+    bodyBuilder.indentRemove();
+    // }
+    bodyBuilder.appendFormalLine("}");
+
+    // }
+    bodyBuilder.indentRemove();
+    bodyBuilder.appendFormalLine("}");
+
+
+    // {param0}.{removeFromMethod}(toRemove);
+    bodyBuilder.appendFormalLine("%s.%s(toRemove);", param0,
+        relationInfo.removeMethod.getMethodName());
+
+    // {param0}.{addToMethod}({childListVariable);
+    bodyBuilder.appendFormalLine("%s.%s(%s);", param0, relationInfo.addMethod.getMethodName(),
+        childListVariable);
+
+    // return {repoField}.{saveMethod}({param0});
+    bodyBuilder.appendFormalLine("return %s.%s(%s);", repoField, saveMethod, param0);
+    return getMethod(methodToBeImplemented, true, bodyBuilder);
+  }
 
   private MethodMetadata getMethodAddTo(MethodMetadata methodToBeImplemented,
       RelationInfo relationInfo) {

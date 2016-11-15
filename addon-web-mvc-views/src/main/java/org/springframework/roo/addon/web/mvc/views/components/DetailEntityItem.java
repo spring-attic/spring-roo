@@ -1,6 +1,11 @@
 package org.springframework.roo.addon.web.mvc.views.components;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
 import org.springframework.roo.support.util.XmlUtils;
 
 /**
@@ -12,9 +17,16 @@ import org.springframework.roo.support.util.XmlUtils;
  */
 public class DetailEntityItem extends EntityItem {
 
+  private EntityItem rootEntity;
+  private RelationInfo fieldInfo;
   private String tabLinkCode;
   private String fieldName;
   private String fieldNameCapitalized;
+  private DetailEntityItem parentEntity;
+  private int level;
+  private List<RelationInfo> path;
+  private String pathString;
+  private String pathStringFieldNames;
 
   /**
    * Constructs a DetailEntityItem using the fieldName and suffixId
@@ -24,13 +36,20 @@ public class DetailEntityItem extends EntityItem {
    * @param suffixId
    *            used to generate field id
    */
-  public DetailEntityItem(String fieldName, String suffixId, boolean readOnly) {
-    super("", suffixId, readOnly);
-    this.fieldName = fieldName;
+  public DetailEntityItem(JpaEntityMetadata childEntityMetadata,
+      ControllerMetadata controllerMetadata, String detailSuffix, EntityItem rootEntity) {
+    super(childEntityMetadata.getDestination().getSimpleTypeName(), detailSuffix,
+        childEntityMetadata.isReadOnly());
+    this.level = controllerMetadata.getDetailsFieldInfo().size();
+    this.rootEntity = rootEntity;
+    this.fieldInfo = controllerMetadata.getLastDetailsInfo();
+    this.fieldName = fieldInfo.fieldName;
     this.fieldNameCapitalized = StringUtils.capitalize(fieldName);
     this.tabLinkCode = null;
+    this.pathString = controllerMetadata.getDetailsPathAsString("-");
+    this.pathStringFieldNames = controllerMetadata.getDetailsPathAsString(".");
     this.z = calculateZ();
-    buildDetailItemId(suffixId);
+    buildDetailItemId(detailSuffix);
   }
 
   /**
@@ -40,8 +59,8 @@ public class DetailEntityItem extends EntityItem {
    *            The suffix to complete the field id
    *
    */
-  public void buildDetailItemId(String suffix) {
-    String id = XmlUtils.convertId(this.fieldName.toLowerCase());
+  private void buildDetailItemId(String suffix) {
+    String id = XmlUtils.convertId(this.pathString.toLowerCase());
 
     // If suffix is not blank or null, concatenate it
     if (!StringUtils.isEmpty(suffix)) {
@@ -52,7 +71,7 @@ public class DetailEntityItem extends EntityItem {
   }
 
   /**
-   * Calculate the hash code of the entityItemId, configuration and fieldName
+   * Calculate the hash code of the path, configuration and fieldName
    *
    * @return hash code
    */
@@ -90,4 +109,40 @@ public class DetailEntityItem extends EntityItem {
     this.fieldNameCapitalized = fieldNameCapitalized;
   }
 
+  public EntityItem getRootEntity() {
+    return rootEntity;
+  }
+
+  public DetailEntityItem getParentEntity() {
+    return parentEntity;
+  }
+
+  public void setParentEntity(DetailEntityItem parent) {
+    this.parentEntity = parent;
+  }
+
+  public int getLevel() {
+    return level;
+  }
+
+  public String getPathString() {
+    return pathString;
+  }
+
+  public List<RelationInfo> getPath() {
+    return path;
+  }
+
+  public String getPathStringFieldNames() {
+    return pathStringFieldNames;
+  }
+
+  public boolean isTheParentEntity(DetailEntityItem parent) {
+    String parentPath = parent.getPathString();
+    return pathString.equals(parentPath.concat("-").concat(fieldName));
+  }
+
+  public RelationInfo getFieldInfo() {
+    return fieldInfo;
+  }
 }

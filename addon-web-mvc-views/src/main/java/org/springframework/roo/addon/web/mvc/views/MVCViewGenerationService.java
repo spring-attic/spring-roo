@@ -1,11 +1,13 @@
 package org.springframework.roo.addon.web.mvc.views;
 
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -18,8 +20,12 @@ import java.util.List;
  * @author Juan Carlos García
  * @since 2.0
  */
-public interface MVCViewGenerationService {
+public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
 
+  public static final String FIELD_SUFFIX = "field";
+  public static final String TABLE_SUFFIX = "entity";
+  public static final String DETAIL_SUFFIX = "detail";
+  public static final String FINDER_SUFFIX = "finder";
 
   /**
    * Return JavaType which identifies the view Type (usually annotation java type)
@@ -81,7 +87,7 @@ public interface MVCViewGenerationService {
    *            the controller, the project, etc...
    */
   void addListView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
-      List<? extends AbstractViewMetadata> detailsControllers, ViewContext ctx);
+      List<T> detailsControllers, ViewContext ctx);
 
   /**
    * This operation will add a show view using entityDetails
@@ -95,6 +101,21 @@ public interface MVCViewGenerationService {
    */
   void addShowView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
       ViewContext ctx);
+
+  /**
+   * This operation will add views related to a details controller using entityDetails
+   * and the provided context
+   *
+   * @param moduleName module where create view will be added
+   * @param entityMetadata entity metadata which contains information about it
+   * @param entity Details of an entity to be able to generate view
+   * @param controllerMetadata controller metadata
+   * @param viewMetadata
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addDetailsViews(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
+      ControllerMetadata controllerMetadata, T viewMetadata, ViewContext ctx);
 
   /**
    * This operation will add a create view using entityDetails
@@ -301,5 +322,20 @@ public interface MVCViewGenerationService {
    * to be able to generate views with their custom code.
    */
   void installTemplates();
+
+  /**
+   * Get labels to add or update in i18n system for a specific entity
+   *
+   * @param entityMemberDetails
+   * @param entity
+   * @param entityMetadata
+   * @param controllerMetadata
+   * @param module
+   * @param ctx
+   * @return
+   */
+  Map<String, String> getI18nLabels(MemberDetails entityMemberDetails, JavaType entity,
+      JpaEntityMetadata entityMetadata, ControllerMetadata controllerMetadata, String module,
+      ViewContext ctx);
 
 }

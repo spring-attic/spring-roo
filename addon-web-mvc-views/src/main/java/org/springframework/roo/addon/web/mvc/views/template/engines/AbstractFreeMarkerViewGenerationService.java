@@ -1,5 +1,19 @@
 package org.springframework.roo.addon.web.mvc.views.template.engines;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.StringBuilderWriter;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.springframework.roo.addon.web.mvc.views.AbstractViewGenerationService;
+import org.springframework.roo.addon.web.mvc.views.AbstractViewMetadata;
+import org.springframework.roo.addon.web.mvc.views.ViewContext;
+import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
+import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.support.osgi.OSGiUtils;
+import org.springframework.roo.support.util.FileUtils;
+
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -8,27 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.StringBuilderWriter;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.springframework.roo.addon.web.mvc.views.AbstractViewGenerationService;
-import org.springframework.roo.addon.web.mvc.views.ViewContext;
-import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
-import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.support.osgi.OSGiUtils;
-import org.springframework.roo.support.util.FileUtils;
-
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.Version;
 
 @Component(componentAbstract = true)
-public abstract class AbstractFreeMarkerViewGenerationService<DOC> extends
-    AbstractViewGenerationService<DOC> {
+public abstract class AbstractFreeMarkerViewGenerationService<DOC, T extends AbstractViewMetadata>
+    extends AbstractViewGenerationService<DOC, T> {
 
   @Reference
   FileManager fileManager;

@@ -12,7 +12,7 @@
     Only the inner content of the following div is included within the
     template, in the section modal
     -->
-  <div data-th-fragment="modalConfirmDelete(tableId, title, message, baseUrl)">
+  <div data-th-fragment="modalConfirmDelete(tableId, title, message)">
     <div
       data-th-replace="fragments/modal :: modal(tableId = ${r"${tableId}"}, id = ${r"${tableId}"} + 'DeleteConfirm', title = ${r"${title}"}, body = ~{::modalConfirmBody})">
 
@@ -25,7 +25,7 @@
               <div class="form-group">
                 <div class="col-md-12">
                   <div class="pull-left">
-                    <button type="reset" class="btn btn-default"
+                    <button type="button" class="btn btn-default"
                       data-dismiss="modal" aria-label="Close"
                       data-th-text="${r"#{label_reset}"}">Cancel</button>
                   </div>

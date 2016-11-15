@@ -142,22 +142,27 @@ public class ThymeleafMetadataProviderImpl extends
   }
 
   @Override
-  protected ThymeleafMetadata createMetadataInstance(String metadataIdentificationString,
-      JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      ControllerMetadata controllerMetadata, ServiceMetadata serviceMetadata,
-      JpaEntityMetadata entityMetadata, String entityPlural, String entityIdentifierPlural,
-      List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne,
-      JavaType itemController, JavaType collectionController, List<FieldMetadata> dateTimeFields,
-      List<FieldMetadata> enumFields, Map<String, MethodMetadata> findersToAdd,
-      Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields,
-      Map<JavaType, List<FieldMetadata>> formBeansEnumFields, ViewContext ctx) {
+  protected ThymeleafMetadata createMetadataInstance(final String metadataIdentificationString,
+      final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+      final ControllerMetadata controllerMetadata, final ServiceMetadata serviceMetadata,
+      final JpaEntityMetadata entityMetadata, final String entityPlural,
+      final String entityIdentifierPlural,
+      final List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne,
+      final JavaType itemController, final JavaType collectionController,
+      final List<FieldMetadata> dateTimeFields, final List<FieldMetadata> enumFields,
+      final Map<String, MethodMetadata> findersToAdd,
+      final Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields,
+      final Map<JavaType, List<FieldMetadata>> formBeansEnumFields,
+      final JavaType detailsItemController, final JavaType detailsCollectionController,
+      final ViewContext ctx) {
 
     final ThymeleafMetadata metadata =
         new ThymeleafMetadata(metadataIdentificationString, aspectName,
             governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
             entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
             collectionController, dateTimeFields, enumFields, findersToAdd,
-            formBeansDateTimeFields, formBeansEnumFields);
+            formBeansDateTimeFields, formBeansEnumFields, detailsItemController,
+            detailsCollectionController);
 
     ctx.addExtraParameter("mvcControllerName", metadata.getMvcControllerName());
     if (controllerMetadata.getType() == ControllerType.COLLECTION) {
@@ -173,17 +178,19 @@ public class ThymeleafMetadataProviderImpl extends
           ThymeleafMetadata.getMvcControllerName(itemController));
     }
     ctx.addExtraParameter("mvcMethodName_datatables",
-        ThymeleafMetadata.LIST_DATATABLES_METHOD_NAME.getSymbolName());
+        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.LIST_DATATABLES_METHOD_NAME));
     ctx.addExtraParameter("mvcMethodName_createForm",
-        ThymeleafMetadata.CREATE_FORM_METHOD_NAME.getSymbolName());
-    ctx.addExtraParameter("mvcMethodName_show", ThymeleafMetadata.SHOW_METHOD_NAME.getSymbolName());
+        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.CREATE_FORM_METHOD_NAME));
+    ctx.addExtraParameter("mvcMethodName_show",
+        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.SHOW_METHOD_NAME));
     ctx.addExtraParameter("mvcMethodName_editForm",
-        ThymeleafMetadata.EDIT_FORM_METHOD_NAME.getSymbolName());
+        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.EDIT_FORM_METHOD_NAME));
     ctx.addExtraParameter("mvcMethodName_remove",
-        ThymeleafMetadata.DELETE_METHOD_NAME.getSymbolName());
-    ctx.addExtraParameter("mvcMethodName_list", ThymeleafMetadata.LIST_METHOD_NAME.getSymbolName());
+        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.DELETE_METHOD_NAME));
+    ctx.addExtraParameter("mvcMethodName_list",
+        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.LIST_METHOD_NAME));
     ctx.addExtraParameter("mvcMethodName_update",
-        ThymeleafMetadata.UPDATE_METHOD_NAME.getSymbolName());
+        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.UPDATE_METHOD_NAME));
 
     // TODO finder names
 

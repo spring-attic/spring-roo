@@ -1,5 +1,13 @@
 package org.springframework.roo.addon.web.mvc.views;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -17,7 +25,6 @@ import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata
 import org.springframework.roo.addon.web.mvc.controller.addon.finder.SearchAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
-import org.springframework.roo.addon.web.mvc.i18n.I18nOperationsImpl;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -37,14 +44,6 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.propfiles.manager.PropFilesManagerService;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * This abstract class will be extended by MetadataProviders focused on
@@ -84,7 +83,7 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
    *
    * @return MVCViewGenerationService
    */
-  protected abstract MVCViewGenerationService getViewGenerationService();
+  protected abstract MVCViewGenerationService<T> getViewGenerationService();
 
   /**
    * This operations returns the necessary Metadata that will generate .aj file.
@@ -105,6 +104,8 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
    * @param findersToAdd
    * @param formBeansEnumFields
    * @param formBeansDateTimeFields
+   * @param detailItemController
+   * @param detailCollectionController
    *
    * @return ItdTypeDetailsProvidingMetadataItem
    */
@@ -116,7 +117,8 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
       JavaType itemController, JavaType collectionController, List<FieldMetadata> dateTimeFields,
       List<FieldMetadata> enumFields, Map<String, MethodMetadata> findersToAdd,
       Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields,
-      Map<JavaType, List<FieldMetadata>> formBeansEnumFields, ViewContext ctx);
+      Map<JavaType, List<FieldMetadata>> formBeansEnumFields, JavaType detailsItemController,
+      JavaType detailCollectionController, ViewContext ctx);
 
   protected void fillContext(ViewContext ctx) {
     // To be overridden if needed
@@ -128,7 +130,7 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
     // Use provided MVCViewGenerationService to generate views
-    MVCViewGenerationService viewGenerationService = getViewGenerationService();
+    MVCViewGenerationService<T> viewGenerationService = getViewGenerationService();
 
     ClassOrInterfaceTypeDetails controllerDetail =
         governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
@@ -183,6 +185,7 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
           "ERROR: Can't find Collection-type controller related to controller '%s'",
           controllerDetail.getType().getFullyQualifiedTypeName());
     }
+
     List<T> detailsControllers = null;
     if (controllerMetadata.getType() == ControllerType.COLLECTION) {
       // Locate Details controllers
@@ -204,6 +207,46 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
       if (!found.isEmpty()) {
         detailsControllers = Collections.unmodifiableList(found);
       }
+    }
+
+    JavaType detailItemController = null;
+    JavaType detailCollectionController = null;
+    if (controllerMetadata.getType() == ControllerType.DETAIL) {
+      // Locate controller item which handles details elements
+      JavaType detailEntity = controllerMetadata.getLastDetailEntity();
+      Collection<ClassOrInterfaceTypeDetails> detailsControllersToCheck =
+          getControllerLocator().getControllers(detailEntity, ControllerType.ITEM, viewType);
+
+      for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
+        if (controllerPackage.equals(controller.getType().getPackage())) {
+          detailItemController = controller.getType();
+          break;
+        }
+      }
+      Validate
+          .notNull(
+              detailItemController,
+              "ERROR: Can't find Item-type controller for details entity '%s' related to controller '%s'",
+              detailEntity.getFullyQualifiedTypeName(), controllerDetail.getType()
+                  .getFullyQualifiedTypeName());
+
+      // Locate controller collection which handles details elements
+      detailsControllersToCheck =
+          getControllerLocator().getControllers(detailEntity, ControllerType.COLLECTION, viewType);
+
+      for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
+        if (controllerPackage.equals(controller.getType().getPackage())) {
+          detailCollectionController = controller.getType();
+          break;
+        }
+      }
+      Validate
+          .notNull(
+              detailItemController,
+              "ERROR: Can't find Collection-type controller for details entity '%s' related to controller '%s'",
+              detailEntity.getFullyQualifiedTypeName(), controllerDetail.getType()
+                  .getFullyQualifiedTypeName());
+
 
     }
 
@@ -351,7 +394,8 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
             governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
             entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
             collectionController, dateTimeFields, enumFields, findersToAdd,
-            formBeansDateTimeFields, formBeansEnumFields, ctx);
+            formBeansDateTimeFields, formBeansEnumFields, detailItemController,
+            detailCollectionController, ctx);
 
     // Call Abstract Method fillContext to fill context with view provider custom implementation
     fillContext(ctx);
@@ -376,8 +420,8 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
         viewGenerationService.addUpdateView(module, entityMetadata, entityMemberDetails, ctx);
       }
     } else if (controllerMetadata.getType() == ControllerType.DETAIL) {
-      // TODO this should do nothing as it's used in collection list
-      //viewGenerationService.addListView(module, entityMetadata, entityMemberDetails, ctx);
+      viewGenerationService.addDetailsViews(module, entityMetadata, entityMemberDetails,
+          controllerMetadata, viewMetadata, ctx);
     }
 
     // Add finder views
@@ -464,12 +508,14 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
     viewGenerationService.updateMenuView(module, ctx);
 
     // Update i18n labels
-    getI18nOperationsImpl().updateI18n(entityMemberDetails, entity, module);
+    Map<String, String> labels =
+        viewGenerationService.getI18nLabels(entityMemberDetails, entity, entityMetadata,
+            controllerMetadata, module, ctx);
+    getI18nOperations().addOrUpdateLabels(module, labels);
 
     // Register dependency between JavaBeanMetadata and this one
     final String javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails);
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
-
 
     return viewMetadata;
   }
@@ -546,9 +592,8 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
     return serviceInstaceManager.getServiceInstance(this, PropFilesManagerService.class);
   }
 
-  protected I18nOperationsImpl getI18nOperationsImpl() {
-    return (I18nOperationsImpl) serviceInstaceManager
-        .getServiceInstance(this, I18nOperations.class);
+  protected I18nOperations getI18nOperations() {
+    return serviceInstaceManager.getServiceInstance(this, I18nOperations.class);
   }
 
   protected FinderOperationsImpl getFinderOperations() {

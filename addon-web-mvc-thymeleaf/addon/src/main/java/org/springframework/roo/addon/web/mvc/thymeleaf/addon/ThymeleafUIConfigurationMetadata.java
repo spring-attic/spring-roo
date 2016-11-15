@@ -221,7 +221,7 @@ public class ThymeleafUIConfigurationMetadata extends AbstractItdTypeDetailsProv
         resolver.setTemplateEngine(this.templateEngine);
         resolver.setCharacterEncoding(UTF8);
         resolver.setContentType("application/javascript");
-        resolver.setViewNames(new String[] {".js"});
+        resolver.setViewNames(new String[] {"*.js"});
         resolver.setCache(this.properties.isCache());
         return resolver;
      */
@@ -231,7 +231,7 @@ public class ThymeleafUIConfigurationMetadata extends AbstractItdTypeDetailsProv
         this.templateEngineField.getFieldName());
     bodyBuilder.appendFormalLine("resolver.setCharacterEncoding(\"UTF-8\");");
     bodyBuilder.appendFormalLine("resolver.setContentType(\"application/javascript\");");
-    bodyBuilder.appendFormalLine("resolver.setViewNames(new String[] {\".js\"});");
+    bodyBuilder.appendFormalLine("resolver.setViewNames(new String[] {\"*.js\"});");
     bodyBuilder.appendFormalLine("resolver.setCache(this.%s.isCache());",
         this.thymeleafPropertiesField.getFieldName());
     bodyBuilder.appendFormalLine("return resolver;");
