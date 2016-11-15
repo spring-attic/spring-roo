@@ -25,8 +25,11 @@ import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue
 import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -44,7 +47,8 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
-  private ClassOrInterfaceTypeDetails sei;
+  private final JavaPackage projectTopLevelPackage;
+  private final ClassOrInterfaceTypeDetails sei;
   private final JavaType service;
   private final List<MethodMetadata> serviceMethods;
   private Map<MethodMetadata, MethodMetadata> seiMethods;
@@ -92,16 +96,19 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    * @param governorPhysicalTypeMetadata
    *            the governor, which is expected to contain a
    *            {@link ClassOrInterfaceTypeDetails} (required)
+   * @param projectTopLevelPackage the base package of the project that will be 
+   * 								used to create the targetNamespace           
    * @param sei the annotated sei
    * @param service the service related with this SEI
    * @param serviceMethods
    * 			the methods registered in based service
    */
   public SeiMetadata(final String identifier, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalTypeMetadata, ClassOrInterfaceTypeDetails sei,
-      JavaType service, List<MethodMetadata> serviceMethods) {
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaPackage projectTopLevelPackage,
+      ClassOrInterfaceTypeDetails sei, JavaType service, List<MethodMetadata> serviceMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
+    this.projectTopLevelPackage = projectTopLevelPackage;
     this.sei = sei;
     this.service = service;
     this.serviceMethods = serviceMethods;
@@ -116,8 +123,8 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     webServiceAnnotation.addStringAttribute("name", sei.getType().getSimpleTypeName());
     webServiceAnnotation.addStringAttribute(
         "targetNamespace",
-        String.format("http://ws.%s/", StringUtils.reverseDelimited(sei.getType().getPackage()
-            .getFullyQualifiedPackageName(), '.')));
+        String.format("http://ws.%s/", StringUtils.reverseDelimited(
+            projectTopLevelPackage.getFullyQualifiedPackageName(), '.')));
     ensureGovernorIsAnnotated(webServiceAnnotation);
 
     // Include @WSDLDocumentation annotation
@@ -183,7 +190,7 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       methodName = new JavaSymbolName(methodName.toString().concat("By").concat(paramList));
     }
 
-    // Annotate parameter types with @WebParam
+    // Annotate parameter types with @WebParam and @XmlJavaTypeAdapter if needed
     List<AnnotatedJavaType> annotatedParameterTypes = new ArrayList<AnnotatedJavaType>();
     for (int i = 0; i < parameterTypes.size(); i++) {
       List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
@@ -196,6 +203,27 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       webParamAnnotation.addStringAttribute("name", paramName.toString());
       webParamAnnotation.addStringAttribute("targetNamespace", "");
       annotations.add(webParamAnnotation.build());
+
+      // Creating @XmlJavaTypeAdapter annotation
+      AnnotationMetadataBuilder javaTypeAdapter =
+          new AnnotationMetadataBuilder(JavaType.XML_JAVATYPE_ADAPTER);
+      if (paramType.getJavaType().getFullyQualifiedTypeName()
+          .equals(JavaType.ITERABLE.getFullyQualifiedTypeName())) {
+        javaTypeAdapter.addClassAttribute("value", SpringletsJavaType.SPRINGLETS_ITERABLE_ADAPTER);
+        annotations.add(javaTypeAdapter.build());
+      } else if (paramType.getJavaType().getFullyQualifiedTypeName()
+          .equals(SpringJavaType.PAGE.getFullyQualifiedTypeName())) {
+        javaTypeAdapter.addClassAttribute("value", SpringletsJavaType.SPRINGLETS_PAGE_ADAPTER);
+        annotations.add(javaTypeAdapter.build());
+      } else if (paramType.getJavaType().equals(SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH)) {
+        javaTypeAdapter.addClassAttribute("value",
+            SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH_ADAPTER);
+        annotations.add(javaTypeAdapter.build());
+      } else if (paramType.getJavaType().equals(SpringJavaType.PAGEABLE)) {
+        javaTypeAdapter.addClassAttribute("value", SpringletsJavaType.SPRINGLETS_PAGEABLE_ADAPTER);
+        annotations.add(javaTypeAdapter.build());
+      }
+
       // Creating new parameter type annotated with @WebParam
       AnnotatedJavaType annotatedParam =
           new AnnotatedJavaType(paramType.getJavaType(), annotations);
@@ -205,6 +233,26 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     MethodMetadataBuilder seiMethod =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
             returnType, annotatedParameterTypes, parameterNames, null);
+
+    // Include @XmlJavaTypeAdapter annotation if needed
+    AnnotationMetadataBuilder javaTypeAdapter =
+        new AnnotationMetadataBuilder(JavaType.XML_JAVATYPE_ADAPTER);
+    if (returnType.getFullyQualifiedTypeName()
+        .equals(JavaType.ITERABLE.getFullyQualifiedTypeName())) {
+      javaTypeAdapter.addClassAttribute("value", SpringletsJavaType.SPRINGLETS_ITERABLE_ADAPTER);
+      seiMethod.addAnnotation(javaTypeAdapter);
+    } else if (returnType.getFullyQualifiedTypeName().equals(
+        SpringJavaType.PAGE.getFullyQualifiedTypeName())) {
+      javaTypeAdapter.addClassAttribute("value", SpringletsJavaType.SPRINGLETS_PAGE_ADAPTER);
+      seiMethod.addAnnotation(javaTypeAdapter);
+    } else if (returnType.equals(SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH)) {
+      javaTypeAdapter.addClassAttribute("value",
+          SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH_ADAPTER);
+      seiMethod.addAnnotation(javaTypeAdapter);
+    } else if (returnType.equals(SpringJavaType.PAGEABLE)) {
+      javaTypeAdapter.addClassAttribute("value", SpringletsJavaType.SPRINGLETS_PAGEABLE_ADAPTER);
+      seiMethod.addAnnotation(javaTypeAdapter);
+    }
 
     // Include @RequestWrapper annotation
     AnnotationMetadataBuilder requestWrapperAnnotation =
@@ -216,8 +264,8 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             .getSymbolNameCapitalisedFirstLetter()));
     requestWrapperAnnotation.addStringAttribute(
         "targetNamespace",
-        String.format("http://ws.%s/", StringUtils.reverseDelimited(sei.getType().getPackage()
-            .getFullyQualifiedPackageName(), '.')));
+        String.format("http://ws.%s/", StringUtils.reverseDelimited(
+            projectTopLevelPackage.getFullyQualifiedPackageName(), '.')));
     seiMethod.addAnnotation(requestWrapperAnnotation);
 
     // Include @ResponseWrapper annotation
@@ -229,8 +277,8 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         .getMethodName().getSymbolNameCapitalisedFirstLetter()));
     responseWrapperAnnotation.addStringAttribute(
         "targetNamespace",
-        String.format("http://ws.%s/", StringUtils.reverseDelimited(sei.getType().getPackage()
-            .getFullyQualifiedPackageName(), '.')));
+        String.format("http://ws.%s/", StringUtils.reverseDelimited(
+            projectTopLevelPackage.getFullyQualifiedPackageName(), '.')));
     seiMethod.addAnnotation(responseWrapperAnnotation);
 
     // Include @WebMethod annotation
@@ -243,7 +291,8 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Include @WebResult annotation
     AnnotationMetadataBuilder webResultAnnotation =
         new AnnotationMetadataBuilder(JavaType.WEB_RESULT);
-    webResultAnnotation.addStringAttribute("name", "return");
+    webResultAnnotation.addStringAttribute("name", returnType.getBaseType().getSimpleTypeName()
+        .toLowerCase());
     webResultAnnotation.addStringAttribute("targetNamespace", "");
     seiMethod.addAnnotation(webResultAnnotation);
 

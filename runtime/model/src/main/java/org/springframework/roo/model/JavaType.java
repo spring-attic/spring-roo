@@ -88,6 +88,20 @@ public class JavaType implements Comparable<JavaType> {
   public static final JavaType WEB_PARAM = new JavaType("javax.jws.WebParam");
   public static final JavaType WEB_RESULT = new JavaType("javax.jws.WebResult");
   public static final JavaType WEB_SERVICE = new JavaType("javax.jws.WebService");
+  public static final JavaType XML_ROOT_ELEMENT = new JavaType(
+      "javax.xml.bind.annotation.XmlRootElement");
+  public static final JavaType XML_ID_REF = new JavaType("javax.xml.bind.annotation.XmlIDREF");
+  public static final JavaType XML_ELEMENT = new JavaType("javax.xml.bind.annotation.XmlElement");
+  public static final JavaType XML_ELEMENT_WRAPPER = new JavaType(
+      "javax.xml.bind.annotation.XmlElementWrapper");
+  public static final JavaType XML_TRANSIENT = new JavaType(
+      "javax.xml.bind.annotation.XmlTransient");
+  public static final JavaType XML_ID = new JavaType("javax.xml.bind.annotation.XmlID");
+  public static final JavaType XML_ATTRIBUTE = new JavaType(
+      "javax.xml.bind.annotation.XmlAttribute");
+  public static final JavaType XML_JAVATYPE_ADAPTER = new JavaType(
+      "javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
+
 
   /**
    * @deprecated use {@link #STRING} instead

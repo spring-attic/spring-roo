@@ -31,7 +31,7 @@ public class FieldDetails {
   private String column;
 
   /** Any JavaDoc comments (reserved for future expansion) */
-  protected String comment = "";
+  protected String comment;
 
   /** The name of the field to be added */
   private final JavaSymbolName fieldName;

@@ -21,10 +21,12 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
@@ -44,6 +46,7 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
+  private final JavaPackage projectTopLevelPackage;
   private final ClassOrInterfaceTypeDetails endpoint;
   private final JavaType sei;
   private final JavaType service;
@@ -93,6 +96,8 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * @param governorPhysicalTypeMetadata
    *            the governor, which is expected to contain a
    *            {@link ClassOrInterfaceTypeDetails} (required)
+   * @param projectTopLevelPackage the base package of the project that will be 
+   * 								used to create the targetNamespace      
    * @param endpoint the annotated endpoint
    * @param sei the related SEI
    * @param service the related Service
@@ -100,11 +105,12 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * 			the methods registered in based SEI
    */
   public SeiImplMetadata(final String identifier, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaPackage projectTopLevelPackage,
       ClassOrInterfaceTypeDetails endpoint, JavaType sei, JavaType service,
       Map<MethodMetadata, MethodMetadata> seiMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
+    this.projectTopLevelPackage = projectTopLevelPackage;
     this.endpoint = endpoint;
     this.sei = sei;
     this.service = service;
@@ -123,10 +129,8 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     webServiceAnnotation.addStringAttribute("serviceName", sei.getSimpleTypeName());
     webServiceAnnotation.addStringAttribute(
         "targetNamespace",
-        String.format(
-            "http://ws.%s/",
-            StringUtils.reverseDelimited(endpoint.getType().getPackage()
-                .getFullyQualifiedPackageName(), '.')));
+        String.format("http://ws.%s/", StringUtils.reverseDelimited(
+            projectTopLevelPackage.getFullyQualifiedPackageName(), '.')));
     ensureGovernorIsAnnotated(webServiceAnnotation);
 
     // Include implements
@@ -211,9 +215,18 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     }
 
     // If not exists, generate it and cache it.
+
+    // First of all, obtain the SEI method parameters and remove the @WebParam annotation from them.
+    // Is not necessary in the endpoint because is already defined in the SEI
+    List<JavaType> parameters = new ArrayList<JavaType>();
+    for (AnnotatedJavaType type : seiMethod.getParameterTypes()) {
+      parameters.add(type.getJavaType());
+    }
+
+    // Create the new endpoint method wind the updated information
     MethodMetadataBuilder endpointMethod =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, seiMethod.getMethodName(),
-            seiMethod.getReturnType(), seiMethod.getParameterTypes(),
+            seiMethod.getReturnType(), AnnotatedJavaType.convertFromJavaTypes(parameters),
             seiMethod.getParameterNames(), null);
 
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();

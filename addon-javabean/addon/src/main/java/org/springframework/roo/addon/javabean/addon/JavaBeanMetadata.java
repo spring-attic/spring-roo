@@ -13,6 +13,14 @@ import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
 import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
 import static org.springframework.roo.model.JpaJavaType.TRANSIENT;
 
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -39,14 +47,6 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * Metadata for {@link RooJavaBean}.
@@ -99,9 +99,9 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
   private MemberDetailsScanner memberDetailsScanner;
 
-  private List<MethodMetadata> accesorMethods;
+  private Map<JavaSymbolName, MethodMetadata> accesorMethods;
 
-  private List<MethodMetadata> mutatorMethods;
+  private Map<JavaSymbolName, MethodMetadata> mutatorMethods;
 
   /**
    * Constructor
@@ -141,8 +141,8 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     this.declaredFields = declaredFields;
     this.interfaceMethods = interfaceMethods;
     this.memberDetailsScanner = memberDetailsScanner;
-    this.accesorMethods = new ArrayList<MethodMetadata>();
-    this.mutatorMethods = new ArrayList<MethodMetadata>();
+    this.accesorMethods = new HashMap<JavaSymbolName, MethodMetadata>();
+    this.mutatorMethods = new HashMap<JavaSymbolName, MethodMetadata>();
 
     // Add getters and setters
     for (final Entry<FieldMetadata, JavaSymbolName> entry : declaredFields.entrySet()) {
@@ -172,11 +172,11 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
       // Add to mutators and accesors list and build
       if (accessorMethod != null) {
-        this.accesorMethods.add(accessorMethod.build());
+        this.accesorMethods.put(field.getFieldName(), accessorMethod.build());
         builder.addMethod(accessorMethod);
       }
       if (mutatorMethod != null) {
-        this.mutatorMethods.add(mutatorMethod.build());
+        this.mutatorMethods.put(field.getFieldName(), mutatorMethod.build());
         builder.addMethod(mutatorMethod);
       }
     }
@@ -595,7 +595,16 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
    * @return List<MethodMetadata> with mutator methods of the class
    */
   public List<MethodMetadata> getMutatorMethods() {
-    return this.mutatorMethods;
+    return (List<MethodMetadata>) this.mutatorMethods.values();
+  }
+
+  /**
+   * Returns the mutator method related with the provided field
+   * 
+   * @return MethodMetadata with the mutator method of the field
+   */
+  public MethodMetadata getMutatorMethod(FieldMetadata field) {
+    return mutatorMethods.get(field.getFieldName());
   }
 
   /**
@@ -604,7 +613,16 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
    * @return List<MethodMetadata> with accesor methods of the class
    */
   public List<MethodMetadata> getAccesorMethods() {
-    return this.accesorMethods;
+    return (List<MethodMetadata>) this.accesorMethods.values();
+  }
+
+  /**
+   * Returns the accesor method related with the provided field
+   * 
+   * @return MethodMetadata with the accesor method of the field
+   */
+  public MethodMetadata getAccesorMethod(FieldMetadata field) {
+    return accesorMethods.get(field.getFieldName());
   }
 
   @Override
