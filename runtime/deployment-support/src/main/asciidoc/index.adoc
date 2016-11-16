@@ -1598,136 +1598,194 @@ Default if option not present: the class focused by Roo shell.
 
 --column::
   The JPA @Column name.
-  This option is mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
-  This option is only visible for JPA entities and embeddable classes.
++
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only visible for JPA entities and embeddable classes.
+
+--transient::
+  Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` annotation. This marks the field as not persistent.
++
+This option is only available for JPA entities and embeddable classes.
++
+Default if option present:`true`. Default if option not present: `false`.
   
 * Optional:
 
 --notNull::
-  Whether this value cannot be null.
-  Default if option present: `true`; default if option not present: `false`.
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --nullRequired::
-  Whether this value must be null. 
-  Default if option present: `true`; default if option not present: `false`.
+  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --assertFalse::
-  Whether this value must assert false. 
-  Default if option present: `true`; default if option not present: `false`.
+  Whether the value of this field must be false. Adds `javax.validation.constraints.AssertFalse` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --assertTrue::
-  Whether this value must assert true; default if option present:
-  `true`; default if option not present: `false`
+  Whether the value of this field must be true. Adds `javax.validation.constraints.AssertTrue` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --value::
-  Inserts an optional Spring @Value annotation with the given content
+  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection. 
+
 --comment::
-  An optional comment for JavaDocs
+  An optional comment for JavaDocs.
+
 --primitive::
-  Indicates to use a primitive type; default if option present: `true`;
-  default if option not present: `false`
---transient::
-  Indicates to mark the field as transient. This option is only available for JPA entities and 
-  embeddable classes; default if option present:`true`; default if option not present: `false`
+  Indicates to use the primitive type.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: `true`; default if option not present: `false`
+  Indicates whether reserved words are ignored by Roo.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
---profile::
-  Parameter that indicates the name of the profile that will be applied
+  Force command execution. 
++
+Default if option present: `true`; default if option not present: `false`.
 
 === field date
 
-Adds a private date field to an existing Java source file
+Adds a private date field to an existing Java source file.
 
 [source,sh]
 ----
-roo> field date --fieldName --type --class --column
+roo> field date --fieldName --type
 ----
 
+* Mandatory:
+
 --fieldName::
-  The name of the field to add (mandatory)
+  The name of the field to add.
+
 --type::
-  The Java type of the entity (mandatory)
---persistenceType::
-  The type of persistent storage to be used. This option is only available for JPA entities 
-  and embeddable classes.
+  The Java date type of the field. Its value can be `java.util.Date` or `java.util.Calendar`.
+
+* Conditional:
+
 --class::
-  The name of the class to receive this field. This option is available for this command when 
-  the focus is not set to one class (mandatory). When working on a mono module project, simply 
-  specify the name of the entity in which the new field will be included. If you consider it 
-  necessary, you can also specify the package. Ex.: '--class ~ .domain.MyEntity'. When working 
-  with multiples modules, you should specify the module of the the entity and the name of the 
-  entity that will create the new field. If the module is not specified, it is assumed that the
-  entity is in the module that has set the focus. If you consider it necessary, you can also 
-  specify the package of the entity with the module name. Ex.: '--class model: ~ .domain.MyEntity';
-  default if option not present: '*' 
---notNull::
-  Whether this value cannot be null; default if option present: `true`;
-  default if option not present: `false`
---nullRequired::
-  Whether this value must be null; default if option present: `true`;
-  default if option not present: `false`
---future::
-  Whether this value must be in the future; default if option present:
-  `true`; default if option not present: `false`
---past::
-  Whether this value must be in the past; default if option present:
-  `true`; default if option not present: `false`
+  The name of the class to generate the field. When working on a mono module project, simply specify the name of the class in which the field will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+This option is mandatory for this command when the focus is not set to one class.
++
+Default if option not present: the class focused by Roo shell.
+
+--persistenceType::
+  The type of persistent storage to be used. It adds a `javax.persistence.TemporalType` to a `javax.persistence.Temporal` annotation into the field.
++
+This option is only available for JPA entities and embeddable classes.
++
+Default if option not present: `TemporalType.TIMESTAMP`
+
 --column::
-  The JPA @Column name. This option is only available for JPA entities and embeddable classes 
-  (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting 
-  it's `true`. See 'settings list' command)
---comment::
-  An optional comment for JavaDocs
---value::
-  Inserts an optional Spring @Value annotation with the given content
+  The JPA @Column name.
++
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only visible for JPA entities and embeddable classes.
+
 --transient::
-  Indicates to mark the field as transient. This option is only available for JPA entities and 
-  embeddable classes; default if option present: `true`; default if option not present: `false`
+  Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` annotation. This marks the field as not persistent.
++
+This option is only available for JPA entities and embeddable classes.
++
+Default if option present:`true`. Default if option not present: `false`.
+
+* Optional:
+
+--notNull::
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--nullRequired::
+  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--future::
+  Whether this value must be in the future. Adds `field.javax.validation.constraints.Future` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--past::
+  Whether this value must be in the past. Adds `field.javax.validation.constraints.Past` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--value::
+  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection. 
+
+--comment::
+  An optional comment for JavaDocs.
+
 --permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: `true`; default if option not present: `false`
+  Indicates whether reserved words are ignored by Roo.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --dateFormat::
-  Indicates the style of the date format (ignored if
-  dateTimeFormatPattern is specified); default: 'MEDIUM'
+  Indicates the style of the date format (ignored if dateTimeFormatPattern is specified), adding `style` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field. Possible values are: MEDIUM (style="MS"), NONE (style="-S") and SHORT (style="SS").
++
+Default: `MEDIUM`.
+
 --timeFormat::
-  Indicates the style of the time format (ignored if
-  dateTimeFormatPattern is specified); default: 'NONE'
+  Indicates the style of the time format (ignored if dateTimeFormatPattern is specified), adding `style` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field. Possible values are: MEDIUM (style="MS"), NONE (style="-S") and SHORT (style="SS").
++
+Default: `NONE`.
+
 --dateTimeFormatPattern::
-  Indicates a DateTime format pattern such as yyyy-MM-dd hh:mm:ss a
+  Indicates a 'custom' DateTime format pattern such as yyyy-MM-dd hh:mm:ss, adding `pattern` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field, with the provided value.
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
---profile::
-  Parameter that indicates the name of the profile that will be applied
+  Force command execution. 
++
+Default if option present: `true`; default if option not present: `false`.
 
 === field embedded
 
-Adds a private @Embedded field to an existing Java source file
+Adds a private @Embedded field to an existing Java source file. This command is only available for entities annotated with `@RooJpaEntity`. Therefore, you should focus the desired entity in the Roo Shell to make this command available.
 
 [source,sh]
 ----
-roo> field embedded --fieldName --type --class
+roo> field embedded --fieldName --type
 ----
 
+* Mandatory:
+
 --fieldName::
-  The name of the field to add (mandatory)
+  The name of the field to add.
+
 --type::
-  The Java type of the @Embeddable class (mandatory)
+  The Java type of the an embeddable class, annotated with `@Embeddable`.
+
+* Conditional:
+
 --class::
-  The name of the class to receive this field. This option is available for this command when 
-  the focus is not set to one class (mandatory). When working on a mono module project, simply 
-  specify the name of the entity in which the new field will be included. If you consider it 
-  necessary, you can also specify the package. Ex.: '--class ~ .domain.MyEntity'. When working 
-  with multiples modules, you should specify the module of the the entity and the name of the 
-  entity that will create the new field. If the module is not specified, it is assumed that the
-  entity is in the module that has set the focus. If you consider it necessary, you can also 
-  specify the package of the entity with the module name. Ex.: '--class model: ~ .domain.MyEntity';
-  default if option not present: '*' 
+  The name of the class to generate the field. When working on a mono module project, simply specify the name of the class in which the field will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+This option is mandatory for this command when the focus is not set to one class.
++
+Default if option not present: the class focused by Roo Shell.
+
 --permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: `true`; default if option not present: `false`
+  Indicates whether reserved words are ignored by Roo.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
---profile::
-  Parameter that indicates the name of the profile that will be applied
+  Force command execution. 
++
+Default if option present: `true`; default if option not present: `false`.
 
 === field enum
 
