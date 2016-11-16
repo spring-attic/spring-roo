@@ -176,8 +176,8 @@ public class FieldCommands implements CommandMarker {
           mandatory = true,
           unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT,
-          help = "The name of the class to receive this field. This option is available for"
-              + " this command when the focus is not set to one class (mandatory). When working on a mono module project, "
+          help = "The name of the class to receive this field. This option is available and mandatory for"
+              + " this command when the focus is not set to one class. When working on a mono module project, "
               + "simply specify the name of the entity in which the new field will be included. If you considers it necessary,"
               + " you can also specify the package. Ex.: '--class ~ .domain.MyEntity'. When working with multiples modules, "
               + "you should specify the module of the the entity and the name of the entity that will create the new field. If "

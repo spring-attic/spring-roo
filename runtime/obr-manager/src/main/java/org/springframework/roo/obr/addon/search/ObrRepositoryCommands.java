@@ -42,7 +42,7 @@ public class ObrRepositoryCommands implements CommandMarker {
     operations.removeRepo(url);
   }
 
-  @CliCommand(value = "addon repository list", help = "Lists existing OBR Repositories")
+  @CliCommand(value = "addon repository list", help = "Lists installed OBR Repositories")
   public void listRepos() throws Exception {
     operations.listRepos();
   }
