@@ -644,12 +644,32 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
       return sb.toString();
     }
 
-    sb.append("    ____  ____  ____  ").append(LINE_SEPARATOR);
-    sb.append("   / __ \\/ __ \\/ __ \\ ").append(LINE_SEPARATOR);
-    sb.append("  / /_/ / / / / / / / ").append(LINE_SEPARATOR);
-    sb.append(" / _, _/ /_/ / /_/ /  ").append(LINE_SEPARATOR);
-    sb.append("/_/ |_|\\____/\\____/   ").append(" ").append(versionInfo()).append(LINE_SEPARATOR);
-    sb.append(LINE_SEPARATOR);
+    //    sb.append("    ____  ____  ____  ").append(LINE_SEPARATOR);
+    //    sb.append("   / __ \\/ __ \\/ __ \\ ").append(LINE_SEPARATOR);
+    //    sb.append("  / /_/ / / / / / / / ").append(LINE_SEPARATOR);
+    //    sb.append(" / _, _/ /_/ / /_/ /  ").append(LINE_SEPARATOR);
+    //    sb.append("/_/ |_|\\____/\\____/   ").append(" ").append(versionInfo()).append(LINE_SEPARATOR);
+    //    sb.append(LINE_SEPARATOR);
+
+    sb.append("                _                               ").append(LINE_SEPARATOR);
+    sb.append(" ___ _ __  _ __(_)_ __   __ _   _ __ ___   ___  ").append(LINE_SEPARATOR);
+    sb.append("/ __| '_ \\| '__| | '_ \\ / _` | | '__/ _ \\ / _ \\ ").append(LINE_SEPARATOR);
+    sb.append("\\__ \\ |_) | |  | | | | | (_| | | | | (_) | (_) |").append(LINE_SEPARATOR);
+    sb.append("|___/ .__/|_|  |_|_| |_|\\__, | |_|  \\___/ \\___/ ").append(LINE_SEPARATOR);
+    sb.append("    |_|                 |___/  ");
+
+    // By default show version without Git commit ID. To see the Git commit
+    // ID use the "version" command.
+    String versionInfo = versionInfoWithoutGit();
+
+    // We have only an space of 17 chars to put the version info.
+    if (versionInfo.length() < 17) {
+
+      // Align version info to the right
+      versionInfo = StringUtils.leftPad(versionInfo, 17 - versionInfo.length());
+    }
+
+    sb.append(versionInfo).append(LINE_SEPARATOR);
 
     return sb.toString();
   }
