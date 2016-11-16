@@ -476,12 +476,15 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
   @CliCommand(value = {"script"},
       help = "Parses the specified resource file and executes its commands")
-  public void script(@CliOption(key = {"", "file"},
-      help = "The file to locate and execute (mandatory)", mandatory = true) final File script,
+  public void script(
+      @CliOption(key = {"", "file"}, help = "The file to locate and execute (mandatory)",
+          mandatory = true) final File script,
       @CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
           help = "Display line numbers when executing the script") final boolean lineNumbers,
-      @CliOption(key = "ignoreLines", mandatory = false, 
+      @CliOption(
+          key = "ignoreLines",
+          mandatory = false,
           help = "Comma-list of prefixes to ignore the lines that starts with any of the provided case-sensitive prefixes.") final String ignoreLines) {
 
     Validate.notNull(script, "Script file to parse is required");
@@ -501,8 +504,8 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
         }
 
         // ROO-3836
-        boolean ignoreLine = StringUtils.startsWithAny(line,ignoreLinesPrefixes);
-        if(ignoreLine) {
+        boolean ignoreLine = StringUtils.startsWithAny(line, ignoreLinesPrefixes);
+        if (ignoreLine) {
           if (lineNumbers) {
             logger.fine("Ignoring line " + i + ": " + line);
           } else {
