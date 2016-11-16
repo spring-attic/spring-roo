@@ -89,10 +89,6 @@ public class FieldCommands implements CommandMarker {
   // FieldCreatorProvider implementations
   private List<FieldCreatorProvider> fieldCreatorProviders = new ArrayList<FieldCreatorProvider>();
 
-  // Project Settings
-  private static final String SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME =
-      "spring.roo.jpa.require.schema-object-name";
-
   private final Set<String> legalNumericPrimitives = new HashSet<String>();
 
   protected void activate(final ComponentContext context) {
