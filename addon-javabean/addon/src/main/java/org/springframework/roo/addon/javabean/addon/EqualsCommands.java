@@ -50,19 +50,31 @@ public class EqualsCommands implements CommandMarker {
     return getProjectOperations().isFocusedProjectAvailable();
   }
 
-  @CliCommand(value = "equals", help = "Add equals and hashCode methods to a class")
+  @CliCommand(value = "equals", help = "Add `equals()` and `hashCode()` methods to a class.")
   public void addEquals(
-      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
-          optionContext = UPDATE_PROJECT, help = "The name of the class") final JavaType javaType,
+      @CliOption(
+          key = "class",
+          mandatory = false,
+          unspecifiedDefaultValue = "*",
+          optionContext = UPDATE_PROJECT,
+          help = "The name of the class to generate `equals()` and `hashCode()` "
+              + "methods. When working on a mono module project, simply specify the name of the class in which "
+              + "the methods will be included. If you consider it necessary, you can also specify the package. "
+              + "Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple "
+              + "modules, you should specify the name of the class and the module where it is. "
+              + "Ex.: `--class model:~.domain.MyClass`. "
+              + "If the module is not specified, it is assumed that the class is in the module which has the focus. "
+              + "Default if option not present: the class focused by Roo shell.") final JavaType javaType,
       @CliOption(key = "appendSuper", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "Whether to call the super class equals and hashCode methods") final boolean appendSuper,
+          help = "Whether to call the super class `equals()` and `hashCode()` methods."
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean appendSuper,
       @CliOption(
           key = "excludeFields",
           mandatory = false,
           specifiedDefaultValue = "",
           optionContext = "exclude-fields",
-          help = "The fields to exclude in the equals and hashcode methods. Multiple field names must be a double-quoted list separated by spaces") final Set<String> excludeFields) {
+          help = "The fields to exclude in the `equals()` and `hashcode()` methods. Multiple field names must be a double-quoted list separated by spaces.s") final Set<String> excludeFields) {
 
     equalsOperations.addEqualsAndHashCodeMethods(javaType, appendSuper, excludeFields);
   }

@@ -360,17 +360,17 @@ public class HelpServiceImpl implements HelpService {
                   if ("".equals(key)) {
                     key = "** default **";
                   }
-                  sb.append(" Keyword:                  ").append(key).append(LINE_SEPARATOR);
+                  sb.append(" Keyword:                   ").append(key).append(LINE_SEPARATOR);
                 }
 
-                sb.append("   Help:                   ").append(cliOption.help())
+                sb.append("   Help:                    ").append(cliOption.help())
                     .append(LINE_SEPARATOR);
-                sb.append("   Mandatory:              ").append(cliOption.mandatory())
-                    .append(LINE_SEPARATOR);
-                sb.append("   Default if specified:   '").append(cliOption.specifiedDefaultValue())
-                    .append("'").append(LINE_SEPARATOR);
-                sb.append("   Default if unspecified: '")
-                    .append(cliOption.unspecifiedDefaultValue()).append("'").append(LINE_SEPARATOR);
+                //                sb.append("   Mandatory:              ").append(cliOption.mandatory())
+                //                    .append(LINE_SEPARATOR);
+                //                sb.append("   Default if specified:   '").append(cliOption.specifiedDefaultValue())
+                //                    .append("'").append(LINE_SEPARATOR);
+                //                sb.append("   Default if unspecified: '")
+                //                    .append(cliOption.unspecifiedDefaultValue()).append("'").append(LINE_SEPARATOR);
                 sb.append(LINE_SEPARATOR);
               }
 

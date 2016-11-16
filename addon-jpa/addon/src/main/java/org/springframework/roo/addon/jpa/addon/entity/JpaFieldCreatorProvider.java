@@ -449,7 +449,13 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
     String cardinality = shellContext.getParameters().get("cardinality");
 
-    if (cardinality != null && cardinality.equals("MANY_TO_MANY")) {
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    if (cardinality != null && cardinality.equals("MANY_TO_MANY")
+        && requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
       return true;
     }
 
@@ -978,7 +984,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
         case ONE_TO_MANY:
           createParentFieldOfToManyRelation(parentCid, childCid, fieldName, fieldType,
               Cardinality.ONE_TO_MANY, permitReservedWords, sizeMin, sizeMax, comment, notNull,
-              mappedBy, fetch, aggregation, orphanRemoval, cascadeType, false);
+              mappedBy, fetch, aggregation, orphanRemoval, cascadeType, isList);
 
           createChildFieldOfOneToManyRelation(childCid, typeName, permitReservedWords, mappedBy,
               fetch, joinTable, joinColumns, referencedColumns, inverseJoinColumns,
@@ -987,11 +993,11 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
         case MANY_TO_MANY:
           createParentFieldOfToManyRelation(parentCid, childCid, fieldName, fieldType,
               Cardinality.MANY_TO_MANY, permitReservedWords, sizeMin, sizeMax, comment, notNull,
-              mappedBy, fetch, aggregation, orphanRemoval, cascadeType, false);
+              mappedBy, fetch, aggregation, orphanRemoval, cascadeType, isList);
 
           createChildFieldOfManyToManyRelation(childCid, typeName, permitReservedWords, mappedBy,
               fetch, joinTable, joinColumns, referencedColumns, inverseJoinColumns,
-              inverseReferencedColumns, false);
+              inverseReferencedColumns, isList);
 
           break;
 
@@ -1188,7 +1194,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       parentFieldDetails =
           new ListField(parentCid.getDeclaredByMetadataId(), new JavaType(
               LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(fieldType)),
-              fieldName, fieldType, Cardinality.ONE_TO_MANY, cascadeType, false);
+              fieldName, fieldType, cardinality, cascadeType, false);
 
     } else {
       parentFieldDetails =
@@ -1283,7 +1289,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     createCollectionField(typeName, fieldType, fieldName, cardinality, cascadeType, notNull,
         sizeMin, sizeMax, mappedBy, fetch, comment, joinTable, joinColumns, referencedColumns,
         inverseJoinColumns, inverseReferencedColumns, permitReservedWords, aggregation,
-        orphanRemoval, isForce, false);
+        orphanRemoval, isForce, true);
   };
 
 

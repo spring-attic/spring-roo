@@ -1,0 +1,12 @@
+Following commands have been disabled from MavenCommands.java:
+- dependency add
+- dependency remove
+- perform assembly
+- perform clean
+- perform command
+- perform eclipse
+- perform package
+- perform tests
+- maven repository add
+- maven repository remove
+ 

@@ -94,20 +94,33 @@ public class DtoCommands implements CommandMarker {
     return dtoOperations.isEntityProjectionPossible();
   }
 
-  @CliCommand(value = "dto", help = "Creates a new DTO class in SRC_MAIN_JAVA")
+  @CliCommand(
+      value = "dto",
+      help = "Creates a new DTO (Data Transfer Object) class in the directory _src/main/java_ of the selected project module (if any) with @RooDTO annotation.")
   public void newDtoClass(
       @CliOption(
           key = "class",
           mandatory = true,
           optionContext = UPDATELAST_PROJECT,
-          help = "Name of the DTO class to create, including package and module (if multimodule project) (mandatory)") final JavaType name,
+          help = "The name of the DTO class to create. If you consider it necessary, "
+              + "you can also specify the package (base package can be specified with `~`). "
+              + "Ex.: `--class ~.domain.MyDto`. You can specify module as well, if necessary. "
+              + "Ex.: `--class model:~.domain.MyDto`. When working with a multi-module project, "
+              + "if module is not specified the class will be created in the module which has the focus.") final JavaType name,
       @CliOption(key = "immutable", mandatory = false, specifiedDefaultValue = "true",
-          unspecifiedDefaultValue = "false", help = "Whether the DTO should be inmutable") final boolean immutable,
-      @CliOption(key = "utilityMethods", mandatory = false, specifiedDefaultValue = "true",
+          unspecifiedDefaultValue = "false", help = "Whether the DTO should be inmutable. "
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean immutable,
+      @CliOption(
+          key = "utilityMethods",
+          mandatory = false,
+          specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "Whether the DTO should implement 'toString', 'hashCode' and 'equals' methods") final boolean utilityMethods,
+          help = "Whether the DTO should implement `toString()`, `hashCode()` and `equals()` methods. "
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean utilityMethods,
       @CliOption(key = "serializable", mandatory = false, specifiedDefaultValue = "true",
-          unspecifiedDefaultValue = "false", help = "Whether the DTO should implement Serializable") final boolean serializable,
+          unspecifiedDefaultValue = "false",
+          help = "Whether the DTO should implement `java.io.Serializable`. "
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean serializable,
       ShellContext shellContext) {
 
     // Check if DTO already exists
@@ -289,28 +302,45 @@ public class DtoCommands implements CommandMarker {
     return results;
   }
 
-  @CliCommand(value = "entity projection",
-      help = "Creates new projection classes from entities in SRC_MAIN_JAVA")
+  @CliCommand(
+      value = "entity projection",
+      help = "Creates new projection classes from entities in the directory _src/main/java_ of the selected project module (if any) annotated with `@RooEntityProjection`.")
   public void newProjectionClass(
-      @CliOption(key = "entity", mandatory = true,
-          help = "Name of the entity which can be used to create the Projection from (mandatory)") final JavaType entity,
+      @CliOption(
+          key = "all",
+          mandatory = false,
+          specifiedDefaultValue = "true",
+          unspecifiedDefaultValue = "false",
+          help = "Create one projection class for each entity in the project."
+              + "This parameter is mandatory if `--class` is not specified. Otherwise, using `--class` will cause the parameter `--all` won't be available.") final boolean all,
       @CliOption(
           key = "class",
           mandatory = false,
           optionContext = UPDATELAST_PROJECT,
-          help = "Name of the Projection class to create, including package and module (if multimodule project)") final JavaType name,
-      @CliOption(key = "all", mandatory = false, specifiedDefaultValue = "true",
-          unspecifiedDefaultValue = "false",
-          help = "Whether should create one Projection per each entity in the project") final boolean all,
+          help = "The name of the projection class to create. If you consider it necessary, "
+              + "you can also specify the package (base package can be specified with `~`). "
+              + "Ex.: `--class ~.domain.MyProjection`. You can specify module as well, if necessary. "
+              + "Ex.: `--class model:~.domain.MyProjection`. When working with a multi-module "
+              + "project, if module is not specified the projection will be created in the module "
+              + "which has the focus."
+              + "This parameter is mandatory if `--all` is not specified. Otherwise, using `--all` will cause the parameter `--class` won't be") final JavaType name,
+      @CliOption(
+          key = "entity",
+          mandatory = true,
+          help = "Name of the entity which can be used to create the Projection from. "
+              + "This parameter is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--entity` won't be available.") final JavaType entity,
       @CliOption(
           key = "fields",
           mandatory = true,
-          help = "Comma separated list of entity fields to be included into the Projection (mandatory)") final String fields,
+          help = "Comma separated list of entity fields to be included into the Projection. "
+              + "This parameter is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--fields` won't be available.") final String fields,
       @CliOption(
           key = "suffix",
           mandatory = false,
           unspecifiedDefaultValue = "Projection",
-          help = "Suffix added to each Projection class name, builded from each associated entity name.") final String suffix,
+          help = "Suffix added to each Projection class name, built from each associated entity name. "
+              + "This parameter is only available if `--all` has been already specified."
+              + "Default if option not present: 'Projection'.") final String suffix,
       ShellContext shellContext) {
 
     // Check if Projection already exists

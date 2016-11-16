@@ -123,9 +123,10 @@ public class ProjectCommands implements CommandMarker {
     return getProjectOperations().isFocusedProjectAvailable();
   }
 
-  @CliCommand(value = DEVELOPMENT_MODE_COMMAND,
-      help = "Switches the system into development mode (greater diagnostic information)")
-  public String developmentMode(@CliOption(key = {"", "enabled"}, mandatory = false,
+  @CliCommand(
+      value = DEVELOPMENT_MODE_COMMAND,
+      help = "Switches the system into development mode (greater diagnostic information and enables add-on development commands)")
+  public String developmentMode(@CliOption(key = {"enabled"}, mandatory = false,
       specifiedDefaultValue = "true", unspecifiedDefaultValue = "true",
       help = "Activates development mode") final boolean enabled) {
 

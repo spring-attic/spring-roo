@@ -129,16 +129,24 @@ public class JpaCommands implements CommandMarker {
 
   @CliCommand(
       value = "embeddable",
-      help = "Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA")
+      help = "Creates a new Java class source file with the JPA `@Embeddable` annotation in the directory _src/main/java_ of the selected project module (if any).")
   public void createEmbeddableClass(
       @CliOption(key = "class", optionContext = UPDATE_PROJECT, mandatory = true,
-          help = "The name of the class to create (mandatory)") final JavaType name,
+          help = "The name of the embeddable class to create. If you consider it "
+              + "necessary, you can also specify the package (base package can be "
+              + "specified with `~`). Ex.: `--class ~.domain.MyEmbeddableClass`. "
+              + "You can specify module as well, if necessary. "
+              + "Ex.: `--class model:~.domain.MyEmbeddableClass`. When working "
+              + "with a multi-module project, if module is not specified the class "
+              + "will be created in the module which has the focus.") final JavaType name,
       @CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether the generated class should implement java.io.Serializable") final boolean serializable,
+          help = "Whether the generated class should implement `java.io.Serializable`. "
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean serializable,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+          help = "Indicates whether reserved words are ignored by Roo."
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords) {
 
     if (!permitReservedWords) {
       ReservedWords.verifyReservedWordsNotPresent(name);
@@ -390,21 +398,33 @@ public class JpaCommands implements CommandMarker {
     return allPossibleValues;
   }
 
-  @CliCommand(value = "entity jpa", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
+  @CliCommand(
+      value = "entity jpa",
+      help = "Creates a new JPA persistent entity in the directory _src/main/java_ of the selected project module (if any) with `@RooEntity` annotation.")
   public void newPersistenceClassJpa(
-      @CliOption(key = "class", optionContext = UPDATELAST_PROJECT, mandatory = true,
-          help = "Name of the entity to create (mandatory)") final JavaType name,
+      @CliOption(
+          key = "class",
+          optionContext = UPDATELAST_PROJECT,
+          mandatory = true,
+          help = "The name of the entity to create. If you consider it necessary, you can also "
+              + "specify the package (base package can be specified with `~`). "
+              + "Ex.: `--class ~.domain.MyEntity`. You can specify module as well, if necessary. "
+              + "Ex.: `--class model:~.domain.MyEntity`. When working with a multi-module project, "
+              + "if module is not specified the entity will be created in the module which has the focus.") final JavaType name,
       @CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object",
-          optionContext = SUPERCLASS, help = "The superclass") final JavaType superclass,
+          optionContext = SUPERCLASS, help = "The fully qualified name of the superclass. "
+              + "Default if option not present: `java.lang.Object`.") final JavaType superclass,
       @CliOption(key = "implements", mandatory = false, optionContext = INTERFACE,
-          help = "The interface to implement") final JavaType implementsType,
+          help = "The fully qualified name of the interface to implement") final JavaType implementsType,
       @CliOption(key = "abstract", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "Whether the generated class should be marked as abstract") final boolean createAbstract,
+          help = "Whether the generated class should be marked as abstract. "
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean createAbstract,
       @CliOption(
           key = "table",
           mandatory = true,
-          help = "The JPA table name to use for this entity (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)") final String table,
+          help = "The JPA table name to use for this entity. "
+              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting it’s `true`.") final String table,
       @CliOption(key = "schema", mandatory = false,
           help = "The JPA table schema name to use for this entity") final String schema,
       @CliOption(key = "catalog", mandatory = false,
@@ -414,52 +434,67 @@ public class JpaCommands implements CommandMarker {
       @CliOption(
           key = "identifierColumn",
           mandatory = true,
-          help = "The JPA identifier field column to use for this entity (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)") final String identifierColumn,
+          help = "The JPA identifier field column to use for this entity. "
+              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting it’s `true`.") final String identifierColumn,
       @CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang",
           unspecifiedDefaultValue = IDENTIFIER_DEFAULT_TYPE,
           specifiedDefaultValue = "java.lang.Long",
-          help = "The data type that will be used for the JPA identifier field") final JavaType identifierType,
+          help = "The data type that will be used for the JPA identifier field."
+              + "Default: `java.lang.Long`.") final JavaType identifierType,
       @CliOption(
           key = "versionField",
           mandatory = true,
-          help = "The JPA version field name to use for this entity (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)") final String versionField,
+          help = "The JPA version field name to use for this entity. "
+              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting it’s `true`.") final String versionField,
       @CliOption(
           key = "versionColumn",
           mandatory = true,
-          help = "The JPA version field column to use for this entity. This option is available if 'versionField' option is set (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)") final String versionColumn,
+          help = "The JPA version field column to use for this entity. "
+              + "This option is available if 'versionField' option is set."
+              + " This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting it’s `true`.") final String versionColumn,
       @CliOption(
           key = "versionType",
           mandatory = true,
           optionContext = "java-lang,project",
           unspecifiedDefaultValue = VERSION_DEFAULT_TYPE,
-          help = "The data type that will be used for the JPA version field. This option is available if 'versionField' option is set (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)") final JavaType versionType,
+          help = "The data type that will be used for the JPA version field. "
+              + "This option is available if 'versionField' option is set."
+              + " This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting it’s `true`.") final JavaType versionType,
       @CliOption(key = "inheritanceType", mandatory = false,
           help = "The JPA @Inheritance value (apply to base class)") final InheritanceType inheritanceType,
       @CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true",
-          unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") final boolean mappedSuperclass,
+          unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity."
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean mappedSuperclass,
       @CliOption(key = "equals", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether the generated class should implement equals and hashCode methods") final boolean equals,
+          help = "Whether the generated class should implement equals and hashCode methods."
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean equals,
       @CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether the generated class should implement java.io.Serializable") final boolean serializable,
+          help = "Whether the generated class should implement `java.io.Serializable`."
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean serializable,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+          help = "Indicates whether reserved words are ignored by Roo."
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords,
       @CliOption(key = "entityName", mandatory = false,
           help = "The name used to refer to the entity in queries") final String entityName,
       @CliOption(
           key = "sequenceName",
           mandatory = true,
-          help = "The name of the sequence for incrementing sequence-driven primary keys (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)") final String sequenceName,
+          help = "The name of the sequence for incrementing sequence-driven primary keys."
+              + " This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting it’s `true`.") final String sequenceName,
       @CliOption(
           key = "identifierStrategy",
           mandatory = true,
           specifiedDefaultValue = "AUTO",
-          help = "The generation value strategy to be used (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)") final IdentifierStrategy identifierStrategy,
+          help = "The generation value strategy to be used."
+              + " This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting it’s `true`."
+              + "Default if option present: `AUTO`.") final IdentifierStrategy identifierStrategy,
       @CliOption(key = "readOnly", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether the generated entity should be used for read operations only.") final boolean readOnly,
+          help = "Whether the generated entity should be used for read operations only."
+              + "Default if option present: `true`; default if option not present `false`.") final boolean readOnly,
       @CliOption(
           key = "plural",
           mandatory = false,
