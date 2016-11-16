@@ -312,43 +312,43 @@ public class ControllerCommands implements CommandMarker {
    */
   @CliCommand(
       value = "web mvc controller",
-      help = "Generates new `@RooController's` in the directory _src/main/java_ of the selected project module \n"
-          + "\t\t\t\t\t\t\t\t(if any). The generated controllers should manage specific entities in the project.")
+      help = "Generates new `@RooController's` in the directory _src/main/java_ of the selected project module"
+          + "(if any). The generated controllers should manage specific entities in the project.")
   public void addController(
       @CliOption(
           key = "all",
           mandatory = false,
           specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "Indicates if developer wants to generate controllers for every entity of current project.\n"
-              + "\t\t\t\t\t\t\tThis param will be available if `--entity` parameter has not been specified.") boolean all,
+          help = "Indicates if developer wants to generate controllers for every entity of current project."
+              + "This param will be available if `--entity` parameter has not been specified.") boolean all,
       @CliOption(
           key = "entity",
           mandatory = false,
-          help = "Indicates the entity that new controller will be manage.\n"
-              + "\t\t\t\t\t\t\tThis param will be available if `--all` parameter has not been specified") JavaType entity,
+          help = "Indicates the entity that new controller will be manage."
+              + "This param will be available if `--all` parameter has not been specified") JavaType entity,
       @CliOption(
           key = "responseType",
           mandatory = false,
           unspecifiedDefaultValue = "JSON",
           specifiedDefaultValue = "JSON",
-          help = "Indicates the responseType to be used by generated controller. Depending of the selected\n"
-              + "\t\t\t\t\t\t\t\tresponseType, generated methods and views will vary.\n"
-              + "\t\t\t\t\t\t\tThis param will be available once `--all` or `--entity` parameters have been specified") String responseType,
+          help = "Indicates the responseType to be used by generated controller. Depending of the selected"
+              + "responseType, generated methods and views will vary."
+              + "This param will be available once `--all` or `--entity` parameters have been specified") String responseType,
       @CliOption(
           key = "package",
           mandatory = false,
           optionContext = APPLICATION_FEATURE,
-          help = "Indicates which package should be used to include generated controllers.\n"
-              + "\t\t\t\t\t\t\tThis param will be available once `--all` or `--entity` parameters have been specified") JavaPackage controllersPackage,
+          help = "Indicates which package should be used to include generated controllers."
+              + "This param will be available once `--all` or `--entity` parameters have been specified") JavaPackage controllersPackage,
       @CliOption(
           key = "pathPrefix",
           mandatory = false,
           specifiedDefaultValue = "",
           unspecifiedDefaultValue = "",
-          help = "Indicates `@ResquestMapping` prefix to be used on this controller. Is not necessary to specify '/'.\n"
-              + "\t\t\t\t\t\t\t\tSpring Roo shell will include it automatically.\n"
-              + "\t\t\t\t\t\t\tThis param will be visible once `--all` or `--entity` parameters have been specified") String pathPrefix) {
+          help = "Indicates `@ResquestMapping` prefix to be used on this controller. Is not necessary to specify '/'."
+              + "Spring Roo shell will include it automatically."
+              + "This param will be visible once `--all` or `--entity` parameters have been specified") String pathPrefix) {
 
     // Getting --responseType service
     Map<String, ControllerMVCResponseService> responseTypeServices =
