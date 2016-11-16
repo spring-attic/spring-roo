@@ -167,6 +167,11 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
     registerDependency(entityMetadataId, metadataIdentificationString);
     final JpaEntityMetadata entityMetadata = getMetadataService().get(entityMetadataId);
 
+    // This metadata is not available yet.
+    if (entityMetadata == null) {
+      return null;
+    }
+
     // Getting type
     ControllerType type = controllerValues.getType();
 
@@ -182,6 +187,11 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
     final String serviceMetadataId = ServiceMetadata.createIdentifier(serviceDetails);
     registerDependency(serviceMetadataId, metadataIdentificationString);
     final ServiceMetadata serviceMetadata = getMetadataService().get(serviceMetadataId);
+
+    // This metadata is not available yet.
+    if (serviceMetadata == null) {
+      return null;
+    }
 
     // Generate path
     String path = "/".concat(StringUtils.lowerCase(getPluralService().getPlural(entity)));
