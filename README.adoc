@@ -414,9 +414,10 @@ git diff
 git commit -a -m "ROO-XXXX: Update to next version"
 git push
 
-If any problems are detected before step 8, *simply fix*, push and start from step 1 again. You have not deployed anything substantial (ie only the reference guide) until step 8, so some corrections and re-tagging can be performed without any difficulty. The critical requirement is to defer step 8 (and beyond) until you're sure everything is fine.
-
 . Update the `Apache Felix` libraries and the `Spring Roo` libraries included in the Spring Roo STS Plugin. These libraries are located in https://github.com/spring-projects/spring-ide/tree/master/plugins/org.springframework.ide.eclipse.roo.core/lib. After include the new libraries, send a pull-request with the applied changes. 
+
+NOTE: _If any problems are detected before step 8, *simply fix*, push and start from step 1 again. You have not deployed anything substantial (ie only the reference guide) until step 8, so some corrections and re-tagging can be performed without any difficulty. The critical requirement is to defer step 8 (and beyond) until you're sure everything is fine_
+
 
 === Pre-notification testing
 
