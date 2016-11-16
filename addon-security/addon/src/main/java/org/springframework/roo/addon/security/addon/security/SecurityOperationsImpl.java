@@ -32,6 +32,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.project.Dependency;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -53,6 +54,9 @@ import java.util.logging.Logger;
 public class SecurityOperationsImpl implements SecurityOperations {
 
   protected final static Logger LOGGER = HandlerUtils.getLogger(SecurityOperationsImpl.class);
+
+  private static final Dependency SPRING_SECURITY_CORE = new Dependency(
+      "org.springframework.security", "spring-security-core", null);
 
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
@@ -169,6 +173,9 @@ public class SecurityOperationsImpl implements SecurityOperations {
 
     // Write on disk
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+
+    // Add Spring Security dependency
+    getProjectOperations().addDependency(klass.getModule(), SPRING_SECURITY_CORE, false);
 
   }
 
