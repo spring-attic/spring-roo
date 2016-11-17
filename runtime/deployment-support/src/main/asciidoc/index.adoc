@@ -951,7 +951,7 @@ Provide information about a specific Spring Roo Add-on from installed repositori
 roo> addon info bundle --bundleSymbolicName
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --bundleSymbolicName::
   The bundle symbolic name of the add-on of interest.
@@ -965,7 +965,7 @@ Installs Spring Roo Add-on.
 roo> addon install bundle --bundleSymbolicName
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --bundleSymbolicName::
   The bundle symbolic name of the add-on of interest from installed repositories.
@@ -979,7 +979,7 @@ Installs Spring Roo Add-on using an URL.
 roo> addon install url --url
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --url::
   The url of the add-on of interest.
@@ -1004,7 +1004,7 @@ Removes an installed Spring Roo Add-on.
 roo> addon remove --bundleSymbolicName
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --bundleSymbolicName::
   The bundle symbolic name of the add-on of interest.
@@ -1018,7 +1018,7 @@ Adds a new OBR Repository to Roo Shell.
 roo> addon repository add --url
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --url::
   URL file that defines repository. Ex: 'http://localhost/repo/index.xml'.
@@ -1056,7 +1056,7 @@ Removes an existing OBR Repository from Roo Shell.
 roo> addon repository remove --url
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --url::
   URL file that defines repository. Ex: 'http://localhost/repo/index.xml'.
@@ -1070,7 +1070,7 @@ Searches all known Spring Roo Add-ons from installed repositories.
 roo> addon search --requiresCommand
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --requiresCommand::
   Only display add-ons in search results that offer this command.
@@ -1084,7 +1084,7 @@ Installs some 'Roo Addon Suite' from installed OBR Repository.
 roo> addon suite install name --symbolicName
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --symbolicName::
   Name that identifies the 'Roo Addon Suite'.
@@ -1098,7 +1098,7 @@ Installs some 'Roo Addon Suite' from URL.
 roo> addon suite install url --url
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --url::
   URL of Roo Addon Suite .esa file.
@@ -1112,7 +1112,7 @@ Lists all installed 'Roo Addon Suite'. If you want to list all available 'Roo Ad
 roo> addon suite list
 ----
 
-* Optional:
+* _Optional:_
 
 --repository::
   OBR Repository where the 'Roo Addon Suite' are located.
@@ -1126,7 +1126,7 @@ Starts some installed 'Roo Addon Suite'. By default, an installed 'Roo Addon Sui
 roo> addon suite start --symbolicName
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --symbolicName::
   Name that identifies the 'Roo Addon Suite'.
@@ -1140,7 +1140,7 @@ Stops some started 'Roo Addon Suite'.
 roo> addon suite stop --symbolicName
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --symbolicName::
   Name that identifies the 'Roo Addon Suite'.
@@ -1154,7 +1154,7 @@ Uninstall some installed 'Roo Addon Suite'.
 roo> addon suite uninstall --symbolicName
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --symbolicName::
   Name that identifies the 'Roo Addon Suite'.
@@ -1180,7 +1180,7 @@ Installs support for using intermediate memory in generated project by using Spr
 roo> cache setup
 ---- 
 
-* Optional:
+* _Optional:_
         
 --provider::                    
   Parameter that indicates the provider to use for managing intermediate memory.
@@ -1197,12 +1197,12 @@ Creates a new Java class source file in any project path.
 roo> class --class
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --class::
   The name of the class to create. If you consider it necessary, you can also specify the package (base package can be specified with `~`). Ex.: `--class ~.domain.MyClass`. You can specify module as well, if necessary. Ex.: `--class model:~.domain.MyClass`. When working with a multi-module project, if module is not specified the class will be created in the module which has the focus.
 
-* Optional:
+* _Optional:_
 
 --rooAnnotations::
   Whether the generated class should have common Roo annotations (`@RooToString`, `@RooEquals` and `@RooSerializable`).
@@ -1246,7 +1246,7 @@ Creates a class constructor
 roo> constructor
 ----
 
-* Optional:
+* _Optional:_
 
 --class::
   The name of the class to receive this constructor. If you consider it necessary, you can also specify the package (base package can be specified with `~`). Ex.: `--class ~.domain.MyEntity`. You can specify module as well, if necessary. Ex.: `--class model:~.domain.MyEntity`. When working with a multi-module project, if module is not specified, it is assumed that the class is in the module that has set the focus.
@@ -1266,12 +1266,12 @@ Creates a new DTO (Data Transfer Object) class in the directory _src/main/java_ 
 roo> dto --class
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --class::
   The name of the DTO class to create. If you consider it necessary, you can also specify the package (base package can be specified with `~`). Ex.: `--class ~.domain.MyDto`. You can specify module as well, if needed. Ex.: `--class model:~.domain.MyDto`. When working with a multi-module project, if module is not specified the class will be created in the module which has the focus.
 
-* Optional:
+* _Optional:_
 
 --immutable::
   Whether the DTO should be inmutable.
@@ -1302,12 +1302,12 @@ Creates a new Java class source file with the JPA `@Embeddable` annotation in th
 roo> embeddable --class
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --class::
   The name of the embeddable class to create. If you consider it necessary, you can also specify the package (base package can be specified with `~`). Ex.: `--class ~.domain.MyEmbeddableClass`. You can specify module as well, if necessary. Ex.: `--class model:~.domain.MyEmbeddableClass`. When working with a multi-module project, if module is not specified the class will be created in the module which has the focus.
 
-* Optional:
+* _Optional:_
 
 --serializable::
   Whether the generated class should implement `java.io.Serializable`.
@@ -1329,12 +1329,12 @@ Creates a new JPA persistent entity in the directory _src/main/java_ of the sele
 roo> entity jpa --class
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --class::
   The name of the entity to create. If you consider it necessary, you can also specify the package (base package can be specified with `~`). Ex.: `--class ~.domain.MyEntity`. You can specify module as well, if necessary. Ex.: `--class model:~.domain.MyEntity`. When working with a multi-module project, if module is not specified the entity will be created in the module which has the focus.
 
-* Conditional:
+* _Conditional:_
 
 All the following parameters are mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's value is `true`. See link:#settings-commands[settings commands].
 
@@ -1365,7 +1365,7 @@ This parameter is available only when `--versionField` has been specified.
 +
 Default if option present: `AUTO`.
 
-* Optional:
+* _Optional:_
 
 --extends::
   The fully qualified name of the superclass.
@@ -1465,7 +1465,7 @@ This parameter is mandatory if `--class` is specified. Otherwise, not specifying
 +
 This parameter is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--fields` won't be available.
 
-* Conditional:
+* _Conditional:_
 
 --suffix::
   Suffix added to each Projection class name, built from each associated entity name. 
@@ -1474,7 +1474,7 @@ This parameter is only available if `--all` has been already specified.
 +
 Default if option not present: 'Projection'.
 
-* Optional:
+* _Optional:_
 
 --force::
   Force command execution
@@ -1490,12 +1490,12 @@ Inserts a new enum constant into an enum class.
 roo> enum constant --name
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --name::
   The name of the constant. It will converted to upper case automatically.
 
-* Optional:
+* _Optional:_
 
 --class::
   The name of the enum class to receive this constant. When working on a mono module project, simply specify the name of the class in which the new constant will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyEnumClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyEnumClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
@@ -1516,12 +1516,12 @@ Creates a new Java enum source file in any project path
 roo> enum type --class
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --class::
   The name of the enum class to create. If you consider it necessary, you can also specify the package (base package can be specified with `~`). Ex.: `--class ~.domain.MyEnumClass`. You can specify module as well, if necessary. Ex.: `--class model:~.domain.MyEnumClass`. When working with a multi-module project, if module is not specified the projection will be created in the module which has the focus.
 
-* Optional:
+* _Optional:_
 
 --path::
   Source directory where create the enum.
@@ -1547,7 +1547,7 @@ Adds `equals()` and `hashCode()` methods to a class.
 roo> equals
 ----
 
-* Optional:
+* _Optional:_
 
 --class::
   The name of the class to generate `equals()` and `hashCode()` methods. When working on a mono module project, simply specify the name of the class in which the methods will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
@@ -1582,12 +1582,12 @@ Adds a private boolean field to an existing Java source file.
 roo> field boolean --fieldName
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --fieldName::
   The name of the field to add.
 
-* Conditional:
+* _Conditional:_
 
 --class::
   The name of the class to generate the field. When working on a mono module project, simply specify the name of the class in which the field will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
@@ -1601,7 +1601,7 @@ Default if option not present: the class focused by Roo shell.
 +
 This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
 +
-This option is only visible for JPA entities and embeddable classes.
+This option is only available for JPA entities and embeddable classes.
 
 --transient::
   Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` annotation. This marks the field as not persistent.
@@ -1610,7 +1610,7 @@ This option is only available for JPA entities and embeddable classes.
 +
 Default if option present:`true`. Default if option not present: `false`.
   
-* Optional:
+* _Optional:_
 
 --notNull::
   Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
@@ -1662,7 +1662,7 @@ Adds a private date field to an existing Java source file.
 roo> field date --fieldName --type
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --fieldName::
   The name of the field to add.
@@ -1670,7 +1670,7 @@ roo> field date --fieldName --type
 --type::
   The Java date type of the field. Its value can be `java.util.Date` or `java.util.Calendar`.
 
-* Conditional:
+* _Conditional:_
 
 --class::
   The name of the class to generate the field. When working on a mono module project, simply specify the name of the class in which the field will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
@@ -1691,7 +1691,7 @@ Default if option not present: `TemporalType.TIMESTAMP`
 +
 This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
 +
-This option is only visible for JPA entities and embeddable classes.
+This option is only available for JPA entities and embeddable classes.
 
 --transient::
   Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` annotation. This marks the field as not persistent.
@@ -1700,7 +1700,7 @@ This option is only available for JPA entities and embeddable classes.
 +
 Default if option present:`true`. Default if option not present: `false`.
 
-* Optional:
+* _Optional:_
 
 --notNull::
   Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
@@ -1722,11 +1722,11 @@ Default if option present: `true`; default if option not present: `false`.
 +
 Default if option present: `true`; default if option not present: `false`.
 
---value::
-  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection. 
-
 --comment::
   An optional comment for JavaDocs.
+
+--value::
+  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection. 
 
 --permitReservedWords::
   Indicates whether reserved words are ignored by Roo.
@@ -1734,12 +1734,16 @@ Default if option present: `true`; default if option not present: `false`.
 Default if option present: `true`; default if option not present: `false`.
 
 --dateFormat::
-  Indicates the style of the date format (ignored if dateTimeFormatPattern is specified), adding `style` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field. Possible values are: MEDIUM (style="MS"), NONE (style="-S") and SHORT (style="SS").
+  Indicates the style of the date format (ignored if dateTimeFormatPattern is specified), adding `style` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field. 
++
+Possible values are: MEDIUM (style="MS"), NONE (style="-S") and SHORT (style="SS").
 +
 Default: `MEDIUM`.
 
 --timeFormat::
-  Indicates the style of the time format (ignored if dateTimeFormatPattern is specified), adding `style` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field. Possible values are: MEDIUM (style="MS"), NONE (style="-S") and SHORT (style="SS").
+  Indicates the style of the time format (ignored if dateTimeFormatPattern is specified), adding `style` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field. 
++
+Possible values are: MEDIUM (style="MS"), NONE (style="-S") and SHORT (style="SS").
 +
 Default: `NONE`.
 
@@ -1760,15 +1764,15 @@ Adds a private @Embedded field to an existing Java source file. This command is 
 roo> field embedded --fieldName --type
 ----
 
-* Mandatory:
+* _Mandatory:_
 
 --fieldName::
   The name of the field to add.
 
 --type::
-  The Java type of the an embeddable class, annotated with `@Embeddable`.
+  The Java type of an embeddable class, annotated with `@Embeddable`.
 
-* Conditional:
+* _Conditional:_
 
 --class::
   The name of the class to generate the field. When working on a mono module project, simply specify the name of the class in which the field will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
@@ -1789,410 +1793,621 @@ Default if option present: `true`; default if option not present: `false`.
 
 === field enum
 
-Adds a private enum field to an existing Java source file
+Adds a private enum field to an existing Java source file. The field type must be a Java enum type.
 
 [source,sh]
 ----
-roo> field enum --fieldName --type --class --column
+roo> field enum --fieldName --type
 ----
 
+* _Mandatory:_
+
 --fieldName::
-  The name of the field to add (mandatory)
+  The name of the field to add.
+
 --type::
-  The enum type of this field (mandatory)
+  The Java type of the field. It must be a Java enum type.
+
+* _Conditional:_
+
 --class::
-  The name of the class to receive this field. This option is available for this command when 
-  the focus is not set to one class (mandatory). When working on a mono module project, simply 
-  specify the name of the entity in which the new field will be included. If you consider it 
-  necessary, you can also specify the package. Ex.: '--class ~ .domain.MyEntity'. When working 
-  with multiples modules, you should specify the module of the the entity and the name of the 
-  entity that will create the new field. If the module is not specified, it is assumed that the
-  entity is in the module that has set the focus. If you consider it necessary, you can also 
-  specify the package of the entity with the module name. Ex.: '--class model: ~ .domain.MyEntity';
-  default if option not present: '*' 
+  The name of the class to generate the field. When working on a mono module project, simply specify the name of the class in which the field will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+This option is mandatory for this command when the focus is not set to one class.
++
+Default if option not present: the class focused by Roo Shell.
+
 --column::
-  The JPA @Column name. This option is only available for JPA entities and embeddable classes 
-  (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting 
-  it's `true`. See 'settings list' command)
---notNull::
-  Whether this value cannot be null; default if option present: `true`;
-  default if option not present: `false`
---nullRequired::
-  Whether this value must be null; default if option present: `true`;
-  default if option not present: `false`
---enumType::
-  The fetch semantics at a JPA level. This option is only available for JPA entities and embeddable classes.
---comment::
-  An optional comment for JavaDocs
+  The JPA @Column name.
++
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes.
+
 --transient::
-  Indicates to mark the field as transient. This option is only available for JPA entities and embeddable 
-  classes; default if option present: `true`; default if option not present: `false`
+  Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` annotation. This marks the field as not persistent.
++
+This option is only available for JPA entities and embeddable classes.
++
+Default if option present:`true`. Default if option not present: `false`.
+
+--enumType::
+  Defines how the enumerated field should be persisted at a JPA level. Adds the `javax.persistence.Enumerated` annotation to the field, with `javax.persistence.EnumType` attribute. 
++
+Possible values are: `ORDINAL` (persists as an integer) and `STRING` (persists as a String). If this option is not specified, the `Enumerated` annotation will be added without the `EnumType` attribute, using its default value (`ORDINAL`).
++ 
+This option is only available for JPA entities and embeddable classes.
+
+* _Optional:_
+
+--notNull::
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--nullRequired::
+  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--comment::
+  An optional comment for JavaDocs.
+
 --permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: `true`; default if option not present: `false`
+  Indicates whether reserved words are ignored by Roo.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
---profile::
-  Parameter that indicates the name of the profile that will be applied
+  Force command execution.
++
+Default if option present: `true`; default if option not present: `false`.
 
 === field file
 
-Adds a byte array field for storing uploaded file contents
-(JSF-scaffolded UIs only)
+Adds a byte array field for storing uploaded file contents.
 
 [source,sh]
 ----
 roo> field file --fieldName --class --contentType --column
 ----
 
+* _Mandatory:_
+
 --fieldName::
-  The name of the file upload field to add (mandatory)
---class::
-  The name of the class to receive this field. This option is available for this command when 
-  the focus is not set to one class (mandatory). When working on a mono module project, simply 
-  specify the name of the entity in which the new field will be included. If you consider it 
-  necessary, you can also specify the package. Ex.: '--class ~ .domain.MyEntity'. When working 
-  with multiples modules, you should specify the module of the the entity and the name of the 
-  entity that will create the new field. If the module is not specified, it is assumed that the
-  entity is in the module that has set the focus. If you consider it necessary, you can also 
-  specify the package of the entity with the module name. Ex.: '--class model: ~ .domain.MyEntity';
-  default if option not present: '*'
+  The name of the file upload field to add.
+
 --contentType::
-  The content type of the file (mandatory)
---autoUpload::
-  Whether the file is uploaded automatically when selected; default if
-  option present: `true`; default if option not present: `false`
+  The content type of the file.
++
+Possible values are: CSS, CSV, DOC, GIF, HTML, JAVASCRIPT, JPG, JSON, MP3, MP4, MPEG, PDF, PNG, TXT, XLS, XML and ZIP.
+
+* _Conditional:_
+
+--class::
+  The name of the class to generate the field. When working on a mono module project, simply specify the name of the class in which the field will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+This option is mandatory for this command when the focus is not set to one class.
++
+Default if option not present: the class focused by Roo Shell.
+
 --column::
-  The JPA @Column name. This option is only available for JPA entities and embeddable classes 
-  (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting 
-  it's `true`. See 'settings list' command). 
+  The JPA @Column name.
++
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes.
+
+* _Optional:_
+
+--autoUpload::
+  Whether the file is uploaded automatically when selected.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --notNull::
-  Whether this value cannot be null; default if option present: `true`;
-  default if option not present: `false`
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: `true`; default if option not present: `false`
+  Indicates whether reserved words are ignored by Roo.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
---profile::
-  Parameter that indicates the name of the profile that will be applied
+  Force command execution.
++
+Default if option present: `true`; default if option not present: `false`.
 
 === field list
 
-Adds a private List field to an existing Java source file (eg the 'one'
-side of a many-to-one)
+Adds a private `List` field to an existing Java source file, representing (always) a bidirectional relation with other entity. Therefore, this command will also add a field on the other side of the relation (the owner side, with `mappedBy` attribute), which will be a `List` field for 'many-to-many' relations, or a *not* `Collection` field for a 'one-to-many' relation. All added fields will have the needed JPA annotations to properly manage bidirectional relations.
 
 [source,sh]
 ----
-roo> field list --fieldName --class --type --joinTable --joinColumns --referencedColumns --inverseJoinColumns --inverseReferencedColumns
+roo> field list --fieldName --type
 ----
 
+* _Mandatory:_
+
 --fieldName::
-  The name of the field to add (mandatory)
---class::
-  The name of the class to receive this field. This option is available for this command when 
-  the focus is not set to one class (mandatory). When working on a mono module project, simply 
-  specify the name of the entity in which the new field will be included. If you consider it 
-  necessary, you can also specify the package. Ex.: '--class ~ .domain.MyEntity'. When working 
-  with multiples modules, you should specify the module of the the entity and the name of the 
-  entity that will create the new field. If the module is not specified, it is assumed that the
-  entity is in the module that has set the focus. If you consider it necessary, you can also 
-  specify the package of the entity with the module name. Ex.: '--class model: ~ .domain.MyEntity';
-  default if option not present: '*'
+  The name of the field to add.
+
 --type::
-  The entity which will be contained within the List (mandatory)
---mappedBy::
-  The field name on the referenced type which owns the relationship. This option is only available for JPA entities.
---notNull::
-  Whether this value cannot be null; default if option present: `true`;
-  default if option not present: `false`
---sizeMin::
-  The minimum number of elements in the collection
---sizeMax::
-  The maximum number of elements in the collection
---cardinality::
-  The relationship cardinality at a JPA level. This option is only available for JPA entities and embeddable 
-  classes; default: 'ONE_TO_MANY'
---fetch::
-  The fetch semantics at a JPA level. This option is only available for JPA entities and embeddable classes. 
---comment::
-  An optional comment for JavaDocs
---permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: `true`; default if option not present: `false`
+  The entity related to this one, which will be contained within the `List`.
++
+Possible values are: any of the entities in the project.
+
+* _Conditional:_
+
+--class::
+  The name of the class to generate the field. When working on a mono module project, simply specify the name of the class in which the field will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+This option is mandatory for this command when the focus is not set to one class.
++
+Default if option not present: the class focused by Roo Shell.
+
 --joinTable::
-  Join table name. Most usually used in @ManyToMany relations. This option is only available for JPA entities and embeddable classes 
-  (mandatory if 'cardinality' option is 'MANY_TO_MANY').
+  Join table name. Most usually used in @ManyToMany relations.
++
+This option is mandatory for this command if `--cardinality` is set to `MANY_TO_MANY` and `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes.
+
 --joinColumns::
-  Comma separated list of join table's foreign key columns which references the table of the entity owning the relation. 
-  This option is only available for JPA entities and embeddable classes when 'joinTable' option is set (mandatory 
-  if 'spring.roo.jpa.require.schema-object-name' configuration setting it's `true`, See 'settings list' command) 
+  Comma separated list of join table's foreign key columns which references the table of the related entity (the owner entity in bidirectional relations).
++
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
+
 --referencedColumns::
-  Comma separated list of foreign key referenced columns in the table of the entity owning the relation.
-  This option is only available for JPA entities and embeddable classes when 'joinTable' option is set (mandatory 
-  if 'spring.roo.jpa.require.schema-object-name' configuration setting it's `true`, See 'settings list' command).
+  Comma separated list of foreign key referenced columns in the primary table of the related entity (the owner entity in bidirectional relations).
++
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
+
 --inverseJoinColumns::
-  Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation.
-  This option is only available for JPA entities and embeddable classes when 'joinTable' option is set (mandatory 
-  if 'spring.roo.jpa.require.schema-object-name' configuration setting it's `true`, See 'settings list' command).
+  Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation (current entity).
++
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
+
 --inverseReferencedColumns::
-  Comma separated list of foreign key referenced columns in the table of the entity that does not own the relation
-  This option is only available for JPA entities and embeddable classes when 'joinTable' option is set (mandatory 
-  if 'spring.roo.jpa.require.schema-object-name' configuration setting it's `true`, See 'settings list' command).
---aggregation::
-  Aggregation. Identify relationship as 'aggregation' (if is `true`, default) or a 'composition' (if is `false`); default: `true`
+  Comma separated list of foreign key referenced columns in the primary table of the entity that does not own the relation (current entity).
++
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
+
+--mappedBy::
+  The field name on the referenced type which owns the relationship. 
++
+This option is only available for JPA entities.
+
+--cardinality::
+  The relationship cardinality at a JPA level. This option is only available for JPA entities and embeddable classes.
++
+Default: `ONE_TO_MANY`.
+
+--fetch::
+  The fetch semantics at a JPA level. It adds the provided value to `fetch` attribute of JPA `@OneToMany`, `@ManyToMany` and `@ManyToOne`. If this option is not provided, default fetch type will be `LAZY`.
++
+Possible values are `LAZY`and `EAGER`.
++
+This option is only available for JPA entities and embeddable classes.
+
+* _Optional:_
+
+--aggregation::                    
+  Whether the relationship type is 'aggregation' or 'composition'. An aggregation relation means that children entities aren't dependent from parent entity (current entity) and they can exist without parent entity. In the other hand, in a composition relation the parent entity of the relationship also owns the life cycle of related entities. The parent entity is responsible for the creation and destruction of children entities, these being linked to a single parent entity. A child entity cannot be in two different composition relationships.
++
+Default: `true`.
+
 --orphanRemoval::
-  Indicates whether to apply the remove operation to entities that have been removed from the relationship and to cascade the remove operation to those entities; default if option present: `true`
+  Indicates whether to apply the remove operation to entities that have been removed from the relationship and to cascade the remove operation to those entities. If this relation represents a 'composition' relation and this option is not present, `--orphanRemoval` value will be `true`.
++
+Default if option present: `true`.
+
+--sizeMin::
+  The minimum number of elements in the collection. This option adds or updates `javax.validation.constraints.Size` with the provided value as `min` attribute value. 
+
+--sizeMax::
+  The maximum number of elements in the collection. This option adds or updates `javax.validation.constraints.Size` with the provided value as `max` attribute value.
+
+--notNull::
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--comment::
+  An optional comment for JavaDocs.
+
+--permitReservedWords::
+  Indicates whether reserved words are ignored by Roo.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
---profile::
-  Parameter that indicates the name of the profile that will be applied
+  Force command execution.
++
+Default if option present: `true`; default if option not present: `false`.
 
 === field number
 
-Adds a private numeric field to an existing Java source file
+Adds a private numeric field to an existing Java source file. User can choose the field type between a wide range of numeric types.
 
 [source,sh]
 ----
-roo> field number --fieldName --type --class --column
+roo> field number --fieldName --type
 ----
 
+* _Mandatory:_
+
 --fieldName::
-  The name of the field to add (mandatory)
+  The name of the field to add.
+
 --type::
-  The Java type of the field (mandatory)
+  The Java type of the field. Only numeric types allowed.
++
+Possible values are: `java.math.BigDecimal`, `java.math.BigInteger`, `byte`, `java.lang.Byte`, `double`, `java.lang.Double`, `float`, `java.lang.Float`, `int`, `java.lang.Integer`, `long`, `java.lang.Long`, `java.lang.Number`, `short` and `java.lang.Short`.
+
+* _Conditional:_
+
 --class::
-  The name of the class to receive this field. This option is available for this command when 
-  the focus is not set to one class (mandatory). When working on a mono module project, simply 
-  specify the name of the entity in which the new field will be included. If you consider it 
-  necessary, you can also specify the package. Ex.: '--class ~ .domain.MyEntity'. When working 
-  with multiples modules, you should specify the module of the the entity and the name of the 
-  entity that will create the new field. If the module is not specified, it is assumed that the
-  entity is in the module that has set the focus. If you consider it necessary, you can also 
-  specify the package of the entity with the module name. Ex.: '--class model: ~ .domain.MyEntity';
-  default if option not present: '*'
---notNull::
-  Whether this value cannot be null; default if option present: `true`;
-  default if option not present: `false`
---nullRequired::
-  Whether this value must be null; default if option present: `true`;
-  default if option not present: `false`
---decimalMin::
-  The BigDecimal string-based representation of the minimum value
---decimalMax::
-  The BigDecimal string based representation of the maximum value
---digitsInteger::
-  Maximum number of integral digits accepted for this number
---digitsFraction::
-  Maximum number of fractional digits accepted for this number
---min::
-  The minimum value
---max::
-  The maximum value
+  The name of the class to generate the field. When working on a mono module project, simply specify the name of the class in which the field will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+This option is mandatory for this command when the focus is not set to one class.
++
+Default if option not present: the class focused by Roo Shell.
+
 --column::
-  The JPA @Column name. This option is only available for JPA entities and embeddable classes 
-  (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting 
-  it's `true`. See 'settings list' command)
---comment::
-  An optional comment for JavaDocs
---value::
-  Inserts an optional Spring @Value annotation with the given content
---transient::
-  Indicates to mark the field as transient. This option is only available for JPA entities and 
-  embeddable classes; default if option present: `true`; default if option not present: `false`
---primitive::
-  Indicates to use a primitive type if possible; default if option
-  present: `true`; default if option not present: `false`
+  The JPA @Column name.
++
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes.
+
 --unique::
-  Indicates whether to mark the field with a unique constraint. This option is only available for JPA entities
-  and embeddable classes; default if option present: `true`; default if option not present: `false`
+  Indicates whether to mark the field with a unique constraint.
++
+This option is only available for JPA entities and embeddable classes.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--transient::
+  Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` annotation. This marks the field as not persistent.
++
+This option is only available for JPA entities and embeddable classes.
++
+Default if option present:`true`. Default if option not present: `false`.
+
+* _Optional:_
+
+--notNull::
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--nullRequired::
+  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--decimalMin::
+  The BigDecimal string-based representation of the minimum value. It adds to the field `javax.validation.constraints.DecimalMin` annotation with provided value.
+
+--decimalMax::
+  The BigDecimal string based representation of the maximum value. It adds to the field `javax.validation.constraints.DecimalMax` annotation with provided value.
+
+--digitsInteger::
+  Maximum number of integral digits accepted for this number. It creates or updates field `javax.validation.constraints.Digits` annotation, adding `integer` attribute with the provided value.
+
+--digitsFraction::
+  Maximum number of fractional digits accepted for this number. It creates or updates field `javax.validation.constraints.Digits` annotation, adding `fraction` attribute with the provided value.
+
+--min::
+  The minimum value of the numeric field. It adds `javax.validation.constraints.Min` with provided value to the field.
+
+--max::
+  The maximum value of the numeric field. It adds `javax.validation.constraints.Max` with provided value to the field.
+
+--comment::
+  An optional comment for JavaDocs.
+
+--value::
+  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection. 
+
+--primitive::
+  Indicates to use a primitive type if possible.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: `true`; default if option not present: `false`
+  Indicates whether reserved words are ignored by Roo.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
---profile::
-  Parameter that indicates the name of the profile that will be applied
+  Force command execution.
++
+Default if option present: `true`; default if option not present: `false`.
 
 === field other
 
-Inserts a private field into the specified file
+Inserts a private field into the specified file. User can choose a custom type for the field by specifying its fully qualified name.
 
 [source,sh]
 ----
 roo> field other --fieldName --type --class --column
 ----
 
+* _Mandatory:_
+
 --fieldName::
-  The name of the field (mandatory)
+  The name of the field.
+
 --type::
-  The Java type of this field (mandatory)
+  The Java type of this field.
+
+* _Conditional:_
+
 --class::
-  The name of the class to receive this field. This option is available for this command when 
-  the focus is not set to one class (mandatory). When working on a mono module project, simply 
-  specify the name of the entity in which the new field will be included. If you consider it 
-  necessary, you can also specify the package. Ex.: '--class ~ .domain.MyEntity'. When working 
-  with multiples modules, you should specify the module of the the entity and the name of the 
-  entity that will create the new field. If the module is not specified, it is assumed that the
-  entity is in the module that has set the focus. If you consider it necessary, you can also 
-  specify the package of the entity with the module name. Ex.: '--class model: ~ .domain.MyEntity'; 
-  default if option not present: '*'
---notNull::
-  Whether this value cannot be null; default if option present: `true`;
-  default if option not present: `false`
---nullRequired::
-  Whether this value must be null; default if option present: `true`;
-  default if option not present: `false`
---comment::
-  An optional comment for JavaDocs
+  The name of the class to generate the field. When working on a mono module project, simply specify the name of the class in which the field will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+This option is mandatory for this command when the focus is not set to one class.
++
+Default if option not present: the class focused by Roo Shell.
+
 --column::
-  The JPA @Column name. This option is only available for JPA entities and embeddable classes 
-  (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting 
-  it's `true`. See 'settings list' command)
---value::
-  Inserts an optional Spring @Value annotation with the given content
+  The JPA @Column name.
++
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes.
+
 --transient::
-  Indicates to mark the field as transient. This option is only available for JPA entities and 
-  embeddable classes; default if option present:
-  `true`; default if option not present: `false`
+  Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` annotation. This marks the field as not persistent.
++
+This option is only available for JPA entities and embeddable classes.
++
+Default if option present:`true`. Default if option not present: `false`
+
+* _Optional:_
+
+--notNull::
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--nullRequired::
+  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--comment::
+  An optional comment for JavaDocs.
+
+--value::
+  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection. 
+
 --permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: `true`; default if option not present: `false`
+  Indicates whether reserved words are ignored by Roo.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
---profile::
-  Parameter that indicates the name of the profile that will be applied
+  Force command execution.
++
+Default if option present: `true`; default if option not present: `false`.
 
 === field reference
 
-Adds a private reference field to an existing Java source file (eg the
-'many' side of a many-to-one)
+Adds a private reference field, representing (always) a bidirectional 'one-to-one' relation, to an existing Java source file. Therefore, this command will add as well a 'one-to-one' field on the other side of the relation.
+
+This command is only available for entities annotated with `@RooJpaEntity`, so you should focus the desired entity in the Roo Shell to make this command available.
 
 [source,sh]
 ----
-roo> field reference --fieldName --type --class --joinColumnName
+roo> field reference --fieldName --type
 ----
 
+* _Mandatory:_
+
 --fieldName::
-  The name of the field to add (mandatory)
+  The name of the field to add.
+
 --type::
-  The Java type of the entity to reference (mandatory)
+  The Java type of the entity to reference.
++
+Possible values are: any of the entities in the project.
+
+* _Conditional:_
+
 --class::
-  The name of the class to receive this field. This option is available for this command when 
-  the focus is not set to one class (mandatory). When working on a mono module project, simply 
-  specify the name of the entity in which the new field will be included. If you consider it 
-  necessary, you can also specify the package. Ex.: '--class ~ .domain.MyEntity'. When working 
-  with multiples modules, you should specify the module of the the entity and the name of the 
-  entity that will create the new field. If the module is not specified, it is assumed that the
-  entity is in the module that has set the focus. If you consider it necessary, you can also 
-  specify the package of the entity with the module name. Ex.: '--class model: ~ .domain.MyEntity';
-  default if option not present: '*'
---notNull::
-  Whether this value cannot be null; default if option present: `true`;
-  default if option not present: `false`
+  The name of the class to generate the field. When working on a mono module project, simply specify the name of the class in which the field will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+This option is mandatory for this command when the focus is not set to one class.
++
+Default if option not present: the class focused by Roo Shell.
+
 --joinColumnName::
-  The JPA @JoinColumn name. This option is only available for JPA entities and embeddable  classes 
-  (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration property is `true`). 
+  The JPA `@JoinColumn` `name` attribute.
++
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes.
+
 --referencedColumnName::
-  The JPA @JoinColumn referencedColumnName. This option is only available for JPA entities and embeddable 
-  classes.
+  The JPA `@JoinColumn` `referencedColumnName` attribute.
++
+This option is only available for JPA entities and embeddable classes.
+
 --fetch::
-  The fetch semantics at a JPA level. This option is only available for JPA entities and embeddable classes. 
---comment::
-  An optional comment for JavaDocs
---permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: `true`; default if option not present: `false`
+  The fetch semantics at a JPA level. It adds the provided value to `fetch` attribute of JPA `@OneToOne`. If this option is not provided, default fetch type will be `LAZY`.
++
+Possible values are `LAZY`and `EAGER`.
++
+This option is only available for JPA entities and embeddable classes. 
+
 --mappedBy::
-  The field name on the referenced type which owns the relationship. This option is only available for 
-  JPA entities.                
+  The field name on the referenced type which owns the relationship. This option adds the `mappedBy` attribute to JPA `@OneToOne`.
++
+This option is only available for JPA entities.   
+
+* _Optional:_
+
 --aggregation::                    
-  Aggregation. Identify relationship as 'aggregation' (if is `true`, default) or a 'composition' (if is `false`); default: `true`
+  Whether the relationship type is 'aggregation' or 'composition'. An aggregation relation means that children entities aren't dependent from parent entity (current entity) and they can exist without parent entity. In the other hand, in a composition relation the parent entity of the relationship also owns the life cycle of related entities. The parent entity is responsible for the creation and destruction of children entities, these being linked to a single parent entity. A child entity cannot be in two different composition relationships.
++
+Default: `true`.
+
 --orphanRemoval::
-  Indicates whether to apply the remove operation to entities that have been removed from the relationship and to cascade the remove operation to those entities; default if option present: `true`
+  Indicates whether to apply the remove operation to entities that have been removed from the relationship and to cascade the remove operation to those entities. If this relation represents a 'composition' relation and this option is not present, `--orphanRemoval` value will be `true`.
++
+Default if option present: `true`.
+
+--notNull::
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--comment::
+  An optional comment for JavaDocs.
+
+--permitReservedWords::
+  Indicates whether reserved words are ignored by Roo.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
---profile::
-  Parameter that indicates the name of the profile that will be applied
+  Force command execution.
++
+Default if option present: `true`; default if option not present: `false`.
 
 === field set
 
-Adds a private Set field to an existing Java source file (eg the 'one'
-side of a many-to-one)
+Adds a private `Set` field to an existing Java source file, representing (always) a bidirectional relation with other entity. Therefore, this command will also add a field on the other side of the relation (the owner side, with `mappedBy` attribute), which will be a `Set` field for 'many-to-many' relations, or a *not* `Collection` field for a 'one-to-many' relation. All added fields will have the needed JPA annotations to properly manage bidirectional relations.
 
 [source,sh]
 ----
-roo> field set --fieldName --class --type --joinTable --joinColumns --referencedColumns --inverseJoinColumns --inverseReferencedColumns
+roo> field set --fieldName --type
 ----
 
+* _Mandatory:_
+
 --fieldName::
-  The name of the field to add (mandatory)
---class::
-  The name of the class to receive this field. This option is available for this command when 
-  the focus is not set to one class (mandatory). When working on a mono module project, simply 
-  specify the name of the entity in which the new field will be included. If you consider it 
-  necessary, you can also specify the package. Ex.: '--class ~ .domain.MyEntity'. When working 
-  with multiples modules, you should specify the module of the the entity and the name of the 
-  entity that will create the new field. If the module is not specified, it is assumed that the
-  entity is in the module that has set the focus. If you consider it necessary, you can also 
-  specify the package of the entity with the module name. Ex.: '--class model: ~ .domain.MyEntity';
-  default if option not present: '*'
+  The name of the field to add.
+
 --type::
-  The entity which will be contained within the Set (mandatory)
---mappedBy::
-  The field name on the referenced type which owns the relationship. This option is only available for 
-  JPA entities.
---notNull::
-  Whether this value cannot be null; default if option present: `true`;
-  default if option not present: `false`
---nullRequired::
-  Whether this value must be null; default if option present: `true`;
-  default if option not present: `false`
---sizeMin::
-  The minimum number of elements in the collection
---sizeMax::
-  The maximum number of elements in the collection
---cardinality::
-  The relationship cardinality at a JPA level. This option is only available for JPA entities and 
-  embeddable classes; default: 'ONE_TO_MANY'
---fetch::
-  The fetch semantics at a JPA level. This option is only available for JPA entities and embeddable classes. 
---comment::
-  An optional comment for JavaDocs
---transient::
-  Indicates to mark the field as transient. This option is only available for JPA entities and embeddable
-  classes; default if option present:`true`; default if option not present: `false`
---permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: `true`; default if option not present: `false`
+  The entity related to this one, which will be contained within the `List`.
++
+Possible values are: any of the entities in the project.
+
+* _Conditional:_
+
+--class::
+  The name of the class to generate the field. When working on a mono module project, simply specify the name of the class in which the field will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+This option is mandatory for this command when the focus is not set to one class.
++
+Default if option not present: the class focused by Roo Shell.
+
 --joinTable::
-  Join table name. Most usually used in @ManyToMany relations. This option is only available for JPA entities and embeddable classes 
-  (mandatory if 'cardinality' option is 'MANY_TO_MANY')
+  Join table name. Most usually used in @ManyToMany relations.
++
+This option is mandatory for this command if `--cardinality` is set to `MANY_TO_MANY` and `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes.
+
 --joinColumns::
-  Comma separated list of join table's foreign key columns which references the table of the entity owning the relation.
-  This option is only available for JPA entities and embeddable classes when 'joinTable' option is set (mandatory 
-  if 'spring.roo.jpa.require.schema-object-name' configuration setting it's `true`, See 'settings list' command)
+  Comma separated list of join table's foreign key columns which references the table of the related entity (the owner entity in bidirectional relations).
++
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
+
 --referencedColumns::
-  Comma separated list of foreign key referenced columns in the table of the entity owning the relation.
-  This option is only available for JPA entities and embeddable classes when 'joinTable' option is set (mandatory 
-  if 'spring.roo.jpa.require.schema-object-name' configuration setting it's `true`, See 'settings list' command) 
+  Comma separated list of foreign key referenced columns in the primary table of the related entity (the owner entity in bidirectional relations).
++
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
+
 --inverseJoinColumns::
-  Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation.
-  This option is only available for JPA entities and embeddable classes when 'joinTable' option is set (mandatory 
-  if 'spring.roo.jpa.require.schema-object-name' configuration setting it's `true`, See 'settings list' command)
+  Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation (current entity).
++
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
+
 --inverseReferencedColumns::
-  Comma separated list of foreign key referenced columns in the table of the entity that does not own the relation.
-  This option is only available for JPA entities and embeddable classes when 'joinTable' option is set (mandatory 
-  if 'spring.roo.jpa.require.schema-object-name' configuration setting it's `true`, See 'settings list' command)
+  Comma separated list of foreign key referenced columns in the primary table of the entity that does not own the relation (current entity).
++
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
+
+--mappedBy::
+  The field name on the referenced type which owns the relationship. 
++
+This option is only available for JPA entities.
+
+--cardinality::
+  The relationship cardinality at a JPA level. This option is only available for JPA entities and embeddable classes.
++
+Default: `ONE_TO_MANY`.
+
+--fetch::
+  The fetch semantics at a JPA level. It adds the provided value to `fetch` attribute of JPA `@OneToMany`, `@ManyToMany` and `@ManyToOne`. If this option is not provided, default fetch type will be `LAZY`.
++
+Possible values are `LAZY`and `EAGER`.
++
+This option is only available for JPA entities and embeddable classes.
+
+* _Optional:_
+
 --aggregation::                    
-  Aggregation. Identify relationship as 'aggregation' (if is `true`, default) or a 'composition' (if is `false`); default: `true`
+  Whether the relationship type is 'aggregation' or 'composition'. An aggregation relation means that children entities aren't dependent from parent entity (current entity) and they can exist without parent entity. In the other hand, in a composition relation the parent entity of the relationship also owns the life cycle of related entities. The parent entity is responsible for the creation and destruction of children entities, these being linked to a single parent entity. A child entity cannot be in two different composition relationships.
++
+Default: `true`.
+
 --orphanRemoval::
-  Indicates whether to apply the remove operation to entities that have been removed from the relationship and to cascade the 
-  remove operation to those entities; default if option present: `true`
+  Indicates whether to apply the remove operation to entities that have been removed from the relationship and to cascade the remove operation to those entities. If this relation represents a 'composition' relation and this option is not present, `--orphanRemoval` value will be `true`.
++
+Default if option present: `true`.
+
+--sizeMin::
+  The minimum number of elements in the collection. This option adds or updates `javax.validation.constraints.Size` with the provided value as `min` attribute value. 
+
+--sizeMax::
+  The maximum number of elements in the collection. This option adds or updates `javax.validation.constraints.Size` with the provided value as `max` attribute value.
+
+--notNull::
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--nullRequired::
+  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--comment::
+  An optional comment for JavaDocs.
+
+--permitReservedWords::
+  Indicates whether reserved words are ignored by Roo.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
---profile::
-  Parameter that indicates the name of the profile that will be applied
+  Force command execution.
++
+Default if option present: `true`; default if option not present: `false`.
 
 === field string
 
@@ -2200,59 +2415,87 @@ Adds a private string field to an existing Java source file
 
 [source,sh]
 ----
-roo> field string --fieldName --class --column
+roo> field string --fieldName
 ----
 
+* _Mandatory:_
+
 --fieldName::
-  The name of the field to add (mandatory)
+  The name of the field to add.
+
+* _Conditional:_
+
 --class::
-  The name of the class to receive this field. This option is available for this command when 
-  the focus is not set to one class (mandatory). When working on a mono module project, simply 
-  specify the name of the entity in which the new field will be included. If you consider it 
-  necessary, you can also specify the package. Ex.: '--class ~ .domain.MyEntity'. When working 
-  with multiples modules, you should specify the module of the the entity and the name of the 
-  entity that will create the new field. If the module is not specified, it is assumed that the
-  entity is in the module that has set the focus. If you consider it necessary, you can also 
-  specify the package of the entity with the module name. Ex.: '--class model: ~ .domain.MyEntity';
-  default if option not present: '*'
---notNull::
-  Whether this value cannot be null; default if option present: `true`;
-  default if option not present: `false`
---nullRequired::
-  Whether this value must be null; default if option present: `true`;
-  default if option not present: `false`
---sizeMin::
-  The minimum string length
---sizeMax::
-  The maximum string length
---regexp::
-  The required regular expression pattern
+    The name of the class to generate the field. When working on a mono module project, simply specify the name of the class in which the field will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+This option is mandatory for this command when the focus is not set to one class.
++
+Default if option not present: the class focused by Roo Shell.
+
 --column::
-  The JPA @Column name. This option is only available for JPA entities and embeddable classes 
-  (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting 
-  it's `true`. See 'settings list' command)
---value::
-  Inserts an optional Spring @Value annotation with the given content
---comment::
-  An optional comment for JavaDocs
+  The JPA @Column name.
++
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
++
+This option is only available for JPA entities and embeddable classes.
+
 --transient::
-  Indicates to mark the field as transient. This option is only available for JPA entities and 
-  embeddable classes; default if option present:
-  `true`; default if option not present: `false`
---unique::
-  Indicates whether to mark the field with a unique constraint. This option is only available for JPA entities
-  and embeddable classes; default
-  if option present: `true`; default if option not present: `false`
---permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: `true`; default if option not present: `false`
+  Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` annotation. This marks the field as not persistent.
++
+This option is only available for JPA entities and embeddable classes.
++
+Default if option present:`true`. Default if option not present: `false`
+
 --lob::
-  Indicates that this field is a Large Object. This option is only available for JPA entities and embeddable 
-  classes; default if option present: `true`; default if option not present: `false`
+  Indicates that this field is a Large Object. This option adds `javax.persistence.Lob` annotation to the field.
++
+This option is only available for JPA entities and embeddable classes.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--unique::
+  Indicates whether to mark the field with a unique constraint.
++
+This option is only available for JPA entities and embeddable classes.
++
+Default if option present: `true`; default if option not present: `false`.
+
+* _Optional:_
+
+--regexp::
+  The required regular expression pattern. This option adds `javax.validation.constraints.Pattern` with the provided value as `regexp` attribute.
+
+--sizeMin::
+  The minimum string length. This option adds or updates `javax.validation.constraints.Size` with the provided value as `min` attribute value. 
+
+--sizeMax::
+  The maximum string length. This option adds or updates `javax.validation.constraints.Size` with the provided value as `max` attribute value.
+
+--notNull::
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--nullRequired::
+  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--value::
+  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection.
+
+--comment::
+  An optional comment for JavaDocs.
+
+--permitReservedWords::
+  Indicates whether reserved words are ignored by Roo.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
---profile::
-  Parameter that indicates the name of the profile that will be applied
+  Force command execution.
++
+Default if option present: `true`; default if option not present: `false`.
 
 [[finder-add-command]]
 === finder add
@@ -2903,7 +3146,7 @@ roo> web mvc view setup --type --module
 
 These commands are specific for developing Spring Roo add-ons and will be only available if user enables the add-on "development mode" with link:#addon-development-mode[`addon development mode`] command.
 
-=== !
+=== !os
 
 Allows execution of operating system (OS) commands.
 
