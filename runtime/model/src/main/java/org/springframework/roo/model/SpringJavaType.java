@@ -14,6 +14,8 @@ import org.apache.commons.lang3.Validate;
 public final class SpringJavaType {
 
   // org.springframework
+  public static final JavaType ACTIVE_PROFILES = new JavaType(
+      "org.springframework.test.context.ActiveProfiles");
   public static final JavaType ANNOTATION_CONFIGURATION = new JavaType(
       "org.springframework.context.annotation.Configuration");
   public static final JavaType ANNOTATION_IMPORT = new JavaType(
@@ -76,6 +78,10 @@ public final class SpringJavaType {
       "org.springframework.cache.annotation.EnableCaching");
   public static final JavaType ENABLE_JMS = new JavaType(
       "org.springframework.jms.annotation.EnableJms");
+  public static final JavaType ENABLE_JPA_REPOSITORIES = new JavaType(
+      "org.springframework.data.jpa.repository.config.EnableJpaRepositories");
+  public static final JavaType ENTITY_SCAN = new JavaType(
+      "org.springframework.boot.autoconfigure.domain.EntityScan");
   public static final JavaType EXCEPTION_HANDLER = new JavaType(
       "org.springframework.web.bind.annotation.ExceptionHandler");
   public static final JavaType FLOW_HANDLER_MAPPING = new JavaType(
@@ -198,6 +204,8 @@ public final class SpringJavaType {
       "org.springframework.mail.SimpleMailMessage");
   public static final JavaType SIMPLE_TYPE_CONVERTER = new JavaType(
       "org.springframework.beans.SimpleTypeConverter");
+  public static final JavaType SPRING_BOOT_TEST = new JavaType(
+      "org.springframework.boot.test.context.SpringBootTest");
   public static final JavaType STRING_UTILS = new JavaType("org.springframework.util.StringUtils");
   public static final JavaType TRANSACTIONAL = new JavaType(
       "org.springframework.transaction.annotation.Transactional");
@@ -213,13 +221,10 @@ public final class SpringJavaType {
   public static final JavaType WEB_MVC_CONFIGURER_ADAPTER = new JavaType(
       "org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter");
   public static final JavaType WEB_UTILS = new JavaType("org.springframework.web.util.WebUtils");
-  public static final JavaType ENTITY_SCAN = new JavaType(
-      "org.springframework.boot.autoconfigure.domain.EntityScan");
-  public static final JavaType ENABLE_JPA_REPOSITORIES = new JavaType(
-      "org.springframework.data.jpa.repository.config.EnableJpaRepositories");
+  public static final JavaType WEB_APP_CONFIGURATION = new JavaType(
+      "org.springframework.test.context.web.WebAppConfiguration");
   public static final JavaType WEB_APPLICATION_INITIALIZER = new JavaType(
       "org.springframework.web.WebApplicationInitializer");
-
 
   /**
    * Returns the {@link JavaType} for a Spring converter

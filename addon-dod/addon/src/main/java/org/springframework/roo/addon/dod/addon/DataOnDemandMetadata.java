@@ -28,17 +28,6 @@ import static org.springframework.roo.model.Jsr303JavaType.SIZE;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 import static org.springframework.roo.model.SpringJavaType.COMPONENT;
 
-import java.lang.reflect.Modifier;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -48,6 +37,8 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -67,9 +58,20 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Metadata for {@link RooDataOnDemand}.
- * 
+ *
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Alan Stewart
@@ -130,10 +132,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
   private final List<JavaType> requiredDataOnDemandCollaborators = new ArrayList<JavaType>();
   private JavaSymbolName rndFieldName;
   private MethodMetadata specificPersistentEntityMethod;
+  private JavaType repository;
 
   /**
    * Constructor
-   * 
+   *
    * @param identifier
    * @param aspectName
    * @param governorPhysicalTypeMetadata
@@ -147,6 +150,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
    * @param entity
    * @param embeddedIdHolder
    * @param embeddedHolders
+   * @param repository
+  * @param dataOnDemandClasses
    */
   public DataOnDemandMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
@@ -154,7 +159,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
       final MemberTypeAdditions findMethod, final MemberTypeAdditions findEntriesMethod,
       final MemberTypeAdditions persistMethod, final MemberTypeAdditions flushMethod,
       final Map<FieldMetadata, DataOnDemandMetadata> locatedFields, final JavaType identifierType,
-      final EmbeddedIdHolder embeddedIdHolder, final List<EmbeddedHolder> embeddedHolders) {
+      final EmbeddedIdHolder embeddedIdHolder, final List<EmbeddedHolder> embeddedHolders,
+      final JavaType repository, Set<ClassOrInterfaceTypeDetails> dataOnDemandClasses) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.isTrue(isValid(identifier),
         "Metadata identification string '%s' does not appear to be a valid", identifier);
@@ -162,6 +168,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
     Validate.notNull(identifierAccessor, "Identifier accessor method required");
     Validate.notNull(locatedFields, "Located fields map required");
     Validate.notNull(embeddedHolders, "Embedded holders list required");
+
+    this.repository = repository;
 
     if (!isValid()) {
       return;
@@ -182,7 +190,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
     // Calculate and store field initializers
     for (final Map.Entry<FieldMetadata, DataOnDemandMetadata> entry : locatedFields.entrySet()) {
       final FieldMetadata field = entry.getKey();
-      final String initializer = getFieldInitializer(field, entry.getValue());
+      final String initializer = getFieldInitializer(field, entry.getValue(), dataOnDemandClasses);
       if (!StringUtils.isBlank(initializer)) {
         fieldInitializers.put(field, initializer);
       }
@@ -191,7 +199,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
     for (final EmbeddedHolder embeddedHolder : embeddedHolders) {
       final Map<FieldMetadata, String> initializers = new LinkedHashMap<FieldMetadata, String>();
       for (final FieldMetadata field : embeddedHolder.getFields()) {
-        initializers.put(field, getFieldInitializer(field, null));
+        initializers.put(field, getFieldInitializer(field, null, dataOnDemandClasses));
       }
       embeddedFieldInitializers.put(embeddedHolder.getEmbeddedField(), initializers);
     }
@@ -200,14 +208,21 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
     builder.addField(getRndField());
     builder.addField(getDataField());
 
-    addCollaboratingDoDFieldsToBuilder();
+    // add repository field
+    ensureGovernorHasField(getRepositoryField());
+
+    // add constructor
+    ensureGovernorHasConstructor(getConstructor());
+
+
+    addCollaboratingDoDFieldsToBuilder(dataOnDemandClasses);
     setNewTransientEntityMethod();
 
-    builder.addMethod(getEmbeddedIdMutatorMethod());
+    builder.addMethod(getEmbeddedIdMutatorMethod(dataOnDemandClasses));
 
     for (final EmbeddedHolder embeddedHolder : embeddedHolders) {
       builder.addMethod(getEmbeddedClassMutatorMethod(embeddedHolder));
-      addEmbeddedClassFieldMutatorMethodsToBuilder(embeddedHolder);
+      addEmbeddedClassFieldMutatorMethodsToBuilder(embeddedHolder, dataOnDemandClasses);
     }
 
     for (final MethodMetadataBuilder fieldInitializerMethod : getFieldMutatorMethods()) {
@@ -223,52 +238,94 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
     itdTypeDetails = builder.build();
   }
 
-  private void addCollaboratingDoDFieldsToBuilder() {
+  /**
+   * Creates Repository field.
+   *
+   * @return {@link FieldMetadataBuilder} for building field into ITD.
+   */
+  private FieldMetadataBuilder getRepositoryField() {
+
+    // Create field
+    FieldMetadataBuilder repositoryField =
+        new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
+            new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(
+                StringUtils.uncapitalize(this.repository.getSimpleTypeName())), this.repository);
+
+    return repositoryField;
+  }
+
+  /**
+   * Builds constructor.
+   *
+   * @return ConstructorMetadataBuilder for adding constructor to ITD
+   */
+  private ConstructorMetadataBuilder getConstructor() {
+    ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+    String fieldName = StringUtils.uncapitalize(this.repository.getSimpleTypeName());
+    constructorBuilder.addParameter(fieldName, this.repository);
+    bodyBuilder.appendFormalLine(String.format("this.%s = %s;", fieldName, fieldName));
+
+    constructorBuilder.setModifier(Modifier.PUBLIC);
+    constructorBuilder.setBodyBuilder(bodyBuilder);
+
+    return constructorBuilder;
+  }
+
+  private void addCollaboratingDoDFieldsToBuilder(
+      final Set<ClassOrInterfaceTypeDetails> dataOnDemandClasses) {
     final Set<JavaSymbolName> fields = new LinkedHashSet<JavaSymbolName>();
     for (final JavaType entityNeedingCollaborator : requiredDataOnDemandCollaborators) {
-      final JavaType collaboratorType = getCollaboratingType(entityNeedingCollaborator);
-      final String collaboratingFieldName =
-          getCollaboratingFieldName(entityNeedingCollaborator).getSymbolName();
+      final JavaType collaboratorType =
+          getCollaboratingType(entityNeedingCollaborator, dataOnDemandClasses);
+      if (collaboratorType != null) {
+        final String collaboratingFieldName =
+            getCollaboratingFieldName(entityNeedingCollaborator, dataOnDemandClasses)
+                .getSymbolName();
 
-      final JavaSymbolName fieldSymbolName = new JavaSymbolName(collaboratingFieldName);
-      final FieldMetadata candidate = governorTypeDetails.getField(fieldSymbolName);
-      if (candidate != null) {
-        // We really expect the field to be correct if we're going to
-        // rely on it
-        Validate.isTrue(candidate.getFieldType().equals(collaboratorType),
-            "Field '%s' on '%s' must be of type '%s'", collaboratingFieldName,
-            destination.getFullyQualifiedTypeName(), collaboratorType.getFullyQualifiedTypeName());
-        Validate.isTrue(Modifier.isPrivate(candidate.getModifier()),
-            "Field '%s' on '%s' must be private", collaboratingFieldName,
-            destination.getFullyQualifiedTypeName());
-        Validate.notNull(
-            MemberFindingUtils.getAnnotationOfType(candidate.getAnnotations(), AUTOWIRED),
-            "Field '%s' on '%s' must be @Autowired", collaboratingFieldName,
-            destination.getFullyQualifiedTypeName());
-        // It's ok, so we can move onto the new field
-        continue;
-      }
+        final JavaSymbolName fieldSymbolName = new JavaSymbolName(collaboratingFieldName);
+        final FieldMetadata candidate = governorTypeDetails.getField(fieldSymbolName);
+        if (candidate != null) {
+          // We really expect the field to be correct if we're going to
+          // rely on it
+          Validate
+              .isTrue(candidate.getFieldType().equals(collaboratorType),
+                  "Field '%s' on '%s' must be of type '%s'", collaboratingFieldName,
+                  destination.getFullyQualifiedTypeName(),
+                  collaboratorType.getFullyQualifiedTypeName());
+          Validate.isTrue(Modifier.isPrivate(candidate.getModifier()),
+              "Field '%s' on '%s' must be private", collaboratingFieldName,
+              destination.getFullyQualifiedTypeName());
+          Validate.notNull(
+              MemberFindingUtils.getAnnotationOfType(candidate.getAnnotations(), AUTOWIRED),
+              "Field '%s' on '%s' must be @Autowired", collaboratingFieldName,
+              destination.getFullyQualifiedTypeName());
+          // It's ok, so we can move onto the new field
+          continue;
+        }
 
-      // Create field and add it to the ITD, if it hasn't already been
-      if (!fields.contains(fieldSymbolName)) {
-        // Must make the field
-        final List<AnnotationMetadataBuilder> annotations =
-            new ArrayList<AnnotationMetadataBuilder>();
-        annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
-        builder.addField(new FieldMetadataBuilder(getId(), 0, annotations, fieldSymbolName,
-            collaboratorType));
-        fields.add(fieldSymbolName);
+        // Create field and add it to the ITD, if it hasn't already been
+        if (!fields.contains(fieldSymbolName)) {
+          // Must make the field
+          final List<AnnotationMetadataBuilder> annotations =
+              new ArrayList<AnnotationMetadataBuilder>();
+          annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
+          builder.addField(new FieldMetadataBuilder(getId(), 0, annotations, fieldSymbolName,
+              collaboratorType));
+          fields.add(fieldSymbolName);
+        }
       }
     }
   }
 
-  private void addEmbeddedClassFieldMutatorMethodsToBuilder(final EmbeddedHolder embeddedHolder) {
+  private void addEmbeddedClassFieldMutatorMethodsToBuilder(final EmbeddedHolder embeddedHolder,
+      final Set<ClassOrInterfaceTypeDetails> dataOnDemandClasses) {
     final JavaType embeddedFieldType = embeddedHolder.getEmbeddedField().getFieldType();
     final JavaType[] parameterTypes = {embeddedFieldType, JavaType.INT_PRIMITIVE};
     final List<JavaSymbolName> parameterNames = Arrays.asList(OBJ_SYMBOL, INDEX_SYMBOL);
 
     for (final FieldMetadata field : embeddedHolder.getFields()) {
-      final String initializer = getFieldInitializer(field, null);
+      final String initializer = getFieldInitializer(field, null, dataOnDemandClasses);
       final JavaSymbolName fieldMutatorMethodName =
           BeanInfoUtils.getMutatorMethodName(field.getFieldName());
 
@@ -289,13 +346,29 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
     }
   }
 
-  private JavaSymbolName getCollaboratingFieldName(final JavaType entity) {
-    return new JavaSymbolName(StringUtils.uncapitalize(getCollaboratingType(entity)
-        .getSimpleTypeName()));
+  private JavaSymbolName getCollaboratingFieldName(final JavaType entity,
+      final Set<ClassOrInterfaceTypeDetails> dataOnDemandClasses) {
+    JavaSymbolName symbolName = null;
+    JavaType collaboratingType = getCollaboratingType(entity, dataOnDemandClasses);
+    if (collaboratingType != null) {
+      symbolName =
+          new JavaSymbolName(StringUtils.uncapitalize(collaboratingType.getSimpleTypeName()));
+    }
+    return symbolName;
   }
 
-  private JavaType getCollaboratingType(final JavaType entity) {
-    return new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand");
+  private JavaType getCollaboratingType(final JavaType entity,
+      final Set<ClassOrInterfaceTypeDetails> dataOnDemandClasses) {
+    JavaType dataOnDemand = null;
+    for (ClassOrInterfaceTypeDetails dataOnDemandClass : dataOnDemandClasses) {
+      String searchDataOnDemand = entity.getSimpleTypeName().concat("DataOnDemand");
+      if (dataOnDemandClass.getType().getSimpleTypeName().equals(searchDataOnDemand)
+          && governorTypeDetails.getType().getModule()
+              .equals(dataOnDemandClass.getType().getModule())) {
+        dataOnDemand = dataOnDemandClass.getType();
+      }
+    }
+    return dataOnDemand;
   }
 
   private String getColumnPrecisionAndScaleBody(final FieldMetadata field,
@@ -345,7 +418,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
   /**
    * Adds the @org.springframework.stereotype.Component annotation to the
    * type, unless it already exists.
-   * 
+   *
    * @return the annotation is already exists or will be created, or null if
    *         it will not be created (required)
    */
@@ -555,7 +628,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
         + StringUtils.capitalize(fieldName.getSymbolName())));
   }
 
-  private MethodMetadataBuilder getEmbeddedIdMutatorMethod() {
+  private MethodMetadataBuilder getEmbeddedIdMutatorMethod(
+      final Set<ClassOrInterfaceTypeDetails> dataOnDemandClasses) {
     if (!hasEmbeddedIdentifier()) {
       return null;
     }
@@ -586,7 +660,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
       final String fieldName = field.getFieldName().getSymbolName();
       final JavaType fieldType = field.getFieldType();
       builder.getImportRegistrationResolver().addImport(fieldType);
-      final String initializer = getFieldInitializer(field, null);
+      final String initializer = getFieldInitializer(field, null, dataOnDemandClasses);
       bodyBuilder.append(getFieldValidationBody(field, initializer, null, true));
       sb.append(fieldName);
     }
@@ -627,7 +701,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
   }
 
   private String getFieldInitializer(final FieldMetadata field,
-      final DataOnDemandMetadata collaboratingMetadata) {
+      final DataOnDemandMetadata collaboratingMetadata,
+      final Set<ClassOrInterfaceTypeDetails> dataOnDemandClasses) {
     final JavaType fieldType = field.getFieldType();
     final String fieldName = field.getFieldName().getSymbolName();
     String initializer = "null";
@@ -827,32 +902,40 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
     } else if (collaboratingMetadata != null && collaboratingMetadata.getEntityType() != null) {
       requiredDataOnDemandCollaborators.add(fieldType);
       initializer =
-          getFieldInitializerForRelatedEntity(field, collaboratingMetadata, fieldCustomDataKeys);
+          getFieldInitializerForRelatedEntity(field, collaboratingMetadata, fieldCustomDataKeys,
+              dataOnDemandClasses);
     }
 
     return initializer;
   }
 
   private String getFieldInitializerForRelatedEntity(final FieldMetadata field,
-      final DataOnDemandMetadata collaboratingMetadata, final Set<?> fieldCustomDataKeys) {
+      final DataOnDemandMetadata collaboratingMetadata, final Set<?> fieldCustomDataKeys,
+      final Set<ClassOrInterfaceTypeDetails> dataOnDemandClasses) {
     // To avoid circular references, we don't try to set nullable fields
     final boolean nullableField =
         field.getAnnotation(NOT_NULL) == null && isNullableJoinColumn(field);
     if (nullableField) {
       return null;
     }
-    final String collaboratingFieldName =
-        getCollaboratingFieldName(field.getFieldType()).getSymbolName();
-    if (fieldCustomDataKeys.contains(CustomDataKeys.ONE_TO_ONE_FIELD)) {
-      // We try to keep the same ID (ROO-568)
-      return collaboratingFieldName
-          + "."
-          + collaboratingMetadata.getSpecificPersistentEntityMethod().getMethodName()
-              .getSymbolName() + "(" + INDEX_VAR + ")";
+    JavaSymbolName collaboratingFieldName =
+        getCollaboratingFieldName(field.getFieldType(), dataOnDemandClasses);
+    if (collaboratingFieldName != null) {
+      final String collaboratingName = collaboratingFieldName.getSymbolName();
+      if (fieldCustomDataKeys.contains(CustomDataKeys.ONE_TO_ONE_FIELD)) {
+        // We try to keep the same ID (ROO-568)
+        return collaboratingName
+            + "."
+            + collaboratingMetadata.getSpecificPersistentEntityMethod().getMethodName()
+                .getSymbolName() + "(" + INDEX_VAR + ")";
+      }
+      return collaboratingName + "."
+          + collaboratingMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName()
+          + "()";
+    } else {
+      return null;
     }
-    return collaboratingFieldName + "."
-        + collaboratingMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName()
-        + "()";
+
   }
 
   private boolean isNullableJoinColumn(final FieldMetadata field) {
@@ -991,10 +1074,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
   /**
    * Returns the DoD type's "void init()" method (existing or generated)
-   * 
-   * @param findEntriesMethod (required)
-   * @param persistMethod (required)
-   * @param flushMethod (required)
+   *
+   * @param findEntriesMethod
+   *            (required)
+   * @param persistMethod
+   *            (required)
+   * @param flushMethod
+   *            (required)
    * @return never <code>null</code>
    */
   private MethodMetadataBuilder getInitMethod(final int quantity,

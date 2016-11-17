@@ -7,8 +7,9 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates to produce an integration test class.
- * 
+ *
  * @author Ben Alex
+ * @author Manuel Iborra
  * @since 1.0
  */
 @Retention(RetentionPolicy.SOURCE)
@@ -21,7 +22,7 @@ public @interface RooIntegrationTest {
    * @return the type of class that will have an entity test created
    *         (required; must offer entity services)
    */
-  Class<?> entity();
+  Class<?> source();
 
   boolean find() default true;
 

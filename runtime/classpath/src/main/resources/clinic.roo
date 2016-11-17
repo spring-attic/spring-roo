@@ -89,3 +89,9 @@ security authorize --class ~.service.impl.OwnerServiceImpl --method delete.* --r
 // Generate new SOAP Services that will be available under "/services" URL
 ws endpoint --service ~.service.api.OwnerService --sei ~.ws.api.OwnerWebService --class ~.ws.endpoint.OwnerWebServiceEndpoint --config ~.config.WsEndpointsConfiguration
 ws endpoint --service ~.service.api.PetService --sei ~.ws.api.PetWebService --class ~.ws.endpoint.PetWebServiceEndpoint --config ~.config.WsEndpointsConfiguration
+
+// Generate integration test
+test integration --class ~.repository.VetRepository
+test integration --class ~.repository.OwnerRepository
+test integration --class ~.repository.VisitRepository
+test integration --class ~.repository.PetRepository

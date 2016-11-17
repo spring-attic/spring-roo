@@ -3,38 +3,56 @@ package org.springframework.roo.addon.test.addon.integration;
 import static org.springframework.roo.model.RooJavaType.ROO_INTEGRATION_TEST;
 import static org.springframework.roo.model.SpringJavaType.MOCK_STATIC_ENTITY_METHODS;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.dod.addon.DataOnDemandOperations;
+import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
-import org.springframework.roo.classpath.details.*;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.DependencyScope;
+import org.springframework.roo.project.DependencyType;
 import org.springframework.roo.project.FeatureNames;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Element;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Provides convenience methods that can be used to create mock tests.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -42,72 +60,80 @@ import org.springframework.roo.project.ProjectOperations;
 @Service
 public class IntegrationTestOperationsImpl implements IntegrationTestOperations {
 
+  private static final Logger LOGGER = HandlerUtils.getLogger(IntegrationTestOperationsImpl.class);
+
   private static final JavaType JUNIT_4 = new JavaType("org.junit.runners.JUnit4");
   private static final JavaType RUN_WITH = new JavaType("org.junit.runner.RunWith");
   private static final JavaType TEST = new JavaType("org.junit.Test");
 
-  @Reference
-  private DataOnDemandOperations dataOnDemandOperations;
-  @Reference
-  private MemberDetailsScanner memberDetailsScanner;
-  @Reference
-  private MetadataService metadataService;
-  @Reference
-  private ProjectOperations projectOperations;
-  @Reference
-  private TypeLocationService typeLocationService;
-  @Reference
-  private TypeManagementService typeManagementService;
+  // Dependencies
+  private static final Dependency DEPENDENCY_SPRING_BOOT_STARTER_TEST = new Dependency(
+      "org.springframework.boot", "spring-boot-starter-test", null, DependencyType.JAR,
+      DependencyScope.TEST);
 
-  /**
-   * @param entity the entity to lookup required
-   * @return the type details (never null; throws an exception if it cannot be
-   *         obtained or parsed)
-   */
-  private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
-    final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(entity);
-    Validate.notNull(cid, "Java source code details unavailable for type %s", cid);
-    return cid;
+  private BundleContext context;
+
+  private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
+
+  protected void activate(final ComponentContext cContext) {
+    this.context = cContext.getBundleContext();
+    this.serviceInstaceManager.activate(this.context);
   }
 
   public boolean isIntegrationTestInstallationPossible() {
-    return projectOperations.isFocusedProjectAvailable()
-        && projectOperations.isFeatureInstalled(FeatureNames.JPA, FeatureNames.MONGO);
+    return getProjectOperations().isFocusedProjectAvailable()
+        && getProjectOperations().isFeatureInstalled(FeatureNames.JPA, FeatureNames.MONGO);
   }
 
-  public void newIntegrationTest(final JavaType entity) {
-    newIntegrationTest(entity, true);
-  }
+  public void newIntegrationTest(JavaType klass, Pom module) {
+    Validate
+        .isTrue(
+            getTypeLocationService().hasModuleFeature(module, ModuleFeatureName.APPLICATION),
+            "ERROR: You are trying to generate an integration test inside module that doesn't match with APPLICATION modules features.");
 
-  public void newIntegrationTest(final JavaType entity, final boolean transactional) {
-    Validate.notNull(entity, "Entity to produce an integration test for is required");
+    Validate.notNull(klass, "Repository to produce an integration test for is required");
 
     // Verify the requested entity actually exists as a class and is not
     // abstract
-    final ClassOrInterfaceTypeDetails cid = getEntity(entity);
-    Validate.isTrue(!Modifier.isAbstract(cid.getModifier()), "Type %s is abstract",
-        entity.getFullyQualifiedTypeName());
+    final ClassOrInterfaceTypeDetails cidRepository =
+        getTypeLocationService().getTypeDetails(klass);
+    Validate.notNull(cidRepository, "Java source code details unavailable for type %s",
+        cidRepository);
+    Validate.isTrue(!Modifier.isAbstract(cidRepository.getModifier()), "Type %s is abstract",
+        klass.getFullyQualifiedTypeName());
 
-    final LogicalPath path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
-    dataOnDemandOperations.newDod(entity, new JavaType(entity.getFullyQualifiedTypeName()
-        + "DataOnDemand"));
+    // Get entity related
+    AnnotationMetadata annotationRepository =
+        cidRepository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
+    AnnotationAttributeValue<Object> entityAttribute = annotationRepository.getAttribute("entity");
+    JavaType entity = (JavaType) entityAttribute.getValue();
 
-    final JavaType name = new JavaType(entity + "IntegrationTest");
+    JavaPackage topLevelPackage = getProjectOperations().getTopLevelPackage(module.getModuleName());
+    String dodPath = topLevelPackage.getFullyQualifiedPackageName().concat(".dod.");
+    getDataOnDemandOperations().newDod(
+        entity,
+        new JavaType(dodPath.concat(entity.getSimpleTypeName()).concat("DataOnDemand"), module
+            .getModuleName()));
+
+    final JavaType name = new JavaType(klass + "IT");
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(name,
-            Path.SRC_TEST_JAVA.getModulePathId(path.getModule()));
+            Path.SRC_TEST_JAVA.getModulePathId(module.getModuleName()));
 
-    if (metadataService.get(declaredByMetadataId) != null) {
+    if (getMetadataService().get(declaredByMetadataId) != null) {
+
       // The file already exists
+      LOGGER
+          .log(
+              Level.SEVERE,
+              String
+                  .format("The class selected already has defined an integration test. Please, select another"));
       return;
     }
 
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
     final List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
-    config.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
-    if (!transactional) {
-      config.add(new BooleanAttributeValue(new JavaSymbolName("transactional"), false));
-    }
+    config.add(new ClassAttributeValue(new JavaSymbolName("source"), klass));
     annotations.add(new AnnotationMetadataBuilder(ROO_INTEGRATION_TEST, config));
 
     final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
@@ -126,14 +152,36 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
     cidBuilder.setAnnotations(annotations);
     cidBuilder.setDeclaredMethods(methods);
 
-    typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+
+    // Add spring-boot-test dependency
+    getProjectOperations().addDependency(module.getModuleName(),
+        DEPENDENCY_SPRING_BOOT_STARTER_TEST);
+
+    // Add plugin maven-failsafe-plugin
+    // Stop if the plugin is already installed
+    for (final Plugin plugin : module.getBuildPlugins()) {
+      if (plugin.getArtifactId().equals("maven-failsafe-plugin")) {
+        return;
+      }
+    }
+
+    final Element configuration = XmlUtils.getConfiguration(getClass());
+    final Element plugin = XmlUtils.findFirstElement("/configuration/plugin", configuration);
+
+    // Now install the plugin itself
+    if (plugin != null) {
+      getProjectOperations().addBuildPlugin(module.getModuleName(), new Plugin(plugin));
+    }
+
   }
 
   /**
-   * Creates a unit test for the project class. Silently returns if the unit test
-   * file already exists.
-   * 
-   * @param projectType to produce a unit test class (required)
+   * Creates a unit test for the project class. Silently returns if the unit
+   * test file already exists.
+   *
+   * @param projectType
+   *            to produce a unit test class (required)
    */
   public void newUnitTest(final JavaType projectType) {
     Validate.notNull(projectType, "Class to produce a unit test class for is required");
@@ -143,7 +191,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
         PhysicalTypeIdentifier.createIdentifier(name,
             Path.SRC_TEST_JAVA.getModulePathId(projectType.getModule()));
 
-    if (metadataService.get(declaredByMetadataId) != null) {
+    if (getMetadataService().get(declaredByMetadataId) != null) {
       // The file already exists
       return;
     }
@@ -160,14 +208,15 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
         new ArrayList<AnnotationMetadataBuilder>();
     methodAnnotations.add(new AnnotationMetadataBuilder(TEST));
 
-    //     Get the entity so we can hopefully make a demo method that will be
-    //     usable
+    // Get the entity so we can hopefully make a demo method that will be
+    // usable
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(projectType);
+    final ClassOrInterfaceTypeDetails cid = getTypeLocationService().getTypeDetails(projectType);
     if (cid != null) {
       final MemberDetails memberDetails =
-          memberDetailsScanner.getMemberDetails(IntegrationTestOperationsImpl.class.getName(), cid);
+          getMemberDetailsScanner().getMemberDetails(IntegrationTestOperationsImpl.class.getName(),
+              cid);
       final List<MethodMetadata> countMethods =
           memberDetails.getMethodsWithTag(CustomDataKeys.COUNT_ALL_METHOD);
       if (countMethods.size() == 1) {
@@ -197,7 +246,33 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
     cidBuilder.setAnnotations(annotations);
     cidBuilder.setDeclaredMethods(methods);
 
-    typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+  }
+
+  // Methods to obtain OSGi Services
+
+  private TypeLocationService getTypeLocationService() {
+    return serviceInstaceManager.getServiceInstance(this, TypeLocationService.class);
+  }
+
+  private TypeManagementService getTypeManagementService() {
+    return serviceInstaceManager.getServiceInstance(this, TypeManagementService.class);
+  }
+
+  private ProjectOperations getProjectOperations() {
+    return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
+  }
+
+  private DataOnDemandOperations getDataOnDemandOperations() {
+    return serviceInstaceManager.getServiceInstance(this, DataOnDemandOperations.class);
+  }
+
+  private MemberDetailsScanner getMemberDetailsScanner() {
+    return serviceInstaceManager.getServiceInstance(this, MemberDetailsScanner.class);
+  }
+
+  private MetadataService getMetadataService() {
+    return serviceInstaceManager.getServiceInstance(this, MetadataService.class);
   }
 
 }

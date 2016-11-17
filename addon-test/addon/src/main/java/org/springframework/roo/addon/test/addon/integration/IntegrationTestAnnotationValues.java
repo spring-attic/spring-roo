@@ -10,8 +10,9 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooIntegrationTest} annotation.
- * 
+ *
  * @author Ben Alex
+ * @author Manuel Iborra
  * @since 1.0
  */
 public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
@@ -19,7 +20,7 @@ public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
   @AutoPopulate
   private boolean count = true;
   @AutoPopulate
-  private JavaType entity;
+  private JavaType source;
   @AutoPopulate
   private boolean find = true;
   @AutoPopulate
@@ -44,8 +45,8 @@ public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
     AutoPopulationUtils.populate(this, annotationMetadata);
   }
 
-  public JavaType getEntity() {
-    return entity;
+  public JavaType getSource() {
+    return source;
   }
 
   public int getFindAllMaximum() {

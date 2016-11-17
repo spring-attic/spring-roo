@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+	<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-failsafe-plugin</artifactId>
+		<configuration>
+			<argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+			<excludes>
+        <exclude>**/*_Roo_*</exclude>
+      </excludes>
+		</configuration>
+		<executions>
+			<execution>
+				<goals>
+					<goal>integration-test</goal>
+					<goal>verify</goal>
+				</goals>
+			</execution>
+		</executions>
+	</plugin>
+</configuration>
+
+
