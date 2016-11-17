@@ -55,7 +55,7 @@ field set --fieldName pets --type ~.domain.Pet --mappedBy owner --notNull false 
 repository jpa --all --package ~.repository
 service --all --apiPackage ~.service.api --implPackage ~.service.impl
 
-dto --class ~.domain.PetFindByNameAndWeight
+dto --class ~.domain.PetNameAndWeightFormBean
 field string --fieldName name
 field number --fieldName weight --type java.lang.Float
 finder add --entity ~.domain.Pet --name findByNameAndWeight --formBean ~.domain.PetFindByNameAndWeight
