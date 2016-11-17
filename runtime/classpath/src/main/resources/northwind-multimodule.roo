@@ -1,5 +1,5 @@
 // Creating Northwind project
-project setup --topLevelPackage org.springframework.roo.northwind --projectName Northwind --multimodule --java 7
+project setup --topLevelPackage org.springframework.roo.northwind --projectName Northwind --java 7 --multimodule
 
 // Configuring settings
 settings add --name spring.roo.jpa.require.schema-object-name --value true
@@ -534,6 +534,8 @@ jpa audit add --entity model:~.Category --createdDateColumn CREATED_DATE --modif
 // Install THYMELEAF view
 web mvc view setup --type THYMELEAF
 
+// Include templates inside generated project to allow developers to customize them
+web mvc templates setup --type THYMELEAF
 
 // Add necessary controllers
 web mvc controller --entity model:~.Category --responseType THYMELEAF

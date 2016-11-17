@@ -623,6 +623,17 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       boolean assertTrue, String column, String comment, String value, boolean permitReservedWords,
       boolean transientModifier) {
 
+    createBooleanField(javaTypeDetails, primitive, fieldName, notNull, nullRequired, assertFalse,
+        assertTrue, column, comment, value, permitReservedWords, transientModifier, null);
+
+  }
+
+  @Override
+  public void createBooleanField(ClassOrInterfaceTypeDetails javaTypeDetails, boolean primitive,
+      JavaSymbolName fieldName, boolean notNull, boolean nullRequired, boolean assertFalse,
+      boolean assertTrue, String column, String comment, String value, boolean permitReservedWords,
+      boolean transientModifier, List<AnnotationMetadataBuilder> extraAnnotations) {
+
     final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
     final BooleanField fieldDetails =
         new BooleanField(physicalTypeIdentifier, primitive ? JavaType.BOOLEAN_PRIMITIVE
@@ -641,7 +652,12 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       fieldDetails.setValue(value);
     }
 
+    if (extraAnnotations != null && !extraAnnotations.isEmpty()) {
+      fieldDetails.addAnnotations(extraAnnotations);
+    }
+
     insertField(fieldDetails, permitReservedWords, transientModifier);
+
   }
 
   @Override
@@ -651,6 +667,18 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       DateTime dateFormat, DateTime timeFormat, String pattern, String value,
       boolean permitReservedWords, boolean transientModifier) {
 
+    createDateField(javaTypeDetails, fieldType, fieldName, notNull, nullRequired, future, past,
+        persistenceType, column, comment, dateFormat, timeFormat, pattern, value,
+        permitReservedWords, transientModifier, null);
+  }
+
+  @Override
+  public void createDateField(ClassOrInterfaceTypeDetails javaTypeDetails, JavaType fieldType,
+      JavaSymbolName fieldName, boolean notNull, boolean nullRequired, boolean future,
+      boolean past, DateFieldPersistenceType persistenceType, String column, String comment,
+      DateTime dateFormat, DateTime timeFormat, String pattern, String value,
+      boolean permitReservedWords, boolean transientModifier,
+      List<AnnotationMetadataBuilder> extraAnnotations) {
     final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
     final DateField fieldDetails = new DateField(physicalTypeIdentifier, fieldType, fieldName);
     fieldDetails.setNotNull(notNull);
@@ -680,13 +708,28 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       fieldDetails.setValue(value);
     }
 
+    if (extraAnnotations != null && !extraAnnotations.isEmpty()) {
+      fieldDetails.addAnnotations(extraAnnotations);
+    }
+
     insertField(fieldDetails, permitReservedWords, transientModifier);
+
   }
 
   @Override
   public void createEnumField(ClassOrInterfaceTypeDetails cid, JavaType fieldType,
       JavaSymbolName fieldName, String column, boolean notNull, boolean nullRequired,
       EnumType enumType, String comment, boolean permitReservedWords, boolean transientModifier) {
+
+    createEnumField(cid, fieldType, fieldName, column, notNull, nullRequired, enumType, comment,
+        permitReservedWords, transientModifier, null);
+  }
+
+  @Override
+  public void createEnumField(ClassOrInterfaceTypeDetails cid, JavaType fieldType,
+      JavaSymbolName fieldName, String column, boolean notNull, boolean nullRequired,
+      EnumType enumType, String comment, boolean permitReservedWords, boolean transientModifier,
+      List<AnnotationMetadataBuilder> extraAnnotations) {
 
     ClassOrInterfaceTypeDetails typeDetails = typeLocationService.getTypeDetails(fieldType);
     Validate.isTrue(typeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION,
@@ -706,13 +749,23 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       fieldDetails.setComment(comment);
     }
 
+    if (extraAnnotations != null && !extraAnnotations.isEmpty()) {
+      fieldDetails.addAnnotations(extraAnnotations);
+    }
+
     insertField(fieldDetails, permitReservedWords, transientModifier);
+
   }
 
   @Override
   public void createEmbeddedField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       boolean permitReservedWords) {
+    createEmbeddedField(typeName, fieldType, fieldName, permitReservedWords, null);
+  }
 
+  @Override
+  public void createEmbeddedField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
+      boolean permitReservedWords, List<AnnotationMetadataBuilder> extraAnnotations) {
     // Check if the requested entity is a JPA @Entity
     final ClassOrInterfaceTypeDetails javaTypeDetails =
         typeLocationService.getTypeDetails(typeName);
@@ -739,7 +792,12 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     final EmbeddedField fieldDetails =
         new EmbeddedField(physicalTypeIdentifier, fieldType, fieldName);
 
+    if (extraAnnotations != null && !extraAnnotations.isEmpty()) {
+      fieldDetails.addAnnotations(extraAnnotations);
+    }
+
     insertField(fieldDetails, permitReservedWords, false);
+
   }
 
   @Override
@@ -749,6 +807,19 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       Integer digitsInteger, Integer digitsFraction, Long min, Long max, String column,
       String comment, boolean unique, String value, boolean permitReservedWords,
       boolean transientModifier) {
+
+    createNumericField(javaTypeDetails, fieldType, primitive, legalNumericPrimitives, fieldName,
+        notNull, nullRequired, decimalMin, decimalMax, digitsInteger, digitsFraction, min, max,
+        column, comment, unique, value, permitReservedWords, transientModifier, null);
+  }
+
+  @Override
+  public void createNumericField(ClassOrInterfaceTypeDetails javaTypeDetails, JavaType fieldType,
+      boolean primitive, Set<String> legalNumericPrimitives, JavaSymbolName fieldName,
+      boolean notNull, boolean nullRequired, String decimalMin, String decimalMax,
+      Integer digitsInteger, Integer digitsFraction, Long min, Long max, String column,
+      String comment, boolean unique, String value, boolean permitReservedWords,
+      boolean transientModifier, List<AnnotationMetadataBuilder> extraAnnotations) {
 
     final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
     if (primitive && legalNumericPrimitives.contains(fieldType.getFullyQualifiedTypeName())) {
@@ -790,10 +861,15 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       fieldDetails.setValue(value);
     }
 
+    if (extraAnnotations != null && !extraAnnotations.isEmpty()) {
+      fieldDetails.addAnnotations(extraAnnotations);
+    }
+
     Validate.isTrue(fieldDetails.isDigitsSetCorrectly(),
         "Must specify both --digitsInteger and --digitsFractional for @Digits to be added");
 
     insertField(fieldDetails, permitReservedWords, transientModifier);
+
   }
 
   @Override
@@ -1299,6 +1375,17 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       Integer sizeMax, String regexp, String column, String comment, boolean unique, String value,
       boolean lob, boolean permitReservedWords, boolean transientModifier) {
 
+    createStringField(cid, fieldName, notNull, nullRequired, decimalMin, decimalMax, sizeMin,
+        sizeMax, regexp, column, comment, unique, value, lob, permitReservedWords,
+        transientModifier, null);
+  }
+
+  @Override
+  public void createStringField(ClassOrInterfaceTypeDetails cid, JavaSymbolName fieldName,
+      boolean notNull, boolean nullRequired, String decimalMin, String decimalMax, Integer sizeMin,
+      Integer sizeMax, String regexp, String column, String comment, boolean unique, String value,
+      boolean lob, boolean permitReservedWords, boolean transientModifier,
+      List<AnnotationMetadataBuilder> extraAnnotations) {
     final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
     final StringField fieldDetails = new StringField(physicalTypeIdentifier, fieldName);
     fieldDetails.setNotNull(notNull);
@@ -1343,6 +1430,10 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       fieldDetails.getInitedAnnotations().add(basicAnnotation);
     }
 
+    if (extraAnnotations != null && !extraAnnotations.isEmpty()) {
+      fieldDetails.addAnnotations(extraAnnotations);
+    }
+
     insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
@@ -1351,6 +1442,14 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       UploadedFileContentType contentType, boolean autoUpload, boolean notNull, String column,
       boolean permitReservedWords) {
 
+    createFileField(cid, fieldName, contentType, autoUpload, notNull, column, permitReservedWords,
+        null);
+  }
+
+  @Override
+  public void createFileField(ClassOrInterfaceTypeDetails cid, JavaSymbolName fieldName,
+      UploadedFileContentType contentType, boolean autoUpload, boolean notNull, String column,
+      boolean permitReservedWords, List<AnnotationMetadataBuilder> extraAnnotations) {
     final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
     final UploadedFileField fieldDetails =
         new UploadedFileField(physicalTypeIdentifier, fieldName, contentType);
@@ -1360,6 +1459,10 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       fieldDetails.setColumn(column);
     }
 
+    if (extraAnnotations != null && !extraAnnotations.isEmpty()) {
+      fieldDetails.addAnnotations(extraAnnotations);
+    }
+
     insertField(fieldDetails, permitReservedWords, false);
   }
 
@@ -1367,6 +1470,16 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
   public void createOtherField(ClassOrInterfaceTypeDetails cid, JavaType fieldType,
       JavaSymbolName fieldName, boolean notNull, boolean nullRequired, String comment,
       String column, boolean permitReservedWords, boolean transientModifier) {
+
+    createOtherField(cid, fieldType, fieldName, notNull, nullRequired, comment, column,
+        permitReservedWords, transientModifier, null);
+  }
+
+  @Override
+  public void createOtherField(ClassOrInterfaceTypeDetails cid, JavaType fieldType,
+      JavaSymbolName fieldName, boolean notNull, boolean nullRequired, String comment,
+      String column, boolean permitReservedWords, boolean transientModifier,
+      List<AnnotationMetadataBuilder> extraAnnotations) {
 
     final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
     final FieldDetails fieldDetails =
@@ -1380,7 +1493,12 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       fieldDetails.setColumn(column);
     }
 
+    if (extraAnnotations != null && !extraAnnotations.isEmpty()) {
+      fieldDetails.addAnnotations(extraAnnotations);
+    }
+
     insertField(fieldDetails, permitReservedWords, transientModifier);
+
   }
 
   /**
@@ -1650,4 +1768,5 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       }
     }
   }
+
 }

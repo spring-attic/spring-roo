@@ -206,4 +206,16 @@ public class FieldDetails {
   public void setAnnotations(List<AnnotationMetadataBuilder> annotations) {
     this.annotations = annotations;
   }
+
+  public void addAnnotations(List<AnnotationMetadataBuilder> annotations) {
+    if (annotations == null || annotations.isEmpty()) {
+      return;
+    }
+
+    // Initialize annotations if needed
+    if (this.annotations == null) {
+      this.annotations = new ArrayList<AnnotationMetadataBuilder>();
+    }
+    this.annotations.addAll(annotations);
+  }
 }

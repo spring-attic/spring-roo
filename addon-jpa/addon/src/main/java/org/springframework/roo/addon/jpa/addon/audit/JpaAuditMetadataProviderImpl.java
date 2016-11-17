@@ -2,11 +2,16 @@ package org.springframework.roo.addon.jpa.addon.audit;
 
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_AUDIT;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -14,6 +19,7 @@ import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
@@ -94,11 +100,20 @@ public class JpaAuditMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
-    final JpaAuditAnnotationValues annotationValues =
-        new JpaAuditAnnotationValues(governorPhysicalTypeMetadata);
+    // Obtain the fields that are annotated with Audit annotations
+    List<FieldMetadata> auditFields = new ArrayList<FieldMetadata>();
+
+    JavaType annotatedEntity = governorPhysicalTypeMetadata.getType();
+    ClassOrInterfaceTypeDetails entityDetails =
+        getTypeLocationService().getTypeDetails(annotatedEntity);
+
+    auditFields.addAll(entityDetails.getFieldsWithAnnotation(SpringJavaType.CREATED_DATE));
+    auditFields.addAll(entityDetails.getFieldsWithAnnotation(SpringJavaType.LAST_MODIFIED_DATE));
+    auditFields.addAll(entityDetails.getFieldsWithAnnotation(SpringJavaType.CREATED_BY));
+    auditFields.addAll(entityDetails.getFieldsWithAnnotation(SpringJavaType.LAST_MODIFIED_BY));
 
     return new JpaAuditMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues);
+        governorPhysicalTypeMetadata, auditFields);
   }
 
   public String getProvidesType() {

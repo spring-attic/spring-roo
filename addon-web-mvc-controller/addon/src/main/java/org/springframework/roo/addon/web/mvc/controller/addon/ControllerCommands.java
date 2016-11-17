@@ -322,9 +322,7 @@ public class ControllerCommands implements CommandMarker {
           unspecifiedDefaultValue = "false",
           help = "Indicates if developer wants to generate controllers for every entity of current project."
               + "This param will be available if `--entity` parameter has not been specified.") boolean all,
-      @CliOption(
-          key = "entity",
-          mandatory = false,
+      @CliOption(key = "entity", mandatory = false,
           help = "Indicates the entity that new controller will be manage."
               + "This param will be available if `--all` parameter has not been specified") JavaType entity,
       @CliOption(

@@ -367,6 +367,8 @@ public class SecurityOperationsImpl implements SecurityOperations {
     // Write on disk
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
+    // Add Spring Security dependency
+    getProjectOperations().addDependency(klass.getModule(), SPRING_SECURITY_CORE, false);
   }
 
   /**
