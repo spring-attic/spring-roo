@@ -171,8 +171,8 @@ field string --fieldName fax --column FAX
 field string --fieldName web --column WEB
 field set --fieldName products --type ~.Product --cardinality ONE_TO_MANY --mappedBy supplier
 
-// Temporary deactivated field with --joinTable and associated params
-// field set --fieldName stores --type ~.Store --cardinality MANY_TO_MANY --joinTable NW_SUPPLIER_STORES --joinColumns SUPPLIER --referencedColumns SUPPLIER_ID --inverseJoinColumns STORE --inverseReferencedColumns STORE_ID
+// Many to many relation with --joinTable and associated parameters
+field set --fieldName stores --type ~.Store --cardinality MANY_TO_MANY --joinTable NW_SUPPLIER_STORES --joinColumns STORE --referencedColumns STORE_ID --inverseJoinColumns SUPPLIER --inverseReferencedColumns SUPPLIER_ID
 
 // Generate DTO's
 dto --class ~.ActiveCustomerOrder --immutable
