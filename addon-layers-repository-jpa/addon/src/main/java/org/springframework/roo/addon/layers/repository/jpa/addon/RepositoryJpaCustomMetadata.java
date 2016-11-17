@@ -266,7 +266,8 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     parameterTypes.add(PAGEABLE_PARAMETER);
 
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName(StringUtils.uncapitalize(paramType.getSimpleTypeName())));
+    parameterNames.add(new JavaSymbolName(StringUtils.uncapitalize(referencedField.getFieldName()
+        .getSymbolName())));
     parameterNames.add(GOBAL_SEARCH_PARAMETER_NAME);
     parameterNames.add(PAGEABLE_PARAMETER_NAME);
 
