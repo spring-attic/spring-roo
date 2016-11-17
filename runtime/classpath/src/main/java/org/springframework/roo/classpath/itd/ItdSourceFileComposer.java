@@ -169,7 +169,7 @@ public class ItdSourceFileComposer {
         final AnnotatedJavaType paramType = parameterTypes.get(i);
         final JavaSymbolName paramName = parameterNames.get(i);
         for (final AnnotationMetadata methodParameterAnnotation : paramType.getAnnotations()) {
-          append(AnnotationMetadataUtils.toSourceForm(methodParameterAnnotation));
+          append(AnnotationMetadataUtils.toSourceForm(methodParameterAnnotation, resolver));
           append(" ");
         }
         append(paramType.getJavaType().getNameIncludingTypeParameters(false, resolver));
