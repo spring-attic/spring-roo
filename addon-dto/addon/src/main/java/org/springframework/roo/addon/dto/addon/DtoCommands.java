@@ -312,7 +312,7 @@ public class DtoCommands implements CommandMarker {
           specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
           help = "Create one projection class for each entity in the project."
-              + "This parameter is mandatory if `--class` is not specified. Otherwise, using `--class` will cause the parameter `--all` won't be available.") final boolean all,
+              + "This option is mandatory if `--class` is not specified. Otherwise, using `--class` will cause the parameter `--all` won't be available.") final boolean all,
       @CliOption(
           key = "class",
           mandatory = false,
@@ -323,23 +323,23 @@ public class DtoCommands implements CommandMarker {
               + "Ex.: `--class model:~.domain.MyProjection`. When working with a multi-module "
               + "project, if module is not specified the projection will be created in the module "
               + "which has the focus."
-              + "This parameter is mandatory if `--all` is not specified. Otherwise, using `--all` will cause the parameter `--class` won't be") final JavaType name,
+              + "This option is mandatory if `--all` is not specified. Otherwise, using `--all` will cause the parameter `--class` won't be") final JavaType name,
       @CliOption(
           key = "entity",
           mandatory = true,
           help = "Name of the entity which can be used to create the Projection from. "
-              + "This parameter is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--entity` won't be available.") final JavaType entity,
+              + "This option is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--entity` won't be available.") final JavaType entity,
       @CliOption(
           key = "fields",
           mandatory = true,
           help = "Comma separated list of entity fields to be included into the Projection. "
-              + "This parameter is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--fields` won't be available.") final String fields,
+              + "This option is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--fields` won't be available.") final String fields,
       @CliOption(
           key = "suffix",
           mandatory = false,
           unspecifiedDefaultValue = "Projection",
           help = "Suffix added to each Projection class name, built from each associated entity name. "
-              + "This parameter is only available if `--all` has been already specified."
+              + "This option is only available if `--all` has been already specified."
               + "Default if option not present: 'Projection'.") final String suffix,
       ShellContext shellContext) {
 

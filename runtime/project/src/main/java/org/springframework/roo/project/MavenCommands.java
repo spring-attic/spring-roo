@@ -110,20 +110,27 @@ public class MavenCommands implements CommandMarker {
     return allPossibleValues;
   }
 
-  @CliCommand(value = MODULE_CREATE_COMMAND, help = "Creates a new Maven module")
-  public void createModule(
-      @CliOption(key = "moduleName", mandatory = true, help = "The name of the module (mandatory)") final String moduleName,
-      @CliOption(key = "packaging", help = "The Maven packaging of this module",
-          unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging,
-      @CliOption(key = "artifactId",
-          help = "The artifact ID of this module; default: moduleName if not specified") final String artifactId) {
+  @CliCommand(value = MODULE_CREATE_COMMAND,
+      help = "Creates a new Maven module in current *multimodule* project.")
+  public void createModule(@CliOption(key = "moduleName", mandatory = true,
+      help = "The name of the module to create.") final String moduleName, @CliOption(
+      key = "packaging", help = "The Maven packaging of this module."
+          + "Possible values are: `BUNDLE`, `EAR`, `ESA`, `JAR` and `WAR`."
+          + "Default if option not present: `JAR` (equals to 'jar').",
+      unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging, @CliOption(
+      key = "artifactId", help = "The artifact ID of this module."
+          + "Default if option not present: `--moduleName` value.") final String artifactId) {
 
     getMavenOperations().createModule(moduleName, packaging, artifactId);
   }
 
-  @CliCommand(value = MODULE_FOCUS_COMMAND, help = "Changes focus to a different project module")
-  public void focusModule(@CliOption(key = "moduleName", mandatory = true, optionContext = UPDATE,
-      help = "The module to focus on (mandatory)") final Pom module) {
+  @CliCommand(value = MODULE_FOCUS_COMMAND,
+      help = "Changes Roo Shell focus to a different project "
+          + "module, when in a multimodule project.")
+  public void focusModule(
+      @CliOption(key = "moduleName", mandatory = true, optionContext = UPDATE,
+          help = "The module name to focus on."
+              + "Possible values are: any of the project module names (`~` for root module).") final Pom module) {
 
     getMavenOperations().setModule(module);
   }

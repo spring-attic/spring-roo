@@ -237,7 +237,7 @@ public class WsCommands implements CommandMarker {
       @CliOption(
           key = "serviceUrl",
           mandatory = false,
-          help = "The service URL to be used. If this parameter is not specified, "
+          help = "The service URL to be used. If This option is not specified, "
               + "default location provided by the .wsdl file will be used. This default location will be obtained from the 'location' "
               + "attribute of the 'address' element located inside the 'port' element provided in the '--endpoint' parameter.") String serviceUrl,
       ShellContext context) {

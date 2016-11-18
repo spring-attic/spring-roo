@@ -87,14 +87,20 @@ public class JpaAuditCommands implements CommandMarker {
     return true;
   }
 
-  @CliCommand(value = "jpa audit setup", help = "Install audit support into your project")
+  @CliCommand(value = "jpa audit setup",
+      help = "Installs audit support into your project, preparing it " + "to audit entity changes.")
   public void setupAudit(
       @CliOption(
           key = "module",
           mandatory = true,
-          help = "The application module where to install the persistence. This option is not available if there is only one application module "
-              + "(mandatory if the focus is not set in application module) ",
-          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
+          help = "The application module where to install audit support."
+              + "This option is mandatory if the focus is not set in an application module, that is, a "
+              + "module containing an `@SpringBootApplication` class."
+              + "This option is available only if there are more than one application module and none of "
+              + "them is focused."
+              + "Default if option not present: the unique 'application' module, or focused 'application'"
+              + " module.", unspecifiedDefaultValue = ".",
+          optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
     auditOperations.setupJpaAudit(module);
   }
 
@@ -114,30 +120,39 @@ public class JpaAuditCommands implements CommandMarker {
     return false;
   }
 
-  @CliCommand(value = "jpa audit add", help = "Adds support for auditing a JPA entity")
+  @CliCommand(value = "jpa audit add",
+      help = "Adds support for auditing a JPA entity. This will add JPA "
+          + "and Spring listeners to this entity to record the entity changes.")
   public void auditAdd(
-      @CliOption(key = "entity", mandatory = true,
-          help = "The entity which should be audited (mandatory)") final JavaType entity,
       @CliOption(
-          key = "createdDateColumn",
+          key = "entity",
           mandatory = true,
-          help = "The DB column used for storing created date info (mandatory if 'spring.roo.jpa.require.schema-object-name'"
-              + " configuration setting it’s 'true'. See 'settings list' command) ") final String createdDateColumn,
-      @CliOption(
-          key = "modifiedDateColumn",
-          mandatory = true,
-          help = "The DB column used for storing modified date info (mandatory if 'spring.roo.jpa.require.schema-object-name'"
-              + " configuration setting it’s 'true'. See 'settings list' command) ") final String modifiedDateColumn,
+          help = "The entity which should be audited. When working on a mono module project, simply "
+              + "specify the name of the entity. If you consider it necessary, you can also specify "
+              + "the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). When "
+              + "working with multiple modules, you should specify the name of the class and the "
+              + "module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not "
+              + "specified, it is assumed that the entity is in the module which has the focus.") final JavaType entity,
+      @CliOption(key = "createdDateColumn", mandatory = true,
+          help = "The DB column used for storing the date when each record is created."
+              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` "
+              + "configuration setting exists and it's `true`.") final String createdDateColumn,
+      @CliOption(key = "modifiedDateColumn", mandatory = true,
+          help = "The DB column used for storing the date when each record is modified."
+              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` "
+              + "configuration setting exists and it's `true`.") final String modifiedDateColumn,
       @CliOption(
           key = "createdByColumn",
           mandatory = true,
-          help = "The DB column used for storing created by info (mandatory if 'spring.roo.jpa.require.schema-object-name'"
-              + " configuration setting it’s 'true'. See 'settings list' command) ") final String createdByColumn,
+          help = "The DB column used for storing information about who creates each record."
+              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration "
+              + "setting exists and it's `true`.") final String createdByColumn,
       @CliOption(
           key = "modifiedByColumn",
           mandatory = true,
-          help = "The DB column used for storing modified by info (mandatory if 'spring.roo.jpa.require.schema-object-name'"
-              + " configuration setting it’s 'true'. See 'settings list' command) ") final String modifiedByColumn) {
+          help = "The DB column used for storing information about who modifies each record."
+              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration "
+              + "setting exists and it's `true`.") final String modifiedByColumn) {
 
     // Check if entity exists
     final ClassOrInterfaceTypeDetails entityDetails = typeLocationService.getTypeDetails(entity);
