@@ -65,6 +65,8 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
   private final List<Pair<FinderMethod, PartTree>> findersToAddInCustom;
   private final List<String> declaredFinderNames;
 
+  private Map<JavaSymbolName, MethodMetadata> finderMethodsAndCounts;
+
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
   }
@@ -132,9 +134,11 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
     this.countMethodByReferencedFields = new HashMap<FieldMetadata, MethodMetadata>();
     this.declaredFinderNames = Collections.unmodifiableList(declaredFinderNames);
 
+    this.finderMethodsAndCounts = new HashMap<JavaSymbolName, MethodMetadata>();
+
     // Iterate over fields which are child fields
     boolean composition = false;
-    MethodMetadata countMethod;
+    MethodMetadata countMethod = null;
     MethodMetadata compositionCountMethod = null;
     Pair<FieldMetadata, RelationInfo> compositionFieldInfo = null;
     for (Pair<FieldMetadata, RelationInfo> fieldInfo : relationsAsChild) {
@@ -206,17 +210,18 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
       MethodMetadata method = getFinderMethod(finderMethod).build();
       if (!isAlreadyDeclaredMethod(method, findersTmp)) {
         ensureGovernorHasMethod(new MethodMetadataBuilder(method));
-        findersTmp.add(method);
       }
+      findersTmp.add(method);
 
       // Generate a count method for each finder if they aren't count methods
       if (!StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "count")) {
         countMethod = getCountMethod(finderMethod).build();
         if (!isAlreadyDeclaredMethod(countMethod, countMethodsTmp)) {
           ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
-          countMethodsTmp.add(countMethod);
         }
+        countMethodsTmp.add(countMethod);
       }
+      finderMethodsAndCounts.put(method.getMethodName(), countMethod);
     }
 
     this.findersDeclared = Collections.unmodifiableList(new ArrayList<FinderMethod>(findersToAdd));
@@ -506,6 +511,15 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
    */
   public JavaType getDefaultReturnType() {
     return defaultReturnType;
+  }
+
+  /**
+   * Return the finder name methods and the related count method if exists.
+   * 
+   * @return
+   */
+  public Map<JavaSymbolName, MethodMetadata> getFinderMethodsAndCounts() {
+    return finderMethodsAndCounts;
   }
 
   @Override
