@@ -224,7 +224,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     MethodMetadata tmpMethod;
     for (RelationInfo relationInfo : entityMetadata.getRelationInfos().values()) {
 
-      if (!(relationInfo.type == JpaRelationType.COMPOSITION && relationInfo.cardinality == Cardinality.ONE_TO_ONE)) {
+      if (relationInfo.cardinality != Cardinality.ONE_TO_ONE) {
         // addToRELATION
         tmpMethod = getAddToRelationMethod(relationInfo);
         addToRelationMethodsTemp.put(relationInfo, tmpMethod);

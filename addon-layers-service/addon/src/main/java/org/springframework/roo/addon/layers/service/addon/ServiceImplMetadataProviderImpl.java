@@ -215,10 +215,8 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
         new HashMap<JavaType, ServiceMetadata>();
     ClassOrInterfaceTypeDetails relatedService;
     for (RelationInfo info : entityMetadata.getRelationInfos().values()) {
-      if (info.type == JpaRelationType.COMPOSITION && info.cardinality == Cardinality.ONE_TO_ONE) {
-        continue;
-      }
-      if (!requiredServicesByEntity.containsKey(info.childType)) {
+      if (info.cardinality != Cardinality.ONE_TO_ONE
+          && !requiredServicesByEntity.containsKey(info.childType)) {
         relatedService = getServiceLocator().getFirstService(info.childType);
         if (relatedService == null) {
           // Exit without metadata. This should be called in next metadata iteration
