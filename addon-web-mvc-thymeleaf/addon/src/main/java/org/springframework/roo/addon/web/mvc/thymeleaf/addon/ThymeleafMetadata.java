@@ -23,6 +23,7 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jsoup.helper.Validate;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
@@ -86,10 +87,17 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
   private static final AnnotatedJavaType PAGEABLE_PARAM = new AnnotatedJavaType(
       SpringJavaType.PAGEABLE);
+  private static final JavaSymbolName PAGEABLE_PARAM_NAME = new JavaSymbolName("pageable");
+  private static final AnnotatedJavaType DATATABLES_PAGEABLE_PARAM = new AnnotatedJavaType(
+      SpringletsJavaType.SPRINGLETS_DATATABLES_PAGEABLE);
+  private static final JavaSymbolName DATATABLES_PAGEABLE_PARAM_NAME = new JavaSymbolName(
+      "pageable");
   private static final AnnotatedJavaType GLOBAL_SEARCH_PARAM = new AnnotatedJavaType(
       SPRINGLETS_GLOBAL_SEARCH);
+  private static final JavaSymbolName GLOBAL_SEARCH_PARAM_NAME = new JavaSymbolName("search");
   private static final AnnotatedJavaType MODEL_PARAM = new AnnotatedJavaType(SpringJavaType.MODEL);
   private static final JavaSymbolName MODEL_PARAM_NAME = new JavaSymbolName("model");
+  private static final JavaSymbolName FORM_BEAN_PARAM_NAME = new JavaSymbolName("formBean");
   private static final AnnotatedJavaType LOCALE_PARAM = new AnnotatedJavaType(JdkJavaType.LOCALE);
   private static final AnnotationMetadataBuilder RESPONSE_BODY_ANNOTATION =
       new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
@@ -106,6 +114,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
+  private static final JavaSymbolName DRAW_PARAM_NAME = new JavaSymbolName("draw");
 
   private final boolean readOnly;
   private final ControllerMetadata controllerMetadata;
@@ -156,8 +165,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
 
   // Finder Methods
+  private final Map<String, MethodMetadata> finderFormMethods;
   private final Map<String, MethodMetadata> finderDatatableMethods;
-  private final Map<String, MethodMetadata> finderFromMethods;
 
   // TODO
   // private final Map<String, MethodMetadata> finderListMethods;
@@ -322,7 +331,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.modelAttributeDetailsMethod = null;
         this.listDatatablesDetailsMethod = null;
         this.finderDatatableMethods = null;
-        this.finderFromMethods = null;
+        this.finderFormMethods = null;
         this.createDetailsMethod = null;
         this.createFormDetailsMethod = null;
         this.removeFromDetailsMethod = null;
@@ -363,7 +372,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.modelAttributeDetailsMethod = null;
         this.listDatatablesDetailsMethod = null;
         this.finderDatatableMethods = null;
-        this.finderFromMethods = null;
+        this.finderFormMethods = null;
         this.select2Method = null;
         this.createDetailsMethod = null;
         this.createFormDetailsMethod = null;
@@ -378,19 +387,23 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       case SEARCH: {
         Map<String, MethodMetadata> tmpFindersDtt = new TreeMap<String, MethodMetadata>();
         Map<String, MethodMetadata> tmpFinderForms = new TreeMap<String, MethodMetadata>();
-        MethodMetadata finderMethod, finderFormMethod;
+        MethodMetadata finderFormMethod, finderMethod, finderDtMethod;
         for (Entry<String, MethodMetadata> finder : findersToAdd.entrySet()) {
-          finderMethod =
-              getFinderDatatablesMethodForFinderInService(finder.getKey(), finder.getValue());
-          tmpFindersDtt.put(finder.getKey(), addAndGet(finderMethod, allMethods));
-
           finderFormMethod =
               getFinderFormMethodForFinderInService(finder.getKey(), finder.getValue());
-          tmpFindersDtt.put(finder.getKey(), addAndGet(finderFormMethod, allMethods));
+          tmpFinderForms.put(finder.getKey(), addAndGet(finderFormMethod, allMethods));
+
+          finderMethod = getFinderMethodForFinderInService(finder.getKey(), finder.getValue());
+          tmpFinderForms.put(finder.getKey(), addAndGet(finderMethod, allMethods));
+
+          finderDtMethod =
+              getFinderDatatablesMethodForFinderInService(finder.getKey(), finder.getValue());
+          tmpFindersDtt.put(finder.getKey(), addAndGet(finderDtMethod, allMethods));
+
 
         }
         this.finderDatatableMethods = Collections.unmodifiableMap(tmpFindersDtt);
-        this.finderFromMethods = Collections.unmodifiableMap(tmpFinderForms);
+        this.finderFormMethods = Collections.unmodifiableMap(tmpFinderForms);
         // FIXME We need more method to handle it... To Be Defined!!!
 
         this.listMethod = null;
@@ -463,7 +476,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.showMethod = null;
         this.showURIMethod = null;
         this.finderDatatableMethods = null;
-        this.finderFromMethods = null;
+        this.finderFormMethods = null;
         this.select2Method = null;
 
         this.editFormDetailMethod = null;
@@ -509,7 +522,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.showMethod = null;
         this.showURIMethod = null;
         this.finderDatatableMethods = null;
-        this.finderFromMethods = null;
+        this.finderFormMethods = null;
         this.select2Method = null;
         this.listDatatablesDetailsMethod = null;
         this.removeFromDetailsMethod = null;
@@ -615,10 +628,26 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       MethodMetadata serviceFinderMethod) {
 
     // Define methodName
-    final JavaSymbolName methodName = new JavaSymbolName(finderName);
+    String pathName = finderName;
+    if (pathName.startsWith("findBy")) {
+      pathName = pathName.replace("findBy", "by");
+    }
 
+    final JavaSymbolName methodName = new JavaSymbolName(pathName.concat("Form"));
+
+    // Form Bean is always the first parameter of finder
+    final JavaType formBean = serviceFinderMethod.getParameterTypes().get(0).getJavaType();
+    List<AnnotationMetadata> formBeanAnnotations = new ArrayList<AnnotationMetadata>();
+    AnnotationMetadataBuilder formBeanAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
+    formBeanAnnotation.addStringAttribute("value", FORM_BEAN_PARAM_NAME.getSymbolName());
+    formBeanAnnotations.add(formBeanAnnotation.build());
+    AnnotatedJavaType annotatedFormBean = new AnnotatedJavaType(formBean, formBeanAnnotations);
+
+    // Including annotated formBean parameter and Model parameter
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.MODEL));
+    parameterTypes.add(annotatedFormBean);
+    parameterTypes.add(MODEL_PARAM);
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -628,6 +657,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     }
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(FORM_BEAN_PARAM_NAME);
     parameterNames.add(MODEL_PARAM_NAME);
 
     // Adding annotations
@@ -636,12 +666,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // Adding @GetMapping annotation
     AnnotationMetadataBuilder getMappingAnnotation = new AnnotationMetadataBuilder(GET_MAPPING);
     getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
-    getMappingAnnotation.addStringAttribute("value", "/" + finderName);
+    // TODO Delegates on ControllerOperations to obtain the URL for this finder
+    getMappingAnnotation.addStringAttribute("value", "/" + pathName + "/search-form");
     annotations.add(getMappingAnnotation);
     this.mvcMethodNames.put(methodName.getSymbolName(), methodName.getSymbolName());
-
-    // Form Bean is always the firs parameter of finder
-    final JavaType formBean = serviceFinderMethod.getParameterTypes().get(0).getJavaType();
 
     // Generate body
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -653,6 +681,83 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       buildPopulateEnumsBody(bodyBuilder, formBeansEnumFields.get(formBean));
     }
 
+    // return new ModelAndView("customers/findByFirstNameLastNameForm");
+    bodyBuilder.appendFormalLine("return new %s(\"%s/%s\");",
+        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath, finderName.concat("Form"));
+
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            SpringJavaType.MODEL_AND_VIEW, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * Generates a finder method which delegates on entity service to get result
+   *
+   * @param finderName
+   * @param serviceFinderMethod
+   * @return
+   */
+  private MethodMetadata getFinderMethodForFinderInService(String finderName,
+      MethodMetadata serviceFinderMethod) {
+
+    // Define methodName
+    String pathName = finderName;
+    if (pathName.startsWith("findBy")) {
+      pathName = pathName.replace("findBy", "by");
+    }
+
+    final JavaSymbolName methodName = new JavaSymbolName(pathName);
+
+    // Form Bean is always the first parameter of finder
+    final JavaType formBean = serviceFinderMethod.getParameterTypes().get(0).getJavaType();
+    List<AnnotationMetadata> formBeanAnnotations = new ArrayList<AnnotationMetadata>();
+    AnnotationMetadataBuilder formBeanAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
+    formBeanAnnotation.addStringAttribute("value", FORM_BEAN_PARAM_NAME.getSymbolName());
+    formBeanAnnotations.add(formBeanAnnotation.build());
+    AnnotatedJavaType annotatedFormBean = new AnnotatedJavaType(formBean, formBeanAnnotations);
+
+    // Including annotated formBean parameter and Model parameter
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(annotatedFormBean);
+    parameterTypes.add(MODEL_PARAM);
+
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(FORM_BEAN_PARAM_NAME);
+    parameterNames.add(MODEL_PARAM_NAME);
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @GetMapping annotation
+    AnnotationMetadataBuilder getMappingAnnotation = new AnnotationMetadataBuilder(GET_MAPPING);
+    getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    // TODO Delegates on ControllerOperations to obtain the URL for this finder
+    getMappingAnnotation.addStringAttribute("value", "/" + pathName);
+    annotations.add(getMappingAnnotation);
+    this.mvcMethodNames.put(methodName.getSymbolName(), methodName.getSymbolName());
+
+    // Generate body
+    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    buildPopulateFormatBody(bodyBuilder, formBeansDateTimeFields.get(formBean));
+
+    final List<FieldMetadata> enumFileds = formBeansEnumFields.get(formBean);
+    if (enumFileds != null && !enumFileds.isEmpty()) {
+      buildPopulateEnumsBody(bodyBuilder, formBeansEnumFields.get(formBean));
+    }
 
     // return new ModelAndView("customers/findByFirstNameLastName");
     bodyBuilder.appendFormalLine("return new %s(\"%s/%s\");",
@@ -680,10 +785,37 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       MethodMetadata serviceFinderMethod) {
 
     // Define methodName
-    final JavaSymbolName methodName = new JavaSymbolName(finderName.concat("Datatables"));
+    String pathName = finderName;
+    if (pathName.startsWith("findBy")) {
+      pathName = pathName.replace("findBy", "by");
+    }
+    final JavaSymbolName methodName = new JavaSymbolName(pathName.concat("Dt"));
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.addAll(serviceFinderMethod.getParameterTypes());
+
+    // Form Bean is always the first parameter of finder
+    final JavaType formBean = serviceFinderMethod.getParameterTypes().get(0).getJavaType();
+    List<AnnotationMetadata> formBeanAnnotations = new ArrayList<AnnotationMetadata>();
+    AnnotationMetadataBuilder formBeanAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
+    formBeanAnnotation.addStringAttribute("value", FORM_BEAN_PARAM_NAME.getSymbolName());
+    formBeanAnnotations.add(formBeanAnnotation.build());
+    AnnotatedJavaType annotatedFormBean = new AnnotatedJavaType(formBean, formBeanAnnotations);
+    parameterTypes.add(annotatedFormBean);
+
+    // Including GlobalSearch parameter and DatatablesPageable parameter
+    parameterTypes.add(GLOBAL_SEARCH_PARAM);
+    parameterTypes.add(DATATABLES_PAGEABLE_PARAM);
+
+    // Including Draw parameter
+    List<AnnotationMetadata> drawAnnotations = new ArrayList<AnnotationMetadata>();
+    AnnotationMetadataBuilder drawAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.REQUEST_PARAM);
+    drawAnnotation.addEnumAttribute("value", SpringletsJavaType.SPRINGLETS_DATATABLES,
+        "PARAMETER_DRAW");
+    drawAnnotations.add(drawAnnotation.build());
+    AnnotatedJavaType annotatedDraw = new AnnotatedJavaType(JavaType.INT_OBJECT, drawAnnotations);
+    parameterTypes.add(annotatedDraw);
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -694,10 +826,13 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     final List<String> parameterStrings = new ArrayList<String>();
-    for (JavaSymbolName param : serviceFinderMethod.getParameterNames()) {
-      parameterNames.add(param);
-      parameterStrings.add(param.getSymbolName());
-    }
+    parameterNames.add(FORM_BEAN_PARAM_NAME);
+    parameterStrings.add(FORM_BEAN_PARAM_NAME.getSymbolName());
+    parameterNames.add(GLOBAL_SEARCH_PARAM_NAME);
+    parameterStrings.add(GLOBAL_SEARCH_PARAM_NAME.getSymbolName());
+    parameterNames.add(DATATABLES_PAGEABLE_PARAM_NAME);
+    parameterStrings.add(DATATABLES_PAGEABLE_PARAM_NAME.getSymbolName());
+    parameterNames.add(DRAW_PARAM_NAME);
 
     // Adding annotations
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -705,7 +840,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // Adding @GetMapping annotation
     AnnotationMetadataBuilder getMappingAnnotation = new AnnotationMetadataBuilder(GET_MAPPING);
     getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
-    getMappingAnnotation.addStringAttribute("value", "/" + finderName + "/dt");
+    // TODO Delegates on ControllerOperations to obtain the URL for this finder
+    getMappingAnnotation.addStringAttribute("value", "/" + pathName + "/dt");
     getMappingAnnotation.addEnumAttribute("produces", SPRINGLETS_DATATABLES, "MEDIA_TYPE");
     annotations.add(getMappingAnnotation);
     this.mvcMethodNames.put(methodName.getSymbolName(), methodName.getSymbolName());
@@ -715,7 +851,12 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // Generating returnType
     JavaType serviceReturnType = serviceFinderMethod.getReturnType();
-    JavaType returnType = JavaType.wrapperOf(RESPONSE_ENTITY, serviceReturnType);
+    JavaType datatablesDataReturnType =
+        serviceReturnType.getParameters().isEmpty() ? serviceReturnType.getBaseType()
+            : serviceReturnType.getParameters().get(0);
+    JavaType returnType =
+        JavaType.wrapperOf(RESPONSE_ENTITY, JavaType.wrapperOf(
+            SpringletsJavaType.SPRINGLETS_DATATABLES_DATA, datatablesDataReturnType));
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -728,9 +869,53 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         itemNames, controllerMetadata.getServiceField().getFieldName(),
         serviceFinderMethod.getMethodName(), StringUtils.join(parameterStrings, ","));
 
-    // return ResponseEntity.status(HttpStatus.FOUND).body(customers);
-    bodyBuilder.appendFormalLine(String.format("return %s.status(%s.FOUND).body(%s);",
-        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(HTTP_STATUS), itemNames));
+    // long totalProductsCount = products.getTotalElements();
+    String totalItemNamesCount = String.format("total%sCount", StringUtils.capitalize(itemNames));
+    bodyBuilder.appendFormalLine(String.format("long %s = %s.getTotalElements();",
+        totalItemNamesCount, itemNames));
+
+    // if (search != null && StringUtils.hasText(search.getText())) {
+    bodyBuilder.appendFormalLine(String.format("if (%s != null && %s.hasText(%s.getText())) {",
+        GLOBAL_SEARCH_PARAM_NAME, getNameOfJavaType(SpringJavaType.STRING_UTILS),
+        GLOBAL_SEARCH_PARAM_NAME));
+
+    // Getting count method
+    MethodMetadata countMethod = null;
+    Map<JavaSymbolName, MethodMetadata> repositoryCustomFindersAndCounts =
+        serviceMetadata.getRepositoryCustomFindersAndCounts();
+    for (Entry<JavaSymbolName, MethodMetadata> entry : repositoryCustomFindersAndCounts.entrySet()) {
+      if (entry.getKey().getSymbolName().equals(finderName)) {
+        countMethod = entry.getValue();
+      }
+    }
+
+    Validate
+        .notNull(
+            countMethod,
+            String
+                .format(
+                    "ERROR: Is not possible to obtain the count method related with finder '%s'. Please, "
+                        + "generate the count method before continue publishing this finder to the web layer.",
+                    finderName));
+
+    // totalProductsCount = productService.countByNameAndDescription(formBean);
+    bodyBuilder.indent();
+    bodyBuilder.appendFormalLine(String.format("%s = %s.%s(%s);", totalItemNamesCount,
+        controllerMetadata.getServiceField().getFieldName().getSymbolName(),
+        countMethod.getMethodName(), FORM_BEAN_PARAM_NAME));
+    bodyBuilder.indentRemove();
+    bodyBuilder.appendFormalLine("}");
+
+    // DatatablesData<Product> datatablesData = new DatatablesData<Product>(products, totalProductsCount, draw);
+    bodyBuilder.appendFormalLine(String.format(
+        "%s<%s> datatablesData = new DatatablesData<%s>(%s, %s, %s);",
+        getNameOfJavaType(SpringletsJavaType.SPRINGLETS_DATATABLES_DATA),
+        getNameOfJavaType(datatablesDataReturnType), getNameOfJavaType(datatablesDataReturnType),
+        itemNames, totalItemNamesCount, DRAW_PARAM_NAME));
+
+    // return ResponseEntity.ok(datatablesData);
+    bodyBuilder.appendFormalLine(String.format("return %s.ok(datatablesData);",
+        getNameOfJavaType(RESPONSE_ENTITY)));
 
 
     MethodMetadataBuilder methodBuilder =

@@ -175,12 +175,17 @@ public class WebFinderCommands implements CommandMarker {
 
     if (context.getParameters().containsKey("entity")) {
       // Extract entity
-      JavaType entity =
-          getJavaTypeConverter().convertFromText(context.getParameters().get("entity"),
-              JavaType.class, "");
+      String providedEntity = context.getParameters().get("entity");
 
-      // Get finders
-      finders = getFinders(entity, null);
+      // Getting the JavaType converter
+      if (getJavaTypeConverter() != null && StringUtils.isNotBlank(providedEntity)) {
+        JavaType entity =
+            getJavaTypeConverter().convertFromText(providedEntity, JavaType.class, "");
+
+        // Get finders
+        finders = getFinders(entity, null);
+      }
+
     }
 
     if (finders.isEmpty()) {
@@ -503,14 +508,20 @@ public class WebFinderCommands implements CommandMarker {
   @SuppressWarnings("unchecked")
   public Converter<JavaType> getJavaTypeConverter() {
     if (javaTypeConverter == null) {
-      javaTypeConverter =
-          (Converter<JavaType>) serviceInstaceManager.getServiceInstance(this, Converter.class,
+      List<Converter> javaTypeConverters =
+          serviceInstaceManager.getServiceInstance(this, Converter.class,
               new ServiceInstaceManager.Matcher<Converter>() {
                 @Override
                 public boolean match(Converter service) {
                   return service.supports(JavaType.class, "");
                 }
               });
+
+      if (!javaTypeConverters.isEmpty()) {
+        javaTypeConverter = javaTypeConverters.get(0);
+      }
+
+      return javaTypeConverter;
 
     }
     return javaTypeConverter;

@@ -73,6 +73,8 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   private final Map<RelationInfo, MethodMetadata> addToRelationMethods;
   private final Map<RelationInfo, MethodMetadata> removeFromRelationMethods;
   private final Map<RelationInfo, MethodMetadata> setRelationMethods;
+  private final Map<JavaSymbolName, MethodMetadata> repositoryFindersAndCounts;
+  private final Map<JavaSymbolName, MethodMetadata> repositoryCustomFindersAndCounts;
 
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
@@ -132,7 +134,9 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       final Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods,
       final Map<FieldMetadata, MethodMetadata> countByReferencedFieldsMethods,
       final List<MethodMetadata> customCountMethods,
-      Map<JavaType, JpaEntityMetadata> relatedEntities) {
+      Map<JavaType, JpaEntityMetadata> relatedEntities,
+      Map<JavaSymbolName, MethodMetadata> repositoryFindersAndCounts,
+      Map<JavaSymbolName, MethodMetadata> repositoryCustomFindersAndCounts) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     Validate.notNull(entity, "ERROR: Entity required to generate service interface");
@@ -146,6 +150,9 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     this.repositoryMetadata = repositoryMetadata;
     this.finders = finders;
     this.findAllGlobalSearchMethod = findAllGlobalSearchMethod;
+    this.repositoryFindersAndCounts = repositoryFindersAndCounts;
+    this.repositoryCustomFindersAndCounts = repositoryCustomFindersAndCounts;
+
     Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllDefinedMethods =
         new HashMap<FieldMetadata, MethodMetadata>();
     List<MethodMetadata> transactionalDefinedMethod = new ArrayList<MethodMetadata>();
@@ -157,6 +164,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     this.findOneMethod = getFindOneMethod();
     notTransactionalDefinedMethod.add(findOneMethod);
     ensureGovernorHasMethod(new MethodMetadataBuilder(findOneMethod));
+
 
     // Generating persistent methods for modifiable entities
     // (not reandOnly an no composition child)
@@ -1095,6 +1103,24 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   public Set<MethodMetadata> getAllMethods() {
     return allMethods;
+  }
+
+  /**
+   * Obtains the finder methods and the associated counts
+   * 
+   * @return
+   */
+  public Map<JavaSymbolName, MethodMetadata> getRepositoryFindersAndCounts() {
+    return repositoryFindersAndCounts;
+  }
+
+  /**
+   * Obtains the finder methods and the associated counts
+   * 
+   * @return
+   */
+  public Map<JavaSymbolName, MethodMetadata> getRepositoryCustomFindersAndCounts() {
+    return repositoryCustomFindersAndCounts;
   }
 
 
