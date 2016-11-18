@@ -43,7 +43,9 @@ public class AddonSuiteCommands implements CommandMarker {
     operations.uninstallRooAddonSuite(symbolicName);
   }
 
-  @CliCommand(value = "addon suite start", help = "Start some installed 'Roo Addon Suite' ")
+  @CliCommand(
+      value = "addon suite start",
+      help = "Start some installed 'Roo Addon Suite'. By default, an installed 'Roo Addon Suite' is started automatically.")
   public void startAddonSuite(
       @CliOption(key = "symbolicName", mandatory = true,
           help = "Name that identifies the 'Roo Addon Suite' (mandatory)") final AddonSuiteSymbolicName symbolicName)

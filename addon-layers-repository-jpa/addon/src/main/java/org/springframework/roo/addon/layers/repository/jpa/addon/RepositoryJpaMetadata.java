@@ -324,7 +324,8 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     final JavaType paramType = field.getFieldType().getBaseType();
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(paramType));
-    parameterNames.add(new JavaSymbolName(StringUtils.uncapitalize(paramType.getSimpleTypeName())));
+    parameterNames.add(new JavaSymbolName(StringUtils.uncapitalize(field.getFieldName()
+        .getSymbolName())));
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,

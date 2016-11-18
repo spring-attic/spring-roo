@@ -34,7 +34,7 @@ import org.springframework.roo.project.ProjectOperations;
 
 /**
  * Implementation of {@link DataOnDemandOperations}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1.3
  */
@@ -73,8 +73,7 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
     Validate.notNull(entity, "Entity to produce a data on demand provider for is required");
     Validate.notNull(name, "Name of the new data on demand provider is required");
 
-    final LogicalPath path =
-        LogicalPath.getInstance(Path.SRC_TEST_JAVA, projectOperations.getFocusedModuleName());
+    final LogicalPath path = LogicalPath.getInstance(Path.SRC_TEST_JAVA, name.getModule());
     Validate.notNull(path, "Location of the new data on demand provider is required");
 
     // Verify the requested entity actually exists as a class and is not

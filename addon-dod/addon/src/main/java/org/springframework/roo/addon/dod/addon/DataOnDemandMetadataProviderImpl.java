@@ -15,23 +15,13 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.TRANSI
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.VERSION_FIELD;
 import static org.springframework.roo.model.RooJavaType.ROO_DATA_ON_DEMAND;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.addon.ConfigurableMetadataProvider;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
@@ -60,6 +50,16 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.shell.NaturalOrderComparator;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link DataOnDemandMetadataProvider}.
@@ -88,6 +88,8 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
   protected MetadataDependencyRegistryTracker registryTracker = null;
   protected ItdTriggerBasedMetadataProviderTracker configurableMetadataProviderTracker = null;
 
+  private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
+
   /**
    * This service is being activated so setup it:
    * <ul>
@@ -115,6 +117,8 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
     this.configurableMetadataProviderTracker.open();
 
     addMetadataTrigger(ROO_DATA_ON_DEMAND);
+
+    serviceInstaceManager.activate(this.context);
   }
 
   /**
@@ -412,10 +416,18 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
     // no embedded identifier exists
     final List<EmbeddedHolder> embeddedHolders = getEmbeddedHolders(memberDetails, dodMetadataId);
 
+    // Get entity repository
+    ClassOrInterfaceTypeDetails repository = getRepositoryJpaLocator().getFirstRepository(entity);
+
+
+    Set<ClassOrInterfaceTypeDetails> dataOnDemandClasses =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_DATA_ON_DEMAND);
+
     return new DataOnDemandMetadata(dodMetadataId, aspectName, governorPhysicalTypeMetadata,
         annotationValues, identifierAccessor, findMethodAdditions, findEntriesMethod,
         persistMethodAdditions, flushMethod, locatedFields, identifierType, embeddedIdHolder,
-        embeddedHolders);
+        embeddedHolders, repository.getType(), dataOnDemandClasses);
   }
 
   public String getProvidesType() {
@@ -460,6 +472,11 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
   }
 
   protected LayerService getLayerService() {
-    return getServiceManager().getServiceInstance(this, LayerService.class);
+    return serviceInstaceManager.getServiceInstance(this, LayerService.class);
   }
+
+  private RepositoryJpaLocator getRepositoryJpaLocator() {
+    return serviceInstaceManager.getServiceInstance(this, RepositoryJpaLocator.class);
+  }
+
 }

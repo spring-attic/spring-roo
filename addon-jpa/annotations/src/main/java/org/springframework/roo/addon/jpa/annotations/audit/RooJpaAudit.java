@@ -9,30 +9,11 @@ import java.lang.annotation.Target;
  * Indicates an entity class which must be audited
  * 
  * @author Sergio Clares
+ * @author Juan Carlos García
  * @since 2.0
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooJpaAudit {
-
-  /**
-   * Indicates the name of the Data Base column to store createdDate field data.
-   */
-  String createdDateColumn() default "";
-
-  /**
-   * Indicates the name of the Data Base column to store modifiedDate field data.
-   */
-  String modifiedDateColumn() default "";
-
-  /**
-   * Indicates the name of the Data Base column to store createdBy field data.
-   */
-  String createdByColumn() default "";
-
-  /**
-   * Indicates the name of the Data Base column to store modifiedBy field data.
-   */
-  String modifiedByColumn() default "";
 
 }

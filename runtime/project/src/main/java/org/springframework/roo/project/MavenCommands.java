@@ -68,8 +68,8 @@ public class MavenCommands implements CommandMarker {
     context = cContext.getBundleContext();
   }
 
-  @CliCommand(value = DEPENDENCY_ADD_COMMAND,
-      help = "Adds a new dependency to the Maven project object model (POM)")
+  /* @CliCommand(value = DEPENDENCY_ADD_COMMAND,
+       help = "Adds a new dependency to the Maven project object model (POM)") */
   public void addDependency(@CliOption(key = "groupId", mandatory = true,
       help = "The group ID of the dependency (mandatory)") final String groupId,
       @CliOption(key = "artifactId", mandatory = true,
@@ -83,8 +83,8 @@ public class MavenCommands implements CommandMarker {
         artifactId, version, scope, classifier);
   }
 
-  @CliCommand(value = REPOSITORY_ADD_COMMAND,
-      help = "Adds a new repository to the Maven project object model (POM)")
+  /*  @CliCommand(value = REPOSITORY_ADD_COMMAND,
+        help = "Adds a new repository to the Maven project object model (POM)") */
   public void addRepository(
       @CliOption(key = "id", mandatory = true, help = "The ID of the repository (mandatory)") final String id,
       @CliOption(key = "name", mandatory = false, help = "The name of the repository") final String name,
@@ -160,7 +160,7 @@ public class MavenCommands implements CommandMarker {
     return getMavenOperations().isFocusedProjectAvailable();
   }
 
-  @CliCommand(value = {PERFORM_COMMAND_COMMAND}, help = "Executes a user-specified Maven command")
+  /* @CliCommand(value = {PERFORM_COMMAND_COMMAND}, help = "Executes a user-specified Maven command") */
   public void mvn(@CliOption(key = "mavenCommand", mandatory = true,
       help = "User-specified Maven command (eg test:test) (mandatory)") final String command)
       throws IOException {
@@ -168,8 +168,8 @@ public class MavenCommands implements CommandMarker {
     getMavenOperations().executeMvnCommand(command);
   }
 
-  @CliCommand(value = DEPENDENCY_REMOVE_COMMAND,
-      help = "Removes an existing dependency from the Maven project object model (POM)")
+  /*  @CliCommand(value = DEPENDENCY_REMOVE_COMMAND,
+        help = "Removes an existing dependency from the Maven project object model (POM)") */
   public void removeDependency(@CliOption(key = "groupId", mandatory = true,
       help = "The group ID of the dependency (mandatory)") final String groupId,
       @CliOption(key = "artifactId", mandatory = true,
@@ -183,8 +183,8 @@ public class MavenCommands implements CommandMarker {
         artifactId, version, classifier);
   }
 
-  @CliCommand(value = REPOSITORY_REMOVE_COMMAND,
-      help = "Removes an existing repository from the Maven project object model (POM)")
+  /* @CliCommand(value = REPOSITORY_REMOVE_COMMAND,
+       help = "Removes an existing repository from the Maven project object model (POM)") */
   public void removeRepository(@CliOption(key = "id", mandatory = true,
       help = "The ID of the repository") final String id, @CliOption(key = "url", mandatory = true,
       help = "The URL of the repository") final String url) {
@@ -193,31 +193,31 @@ public class MavenCommands implements CommandMarker {
         new Repository(id, null, url));
   }
 
-  @CliCommand(value = {PERFORM_ASSEMBLY_COMMAND}, help = "Executes the assembly goal via Maven")
+  /* @CliCommand(value = {PERFORM_ASSEMBLY_COMMAND}, help = "Executes the assembly goal via Maven") */
   public void runAssembly() throws IOException {
     mvn("assembly:assembly");
   }
 
-  @CliCommand(value = {PERFORM_CLEAN_COMMAND},
-      help = "Executes a full clean (including Eclipse files) via Maven")
+  /* @CliCommand(value = {PERFORM_CLEAN_COMMAND},
+       help = "Executes a full clean (including Eclipse files) via Maven") */
   public void runClean() throws IOException {
     mvn("clean");
   }
 
-  @CliCommand(
-      value = {PERFORM_ECLIPSE_COMMAND},
-      help = "Sets up Eclipse configuration via Maven (only necessary if you have not installed the m2eclipse plugin in Eclipse)")
+  /* @CliCommand(
+       value = {PERFORM_ECLIPSE_COMMAND},
+       help = "Sets up Eclipse configuration via Maven (only necessary if you have not installed the m2eclipse plugin in Eclipse)") */
   public void runEclipse() throws IOException {
     mvn("eclipse:clean eclipse:eclipse");
   }
 
-  @CliCommand(value = {PERFORM_PACKAGE_COMMAND},
-      help = "Packages the application using Maven, but does not execute any tests")
+  /* @CliCommand(value = {PERFORM_PACKAGE_COMMAND},
+       help = "Packages the application using Maven, but does not execute any tests") */
   public void runPackage() throws IOException {
     mvn("-DskipTests=true package");
   }
 
-  @CliCommand(value = {PERFORM_TESTS_COMMAND}, help = "Executes the tests via Maven")
+  /* @CliCommand(value = {PERFORM_TESTS_COMMAND}, help = "Executes the tests via Maven") */
   public void runTest() throws IOException {
     mvn("test");
   }

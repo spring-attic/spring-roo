@@ -166,6 +166,15 @@ public final class RooJavaType {
   public static final JavaType ROO_JAXB_ENTITY = new JavaType(
       "org.springframework.roo.addon.ws.annotations.jaxb.RooJaxbEntity");
 
+  public static final JavaType ROO_SECURITY_FILTER = new JavaType(
+      "org.springframework.roo.addon.security.annotations.RooSecurityFilter");
+  public static final JavaType ROO_SECURITY_FILTERS = new JavaType(
+      "org.springframework.roo.addon.security.annotations.RooSecurityFilters");
+  public static final JavaType ROO_SECURITY_AUTHORIZATION = new JavaType(
+      "org.springframework.roo.addon.security.annotations.RooSecurityAuthorization");
+  public static final JavaType ROO_SECURITY_AUTHORIZATIONS = new JavaType(
+      "org.springframework.roo.addon.security.annotations.RooSecurityAuthorizations");
+
   /**
    * Constructor is private to prevent instantiation
    */

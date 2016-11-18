@@ -70,7 +70,7 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
     perform(commandLine);
   }
 
-  @CliCommand(value = {"exit", "quit"}, help = "Exits the shell. You can also use 'quit' command")
+  @CliCommand(value = {"exit", "quit"}, help = "Exits the shell. You can also use `quit` command.")
   public ExitShellRequest quit() {
     return ExitShellRequest.NORMAL_EXIT;
   }

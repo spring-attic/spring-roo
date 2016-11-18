@@ -3,9 +3,7 @@ package org.springframework.roo.addon.dod.addon;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
 import org.apache.commons.lang3.Validate;
-import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
@@ -16,12 +14,12 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Shell commands for creating data-on-demand (DoD) classes.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1.3
  */
-@Component
-@Service
+//@Component
+//@Service
 public class DataOnDemandCommands implements CommandMarker {
 
   @Reference

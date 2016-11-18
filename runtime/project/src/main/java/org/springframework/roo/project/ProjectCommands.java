@@ -37,7 +37,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Service
 public class ProjectCommands implements CommandMarker {
 
-  private static final String DEVELOPMENT_MODE_COMMAND = "development mode";
+  private static final String DEVELOPMENT_MODE_COMMAND = "addon development mode";
   private static final String PROJECT_SETUP_COMMAND = "project setup";
   private static final String PROJECT_SCAN_SPEED_COMMAND = "project scan speed";
   private static final String PROJECT_SCAN_STATUS_COMMAND = "project scan status";
@@ -123,9 +123,10 @@ public class ProjectCommands implements CommandMarker {
     return getProjectOperations().isFocusedProjectAvailable();
   }
 
-  @CliCommand(value = DEVELOPMENT_MODE_COMMAND,
-      help = "Switches the system into development mode (greater diagnostic information)")
-  public String developmentMode(@CliOption(key = {"", "enabled"}, mandatory = false,
+  @CliCommand(
+      value = DEVELOPMENT_MODE_COMMAND,
+      help = "Switches the system into development mode (greater diagnostic information and enables add-on development commands)")
+  public String developmentMode(@CliOption(key = {"enabled"}, mandatory = false,
       specifiedDefaultValue = "true", unspecifiedDefaultValue = "true",
       help = "Activates development mode") final boolean enabled) {
 

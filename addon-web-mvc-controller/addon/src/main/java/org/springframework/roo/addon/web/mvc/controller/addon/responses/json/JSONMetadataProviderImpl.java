@@ -165,6 +165,11 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     final ControllerMetadata controllerMetadata =
         (ControllerMetadata) getMetadataService().get(controllerMetadataKey);
 
+    // This metadata is not available yet.
+    if (controllerMetadata == null) {
+      return null;
+    }
+
     // Getting entity and check if is a readOnly entity or not
     final JavaType entity = controllerMetadata.getEntity();
 

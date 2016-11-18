@@ -1,27 +1,38 @@
 package org.springframework.roo.addon.jpa.addon.audit;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.FieldDetails;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.model.EnumDetails;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 /**
  * Implements {@link JpaAuditOperations} to be able to include
@@ -40,18 +51,16 @@ public class JpaAuditOperationsImpl implements JpaAuditOperations {
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
 
+  private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
+
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
       "1.0.0.BUILD-SNAPSHOT");
   private static final Dependency SPRINGLETS_DATA_JPA_STARTER = new Dependency("io.springlets",
       "springlets-boot-starter-data-jpa", "${springlets.version}");
 
-
-  private ProjectOperations projectOperations;
-  private TypeLocationService typeLocationService;
-  private TypeManagementService typeManagementService;
-
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
+    serviceInstaceManager.activate(this.context);
   }
 
   @Override
@@ -83,97 +92,179 @@ public class JpaAuditOperationsImpl implements JpaAuditOperations {
   public void addJpaAuditToEntity(JavaType entity, String createdDateColumn,
       String modifiedDateColumn, String createdByColumn, String modifiedByColumn) {
 
-    // Create @RooJpaAudit
-    AnnotationMetadataBuilder rooJpaAudit =
-        new AnnotationMetadataBuilder(RooJavaType.ROO_JPA_AUDIT);
+    // Getting entity details
+    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
+    ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(entityDetails);
 
-    // Add parameters if required
-    if (createdDateColumn != null) {
-      rooJpaAudit.addStringAttribute("createdDateColumn", createdDateColumn);
-    }
-    if (modifiedDateColumn != null) {
-      rooJpaAudit.addStringAttribute("modifiedDateColumn", modifiedDateColumn);
-    }
-    if (createdByColumn != null) {
-      rooJpaAudit.addStringAttribute("createdByColumn", createdByColumn);
-    }
-    if (modifiedByColumn != null) {
-      rooJpaAudit.addStringAttribute("modifiedByColumn", modifiedByColumn);
-    }
+    // Add audit fields
+    cidBuilder.addField(getCreatedDateField(entityDetails, createdDateColumn));
+    cidBuilder.addField(getModifiedDateField(entityDetails, modifiedDateColumn));
+    cidBuilder.addField(getCreatedByField(entityDetails, createdByColumn));
+    cidBuilder.addField(getModifiedByField(entityDetails, modifiedByColumn));
 
-    // Add annotation
-    ClassOrInterfaceTypeDetails cid = getTypeLocationService().getTypeDetails(entity);
-    ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(cid);
-    cidBuilder.addAnnotation(rooJpaAudit.build());
+    // Add @RooJpaAudit annotation
+    cidBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_JPA_AUDIT).build());
 
+    // Write changes on disk
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
   }
 
+  /**
+   * Builds createdDate field for storing entity's created date 
+   * 
+   * @return FieldMetadataBuilder 
+   */
+  private FieldMetadataBuilder getCreatedDateField(ClassOrInterfaceTypeDetails entityDetails,
+      String columnName) {
+
+    // Create field annotations
+    List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Only add @Column if required by annotation @RooJpaAudit
+    if (StringUtils.isNotBlank(columnName)) {
+      AnnotationMetadataBuilder columnAnnotation =
+          new AnnotationMetadataBuilder(JpaJavaType.COLUMN);
+      columnAnnotation.addStringAttribute("name", columnName);
+      annotations.add(columnAnnotation);
+    }
+
+    AnnotationMetadataBuilder createdDateAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.CREATED_DATE);
+    annotations.add(createdDateAnnotation);
+    AnnotationMetadataBuilder temporalAnnotation =
+        new AnnotationMetadataBuilder(JpaJavaType.TEMPORAL);
+    temporalAnnotation.addEnumAttribute("value", new EnumDetails(JpaJavaType.TEMPORAL_TYPE,
+        new JavaSymbolName("TIMESTAMP")));
+    annotations.add(temporalAnnotation);
+
+    // Create field
+    FieldDetails fieldDetails =
+        new FieldDetails(PhysicalTypeIdentifier.createIdentifier(entityDetails),
+            JdkJavaType.CALENDAR, new JavaSymbolName("createdDate"));
+    fieldDetails.setModifiers(Modifier.PRIVATE);
+    fieldDetails.setAnnotations(annotations);
+    FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails);
+    return fieldBuilder;
+  }
+
+  /**
+   * Builds modifiedDate field for storing entity's last modified date 
+   * 
+   * @return FieldMetadataBuilder
+   */
+  private FieldMetadataBuilder getModifiedDateField(ClassOrInterfaceTypeDetails entityDetails,
+      String columnName) {
+
+    // Create field annotations
+    List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Only add @Column if required by annotation @RooJpaAudit
+    if (StringUtils.isNotBlank(columnName)) {
+      AnnotationMetadataBuilder columnAnnotation =
+          new AnnotationMetadataBuilder(JpaJavaType.COLUMN);
+      columnAnnotation.addStringAttribute("name", columnName);
+      annotations.add(columnAnnotation);
+    }
+
+    AnnotationMetadataBuilder createdDateAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.LAST_MODIFIED_DATE);
+    annotations.add(createdDateAnnotation);
+    AnnotationMetadataBuilder temporalAnnotation =
+        new AnnotationMetadataBuilder(JpaJavaType.TEMPORAL);
+    temporalAnnotation.addEnumAttribute("value", new EnumDetails(JpaJavaType.TEMPORAL_TYPE,
+        new JavaSymbolName("TIMESTAMP")));
+    annotations.add(temporalAnnotation);
+
+    // Create field
+    FieldDetails fieldDetails =
+        new FieldDetails(PhysicalTypeIdentifier.createIdentifier(entityDetails),
+            JdkJavaType.CALENDAR, new JavaSymbolName("modifiedDate"));
+    fieldDetails.setModifiers(Modifier.PRIVATE);
+    fieldDetails.setAnnotations(annotations);
+    FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails);
+    return fieldBuilder;
+  }
+
+  /**
+   * Builds createdBy field for storing user who creates entity registers
+   * 
+   * @return FieldMetadataBuilder
+   */
+  private FieldMetadataBuilder getCreatedByField(ClassOrInterfaceTypeDetails entityDetails,
+      String columnName) {
+
+    // Create field annotations
+    List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Only add @Column if required by annotation @RooJpaAudit
+    if (StringUtils.isNotBlank(columnName)) {
+      AnnotationMetadataBuilder columnAnnotation =
+          new AnnotationMetadataBuilder(JpaJavaType.COLUMN);
+      columnAnnotation.addStringAttribute("name", columnName);
+      annotations.add(columnAnnotation);
+    }
+
+    AnnotationMetadataBuilder createdDateAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.CREATED_BY);
+    annotations.add(createdDateAnnotation);
+
+    // Create field
+    FieldDetails fieldDetails =
+        new FieldDetails(PhysicalTypeIdentifier.createIdentifier(entityDetails), JavaType.STRING,
+            new JavaSymbolName("createdBy"));
+    fieldDetails.setModifiers(Modifier.PRIVATE);
+    fieldDetails.setAnnotations(annotations);
+    FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails);
+    return fieldBuilder;
+  }
+
+  /**
+   * Builds modifiedBy field for storing user who last modifies entity registers
+   * 
+   * @return FieldMetadataBuilder
+   */
+  private FieldMetadataBuilder getModifiedByField(ClassOrInterfaceTypeDetails entityDetails,
+      String columnName) {
+
+    // Create field annotations
+    List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Only add @Column if required by annotation @RooJpaAudit
+    if (StringUtils.isNotBlank(columnName)) {
+      AnnotationMetadataBuilder columnAnnotation =
+          new AnnotationMetadataBuilder(JpaJavaType.COLUMN);
+      columnAnnotation.addStringAttribute("name", columnName);
+      annotations.add(columnAnnotation);
+    }
+
+    AnnotationMetadataBuilder createdDateAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.LAST_MODIFIED_BY);
+    annotations.add(createdDateAnnotation);
+
+    // Create field
+    FieldDetails fieldDetails =
+        new FieldDetails(PhysicalTypeIdentifier.createIdentifier(entityDetails), JavaType.STRING,
+            new JavaSymbolName("modifiedBy"));
+    fieldDetails.setModifiers(Modifier.PRIVATE);
+    fieldDetails.setAnnotations(annotations);
+    FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails);
+    return fieldBuilder;
+  }
+
+
+  // OSGi Services
 
   public ProjectOperations getProjectOperations() {
-    if (projectOperations == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (ProjectOperations) this.context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on SecurityOperationsImpl.");
-        return null;
-      }
-    } else {
-      return projectOperations;
-    }
+    return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
   }
 
   public TypeLocationService getTypeLocationService() {
-    if (typeLocationService == null) {
-      // Get all Services implement TypeLocationService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (TypeLocationService) this.context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on SecurityOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeLocationService;
-    }
+    return serviceInstaceManager.getServiceInstance(this, TypeLocationService.class);
   }
 
   public TypeManagementService getTypeManagementService() {
-    if (typeManagementService == null) {
-      // Get all Services implement TypeManagementService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (TypeManagementService) this.context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeManagementService on SecurityOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeManagementService;
-    }
+    return serviceInstaceManager.getServiceInstance(this, TypeManagementService.class);
   }
 
   // FEATURE OPERATIONS
