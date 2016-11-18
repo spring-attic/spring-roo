@@ -1,5 +1,14 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.responses.json;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -8,6 +17,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerLocator;
@@ -35,15 +45,6 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Implementation of {@link JSONMetadataProvider}.
@@ -230,7 +231,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     ClassOrInterfaceTypeDetails childEntityDetails;
     JpaEntityMetadata childEntityMetadata;
     for (RelationInfo info : entityMetadata.getRelationInfos().values()) {
-      if (info.cardinality == Cardinality.ONE_TO_ONE) {
+      if (info.cardinality == Cardinality.ONE_TO_ONE && info.type == JpaRelationType.COMPOSITION) {
         childEntityDetails = getTypeLocationService().getTypeDetails(info.childType);
         childEntityMetadata =
             getMetadataService().get(JpaEntityMetadata.createIdentifier(childEntityDetails));

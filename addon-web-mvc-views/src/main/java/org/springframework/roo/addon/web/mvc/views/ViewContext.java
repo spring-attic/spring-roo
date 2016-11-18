@@ -1,15 +1,14 @@
 package org.springframework.roo.addon.web.mvc.views;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * This class contains all necessary information about views.
- * 
+ *
  * It will be provided to view generator to be able to generate
  * views taking in mind some context parameters if needed.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */

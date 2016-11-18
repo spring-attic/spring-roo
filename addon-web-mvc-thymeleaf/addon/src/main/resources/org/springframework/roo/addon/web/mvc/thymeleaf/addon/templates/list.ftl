@@ -228,12 +228,12 @@
                    data-select="single"
                    data-z="${entity.z}"
                    data-order="[[ 0, &quot;asc&quot; ]]"
-                   data-data-load-url="${r"${"}(#mvc.url('${mvcCollectionControllerName}#${mvcMethodName_datatables}')).build()}"
-                   data-data-show-url="${r"${"}(#mvc.url('${mvcItemControllerName}#${mvcMethodName_show}')).buildAndExpand('_ID_')}"
+                   data-data-load-url="${r"${"}(#mvc.url('${mvcUrl_datatables}')).build()}"
+                   data-data-show-url="${r"${"}(#mvc.url('${mvcUrl_show}')).buildAndExpand('_ID_')}"
                    <#if entity.readOnly == false>
-                   data-data-create-url="${r"${"}(#mvc.url('${mvcCollectionControllerName}#${mvcMethodName_createForm}')).build()}"
-                   data-data-edit-url="${r"${"}(#mvc.url('${mvcItemControllerName}#${mvcMethodName_editForm}')).buildAndExpand('_ID_')}"
-                   data-data-delete-url="${r"${"}(#mvc.url('${mvcItemControllerName}#${mvcMethodName_remove}')).buildAndExpand('_ID_')}"
+                   data-data-create-url="${r"${"}(#mvc.url('${mvcUrl_createForm}')).build()}"
+                   data-data-edit-url="${r"${"}(#mvc.url('${mvcUrl_editForm}')).buildAndExpand('_ID_')}"
+                   data-data-delete-url="${r"${"}(#mvc.url('${mvcUrl_remove}')).buildAndExpand('_ID_')}"
                    </#if>
                    >
                 <caption data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}})}">${entityName} List</caption>

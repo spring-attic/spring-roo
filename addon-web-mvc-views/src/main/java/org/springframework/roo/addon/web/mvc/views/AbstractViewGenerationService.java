@@ -22,10 +22,10 @@ import org.apache.felix.scr.annotations.Component;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
-import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerLocator;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.RelationInfoExtended;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
 import org.springframework.roo.addon.web.mvc.i18n.components.I18n;
 import org.springframework.roo.addon.web.mvc.views.components.DetailEntityItem;
@@ -51,6 +51,7 @@ import org.springframework.roo.model.Jsr303JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.XmlUtils;
@@ -1009,6 +1010,14 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
   }
 
+
+  @Override
+  public void addDetailsItemViews(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, ControllerMetadata controllerMetadata, T viewMetadata, ViewContext ctx) {
+    // Nothing to do here
+
+  }
+
   /**
    * Create a new instance of {@link DetailEntityItem}.
    *
@@ -1028,11 +1037,11 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       ViewContext ctx, String detailSuffix, EntityItem rootEntity) {
     ControllerMetadata controllerMetadata = detailController.getControllerMetadata();
 
-    RelationInfo last = controllerMetadata.getLastDetailsInfo();
+    RelationInfoExtended last = controllerMetadata.getLastDetailsInfo();
     ClassOrInterfaceTypeDetails childEntityDetails =
         getTypeLocationService().getTypeDetails(last.childType);
-    JpaEntityMetadata childEntityMetadata =
-        getMetadataService().get(JpaEntityMetadata.createIdentifier(childEntityDetails));
+    JpaEntityMetadata childEntityMetadata = last.childEntityMetadata;
+
 
 
     DetailEntityItem detailItem =
@@ -1055,6 +1064,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     detailItem.addConfigurationElement(
         "referenceFieldFields",
         getFieldViewItems(referencedFields, entityName + "." + last.fieldName, true, ctx,
+            StringUtils.EMPTY));
+    detailItem.addConfigurationElement(
+        "fields",
+        getFieldViewItems(referencedFields, detailItem.getEntityName(), true, ctx,
             StringUtils.EMPTY));
     return detailItem;
   }
@@ -1272,6 +1285,23 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     return getFileManager().exists(viewPath);
   }
 
+  @Override
+  public ViewContext createViewContext(final ControllerMetadata controllerMetadata,
+      final JavaType entity, final JpaEntityMetadata entityMetadata, T viewMetadata) {
+    ViewContext ctx = new ViewContext();
+    ctx.setControllerPath(controllerMetadata.getPath());
+    ctx.setProjectName(getProjectOperations().getProjectName(""));
+    ctx.setVersion(getProjectOperations().getPomFromModuleName("").getVersion());
+    ctx.setEntityName(entity.getSimpleTypeName());
+    ctx.setModelAttribute(StringUtils.uncapitalize(entity.getSimpleTypeName()));
+    ctx.setModelAttributeName(StringUtils.uncapitalize(entity.getSimpleTypeName()));
+    ctx.setIdentifierField(entityMetadata.getCurrentIndentifierField().getFieldName()
+        .getSymbolName());
+    return ctx;
+  }
+
+
+
   // Getting OSGi Services
 
   protected FileManager getFileManager() {
@@ -1300,5 +1330,9 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
   protected ControllerLocator geControllerLocator() {
     return serviceInstaceManager.getServiceInstance(this, ControllerLocator.class);
+  }
+
+  protected ProjectOperations getProjectOperations() {
+    return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
   }
 }

@@ -228,6 +228,8 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     final FieldMetadata childServideField = requiredServiceFieldByEntity.get(childType);
     final String parentFieldName = relationInfo.fieldName;
     final JavaSymbolName param1 = methodToBeImplemented.getParameterNames().get(1);
+    final JavaType param1TypeWrapped =
+        methodToBeImplemented.getParameterTypes().get(1).getJavaType().getParameters().get(0);
     final String repoField = repositoryFieldMetadata.getFieldName().getSymbolName();
     final String saveMethod =
         serviceMetadata.getCurrentSaveMethod().getMethodName().getSymbolName();
@@ -235,16 +237,14 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
     String childListVariable;
 
-    importResolver.addImport(JavaType.LIST);
-    importResolver.addImport(childType);
 
-    if (relationInfo.type == JpaRelationType.COMPOSITION) {
+    if (childType.equals(param1TypeWrapped)) {
       childListVariable = param1.getSymbolName();
     } else {
       // List<{childType}> {parentFieldName} = {childService}.findAll({param1});
       JavaSymbolName childService = childServideField.getFieldName();
-      bodyBuilder.appendFormalLine("List<%s> %s = %s.findAll(%s);", childType, parentFieldName,
-          childService, param1);
+      bodyBuilder.appendFormalLine("%s<%s> %s = %s.findAll(%s);", getNameOfJavaType(JavaType.LIST),
+          getNameOfJavaType(childType), parentFieldName, childService, param1);
       childListVariable = parentFieldName;
     }
     // {param0}.{operation}({childListVariable});

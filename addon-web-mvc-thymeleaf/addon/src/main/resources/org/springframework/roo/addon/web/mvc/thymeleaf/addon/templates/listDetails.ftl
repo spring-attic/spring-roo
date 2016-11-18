@@ -44,12 +44,12 @@
                       data-datatables="true"
                       data-parent-table="${parentEntity.entityItemId}-table"
                       data-order="[[ 0, &quot;asc&quot; ]]"
-                      data-data-load-url="${r"${"}(#mvc.url('${dconfig.mvnDetailControllerName}#${dconfig.mvcMethodName_datatablesDetails}')).buildAndExpand('_PARENTID_')}"
-                      data-data-show-url="${r"${"}(#mvc.url('${dconfig.mvnItemControllerName}#${dconfig.mvcMethodName_show}')).buildAndExpand('_ID_')}"
+                      data-data-load-url="${r"${"}(#mvc.url('${dconfig.mvcUrl_datatablesDetails}')).buildAndExpand('_PARENTID_')}"
+                      data-data-show-url="${r"${"}(#mvc.url('${dconfig.mvcUrl_show}')).buildAndExpand(${dconfig.mvcUrl_itemExpandBuilderExp})}"
                       <#if entity.readOnly == false>
-                      data-data-edit-url="${r"${"}(#mvc.url('${dconfig.mvnItemControllerName}#${dconfig.mvcMethodName_editForm}')).buildAndExpand('_ID_')}"
-                      data-data-delete-url="${r"${"}(#mvc.url('${dconfig.mvnDetailControllerName}#${dconfig.mvcMethodName_removeFromDetails}')).arg(1,'_ID_').buildAndExpand('_PARENTID_')}"
-                      data-data-create-url="${r"${"}(#mvc.url('${dconfig.mvnDetailControllerName}#${dconfig.mvcMethodName_createFormDetails}')).buildAndExpand('_PARENTID_')}"
+                      data-data-edit-url="${r"${"}(#mvc.url('${dconfig.mvcUrl_editForm}')).buildAndExpand(${dconfig.mvcUrl_itemExpandBuilderExp})}"
+                      data-data-delete-url="${r"${"}(#mvc.url('${dconfig.mvcUrl_delete}')).${dconfig.mvcUrl_delete_dt_ext}}"
+                      data-data-create-url="${r"${"}(#mvc.url('${dconfig.mvcUrl_createForm}')).buildAndExpand('_PARENTID_')}"
                       </#if>
                       >
                       <caption data-th-text="${r"#{"}label_list_of_entity(${r"#"}{${dconfig.referencedFieldLabel}})}">${detail.fieldNameCapitalized} List</caption>

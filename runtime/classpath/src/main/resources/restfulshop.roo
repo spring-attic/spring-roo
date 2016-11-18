@@ -81,9 +81,21 @@ web mvc controller --all --responseType THYMELEAF
 
 web mvc language --code es
 
+// detail OneToMany aggregation
 web mvc detail --entity ~.model.Customer --field orders
 web mvc detail --entity ~.model.Customer --field orders --responseType THYMELEAF
+
+// detail ManyToMany aggregation
+web mvc detail --entity ~.model.Category --field products
 web mvc detail --entity ~.model.Category --field products --responseType THYMELEAF
+
+// detail OneToMany composition
+web mvc detail --entity ~.model.CustomerOrder --field details
+web mvc detail --entity ~.model.CustomerOrder --field details --responseType THYMELEAF
+
+// two level details
+// web mvc detail --entity ~.model.Customer --field orders.details
+// web mvc detail --entity ~.model.Customer --field orders.details --responseType THYMELEAF
 
 
 web mvc finder --entity ~.model.Customer

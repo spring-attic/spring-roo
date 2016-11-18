@@ -2,6 +2,13 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_CONTROLLER;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -36,13 +43,6 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.logging.Logger;
 
 /**
  * Implementation of {@link ControllerMetadataProvider}.
@@ -194,12 +194,33 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
 
 
 
-    List<RelationInfo> detailsFieldInfo = null;
+    List<RelationInfoExtended> detailsFieldInfo = null;
+    String detailAnnotaionFieldValue = null;
     Map<JavaType, ServiceMetadata> detailsServiceMetadata = null;
 
-    if (type == ControllerType.DETAIL) {
+    if (type == ControllerType.DETAIL || type == ControllerType.DETAIL_ITEM) {
+
+      final JavaType controller =
+          governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName();
+
+      // Getting the relationField from @RooDetail entity
+      final AnnotationAttributeValue<Object> relationFieldAttr =
+          governorPhysicalTypeMetadata.getMemberHoldingTypeDetails()
+              .getAnnotation(RooJavaType.ROO_DETAIL).getAttribute("relationField");
+
+      Validate.notNull(relationFieldAttr,
+          "ERROR: In %s controller, @RooDetail annotation must have relationField value",
+          controller);
+
+      detailAnnotaionFieldValue = (String) relationFieldAttr.getValue();
+
+      Validate.isTrue(StringUtils.isNotBlank(detailAnnotaionFieldValue),
+          "ERROR: In %s controller, @RooDetail annotation must have relationField value",
+          controller);
+
       // generate detail info object
-      detailsFieldInfo = getControllerDetailInfo(governorPhysicalTypeMetadata, entityMetadata);
+      detailsFieldInfo =
+          getControllerOperations().getRelationInfoFor(entityMetadata, detailAnnotaionFieldValue);
 
       detailsServiceMetadata = new TreeMap<JavaType, ServiceMetadata>();
 
@@ -220,7 +241,7 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
 
     return new ControllerMetadata(metadataIdentificationString, aspectName, controllerValues,
         governorPhysicalTypeMetadata, entity, entityMetadata, service, path, type, serviceMetadata,
-        detailsServiceMetadata, detailsFieldInfo);
+        detailAnnotaionFieldValue, detailsServiceMetadata, detailsFieldInfo);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
@@ -236,33 +257,18 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
   }
 
   /**
-   * Get necesary information about detail to create a detail controller
+   * Get necessary information about detail to create a detail controller
    *
-   * @param governorPhysicalTypeMetadata the governor, which is expected to
-     *            contain a {@link ClassOrInterfaceTypeDetails}
-   * @param path Path parent controller
-   * @param entity Parent entity
-   *
+   * @param governorPhysicalTypeMetadata
+   * @param entityMetadata
+   * @param relationField
+   * @param controller
    * @return Information about detail
    */
   private List<RelationInfo> getControllerDetailInfo(
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      final JpaEntityMetadata entityMetadata) {
-    final JavaType controller =
-        governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName();
+      final JpaEntityMetadata entityMetadata, String relationField, JavaType controller) {
 
-    // Getting the relationField from @RooDetail entity
-    final AnnotationAttributeValue<Object> relationFieldAttr =
-        governorPhysicalTypeMetadata.getMemberHoldingTypeDetails()
-            .getAnnotation(RooJavaType.ROO_DETAIL).getAttribute("relationField");
-
-    Validate.notNull(relationFieldAttr,
-        "ERROR: In %s controller, @RooDetail annotation must have relationField value", controller);
-
-    final String relationField = (String) relationFieldAttr.getValue();
-
-    Validate.isTrue(StringUtils.isNotBlank(relationField),
-        "ERROR: In %s controller, @RooDetail annotation must have relationField value", controller);
 
     String[] relationPath = StringUtils.split(relationField, '.');
 
@@ -345,5 +351,10 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
 
   private ServiceLocator getServiceLocator() {
     return serviceInstaceManager.getServiceInstance(this, ServiceLocator.class);
+  }
+
+
+  private ControllerOperations getControllerOperations() {
+    return serviceInstaceManager.getServiceInstance(this, ControllerOperations.class);
   }
 }

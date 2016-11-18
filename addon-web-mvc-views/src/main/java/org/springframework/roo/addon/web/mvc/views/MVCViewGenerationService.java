@@ -118,6 +118,21 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
       ControllerMetadata controllerMetadata, T viewMetadata, ViewContext ctx);
 
   /**
+   * This operation will add views related to a details item controller using entityDetails
+   * and the provided context
+   *
+   * @param moduleName module where create view will be added
+   * @param entityMetadata entity metadata which contains information about it
+   * @param entity Details of an entity to be able to generate view
+   * @param controllerMetadata controller metadata
+   * @param viewMetadata
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addDetailsItemViews(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, ControllerMetadata controllerMetadata, T viewMetadata, ViewContext ctx);
+
+  /**
    * This operation will add a create view using entityDetails
    * and the provided context
    *
@@ -337,5 +352,17 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
   Map<String, String> getI18nLabels(MemberDetails entityMemberDetails, JavaType entity,
       JpaEntityMetadata entityMetadata, ControllerMetadata controllerMetadata, String module,
       ViewContext ctx);
+
+  /**
+   * Create a view Context for controller
+   *
+   * @param controllerMetadata
+   * @param entity
+   * @param entityMetadata
+   * @param viewMetadata
+   * @return
+   */
+  ViewContext createViewContext(ControllerMetadata controllerMetadata, JavaType entity,
+      JpaEntityMetadata entityMetadata, T viewMetadata);
 
 }

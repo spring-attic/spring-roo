@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.addon;
 
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProvider;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -138,4 +139,20 @@ public interface ControllerOperations extends Feature {
    */
   public void exportOperation(JavaType controller, List<String> operations);
 
+  /**
+   * Return a list of {@link RelationInfoExtended} for a field relation path of a entity.
+   *
+   * path is split by dot char and every return item is information for every path element.
+   *
+   * by example: entity could be Customer and path "order.details"
+   *
+   * @param entity
+   * @param path
+   * @return list of infos
+   * @throws NullPointerException if entity is null
+   * @throws IllegalArgumentException if path is incorrect
+   */
+  public List<RelationInfoExtended> getRelationInfoFor(JavaType entity, String path);
+
+  public List<RelationInfoExtended> getRelationInfoFor(JpaEntityMetadata entity, String path);
 }

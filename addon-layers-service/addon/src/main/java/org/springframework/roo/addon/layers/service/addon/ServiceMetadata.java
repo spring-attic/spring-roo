@@ -161,16 +161,11 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     // Generating persistent methods for modifiable entities
     // (not reandOnly an no composition child)
     if (entityMetadata.isReadOnly() || entityMetadata.isCompositionChild()) {
-      this.saveMethod = null;
       this.deleteMethod = null;
       this.saveBatchMethod = null;
       this.deleteBatchMethod = null;
     } else {
       // Add modification methods
-      this.saveMethod = getSaveMethod();
-      transactionalDefinedMethod.add(saveMethod);
-      ensureGovernorHasMethod(new MethodMetadataBuilder(saveMethod));
-
       this.deleteMethod = getDeleteMethod();
       transactionalDefinedMethod.add(deleteMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(deleteMethod));
@@ -182,6 +177,14 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       this.deleteBatchMethod = getDeleteBatchMethod();
       transactionalDefinedMethod.add(deleteBatchMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(deleteBatchMethod));
+    }
+
+    if (entityMetadata.isReadOnly()) {
+      this.saveMethod = null;
+    } else {
+      this.saveMethod = getSaveMethod();
+      transactionalDefinedMethod.add(saveMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(saveMethod));
     }
 
     // Add standard finders methods (if not composition child)
@@ -344,13 +347,8 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
     if (relationInfo.cardinality != Cardinality.ONE_TO_ONE) {
       // add child entity parameter
-      if (relationInfo.type == JpaRelationType.COMPOSITION) {
-        parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType
-            .iterableOf(relationInfo.childType)));
-      } else {
-        parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType
-            .iterableOf(childEntityMetadata.getCurrentIndentifierField().getFieldType())));
-      }
+      parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType
+          .iterableOf(childEntityMetadata.getCurrentIndentifierField().getFieldType())));
       parameterNames.add(entityRemoveMethod.getParameterNames().get(0));
     }
 

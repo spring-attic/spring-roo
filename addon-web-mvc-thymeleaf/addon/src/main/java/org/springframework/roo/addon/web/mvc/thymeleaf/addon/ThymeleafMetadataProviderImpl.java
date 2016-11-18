@@ -2,22 +2,33 @@ package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_THYMELEAF;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.RelationInfoExtended;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.views.AbstractViewGeneratorMetadataProvider;
 import org.springframework.roo.addon.web.mvc.views.MVCViewGenerationService;
-import org.springframework.roo.addon.web.mvc.views.ViewContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -28,11 +39,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Implementation of {@link ThymeleafMetadataProvider}.
@@ -153,8 +159,50 @@ public class ThymeleafMetadataProviderImpl extends
       final Map<String, MethodMetadata> findersToAdd,
       final Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields,
       final Map<JavaType, List<FieldMetadata>> formBeansEnumFields,
-      final JavaType detailsItemController, final JavaType detailsCollectionController,
-      final ViewContext ctx) {
+      final JavaType detailsItemController, final JavaType detailsCollectionController) {
+
+
+    // Get related controller for select2 request
+    JavaType relatedCollectionController = null;
+    JavaType relatedItemController = null;
+    RelationInfoExtended info = controllerMetadata.getLastDetailsInfo();
+    if (controllerMetadata.getType() == ControllerType.DETAIL
+        && info.type == JpaRelationType.AGGREGATION) {
+
+      Collection<ClassOrInterfaceTypeDetails> controllers =
+          getControllerLocator().getControllers(info.childType, ControllerType.COLLECTION,
+              RooJavaType.ROO_THYMELEAF);
+      final String prefix = controllerMetadata.getAnnotationValues().getPathPrefix();
+      for (ClassOrInterfaceTypeDetails controller : controllers) {
+        // use annotation values to avoid cyclic dependencies
+        ControllerAnnotationValues valuesToCheck = new ControllerAnnotationValues(controller);
+        if (StringUtils.equals(prefix, valuesToCheck.getPathPrefix())) {
+          relatedCollectionController = controller.getType();
+          break;
+        }
+      }
+      Validate
+          .notNull(
+              relatedCollectionController,
+              "Can't found Collection-type controller of entity '%s' and pathPrefix '%s' required by '%s' controller",
+              info.childType, prefix, controllerMetadata.getDestination());
+      controllers =
+          getControllerLocator().getControllers(info.childType, ControllerType.ITEM,
+              RooJavaType.ROO_THYMELEAF);
+      for (ClassOrInterfaceTypeDetails controller : controllers) {
+        // use annotation values to avoid cyclic dependencies
+        ControllerAnnotationValues valuesToCheck = new ControllerAnnotationValues(controller);
+        if (StringUtils.equals(prefix, valuesToCheck.getPathPrefix())) {
+          relatedItemController = controller.getType();
+          break;
+        }
+      }
+      Validate
+          .notNull(
+              relatedItemController,
+              "Can't found Item-type controller of entity '%s' and pathPrefix '%s' required by '%s' controller",
+              info.childType, prefix, controllerMetadata.getDestination());
+    }
 
     final ThymeleafMetadata metadata =
         new ThymeleafMetadata(metadataIdentificationString, aspectName,
@@ -162,37 +210,7 @@ public class ThymeleafMetadataProviderImpl extends
             entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
             collectionController, dateTimeFields, enumFields, findersToAdd,
             formBeansDateTimeFields, formBeansEnumFields, detailsItemController,
-            detailsCollectionController);
-
-    ctx.addExtraParameter("mvcControllerName", metadata.getMvcControllerName());
-    if (controllerMetadata.getType() == ControllerType.COLLECTION) {
-      ctx.addExtraParameter("mvcCollectionControllerName", metadata.getMvcControllerName());
-    } else {
-      ctx.addExtraParameter("mvcCollectionControllerName",
-          ThymeleafMetadata.getMvcControllerName(collectionController));
-    }
-    if (controllerMetadata.getType() == ControllerType.ITEM) {
-      ctx.addExtraParameter("mvcItemControllerName", metadata.getMvcControllerName());
-    } else {
-      ctx.addExtraParameter("mvcItemControllerName",
-          ThymeleafMetadata.getMvcControllerName(itemController));
-    }
-    ctx.addExtraParameter("mvcMethodName_datatables",
-        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.LIST_DATATABLES_METHOD_NAME));
-    ctx.addExtraParameter("mvcMethodName_createForm",
-        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.CREATE_FORM_METHOD_NAME));
-    ctx.addExtraParameter("mvcMethodName_show",
-        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.SHOW_METHOD_NAME));
-    ctx.addExtraParameter("mvcMethodName_editForm",
-        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.EDIT_FORM_METHOD_NAME));
-    ctx.addExtraParameter("mvcMethodName_remove",
-        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.DELETE_METHOD_NAME));
-    ctx.addExtraParameter("mvcMethodName_list",
-        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.LIST_METHOD_NAME));
-    ctx.addExtraParameter("mvcMethodName_update",
-        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.UPDATE_METHOD_NAME));
-
-    // TODO finder names
+            detailsCollectionController, relatedCollectionController, relatedItemController);
 
     return metadata;
   }

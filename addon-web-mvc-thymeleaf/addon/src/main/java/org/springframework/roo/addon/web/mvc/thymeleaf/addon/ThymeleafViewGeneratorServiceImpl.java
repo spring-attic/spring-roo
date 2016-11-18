@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.views.ViewContext;
@@ -22,8 +24,8 @@ import org.springframework.roo.addon.web.mvc.views.components.EntityItem;
 import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
 import org.springframework.roo.addon.web.mvc.views.components.MenuEntry;
 import org.springframework.roo.addon.web.mvc.views.template.engines.AbstractFreeMarkerViewGenerationService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
@@ -51,10 +53,13 @@ public class ThymeleafViewGeneratorServiceImpl extends
       "spring.roo.thymeleaf.templates-location";
 
   @Reference
-  PathResolver pathResolver;
+  private PathResolver pathResolver;
 
   @Reference
-  ProjectSettingsService projectSettings;
+  private ProjectSettingsService projectSettings;
+
+  @Reference
+  private MemberDetailsScanner memberDetailsScanner;
 
   @Override
   public JavaType getType() {
@@ -305,40 +310,58 @@ public class ThymeleafViewGeneratorServiceImpl extends
   protected DetailEntityItem createDetailEntityItem(ThymeleafMetadata detailController,
       MemberDetails entityMembers, JpaEntityMetadata entityMetadata, String entityName,
       ViewContext ctx, String detailSuffix, EntityItem rootEntity) {
+
+
+    JavaType detailItemController;
+    JavaType detailCollectionController;
+    final ControllerType type = detailController.getControllerMetadata().getType();
+    if (type == ControllerType.DETAIL) {
+      detailCollectionController = detailController.getDestination();
+      detailItemController = detailController.getDetailItemController();
+    } else {
+      detailCollectionController = detailController.getDetailCollectionController();
+      detailItemController = detailController.getDestination();
+    }
+    JavaType itemController = detailController.getItemController();
+    JavaType relatedCollectionController = detailController.getRelatedCollectionController();
+    JavaType relatedItemController = detailController.getRelatedItemController();
+
+
     DetailEntityItem item =
         super.createDetailEntityItem(detailController, entityMembers, entityMetadata, entityName,
             ctx, detailSuffix, rootEntity);
     item.addConfigurationElement("mvnDetailControllerName", detailController.getMvcControllerName());
-    item.addConfigurationElement("mvcMethodName_datatablesDetails",
-        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.LIST_DATATABLES_DETAILS_METHOD_NAME));
-    item.addConfigurationElement("mvcMethodName_createFormDetails", ThymeleafMetadata
-        .getMvcMethodName(detailController.getCurrentCreateFormDetailsMethod().getMethodName()));
-    item.addConfigurationElement("mvcMethodName_createDetails", ThymeleafMetadata
-        .getMvcMethodName(detailController.getCurrentCreateDetailsMethod().getMethodName()));
-    item.addConfigurationElement("mvcMethodName_removeFromDetails", ThymeleafMetadata
-        .getMvcMethodName(detailController.getCurrentRemoveFromDetailsMethod().getMethodName()));
+    item.addConfigurationElement("mvcUrl_datatablesDetails", ThymeleafMetadata.getMvcUrlNameFor(
+        detailController.getDestination(), ThymeleafMetadata.LIST_DATATABLES_DETAILS_METHOD_NAME));
+    item.addConfigurationElement("mvcUrl_createForm", ThymeleafMetadata.getMvcUrlNameFor(
+        detailCollectionController, ThymeleafMetadata.CREATE_FORM_METHOD_NAME));
+    item.addConfigurationElement("mvcUrl_create", ThymeleafMetadata.getMvcUrlNameFor(
+        detailCollectionController, ThymeleafMetadata.CREATE_METHOD_NAME));
+    if (detailController.getControllerMetadata().getLastDetailsInfo().type == JpaRelationType.AGGREGATION) {
+      item.addConfigurationElement(
+          "mvcUrl_delete",
+          ThymeleafMetadata.getMvcUrlNameFor(detailCollectionController,
+              detailController.getCurrentRemoveFromDetailsMethod()));
+      item.addConfigurationElement("mvcUrl_delete_dt_ext",
+          "arg(1,'_ID_').buildAndExpand('_PARENTID_')");
+      item.addConfigurationElement("mvcUrl_show", ThymeleafMetadata.getMvcUrlNameFor(
+          relatedItemController, ThymeleafMetadata.SHOW_METHOD_NAME));
+      item.addConfigurationElement("mvcUrl_editForm", ThymeleafMetadata.getMvcUrlNameFor(
+          relatedItemController, ThymeleafMetadata.EDIT_FORM_METHOD_NAME));
+      item.addConfigurationElement("mvcUrl_select2", ThymeleafMetadata.getMvcUrlNameFor(
+          relatedCollectionController, ThymeleafMetadata.SELECT2_METHOD_NAME));
+      item.addConfigurationElement("mvcUrl_itemExpandBuilderExp", "'_ID_'");
 
-    // Get target entity item controller
-    ClassOrInterfaceTypeDetails detailItemControllerCid =
-        getTypeLocationService().getTypeDetails(detailController.getDetailItemController());
-    ClassOrInterfaceTypeDetails detailCollectionControllerCid =
-        getTypeLocationService().getTypeDetails(detailController.getDetailCollectionController());
-    ThymeleafMetadata detailItemController =
-        getMetadataService().get(ThymeleafMetadata.createIdentifier(detailItemControllerCid));
-    ThymeleafMetadata detailCollectionController =
-        getMetadataService().get(ThymeleafMetadata.createIdentifier(detailCollectionControllerCid));
-
-    item.addConfigurationElement("mvnItemControllerName",
-        detailItemController.getMvcControllerName());
-    item.addConfigurationElement("mvcMethodName_show",
-        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.SHOW_METHOD_NAME));
-    item.addConfigurationElement("mvcMethodName_editForm",
-        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.EDIT_FORM_METHOD_NAME));
-
-    item.addConfigurationElement("mvnCollectionControllerName",
-        detailCollectionController.getMvcControllerName());
-    item.addConfigurationElement("mvcMethodName_select2",
-        ThymeleafMetadata.getMvcMethodName(ThymeleafMetadata.SELECT2_METHOD_NAME));
+    } else {
+      item.addConfigurationElement("mvcUrl_delete", ThymeleafMetadata.getMvcUrlNameFor(
+          detailItemController, ThymeleafMetadata.DELETE_METHOD_NAME));
+      item.addConfigurationElement("mvcUrl_show", ThymeleafMetadata.getMvcUrlNameFor(
+          detailItemController, ThymeleafMetadata.SHOW_METHOD_NAME));
+      item.addConfigurationElement("mvcUrl_editForm", ThymeleafMetadata.getMvcUrlNameFor(
+          detailItemController, ThymeleafMetadata.EDIT_FORM_METHOD_NAME));
+      item.addConfigurationElement("mvcUrl_itemExpandBuilderExp", "'_PARENTID_','_ID_'");
+      item.addConfigurationElement("mvcUrl_delete_dt_ext", "buildAndExpand('_PARENTID_','_ID_')");
+    }
 
     return item;
   }
@@ -374,9 +397,108 @@ public class ThymeleafViewGeneratorServiceImpl extends
         .addDetailsViews(moduleName, entityMetadata, entity, controllerMetadata, viewMetadata, ctx);
 
 
-    addCreateDetailsView(moduleName, entityMetadata, entity, controllerMetadata, viewMetadata, ctx);
-
+    if (controllerMetadata.getLastDetailsInfo().type == JpaRelationType.AGGREGATION) {
+      addCreateDetailsView(moduleName, entityMetadata, entity, controllerMetadata, viewMetadata,
+          ctx);
+    } else {
+      addCreateDetailsCompositionView(moduleName, entityMetadata, entity, controllerMetadata,
+          viewMetadata, ctx);
+    }
   }
+
+
+  @Override
+  public void addDetailsItemViews(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, ControllerMetadata controllerMetadata, ThymeleafMetadata viewMetadata,
+      ViewContext ctx) {
+    super.addDetailsItemViews(moduleName, entityMetadata, entity, controllerMetadata, viewMetadata,
+        ctx);
+
+    // Get root entity metadata
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
+
+    DetailEntityItem detail =
+        createDetailEntityItem(viewMetadata, entity, entityMetadata, ctx.getEntityName(), ctx,
+            DETAIL_SUFFIX, entityItem);
+
+
+    detail.addConfigurationElement("entityLabel",
+        StringUtils.uncapitalize(FieldItem.buildLabel(detail.getEntityName(), "")));
+
+    ViewContext childCtx =
+        createViewContext(controllerMetadata, controllerMetadata.getLastDetailEntity(),
+            controllerMetadata.getLastDetailsInfo().childEntityMetadata, viewMetadata);
+
+    // TODO
+    addShowDetailsCompositionView(moduleName, entityMetadata, viewMetadata, entityItem, detail,
+        childCtx);
+    addUpdateDetailsCompositionView(moduleName, entityMetadata, viewMetadata, entityItem, detail,
+        childCtx);
+  }
+
+  private void addShowDetailsCompositionView(String moduleName, JpaEntityMetadata entityMetadata,
+      ThymeleafMetadata viewMetadata, EntityItem entityItem, DetailEntityItem detail,
+      ViewContext ctx) {
+
+    // Process elements to generate
+    Document newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/")
+            .concat(viewMetadata.getControllerMetadata().getDetailsPathAsString("/"))
+            .concat("/show").concat(getViewsExtension());
+
+    ctx.addExtraParameter("entity", entityItem);
+    ctx.addExtraParameter("detail", detail);
+    ctx.addExtraParameter("fields", detail.getConfiguration().get("fields"));
+
+    // TODO
+    ctx.addExtraParameter("details", Collections.EMPTY_LIST);
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc =
+          mergeShowDetailsCompositionView("showDetailComposition", loadExistingDoc(viewName), ctx,
+              entityItem, detail);
+    } else {
+      newDoc = process("showDetailComposition", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+  }
+
+  private void addUpdateDetailsCompositionView(String moduleName, JpaEntityMetadata entityMetadata,
+      ThymeleafMetadata viewMetadata, EntityItem entityItem, DetailEntityItem detail,
+      ViewContext ctx) {
+
+    // Process elements to generate
+    Document newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/")
+            .concat(viewMetadata.getControllerMetadata().getDetailsPathAsString("/"))
+            .concat("/edit").concat(getViewsExtension());
+
+    ctx.addExtraParameter("entity", entityItem);
+    ctx.addExtraParameter("detail", detail);
+    ctx.addExtraParameter("fields", detail.getConfiguration().get("fields"));
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc =
+          mergeUpdateDetailsCompositionView("editDetailComposition", loadExistingDoc(viewName),
+              ctx, entityItem, detail);
+    } else {
+      newDoc = process("editDetailComposition", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+  }
+
 
   protected void addCreateDetailsView(String moduleName, JpaEntityMetadata entityMetadata,
       MemberDetails entity, ControllerMetadata controllerMetadata, ThymeleafMetadata viewMetadata,
@@ -421,11 +543,112 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
   }
 
-  private Document mergeCreateDetailsView(String string, Document loadExistingDoc, ViewContext ctx,
-      EntityItem entityItem, DetailEntityItem detail) {
-    // TODO
+  protected void addCreateDetailsCompositionView(String moduleName,
+      JpaEntityMetadata entityMetadata, MemberDetails entity,
+      ControllerMetadata controllerMetadata, ThymeleafMetadata viewMetadata, ViewContext ctx) {
+    // Process elements to generate
+    Document newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/")
+            .concat(controllerMetadata.getDetailsPathAsString("/")).concat("/create")
+            .concat(getViewsExtension());
+
+    // Get root entity metadata
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
+
+    DetailEntityItem detail =
+        createDetailEntityItem(viewMetadata, entity, entityMetadata, ctx.getEntityName(), ctx,
+            DETAIL_SUFFIX, entityItem);
+
+
+    detail.addConfigurationElement("entityLabel",
+        StringUtils.uncapitalize(FieldItem.buildLabel(detail.getEntityName(), "")));
+
     ctx.addExtraParameter("entity", entityItem);
     ctx.addExtraParameter("detail", detail);
-    return process("createDetail", ctx);
+    ctx.addExtraParameter("fields", detail.getConfiguration().get("fields"));
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc =
+          mergeCreateDetailsCompositionView("createDetailComposition", loadExistingDoc(viewName),
+              ctx, entityItem, detail);
+    } else {
+      newDoc = process("createDetailComposition", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
   }
+
+
+
+  private Document mergeCreateDetailsCompositionView(String templateName, Document loadExistingDoc,
+      ViewContext ctx, EntityItem entityItem, DetailEntityItem detail) {
+    // TODO
+    return process(templateName, ctx);
+  }
+
+  private Document mergeCreateDetailsView(String templateName, Document loadExistingDoc,
+      ViewContext ctx, EntityItem entityItem, DetailEntityItem detail) {
+    // TODO
+    return process(templateName, ctx);
+  }
+
+  private Document mergeUpdateDetailsCompositionView(String templateName, Document loadExistingDoc,
+      ViewContext ctx, EntityItem entityItem, DetailEntityItem detail) {
+    // TODO
+    return process(templateName, ctx);
+  }
+
+  private Document mergeShowDetailsCompositionView(String templateName, Document loadExistingDoc,
+      ViewContext ctx, EntityItem entityItem, DetailEntityItem detail) {
+    // TODO
+    return process(templateName, ctx);
+  }
+
+  @Override
+  public ViewContext createViewContext(final ControllerMetadata controllerMetadata,
+      final JavaType entity, final JpaEntityMetadata entityMetadata, ThymeleafMetadata metadata) {
+    ViewContext ctx = super.createViewContext(controllerMetadata, entity, entityMetadata, metadata);
+
+    final JavaType itemCtrl;
+    final JavaType collCtrl;
+    ctx.addExtraParameter("mvcControllerName", metadata.getMvcControllerName());
+    if (controllerMetadata.getType() == ControllerType.COLLECTION) {
+      collCtrl = controllerMetadata.getDestination();
+    } else {
+      collCtrl = metadata.getCollectionController();
+    }
+    ctx.addExtraParameter("mvcCollectionControllerName",
+        ThymeleafMetadata.getMvcControllerName(collCtrl));
+    if (controllerMetadata.getType() == ControllerType.ITEM) {
+      itemCtrl = controllerMetadata.getDestination();
+    } else {
+      itemCtrl = metadata.getItemController();
+    }
+    ctx.addExtraParameter("mvcItemControllerName", ThymeleafMetadata.getMvcControllerName(itemCtrl));
+    ctx.addExtraParameter("mvcUrl_datatables",
+        ThymeleafMetadata.getMvcUrlNameFor(collCtrl, ThymeleafMetadata.LIST_DATATABLES_METHOD_NAME));
+    ctx.addExtraParameter("mvcUrl_createForm",
+        ThymeleafMetadata.getMvcUrlNameFor(collCtrl, ThymeleafMetadata.CREATE_FORM_METHOD_NAME));
+    ctx.addExtraParameter("mvcUrl_list",
+        ThymeleafMetadata.getMvcUrlNameFor(collCtrl, ThymeleafMetadata.LIST_METHOD_NAME));
+    ctx.addExtraParameter("mvcUrl_show",
+        ThymeleafMetadata.getMvcUrlNameFor(itemCtrl, ThymeleafMetadata.SHOW_METHOD_NAME));
+    ctx.addExtraParameter("mvcUrl_editForm",
+        ThymeleafMetadata.getMvcUrlNameFor(itemCtrl, ThymeleafMetadata.EDIT_FORM_METHOD_NAME));
+    ctx.addExtraParameter("mvcUrl_remove",
+        ThymeleafMetadata.getMvcUrlNameFor(itemCtrl, ThymeleafMetadata.DELETE_METHOD_NAME));
+
+    ctx.addExtraParameter("mvcUrl_update",
+        ThymeleafMetadata.getMvcUrlNameFor(itemCtrl, ThymeleafMetadata.UPDATE_METHOD_NAME));
+
+    // TODO finder names
+
+    return ctx;
+  }
+
 }

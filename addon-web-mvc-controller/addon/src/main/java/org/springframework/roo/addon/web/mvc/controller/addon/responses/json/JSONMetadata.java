@@ -1,15 +1,28 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.responses.json;
 
-import static org.springframework.roo.model.SpringJavaType.RESPONSE_ENTITY;
+import static org.springframework.roo.model.SpringJavaType.DELETE_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.GET_MAPPING;
+import static org.springframework.roo.model.SpringJavaType.POST_MAPPING;
+import static org.springframework.roo.model.SpringJavaType.PUT_MAPPING;
+import static org.springframework.roo.model.SpringJavaType.RESPONSE_ENTITY;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.RelationInfoExtended;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.controller.annotations.responses.json.RooJSON;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -35,14 +48,6 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
 /**
  * Metadata for {@link RooJSON}.
  *
@@ -52,6 +57,10 @@ import java.util.TreeMap;
  */
 public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
+  private static final AnnotationMetadata ANN_REQUEST_BODY = AnnotationMetadataBuilder
+      .getInstance(SpringJavaType.REQUEST_BODY);
+  private static final AnnotationMetadata ANN_MODEL_ATTRIBUTE = AnnotationMetadataBuilder
+      .getInstance(SpringJavaType.MODEL_ATTRIBUTE);
   private static final JavaSymbolName LIST_URI_METHOD_NAME = new JavaSymbolName("listURI");
   private static final JavaSymbolName SHOW_URI_METHOD_NAME = new JavaSymbolName("showURI");
   private static final AnnotationMetadata ANN_METADATA_REQUEST_BODY =
@@ -97,6 +106,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private final MethodMetadata removeFromDetailsMethod;
   private final MethodMetadata addToDetailsBatchMethod;
   private final MethodMetadata removeFromDetailsBatchMethod;
+  private final MethodMetadata showDetailMethod;
+  private final MethodMetadata updateDetailMethod;
+  private final MethodMetadata deleteDetailMethod;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -152,7 +164,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       ControllerMetadata controllerMetadata, ServiceMetadata serviceMetadata,
       JpaEntityMetadata entityMetadata, String entityPlural, String entityIdentifierPlural,
       final List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne,
-      final JavaType itemController, Map<String, MethodMetadata> findersToAdd) {
+      final JavaType itemController, final Map<String, MethodMetadata> findersToAdd) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.readOnly = entityMetadata.isReadOnly();
@@ -181,7 +193,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     List<MethodMetadata> allMethods = new ArrayList<MethodMetadata>();
 
     switch (this.type) {
-      case COLLECTION:
+      case COLLECTION: {
         this.listMethod = addAndGet(getListMethod(), allMethods);
         this.listURIMethod = addAndGet(getListURIMethod(), allMethods);
 
@@ -209,9 +221,12 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         this.removeFromDetailsMethod = null;
         this.addToDetailsBatchMethod = null;
         this.removeFromDetailsBatchMethod = null;
+        this.showDetailMethod = null;
+        this.updateDetailMethod = null;
+        this.deleteDetailMethod = null;
         break;
-
-      case ITEM:
+      }
+      case ITEM: {
         this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
         this.showMethod = addAndGet(getShowMethod(), allMethods);
         this.showURIMethod = addAndGet(getShowURIMethod(), allMethods);
@@ -237,9 +252,13 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         this.removeFromDetailsMethod = null;
         this.addToDetailsBatchMethod = null;
         this.removeFromDetailsBatchMethod = null;
+        this.showDetailMethod = null;
+        this.updateDetailMethod = null;
+        this.deleteDetailMethod = null;
 
         break;
-      case SEARCH:
+      }
+      case SEARCH: {
         Map<String, MethodMetadata> tmpFinders = new TreeMap<String, MethodMetadata>();
         MethodMetadata finderMethod;
         for (Entry<String, MethodMetadata> finder : findersToAdd.entrySet()) {
@@ -265,9 +284,12 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         this.removeFromDetailsMethod = null;
         this.addToDetailsBatchMethod = null;
         this.removeFromDetailsBatchMethod = null;
+        this.showDetailMethod = null;
+        this.updateDetailMethod = null;
+        this.deleteDetailMethod = null;
         break;
-
-      case DETAIL:
+      }
+      case DETAIL: {
         this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
         Map<RelationInfo, MethodMetadata> modelAtributeDetailsMethod =
             new TreeMap<RelationInfo, MethodMetadata>();
@@ -277,14 +299,18 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
           MethodMetadata method =
               addAndGet(
                   getModelAttributeMethod(info.fieldName,
-                      controllerMetadata.getSericeMetadataForEntity(entityType), controllerMetadata
-                          .getDetailsServiceFields().get(entityType)), allMethods);
+                      controllerMetadata.getServiceMetadataForEntity(entityType),
+                      controllerMetadata.getDetailsServiceFields().get(entityType)), allMethods);
           modelAtributeDetailsMethod.put(info, method);
         }
         this.modelAttributeDetailsMethod = Collections.unmodifiableMap(modelAtributeDetailsMethod);
         this.listDetailsMethod = addAndGet(getListDetailsMethod(), allMethods);
         this.addToDetailsMethod = addAndGet(getAddToDetailsMethod(), allMethods);
-        this.removeFromDetailsMethod = addAndGet(getRemoveFromDetailsMethod(), allMethods);
+        if (controllerMetadata.getLastDetailsInfo().type == JpaRelationType.AGGREGATION) {
+          this.removeFromDetailsMethod = addAndGet(getRemoveFromDetailsMethod(), allMethods);
+        } else {
+          this.removeFromDetailsMethod = null;
+        }
         this.addToDetailsBatchMethod = addAndGet(getAddToDetailsBatchMethod(), allMethods);
         this.removeFromDetailsBatchMethod =
             addAndGet(getRemoveFromDetailsBatchMethod(), allMethods);
@@ -300,8 +326,47 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         this.showMethod = null;
         this.showURIMethod = null;
         this.finderMethods = null;
+        this.showDetailMethod = null;
+        this.updateDetailMethod = null;
+        this.deleteDetailMethod = null;
         break;
+      }
+      case DETAIL_ITEM: {
+        this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
+        Map<RelationInfo, MethodMetadata> modelAtributeDetailsMethod =
+            new TreeMap<RelationInfo, MethodMetadata>();
+        for (RelationInfo info : controllerMetadata.getDetailsFieldInfo()) {
+          JavaType entityType = info.childType;
+          MethodMetadata method =
+              addAndGet(
+                  getModelAttributeMethod(info.fieldName,
+                      controllerMetadata.getServiceMetadataForEntity(entityType),
+                      controllerMetadata.getDetailsServiceFields().get(entityType)), allMethods);
+          modelAtributeDetailsMethod.put(info, method);
+        }
+        this.modelAttributeDetailsMethod = Collections.unmodifiableMap(modelAtributeDetailsMethod);
+        this.showDetailMethod = addAndGet(getShowDetailMethod(), allMethods);
+        this.updateDetailMethod = addAndGet(getUpdateDetailMethod(), allMethods);
+        this.deleteDetailMethod = addAndGet(getDeleteDetailMethod(), allMethods);
 
+        this.listDetailsMethod = null;
+        this.addToDetailsMethod = null;
+        this.removeFromDetailsMethod = null;
+        this.addToDetailsBatchMethod = null;
+        this.removeFromDetailsBatchMethod = null;
+        this.listMethod = null;
+        this.listURIMethod = null;
+        this.createMethod = null;
+        this.createBatchMethod = null;
+        this.updateBatchMethod = null;
+        this.deleteBatchMethod = null;
+        this.updateMethod = null;
+        this.deleteMethod = null;
+        this.showMethod = null;
+        this.showURIMethod = null;
+        this.finderMethods = null;
+        break;
+      }
       default:
         throw new IllegalArgumentException("Unsupported Controller type: " + this.type.name());
     }
@@ -310,6 +375,90 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Build the ITD
     itdTypeDetails = builder.build();
+  }
+
+  private MethodMetadata getDeleteDetailMethod() {
+    return getRemoveFromDetailsMethod(new JavaSymbolName("delete"));
+  }
+
+  private MethodMetadata getUpdateDetailMethod() {
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("update");
+
+
+    final RelationInfoExtended info = controllerMetadata.getLastDetailsInfo();
+    final JavaType parentEntity = info.entityType;
+    final JavaType entity = info.childType;
+    final JpaEntityMetadata entityMetadata = info.childEntityMetadata;
+    final FieldMetadata entityIdentifier = entityMetadata.getCurrentIndentifierField();
+    final String entityItemName = StringUtils.uncapitalize(entity.getSimpleTypeName());
+    final ServiceMetadata serviceMetadata = controllerMetadata.getServiceMetadataForEntity(entity);
+
+
+    // Define parameters
+    final List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(parentEntity, ANN_MODEL_ATTRIBUTE));
+    parameterTypes.add(new AnnotatedJavaType(entity, ANN_MODEL_ATTRIBUTE));
+    parameterTypes
+        .add(new AnnotatedJavaType(entity, ANN_METADATA_VALID, ANN_METADATA_REQUEST_BODY));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.BINDING_RESULT));
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    final String storedName = "stored".concat(entity.getSimpleTypeName());
+    parameterNames.add(new JavaSymbolName(
+        StringUtils.uncapitalize(parentEntity.getSimpleTypeName())));
+    parameterNames.add(new JavaSymbolName(storedName));
+    parameterNames.add(new JavaSymbolName(entityItemName));
+    parameterNames.add(new JavaSymbolName("result"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @PutMapping annotation
+    AnnotationMetadataBuilder putMappingAnnotation = new AnnotationMetadataBuilder(PUT_MAPPING);
+    putMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    annotations.add(putMappingAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // if (result.hasErrors()) {
+    // return new ResponseEntity.status(HttpStatus.CONFLICT).body(result);
+    // }
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
+    bodyBuilder.indent();
+    bodyBuilder.appendFormalLine("return %s.status(%s.CONFLICT).body(result);",
+        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS));
+    bodyBuilder.indentRemove();
+    bodyBuilder.appendFormalLine("}");
+
+    // orderDetail.setId(storedOrderDetails.getId());
+    bodyBuilder.appendFormalLine("%s.set%s(%s.get%s());", entityItemName, entityIdentifier
+        .getFieldName().getSymbolNameCapitalisedFirstLetter(), storedName, entityIdentifier
+        .getFieldName().getSymbolNameCapitalisedFirstLetter());
+
+    // customerService.save(customer);
+    bodyBuilder.appendFormalLine("%s.%s(%s);", controllerMetadata.getLastDetailServiceField()
+        .getFieldName(), serviceMetadata.getCurrentSaveMethod().getMethodName(), entityItemName);
+
+    // return ResponseEntity.ok().build();
+    bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
   }
 
   /**
@@ -384,7 +533,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private MethodMetadata getRemoveFromDetailsBatchMethod() {
     RelationInfo detailsInfo = controllerMetadata.getLastDetailsInfo();
     final ServiceMetadata detailsServiceMetadata =
-        controllerMetadata.getSericeMetadataForEntity(detailsInfo.entityType);
+        controllerMetadata.getServiceMetadataForEntity(detailsInfo.entityType);
     final MethodMetadata removeFromDetailsMethod =
         detailsServiceMetadata.getRemoveFromRelationMethods().get(detailsInfo);
     final FieldMetadata detailsServiceField =
@@ -396,9 +545,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(new AnnotatedJavaType(removeFromDetailsMethod.getParameterTypes().get(0)
-        .getJavaType(), AnnotationMetadataBuilder.getInstance(SpringJavaType.MODEL_ATTRIBUTE)));
+        .getJavaType(), ANN_MODEL_ATTRIBUTE));
     parameterTypes.add(new AnnotatedJavaType(removeFromDetailsMethod.getParameterTypes().get(1)
-        .getJavaType(), AnnotationMetadataBuilder.getInstance(SpringJavaType.REQUEST_BODY)));
+        .getJavaType(), ANN_REQUEST_BODY));
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -410,8 +559,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @DeleteMapping annotation
-    AnnotationMetadataBuilder postMappingAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.DELETE_MAPPING);
+    AnnotationMetadataBuilder postMappingAnnotation = new AnnotationMetadataBuilder(DELETE_MAPPING);
     postMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
     postMappingAnnotation.addStringAttribute("value", "/batch");
     annotations.add(postMappingAnnotation);
@@ -442,7 +590,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private MethodMetadata getAddToDetailsBatchMethod() {
     RelationInfo detailsInfo = controllerMetadata.getLastDetailsInfo();
     final ServiceMetadata detailsServiceMetadata =
-        controllerMetadata.getSericeMetadataForEntity(detailsInfo.entityType);
+        controllerMetadata.getServiceMetadataForEntity(detailsInfo.entityType);
     final MethodMetadata addToMethod =
         detailsServiceMetadata.getAddToRelationMethods().get(detailsInfo);
     final FieldMetadata detailsServiceField =
@@ -454,9 +602,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(new AnnotatedJavaType(addToMethod.getParameterTypes().get(0).getJavaType(),
-        AnnotationMetadataBuilder.getInstance(SpringJavaType.MODEL_ATTRIBUTE)));
+        ANN_MODEL_ATTRIBUTE));
     parameterTypes.add(new AnnotatedJavaType(addToMethod.getParameterTypes().get(1).getJavaType(),
-        AnnotationMetadataBuilder.getInstance(SpringJavaType.REQUEST_BODY)));
+        ANN_REQUEST_BODY));
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -468,8 +616,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @PostMapping annotation
-    AnnotationMetadataBuilder postMappingAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.POST_MAPPING);
+    AnnotationMetadataBuilder postMappingAnnotation = new AnnotationMetadataBuilder(POST_MAPPING);
     postMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
     postMappingAnnotation.addStringAttribute("value", "/batch");
     annotations.add(postMappingAnnotation);
@@ -499,19 +646,30 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private MethodMetadata getRemoveFromDetailsMethod() {
     RelationInfo detailsInfo = controllerMetadata.getLastDetailsInfo();
     final ServiceMetadata detailsServiceMetadata =
-        controllerMetadata.getSericeMetadataForEntity(detailsInfo.entityType);
+        controllerMetadata.getServiceMetadataForEntity(detailsInfo.entityType);
     final MethodMetadata removeFromMethod =
         detailsServiceMetadata.getRemoveFromRelationMethods().get(detailsInfo);
-    final FieldMetadata detailsServiceField =
-        controllerMetadata.getDetailsServiceFields(detailsInfo.entityType);
 
     // Define methodName
     final JavaSymbolName methodName = removeFromMethod.getMethodName();
+    return getRemoveFromDetailsMethod(methodName);
+  }
+
+  private MethodMetadata getRemoveFromDetailsMethod(JavaSymbolName methodName) {
+    RelationInfo detailsInfo = controllerMetadata.getLastDetailsInfo();
+    final ServiceMetadata detailsServiceMetadata =
+        controllerMetadata.getServiceMetadataForEntity(detailsInfo.entityType);
+    final MethodMetadata removeFromMethod =
+        detailsServiceMetadata.getRemoveFromRelationMethods().get(detailsInfo);
+
+    final FieldMetadata detailsServiceField =
+        controllerMetadata.getDetailsServiceFields(detailsInfo.entityType);
+
     JavaSymbolName itemsName = removeFromMethod.getParameterNames().get(1);
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(new AnnotatedJavaType(removeFromMethod.getParameterTypes().get(0)
-        .getJavaType(), AnnotationMetadataBuilder.getInstance(SpringJavaType.MODEL_ATTRIBUTE)));
+        .getJavaType(), ANN_MODEL_ATTRIBUTE));
     AnnotationMetadataBuilder pathVariableAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
     pathVariableAnnotation.addStringAttribute("value", itemsName.getSymbolName());
@@ -529,8 +687,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @DeleteMapping annotation
-    AnnotationMetadataBuilder postMappingAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.DELETE_MAPPING);
+    AnnotationMetadataBuilder postMappingAnnotation = new AnnotationMetadataBuilder(DELETE_MAPPING);
     postMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
     annotations.add(postMappingAnnotation);
 
@@ -559,7 +716,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private MethodMetadata getAddToDetailsMethod() {
     RelationInfo detailsInfo = controllerMetadata.getLastDetailsInfo();
     final ServiceMetadata detailsServiceMetadata =
-        controllerMetadata.getSericeMetadataForEntity(detailsInfo.entityType);
+        controllerMetadata.getServiceMetadataForEntity(detailsInfo.entityType);
     final MethodMetadata addToMethod =
         detailsServiceMetadata.getAddToRelationMethods().get(detailsInfo);
     final FieldMetadata detailsServiceField =
@@ -571,7 +728,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(new AnnotatedJavaType(addToMethod.getParameterTypes().get(0).getJavaType(),
-        AnnotationMetadataBuilder.getInstance(SpringJavaType.MODEL_ATTRIBUTE)));
+        ANN_MODEL_ATTRIBUTE));
     AnnotationMetadataBuilder pathVariableAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
     pathVariableAnnotation.addStringAttribute("value", itemsName.getSymbolName());
@@ -589,8 +746,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @PostMapping annotation
-    AnnotationMetadataBuilder postMappingAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.POST_MAPPING);
+    AnnotationMetadataBuilder postMappingAnnotation = new AnnotationMetadataBuilder(POST_MAPPING);
     postMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
     annotations.add(postMappingAnnotation);
 
@@ -619,7 +775,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private MethodMetadata getListDetailsMethod() {
     RelationInfo detailsInfo = controllerMetadata.getLastDetailsInfo();
     final ServiceMetadata detailsServiceMetadata =
-        controllerMetadata.getSericeMetadataForEntity(detailsInfo.childType);
+        controllerMetadata.getServiceMetadataForEntity(detailsInfo.childType);
     final MethodMetadata findAllMethod =
         detailsServiceMetadata.getRefencedFieldFindAllDefinedMethod(detailsInfo.mappedBy);
     final FieldMetadata detailsServiceField =
@@ -631,8 +787,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(new AnnotatedJavaType(
-        findAllMethod.getParameterTypes().get(0).getJavaType(), AnnotationMetadataBuilder
-            .getInstance(SpringJavaType.MODEL_ATTRIBUTE)));
+        findAllMethod.getParameterTypes().get(0).getJavaType(), ANN_MODEL_ATTRIBUTE));
     parameterTypes.add(new AnnotatedJavaType(SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE));
 
@@ -876,8 +1031,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @PostMapping annotation
-    AnnotationMetadataBuilder postMappingAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.POST_MAPPING);
+    AnnotationMetadataBuilder postMappingAnnotation = new AnnotationMetadataBuilder(POST_MAPPING);
     postMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
     annotations.add(postMappingAnnotation);
 
@@ -974,9 +1128,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Define parameters
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    AnnotationMetadataBuilder modelAttributeAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
-    parameterTypes.add(new AnnotatedJavaType(this.entity, modelAttributeAnnotation.build()));
+    parameterTypes.add(new AnnotatedJavaType(this.entity, ANN_MODEL_ATTRIBUTE));
     parameterTypes.add(new AnnotatedJavaType(this.entity, ANN_METADATA_VALID,
         ANN_METADATA_REQUEST_BODY));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.BINDING_RESULT));
@@ -999,8 +1151,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @PutMapping annotation
-    AnnotationMetadataBuilder putMappingAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.PUT_MAPPING);
+    AnnotationMetadataBuilder putMappingAnnotation = new AnnotationMetadataBuilder(PUT_MAPPING);
     putMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
     annotations.add(putMappingAnnotation);
 
@@ -1019,7 +1170,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     bodyBuilder.appendFormalLine("}");
 
     // customer.setId(storedCustomer.getId());
-    bodyBuilder.appendFormalLine("%s.set%s(%s.getId());", entityItemName,
+    bodyBuilder.appendFormalLine("%s.set%s(%s.get%s());", entityItemName,
         StringUtils.capitalize(entityIdentifier), storedName,
         StringUtils.capitalize(entityIdentifier));
 
@@ -1059,9 +1210,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Define parameters
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    AnnotationMetadataBuilder modelAttributeAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
-    parameterTypes.add(new AnnotatedJavaType(entity, modelAttributeAnnotation.build()));
+    parameterTypes.add(new AnnotatedJavaType(entity, ANN_MODEL_ATTRIBUTE));
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -1078,7 +1227,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Adding @DeleteMapping annotation
     AnnotationMetadataBuilder deleteMappingAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.DELETE_MAPPING);
+        new AnnotationMetadataBuilder(DELETE_MAPPING);
     deleteMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
     annotations.add(deleteMappingAnnotation);
 
@@ -1182,12 +1331,69 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Define parameters
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    AnnotationMetadataBuilder modelAttributeAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
-    parameterTypes.add(new AnnotatedJavaType(entity, modelAttributeAnnotation.build()));
+    parameterTypes.add(new AnnotatedJavaType(entity, ANN_MODEL_ATTRIBUTE));
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName(entityItemName));
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @GetMapping annotation
+    AnnotationMetadataBuilder getMappingAnnotation = new AnnotationMetadataBuilder(GET_MAPPING);
+    getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    annotations.add(getMappingAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // return ResponseEntity.status(HttpStatus.FOUND).body(customer);
+    bodyBuilder.appendFormalLine("return %s.status(%s.FOUND).body(%s);",
+        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS),
+        entityItemName);
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "show" method using JSON response type
+   *
+   * @return MethodMetadata
+   */
+  private MethodMetadata getShowDetailMethod() {
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("show");
+
+    // Define parameters
+    final List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    JavaType parentEntity = controllerMetadata.getLastDetailsInfo().entityType;
+    JavaType entity = controllerMetadata.getLastDetailEntity();
+    String entityItemName = StringUtils.uncapitalize(entity.getSimpleTypeName());
+
+    parameterTypes.add(new AnnotatedJavaType(parentEntity, ANN_MODEL_ATTRIBUTE));
+    parameterNames.add(new JavaSymbolName(
+        StringUtils.uncapitalize(parentEntity.getSimpleTypeName())));
+
+
+    parameterTypes.add(new AnnotatedJavaType(entity, ANN_MODEL_ATTRIBUTE));
+    parameterNames.add(new JavaSymbolName(entityItemName));
+
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.MODEL));
+    parameterNames.add(new JavaSymbolName("model"));
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -1251,8 +1457,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @PostMapping annotation
-    AnnotationMetadataBuilder postMappingAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.POST_MAPPING);
+    AnnotationMetadataBuilder postMappingAnnotation = new AnnotationMetadataBuilder(POST_MAPPING);
     postMappingAnnotation.addStringAttribute("value", "/batch");
     postMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
     annotations.add(postMappingAnnotation);
@@ -1321,8 +1526,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @PutMapping annotation
-    AnnotationMetadataBuilder putMappingAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.PUT_MAPPING);
+    AnnotationMetadataBuilder putMappingAnnotation = new AnnotationMetadataBuilder(PUT_MAPPING);
     putMappingAnnotation.addStringAttribute("value", "/batch");
     putMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
     annotations.add(putMappingAnnotation);
@@ -1393,7 +1597,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Adding @DeleteMapping annotation
     AnnotationMetadataBuilder deleteMappingAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.DELETE_MAPPING);
+        new AnnotationMetadataBuilder(DELETE_MAPPING);
     deleteMappingAnnotation.addStringAttribute("value", "/batch/{" + entityIdentifierPlural + "}");
     deleteMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
     annotations.add(deleteMappingAnnotation);
@@ -1493,8 +1697,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, parameterTypes,
             parameterNames, bodyBuilder);
 
-    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE)
-        .build());
+    methodBuilder.addAnnotation(ANN_MODEL_ATTRIBUTE);
 
     return methodBuilder.build();
   }

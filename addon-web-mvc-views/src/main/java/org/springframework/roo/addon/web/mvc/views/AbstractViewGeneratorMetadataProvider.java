@@ -16,12 +16,15 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.FinderOperations;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.FinderOperationsImpl;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.plural.addon.PluralService;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerLocator;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.DetailAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.addon.finder.SearchAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
@@ -118,11 +121,7 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
       List<FieldMetadata> enumFields, Map<String, MethodMetadata> findersToAdd,
       Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields,
       Map<JavaType, List<FieldMetadata>> formBeansEnumFields, JavaType detailsItemController,
-      JavaType detailCollectionController, ViewContext ctx);
-
-  protected void fillContext(ViewContext ctx) {
-    // To be overridden if needed
-  }
+      JavaType detailCollectionController);
 
   @Override
   protected ItdTypeDetailsProvidingMetadataItem getMetadata(
@@ -147,6 +146,7 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
     JavaType itemController = null;
     JavaType collectionController = null;
     final JavaPackage controllerPackage = controllerDetail.getType().getPackage();
+    final String pathPrefix = controllerMetadata.getAnnotationValues().getPathPrefix();
     if (controllerMetadata.getType() != ControllerType.ITEM) {
       // Locate ItemController
       Collection<ClassOrInterfaceTypeDetails> itemControllers =
@@ -157,12 +157,8 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
         return null;
       } else {
         // Get controller with the same package
-        for (ClassOrInterfaceTypeDetails controller : itemControllers) {
-          if (controllerPackage.equals(controller.getType().getPackage())) {
-            itemController = controller.getType();
-            break;
-          }
-        }
+        itemController =
+            filterControllerByPackageAndPrefix(itemControllers, controllerPackage, pathPrefix);
         Validate.notNull(itemControllers,
             "ERROR: Can't find ITEM-type controller related to controller '%s'", controllerDetail
                 .getType().getFullyQualifiedTypeName());
@@ -175,12 +171,8 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
           getControllerLocator().getControllers(entity, ControllerType.COLLECTION, viewType);
 
       // Get controller with the same package
-      for (ClassOrInterfaceTypeDetails controller : collectionControllers) {
-        if (controllerPackage.equals(controller.getType().getPackage())) {
-          collectionController = controller.getType();
-          break;
-        }
-      }
+      collectionController =
+          filterControllerByPackageAndPrefix(collectionControllers, controllerPackage, pathPrefix);
       Validate.notNull(collectionController,
           "ERROR: Can't find Collection-type controller related to controller '%s'",
           controllerDetail.getType().getFullyQualifiedTypeName());
@@ -212,42 +204,91 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
     JavaType detailItemController = null;
     JavaType detailCollectionController = null;
     if (controllerMetadata.getType() == ControllerType.DETAIL) {
+      if (controllerMetadata.getLastDetailsInfo().type == JpaRelationType.AGGREGATION) {
+        // Locate controller item which handles details elements
+        JavaType detailEntity = controllerMetadata.getLastDetailEntity();
+        Collection<ClassOrInterfaceTypeDetails> detailsControllersToCheck =
+            getControllerLocator().getControllers(detailEntity, ControllerType.ITEM, viewType);
+
+        for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
+          if (controllerPackage.equals(controller.getType().getPackage())) {
+            detailItemController = controller.getType();
+            break;
+          }
+        }
+        Validate
+            .notNull(
+                detailItemController,
+                "ERROR: Can't find Item-type controller for details entity '%s' related to controller '%s'",
+                detailEntity.getFullyQualifiedTypeName(), controllerDetail.getType()
+                    .getFullyQualifiedTypeName());
+
+        // Locate controller collection which handles details elements
+        detailsControllersToCheck =
+            getControllerLocator()
+                .getControllers(detailEntity, ControllerType.COLLECTION, viewType);
+
+        for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
+          if (controllerPackage.equals(controller.getType().getPackage())) {
+            detailCollectionController = controller.getType();
+            break;
+          }
+        }
+        Validate
+            .notNull(
+                detailItemController,
+                "ERROR: Can't find Collection-type controller for details entity '%s' related to controller '%s'",
+                detailEntity.getFullyQualifiedTypeName(), controllerDetail.getType()
+                    .getFullyQualifiedTypeName());
+
+
+      } else {
+        // ** COMPOSITION **
+
+        // Locate controller item which handles details elements
+        Collection<ClassOrInterfaceTypeDetails> detailsControllersToCheck =
+            getControllerLocator().getControllers(entity, ControllerType.DETAIL_ITEM, viewType);
+
+        for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
+          if (controllerPackage.equals(controller.getType().getPackage())) {
+            DetailAnnotationValues annotationValues = new DetailAnnotationValues(controller);
+            if (controllerMetadata.getDetailAnnotaionFieldValue().equals(
+                annotationValues.getRelationField())) {
+              detailItemController = controller.getType();
+            }
+            break;
+          }
+        }
+        Validate
+            .notNull(
+                detailItemController,
+                "ERROR: Can't find Detail-Item-type controller for details entity '%s' related to controller '%s' (relation '%s')",
+                entity.getFullyQualifiedTypeName(), controllerDetail.getType()
+                    .getFullyQualifiedTypeName(), controllerMetadata.getDetailAnnotaionFieldValue());
+
+      }
+    }
+    if (controllerMetadata.getType() == ControllerType.DETAIL_ITEM) {
       // Locate controller item which handles details elements
-      JavaType detailEntity = controllerMetadata.getLastDetailEntity();
       Collection<ClassOrInterfaceTypeDetails> detailsControllersToCheck =
-          getControllerLocator().getControllers(detailEntity, ControllerType.ITEM, viewType);
+          getControllerLocator().getControllers(entity, ControllerType.DETAIL, viewType);
 
       for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
         if (controllerPackage.equals(controller.getType().getPackage())) {
-          detailItemController = controller.getType();
+          DetailAnnotationValues annotationValues = new DetailAnnotationValues(controller);
+          if (controllerMetadata.getDetailAnnotaionFieldValue().equals(
+              annotationValues.getRelationField())) {
+            detailCollectionController = controller.getType();
+          }
           break;
         }
       }
       Validate
           .notNull(
-              detailItemController,
-              "ERROR: Can't find Item-type controller for details entity '%s' related to controller '%s'",
-              detailEntity.getFullyQualifiedTypeName(), controllerDetail.getType()
-                  .getFullyQualifiedTypeName());
-
-      // Locate controller collection which handles details elements
-      detailsControllersToCheck =
-          getControllerLocator().getControllers(detailEntity, ControllerType.COLLECTION, viewType);
-
-      for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
-        if (controllerPackage.equals(controller.getType().getPackage())) {
-          detailCollectionController = controller.getType();
-          break;
-        }
-      }
-      Validate
-          .notNull(
-              detailItemController,
-              "ERROR: Can't find Collection-type controller for details entity '%s' related to controller '%s'",
-              detailEntity.getFullyQualifiedTypeName(), controllerDetail.getType()
-                  .getFullyQualifiedTypeName());
-
-
+              detailCollectionController,
+              "ERROR: Can't find Detail-type controller for details entity '%s' related to controller '%s' (relation '%s')",
+              entity.getFullyQualifiedTypeName(), controllerDetail.getType()
+                  .getFullyQualifiedTypeName(), controllerMetadata.getDetailAnnotaionFieldValue());
     }
 
 
@@ -301,8 +342,21 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
       }
     }
 
-    List<FieldMetadata> dateTimeFields = getDateTimeFields(entityMemberDetails);
-    List<FieldMetadata> enumFields = getEnumFields(entityMemberDetails);
+    List<FieldMetadata> dateTimeFields;
+    List<FieldMetadata> enumFields;
+    if (controllerMetadata.getType() == ControllerType.DETAIL
+        || controllerMetadata.getType() == ControllerType.DETAIL_ITEM) {
+
+      ClassOrInterfaceTypeDetails childCid =
+          getTypeLocationService().getTypeDetails(controllerMetadata.getLastDetailEntity());
+      MemberDetails childMemberDetails = getMemberDetails(childCid);
+      dateTimeFields = getDateTimeFields(childMemberDetails);
+      enumFields = getEnumFields(childMemberDetails);
+
+    } else {
+      dateTimeFields = getDateTimeFields(entityMemberDetails);
+      enumFields = getEnumFields(entityMemberDetails);
+    }
 
     Map<String, MethodMetadata> findersToAdd = new HashMap<String, MethodMetadata>();
     Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields =
@@ -373,55 +427,62 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
 
 
 
-    // Fill view context
-    ViewContext ctx = new ViewContext();
-    ctx.setControllerPath(controllerMetadata.getPath());
-    ctx.setProjectName(getProjectOperations().getProjectName(""));
-    ctx.setVersion(getProjectOperations().getPomFromModuleName("").getVersion());
-    ctx.setEntityName(entity.getSimpleTypeName());
-    ctx.setModelAttribute(StringUtils.uncapitalize(entity.getSimpleTypeName()));
-    ctx.setModelAttributeName(StringUtils.uncapitalize(entity.getSimpleTypeName()));
-    ctx.setIdentifierField(entityMetadata.getCurrentIndentifierField().getFieldName()
-        .getSymbolName());
-
-    // Checking if Spring Security has been installed
-    if (getProjectOperations().isFeatureInstalled(FeatureNames.SECURITY)) {
-      ctx.setSecurityEnabled(true);
-    }
-
     T viewMetadata =
         createMetadataInstance(metadataIdentificationString, aspectName,
             governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
             entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
             collectionController, dateTimeFields, enumFields, findersToAdd,
             formBeansDateTimeFields, formBeansEnumFields, detailItemController,
-            detailCollectionController, ctx);
+            detailCollectionController);
 
-    // Call Abstract Method fillContext to fill context with view provider custom implementation
-    fillContext(ctx);
+    // Fill view context
+    ViewContext ctx =
+        viewGenerationService.createViewContext(controllerMetadata, entity, entityMetadata,
+            viewMetadata);
+
+    // Checking if Spring Security has been installed
+    if (getProjectOperations().isFeatureInstalled(FeatureNames.SECURITY)) {
+      ctx.setSecurityEnabled(true);
+    }
 
 
     final String module = controllerDetail.getType().getModule();
 
-    if (controllerMetadata.getType() == ControllerType.COLLECTION) {
-      // Add list view
-      viewGenerationService.addListView(module, entityMetadata, entityMemberDetails,
-          detailsControllers, ctx);
-      if (!entityMetadata.isReadOnly()) {
-        // If not readOnly, add create view
-        viewGenerationService.addCreateView(module, entityMetadata, entityMemberDetails, ctx);
-      }
-    } else if (controllerMetadata.getType() == ControllerType.ITEM) {
-      // Add show view
-      viewGenerationService.addShowView(module, entityMetadata, entityMemberDetails, ctx);
+    switch (controllerMetadata.getType()) {
+      case COLLECTION:
+        // Add list view
+        viewGenerationService.addListView(module, entityMetadata, entityMemberDetails,
+            detailsControllers, ctx);
+        if (!entityMetadata.isReadOnly()) {
+          // If not readOnly, add create view
+          viewGenerationService.addCreateView(module, entityMetadata, entityMemberDetails, ctx);
+        }
 
-      if (!entityMetadata.isReadOnly()) {
-        // If not readOnly, add update view
-        viewGenerationService.addUpdateView(module, entityMetadata, entityMemberDetails, ctx);
-      }
-    } else if (controllerMetadata.getType() == ControllerType.DETAIL) {
-      viewGenerationService.addDetailsViews(module, entityMetadata, entityMemberDetails,
-          controllerMetadata, viewMetadata, ctx);
+        break;
+      case ITEM:
+        // Add show view
+        viewGenerationService.addShowView(module, entityMetadata, entityMemberDetails, ctx);
+
+        if (!entityMetadata.isReadOnly()) {
+          // If not readOnly, add update view
+          viewGenerationService.addUpdateView(module, entityMetadata, entityMemberDetails, ctx);
+        }
+        break;
+      case DETAIL:
+        viewGenerationService.addDetailsViews(module, entityMetadata, entityMemberDetails,
+            controllerMetadata, viewMetadata, ctx);
+        break;
+
+      case DETAIL_ITEM:
+        viewGenerationService.addDetailsItemViews(module, entityMetadata, entityMemberDetails,
+            controllerMetadata, viewMetadata, ctx);
+        break;
+
+      case SEARCH:
+        // TODO
+        break;
+      default:
+        throw new IllegalArgumentException();
     }
 
     // Add finder views
@@ -519,6 +580,24 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
 
     return viewMetadata;
   }
+
+
+  private JavaType filterControllerByPackageAndPrefix(
+      Collection<ClassOrInterfaceTypeDetails> itemControllers, JavaPackage controllerPackage,
+      String pathPrefix) {
+    for (ClassOrInterfaceTypeDetails controller : itemControllers) {
+      ControllerAnnotationValues values = new ControllerAnnotationValues(controller);
+      if (controllerPackage.equals(controller.getType().getPackage())) {
+        if (StringUtils.isBlank(pathPrefix) && StringUtils.isBlank(values.getPathPrefix())) {
+          return controller.getType();
+        } else if (StringUtils.equals(pathPrefix, values.getPathPrefix())) {
+          return controller.getType();
+        }
+      }
+    }
+    return null;
+  }
+
 
   private List<FieldMetadata> getEnumFields(MemberDetails entityMemberDetails) {
     List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
