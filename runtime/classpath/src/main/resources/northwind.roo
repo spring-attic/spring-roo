@@ -172,52 +172,52 @@ field set --fieldName products --type ~.domain.Product --cardinality ONE_TO_MANY
 // field set --fieldName stores --type ~.domain.Store --cardinality MANY_TO_MANY --joinTable NW_SUPPLIER_STORES --joinColumns SUPPLIER --referencedColumns SUPPLIER_ID --inverseJoinColumns STORE --inverseReferencedColumns STORE_ID
 
 // Generate DTO's
-dto --class ~.CustomerOrderStatusAndEmployeeProjection --immutable
+dto --class ~.domain.CustomerOrderStatusAndEmployeeProjection --immutable
 field number --fieldName orderId --type java.lang.Long
 field number --fieldName customerId --type java.lang.Long
 field number --fieldName employeeId --type java.lang.Long
-field other --fieldName status --type ~.Status
+field other --fieldName status --type ~.domain.Status
 field date --fieldName orderDate --type java.util.Calendar
 field string --fieldName customerCompanyName
 
-dto --class ~.CustomerOrderStatusProjection --immutable
+dto --class ~.domain.CustomerOrderStatusProjection --immutable
 field number --fieldName orderId --type java.lang.Long
-field other --fieldName status --type ~.Status
+field other --fieldName status --type ~.domain.Status
 field date --fieldName orderDate --type java.util.Calendar
 field string --fieldName customerCompanyName
 
-dto --class ~.CategoryProjection --immutable
+dto --class ~.domain.CategoryProjection --immutable
 field number --fieldName categoryId --type java.lang.Long
 field string --fieldName name
 field string --fieldName description
 
-dto --class ~.UserCertificateDniMessageBean --immutable
+dto --class ~.domain.UserCertificateDniMessageBean --immutable
 field number --fieldName status --type int
 field string --fieldName statusMsg
 field string --fieldName dni
 
-dto --class ~.CityProjection --immutable
+dto --class ~.domain.CityProjection --immutable
 field number --fieldName cityId --type java.lang.Long
 field number --fieldName regionId --type java.lang.Long
 field string --fieldName description
 
-dto --class ~.CustomerOrderClosedDateAndCustomerProjection --immutable
+dto --class ~.domain.CustomerOrderClosedDateAndCustomerProjection --immutable
 field number --fieldName customerId --type java.lang.Long
 field date --fieldName closedDate --type java.util.Calendar
 field string --fieldName customerCompanyName
 field number --fieldName total --type java.math.BigDecimal
 
-dto --class ~.CustomerOrderProductAndTotalProjection --immutable
+dto --class ~.domain.CustomerOrderProductAndTotalProjection --immutable
 field number --fieldName productId --type java.lang.Long
 field string --fieldName productName
 field number --fieldName quantity --type java.lang.Integer
 field number --fieldName total --type java.math.BigDecimal
 
-dto --class ~.CountryProjection --immutable
+dto --class ~.domain.CountryProjection --immutable
 field number --fieldName countryId --type java.lang.Long
 field string --fieldName description
 
-dto --class ~.CustomerProjection --immutable
+dto --class ~.domain.CustomerProjection --immutable
 field number --fieldName customerId --type java.lang.Long
 field string --fieldName companyName
 field string --fieldName contactName
@@ -225,43 +225,43 @@ field string --fieldName email
 field string --fieldName phone
 field string --fieldName fax
 
-dto --class ~.CustomerMailMessageBean --immutable
+dto --class ~.domain.CustomerMailMessageBean --immutable
 field number --fieldName customerId --type java.lang.Long
 field string --fieldName companyName
 field string --fieldName message
 
-dto --class ~.CustomerOrderProjection --immutable
+dto --class ~.domain.CustomerOrderProjection --immutable
 field number --fieldName orderId --type java.lang.Long
 field number --fieldName employeeId --type java.lang.Long
 field number --fieldName customerId --type java.lang.Long
 field date --fieldName orderDate --type java.util.Calendar
 field string --fieldName employeeName
 field string --fieldName customerCompanyName
-field other --fieldName status --type ~.Status
+field other --fieldName status --type ~.domain.Status
 field date --fieldName shippedDate --type java.util.Calendar
 field number --fieldName freight --type java.math.BigDecimal
 
-dto --class ~.CustomerOrderProductProjection --immutable
+dto --class ~.domain.CustomerOrderProductProjection --immutable
 field number --fieldName customerOrderId --type java.lang.Long
 field number --fieldName productId --type java.lang.Long
 field number --fieldName employeeId --type java.lang.Long
 field number --fieldName customerId --type java.lang.Long
 field date --fieldName orderDate --type java.util.Calendar
-field other --fieldName status --type ~.Status
+field other --fieldName status --type ~.domain.Status
 field string --fieldName employeeName
 field string --fieldName customerCompanyName
 field date --fieldName shippedDate --type java.util.Calendar
 field number --fieldName freight --type java.math.BigDecimal
 
-dto --class ~.CustomerOrderFormBean --immutable
+dto --class ~.domain.CustomerOrderFormBean --immutable
 field number --fieldName customerId --type java.lang.Long
 field number --fieldName employeeId --type java.lang.Long
 // Commented until reactivation of field set on DTO's
-//field set --fieldName statuses --type ~.Status
+//field set --fieldName statuses --type ~.domain.Status
 field date --fieldName orderDateStart --type java.util.Calendar
 field date --fieldName orderDateEnd --type java.util.Calendar
 
-dto --class ~.CustomerOrderCustomerProjection --immutable
+dto --class ~.domain.CustomerOrderCustomerProjection --immutable
 field number --fieldName employeeId --type java.lang.Long
 field number --fieldName customerId --type java.lang.Long
 field string --fieldName employeeName
@@ -272,7 +272,7 @@ field number --fieldName total --type java.math.BigDecimal
 // Commented until reactivation of field set on DTO's
 //field set --fieldName customerOrderClosedDateAndCustomerProjection --type ~.CustomerOrderClosedDateAndCustomerProjection
 
-dto --class ~.CustomerUserLoginFormBean --immutable
+dto --class ~.domain.CustomerUserLoginFormBean --immutable
 field number --fieldName customerId --type java.lang.Long
 field string --fieldName companyName --notNull --sizeMax 50
 field string --fieldName contactName --notNull --sizeMax 100
@@ -291,7 +291,7 @@ field string --fieldName password --notNull --sizeMin 8 --sizeMax 128
 // Add @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./])[A-Za-z\\d`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./]*") to this field
 field string --fieldName repeatPassword --notNull --sizeMin 8 --sizeMax 128
 
-dto --class ~.EmployeeProjection --immutable
+dto --class ~.domain.EmployeeProjection --immutable
 field number --fieldName employeeId --type java.lang.Long
 field number --fieldName supervisorId --type java.lang.Long
 field string --fieldName firstName
@@ -300,7 +300,7 @@ field string --fieldName phone
 field string --fieldName extension
 field string --fieldName supervisorName
 
-dto --class ~.EmployeeUserLoginFormBean --immutable
+dto --class ~.domain.EmployeeUserLoginFormBean --immutable
 field number --fieldName employeeId --type java.lang.Long
 field string --fieldName firstName --notNull --sizeMax 50
 field string --fieldName lastName --notNull --sizeMax 120
@@ -322,7 +322,7 @@ field string --fieldName password --notNull --sizeMin 8 --sizeMax 128
 // Add @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./])[A-Za-z\\d`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./]*") to this field
 field string --fieldName repeatPassword --notNull --sizeMin 8 --sizeMax 128
 
-dto --class ~.InventoryProjection --immutable
+dto --class ~.domain.InventoryProjection --immutable
 field number --fieldName productId --type java.lang.Long
 field string --fieldName name
 field number --fieldName unitsInStock --type java.lang.Integer
@@ -331,7 +331,7 @@ field number --fieldName availableStock --type java.lang.Integer
 field number --fieldName reorderLevel --type java.lang.Integer
 field number --fieldName replenishStock --type java.lang.Integer
 
-dto --class ~.InvoiceProjection --immutable
+dto --class ~.domain.InvoiceProjection --immutable
 field number --fieldName customerOrderId --type java.lang.Long
 field number --fieldName shipCountryId --type java.lang.Long
 field number --fieldName shipRegionId --type java.lang.Long
@@ -362,9 +362,9 @@ field number --fieldName freight --type java.math.BigDecimal
 field number --fieldName subtotal --type java.math.BigDecimal
 field number --fieldName total --type java.math.BigDecimal
 // Commented until reactivation of field set on DTO's
-//field set --fieldName orderDetailsProjection --type ~.OrderDetailProjection
+//field set --fieldName orderDetailsProjection --type ~.domain.OrderDetailProjection
 
-dto --class ~.OrderDetailProjection --immutable
+dto --class ~.domain.OrderDetailProjection --immutable
 field number --fieldName orderDetailId --type java.lang.Long
 field number --fieldName customerOrderId --type java.lang.Long
 field number --fieldName productId --type java.lang.Long
@@ -374,22 +374,22 @@ field number --fieldName unitPrice --type java.math.BigDecimal
 field number --fieldName discount --type java.math.BigDecimal
 field number --fieldName total --type java.math.BigDecimal
 
-dto --class ~.OrderDetailCustomerProjection --immutable
+dto --class ~.domain.OrderDetailCustomerProjection --immutable
 field number --fieldName orderDetailId --type java.lang.Long
 field string --fieldName customerName
-field other --fieldName status --type ~.Status
+field other --fieldName status --type ~.domain.Status
 field number --fieldName quantity --type java.lang.Integer
 field string --fieldName productName
 
-dto --class ~.OrderDetailQuantityBean --immutable
+dto --class ~.domain.OrderDetailQuantityBean --immutable
 field number --fieldName orderDetailId --type java.lang.Long --notNull
 field number --fieldName customerOrderId --type java.lang.Long --notNull
 field number --fieldName quantityToAdd --type java.lang.Integer --notNull
 
-dto --class ~.OrderDetailFormBean --immutable
+dto --class ~.domain.OrderDetailFormBean --immutable
 field number --fieldName customerId --type java.lang.Long
 
-dto --class ~.ProductProjection --immutable
+dto --class ~.domain.ProductProjection --immutable
 field number --fieldName productId --type java.lang.Long
 field number --fieldName categoryId --type java.lang.Long
 field number --fieldName supplierId --type java.lang.Long
@@ -401,7 +401,7 @@ field number --fieldName unitPrice --type java.math.BigDecimal
 field string --fieldName quantityPerUnit
 field boolean --fieldName discontinued
 
-dto --class ~.ProductOrdersProjection --immutable
+dto --class ~.domain.ProductOrdersProjection --immutable
 field number --fieldName productId --type java.lang.Long
 field number --fieldName categoryId --type java.lang.Long
 field number --fieldName supplierId --type java.lang.Long
@@ -415,7 +415,7 @@ field boolean --fieldName discontinued
 field number --fieldName purchaseOrdersCount --type java.lang.Long
 field number --fieldName orderDetailsCount --type java.lang.Long
 
-dto --class ~.CustomerOrderClosedDateAndProductProjection --immutable
+dto --class ~.domain.CustomerOrderClosedDateAndProductProjection --immutable
 field number --fieldName employeeId --type java.lang.Long
 field number --fieldName productId --type java.lang.Long
 field string --fieldName employeeName
@@ -426,7 +426,7 @@ field number --fieldName total --type java.math.BigDecimal
 // Commented until reactivation of field set on DTO's
 //field set --fieldName CustomerOrderClosedDateAndProduct --type ~.CustomerOrderClosedDateAndProduct
 
-dto --class ~.PurchaseOrderProjection --immutable
+dto --class ~.domain.PurchaseOrderProjection --immutable
 field number --fieldName purchaseOrderId --type java.lang.Long
 field number --fieldName productId --type java.lang.Long
 field number --fieldName employeeId --type java.lang.Long
@@ -435,28 +435,28 @@ field string --fieldName employeeName
 field number --fieldName quantity --type java.lang.Integer
 field number --fieldName totalCost --type java.math.BigDecimal
 
-dto --class ~.InboxMailMessageBean --immutable
+dto --class ~.domain.InboxMailMessageBean --immutable
 field string --fieldName subject
 field string --fieldName content
 field string --fieldName from --permitReservedWords
 
-dto --class ~.RegionProjection --immutable
+dto --class ~.domain.RegionProjection --immutable
 field number --fieldName regionId --type java.lang.Long
 field number --fieldName countryId --type java.lang.Long
 field string --fieldName description
 
-dto --class ~.ProductAvailableStockAndReorderLevelProjection --immutable
+dto --class ~.domain.ProductAvailableStockAndReorderLevelProjection --immutable
 field number --fieldName productId --type java.lang.Long
 field string --fieldName name
 field number --fieldName avalaibleStock --type java.lang.Integer
 field number --fieldName reorderLevel --type java.lang.Integer
 
-entity projection --class ~.ShipperProjection --entity ~.domain.Shipper --fields id,companyName,phone
+entity projection --class ~.domain.ShipperProjection --entity ~.domain.Shipper --fields id,companyName,phone
 
-dto --class ~.ShipperPhoneFormBean
+dto --class ~.domain.ShipperPhoneFormBean
 field string --fieldName phone
 
-dto --class ~.StoreProjection --immutable
+dto --class ~.domain.StoreProjection --immutable
 field number --fieldName storeId --type java.lang.Long
 field number --fieldName countryId --type java.lang.Long
 field number --fieldName regionId --type java.lang.Long
@@ -467,12 +467,12 @@ field string --fieldName countryDescription
 field string --fieldName regionDescription
 field string --fieldName cityDescription
 
-dto --class ~.StoreSupplierProjection --immutable
+dto --class ~.domain.StoreSupplierProjection --immutable
 field number --fieldName storeId --type java.lang.Long
 field number --fieldName supplierId --type java.lang.Long
 field string --fieldName name
 
-dto --class ~.SupplierProjection --immutable
+dto --class ~.domain.SupplierProjection --immutable
 field number --fieldName supplierId --type java.lang.Long
 field number --fieldName countryId --type java.lang.Long
 field number --fieldName regionId --type java.lang.Long
@@ -500,7 +500,7 @@ finder add --entity ~.domain.Shipper --name findByCompanyName
 finder add --entity ~.domain.Region --name findByCountryIdOrderByDescriptionAsc
 finder add --entity ~.domain.City --name findByRegionIdOrderByDescriptionAsc
 finder add --entity ~.domain.Product --name findByDiscontinuedOrderByNameAsc
-finder add --entity ~.domain.Shipper --name findByPhone --formBean ~.domain.ShipperFindByPhoneForm --returnType ~.domain.ShipperProjection
+finder add --entity ~.domain.Shipper --name findByPhone --formBean ~.domain.ShipperPhoneFormBean --returnType ~.domain.ShipperProjection
 
 // Add tests
 test unit --class ~.domain.CustomerOrder
