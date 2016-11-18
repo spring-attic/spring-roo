@@ -58,7 +58,7 @@ service --all --apiPackage ~.service.api --implPackage ~.service.impl
 dto --class ~.domain.PetNameAndWeightFormBean
 field string --fieldName name
 field number --fieldName weight --type java.lang.Float
-finder add --entity ~.domain.Pet --name findByNameAndWeight --formBean ~.domain.PetFindByNameAndWeight
+finder add --entity ~.domain.Pet --name findByNameAndWeight --formBean ~.domain.PetNameAndWeightFormBean
 
 
 finder add --entity ~.domain.Pet --name findByOwner
