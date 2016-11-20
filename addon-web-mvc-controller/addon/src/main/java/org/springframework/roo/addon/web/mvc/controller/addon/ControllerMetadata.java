@@ -132,7 +132,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
       ControllerAnnotationValues controllerValues,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType entity,
       final JpaEntityMetadata entityMetadata, final JavaType service, final String path,
-      final ControllerType type, final ServiceMetadata serviceMetadata,
+      final String baseUrl, final ControllerType type, final ServiceMetadata serviceMetadata,
       final String detailAnnotaionFieldValue,
       final Map<JavaType, ServiceMetadata> detailsServiceMetadata,
       final List<RelationInfoExtended> detailsFieldInfo) {
@@ -156,52 +156,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     }
 
     // Generate request mapping value for controller
-    switch (this.type) {
-      case ITEM:
-        this.requestMappingValue =
-            StringUtils.lowerCase(path).concat(
-                "/{" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "}");
-        break;
-      case COLLECTION:
-        this.requestMappingValue = StringUtils.lowerCase(path);
-        break;
-      case SEARCH:
-        this.requestMappingValue = StringUtils.lowerCase(path).concat("/search");
-        break;
-      case DETAIL: {
-        Validate.isTrue(detailsFieldInfo != null & detailsFieldInfo.size() > 0,
-            "Missing details information for %s", governorPhysicalTypeMetadata.getType());
-        StringBuilder sbuilder = new StringBuilder(path);
-        for (RelationInfo info : detailsFieldInfo) {
-          sbuilder.append("/{")
-              .append(StringUtils.uncapitalize(info.entityType.getSimpleTypeName())).append("}/")
-              .append(info.fieldName);
-        }
-        this.requestMappingValue = sbuilder.toString();
-        break;
-
-      }
-      case DETAIL_ITEM: {
-        Validate.isTrue(detailsFieldInfo != null & detailsFieldInfo.size() > 0,
-            "Missing details information for %s", governorPhysicalTypeMetadata.getType());
-        StringBuilder sbuilder = new StringBuilder(path);
-        for (RelationInfo info : detailsFieldInfo) {
-          sbuilder.append("/{")
-              .append(StringUtils.uncapitalize(info.entityType.getSimpleTypeName())).append("}/")
-              .append(info.fieldName);
-        }
-        sbuilder
-            .append("/{")
-            .append(detailsFieldInfo.get(detailsFieldInfo.size() - 1).childType.getSimpleTypeName())
-            .append("}");
-        this.requestMappingValue = sbuilder.toString();
-
-        break;
-      }
-      default:
-        throw new IllegalArgumentException(String.format("Unsupported @%s.type '%s' on %s",
-            RooJavaType.ROO_CONTROLLER, this.type.name(), governorPhysicalTypeMetadata.getType()));
-    }
+    requestMappingValue = baseUrl;
 
     // Adding service field
     this.serviceField = getFieldFor(this.service);

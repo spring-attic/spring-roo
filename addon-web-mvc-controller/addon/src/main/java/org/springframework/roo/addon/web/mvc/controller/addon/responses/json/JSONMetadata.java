@@ -378,7 +378,65 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   }
 
   private MethodMetadata getDeleteDetailMethod() {
-    return getRemoveFromDetailsMethod(new JavaSymbolName("delete"));
+    RelationInfoExtended detailsInfo = controllerMetadata.getLastDetailsInfo();
+    final ServiceMetadata detailsServiceMetadata =
+        controllerMetadata.getServiceMetadataForEntity(detailsInfo.entityType);
+    final MethodMetadata removeFromMethod =
+        detailsServiceMetadata.getRemoveFromRelationMethods().get(detailsInfo);
+
+    final FieldMetadata detailsServiceField =
+        controllerMetadata.getDetailsServiceFields(detailsInfo.entityType);
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("delete");
+
+    JavaSymbolName itemsName = detailsInfo.fieldMetadata.getFieldName();
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(removeFromMethod.getParameterTypes().get(0)
+        .getJavaType(), ANN_MODEL_ATTRIBUTE));
+    AnnotationMetadata modelAttributAnnotation =
+        AnnotationMetadataBuilder.getInstance(SpringJavaType.MODEL_ATTRIBUTE);
+
+    parameterTypes.add(new AnnotatedJavaType(detailsInfo.childType, modelAttributAnnotation));
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @DeleteMapping annotation
+    AnnotationMetadataBuilder postMappingAnnotation = new AnnotationMetadataBuilder(DELETE_MAPPING);
+    postMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    annotations.add(postMappingAnnotation);
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(removeFromMethod.getParameterNames().get(0));
+    parameterNames.add(itemsName);
+
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // customerService.addToOrders(customer, order.getId());
+    bodyBuilder.appendFormalLine("%s.%s(%s,%s.singleton(%s.%s()));", detailsServiceField
+        .getFieldName(), removeFromMethod.getMethodName(), removeFromMethod.getParameterNames()
+        .get(0), getNameOfJavaType(JavaType.COLLECTIONS), itemsName,
+        detailsInfo.childEntityMetadata.getIdentifierAccessor().getMethodName());
+
+    // return ResponseEntity.ok().build();
+    bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
   }
 
   private MethodMetadata getUpdateDetailMethod() {
@@ -643,19 +701,8 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     return methodBuilder.build();
   }
 
+
   private MethodMetadata getRemoveFromDetailsMethod() {
-    RelationInfo detailsInfo = controllerMetadata.getLastDetailsInfo();
-    final ServiceMetadata detailsServiceMetadata =
-        controllerMetadata.getServiceMetadataForEntity(detailsInfo.entityType);
-    final MethodMetadata removeFromMethod =
-        detailsServiceMetadata.getRemoveFromRelationMethods().get(detailsInfo);
-
-    // Define methodName
-    final JavaSymbolName methodName = removeFromMethod.getMethodName();
-    return getRemoveFromDetailsMethod(methodName);
-  }
-
-  private MethodMetadata getRemoveFromDetailsMethod(JavaSymbolName methodName) {
     RelationInfo detailsInfo = controllerMetadata.getLastDetailsInfo();
     final ServiceMetadata detailsServiceMetadata =
         controllerMetadata.getServiceMetadataForEntity(detailsInfo.entityType);
@@ -664,6 +711,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     final FieldMetadata detailsServiceField =
         controllerMetadata.getDetailsServiceFields(detailsInfo.entityType);
+
+    // Define methodName
+    final JavaSymbolName methodName = removeFromMethod.getMethodName();
 
     JavaSymbolName itemsName = removeFromMethod.getParameterNames().get(1);
 
@@ -975,7 +1025,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     bodyBuilder
         .appendFormalLine(String.format("this.%s = %s;", serviceFieldName, serviceFieldName));
 
-    if (this.type == ControllerType.DETAIL) {
+    if (this.type == ControllerType.DETAIL || this.type == ControllerType.DETAIL_ITEM) {
 
       for (FieldMetadata serviceField : controllerMetadata.getDetailsServiceFields().values()) {
 

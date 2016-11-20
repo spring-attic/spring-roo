@@ -359,6 +359,8 @@ public class ThymeleafViewGeneratorServiceImpl extends
           detailItemController, ThymeleafMetadata.SHOW_METHOD_NAME));
       item.addConfigurationElement("mvcUrl_editForm", ThymeleafMetadata.getMvcUrlNameFor(
           detailItemController, ThymeleafMetadata.EDIT_FORM_METHOD_NAME));
+      item.addConfigurationElement("mvcUrl_update", ThymeleafMetadata.getMvcUrlNameFor(
+          detailItemController, ThymeleafMetadata.UPDATE_METHOD_NAME));
       item.addConfigurationElement("mvcUrl_itemExpandBuilderExp", "'_PARENTID_','_ID_'");
       item.addConfigurationElement("mvcUrl_delete_dt_ext", "buildAndExpand('_PARENTID_','_ID_')");
     }
@@ -401,6 +403,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
       addCreateDetailsView(moduleName, entityMetadata, entity, controllerMetadata, viewMetadata,
           ctx);
     } else {
+
       addCreateDetailsCompositionView(moduleName, entityMetadata, entity, controllerMetadata,
           viewMetadata, ctx);
     }
@@ -562,21 +565,24 @@ public class ThymeleafViewGeneratorServiceImpl extends
         createDetailEntityItem(viewMetadata, entity, entityMetadata, ctx.getEntityName(), ctx,
             DETAIL_SUFFIX, entityItem);
 
+    ViewContext childCtx =
+        createViewContext(controllerMetadata, controllerMetadata.getLastDetailEntity(),
+            controllerMetadata.getLastDetailsInfo().childEntityMetadata, viewMetadata);
 
     detail.addConfigurationElement("entityLabel",
         StringUtils.uncapitalize(FieldItem.buildLabel(detail.getEntityName(), "")));
 
-    ctx.addExtraParameter("entity", entityItem);
-    ctx.addExtraParameter("detail", detail);
-    ctx.addExtraParameter("fields", detail.getConfiguration().get("fields"));
+    childCtx.addExtraParameter("entity", entityItem);
+    childCtx.addExtraParameter("detail", detail);
+    childCtx.addExtraParameter("fields", detail.getConfiguration().get("fields"));
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
       newDoc =
           mergeCreateDetailsCompositionView("createDetailComposition", loadExistingDoc(viewName),
-              ctx, entityItem, detail);
+              childCtx, entityItem, detail);
     } else {
-      newDoc = process("createDetailComposition", ctx);
+      newDoc = process("createDetailComposition", childCtx);
     }
 
     // Write newDoc on disk

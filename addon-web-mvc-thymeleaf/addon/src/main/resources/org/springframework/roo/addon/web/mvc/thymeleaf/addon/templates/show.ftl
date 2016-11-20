@@ -286,7 +286,7 @@
               </div>
               <div class="pull-right">
     	     <a id="${entityName}_edit" href="edit.html" class="btn btn-primary"
-    	        data-th-href="@{${controllerPath}/${r"{"}${identifierField}${r"}"}/edit-form(${identifierField}=${r"*{id}"})}"
+    	        data-th-href="@{${controllerPath}/{id}/edit-form(id=*{${identifierField}})}"
     	        data-th-text="${r"#{label_edit}"}">Edit</a>
               </div>
             </div>

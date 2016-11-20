@@ -587,7 +587,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         .appendFormalLine(String.format("this.%s = %s;", serviceFieldName, serviceFieldName));
 
 
-    if (this.type == ControllerType.DETAIL) {
+    if (this.type == ControllerType.DETAIL || this.type == ControllerType.DETAIL_ITEM) {
 
       for (FieldMetadata serviceField : controllerMetadata.getDetailsServiceFields().values()) {
 
@@ -2693,7 +2693,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 
     parameterTypes.add(new AnnotatedJavaType(setMethod.getParameterTypes().get(0).getJavaType(),
-        AnnotationMetadataBuilder.getInstance(SpringJavaType.MODEL_ATTRIBUTE)));
+        ANN_METADATA_MODEL_ATTRIBUTE));
 
     AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM);
     requestParamAnnotation.addStringAttribute("value", itemsName.getSymbolName().concat("Ids"));
@@ -2787,8 +2787,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     final JavaType parentEntity = info.entityType;
     final JavaType entity = info.childType;
 
-    parameterTypes.add(new AnnotatedJavaType(parentEntity, AnnotationMetadataBuilder
-        .getInstance(SpringJavaType.MODEL_ATTRIBUTE)));
+    parameterTypes.add(new AnnotatedJavaType(parentEntity, ANN_METADATA_MODEL_ATTRIBUTE));
 
     parameterTypes.add(MODEL_PARAM);
 
@@ -2838,24 +2837,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     return methodBuilder.build();
   }
 
-  private MethodMetadata getRemoveFromDetailsMethod() {
-    RelationInfo detailsInfo = controllerMetadata.getLastDetailsInfo();
-    final ServiceMetadata detailsServiceMetadata =
-        controllerMetadata.getServiceMetadataForEntity(detailsInfo.entityType);
-    final MethodMetadata removeFromMethod =
-        detailsServiceMetadata.getRemoveFromRelationMethods().get(detailsInfo);
-
-    // Define methodName
-    final JavaSymbolName methodName = removeFromMethod.getMethodName();
-    return getRemoveFromDetailsMethod(methodName);
-  }
-
   private MethodMetadata getDeleteDetailMethod() {
-    return getRemoveFromDetailsMethod(DELETE_METHOD_NAME);
-  }
-
-  private MethodMetadata getRemoveFromDetailsMethod(final JavaSymbolName methodName) {
-    RelationInfo detailsInfo = controllerMetadata.getLastDetailsInfo();
+    RelationInfoExtended detailsInfo = controllerMetadata.getLastDetailsInfo();
     final ServiceMetadata detailsServiceMetadata =
         controllerMetadata.getServiceMetadataForEntity(detailsInfo.entityType);
     final MethodMetadata removeFromMethod =
@@ -2863,6 +2846,69 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     final FieldMetadata detailsServiceField =
         controllerMetadata.getDetailsServiceFields(detailsInfo.entityType);
 
+    JavaSymbolName methodName = DELETE_METHOD_NAME;
+    JavaSymbolName itemsName = detailsInfo.fieldMetadata.getFieldName();
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(removeFromMethod.getParameterTypes().get(0)
+        .getJavaType(), ANN_METADATA_MODEL_ATTRIBUTE));
+
+    parameterTypes.add(new AnnotatedJavaType(detailsInfo.childType, ANN_METADATA_MODEL_ATTRIBUTE));
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @DeleteMapping annotation
+    AnnotationMetadataBuilder postMappingAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.DELETE_MAPPING);
+    postMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    annotations.add(postMappingAnnotation);
+    this.mvcMethodNames.put(methodName.getSymbolName(), methodName.getSymbolName());
+
+    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(removeFromMethod.getParameterNames().get(0));
+    parameterNames.add(itemsName);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // customerService.addToOrders(customer, order.getId());
+    bodyBuilder.appendFormalLine("%s.%s(%s,%s.singleton(%s.%s()));", detailsServiceField
+        .getFieldName(), removeFromMethod.getMethodName(), removeFromMethod.getParameterNames()
+        .get(0), getNameOfJavaType(JavaType.COLLECTIONS), itemsName,
+        detailsInfo.childEntityMetadata.getIdentifierAccessor().getMethodName());
+
+    // return ResponseEntity.ok().build();
+    bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  private MethodMetadata getRemoveFromDetailsMethod() {
+    RelationInfoExtended detailsInfo = controllerMetadata.getLastDetailsInfo();
+    final ServiceMetadata detailsServiceMetadata =
+        controllerMetadata.getServiceMetadataForEntity(detailsInfo.entityType);
+    final MethodMetadata removeFromMethod =
+        detailsServiceMetadata.getRemoveFromRelationMethods().get(detailsInfo);
+    final FieldMetadata detailsServiceField =
+        controllerMetadata.getDetailsServiceFields(detailsInfo.entityType);
+
+
+    // Define methodName
+    final JavaSymbolName methodName = removeFromMethod.getMethodName();
     JavaSymbolName itemsName = removeFromMethod.getParameterNames().get(1);
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();

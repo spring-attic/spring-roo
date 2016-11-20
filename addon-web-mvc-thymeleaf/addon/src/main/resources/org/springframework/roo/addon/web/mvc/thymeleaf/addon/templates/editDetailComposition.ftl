@@ -206,7 +206,7 @@
 
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="@{${controllerPath}/{id}(id=*{${identifierField}})}">
+            data-th-action="@{${"${"}(#mvc.url('${detail.configuration.mvcUrl_update}')).buildAndExpand(${entity.modelAttribute}.${entity.configuration.identifierField},${detail.modelAttribute}.${detail.configuration.identifierField})}}">
             <input type="hidden" name="_method" value="PUT" />
 
              <fieldset id="containerFields">

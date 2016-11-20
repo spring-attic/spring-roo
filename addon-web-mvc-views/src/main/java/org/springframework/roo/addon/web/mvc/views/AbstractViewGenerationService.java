@@ -9,11 +9,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
@@ -23,9 +26,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.plural.addon.PluralService;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerLocator;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerOperations;
 import org.springframework.roo.addon.web.mvc.controller.addon.RelationInfoExtended;
+import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
 import org.springframework.roo.addon.web.mvc.i18n.components.I18n;
 import org.springframework.roo.addon.web.mvc.views.components.DetailEntityItem;
@@ -587,17 +593,21 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     Map<String, MenuEntry> mapMenuEntries = new HashMap<String, MenuEntry>();
 
     Set<ClassOrInterfaceTypeDetails> existingControllers =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_CONTROLLER);
+        new HashSet<ClassOrInterfaceTypeDetails>();
+    existingControllers.addAll(getControllerLocator().getControllers(null,
+        ControllerType.COLLECTION, getType()));
+    existingControllers.addAll(getControllerLocator().getControllers(null, ControllerType.SEARCH,
+        getType()));
+
 
     Iterator<ClassOrInterfaceTypeDetails> it = existingControllers.iterator();
 
     while (it.hasNext()) {
       // Getting controller and its information
       ClassOrInterfaceTypeDetails controller = it.next();
-      AnnotationMetadata controllerAnnotation =
-          controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
-      JavaType entity = (JavaType) controllerAnnotation.getAttribute("entity").getValue();
+
+      ControllerAnnotationValues controllerValues = new ControllerAnnotationValues(controller);
+      JavaType entity = controllerValues.getEntity();
 
       // Get finders for each controller
       AnnotationMetadata controllerSearchAnnotation =
@@ -630,22 +640,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       }
 
       // Getting pathPrefix
-      AnnotationAttributeValue<Object> pathPrefixAttr =
-          controllerAnnotation.getAttribute("pathPrefix");
-      String pathPrefix = "";
-      if (pathPrefixAttr != null) {
-        pathPrefix = (String) pathPrefixAttr.getValue();
-      }
-      // Generate path
-      String path = "/".concat(StringUtils.uncapitalize(getPluralService().getPlural(entity)));
-      if (StringUtils.isNotEmpty(pathPrefix)) {
-        if (pathPrefix.startsWith("/")) {
-          path = pathPrefix.concat(path);
+      String pathPrefix = StringUtils.defaultString(controllerValues.getPathPrefix(), "");
 
-        } else {
-          path = "/".concat(pathPrefix).concat(path);
-        }
-      }
+      // Generate path
+      String path = getControllerOperations().getBaseUrlForController(controller);
 
       // Create new menuEntry element for controller
       MenuEntry menuEntry =
@@ -1328,8 +1326,12 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     return serviceInstaceManager.getServiceInstance(this, PluralService.class);
   }
 
-  protected ControllerLocator geControllerLocator() {
+  protected ControllerLocator getControllerLocator() {
     return serviceInstaceManager.getServiceInstance(this, ControllerLocator.class);
+  }
+
+  protected ControllerOperations getControllerOperations() {
+    return serviceInstaceManager.getServiceInstance(this, ControllerOperations.class);
   }
 
   protected ProjectOperations getProjectOperations() {

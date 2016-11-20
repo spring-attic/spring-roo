@@ -25,6 +25,7 @@ import org.springframework.roo.addon.web.mvc.controller.addon.ControllerAnnotati
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerLocator;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.DetailAnnotationValues;
+import org.springframework.roo.addon.web.mvc.controller.addon.RelationInfoExtended;
 import org.springframework.roo.addon.web.mvc.controller.addon.finder.SearchAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
@@ -476,6 +477,18 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
       case DETAIL_ITEM:
         viewGenerationService.addDetailsItemViews(module, entityMetadata, entityMemberDetails,
             controllerMetadata, viewMetadata, ctx);
+
+        RelationInfoExtended last = controllerMetadata.getLastDetailsInfo();
+        ClassOrInterfaceTypeDetails childCid =
+            getTypeLocationService().getTypeDetails(last.childType);
+
+        MemberDetails detailMemberDetails = getMemberDetails(childCid);
+
+        // Update i18n labels of detail entity
+        Map<String, String> labels =
+            viewGenerationService.getI18nLabels(detailMemberDetails, last.childType,
+                last.childEntityMetadata, controllerMetadata, module, ctx);
+        getI18nOperations().addOrUpdateLabels(module, labels);
         break;
 
       case SEARCH:
