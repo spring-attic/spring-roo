@@ -928,9 +928,12 @@ public class FieldCommands implements CommandMarker {
       @CliOption(
           key = "mappedBy",
           mandatory = false,
-          help = "The field name on the referenced type which owns the relationship. This option adds "
-              + "the `mappedBy` attribute to JPA `@OneToOne`."
-              + "This option is only available for JPA entities.") final JavaSymbolName mappedBy,
+          help = "The field name on the referenced type which owns the relationship, which will be also "
+              + "created due to bidirectional relation. If not specified, it will take the lower camel "
+              + "case of the current entity (focused entity or specified in `--class` option). If the "
+              + "field already exists in the related entity, command won't be executed."
+              + "This option is only available for JPA entities."
+              + "Default if not present: current entity name in lower camel case.") final JavaSymbolName mappedBy,
       @CliOption(key = "aggregation", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "true",
           help = "Whether the relationship type is 'aggregation' or 'composition'. An aggregation "
@@ -1138,9 +1141,15 @@ public class FieldCommands implements CommandMarker {
               + "`spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
               + "This option is only available for JPA entities and embeddable classes when `--joinTable` "
               + "option is set.") final String inverseReferencedColumns,
-      @CliOption(key = "mappedBy", mandatory = false,
-          help = "The field name on the referenced type which owns the relationship."
-              + "This option is only available for JPA entities.") final JavaSymbolName mappedBy,
+      @CliOption(
+          key = "mappedBy",
+          mandatory = false,
+          help = "The field name on the referenced type which owns the relationship, which will be also "
+              + "created due to bidirectional relation. If not specified, it will take the lower camel "
+              + "case of the current entity (focused entity or specified in `--class` option). If the "
+              + "field already exists in the related entity, command won't be executed."
+              + "This option is only available for JPA entities."
+              + "Default if not present: current entity name in lower camel case.") final JavaSymbolName mappedBy,
       @CliOption(key = "cardinality", mandatory = false, unspecifiedDefaultValue = "ONE_TO_MANY",
           specifiedDefaultValue = "ONE_TO_MANY",
           help = "The relationship cardinality at a JPA level. "
@@ -1386,9 +1395,15 @@ public class FieldCommands implements CommandMarker {
               + "`spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
               + "This option is only available for JPA entities and embeddable classes when `--joinTable` "
               + "option is set.") final String inverseReferencedColumns,
-      @CliOption(key = "mappedBy", mandatory = false,
-          help = "The field name on the referenced type which owns the relationship."
-              + "This option is only available for JPA entities.") final JavaSymbolName mappedBy,
+      @CliOption(
+          key = "mappedBy",
+          mandatory = false,
+          help = "The field name on the referenced type which owns the relationship, which will be also "
+              + "created due to bidirectional relation. If not specified, it will take the lower camel "
+              + "case of the current entity (focused entity or specified in `--class` option). If the "
+              + "field already exists in the related entity, command won't be executed."
+              + "This option is only available for JPA entities."
+              + "Default if not present: current entity name in lower camel case.") final JavaSymbolName mappedBy,
       @CliOption(key = "cardinality", mandatory = false, unspecifiedDefaultValue = "ONE_TO_MANY",
           specifiedDefaultValue = "ONE_TO_MANY",
           help = "The relationship cardinality at a JPA level. "
@@ -1525,7 +1540,7 @@ public class FieldCommands implements CommandMarker {
   }
 
   @CliCommand(value = "field string",
-      help = "Adds a private String field to an existing Java source file")
+      help = "Adds a private String field to an existing Java source file.")
   public void addFieldString(
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add.") final JavaSymbolName fieldName,
       @CliOption(

@@ -6,10 +6,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,9 +22,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,10 +56,15 @@ import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+
 /**
  * Default implementation of {@link HelpService}.
  * 
- * @author Juan Carlos García
+ * @author Enrique Ruiz at http://www.disid.com[DISID Corporation S.L.]
+ * @author Juan Carlos García at http://www.disid.com[DISID Corporation S.L.]
  * @since 1.3
  */
 @Component
@@ -82,6 +90,11 @@ public class HelpServiceImpl implements HelpService {
     context = cContext.getBundleContext();
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * TODO: Refactor this method to use the Freemarker template engine. See {@link #obtainHelp(String)}.
+   */
   public void helpReferenceGuide() {
     synchronized (mutex) {
 
@@ -317,97 +330,346 @@ public class HelpServiceImpl implements HelpService {
     }
   }
 
-  public void obtainHelp(@CliOption(key = {"", "command"}, optionContext = "availableCommands",
-      help = "Command name to provide help for") String buffer) {
+  // @formatter:off
+  private final String cmdIndexTemplateStr = 
+      "[#ftl]" 
+      + "${LINE_SEPARATOR}"
+      + "COMMAND INDEX ${LINE_SEPARATOR}" 
+      + "${LINE_SEPARATOR}" 
+      + "[#list commands?keys as key]"
+      + "[#list commands[key] as line]"
+      + "[#if key?trim?length gte CMD_MAX_LENGTH && line?is_first]"
+      + "${key} ${LINE_SEPARATOR}"
+      + "${line}"
+      + "[#elseif line?is_first]"
+      + "${key}${line?trim}"
+      + "[#else]"
+      + "${line}"
+      + "[/#if]"
+      + "${LINE_SEPARATOR}" 
+      + "[/#list]"
+      + "${LINE_SEPARATOR}" 
+      + "[/#list]";
+
+  private final String cmdTemplateStr = 
+      "[#ftl]" 
+      + "${LINE_SEPARATOR}"
+
+      + "SYNOPSIS ${LINE_SEPARATOR}" 
+      + "[#list synopsis as item]"
+      + "[#if item?trim?length &gt; 0]"
+      + "${item} [#if options?has_content][OPTIONS][/#if]${LINE_SEPARATOR}" 
+      + "[/#if]"
+      + "[/#list]" 
+      + "${LINE_SEPARATOR}"
+
+      + "DESCRIPTION ${LINE_SEPARATOR}"
+      + "[#list description as line]"
+      + "${line}${LINE_SEPARATOR}" 
+      + "[/#list]" 
+      + "${LINE_SEPARATOR}"
+
+      + "[#if options?has_content]"
+      + "OPTIONS ${LINE_SEPARATOR}" 
+      + "[#list options?keys as key]"
+      + "[#list options[key] as line]"
+      + "[#if key?trim?length gte OPT_MAX_LENGTH && line?is_first]"
+      + "${key} ${LINE_SEPARATOR}"
+      + "${line}"
+      + "[#elseif line?is_first]"
+      + "${key}${line?trim}"
+      + "[#else]"
+      + "${line}"
+      + "[/#if]"
+      + "${LINE_SEPARATOR}"
+      + "[/#list]"
+      + "${LINE_SEPARATOR}"
+      + "[/#list]"
+      + "[/#if]";
+  // @formatter:on
+
+  private static int LINE_MAX_LENGTH = 80;
+  private static int CMD_MAX_LENGTH = 20;
+  private static int OPT_MAX_LENGTH = 10;
+  private static int CMD_HELP_LEFT_PAD = 5;
+  private static int CMD_INDEX_LEFT_PAD = 0;
+
+  /**
+   * If the given pattern matches several commands, i.e. "web mvc"
+   * or empty, this method writes to {@link #LOGGER} the list of 
+   * commands (command index) which names start with the given pattern.
+   * 
+   * If the given pattern matches with only one command, this method
+   * writes to {@link #LOGGER} the full info about that command.
+   *
+   * @param pattern
+   */
+  public void obtainHelp(String pattern) {
     synchronized (mutex) {
-      if (buffer == null) {
-        buffer = "";
+      if (pattern == null) {
+        pattern = "";
       }
 
-      final StringBuilder sb = new StringBuilder();
+      Template helpTemplate;
 
-      // Figure out if there's a single command we can offer help for
-      final Collection<MethodTarget> matchingTargets = locateTargets(buffer, false, false);
-      if (matchingTargets.size() == 1) {
-        // Single command help
-        final MethodTarget methodTarget = matchingTargets.iterator().next();
+      // Create the data-model for Freemarker engine.
+      Map<String, Object> fmContext = new HashMap<String, Object>();
+      fmContext.put("LINE_SEPARATOR", IOUtils.LINE_SEPARATOR);
+      fmContext.put("CMD_MAX_LENGTH", CMD_MAX_LENGTH);
+      fmContext.put("OPT_MAX_LENGTH", OPT_MAX_LENGTH);
 
-        // Argument conversion time
-        final Annotation[][] parameterAnnotations =
-            methodTarget.getMethod().getParameterAnnotations();
-        if (parameterAnnotations.length > 0) {
+      // Get the methods annotated with @CliCommand that matches the pattern
+      final Collection<MethodTarget> matchingTargets = locateTargets(pattern, false, false);
+
+      try {
+
+        // There is only one command which name matches. Example: "web mvc controller"
+        // In that case the full command help will be rendered.
+        if (matchingTargets.size() == 1) {
+
+          helpTemplate =
+              new Template("cmdTemplate", new StringReader(cmdTemplateStr), new Configuration(
+                  Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS));
+
+          // Single command help
+          final MethodTarget methodTarget = matchingTargets.iterator().next();
+
+          // Argument conversion time
+          final Annotation[][] parameterAnnotations =
+              methodTarget.getMethod().getParameterAnnotations();
+
           // Offer specified help
           final CliCommand cmd = methodTarget.getMethod().getAnnotation(CliCommand.class);
           Validate.notNull(cmd, "CliCommand not found");
 
-          for (final String value : cmd.value()) {
-            sb.append("Keyword:                   ").append(value).append(LINE_SEPARATOR);
-          }
+          // The command has options, those method arguments annotated with @CliOption
+          if (parameterAnnotations.length > 0) {
 
-          sb.append("Description:               ").append(cmd.help()).append(LINE_SEPARATOR);
+            // Synopsis
+            fmContext.put("synopsis", justify(cmd.value(), CMD_HELP_LEFT_PAD, LINE_MAX_LENGTH));
 
-          sb.append("Command parameters:");
-          sb.append(LINE_SEPARATOR);
-          sb.append(LINE_SEPARATOR);
+            // Description
+            fmContext.put("description", justify(cmd.help(), CMD_HELP_LEFT_PAD, LINE_MAX_LENGTH));
 
-          for (final Annotation[] annotations : parameterAnnotations) {
-            CliOption cliOption = null;
-            for (final Annotation a : annotations) {
-              if (a instanceof CliOption) {
-                cliOption = (CliOption) a;
+            // Options
+            Map<String, List<String>> options = new TreeMap<String, List<String>>();
+            fmContext.put("options", options);
 
-                for (String key : cliOption.key()) {
-                  if ("".equals(key)) {
-                    key = "** default **";
+            // Build the Map of command options analyzing the info provided by
+            // method arguments annotated with the @CliOption annotation 
+            for (final Annotation[] annotations : parameterAnnotations) {
+              CliOption cliOption = null;
+              for (final Annotation a : annotations) {
+                if (a instanceof CliOption) {
+                  cliOption = (CliOption) a;
+
+                  for (final String option : cliOption.key()) {
+                    String dashOption = "--".concat(option);
+
+                    // Note justification should be done in the Freemarker template,
+                    // but it is easier to do it here and adjust both justifications
+                    // (cmd name and cmd help) depending on the cmd name length
+                    String optStr =
+                        StringUtils.repeat(" ", CMD_HELP_LEFT_PAD)
+                            + (dashOption.length() <= OPT_MAX_LENGTH ? StringUtils.rightPad(
+                                dashOption, OPT_MAX_LENGTH) : dashOption);
+
+                    // Add as left padding the cmd length to avoid overwrite the command on the left
+                    // +1 to add an empty char (space) between the command and the description
+                    options.put(
+                        optStr,
+                        justify(cliOption.help(), CMD_HELP_LEFT_PAD + OPT_MAX_LENGTH,
+                            LINE_MAX_LENGTH));
                   }
-                  sb.append(" Keyword:                   ").append(key).append(LINE_SEPARATOR);
                 }
-
-                sb.append("   Help:                    ").append(cliOption.help())
-                    .append(LINE_SEPARATOR);
-                //                sb.append("   Mandatory:              ").append(cliOption.mandatory())
-                //                    .append(LINE_SEPARATOR);
-                //                sb.append("   Default if specified:   '").append(cliOption.specifiedDefaultValue())
-                //                    .append("'").append(LINE_SEPARATOR);
-                //                sb.append("   Default if unspecified: '")
-                //                    .append(cliOption.unspecifiedDefaultValue()).append("'").append(LINE_SEPARATOR);
-                sb.append(LINE_SEPARATOR);
               }
-
             }
           }
-        }
-        // Only a single argument, so default to the normal help
-        // operation
-      }
+          // The command hasn't options, usually methods without arguments
+          else {
 
-      final SortedSet<String> result = new TreeSet<String>(COMPARATOR);
-      for (final MethodTarget mt : matchingTargets) {
-        final CliCommand cmd = mt.getMethod().getAnnotation(CliCommand.class);
-        if (cmd != null) {
-          for (final String value : cmd.value()) {
-            if ("".equals(cmd.help())) {
-              result.add("* " + value);
-            } else {
-              result.add("* " + value + " - " + cmd.help());
-            }
+            // Synopsis
+            fmContext.put("synopsis", justify(cmd.value(), CMD_HELP_LEFT_PAD, LINE_MAX_LENGTH));
+
+            // Description
+            fmContext.put("description", justify(cmd.help(), CMD_HELP_LEFT_PAD, LINE_MAX_LENGTH));
           }
         }
+
+        // There are several commands that matches the pattern. Example: "web mvc"
+        // In that case only a list of command names and descriptions will be rendered.
+        else {
+          helpTemplate =
+              new Template("cmdIndexTemplate", new StringReader(cmdIndexTemplateStr),
+                  new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS));
+
+          // Create the list of commands that start with the given token.
+          // Note that empty token will cause all commands will be rendered.
+          Map<String, List<String>> cmdList = new TreeMap<String, List<String>>();
+
+          // Build the Map of commands analyzing the info provided by
+          // method annotation @CliCommand 
+          for (final MethodTarget mt : matchingTargets) {
+            final CliCommand cmd = mt.getMethod().getAnnotation(CliCommand.class);
+            if (cmd != null) {
+              for (final String value : cmd.value()) {
+
+                // Note justification should be done in the Freemarker template,
+                // but it is easier to do it here and adjust both justifications
+                // (cmd name and cmd help) depending on the cmd name length
+                String cmdStr =
+                    StringUtils.repeat(" ", CMD_INDEX_LEFT_PAD)
+                        + (value.length() <= CMD_MAX_LENGTH ? StringUtils.rightPad(value,
+                            CMD_MAX_LENGTH) : value);
+
+                // Add as left padding the cmd length to avoid overwrite the command on the left
+                // +1 to add an empty char (space) between the command and the description
+                cmdList.put(cmdStr,
+                    justify(cmd.help(), CMD_INDEX_LEFT_PAD + CMD_MAX_LENGTH, LINE_MAX_LENGTH));
+              }
+            }
+          }
+
+          // Add the command list to the Freemarker context
+          fmContext.put("commands", cmdList);
+        }
+
+        // Merge data-model with template
+        Writer strWriter = new StringWriter();
+
+        helpTemplate.process(fmContext, strWriter);
+
+        LOGGER.info(strWriter.toString());
+
+      } catch (TemplateException e) {
+        LOGGER.log(Level.SEVERE, "Help engine internal error!", e);
+      } catch (IOException e) {
+        LOGGER.log(Level.SEVERE, "Help engine internal error!", e);
       }
 
-      for (final String s : result) {
-        sb.append(s).append(LINE_SEPARATOR);
-      }
-
-      LOGGER.info(sb.toString());
-      LOGGER
-          .warning("** Type 'hint' (without the quotes) and hit ENTER for step-by-step guidance **"
-              + LINE_SEPARATOR);
+      LOGGER.warning("** Type 'hint' (without the quotes) and hit ENTER "
+          + "for step-by-step guidance **" + LINE_SEPARATOR);
     }
   }
 
-  private Collection<MethodTarget> locateTargets(final String buffer, final boolean strictMatching,
-      final boolean checkAvailabilityIndicators) {
+  /**
+   * Justify the texts in the given list of texts.
+   * 
+   * This method delegates the justifying of each given text in
+   * {@link #justify(String, int, int)}.
+   * 
+   * @param texts to justify
+   * @param leftPad
+   * @param lineLength
+   * @return
+   */
+  private List<String> justify(String[] texts, int leftPad, int lineLength) {
+    List<String> result = new ArrayList<String>();
+    for (String text : texts) {
+      result.addAll(justify(text, leftPad, lineLength));
+    }
+    return result;
+  }
+
+  /**
+   * Justify text. 
+   * 
+   * Split the given text in several lines, each of them with the max length 
+   * given by the lineLength argument.
+   * 
+   * All the returned lines will be left padded with the number of spaces (' ') 
+   * given by the leftPad argument.
+   * 
+   * @param txt Text to justify
+   * @param leftPad
+   * @param lineLength
+   * @return justified text
+   */
+  private List<String> justify(String txt, int leftPad, int lineLength) {
+    if (StringUtils.isEmpty(txt)) {
+      return Collections.emptyList();
+    }
+
+    // Text length in each line, so the lines will have the pattern 
+    // "__LEFT-PAD-STR__ __RIGHT-TEXT__" which length is lineLength 
+    int rightTextLength = lineLength - leftPad;
+    String leftPadStr = StringUtils.repeat(" ", leftPad);
+
+    if (txt.length() <= rightTextLength) {
+
+      // Compose and return the single line: left padding + text
+      return Collections.singletonList(leftPadStr.concat(txt));
+    }
+
+    // If given text 
+    String[] wordList = StringUtils.split(txt);
+
+    List<String> result = new ArrayList<String>();
+
+    StringBuffer currentLine = new StringBuffer();
+    int currentLineLength = 0;
+    for (String word : wordList) {
+
+      // The length of the line after adding the current word
+      int futureLength = currentLineLength + word.length();
+
+      // If the length of the result line is less than the 
+      // right text length then the current word can be added to current line
+      if (futureLength <= rightTextLength) {
+        currentLine.append(word);
+        currentLineLength += word.length();
+
+        // If it is the last word of the text, current line must be added 
+        // to the result
+        if (txt.endsWith(word)) {
+
+          // Compose and add the line: left padding + text
+          result.add(leftPadStr.concat(currentLine.toString()));
+        } else if (futureLength < rightTextLength) {
+
+          // Otherwise, append space if the length of the result line is
+          // strictly less than max length
+          currentLine.append(" ");
+          currentLineLength += 1;
+        }
+      } else {
+        // When current word cannot be added to current line is time to
+        // compose and add the current line and prepare the new line
+
+        // Compose and add the line: left padding + text
+        result.add(leftPadStr.concat(currentLine.toString()));
+
+        // Prepare the new line
+
+        // If it is the last word, add it as new line because current iteration
+        // is the last iteration
+        if (txt.endsWith(word)) {
+
+          // Compose and add the line: left padding + text
+          result.add(leftPadStr.concat(word));
+        } else {
+
+          // Otherwise initialize the next line with the current word
+          currentLine = new StringBuffer(word).append(" ");
+          currentLineLength = word.length() + 1;
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Get the methods annotated with {@link CliCommand} 
+   * inside the {@link CommandMarker} classes, which value attribute matches 
+   * the given pattern.
+   * 
+   * @param pattern
+   * @param strictMatching
+   * @param checkAvailabilityIndicators
+   * @return the @{@link CliCommand} methods that matches the given pattern
+   */
+  private Collection<MethodTarget> locateTargets(final String pattern,
+      final boolean strictMatching, final boolean checkAvailabilityIndicators) {
 
     // Get all Services implement CommandMarker interface
     try {
@@ -425,7 +687,7 @@ public class HelpServiceImpl implements HelpService {
       LOGGER.warning("Cannot load CommandMarker on SimpleParser.");
     }
 
-    Validate.notNull(buffer, "Buffer required");
+    Validate.notNull(pattern, "Buffer required");
     final Collection<MethodTarget> result = new HashSet<MethodTarget>();
 
     // The reflection could certainly be optimised, but it's good enough for
@@ -435,8 +697,10 @@ public class HelpServiceImpl implements HelpService {
       for (final Method method : command.getClass().getMethods()) {
         final CliCommand cmd = method.getAnnotation(CliCommand.class);
         if (cmd != null) {
+
           // We have a @CliCommand.
           if (checkAvailabilityIndicators) {
+
             // Decide if this @CliCommand is available at this
             // moment
             Boolean available = null;
@@ -464,7 +728,7 @@ public class HelpServiceImpl implements HelpService {
           }
 
           for (final String value : cmd.value()) {
-            final String remainingBuffer = isMatch(buffer, value, strictMatching);
+            final String remainingBuffer = isMatch(pattern, value, strictMatching);
             if (remainingBuffer != null) {
               result.add(new MethodTarget(method, command, remainingBuffer, value));
             }

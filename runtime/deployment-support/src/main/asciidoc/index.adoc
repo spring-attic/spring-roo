@@ -771,7 +771,7 @@ roo> web mvc setup
 roo> security setup
 ----
 
-.Add audit to Category entity (link:#jpa-audit-commands[Jpa audit commands])
+.Add audit to Category entity (link:#jpa-audit-add-command[Jpa audit add command] and link:#jpa-audit-setup-command[Jpa audit setup command])
 [source,sh]
 ----
 roo> jpa audit setup
@@ -1336,7 +1336,7 @@ roo> entity jpa --class
 
 * _Conditional:_
 
-All the following parameters are mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's value is `true`. See link:#settings-commands[settings commands].
+All the following parameters are mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's value is `true`.
 
 --table::
   The JPA table name to use for this entity.
@@ -1350,12 +1350,12 @@ All the following parameters are mandatory if `spring.roo.jpa.require.schema-obj
 --versionColumn::
   The JPA version field column to use for this entity.
 +
-This parameter is available only when `--versionField` has been specified.
+This option is available only when `--versionField` has been specified.
 
 --versionType::
   The data type that will be used for the JPA version field.
 +
-This parameter is available only when `--versionField` has been specified.
+This option is available only when `--versionField` has been specified.
 
 --sequenceName::
   The name of the sequence for incrementing sequence-driven primary keys.
@@ -1448,29 +1448,29 @@ roo> entity projection [--all | --class --entity --fields]
 --all::
   Create one projection class for each entity in the project.
 +
-This parameter is mandatory if `--class` is not specified. Otherwise, using `--class` will cause the parameter `--all` won't be available.
+This option is mandatory if `--class` is not specified. Otherwise, using `--class` will cause the parameter `--all` won't be available.
 
 --class::
   The name of the projection class to create. If you consider it necessary, you can also specify the package (base package can be specified with `~`). Ex.: `--class ~.domain.MyProjection`. You can specify module as well, if necessary. Ex.: `--class model:~.domain.MyProjection`. When working with a multi-module project, if module is not specified the projection will be created in the module which has the focus.
 +
-This parameter is mandatory if `--all` is not specified. Otherwise, using `--all` will cause the parameter `--class` won't be available.
+This option is mandatory if `--all` is not specified. Otherwise, using `--all` will cause the parameter `--class` won't be available.
 
 --entity::                   
   Name of the entity which can be used to create the Projection from.
 +
-This parameter is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--entity` won't be available.
+This option is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--entity` won't be available.
 
 --fields::
   Comma separated list of entity fields to be included into the Projection.
 +
-This parameter is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--fields` won't be available.
+This option is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--fields` won't be available.
 
 * _Conditional:_
 
 --suffix::
   Suffix added to each Projection class name, built from each associated entity name. 
 +  
-This parameter is only available if `--all` has been already specified.
+This option is only available if `--all` has been already specified.
 +
 Default if option not present: 'Projection'.
 
@@ -1599,7 +1599,7 @@ Default if option not present: the class focused by Roo shell.
 --column::
   The JPA @Column name.
 +
-This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes.
 
@@ -1689,7 +1689,7 @@ Default if option not present: `TemporalType.TIMESTAMP`
 --column::
   The JPA @Column name.
 +
-This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes.
 
@@ -1820,7 +1820,7 @@ Default if option not present: the class focused by Roo Shell.
 --column::
   The JPA @Column name.
 +
-This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes.
 
@@ -1894,7 +1894,7 @@ Default if option not present: the class focused by Roo Shell.
 --column::
   The JPA @Column name.
 +
-This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes.
 
@@ -1951,42 +1951,44 @@ Default if option not present: the class focused by Roo Shell.
 --joinTable::
   Join table name. Most usually used in @ManyToMany relations.
 +
-This option is mandatory for this command if `--cardinality` is set to `MANY_TO_MANY` and `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory for this command if `--cardinality` is set to `MANY_TO_MANY` and `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes.
 
 --joinColumns::
   Comma separated list of join table's foreign key columns which references the table of the related entity (the owner entity in bidirectional relations).
 +
-This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
 
 --referencedColumns::
   Comma separated list of foreign key referenced columns in the primary table of the related entity (the owner entity in bidirectional relations).
 +
-This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
 
 --inverseJoinColumns::
   Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation (current entity).
 +
-This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
 
 --inverseReferencedColumns::
   Comma separated list of foreign key referenced columns in the primary table of the entity that does not own the relation (current entity).
 +
-This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
 
 --mappedBy::
-  The field name on the referenced type which owns the relationship. 
+  The field name on the referenced type which owns the relationship, which will be also created due to bidirectional relation. If not specified, it will take the lower camel case of the current entity (focused entity or specified in `--class` option). If the field already exists in the related entity, command won't be executed.
 +
 This option is only available for JPA entities.
++
+Default if not present: current entity name in lower camel case.
 
 --cardinality::
   The relationship cardinality at a JPA level. This option is only available for JPA entities and embeddable classes.
@@ -2067,7 +2069,7 @@ Default if option not present: the class focused by Roo Shell.
 --column::
   The JPA @Column name.
 +
-This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes.
 
@@ -2165,7 +2167,7 @@ Default if option not present: the class focused by Roo Shell.
 --column::
   The JPA @Column name.
 +
-This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes.
 
@@ -2237,7 +2239,7 @@ Default if option not present: the class focused by Roo Shell.
 --joinColumnName::
   The JPA `@JoinColumn` `name` attribute.
 +
-This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes.
 
@@ -2254,9 +2256,11 @@ Possible values are `LAZY`and `EAGER`.
 This option is only available for JPA entities and embeddable classes. 
 
 --mappedBy::
-  The field name on the referenced type which owns the relationship. This option adds the `mappedBy` attribute to JPA `@OneToOne`.
+  The field name on the referenced type which owns the relationship, which will be also created due to bidirectional relation. If not specified, it will take the lower camel case of the current entity (focused entity or specified in `--class` option). If the field already exists in the related entity, command won't be executed.
 +
-This option is only available for JPA entities.   
+This option is only available for JPA entities.
++
+Default if not present: current entity name in lower camel case.  
 
 * _Optional:_
 
@@ -2319,42 +2323,44 @@ Default if option not present: the class focused by Roo Shell.
 --joinTable::
   Join table name. Most usually used in @ManyToMany relations.
 +
-This option is mandatory for this command if `--cardinality` is set to `MANY_TO_MANY` and `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory for this command if `--cardinality` is set to `MANY_TO_MANY` and `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes.
 
 --joinColumns::
   Comma separated list of join table's foreign key columns which references the table of the related entity (the owner entity in bidirectional relations).
 +
-This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
 
 --referencedColumns::
   Comma separated list of foreign key referenced columns in the primary table of the related entity (the owner entity in bidirectional relations).
 +
-This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
 
 --inverseJoinColumns::
   Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation (current entity).
 +
-This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
 
 --inverseReferencedColumns::
   Comma separated list of foreign key referenced columns in the primary table of the entity that does not own the relation (current entity).
 +
-This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
 
 --mappedBy::
-  The field name on the referenced type which owns the relationship. 
+  The field name on the referenced type which owns the relationship, which will be also created due to bidirectional relation. If not specified, it will take the lower camel case of the current entity (focused entity or specified in `--class` option). If the field already exists in the related entity, command won't be executed.
 +
 This option is only available for JPA entities.
++
+Default if not present: current entity name in lower camel case.
 
 --cardinality::
   The relationship cardinality at a JPA level. This option is only available for JPA entities and embeddable classes.
@@ -2435,7 +2441,7 @@ Default if option not present: the class focused by Roo Shell.
 --column::
   The JPA @Column name.
 +
-This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. See link:#settings-commands[settings commands].
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes.
 
@@ -2500,121 +2506,181 @@ Default if option present: `true`; default if option not present: `false`.
 [[finder-add-command]]
 === finder add
 
-Install a finder in the given target (must be an entity)
+Installs a finder in the given target (must be an entity). This command needs an existing repository for the target entity, you can create it with `repository jpa` command. The finder will be added to targeted entity associated repository and associated service if exists or when it will be created.
 
 [source,sh]
 ----
 roo> finder add --entity --name
 ----
 
+* _Mandatory:_
+
 --entity::
-  The entity for which the finders are generated; default if option not present: '*' (mandatory) 
+  The entity for which the finders are generated. When working on a mono module project, simply specify the name of the entity. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not specified, it is assumed that the entity is in the module which has the focus.
+
 --name::
-  The finder string defined as a Spring Data query. Use Spring Data JPA nomenclature. You must define 'entity' parameter before (mandatory) 
+  The finder string defined as a Spring Data query. Use Spring Data JPA nomenclature.
++
+Possible values are: any finder name following Spring Data nomenclature.
++
+This option will not be available until `--entity` is specified.
+
+* _Conditional:_
+
 --formBean::
-  The finder's search parameter. Should be a DTO. Not avalaible if 'entity' parameter has not been specified
-  before or if there aren't exist any DTO in generated project. If not specified, it is used as search parameter the entity 
-  specified in the 'entity' parameter (mandatory if 'returnType' is specified)
+  The finder's search parameter. Should be a DTO and it must have at least same fields (name and type) as those included in the finder `--name`, which can be target entity fields or related entity fields.
++
+Possible values are: any of the DTO's in the project.
++
+This option is mandatory if `--returnType` is specified.
++
+This option is not available if `--entity` parameter has not been specified before or if it does not exist any DTO in generated project. 
++
+Default if option not present: the entity specified in `--entity` option.
+
 --returnType::
-  The finder's results return type. Should be a Projection class related with the specified entity in 'entity' parameter.
-  This option is not available if 'entity' parameter has not been specified before or if there are not exist any Projection 
-  class associated. If not specified, it is used as type of response the  entity specified in the 'entity' parameter
+  The finder's results return type.
++
+Possible values are: Projection classes annotated with `@RooEntityProjection` and related to the entity specified in `--entity` option.
++
+This option is not available if `--entity` parameter has not been specified before or if it does not exist any Projection class associated to the targeted entity.
++
+Default if not present: the entity specified in `--entity`.
 
 === focus
 
-Changes focus to a different type
+Changes Roo Shell focus to a different type in the project.
 
 [source,sh]
 ----
 roo> focus --class
 ----
 
+* _Mandatory:_
+
 --class::
-  The type to focus on (mandatory). It could include module name if necessary.
+  The type to focus on (mandatory). When working on a mono module project, simply specify the name of the class in which the new constant will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyEnumClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyEnumClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
 
 [[help-command]]
 === help
 
-Shows system help
+Shows a summary of all Spring Roo commands.
 
 [source,sh]
 ----
 roo> help
 ----
 
+* _Optional:_
+
 --command::
-  Command name to provide help for
+  Command name to provide help for. When command name has more than one word, it should be between quotation marks.
 
 [[hint-command]]
 === hint
 
-Provides step-by-step hints and context-sensitive guidance
+Provides step-by-step hints and context-sensitive guidance.
 
 [source,sh]
 ----
 roo> hint
 ----
 
+* _Optional:_
+
 --topic::
-  The topic for which advice should be provided
+  The topic for which advice should be provided.
++
+Possible values are: `controllers`, `eclipse`, `entities`, `fields`, `finders`, `general`, `mvc`, `persistence`, `relationships`, `repositories`, `services`, `start` and `topics`.
 
 === interface
 
-Creates a new Java interface source file in any project path
+Creates a new Java interface source file in any project path.
 
 [source,sh]
 ----
 roo> interface --class
 ----
 
---class::
-  The name of the interface to create (mandatory). It could include module name if necessary.
---path::
-  Source directory to create the interface in; default:
-  'FOCUSED:SRC_MAIN_JAVA'
---permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: `true`; default if option not present: `false`
---force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
+* _Mandatory:_
 
-[[jpa-audit-commands]]     
+--class::
+  The name of the class to create. If you consider it necessary, you can also specify the package (base package can be specified with `~`). Ex.: `--class ~.domain.MyClass`. You can specify module as well, if necessary. Ex.: `--class model:~.domain.MyClass`. When working with a multi-module project, if module is not specified the class will be created in the module which has the focus.
+
+* _Optional:_
+
+--path::
+  Source directory to create the interface in.
++
+Default: _[FOCUSED-MODULE]/src/main/java_.
+
+--permitReservedWords::
+  Indicates whether reserved words are ignored by Roo.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--force::
+  Force command execution.
++
+Default if option present: `true`; default if option not present: `false`.
+
+[[jpa-audit-add-command]]     
 === jpa audit add
 
-Adds support for auditing a JPA entity
+Adds support for auditing a JPA entity. This will add JPA and Spring listeners to this entity to record the entity changes.
 
 [source,sh]
 ----
-roo> jpa audit add --entity --createdDateColumn --modifiedDateColumn --createdByColumn --modifiedByColumn
+roo> jpa audit add --entity
 ----
+
+* _Mandatory:_
                 
 --entity::
-  The entity which should be audited (mandatory) 
+  The entity which should be audited. When working on a mono module project, simply specify the name of the entity. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not specified, it is assumed that the entity is in the module which has the focus.
+
+* _Conditional:_
+
 --createdDateColumn::
-  The DB column used for storing created date info (mandatory if 'spring.roo.jpa.require.schema-object-name' 
-  configuration setting it’s `true`. See 'settings list' command) 
+  The DB column used for storing the date when each record is created.
++
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
+
 --modifiedDateColumn::
-  The DB column used for storing modified date info; default (mandatory if 'spring.roo.jpa.require.schema-object-name' 
-  configuration setting it’s `true`. See 'settings list' command) 
+  The DB column used for storing the date when each record is modified.
++
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
+
 --createdByColumn::
-  The DB column used for storing created by info; default (mandatory if 'spring.roo.jpa.require.schema-object-name' 
-  configuration setting it’s `true`. See 'settings list' command) 
+  The DB column used for storing information about who creates each record.
++
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
+
 --modifiedByColumn::
-  The DB column used for storing modified by info; default (mandatory if 'spring.roo.jpa.require.schema-object-name' 
-  configuration setting it’s `true`. 
-  See 'settings list' command) 
+  The DB column used for storing information about who modifies each record.
++
+This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
         
+[[jpa-audit-setup-command]]
 === jpa audit setup
 
-Install audit support into your project
+Installs audit support into your project, preparing it to audit entity changes.
 
 [source,sh]
 ----
-roo> jpa audit setup --module
+roo> jpa audit setup
 ----
 
+* _Conditional:_
+
 --module::
-  The application module where to install the persistence. This option is not available if there is only one application module (mandatory if the focus is not set in application module) ; default if option not present: '.' 
+  The application module where to install the audit support.
++
+This option is mandatory if the focus is not set in an application module, that is, a module containing an `@SpringBootApplication` class.
++
+This option is available only if there are more than one application module and none of them is focused.
++
+Default if option not present: the unique 'application' module, or focused 'application' module.
 
 === jpa setup
 
@@ -2622,7 +2688,7 @@ Install or updates a JPA persistence provider in your project
 
 [source,sh]
 ----
-roo> jpa setup --provider --database --module
+roo> jpa setup --provider --database
 ----
 
 --provider::
@@ -2655,7 +2721,7 @@ roo> jpa setup --provider --database --module
 
 === module create
 
-Creates a new Maven module
+Creates a new Maven module in current *multimodule* project.
 
 [source,sh]
 ----
@@ -3144,7 +3210,7 @@ roo> web mvc view setup --type --module
 [[addon-development-command-index]]
 == Command Index for Add-on Development
 
-These commands are specific for developing Spring Roo add-ons and will be only available if user enables the add-on "development mode" with link:#addon-development-mode[`addon development mode`] command.
+These commands are specific for developing Spring Roo add-ons and will be only available if user enables the add-on "development mode" with `addon development mode` command.
 
 === !os
 

@@ -132,16 +132,17 @@
     </developers>
 
     <properties>
+        <freemarker.version>2.3.23_1</freemarker.version>
         <java.version>1.7</java.version>
         <junit.version>4.11</junit.version>
-        <powermock.version>1.4.12</powermock.version>
-        <spring.version>4.3.1.RELEASE</spring.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <osgi.version>6.0.0</osgi.version>
-        <slf4j.version>1.7.12</slf4j.version>
+        <main.basedir>${basedir}</main.basedir>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <main.basedir>${basedir}</main.basedir>
+        <osgi.version>6.0.0</osgi.version>
+        <powermock.version>1.4.12</powermock.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <slf4j.version>1.7.12</slf4j.version>
+        <spring.version>4.3.1.RELEASE</spring.version>
     </properties>
 
     <dependencyManagement>
@@ -833,7 +834,7 @@
             <dependency>
               <groupId>org.apache.servicemix.bundles</groupId>
               <artifactId>org.apache.servicemix.bundles.freemarker</artifactId>
-              <version>2.3.23_1</version>
+              <version>${freemarker.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -10,12 +10,13 @@ package org.springframework.roo.felix.help;
 public interface HelpService {
 
   /**
-   * Obtains Help Reference Guide
+   * Writes the command index as reference guid in DocBook format, into the 
+   * current working directory.
    */
   void helpReferenceGuide();
 
   /**
-   * Obtains Help
+   * Shows Spring Roo help
    */
   void obtainHelp(String buffer);
 
