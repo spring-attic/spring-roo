@@ -728,7 +728,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
       if (info.cardinality == Cardinality.ONE_TO_ONE) {
         if (!commentAdded) {
           bodyBuilder.newLine();
-          bodyBuilder.appendFormalLine("// Ensure the relationship is maintained");
+          bodyBuilder.appendFormalLine("// Ensure the relationships are maintained");
           commentAdded = true;
         }
         bodyBuilder.appendFormalLine("%s.%s(%s.get%s());", param0, info.addMethod.getMethodName(),
