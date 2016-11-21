@@ -205,7 +205,7 @@
 
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="@{${controllerPath}}">
+            data-th-action="@{${"${"}(#mvc.url('${mvcUrl_create}')).build()}}">
 
             <fieldset id="containerFields">
               <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} data </legend>
@@ -250,7 +250,7 @@
                 <div class="col-md-9 col-md-offset-3">
                     <button type="reset" class="btn btn-default"
                       onclick="location.href='list.html'"
-                      data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
+                      data-th-onclick="'location.href=\'' + @{${"${"}(#mvc.url('${mvcUrl_list}')).build()}} + '\''"
                       data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
                     <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit${r"}"}">Save</button>
                 </div>

@@ -206,7 +206,7 @@
 
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="@{${controllerPath}/{id}(id=*{${identifierField}})}">
+            data-th-action="@{${"${"}(#mvc.url('${mvcUrl_update}')).buildAndExpand(${entity.modelAttribute}.${entity.configuration.identifierField})}}">
             <input type="hidden" name="_method" value="PUT" />
 
              <fieldset id="containerFields">
@@ -254,7 +254,7 @@
                   <div class="pull-left">
                     <button type="reset" class="btn btn-default"
                       onclick="location.href='list.html'"
-                      data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
+                      data-th-onclick="'location.href=\'' + @{${"${"}(#mvc.url('${mvcUrl_list}')).build()}} + '\''"
                       data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
                   </div>
                   <div class="pull-right">

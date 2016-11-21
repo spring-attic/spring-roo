@@ -646,6 +646,8 @@ public class ThymeleafViewGeneratorServiceImpl extends
         ThymeleafMetadata.getMvcUrlNameFor(collCtrl, ThymeleafMetadata.LIST_DATATABLES_METHOD_NAME));
     ctx.addExtraParameter("mvcUrl_createForm",
         ThymeleafMetadata.getMvcUrlNameFor(collCtrl, ThymeleafMetadata.CREATE_FORM_METHOD_NAME));
+    ctx.addExtraParameter("mvcUrl_create",
+        ThymeleafMetadata.getMvcUrlNameFor(collCtrl, ThymeleafMetadata.CREATE_METHOD_NAME));
     ctx.addExtraParameter("mvcUrl_list",
         ThymeleafMetadata.getMvcUrlNameFor(collCtrl, ThymeleafMetadata.LIST_METHOD_NAME));
     ctx.addExtraParameter("mvcUrl_show",
