@@ -61,6 +61,12 @@ electronically._
 
 Spring Roo is an easy-to-use development tool for quickly building web applications in the Java programming language, which can be used as an standalone application or as an Eclipse or STS plugin. It allows you to build high-quality, high-performance, lock-in-free enterprise applications in just minutes.
 
+_What does it mean "Roo is a development tool"?_
+
+* *Roo is not a runtime*. Roo is not involved with your project when it runs in production. You won't find any Roo JARs in your runtime classpath. This is actually a wonderful thing. It means you have no lock-in to worry about. It also means there is no technical way possible for Roo to slow your project down at runtime, waste memory or bloat your deployment artefacts with JARs. We're really proud of the fact that Roo imposes no engineering trade-offs, as it was one of our central design objectives.
+* *Roo is not an IDE plugin*. There is no requirement for a "Roo Eclipse plugin" or "Roo IntelliJ plugin". Roo works perfectly fine in its own operating system command window. It sits there and monitors your file system, intelligently and incrementally responding to changes as appropriate. This means you're perfectly able to use vi or emacs if you'd like (Roo doesn't mind how your project files get changed).
+* *Roo is not an annotation processing library*. This allows Roo to work with a much more sophisticated and extensible internal model.
+
 Best of all, Roo works alongside your existing Java and Spring knowledge, skills and experience. You probably will not need to learn anything new to use Roo, as there is no new language or runtime platform needed. You simply program in your normal Java way and Roo just works, sitting in the background taking care of the things you do not want to worry about.
 
 [[gettingStarted-whatsNew]]
@@ -86,75 +92,104 @@ We always recommend you use the latest version of Java and Maven that are availa
 
 We recommend you use http://spring.io/tools/sts[Spring Tool Suite (STS)] which includes a number of features that make working with Spring Roo even easier (you can of course link:#roo-without-ide[use Roo without an IDE] at all if you prefer).
 
-To install Spring Roo on your STS 3.8.0+ follow the instructions below:
+To install Spring Roo on your STS 3.8.2+ follow the instructions below:
 
 . Download the current release from Spring Roo project page http://projects.spring.io/spring-roo/#download-widget[downloads section].
 . Unzip the distribution, which will unpack to a single installation directory; we will refer to it as `$ROO_HOME` from now on.
 . Go to link:https://spring.io/tools/sts/all[Spring Tool Suite™ Downloads] and follow the instructions to download and install the STS.
 . Open your STS IDE.
-. Open the STS dashboard.
-. Click on Extensions bottom tab and search Spring Roo.
-. Install the *Spring IDE - Roo Extension*.
+. Install the Roo Extension from update site.
++
+Because the release cycle of STS and Roo differ a version of Spring Roo may be in the Nightly or in the Release repository. This is not a problem, the installation process below will guide you which repository you should use depending on a given Roo version.
+[lowerroman]
+.. Open _"Help >> Install New Software"_.
+.. Click _"Available Software sites"_.
+.. Click the _"Import" button_.
+.. Find the _"$ROO_HOME/conf/sts-sites-bookmarks.xml"_ file and click "OK".
+.. Select the _Nightly_ or _Release_ site depending on the versions table below:
++
+[cols="2*", options="header", width="75"]
+|===
+|Version
+|STS update site
+
+a|*2.0.0.M3*
+a|_Spring Roo 2.0 (Nightly)_
+
+a|*2.0.0.RC1*
+a|_Spring Roo 2.0 (Nightly)_
+
+a|*2.0.0.RELEASE*
+a|_Spring Roo 2.0 (Release)_
+|===
+.. Type the filter text _roo_ 
+.. Select the feature *Spring IDE Roo Support*.
 +
 [align="center"]
-image::roo-extension.png["STS Spring IDE - Roo Extension"]
+image::install-roo-extension.png["STS Spring IDE - Roo Extension", width="60%"]
+.. Click _"Next"_
+.. Review the list of software that will be installed. Click _"Next"_ again.
+.. Review and accept licence agreement and click _"Finish"_.
 . Restart the STS IDE
 
-Configure Spring Roo 2.0.0 on your STS:
+*Configure Spring Roo 2.0.0*
 
 . Open _"Window > Preferences > Spring > Roo Support"_.
 . In _"Roo Support"_ press _"Add"_ new installation button.
 . In _"Roo Configure Roo Installation"_ press _"Browse"_ button, then select the the directory in which Spring Roo 2.0.0 was unpacked, `$ROO_HOME`.
 +
 [align="center"]
-image::sts-add-installation-01.png["Select Roo installation", width="50%"]
+image::sts-add-installation-01.png["Select Roo installation", width="60%"]
 . Confirm the new Roo installation.
 +
 [align="center"]
-image::sts-add-installation-02.png["Confirm Roo installation", width="50%"]
+image::sts-add-installation-02.png["Confirm Roo installation", width="60%"]
 . Now Roo is installed in your STS.
 +
 [align="center"]
-image::sts-add-installation-03.png["Roo support installed", width="50%"]
+image::sts-add-installation-03.png["Roo support installed", width="60%"]
 
 [[usingSpringRoo]]
 == Using Spring Roo
 
-In this tutorial you will learn to create a complete multimodule web application from scratch using Roo. The application we are going to develop will demonstrate many of the core features offered by Roo. In particular you will learn how to use the Roo shell.
+In this tutorial you will learn to create a complete multimodule web application from scratch using Roo. The application we are going to develop will demonstrate many of the core features offered by Roo.
 
 [[usingSpringRoo-usage-roo-shell]]
 === 1. The Roo shell
 
-You can work with Roo simply by loading its "shell" and keep it running. You can interact with Roo via commands typed into the shell, but most of time you will just use your text editor or IDE as usual. As you make changes to your project, Roo intelligently determines what you are trying to do and takes care of doing it for you automatically. This usually involves automatically detecting file system changes you have made and then maintaining files in response. We say "maintaining files" because Roo is fully round-trip aware. This means you can change any code at any time, and Roo will notice it and will intelligently and automatically will make any change needed.
+The Spring Roo shell is an interactive shell that allows you to type _Roo_ commands to perform code generation tasks.
 
-Add STS Roo Shell View and start working
+Moreover by loading the "shell" in a window and leaving it running, as you make changes to your project, Roo intelligently determines what you're trying to do and takes care of doing it for you automatically. This usually involves automatically detecting file system changes you've made and then maintaining files in response.
 
-1. Open "Window > Show View > Other > Spring > Roo Shell" and press "OK" button.
-+
+We say "maintaining files" because Roo is fully round-trip aware. This means you can change any code you like, at any time and without telling Roo about it, yet Roo will intelligently and automatically deal with whatever changes need to be made in response. It might sound magical, but it isn't. This documentation will clearly explain how Roo works and you'll find yourself loving the approach - just like so the many other people who are already using Roo.
+
 [align="center"]
-image::sts-add-roo-shell.png["Add Roo Shell", width="30%"]
-2. Select Roo Shell tab and press _"Open Roo Shell for projects"_.
-+
-[align="center"]
-image::sts-open-roo-shell.png["Open Roo Shell", width="60%"]
-3. Select your project and start working with your Roo project
-+
-NOTE: If it is a multimodule project you have to select only the parent module of the project.
-+
-[align="center"]
-image::sts-select-roo-project.png["Select Roo Project", width="30%"]
-4. You can use link:#hint-command[hint command] to obtain step-by-step hints and context-sensitive guidance. You can also use the link:#help-command[help command] for help. For assistance press *"CTRL+SPACE"*
-+
-[align="center"]
-image::sts-roo-shell-hint.png["hint command", width="60%"]
+image::sts-roo-shell.png["Spring Roo Shell", width="60%"]
+
+Here are some of the usability features that make the shell so nice to work with:
+
+* _Tab completion_: The cornerstone of command-line usability is tab assist. Hit `CTRL+SPACE` (or TAB if you're in a bash-like shell) and Roo will show you the applicable options.
+* _Command hiding_: Command hiding will remove commands which do not make sense given the current context of your project. For example, if you're in an empty directory, you can type `project`, hit `CTRL+SPACE`, and see the options for creating a project. But once you've created the project, the `project` command is no longer visible. The same applies for most Roo commands. This is nice as it means you only see commands which you can actually use right now. Of course, a full list of commands applicable to your version of Roo is available in the command index appendix and also via help.
+* _Contextual awareness_: Roo remembers the last Java type you are working with in your current shell session and automatically treats it as the argument to a command. You always know what Roo considers the current context because the shell prompt will indicate this just before it writes `roo>`.
+* _Hinting_: Not sure what to do next? Just use the hint command. It's the perfect lightweight substitute for documentation if you're in a hurry!
+* _Inbuilt help_: If you'd like to know all the options available for a given command, use the help command. It lists every option directly within the shell.
+* _Automatic inline help_: Of course, it's a bit of a pain to have to go to the trouble of typing help then hitting enter if you're in the middle of typing a command. That's why we offer inline help, which is automatically displayed whenever you press `CTRL+SPACE` (or `TAB`). It is listed just before the completion options. To save screen space, we only list the inline help once for a given command option. So if you type project `--template CTRL+SPACE` (or TAB TAB TAB), you'd see the inline help and the completion options
+* _Scripting and script recording_: Save your Roo commands and play them again later.
+
+You'll also have other neat Roo-IDE integation features, like the ability to press `CTRL+R` (or `Apple+R` if you're on an Apple) and a popup will allow you to type a Roo command from anywhere within the IDE. Another nice feature is the shell message hotlinking, which means all shell messages emitted by Roo are actually links that you can click to open the corresponding file in an Eclipse editor.
+
+There are two ways to work with Spring Roo:
+
+. Import existing Spring Roo projects. A simple import of the project using _Eclipse's File > Import > General > Maven Projects_ menu option is sufficient.
+. Create new projects, as we will see in the next section.
 
 [[usingSpringRoo-build-multimodule-app]]
-=== 2. Multimodule projects
+=== 2. Create projects
 
 We will build an app step-by-step together in a relatively fast manner so that you can see how to typically use Roo in a multimodule project: 'Northwind'
 
 [align="center"]
-image::northwind-diagram.png["Northwind diagram"]
+image::northwind-diagram.png["Northwind diagram", width="60%"]
 
 [[usingSpringRoo-project-creation]]
 ==== Project creation
@@ -818,13 +853,13 @@ To _push-in_ the Roo-generated code:
 1. Edit Java source file.
 2. Open the link:http://www.eclipse.org/ajdt/xref/[Cross References] view.
 +
-NOTE: If the Cross References view is empty you must re-build the project by executing 'Project > Clean …​'. It occurs when the crosscutting information is missing, so you must re-build the project in order to re-generate the crosscutting information shown in the Cross References view.
+NOTE: If the Cross References view is empty you must re-build the project by executing 'Project > Clean ...' It occurs when the crosscutting information is missing, so you must re-build the project in order to re-generate the crosscutting information shown in the Cross References view.
 +
 [align="center"]
 image::sts-cross-references.png["Cross References View", width="60%"]
 3. Double click on the aspect declaration. The the ITD file is opened in the AspectJ/Java editor.
 
-4. Right click ont he aspect declaration, then run 'AspectJ Refactoring > Push In …​'.
+4. Right click ont he aspect declaration, then run 'AspectJ Refactoring > Push In ...'.
     AspectJ Refactoring
 
     Finally re-build the project by executing 'Project > Clean …​'
