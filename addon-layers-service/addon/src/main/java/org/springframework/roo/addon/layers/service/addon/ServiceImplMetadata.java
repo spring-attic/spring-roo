@@ -723,15 +723,16 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
      * // Ensure the relationships are maintained
      * entity.addToRelatedEntity(entity.getRelatedEntity());
      */
-    if (!entityMetadata.getRelationInfos().values().isEmpty()) {
-      bodyBuilder.newLine();
-      bodyBuilder.appendFormalLine("// Ensure the relationship is maintained");
-    }
+    boolean commentAdded = false;
     for (RelationInfo info : entityMetadata.getRelationInfos().values()) {
-      String childTypeName = info.childType.getSimpleTypeName();
       if (info.cardinality == Cardinality.ONE_TO_ONE) {
+        if (!commentAdded) {
+          bodyBuilder.newLine();
+          bodyBuilder.appendFormalLine("// Ensure the relationship is maintained");
+          commentAdded = true;
+        }
         bodyBuilder.appendFormalLine("%s.%s(%s.get%s());", param0, info.addMethod.getMethodName(),
-            param0, StringUtils.capitalize(childTypeName));
+            param0, StringUtils.capitalize(info.childType.getSimpleTypeName()));
         bodyBuilder.newLine();
       }
     }
