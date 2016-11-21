@@ -60,7 +60,6 @@ import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
-import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaPackage;
@@ -883,7 +882,17 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     if (StringUtils.isNotBlank(relationField)) {
       // Check field received as parameter
+
+
       List<RelationInfoExtended> infos = getRelationInfoFor(entityMetadata, relationField);
+
+
+      // TODO support multilevel detail (TO BE ANALIZED)
+      if (infos.size() > 1) {
+        LOGGER.log(Level.INFO, "ERROR: multi-level details not supported.");
+        return;
+      }
+
       StringBuilder sbuilder = new StringBuilder();
       for (int i = 0; i < infos.size(); i++) {
         RelationInfoExtended info = infos.get(i);
@@ -1471,8 +1480,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
         getMetadataService().get(JpaEntityMetadata.createIdentifier(childCid));
     infos.add(new RelationInfoExtended(info, entityMetadata, childMetadata));
     if (split.length > 1) {
-      infos.addAll(getRelationInfoFor(childMetadata,
-          StringUtils.join(split, '.', 1, split.length - 1)));
+      infos
+          .addAll(getRelationInfoFor(childMetadata, StringUtils.join(split, '.', 1, split.length)));
     }
     return infos;
   }
