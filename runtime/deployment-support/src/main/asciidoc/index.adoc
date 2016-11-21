@@ -88,7 +88,9 @@ We recommend you use http://spring.io/tools/sts[Spring Tool Suite (STS)] which i
 
 To install Spring Roo on your STS 3.8.0+ follow the instructions below:
 
-. Go to link:https://spring.io/tools/sts/all[Spring Tool Suite™ Downloads] and follow the instructions to install the STS.
+. Download the current release from Spring Roo project page http://projects.spring.io/spring-roo/#download-widget[downloads section].
+. Unzip the distribution, which will unpack to a single installation directory; we will refer to it as `$ROO_HOME` from now on.
+. Go to link:https://spring.io/tools/sts/all[Spring Tool Suite™ Downloads] and follow the instructions to download and install the STS.
 . Open your STS IDE.
 . Open the STS dashboard.
 . Click on Extensions bottom tab and search Spring Roo.
@@ -100,9 +102,9 @@ image::roo-extension.png["STS Spring IDE - Roo Extension"]
 
 Configure Spring Roo 2.0.0 on your STS:
 
-. Open "Window > Preferences > Spring > Roo Support".
-. In "Roo Support" press "Add" new installation button.
-. In "Roo Configure Roo Installation" press "Browse" button, then select the the directory in which Spring Roo 2.0.0 was unpacked.
+. Open _"Window > Preferences > Spring > Roo Support"_.
+. In _"Roo Support"_ press _"Add"_ new installation button.
+. In _"Roo Configure Roo Installation"_ press _"Browse"_ button, then select the the directory in which Spring Roo 2.0.0 was unpacked, `$ROO_HOME`.
 +
 [align="center"]
 image::sts-add-installation-01.png["Select Roo installation", width="50%"]
