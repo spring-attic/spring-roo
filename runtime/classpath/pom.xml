@@ -29,22 +29,6 @@
             <artifactId>org.apache.felix.scr.annotations</artifactId>
         </dependency>
 
-        <!-- JAX-RS -->
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-json-processing</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- Roo -->
         <dependency>
             <groupId>org.springframework.roo</groupId>
