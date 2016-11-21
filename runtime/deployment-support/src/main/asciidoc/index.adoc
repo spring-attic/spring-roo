@@ -196,14 +196,14 @@ image::northwind-diagram.png["Northwind diagram", width="60%"]
 
 You can create projects from STS IDE by following the instructions below:
 
-1. Open "File > New > Spring Roo Project".
-2. Select "Project type", for example "Multimodule Standard".
-3. Select "Roo Installation".
-4. First press "Next" button and then "Finish" button.
+. Open "File > New > Spring Roo Project".
+. Select "Project type", for example "Multimodule Standard".
+. Select "Roo Installation".
+. First press "Next" button and then "Finish" button.
 +
 [align="center"]
 image::sts-new-roo-project.png["New Spring Roo Project", width="50%"]
-5. Start working on your Roo Shell
+. Start working on your Roo Shell
 +
 [align="center"]
 image::sts-roo-shell.png["STS Roo Shell", width="60%"]
