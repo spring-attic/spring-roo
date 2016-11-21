@@ -97,6 +97,10 @@ To install Spring Roo on your STS 3.8.2+ follow the instructions below:
 . Download the current release from Spring Roo project page http://projects.spring.io/spring-roo/#download-widget[downloads section].
 . Unzip the distribution, which will unpack to a single installation directory; we will refer to it as `$ROO_HOME` from now on.
 . Go to link:https://spring.io/tools/sts/all[Spring Tool Suite™ Downloads] and follow the instructions to download and install the STS.
++
+[IMPORTANT]
+In Windows, to force the STS use of JDK VM you need to modify STS params by opening _STS.ini_ and adding the following line *before* the `-vmargs` line:
+`-vm [JDK-DIR]/bin/javaw.exe`.
 . Open your STS IDE.
 . Install the Roo Extension from update site.
 +
