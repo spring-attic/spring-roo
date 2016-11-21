@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bookmarks>
+   <site url="http://dist.springframework.org/snapshot/IDE/nightly/" selected="true" name="Spring Roo 2.0 (Nightly)"/>
+   <site url="http://dist.springframework.org/release/IDE/" selected="true" name="Spring Roo 2.0 (Release)"/>
+</bookmarks>
