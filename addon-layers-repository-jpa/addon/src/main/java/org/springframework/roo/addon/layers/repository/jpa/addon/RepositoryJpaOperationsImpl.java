@@ -120,8 +120,8 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
           "ERROR: interfaceType module is required on multimodule projects.");
     } else if (interfaceType == null) {
       interfaceType =
-          new JavaType(String.format("%s.%sRepository", domainType.getPackage(),
-              domainType.getSimpleTypeName()), "");
+          new JavaType(String.format("%s.repository.%sRepository", getProjectOperations()
+              .getFocusedTopLevelPackage(), domainType.getSimpleTypeName()), "");
     }
 
     // Check if entity provided type is annotated with @RooJpaEntity
