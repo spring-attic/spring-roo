@@ -94,7 +94,7 @@ To install Spring Roo on your STS 3.8.0+ follow the instructions below:
 . Open your STS IDE.
 . Open the STS dashboard.
 . Click on Extensions bottom tab and search Spring Roo.
-. Install Spring IDE - Roo Extension.
+. Install the *Spring IDE - Roo Extension*.
 +
 [align="center"]
 image::roo-extension.png["STS Spring IDE - Roo Extension"]
