@@ -155,6 +155,9 @@ public class ServiceOperationsImpl implements ServiceOperations {
       Validate
           .notNull(repositoryType,
               "ERROR: You must specify a repository type to be able to generate service on multimodule projects.");
+      Validate
+          .notNull(interfaceType,
+              "ERROR: You must specify a interface type to be able to generate service on multimodule projects.");
     }
 
     // Check if current entity is related with the repository
@@ -179,16 +182,16 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
     if (interfaceType == null) {
       interfaceType =
-          new JavaType(String.format("%s.%s%s", implType == null ? domainType.getPackage()
-              : implType.getPackage(), domainType.getSimpleTypeName(), implType == null ? "Service"
-              : implType.getSimpleTypeName().concat("Api")),
-              implType == null ? domainType.getModule() : implType.getModule());
+          new JavaType(String.format("%s.service.api.%s%s",
+              projectOperations.getFocusedTopLevelPackage(), domainType.getSimpleTypeName(),
+              implType == null ? "Service" : implType.getSimpleTypeName().concat("Api")), "");
     }
 
     if (implType == null) {
       implType =
-          new JavaType(String.format("%s.%sServiceImpl", interfaceType.getPackage(),
-              domainType.getSimpleTypeName()), interfaceType.getModule());
+          new JavaType(String.format("%s.service.impl.%sServiceImpl",
+              projectOperations.getFocusedTopLevelPackage(), domainType.getSimpleTypeName()),
+              interfaceType.getModule());
     }
 
     // Generating service interface
