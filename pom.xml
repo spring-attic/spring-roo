@@ -22,10 +22,12 @@
     <description>Spring Roo is a next-generation rapid application development tool for Java developers. It focuses on higher productivity, stock-standard Java APIs, high usability, avoiding engineering trade-offs and facilitating easy Roo removal.</description>
     <inceptionYear>2009</inceptionYear>
     <modules>
-        <!-- NB: Update the <dependencyManagement> section in this pom.xml if you
-            add/remove/rename any module below! -->
+        <!-- 
+          NB: Update the <dependencyManagement> section in this pom.xml if you
+          add/remove/rename any module below! -->
         <!-- ROO Core -->
         <module>runtime</module>
+
         <!-- ROO Addons -->
         <module>addon-configurable</module>
         <module>addon-javabean</module>
@@ -54,8 +56,9 @@
         <module>annotations</module>
         <module>addon-email</module>
         <module>addon-jms</module>
-        <!-- Web UI -->
+        <!-- Web UI 
         <module>web-ui</module>
+        -->
 
         <!-- Excluded modules on Spring Roo 2.0.M2 -->
         <!-- <module>addon-tailor</module>
