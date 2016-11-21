@@ -3,6 +3,8 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProvider;
+import org.springframework.roo.addon.web.mvc.controller.annotations.RooController;
+import org.springframework.roo.addon.web.mvc.controller.annotations.finder.RooSearch;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
@@ -155,4 +157,55 @@ public interface ControllerOperations extends Feature {
   public List<RelationInfoExtended> getRelationInfoFor(JavaType entity, String path);
 
   public List<RelationInfoExtended> getRelationInfoFor(JpaEntityMetadata entity, String path);
+
+  /**
+   * Gets base Path for referenced controller
+   *
+   * @param controller JavaType correctly annotated with {@link RooController}
+   * @return
+   */
+  public String getBasePathForController(JavaType controller);
+
+  /**
+   * Gets base Path for referenced controller
+   *
+   * @param controller details correctly annotated with {@link RooController}
+   * @return
+   */
+  public String getBasePathForController(ClassOrInterfaceTypeDetails controller);
+
+  /**
+   * Gets base URL for referenced controller
+   *
+   * @param controller JavaType correctly annotated with {@link RooController}
+   * @return
+   */
+  public String getBaseUrlForController(JavaType controller);
+
+  /**
+   * Gets base URL for referenced controller
+   *
+   * @param controller details correctly annotated with {@link RooController}
+   * @return
+   */
+  public String getBaseUrlForController(ClassOrInterfaceTypeDetails controller);
+
+  /**
+   * Gets finder base URL for referenced controller
+   *
+   * @param controller JavaType correctly annotated with {@link RooController} and {@link RooSearch}
+   * @param finder target. Should be one of {@link RooSearch#finders()}
+   * @return
+   */
+  public String getBaseUrlControllerForFinder(JavaType controller, String finder);
+
+  /**
+   * Gets finder base URL for referenced controller
+   *
+   * @param controller details correctly annotated with {@link RooController} and {@link RooSearch}
+   * @param finder target. Should be one of {@link RooSearch#finders()}
+   * @return
+   */
+  public String getBaseUrlControllerForFinder(ClassOrInterfaceTypeDetails controller, String finder);
+
 }

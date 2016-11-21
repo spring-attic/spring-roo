@@ -147,7 +147,8 @@ public class ProjectCommands implements CommandMarker {
     return "Development mode set to " + enabled;
   }
 
-  @CliCommand(value = PROJECT_SCAN_NOW_COMMAND, help = "Perform a manual file system scan")
+  @CliCommand(value = PROJECT_SCAN_NOW_COMMAND,
+      help = "Perform a manual file system scan, checking that " + "all files are updated.")
   public String scan() {
     if (processManager == null) {
       processManager = getProcessManager();
@@ -166,8 +167,10 @@ public class ProjectCommands implements CommandMarker {
     return "Manual scan completed";
   }
 
-  @CliCommand(value = PROJECT_SCAN_STATUS_COMMAND,
-      help = "Display file system scanning information")
+  @CliCommand(
+      value = PROJECT_SCAN_STATUS_COMMAND,
+      help = "Display file system scanning information such as the time taken for last scan and scanning "
+          + "frequency.")
   public String scanningInfo() {
     if (processManager == null) {
       processManager = getProcessManager();
@@ -193,7 +196,8 @@ public class ProjectCommands implements CommandMarker {
     return sb.toString();
   }
 
-  @CliCommand(value = PROJECT_SCAN_SPEED_COMMAND, help = "Changes the file system scanning speed")
+  @CliCommand(value = PROJECT_SCAN_SPEED_COMMAND,
+      help = "Changes the file system scanning time between " + "file system scans.")
   public String scanningSpeed(@CliOption(key = {"", "ms"}, mandatory = true,
       help = "The number of milliseconds between each scan") final long minimumDelayBetweenScan) {
     if (processManager == null) {

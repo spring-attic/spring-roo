@@ -292,30 +292,51 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
     return StringUtils.isNotBlank(returnType);
   }
 
-  @CliCommand(value = "finder add",
-      help = "Install a finder in the given target (must be an entity)")
+  @CliCommand(
+      value = "finder add",
+      help = "Installs a finder in the given target (must be an entity). This command needs an existing "
+          + "repository for the target entity, you can create it with `repository jpa` command. The "
+          + "finder will be added to targeted entity associated repository and associated service if "
+          + "exists or when it will be created.")
   public void installFinders(
-      @CliOption(key = "entity", mandatory = true, unspecifiedDefaultValue = "*",
+      @CliOption(
+          key = "entity",
+          mandatory = true,
+          unspecifiedDefaultValue = "*",
           optionContext = PROJECT,
-          help = "The entity for which the finders are generated (mandatory") final JavaType entity,
+          help = "The entity for which the finders are generated. When working on a mono module project, "
+              + "simply specify the name of the entity. If you consider it necessary, you can also "
+              + "specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). "
+              + "When working with multiple modules, you should specify the name of the class and the "
+              + "module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not "
+              + "specified, it is assumed that the entity is in the module which has the focus.") final JavaType entity,
       @CliOption(
           key = "name",
           mandatory = true,
-          help = "The finder string defined as a Spring Data query. Use Spring Data JPA nomenclature. You must define 'entity' parameter "
-              + "before (mandatory) ") final JavaSymbolName finderName,
+          help = "The finder string defined as a Spring Data query. Use Spring Data JPA nomenclature."
+              + "Possible values are: any finder name following Spring Data nomenclature."
+              + "This option will not be available until `--entity` is specified.") final JavaSymbolName finderName,
       @CliOption(
           key = "formBean",
           mandatory = true,
-          help = "The finder's search parameter. Should be a DTO. Not avalaible if 'entity' parameter has not been specified "
-              + "before or if there aren't exist any DTO in generated project. If not specified, it is used as search parameter"
-              + " the entity specified in the 'entity' parameter (mandatory if 'returnType' is specified)") final JavaType formBean,
+          help = "The finder's search parameter. Should be a DTO and it must have at least same fields "
+              + "(name and type) as those included in the finder `--name`, which can be target entity"
+              + " fields or related entity fields."
+              + "Possible values are: any of the DTO's in the project."
+              + "This option is mandatory if `--returnType` is specified."
+              + "This option is not available if `--entity` parameter has not been specified before or "
+              + "if it does not exist any DTO in generated project. "
+              + "Default if option not present: the entity specified in `--entity` option.") final JavaType formBean,
       @CliOption(
           key = "returnType",
           mandatory = false,
           optionContext = PROJECT,
-          help = "The finder's results return type. Should be a Projection class related with the specified entity in 'entity' parameter."
-              + " This option is not available if 'entity' parameter has not been specified before or if there are not exist any Projection "
-              + "class associated. If not specified, it is used as type of response the  entity specified in the 'entity' parameter") JavaType returnType) {
+          help = "The finder's results return type."
+              + "Possible values are: link:#entity-projection-command[Projection] classes annotated with "
+              + "`@RooEntityProjection` and related to the entity specified in `--entity` option."
+              + "This option is not available if `--entity` parameter has not been specified before or "
+              + "if it does not exist any Projection class associated to the targeted entity."
+              + "Default if not present: the entity specified in `--entity`.") JavaType returnType) {
 
     // Check if specified finderName follows Spring Data nomenclature
     PartTree partTree = new PartTree(finderName.getSymbolName(), getEntityDetails(entity), this);

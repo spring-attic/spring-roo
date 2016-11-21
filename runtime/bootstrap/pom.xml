@@ -16,6 +16,11 @@
     <description>Main classes, OSGi services implementations and third party
     libraries needed to execute the runtime environment.</description>
 
+    <properties>
+      <freemarker.version>2.3.23_1</freemarker.version>
+      <target.jar.directory>${project.build.directory}/../../target/all</target.jar.directory>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -169,6 +174,7 @@
             <groupId>org.apache.aries</groupId>
             <artifactId>org.apache.aries.util</artifactId>
         </dependency>
+
         <!-- Third party libs -->
         <dependency>
             <groupId>com.github.antlrjavaparser</groupId>
@@ -208,6 +214,7 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
          </dependency>
+
         <!-- Wrapped Third Party libs -->
         <dependency>
             <groupId>org.springframework.roo.wrapping</groupId>
@@ -261,7 +268,4 @@
             </plugin>
         </plugins>
     </build>
-    <properties>
-        <target.jar.directory>${project.build.directory}/../../target/all</target.jar.directory>
-    </properties>
 </project>

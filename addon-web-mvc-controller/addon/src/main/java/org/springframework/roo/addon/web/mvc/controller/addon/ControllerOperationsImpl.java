@@ -1477,6 +1477,117 @@ public class ControllerOperationsImpl implements ControllerOperations {
     return infos;
   }
 
+
+  @Override
+  public String getBaseUrlForController(ClassOrInterfaceTypeDetails controller) {
+    Validate.notNull(controller, "controller is required");
+    Validate.notNull(controller.getAnnotation(RooJavaType.ROO_CONTROLLER),
+        "%s must be annotated with @%s", controller.getType(),
+        RooJavaType.ROO_CONTROLLER.getSimpleTypeName());
+
+
+    ControllerAnnotationValues values = new ControllerAnnotationValues(controller);
+    StringBuilder sbuilder = getBasePathStringBuilder(controller, values);
+
+    final JavaType entity = values.getEntity();
+    if (values.getType() == ControllerType.COLLECTION) {
+      return sbuilder.toString();
+    } else if (values.getType() == ControllerType.ITEM) {
+      return sbuilder.append("/{").append(StringUtils.uncapitalize(entity.getSimpleTypeName()))
+          .append("}").toString();
+    } else if (values.getType() == ControllerType.SEARCH) {
+      return sbuilder.append("/search").toString();
+    }
+    Validate.isTrue(values.getType() == ControllerType.DETAIL
+        || values.getType() == ControllerType.DETAIL_ITEM, "Unsupported @%s.type '%s' on %s",
+        RooJavaType.ROO_CONTROLLER, values.getType(), controller.getType());
+
+    // Getting the relationField from @RooDetail entity
+    final AnnotationAttributeValue<Object> relationFieldAttr =
+        controller.getAnnotation(RooJavaType.ROO_DETAIL).getAttribute("relationField");
+
+    final String detailAnnotaionFieldValue = (String) relationFieldAttr.getValue();
+
+    Validate.notNull(relationFieldAttr,
+        "ERROR: In %s controller, @RooDetail annotation must have relationField value",
+        controller.getType());
+
+    List<RelationInfoExtended> detailsFieldInfo =
+        getRelationInfoFor(entity, detailAnnotaionFieldValue);
+    Validate.isTrue(detailsFieldInfo != null & detailsFieldInfo.size() > 0,
+        "Missing details information for %s", controller.getType());
+    for (RelationInfo info : detailsFieldInfo) {
+      sbuilder.append("/{").append(StringUtils.uncapitalize(info.entityType.getSimpleTypeName()))
+          .append("}/").append(info.fieldName);
+    }
+
+    if (values.getType() == ControllerType.DETAIL_ITEM) {
+      sbuilder.append("/{").append(detailsFieldInfo.get(detailsFieldInfo.size() - 1).fieldName)
+          .append("}");
+    }
+
+    return sbuilder.toString();
+  }
+
+  private StringBuilder getBasePathStringBuilder(ClassOrInterfaceTypeDetails controller,
+      ControllerAnnotationValues values) {
+    StringBuilder sbuilder = new StringBuilder("/");
+    final String prefix = StringUtils.trim(values.getPathPrefix());
+    final JavaType entity = values.getEntity();
+
+    // Add prefix
+    if (StringUtils.isNotBlank(prefix)) {
+      if (prefix.startsWith("/")) {
+        sbuilder.append(prefix.substring(1));
+      } else {
+        sbuilder.append(prefix);
+      }
+    }
+    // add Entity
+    sbuilder.append(StringUtils.lowerCase(getPluralService().getPlural(entity)));
+    return sbuilder;
+  }
+
+  @Override
+  public String getBaseUrlForController(JavaType controller) {
+    ClassOrInterfaceTypeDetails cid = getTypeLocationService().getTypeDetails(controller);
+    Validate.notNull(cid, "%s not found", controller.getFullyQualifiedTypeName());
+    return getBaseUrlForController(cid);
+  }
+
+  @Override
+  public String getBaseUrlControllerForFinder(ClassOrInterfaceTypeDetails controller, String finder) {
+    String basePath = getBaseUrlForController(controller);
+    return basePath + StringUtils.replaceOnce(finder, "findBy", "by");
+  }
+
+  @Override
+  public String getBaseUrlControllerForFinder(JavaType controller, String finder) {
+    ClassOrInterfaceTypeDetails cid = getTypeLocationService().getTypeDetails(controller);
+    Validate.notNull(cid, "%s not found", controller.getFullyQualifiedTypeName());
+    return getBaseUrlControllerForFinder(cid, finder);
+  }
+
+  @Override
+  public String getBasePathForController(ClassOrInterfaceTypeDetails controller) {
+    Validate.notNull(controller, "controller is required");
+    Validate.notNull(controller.getAnnotation(RooJavaType.ROO_CONTROLLER),
+        "%s must be annotated with @%s", controller.getType(),
+        RooJavaType.ROO_CONTROLLER.getSimpleTypeName());
+
+
+    ControllerAnnotationValues values = new ControllerAnnotationValues(controller);
+    StringBuilder sbuilder = getBasePathStringBuilder(controller, values);
+    return sbuilder.toString();
+  }
+
+  @Override
+  public String getBasePathForController(JavaType controller) {
+    ClassOrInterfaceTypeDetails cid = getTypeLocationService().getTypeDetails(controller);
+    Validate.notNull(cid, "%s not found", controller.getFullyQualifiedTypeName());
+    return getBasePathForController(cid);
+  }
+
   //Methods to obtain OSGi Services
 
   private TypeLocationService getTypeLocationService() {
@@ -1501,10 +1612,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
   private ApplicationConfigService getApplicationConfigService() {
     return serviceInstaceManager.getServiceInstance(this, ApplicationConfigService.class);
-  }
-
-  private MemberDetailsScanner getMemberDetailsScanner() {
-    return serviceInstaceManager.getServiceInstance(this, MemberDetailsScanner.class);
   }
 
   private MetadataService getMetadataService() {

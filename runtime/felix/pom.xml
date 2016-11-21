@@ -12,6 +12,10 @@
     <packaging>bundle</packaging>
     <name>Spring Roo - Runtime - Felix Interoperability</name>
 
+    <properties>
+        <main.basedir>${basedir}/../..</main.basedir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -36,6 +40,10 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.bundlerepository</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.freemarker</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -79,8 +87,4 @@
             </plugin>
         </plugins>
     </build>
-    
-    <properties>
-        <main.basedir>${basedir}/../..</main.basedir>
-    </properties>
 </project>

@@ -154,20 +154,26 @@ public class ClasspathCommands implements CommandMarker {
   }
 
   @CliCommand(value = "interface",
-      help = "Creates a new Java interface source file in any project path")
+      help = "Creates a new Java interface source file in any project path.")
   public void createInterface(
       @CliOption(
           key = "class",
           optionContext = UPDATE_PROJECT,
           mandatory = true,
-          help = "The name of the interface to create (mandatory). It could include module name if necessary") final JavaType name,
+          help = "The name of the class to create. If you consider it necessary, you can also specify "
+              + "the package (base package can be specified with `~`). Ex.: `--class ~.domain.MyClass`. "
+              + "You can specify module as well, if necessary. Ex.: `--class model:~.domain.MyClass`. "
+              + "When working with a multi-module project, if module is not specified the class will "
+              + "be created in the module which has the focus.") final JavaType name,
       @CliOption(key = "path", mandatory = false,
           unspecifiedDefaultValue = "FOCUSED:SRC_MAIN_JAVA",
           specifiedDefaultValue = "FOCUSED:SRC_MAIN_JAVA",
-          help = "Source directory to create the interface in") final LogicalPath path,
+          help = "Source directory to create the interface in."
+              + "Default: _[FOCUSED-MODULE]/src/main/java_.") final LogicalPath path,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+          help = "Indicates whether reserved words are ignored by Roo."
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords,
       ShellContext shellContext) {
 
     // Check if already exists a class with same name
@@ -206,10 +212,19 @@ public class ClasspathCommands implements CommandMarker {
     classpathOperations.enumConstant(name, fieldName, permitReservedWords);
   }
 
-  @CliCommand(value = "focus", help = "Changes focus to a different type")
+  @CliCommand(value = "focus", help = "Changes Roo Shell focus to a different type in the project.")
   public void focus(
-      @CliOption(key = "class", mandatory = true, optionContext = UPDATE_PROJECT,
-          help = "The type to focus on (mandatory). It could include module name if necessary.") final JavaType type) {
+      @CliOption(
+          key = "class",
+          mandatory = true,
+          optionContext = UPDATE_PROJECT,
+          help = "The type to focus on. When working on a mono module project, simply specify the name of"
+              + " the class in which the new constant will be included. If you consider it necessary, you"
+              + " can also specify the package. Ex.: `--class ~.domain.MyEnumClass` (where `~` is the "
+              + "base package). When working with multiple modules, you should specify the name of the "
+              + "class and the module where it is. Ex.: `--class model:~.domain.MyEnumClass`. If the "
+              + "module is not specified, it is assumed that the class is in the module which has the "
+              + "focus.") final JavaType type) {
     classpathOperations.focus(type);
   }
 

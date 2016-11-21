@@ -23,6 +23,7 @@ public class EntityItem {
   private Map<String, Object> configuration;
   protected int z;
   private boolean readOnly;
+  private String modelAttribute;
 
   /**
    *
@@ -41,6 +42,7 @@ public class EntityItem {
   public EntityItem(String entityName, String identifierField, String controllerPath,
       String suffixId, boolean readOnly) {
     this.entityName = entityName;
+    this.modelAttribute = StringUtils.uncapitalize(entityName);
     this.userManaged = false;
     this.codeManaged = "";
     this.readOnly = readOnly;
@@ -56,6 +58,7 @@ public class EntityItem {
 
   public EntityItem(String entityName, String suffixId, boolean readOnly) {
     this.entityName = entityName;
+    this.modelAttribute = StringUtils.uncapitalize(entityName);
     this.userManaged = false;
     this.codeManaged = "";
     this.readOnly = readOnly;
@@ -69,6 +72,7 @@ public class EntityItem {
 
   public EntityItem(String entityName, Map<String, Object> configuration, String suffixId) {
     this.entityName = entityName;
+    this.modelAttribute = StringUtils.uncapitalize(entityName);
     this.configuration = configuration;
     this.userManaged = false;
     this.codeManaged = "";
@@ -168,5 +172,13 @@ public class EntityItem {
 
   public boolean getReadOnly() {
     return this.readOnly;
+  }
+
+  public String getModelAttribute() {
+    return modelAttribute;
+  }
+
+  public void setModelAttribute(String modelAttribute) {
+    this.modelAttribute = modelAttribute;
   }
 }

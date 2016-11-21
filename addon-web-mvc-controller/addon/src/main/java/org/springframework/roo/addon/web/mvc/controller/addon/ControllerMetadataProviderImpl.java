@@ -175,12 +175,6 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
     // Getting type
     ControllerType type = controllerValues.getType();
 
-    // Getting pathPrefix
-    String pathPrefix = "";
-    if (controllerValues.getPathPrefix() != null) {
-      pathPrefix = StringUtils.lowerCase(controllerValues.getPathPrefix());
-    }
-
     // Getting related service
     ClassOrInterfaceTypeDetails serviceDetails = getServiceLocator().getService(entity);
     JavaType service = serviceDetails.getType();
@@ -194,15 +188,12 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
     }
 
     // Generate path
-    String path = "/".concat(StringUtils.lowerCase(getPluralService().getPlural(entity)));
-    if (StringUtils.isNotEmpty(pathPrefix)) {
-      if (!pathPrefix.startsWith("/")) {
-        pathPrefix = "/".concat(pathPrefix);
-      }
-      path = pathPrefix.concat(path);
-    }
-
-
+    final String path =
+        getControllerOperations().getBasePathForController(
+            governorPhysicalTypeMetadata.getMemberHoldingTypeDetails());
+    final String baseUrl =
+        getControllerOperations().getBaseUrlForController(
+            governorPhysicalTypeMetadata.getMemberHoldingTypeDetails());
 
     List<RelationInfoExtended> detailsFieldInfo = null;
     String detailAnnotaionFieldValue = null;
@@ -250,8 +241,8 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
     }
 
     return new ControllerMetadata(metadataIdentificationString, aspectName, controllerValues,
-        governorPhysicalTypeMetadata, entity, entityMetadata, service, path, type, serviceMetadata,
-        detailAnnotaionFieldValue, detailsServiceMetadata, detailsFieldInfo);
+        governorPhysicalTypeMetadata, entity, entityMetadata, service, path, baseUrl, type,
+        serviceMetadata, detailAnnotaionFieldValue, detailsServiceMetadata, detailsFieldInfo);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

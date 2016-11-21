@@ -58,9 +58,10 @@ public class HelpCommands implements CommandMarker {
     helpService.helpReferenceGuide();
   }
 
-  @CliCommand(value = HELP_COMMAND, help = "Shows system help")
+  @CliCommand(value = HELP_COMMAND, help = "Shows a summary of all Spring Roo commands.")
   public void obtainHelp(@CliOption(key = {"", "command"}, optionContext = "availableCommands",
-      help = "Command name to provide help for") final String buffer) {
+      help = "Command name to provide help for. When command name has more than one word, it "
+          + "should be between quotation marks.") final String buffer) {
 
     helpService.obtainHelp(buffer);
   }

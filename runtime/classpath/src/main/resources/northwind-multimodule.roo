@@ -175,7 +175,7 @@ field set --fieldName products --type ~.Product --cardinality ONE_TO_MANY --mapp
 field set --fieldName stores --type ~.Store --cardinality MANY_TO_MANY --joinTable NW_SUPPLIER_STORES --joinColumns STORE --referencedColumns STORE_ID --inverseJoinColumns SUPPLIER --inverseReferencedColumns SUPPLIER_ID
 
 // Generate DTO's
-dto --class ~.CustomerOrderStatusProjection --immutable
+dto --class ~.CustomerOrderStatusAndEmployeeProjection --immutable
 field number --fieldName orderId --type java.lang.Long
 field number --fieldName customerId --type java.lang.Long
 field number --fieldName employeeId --type java.lang.Long
@@ -183,7 +183,7 @@ field other --fieldName status --type ~.Status
 field date --fieldName orderDate --type java.util.Calendar
 field string --fieldName customerCompanyName
 
-dto --class ~.CustomerOrderStatusAndDateAndCustomerNameProjection --immutable
+dto --class ~.CustomerOrderStatusProjection --immutable
 field number --fieldName orderId --type java.lang.Long
 field other --fieldName status --type ~.Status
 field date --fieldName orderDate --type java.util.Calendar
@@ -194,7 +194,7 @@ field number --fieldName categoryId --type java.lang.Long
 field string --fieldName name
 field string --fieldName description
 
-dto --class ~.UserCertificateDniBean --immutable
+dto --class ~.UserCertificateDniMessageBean --immutable
 field number --fieldName status --type int
 field string --fieldName statusMsg
 field string --fieldName dni
@@ -204,13 +204,13 @@ field number --fieldName cityId --type java.lang.Long
 field number --fieldName regionId --type java.lang.Long
 field string --fieldName description
 
-dto --class ~.CustomerOrderClosedDateAndCustomerNameAndTotalProjection --immutable
+dto --class ~.CustomerOrderClosedDateAndCustomerProjection --immutable
 field number --fieldName customerId --type java.lang.Long
 field date --fieldName closedDate --type java.util.Calendar
 field string --fieldName customerCompanyName
 field number --fieldName total --type java.math.BigDecimal
 
-dto --class ~.CustomerOrderClosedDateAndProductNameAndTotalProjection --immutable
+dto --class ~.CustomerOrderProductAndTotalProjection --immutable
 field number --fieldName productId --type java.lang.Long
 field string --fieldName productName
 field number --fieldName quantity --type java.lang.Integer
@@ -228,7 +228,7 @@ field string --fieldName email
 field string --fieldName phone
 field string --fieldName fax
 
-dto --class ~.CustomerMessageBean --immutable
+dto --class ~.CustomerMailMessageBean --immutable
 field number --fieldName customerId --type java.lang.Long
 field string --fieldName companyName
 field string --fieldName message
@@ -264,7 +264,7 @@ field number --fieldName employeeId --type java.lang.Long
 field date --fieldName orderDateStart --type java.util.Calendar
 field date --fieldName orderDateEnd --type java.util.Calendar
 
-dto --class ~.CustomerOrdersCustomerProjection --immutable
+dto --class ~.CustomerOrderCustomerProjection --immutable
 field number --fieldName employeeId --type java.lang.Long
 field number --fieldName customerId --type java.lang.Long
 field string --fieldName employeeName
@@ -273,8 +273,7 @@ field date --fieldName thruDate --type java.util.Calendar
 field string --fieldName customerCompanyName
 field number --fieldName total --type java.math.BigDecimal
 // Commented until reactivation of field set on DTO's
-
-//field set --fieldName customerOrderClosedDateAndCustomerNameAndTotalProjection --type ~.CustomerOrderClosedDateAndCustomerNameAndTotalProjection
+//field set --fieldName customerOrderClosedDateAndCustomerProjection --type ~.CustomerOrderClosedDateAndCustomerProjection
 
 dto --class ~.CustomerUserLoginFormBean --immutable
 field number --fieldName customerId --type java.lang.Long
@@ -304,7 +303,7 @@ field string --fieldName phone
 field string --fieldName extension
 field string --fieldName supervisorName
 
-dto --class ~.EmployeeUserLoginBean --immutable
+dto --class ~.EmployeeUserLoginFormBean --immutable
 field number --fieldName employeeId --type java.lang.Long
 field string --fieldName firstName --notNull --sizeMax 50
 field string --fieldName lastName --notNull --sizeMax 120
@@ -326,7 +325,7 @@ field string --fieldName password --notNull --sizeMin 8 --sizeMax 128
 // Add @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./])[A-Za-z\\d`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./]*") to this field
 field string --fieldName repeatPassword --notNull --sizeMin 8 --sizeMax 128
 
-dto --class ~.ProductInventoryProjection --immutable
+dto --class ~.InventoryProjection --immutable
 field number --fieldName productId --type java.lang.Long
 field string --fieldName name
 field number --fieldName unitsInStock --type java.lang.Integer
@@ -335,7 +334,7 @@ field number --fieldName availableStock --type java.lang.Integer
 field number --fieldName reorderLevel --type java.lang.Integer
 field number --fieldName replenishStock --type java.lang.Integer
 
-dto --class ~.CustomerOrderInvoiceProjection --immutable
+dto --class ~.InvoiceProjection --immutable
 field number --fieldName customerOrderId --type java.lang.Long
 field number --fieldName shipCountryId --type java.lang.Long
 field number --fieldName shipRegionId --type java.lang.Long
@@ -418,7 +417,7 @@ field boolean --fieldName discontinued
 field number --fieldName purchaseOrdersCount --type java.lang.Long
 field number --fieldName orderDetailsCount --type java.lang.Long
 
-dto --class ~.CustomerOrdersClosedDateAndProductProjection --immutable
+dto --class ~.CustomerOrderClosedDateAndProductProjection --immutable
 field number --fieldName employeeId --type java.lang.Long
 field number --fieldName productId --type java.lang.Long
 field string --fieldName employeeName
@@ -427,7 +426,7 @@ field date --fieldName thruDate --type java.util.Calendar
 field string --fieldName productName
 field number --fieldName total --type java.math.BigDecimal
 // Commented until reactivation of field set on DTO's
-//field set --fieldName CustomerOrdersClosedDateAndProduct --type ~.CustomerOrdersClosedDateAndProduct
+//field set --fieldName CustomerOrderClosedDateAndProduct --type ~.CustomerOrderClosedDateAndProduct
 
 dto --class ~.PurchaseOrderProjection --immutable
 field number --fieldName purchaseOrderId --type java.lang.Long
@@ -438,7 +437,7 @@ field string --fieldName employeeName
 field number --fieldName quantity --type java.lang.Integer
 field number --fieldName totalCost --type java.math.BigDecimal
 
-dto --class ~.MessageInboxProjection --immutable
+dto --class ~.InboxMailMessageBean --immutable
 field string --fieldName subject
 field string --fieldName content
 field string --fieldName from --permitReservedWords
@@ -505,7 +504,7 @@ finder add --entity model:~.Shipper --name findByCompanyName
 finder add --entity model:~.Region --name findByCountryIdOrderByDescriptionAsc
 finder add --entity model:~.City --name findByRegionIdOrderByDescriptionAsc
 finder add --entity model:~.Product --name findByDiscontinuedOrderByNameAsc
-finder add --entity model:~.Shipper --name findByPhone --formBean model:~.ShipperFindByPhoneForm --returnType model:~.ShipperProjection
+finder add --entity model:~.Shipper --name findByPhone --formBean model:~.ShipperPhoneFormBean --returnType model:~.ShipperProjection
 
 // Add tests
 test unit --class model:~.CustomerOrder
@@ -560,3 +559,21 @@ web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions
 
 // Add finders
 web mvc finder --all --responseType THYMELEAF
+
+// Add integration tests
+test integration --class repository:~.CategoryRepository
+test integration --class repository:~.CityRepository
+test integration --class repository:~.CountryRepository
+test integration --class repository:~.CustomerOrderRepository
+test integration --class repository:~.CustomerRepository
+test integration --class repository:~.EmployeeRepository
+test integration --class repository:~.OrderDetailRepository
+test integration --class repository:~.PartyRepository
+test integration --class repository:~.ProductRepository
+test integration --class repository:~.PurchaseOrderRepository
+test integration --class repository:~.RegionRepository
+test integration --class repository:~.ReportRepository
+test integration --class repository:~.ShipperRepository
+test integration --class repository:~.SoldProductRepository
+test integration --class repository:~.StoreRepository
+test integration --class repository:~.SupplierRepository

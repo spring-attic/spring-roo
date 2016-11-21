@@ -202,10 +202,11 @@
   	-->
 
           <h1 data-th-text="${r"#{"}label_create_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Create ${entityName}</h1>
+          <#assign dconfig=detail.configuration>
 
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="@{${controllerPath}}">
+            data-th-action="@{${r"${"}(#mvc.url('${dconfig.mvcUrl_create}')).buildAndExpand(${entity.modelAttribute}.${entity.configuration.identifierField})}}">
 
             <fieldset id="containerFields">
               <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} data </legend>
