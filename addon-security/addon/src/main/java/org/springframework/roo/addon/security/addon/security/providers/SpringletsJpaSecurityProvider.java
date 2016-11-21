@@ -26,7 +26,7 @@ import org.springframework.roo.support.osgi.ServiceInstaceManager;
  * Implementation of SecurityProvider to work with the domain
  * model during the authentication process.
  * 
- * The name of this provider is "MODEL" and must be unique. It will be used to 
+ * The name of this provider is "SPRINGLETS_JPA" and must be unique. It will be used to 
  * recognize this Spring Security Provider.
  * 
  * @author Juan Carlos García
@@ -34,14 +34,14 @@ import org.springframework.roo.support.osgi.ServiceInstaceManager;
  */
 @Component
 @Service
-public class ModelSecurityProvider implements SecurityProvider {
+public class SpringletsJpaSecurityProvider implements SecurityProvider {
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
       "1.0.0.BUILD-SNAPSHOT");
   private static final Dependency SPRINGLETS_SECURITY_AUTHENTICATION_STARTER = new Dependency(
       "io.springlets", "springlets-boot-starter-authentication", "${springlets.version}");
 
-  protected final static Logger LOGGER = HandlerUtils.getLogger(ModelSecurityProvider.class);
+  protected final static Logger LOGGER = HandlerUtils.getLogger(SpringletsJpaSecurityProvider.class);
 
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
@@ -57,7 +57,7 @@ public class ModelSecurityProvider implements SecurityProvider {
 
   @Override
   public String getName() {
-    return "MODEL";
+    return "SPRINGLETS_JPA";
   }
 
   @Override
@@ -78,7 +78,7 @@ public class ModelSecurityProvider implements SecurityProvider {
   public boolean isInstallationAvailable() {
     return getProjectOperations().isFocusedProjectAvailable()
         && getProjectOperations().isFeatureInstalled(FeatureNames.MVC)
-        && !getProjectOperations().isFeatureInstalled("MODEL");
+        && !getProjectOperations().isFeatureInstalled("SPRINGLETS_JPA");
   }
 
   @Override

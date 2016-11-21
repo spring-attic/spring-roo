@@ -520,7 +520,7 @@ web mvc setup
 
 
 // Install security
-security setup --provider MODEL
+security setup --provider SPRINGLETS_JPA
 
 // Restrict delete method to user with roles ADMIN or EMPLEADO
 security authorize --class service-api:~.CustomerService --method delete --roles ADMIN,EMPLEADO
