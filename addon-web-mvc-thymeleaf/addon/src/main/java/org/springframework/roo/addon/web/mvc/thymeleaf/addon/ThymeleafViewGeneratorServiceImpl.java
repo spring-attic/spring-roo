@@ -1,10 +1,5 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -32,6 +27,12 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.settings.project.ProjectSettingsService;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -157,31 +158,6 @@ public class ThymeleafViewGeneratorServiceImpl extends
       entity.setCodeManaged(elementField.outerHtml());
     }
 
-    // Get javascript associated to field if data-z attribute value is
-    // equals to user-managed
-    Map<String, String> javascriptCode = new HashMap<String, String>();
-    Element elementJavascriptField =
-        loadExistingDoc.getElementById(entity.getEntityItemId().concat("-table-javascript"));
-    if (elementJavascriptField != null && elementJavascriptField.hasAttr("data-z")
-        && elementJavascriptField.attr("data-z").equals("user-managed")) {
-      javascriptCode.put(entity.getEntityItemId().concat("-table-javascript"),
-          elementJavascriptField.outerHtml());
-    }
-
-    // Check if has details because in this case it has a special javascript
-    if (!detailsLevels.isEmpty()) {
-      Element elementJavascriptDetailField =
-          loadExistingDoc.getElementById(entity.getEntityItemId().concat(
-              "-table-javascript-firstdetail"));
-      if (elementJavascriptDetailField != null && elementJavascriptDetailField.hasAttr("data-z")
-          && elementJavascriptDetailField.attr("data-z").equals("user-managed")) {
-        javascriptCode.put(entity.getEntityItemId().concat("-table-javascript-firstdetail"),
-            elementJavascriptDetailField.outerHtml());
-      }
-    }
-
-    entity.setJavascriptCode(javascriptCode);
-
     for (List<DetailEntityItem> detailsLevel : detailsLevels) {
       for (DetailEntityItem detail : detailsLevel) {
 
@@ -195,19 +171,8 @@ public class ThymeleafViewGeneratorServiceImpl extends
           detail.setCodeManaged(elementDetail.outerHtml());
         }
 
-        // Get javascript associated to field if data-z attribute value is
-        // equals to user-managed
-        Map<String, String> javascriptDetailCode = new HashMap<String, String>();
-        Element elementJavascriptDetailField =
-            loadExistingDoc.getElementById(detail.getEntityItemId().concat("-table-javascript"));
-        if (elementJavascriptDetailField != null && elementJavascriptDetailField.hasAttr("data-z")
-            && elementJavascriptDetailField.attr("data-z").equals("user-managed")) {
-          javascriptDetailCode.put(detail.getEntityItemId().concat("-table-javascript"),
-              elementJavascriptDetailField.outerHtml());
-        }
-
-        detail.setJavascriptCode(javascriptDetailCode);
-
+        // Check tab code if data-z attribute value is equals to
+        // user-managed
         Element elementTabCodeDetailField =
             loadExistingDoc.getElementById(detail.getEntityItemId().concat("-table-tab"));
         if (elementTabCodeDetailField != null && elementTabCodeDetailField.hasAttr("data-z")
@@ -457,17 +422,16 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     ctx.addExtraParameter("entity", entityItem);
     ctx.addExtraParameter("detail", detail);
-    ctx.addExtraParameter("fields", detail.getConfiguration().get("fields"));
 
     // TODO
     ctx.addExtraParameter("details", Collections.EMPTY_LIST);
-
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
       newDoc =
-          mergeShowDetailsCompositionView("showDetailComposition", loadExistingDoc(viewName), ctx,
-              entityItem, detail);
+          mergeDetailsCompositionView("showDetailComposition", loadExistingDoc(viewName), ctx,
+              entityItem, detail, (List<FieldItem>) detail.getConfiguration().get("fields"));
     } else {
+      ctx.addExtraParameter("fields", detail.getConfiguration().get("fields"));
       newDoc = process("showDetailComposition", ctx);
     }
 
@@ -490,14 +454,14 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     ctx.addExtraParameter("entity", entityItem);
     ctx.addExtraParameter("detail", detail);
-    ctx.addExtraParameter("fields", detail.getConfiguration().get("fields"));
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
       newDoc =
-          mergeUpdateDetailsCompositionView("editDetailComposition", loadExistingDoc(viewName),
-              ctx, entityItem, detail);
+          mergeDetailsCompositionView("editDetailComposition", loadExistingDoc(viewName), ctx,
+              entityItem, detail, (List<FieldItem>) detail.getConfiguration().get("fields"));
     } else {
+      ctx.addExtraParameter("fields", detail.getConfiguration().get("fields"));
       newDoc = process("editDetailComposition", ctx);
     }
 
@@ -578,14 +542,15 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     childCtx.addExtraParameter("entity", entityItem);
     childCtx.addExtraParameter("detail", detail);
-    childCtx.addExtraParameter("fields", detail.getConfiguration().get("fields"));
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
       newDoc =
-          mergeCreateDetailsCompositionView("createDetailComposition", loadExistingDoc(viewName),
-              childCtx, entityItem, detail);
+          mergeDetailsCompositionView("createDetailComposition", loadExistingDoc(viewName),
+              childCtx, entityItem, detail,
+              (List<FieldItem>) detail.getConfiguration().get("fields"));
     } else {
+      childCtx.addExtraParameter("fields", detail.getConfiguration().get("fields"));
       newDoc = process("createDetailComposition", childCtx);
     }
 
@@ -595,27 +560,38 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
 
 
-  private Document mergeCreateDetailsCompositionView(String templateName, Document loadExistingDoc,
-      ViewContext<ThymeleafMetadata> ctx, EntityItem entityItem, DetailEntityItem detail) {
-    // TODO
+  private Document mergeDetailsCompositionView(String templateName, Document loadExistingDoc,
+      ViewContext ctx, EntityItem entityItem, DetailEntityItem detail, List<FieldItem> fields) {
+    for (FieldItem field : fields) {
+      // Get field code if data-z attribute value is equals to
+      // user-managed
+      Element elementField = loadExistingDoc.getElementById(field.getFieldId());
+      if (elementField != null && elementField.hasAttr("data-z")
+          && elementField.attr("data-z").equals("user-managed")) {
+        field.setUserManaged(true);
+        field.setCodeManaged(elementField.outerHtml());
+      } else {
+        field.setUserManaged(false);
+        field.setCodeManaged("");
+      }
+    }
+    ctx.addExtraParameter("fields", fields);
+
+    ctx.addExtraParameter("userManagedComponents", mergeStructure(loadExistingDoc));
     return process(templateName, ctx);
   }
 
   private Document mergeCreateDetailsView(String templateName, Document loadExistingDoc,
-      ViewContext<ThymeleafMetadata> ctx, EntityItem entityItem, DetailEntityItem detail) {
-    // TODO
-    return process(templateName, ctx);
-  }
+      ViewContext ctx, EntityItem entityItem, DetailEntityItem detail) {
+    Element elementDetail = loadExistingDoc.getElementById(detail.getEntityItemId());
+    if (elementDetail != null && elementDetail.hasAttr("data-z")
+        && elementDetail.attr("data-z").equals("user-managed")) {
+      detail.setUserManaged(true);
+      detail.setCodeManaged(elementDetail.outerHtml());
+      ctx.addExtraParameter("detail", detail);
+    }
+    ctx.addExtraParameter("userManagedComponents", mergeStructure(loadExistingDoc));
 
-  private Document mergeUpdateDetailsCompositionView(String templateName, Document loadExistingDoc,
-      ViewContext<ThymeleafMetadata> ctx, EntityItem entityItem, DetailEntityItem detail) {
-    // TODO
-    return process(templateName, ctx);
-  }
-
-  private Document mergeShowDetailsCompositionView(String templateName, Document loadExistingDoc,
-      ViewContext<ThymeleafMetadata> ctx, EntityItem entityItem, DetailEntityItem detail) {
-    // TODO
     return process(templateName, ctx);
   }
 

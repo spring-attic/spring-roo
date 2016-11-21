@@ -33,10 +33,10 @@
                   <#assign parentEntity=detail.rootEntity>
                 </#if>
                 <div class="table-responsive">
+                  <#assign dconfig=detail.configuration>
                   <#if detail.userManaged>
                     ${detail.codeManaged}
                   <#else>
-                    <#assign dconfig=detail.configuration>
                     <table id="${detail.entityItemId}-table"
                       class="table table-striped table-hover table-bordered"
                       data-z="${detail.z}"

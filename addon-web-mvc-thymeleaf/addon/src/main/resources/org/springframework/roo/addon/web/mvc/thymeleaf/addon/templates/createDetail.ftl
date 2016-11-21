@@ -205,7 +205,10 @@
             <fieldset id="containerFields">
               <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${detail.configuration.entityLabel}})}">${detail.entityName} data </legend>
 
-                <div class="form-group has-error has-feedback" data-z="${z}" id="selector"
+              <#if detail.userManaged>
+                ${detail.codeManaged}
+              <#else>
+                <div class="form-group has-error has-feedback" data-z="${detail.z}" id="${detail.entityItemId}"
                     data-th-class="form-group">
                     <div class="col-md-6">
                       <!-- Select2 -->
@@ -224,7 +227,7 @@
                       </select>
                     </div>
                 </div>
-
+              </#if>
               </fieldset>
 
               <!-- buttons form -->

@@ -18,10 +18,9 @@ public class EntityItem {
   private boolean userManaged;
   private String entityName;
   protected String entityItemId;
-  private Map<String, String> javascriptCode;
   private String codeManaged;
   private Map<String, Object> configuration;
-  protected int z;
+  protected String z;
   private boolean readOnly;
   private String modelAttribute;
 
@@ -46,7 +45,6 @@ public class EntityItem {
     this.userManaged = false;
     this.codeManaged = "";
     this.readOnly = readOnly;
-    this.javascriptCode = new HashMap<String, String>();
     this.configuration = new HashMap<String, Object>();
     this.configuration.put("identifierField", identifierField);
     this.configuration.put("controllerPath", controllerPath);
@@ -62,7 +60,6 @@ public class EntityItem {
     this.userManaged = false;
     this.codeManaged = "";
     this.readOnly = readOnly;
-    this.javascriptCode = new HashMap<String, String>();
     this.configuration = new HashMap<String, Object>();
     buildId(suffixId);
 
@@ -76,7 +73,6 @@ public class EntityItem {
     this.configuration = configuration;
     this.userManaged = false;
     this.codeManaged = "";
-    this.javascriptCode = new HashMap<String, String>();
     buildId(suffixId);
 
     // Calculate the Z parameter as the hash code of the other parameters
@@ -108,13 +104,13 @@ public class EntityItem {
    *
    * @return hash code
    */
-  private int calculateZ() {
+  private String calculateZ() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((entityName == null) ? 0 : entityName.hashCode());
     result = prime * result + ((entityItemId == null) ? 0 : entityItemId.hashCode());
     result = prime * result + ((configuration == null) ? 0 : configuration.hashCode());
-    return result;
+    return Integer.toHexString(result);
   }
 
   public void addConfigurationElement(String key, Object value) {
@@ -137,14 +133,6 @@ public class EntityItem {
     this.entityName = entityName;
   }
 
-  public Map<String, String> getJavascriptCode() {
-    return javascriptCode;
-  }
-
-  public void setJavascriptCode(Map<String, String> javascriptCode) {
-    this.javascriptCode = javascriptCode;
-  }
-
   public String getCodeManaged() {
     return codeManaged;
   }
@@ -153,7 +141,7 @@ public class EntityItem {
     this.codeManaged = codeManaged;
   }
 
-  public int getZ() {
+  public String getZ() {
     return z;
   }
 

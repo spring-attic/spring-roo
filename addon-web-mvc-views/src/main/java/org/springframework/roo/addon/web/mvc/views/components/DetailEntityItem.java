@@ -75,14 +75,14 @@ public class DetailEntityItem extends EntityItem {
    *
    * @return hash code
    */
-  private int calculateZ() {
+  private String calculateZ() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((entityItemId == null) ? 0 : entityItemId.hashCode());
     result = prime * result + ((getConfiguration() == null) ? 0 : getConfiguration().hashCode());
     result = prime * result + ((fieldName == null) ? 0 : fieldName.hashCode());
 
-    return result;
+    return Integer.toHexString(result);
   }
 
   public String getTabLinkCode() {
