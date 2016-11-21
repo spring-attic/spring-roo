@@ -222,26 +222,25 @@
                       <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
                   <#elseif field.type == "DATE">
                       <@date.input label=field.label
-                      fieldName=field.fieldName
-                      fieldId=field.fieldId
-                      z=field.z
-                      format=field.configuration.format required=field.configuration.required />
+                          fieldName=field.fieldName
+                          fieldId=field.fieldId
+                          z=field.z
+                          format=field.configuration.format required=field.configuration.required />
                   <#elseif field.type == "REFERENCE">
                       <@reference.input label=field.label
                           fieldName=field.fieldName
                           fieldId=field.fieldId
                           z=field.z
-                  referencedEntity=field.configuration.referencedEntity
+                          referencedEntity=field.configuration.referencedEntity
                           identifierField=field.configuration.identifierField
-                          referencedPath=field.configuration.referencedPath
-                          fieldOne=field.configuration.fieldOne
-                          fieldTwo=field.configuration.fieldTwo required=field.configuration.required />
+                          referecedMvcUrl_select2=field.configuration.referecedMvcUrl_select2
+                          required=field.configuration.required />
                   <#elseif field.type == "ENUM">
                       <@enum.input label=field.label
-                      fieldName=field.fieldName
-                      fieldId=field.fieldId
-                      z=field.z
-                      items=field.configuration.items required=field.configuration.required />
+                          fieldName=field.fieldName
+                          fieldId=field.fieldId
+                          z=field.z
+                          items=field.configuration.items required=field.configuration.required />
                   <#elseif field.type == "BOOLEAN">
                       <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
                   </#if>

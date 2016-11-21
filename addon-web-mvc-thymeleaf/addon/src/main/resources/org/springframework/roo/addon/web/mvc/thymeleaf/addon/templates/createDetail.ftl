@@ -217,8 +217,7 @@
                         data-ajax--delay="250"
                         multiple="multiple"
                         data-data-ajax--url="${r"${"}(#mvc.url('${dconfig.mvcUrl_select2}')).build()}"
-                        data-data-placeholder="${r"#{"}${select2_placeholder}}"
-                        data-id-field="${dconfig.identifierField}">
+                        data-data-placeholder="${r"#{"}${select2_placeholder}}">
                           <option data-th-each="item: *{${detail.pathStringFieldNames}}"
                              selected="true"
                              data-th-text="${r"${"}item}" data-th-value="${r"${"}item.${dconfig.identifierField}}">Another product to select</option>

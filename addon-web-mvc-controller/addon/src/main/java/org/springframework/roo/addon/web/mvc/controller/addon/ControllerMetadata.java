@@ -67,6 +67,8 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
   private final RelationInfoExtended lastDetailsInfo;
   private final String detailAnnotaionFieldValue;
 
+  private Map<String, RelationInfoExtended> relationInfos;
+
 
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
@@ -125,6 +127,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
    *            this controller
    * @param serviceMetadata
    *            ServiceMetadata of the service used by controller
+   * @param relationInfos
    * @param controllerDetailInfo
    *            Contains information relative to detail controller
    */
@@ -135,7 +138,8 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
       final String baseUrl, final ControllerType type, final ServiceMetadata serviceMetadata,
       final String detailAnnotaionFieldValue,
       final Map<JavaType, ServiceMetadata> detailsServiceMetadata,
-      final List<RelationInfoExtended> detailsFieldInfo) {
+      final List<RelationInfoExtended> detailsFieldInfo,
+      Map<String, RelationInfoExtended> relationInfos) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.annotationValues = controllerValues;
@@ -148,6 +152,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     this.identifierField = entityMetadata.getCurrentIndentifierField();
     this.identifierType = identifierField.getFieldType();
     this.path = path;
+    this.relationInfos = Collections.unmodifiableMap(relationInfos);
     this.detailAnnotaionFieldValue = detailAnnotaionFieldValue;
     if (detailsFieldInfo == null) {
       this.detailsFieldInfo = null;
@@ -299,12 +304,16 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     return serviceField;
   }
 
-  public JpaEntityMetadata entityMetadata() {
+  public JpaEntityMetadata getEntityMetadata() {
     return entityMetadata;
   }
 
   public String getDetailAnnotaionFieldValue() {
     return detailAnnotaionFieldValue;
+  }
+
+  public Map<String, RelationInfoExtended> getRelationInfos() {
+    return relationInfos;
   }
 
   public ServiceMetadata getServiceMetadataForEntity(JavaType entityType) {

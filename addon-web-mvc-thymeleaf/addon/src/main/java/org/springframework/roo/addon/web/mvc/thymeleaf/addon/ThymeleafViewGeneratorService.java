@@ -12,6 +12,6 @@ import org.springframework.roo.addon.web.mvc.views.ViewContext;
  */
 public interface ThymeleafViewGeneratorService extends MVCViewGenerationService<ThymeleafMetadata> {
 
-  void addModalConfirmDelete(String moduleName, ViewContext ctx);
+  void addModalConfirmDelete(String moduleName, ViewContext<ThymeleafMetadata> ctx);
 
 }

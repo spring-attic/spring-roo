@@ -156,6 +156,17 @@ public interface ControllerOperations extends Feature {
    */
   public List<RelationInfoExtended> getRelationInfoFor(JavaType entity, String path);
 
+  /**
+   * Return a list of {@link RelationInfoExtended} for a field relation path of a entity.
+   *
+   * path is split by dot char and every return item is information for every path element.
+   *
+   * by example: entity could be Customer and path "order.details"
+   *
+   * @param entity
+   * @param path
+   * @return
+   */
   public List<RelationInfoExtended> getRelationInfoFor(JpaEntityMetadata entity, String path);
 
   /**

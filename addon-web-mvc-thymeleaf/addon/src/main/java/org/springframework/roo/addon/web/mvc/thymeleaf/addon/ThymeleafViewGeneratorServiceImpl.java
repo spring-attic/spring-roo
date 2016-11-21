@@ -24,6 +24,7 @@ import org.springframework.roo.addon.web.mvc.views.components.EntityItem;
 import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
 import org.springframework.roo.addon.web.mvc.views.components.MenuEntry;
 import org.springframework.roo.addon.web.mvc.views.template.engines.AbstractFreeMarkerViewGenerationService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaType;
@@ -124,8 +125,8 @@ public class ThymeleafViewGeneratorServiceImpl extends
   }
 
   @Override
-  public Document merge(String templateName, Document loadExistingDoc, ViewContext ctx,
-      List<FieldItem> fields) {
+  public Document merge(String templateName, Document loadExistingDoc,
+      ViewContext<ThymeleafMetadata> ctx, List<FieldItem> fields) {
     for (FieldItem field : fields) {
       // Get field code if data-z attribute value is equals to
       // user-managed
@@ -143,8 +144,9 @@ public class ThymeleafViewGeneratorServiceImpl extends
   }
 
   @Override
-  public Document mergeListView(String templateName, Document loadExistingDoc, ViewContext ctx,
-      EntityItem entity, List<FieldItem> fields, List<List<DetailEntityItem>> detailsLevels) {
+  public Document mergeListView(String templateName, Document loadExistingDoc,
+      ViewContext<ThymeleafMetadata> ctx, EntityItem entity, List<FieldItem> fields,
+      List<List<DetailEntityItem>> detailsLevels) {
 
     // Get field code if data-z attribute value is equals to user-managed
     Element elementField =
@@ -224,8 +226,8 @@ public class ThymeleafViewGeneratorServiceImpl extends
   }
 
   @Override
-  public Document mergeMenu(String templateName, Document loadExistingDoc, ViewContext ctx,
-      List<MenuEntry> menuEntries) {
+  public Document mergeMenu(String templateName, Document loadExistingDoc,
+      ViewContext<ThymeleafMetadata> ctx, List<MenuEntry> menuEntries) {
 
     for (MenuEntry menuEntry : menuEntries) {
 
@@ -245,7 +247,8 @@ public class ThymeleafViewGeneratorServiceImpl extends
   }
 
   @Override
-  public Document merge(String templateName, Document loadExistingDoc, ViewContext ctx) {
+  public Document merge(String templateName, Document loadExistingDoc,
+      ViewContext<ThymeleafMetadata> ctx) {
     // TODO: TO BE FIXED WITH NEW COMMAND 'web mvc view update'
     ctx.addExtraParameter("userManagedComponents", mergeStructure(loadExistingDoc));
     Document newDoc = process(templateName, ctx);
@@ -286,7 +289,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
   }
 
   @Override
-  public void addModalConfirmDelete(String moduleName, ViewContext ctx) {
+  public void addModalConfirmDelete(String moduleName, ViewContext<ThymeleafMetadata> ctx) {
     // Process elements to generate
     Document newDoc = null;
 
@@ -309,7 +312,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
   @Override
   protected DetailEntityItem createDetailEntityItem(ThymeleafMetadata detailController,
       MemberDetails entityMembers, JpaEntityMetadata entityMetadata, String entityName,
-      ViewContext ctx, String detailSuffix, EntityItem rootEntity) {
+      ViewContext<ThymeleafMetadata> ctx, String detailSuffix, EntityItem rootEntity) {
 
 
     JavaType detailItemController;
@@ -371,7 +374,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
   @Override
   public Map<String, String> getI18nLabels(MemberDetails entityMemberDetails, JavaType entity,
       JpaEntityMetadata entityMetadata, ControllerMetadata controllerMetadata, String module,
-      ViewContext ctx) {
+      ViewContext<ThymeleafMetadata> ctx) {
     Map<String, String> labels =
         super.getI18nLabels(entityMemberDetails, entity, entityMetadata, controllerMetadata,
             module, ctx);
@@ -387,14 +390,14 @@ public class ThymeleafViewGeneratorServiceImpl extends
   }
 
   private String getCreateDetailsSelect2PlaceholderLabelKey(ControllerMetadata controllerMetadata,
-      ViewContext ctx) {
+      ViewContext<ThymeleafMetadata> ctx) {
     return "info_select_" + controllerMetadata.getDetailsPathAsString("_");
   }
 
   @Override
   public void addDetailsViews(String moduleName, JpaEntityMetadata entityMetadata,
       MemberDetails entity, ControllerMetadata controllerMetadata, ThymeleafMetadata viewMetadata,
-      ViewContext ctx) {
+      ViewContext<ThymeleafMetadata> ctx) {
     super
         .addDetailsViews(moduleName, entityMetadata, entity, controllerMetadata, viewMetadata, ctx);
 
@@ -413,7 +416,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
   @Override
   public void addDetailsItemViews(String moduleName, JpaEntityMetadata entityMetadata,
       MemberDetails entity, ControllerMetadata controllerMetadata, ThymeleafMetadata viewMetadata,
-      ViewContext ctx) {
+      ViewContext<ThymeleafMetadata> ctx) {
     super.addDetailsItemViews(moduleName, entityMetadata, entity, controllerMetadata, viewMetadata,
         ctx);
 
@@ -428,7 +431,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
     detail.addConfigurationElement("entityLabel",
         StringUtils.uncapitalize(FieldItem.buildLabel(detail.getEntityName(), "")));
 
-    ViewContext childCtx =
+    ViewContext<ThymeleafMetadata> childCtx =
         createViewContext(controllerMetadata, controllerMetadata.getLastDetailEntity(),
             controllerMetadata.getLastDetailsInfo().childEntityMetadata, viewMetadata);
 
@@ -441,7 +444,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
   private void addShowDetailsCompositionView(String moduleName, JpaEntityMetadata entityMetadata,
       ThymeleafMetadata viewMetadata, EntityItem entityItem, DetailEntityItem detail,
-      ViewContext ctx) {
+      ViewContext<ThymeleafMetadata> ctx) {
 
     // Process elements to generate
     Document newDoc = null;
@@ -474,7 +477,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
   private void addUpdateDetailsCompositionView(String moduleName, JpaEntityMetadata entityMetadata,
       ThymeleafMetadata viewMetadata, EntityItem entityItem, DetailEntityItem detail,
-      ViewContext ctx) {
+      ViewContext<ThymeleafMetadata> ctx) {
 
     // Process elements to generate
     Document newDoc = null;
@@ -505,7 +508,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
   protected void addCreateDetailsView(String moduleName, JpaEntityMetadata entityMetadata,
       MemberDetails entity, ControllerMetadata controllerMetadata, ThymeleafMetadata viewMetadata,
-      ViewContext ctx) {
+      ViewContext<ThymeleafMetadata> ctx) {
 
     // Process elements to generate
     Document newDoc = null;
@@ -548,7 +551,8 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
   protected void addCreateDetailsCompositionView(String moduleName,
       JpaEntityMetadata entityMetadata, MemberDetails entity,
-      ControllerMetadata controllerMetadata, ThymeleafMetadata viewMetadata, ViewContext ctx) {
+      ControllerMetadata controllerMetadata, ThymeleafMetadata viewMetadata,
+      ViewContext<ThymeleafMetadata> ctx) {
     // Process elements to generate
     Document newDoc = null;
 
@@ -565,7 +569,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
         createDetailEntityItem(viewMetadata, entity, entityMetadata, ctx.getEntityName(), ctx,
             DETAIL_SUFFIX, entityItem);
 
-    ViewContext childCtx =
+    ViewContext<ThymeleafMetadata> childCtx =
         createViewContext(controllerMetadata, controllerMetadata.getLastDetailEntity(),
             controllerMetadata.getLastDetailsInfo().childEntityMetadata, viewMetadata);
 
@@ -592,33 +596,35 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
 
   private Document mergeCreateDetailsCompositionView(String templateName, Document loadExistingDoc,
-      ViewContext ctx, EntityItem entityItem, DetailEntityItem detail) {
+      ViewContext<ThymeleafMetadata> ctx, EntityItem entityItem, DetailEntityItem detail) {
     // TODO
     return process(templateName, ctx);
   }
 
   private Document mergeCreateDetailsView(String templateName, Document loadExistingDoc,
-      ViewContext ctx, EntityItem entityItem, DetailEntityItem detail) {
+      ViewContext<ThymeleafMetadata> ctx, EntityItem entityItem, DetailEntityItem detail) {
     // TODO
     return process(templateName, ctx);
   }
 
   private Document mergeUpdateDetailsCompositionView(String templateName, Document loadExistingDoc,
-      ViewContext ctx, EntityItem entityItem, DetailEntityItem detail) {
+      ViewContext<ThymeleafMetadata> ctx, EntityItem entityItem, DetailEntityItem detail) {
     // TODO
     return process(templateName, ctx);
   }
 
   private Document mergeShowDetailsCompositionView(String templateName, Document loadExistingDoc,
-      ViewContext ctx, EntityItem entityItem, DetailEntityItem detail) {
+      ViewContext<ThymeleafMetadata> ctx, EntityItem entityItem, DetailEntityItem detail) {
     // TODO
     return process(templateName, ctx);
   }
 
   @Override
-  public ViewContext createViewContext(final ControllerMetadata controllerMetadata,
-      final JavaType entity, final JpaEntityMetadata entityMetadata, ThymeleafMetadata metadata) {
-    ViewContext ctx = super.createViewContext(controllerMetadata, entity, entityMetadata, metadata);
+  public ViewContext<ThymeleafMetadata> createViewContext(
+      final ControllerMetadata controllerMetadata, final JavaType entity,
+      final JpaEntityMetadata entityMetadata, ThymeleafMetadata metadata) {
+    ViewContext<ThymeleafMetadata> ctx =
+        super.createViewContext(controllerMetadata, entity, entityMetadata, metadata);
 
     final JavaType itemCtrl;
     final JavaType collCtrl;
@@ -655,6 +661,25 @@ public class ThymeleafViewGeneratorServiceImpl extends
     // TODO finder names
 
     return ctx;
+  }
+
+
+  @Override
+  protected boolean getReferenceField(FieldItem fieldItem, ClassOrInterfaceTypeDetails typeDetails,
+      ViewContext<ThymeleafMetadata> ctx) {
+    // TODO Auto-generated method stub
+    boolean found = super.getReferenceField(fieldItem, typeDetails, ctx);
+    if (!found) {
+      return false;
+    }
+    ClassOrInterfaceTypeDetails referenceController =
+        (ClassOrInterfaceTypeDetails) fieldItem.getConfiguration().get("referencedController");
+    fieldItem.addConfigurationElement("referecedMvcUrl_select2", ThymeleafMetadata
+        .getMvcUrlNameFor(referenceController.getType(), ThymeleafMetadata.SELECT2_METHOD_NAME));
+
+
+    return true;
+
   }
 
 }

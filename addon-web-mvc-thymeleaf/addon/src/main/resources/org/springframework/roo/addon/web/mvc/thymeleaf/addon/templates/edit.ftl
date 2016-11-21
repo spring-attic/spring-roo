@@ -222,26 +222,25 @@
                       <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
                   <#elseif field.type == "DATE">
                       <@date.input label=field.label
-                      fieldName=field.fieldName
-                      fieldId=field.fieldId
-                      z=field.z
-                      format=field.configuration.format required=field.configuration.required />
+                          fieldName=field.fieldName
+                          fieldId=field.fieldId
+                          z=field.z
+                          format=field.configuration.format required=field.configuration.required />
                   <#elseif field.type == "REFERENCE">
                       <@reference.input label=field.label
                           fieldName=field.fieldName
                           fieldId=field.fieldId
                           z=field.z
-                  referencedEntity=field.configuration.referencedEntity
+                          referencedEntity=field.configuration.referencedEntity
                           identifierField=field.configuration.identifierField
-                          referencedPath=field.configuration.referencedPath
-                          fieldOne=field.configuration.fieldOne
-                          fieldTwo=field.configuration.fieldTwo required=field.configuration.required />
+                          referecedMvcUrl_select2=field.configuration.referecedMvcUrl_select2
+                          required=field.configuration.required />
                   <#elseif field.type == "ENUM">
                       <@enum.input label=field.label
-                      fieldName=field.fieldName
-                      fieldId=field.fieldId
-                      z=field.z
-                      items=field.configuration.items required=field.configuration.required />
+                          fieldName=field.fieldName
+                          fieldId=field.fieldId
+                          z=field.z
+                          items=field.configuration.items required=field.configuration.required />
                   <#elseif field.type == "BOOLEAN">
                       <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
                   </#if>
@@ -398,75 +397,32 @@
     </script>
 
     <!-- Select2 -->
-    <div data-layout-include="fragments/js/select2 :: select2">
-
-       <!-- Select2 scripts ONLY for HTML templates
-	    Content replaced by the select2 template fragment select2.html
-       -->
-       <script
-         src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.full.js"
-         data-th-src="@{/webjars/select2/4.0.2/dist/js/select2.full.js}"></script>
-       <script
-         src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/i18n/es.js"
-         data-th-src="@{/webjars/select2/4.0.2/dist/js/i18n/}+${r"${#"}locale.language${r"}"}+'.js'"
-         data-th-if="${r"${#"}locale.language${r"}"} != 'en'"></script>
-
-       <script type="text/javascript" data-th-inline="javascript">
-         /*<![CDATA[*/
-	 jQuery('.dropdown-select-simple').select2({
-	   debug : false,
-           theme : 'bootstrap',
-           allowClear : true,
-         });
-         jQuery('.dropdown-select-ajax').select2(
-           {
-             debug : false,
-	     theme : 'bootstrap',
-	     allowClear : true,
-	     ajax : {
-               data : function(params) {
-		 var query = {
-		   'search[value]' : params.term,
-		   'page' : params.page - 1,
-		 }
-		 return query;
-	       },
-	       processResults : function(data, page) {
-		 var idField = this.options.get('idField');
-		 var txtFields = this.options.get('textFields');
-		 var fields = txtFields.split(',');
-		 var results = [];
-		 jQuery.each(data.content, function(i, entity) {
-		   var id = entity[idField];
-		   var text = '';
-		   jQuery.each(fields, function(i, fieldName) {
-		     text = text.concat(' ', entity[fieldName]);
-		   });
-		   var obj = {
-		     'id' : id,
-		     'text' : jQuery.trim(text)
-		   };
-		   jQuery.each(entity, function(key, val) {
-		     var attribute = jQuery.trim(key);
-		     var value = jQuery.trim(val);
-		     obj[attribute] = value;
-		    });
-		    results.push(obj);
-		  });
-		  var morePages = !data.last;
-		  return {
-		    results : results,
-		    pagination : {
-		      more : morePages
-		    }
-		  };
-		},
-	      },
-            });
-         /*]]>*/
-       </script>
-
+    <div data-th-replace="fragments/js/select2 :: select2-js">
+      // TODO add js CDN
      </div>
+
+    <script type="text/javascript" data-th-inline="javascript">
+      // IIFE - Immediately Invoked Function Expression
+      (function(list) {
+
+        // The global jQuery object is passed as a parameter
+        list(window.jQuery, window, document);
+
+      }(function($, window, document) {
+
+        // The $ is now locally scoped, it won't collide with other libraries
+
+        // Listen for the jQuery ready event on the document
+        // READY EVENT BEGIN
+        $(function() {
+
+          // Put this page local javascript here!
+
+        });
+
+        // READY EVENT END
+      }));
+    </script>
 
     </div>
 

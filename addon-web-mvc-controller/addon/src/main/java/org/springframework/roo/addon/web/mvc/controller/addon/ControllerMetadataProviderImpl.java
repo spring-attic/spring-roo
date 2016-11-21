@@ -3,6 +3,7 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 import static org.springframework.roo.model.RooJavaType.ROO_CONTROLLER;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -225,7 +226,7 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
 
       detailsServiceMetadata = new TreeMap<JavaType, ServiceMetadata>();
 
-      for (RelationInfo info : detailsFieldInfo) {
+      for (RelationInfoExtended info : detailsFieldInfo) {
         if (detailsServiceMetadata.containsKey(info.childType)) {
           continue;
         }
@@ -236,13 +237,35 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
         String detailServiceMetadataId = ServiceMetadata.createIdentifier(detailsServiceDetails);
         registerDependency(detailServiceMetadataId, metadataIdentificationString);
         ServiceMetadata curMetadata = getMetadataService().get(detailServiceMetadataId);
+
+        if (curMetadata == null) {
+          // Not ready for this metadata yet
+          return null;
+        }
+
         detailsServiceMetadata.put(info.childType, curMetadata);
+
+        // Register dependency with related entity
+        registerDependency(info.childEntityMetadata.getId(), metadataIdentificationString);
       }
     }
 
+    Map<String, RelationInfoExtended> relationInfos = new HashMap<String, RelationInfoExtended>();
+    for (String fieldName : entityMetadata.getRelationInfos().keySet()) {
+      RelationInfoExtended info =
+          getControllerOperations().getRelationInfoFor(entityMetadata, fieldName).get(0);
+      if (info.childEntityMetadata == null) {
+        // Not ready for this metadata yet
+        return null;
+      }
+      relationInfos.put(fieldName, info);
+    }
+
+
     return new ControllerMetadata(metadataIdentificationString, aspectName, controllerValues,
         governorPhysicalTypeMetadata, entity, entityMetadata, service, path, baseUrl, type,
-        serviceMetadata, detailAnnotaionFieldValue, detailsServiceMetadata, detailsFieldInfo);
+        serviceMetadata, detailAnnotaionFieldValue, detailsServiceMetadata, detailsFieldInfo,
+        relationInfos);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

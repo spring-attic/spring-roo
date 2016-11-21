@@ -1,5 +1,13 @@
 package org.springframework.roo.addon.web.mvc.views.template.engines;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
@@ -13,14 +21,6 @@ import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.FileUtils;
-
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -41,7 +41,7 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC, T extends Abs
     return fileManager.exists(location.concat("/").concat(templateName).concat(".ftl"));
   }
 
-  protected DOC process(String templateName, ViewContext ctx) {
+  protected DOC process(String templateName, ViewContext<T> ctx) {
     String content = "";
 
     try {

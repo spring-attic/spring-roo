@@ -87,7 +87,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    *            the controller, the project, etc...
    */
   void addListView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
-      List<T> detailsControllers, ViewContext ctx);
+      List<T> detailsControllers, ViewContext<T> ctx);
 
   /**
    * This operation will add a show view using entityDetails
@@ -100,7 +100,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    *            the controller, the project, etc...
    */
   void addShowView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
-      ViewContext ctx);
+      ViewContext<T> ctx);
 
   /**
    * This operation will add views related to a details controller using entityDetails
@@ -115,7 +115,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    *            the controller, the project, etc...
    */
   void addDetailsViews(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
-      ControllerMetadata controllerMetadata, T viewMetadata, ViewContext ctx);
+      ControllerMetadata controllerMetadata, T viewMetadata, ViewContext<T> ctx);
 
   /**
    * This operation will add views related to a details item controller using entityDetails
@@ -130,7 +130,8 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    *            the controller, the project, etc...
    */
   void addDetailsItemViews(String moduleName, JpaEntityMetadata entityMetadata,
-      MemberDetails entity, ControllerMetadata controllerMetadata, T viewMetadata, ViewContext ctx);
+      MemberDetails entity, ControllerMetadata controllerMetadata, T viewMetadata,
+      ViewContext<T> ctx);
 
   /**
    * This operation will add a create view using entityDetails
@@ -143,7 +144,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    *            the controller, the project, etc...
    */
   void addCreateView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
-      ViewContext ctx);
+      ViewContext<T> ctx);
 
   /**
    * This operation will add an update view using entityDetails
@@ -156,7 +157,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    *            the controller, the project, etc...
    */
   void addUpdateView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
-      ViewContext ctx);
+      ViewContext<T> ctx);
 
   /**
    * This operation will add a finder form view using entityDetails and the
@@ -171,7 +172,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    *            the controller, the project, etc...
    */
   void addFinderFormView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
-      String finderName, List<FieldMetadata> fieldsToAdd, ViewContext ctx);
+      String finderName, List<FieldMetadata> fieldsToAdd, ViewContext<T> ctx);
 
   /**
    * This operation will add a finder list view using entityDetails and the
@@ -185,7 +186,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    *            the controller, the project, etc...
    */
   void addFinderListView(String moduleName, JpaEntityMetadata entityMetadada, MemberDetails entity,
-      String finderName, ViewContext ctx);
+      String finderName, ViewContext<T> ctx);
 
   /**
    * This operation will add the application index view using
@@ -195,7 +196,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addIndexView(String moduleName, ViewContext ctx);
+  void addIndexView(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the login view using the provided
@@ -205,7 +206,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addLoginView(String moduleName, ViewContext ctx);
+  void addLoginView(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the application accessibility view using
@@ -215,7 +216,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addAccessibilityView(String moduleName, ViewContext ctx);
+  void addAccessibilityView(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the application error view using
@@ -224,7 +225,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addErrorView(String moduleName, ViewContext ctx);
+  void addErrorView(String moduleName, ViewContext<T> ctx);
 
 
   /**
@@ -235,7 +236,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addDefaultLayout(String moduleName, ViewContext ctx);
+  void addDefaultLayout(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the default-layout-no-menu view using
@@ -245,7 +246,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addDefaultLayoutNoMenu(String moduleName, ViewContext ctx);
+  void addDefaultLayoutNoMenu(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the footer fragment using
@@ -255,7 +256,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addFooter(String moduleName, ViewContext ctx);
+  void addFooter(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the header fragment using
@@ -265,7 +266,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addHeader(String moduleName, ViewContext ctx);
+  void addHeader(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the menu fragment using
@@ -275,7 +276,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addMenu(String moduleName, ViewContext ctx);
+  void addMenu(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the modal fragment using
@@ -285,7 +286,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addModal(String moduleName, ViewContext ctx);
+  void addModal(String moduleName, ViewContext<T> ctx);
 
 
   /**
@@ -296,7 +297,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addModalConfirm(String moduleName, ViewContext ctx);
+  void addModalConfirm(String moduleName, ViewContext<T> ctx);
 
 
   /**
@@ -307,7 +308,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addSessionLinks(String moduleName, ViewContext ctx);
+  void addSessionLinks(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the languages fragment using
@@ -317,7 +318,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addLanguages(String moduleName, ViewContext ctx);
+  void addLanguages(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will updates menu view.
@@ -329,7 +330,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void updateMenuView(String moduleName, ViewContext ctx);
+  void updateMenuView(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will install all necessary templates on generated project.
@@ -351,7 +352,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    */
   Map<String, String> getI18nLabels(MemberDetails entityMemberDetails, JavaType entity,
       JpaEntityMetadata entityMetadata, ControllerMetadata controllerMetadata, String module,
-      ViewContext ctx);
+      ViewContext<T> ctx);
 
   /**
    * Create a view Context for controller
@@ -362,7 +363,7 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * @param viewMetadata
    * @return
    */
-  ViewContext createViewContext(ControllerMetadata controllerMetadata, JavaType entity,
+  ViewContext<T> createViewContext(ControllerMetadata controllerMetadata, JavaType entity,
       JpaEntityMetadata entityMetadata, T viewMetadata);
 
 }

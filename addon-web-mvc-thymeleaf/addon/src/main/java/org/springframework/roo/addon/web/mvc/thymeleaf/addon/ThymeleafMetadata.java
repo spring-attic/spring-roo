@@ -2,7 +2,6 @@ package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
 import static org.springframework.roo.model.SpringJavaType.DELETE_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.GET_MAPPING;
-import static org.springframework.roo.model.SpringJavaType.HTTP_STATUS;
 import static org.springframework.roo.model.SpringJavaType.POST_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.REQUEST_PARAM;
 import static org.springframework.roo.model.SpringJavaType.RESPONSE_ENTITY;
@@ -52,7 +51,6 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
-import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.Jsr303JavaType;
 import org.springframework.roo.model.SpringEnumDetails;
 import org.springframework.roo.model.SpringJavaType;
@@ -293,14 +291,16 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.listMethod = addAndGet(getListMethod(), allMethods);
         this.listURIMethod = addAndGet(getListURIMethod(), allMethods);
         this.listDatatablesMethod = addAndGet(getListDatatablesMethod(), allMethods);
-        boolean generateSelect2 = false;
-        for (FieldMetadata relationField : entityMetadata.getRelationsAsChild().values()) {
-          if (relationField.getAnnotation(JpaJavaType.MANY_TO_ONE) != null
-              || relationField.getAnnotation(JpaJavaType.MANY_TO_MANY) != null) {
-            generateSelect2 = true;
-            break;
-          }
-        }
+
+        boolean generateSelect2 = true;
+        // XXX To Be Analyzed
+        //        for (FieldMetadata relationField : entityMetadata.getRelationsAsChild().values()) {
+        //          if (relationField.getAnnotation(JpaJavaType.MANY_TO_ONE) != null
+        //              || relationField.getAnnotation(JpaJavaType.MANY_TO_MANY) != null) {
+        //            generateSelect2 = true;
+        //            break;
+        //          }
+        //        }
         if (generateSelect2) {
           this.select2Method = addAndGet(getSelect2Method(), allMethods);
         } else {
