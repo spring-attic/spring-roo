@@ -162,7 +162,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     inBlockComment = false;
   }
 
-  @CliCommand(value = {"date"}, help = "Displays the local date and time")
+  //  @CliCommand(value = {"date"}, help = "Displays the local date and time")
   public String date() {
     return DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).format(new Date());
   }

@@ -1,0 +1,2 @@
+The annotations @Component and @Service of the PgpCommands.java class have been commented, so all 
+the commands managed by this class "pgp .." are disabled.

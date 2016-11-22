@@ -1,15 +1,7 @@
 package org.springframework.roo.felix.pgp;
 
-import java.text.SimpleDateFormat;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.TimeZone;
-
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPPublicKeyRing;
@@ -19,14 +11,20 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 
+import java.text.SimpleDateFormat;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.TimeZone;
+
 /**
  * Enables a user to manage the Roo PGP keystore.
  *
  * @author Ben Alex
  * @since 1.1
  */
-@Service
-@Component
+//@Service
+//@Component
 public class PgpCommands implements CommandMarker {
 
   private static String getAlgorithm(final int algId) {
