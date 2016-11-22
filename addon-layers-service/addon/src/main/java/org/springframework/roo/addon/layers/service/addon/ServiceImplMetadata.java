@@ -295,7 +295,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
         getNameOfJavaType(JavaType.ITERATOR), childTypeNameJavaType);
 
     bodyBuilder.indent();
-    final String itemName = StringUtils.uncapitalize(childType.getSimpleTypeName());
+    final String itemName = "next".concat(StringUtils.capitalize(childType.getSimpleTypeName()));
     // {childType} {itemName} = iterator.next();
     bodyBuilder.appendFormalLine("%s %s = iterator.next();", childTypeNameJavaType, itemName);
 
