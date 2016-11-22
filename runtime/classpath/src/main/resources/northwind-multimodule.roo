@@ -549,13 +549,15 @@ web mvc controller --entity model:~.Supplier --responseType THYMELEAF
 
 // Required controller to generate its detail
 web mvc controller --entity model:~.Region --responseType THYMELEAF
+web mvc controller --entity model:~.PurchaseOrder --responseType THYMELEAF
 
 // Add details to controllers
 web mvc detail --entity model:~.Category --field products --responseType THYMELEAF
 web mvc detail --entity model:~.Category --responseType THYMELEAF --field products.purchaseOrders
 web mvc detail --entity model:~.Product --field purchaseOrders --responseType THYMELEAF
 web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions
-web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions.cities
+//web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions.cities
+web mvc detail --entity model:~.Region --responseType THYMELEAF --field cities
 
 // Add finders
 web mvc finder --all --responseType THYMELEAF
