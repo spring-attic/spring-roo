@@ -67,7 +67,7 @@ public class MailOperationsImpl implements MailOperations {
 
   // Properties
   private static final Property PROPERTY_SPRINGLETS_VERSION = new Property("springlets.version",
-      "1.0.0.BUILD-SNAPSHOT");
+      "1.0.0.RELEASE");
 
   private static final String SEND_MAIL_PREFIX = "spring.mail";
 
