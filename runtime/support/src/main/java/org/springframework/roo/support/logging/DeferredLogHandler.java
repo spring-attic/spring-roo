@@ -46,9 +46,9 @@ public class DeferredLogHandler extends Handler {
    * instances to the specified fallback {@link Handler} if an event of the
    * specified {@link Level} is received.
    * 
-   * @param fallbackHandler to publish events to (mandatory)
+   * @param fallbackHandler to publish events to
    * @param fallbackPushLevel the level which will trigger an event
-   *            publication (mandatory)
+   *            publication
    */
   public DeferredLogHandler(final Handler fallbackHandler, final Level fallbackPushLevel) {
     Validate.notNull(fallbackHandler, "Fallback handler required");

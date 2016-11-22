@@ -63,7 +63,7 @@ public class ObrAddOnCommands implements CommandMarker {
       help = "Search all known Spring Roo Add-ons from installed repositories")
   public void search(
       @CliOption(key = "requiresCommand", mandatory = true,
-          help = "Only display add-ons in search results that offer this command (mandatory)") final String requiresCommand) {
+          help = "Only display add-ons in search results that offer this command") final String requiresCommand) {
 
     operations.searchAddOns(requiresCommand, SearchType.ADDON);
   }

@@ -218,7 +218,7 @@ public class HelpServiceImpl implements HelpService {
                           .append(option.unspecifiedDefaultValue()).append("'");
                     }
                   }
-                  help.append(option.mandatory() ? " (mandatory) " : "");
+                  help.append(option.mandatory() ? " " : "");
 
                   // Store details for later
                   key = "--" + key;

@@ -70,13 +70,11 @@ public class MavenCommands implements CommandMarker {
 
   /* @CliCommand(value = DEPENDENCY_ADD_COMMAND,
        help = "Adds a new dependency to the Maven project object model (POM)") */
-  public void addDependency(@CliOption(key = "groupId", mandatory = true,
-      help = "The group ID of the dependency (mandatory)") final String groupId,
-      @CliOption(key = "artifactId", mandatory = true,
-          help = "The artifact ID of the dependency (mandatory)") final String artifactId,
-      @CliOption(key = "version", mandatory = true,
-          help = "The version of the dependency (mandatory)") final String version, @CliOption(
-          key = "classifier", help = "The classifier of the dependency") final String classifier,
+  public void addDependency(
+      @CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") final String groupId,
+      @CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") final String artifactId,
+      @CliOption(key = "version", mandatory = true, help = "The version of the dependency") final String version,
+      @CliOption(key = "classifier", help = "The classifier of the dependency") final String classifier,
       @CliOption(key = "scope", help = "The scope of the dependency") final DependencyScope scope) {
 
     getMavenOperations().addDependency(getMavenOperations().getFocusedModuleName(), groupId,
@@ -85,10 +83,10 @@ public class MavenCommands implements CommandMarker {
 
   /*  @CliCommand(value = REPOSITORY_ADD_COMMAND,
         help = "Adds a new repository to the Maven project object model (POM)") */
-  public void addRepository(
-      @CliOption(key = "id", mandatory = true, help = "The ID of the repository (mandatory)") final String id,
-      @CliOption(key = "name", mandatory = false, help = "The name of the repository") final String name,
-      @CliOption(key = "url", mandatory = true, help = "The URL of the repository (mandatory)") final String url) {
+  public void addRepository(@CliOption(key = "id", mandatory = true,
+      help = "The ID of the repository") final String id, @CliOption(key = "name",
+      mandatory = false, help = "The name of the repository") final String name, @CliOption(
+      key = "url", mandatory = true, help = "The URL of the repository") final String url) {
 
     getMavenOperations().addRepository(getMavenOperations().getFocusedModuleName(),
         new Repository(id, name, url));
@@ -169,7 +167,7 @@ public class MavenCommands implements CommandMarker {
 
   /* @CliCommand(value = {PERFORM_COMMAND_COMMAND}, help = "Executes a user-specified Maven command") */
   public void mvn(@CliOption(key = "mavenCommand", mandatory = true,
-      help = "User-specified Maven command (eg test:test) (mandatory)") final String command)
+      help = "User-specified Maven command (eg test:test)") final String command)
       throws IOException {
 
     getMavenOperations().executeMvnCommand(command);
@@ -177,13 +175,11 @@ public class MavenCommands implements CommandMarker {
 
   /*  @CliCommand(value = DEPENDENCY_REMOVE_COMMAND,
         help = "Removes an existing dependency from the Maven project object model (POM)") */
-  public void removeDependency(@CliOption(key = "groupId", mandatory = true,
-      help = "The group ID of the dependency (mandatory)") final String groupId,
-      @CliOption(key = "artifactId", mandatory = true,
-          help = "The artifact ID of the dependency (mandatory)") final String artifactId,
-      @CliOption(key = "version", mandatory = true,
-          help = "The version of the dependency (mandatory)") final String version, @CliOption(
-          key = "classifier", help = "The classifier of the dependency") final String classifier) {
+  public void removeDependency(
+      @CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") final String groupId,
+      @CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") final String artifactId,
+      @CliOption(key = "version", mandatory = true, help = "The version of the dependency") final String version,
+      @CliOption(key = "classifier", help = "The classifier of the dependency") final String classifier) {
 
 
     getMavenOperations().removeDependency(getMavenOperations().getFocusedModuleName(), groupId,
