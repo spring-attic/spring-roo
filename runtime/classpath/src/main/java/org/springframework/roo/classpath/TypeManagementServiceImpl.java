@@ -62,11 +62,19 @@ public class TypeManagementServiceImpl implements TypeManagementService {
   }
 
   public void addField(final FieldMetadata field) {
+    this.addField(field, false);
+  }
+
+  public void addField(final FieldMetadata field, boolean evict) {
     Validate.notNull(field, "Field metadata not provided");
 
     // Obtain the physical type and ITD mutable details
-    final PhysicalTypeMetadata ptm =
-        (PhysicalTypeMetadata) metadataService.get(field.getDeclaredByMetadataId());
+    PhysicalTypeMetadata ptm = null;
+    if (evict) {
+      ptm = (PhysicalTypeMetadata) metadataService.evictAndGet(field.getDeclaredByMetadataId());
+    } else {
+      ptm = (PhysicalTypeMetadata) metadataService.get(field.getDeclaredByMetadataId());
+    }
     Validate.notNull(ptm, "Java source code unavailable for type %s",
         PhysicalTypeIdentifier.getFriendlyName(field.getDeclaredByMetadataId()));
     final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();

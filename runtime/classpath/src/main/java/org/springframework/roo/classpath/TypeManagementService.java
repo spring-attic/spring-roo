@@ -31,6 +31,18 @@ public interface TypeManagementService {
   void addField(FieldMetadata field);
 
   /**
+   * Adds a new field to an existing class.
+   * <p>
+   * An exception is thrown if the class does not exist, cannot be modified or
+   * a field with the requested name is already declared.
+   * 
+   * @param field the field to add (required)
+   * @param whether the physical type where the field is going to be added should 
+   *            be obtained from scratch.
+   */
+  void addField(FieldMetadata field, boolean evict);
+
+  /**
    * Creates a physical type with the contents based on the
    * {@link ClassOrInterfaceTypeDetails} passed in at the location denoted by
    * the passed in path. This method expects the passed in file location to be
