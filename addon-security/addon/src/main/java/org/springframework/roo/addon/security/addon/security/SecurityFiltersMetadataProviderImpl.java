@@ -32,11 +32,11 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
@@ -160,8 +160,8 @@ public class SecurityFiltersMetadataProviderImpl extends
         getMemberDetailsScanner().getMemberDetails(getClass().getName(),
             getTypeLocationService().getTypeDetails(annotatedService));
 
-    Map<MethodMetadata, String> prefilterMethods = new HashMap<MethodMetadata, String>();
-    Map<MethodMetadata, String> postfilterMethods = new HashMap<MethodMetadata, String>();
+    Map<MethodMetadata, String> prefilterMethods = new LinkedHashMap<MethodMetadata, String>();
+    Map<MethodMetadata, String> postfilterMethods = new LinkedHashMap<MethodMetadata, String>();
 
     // Get methods defined in each annotation @RooSecurityFilter
     AnnotationMetadata annotationFilters =
