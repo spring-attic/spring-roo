@@ -20,6 +20,8 @@ import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
 import org.springframework.roo.addon.web.mvc.views.components.MenuEntry;
 import org.springframework.roo.addon.web.mvc.views.template.engines.AbstractFreeMarkerViewGenerationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaType;
@@ -406,6 +408,128 @@ public class ThymeleafViewGeneratorServiceImpl extends
     addUpdateDetailsCompositionView(moduleName, entityMetadata, viewMetadata, entityItem, detail,
         childCtx);
   }
+
+  @Override
+  public void addFinderFormView(String moduleName, JpaEntityMetadata entityMetadata,
+      ThymeleafMetadata viewMetadata, JavaType formBean, String finderName,
+      ViewContext<ThymeleafMetadata> ctx) {
+
+    // Getting formBean details
+    MemberDetails formBeanDetails =
+        getMemberDetailsScanner().getMemberDetails(getClass().getName(),
+            getTypeLocationService().getTypeDetails(formBean));
+
+    // Getting entity fields that should be included on view
+    List<FieldMetadata> formBeanFields = getPersistentFields(formBeanDetails.getFields());
+    List<FieldItem> fields =
+        getFieldViewItems(formBeanFields, ctx.getEntityName(), true, ctx, TABLE_SUFFIX);
+
+    // Process elements to generate
+    Document newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat(finderName)
+            .concat("Form").concat(getViewsExtension());
+
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
+
+    final JavaType searchController = viewMetadata.getDestination();
+
+    Map<String, MethodMetadata> finderListMethods = viewMetadata.getFinderListMethods();
+    MethodMetadata finderMethod = finderListMethods.get(finderName);
+
+    ctx.addExtraParameter("mvcUrl_search",
+        ThymeleafMetadata.getMvcUrlNameFor(searchController, finderMethod));
+
+    ctx.addExtraParameter("entity", entityItem);
+    ctx.addExtraParameter("fields", fields);
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc =
+          mergeListView("finderForm", loadExistingDoc(viewName), ctx, entityItem, fields,
+              new ArrayList<List<DetailEntityItem>>());
+    } else {
+      newDoc = process("finderForm", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
+  public void addFinderListView(String moduleName, JpaEntityMetadata entityMetadata,
+      ThymeleafMetadata viewMetadata, JavaType formBean, JavaType returnType, String finderName,
+      ViewContext<ThymeleafMetadata> ctx) {
+    // Getting returnType details
+    MemberDetails returnTypeDetails =
+        getMemberDetailsScanner().getMemberDetails(getClass().getName(),
+            getTypeLocationService().getTypeDetails(returnType));
+
+    // Getting entity fields that should be included on view
+    List<FieldMetadata> returnFields = getPersistentFields(returnTypeDetails.getFields());
+    List<FieldItem> fields =
+        getFieldViewItems(returnFields, ctx.getEntityName(), true, ctx, TABLE_SUFFIX);
+
+
+    // Getting formBean details
+    MemberDetails formBeanDetails =
+        getMemberDetailsScanner().getMemberDetails(getClass().getName(),
+            getTypeLocationService().getTypeDetails(formBean));
+
+    // Getting entity fields that should be included on view
+    List<FieldMetadata> formBeanFieldsMetadata = getPersistentFields(formBeanDetails.getFields());
+    List<FieldItem> formBeanFields =
+        getFieldViewItems(formBeanFieldsMetadata, ctx.getEntityName(), true, ctx, TABLE_SUFFIX);
+
+
+    // Process elements to generate
+    Document newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat(finderName)
+            .concat(getViewsExtension());
+
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
+
+    final JavaType searchController = viewMetadata.getDestination();
+
+    Map<String, MethodMetadata> finderDatatablesMethods = viewMetadata.getFinderDatatableMethods();
+    MethodMetadata finderDtMethod = finderDatatablesMethods.get(finderName);
+    Map<String, MethodMetadata> finderListMethods = viewMetadata.getFinderListMethods();
+    MethodMetadata finderListMethod = finderListMethods.get(finderName);
+    Map<String, MethodMetadata> finderFormMethods = viewMetadata.getFinderFormMethods();
+    MethodMetadata finderFormMethod = finderFormMethods.get(finderName);
+
+    ctx.addExtraParameter("mvcUrl_search_datatables",
+        ThymeleafMetadata.getMvcUrlNameFor(searchController, finderDtMethod));
+    ctx.addExtraParameter("mvcUrl_search_list",
+        ThymeleafMetadata.getMvcUrlNameFor(searchController, finderListMethod));
+    ctx.addExtraParameter("mvcUrl_search_form",
+        ThymeleafMetadata.getMvcUrlNameFor(searchController, finderFormMethod));
+
+    ctx.addExtraParameter("entity", entityItem);
+    ctx.addExtraParameter("fields", fields);
+
+    // Adding formBean fields
+    ctx.addExtraParameter("formbeanfields", formBeanFields);
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc =
+          mergeListView("finderList", loadExistingDoc(viewName), ctx, entityItem, fields,
+              new ArrayList<List<DetailEntityItem>>());
+    } else {
+      newDoc = process("finderList", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+  }
+
 
   private void addShowDetailsCompositionView(String moduleName, JpaEntityMetadata entityMetadata,
       ThymeleafMetadata viewMetadata, EntityItem entityItem, DetailEntityItem detail,

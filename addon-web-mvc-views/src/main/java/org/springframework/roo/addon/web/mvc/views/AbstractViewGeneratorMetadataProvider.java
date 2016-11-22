@@ -44,6 +44,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.JpaJavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.propfiles.manager.PropFilesManagerService;
@@ -370,6 +371,8 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
         new SearchAnnotationValues(governorPhysicalTypeMetadata);
 
     // Add finders only if controller is of search type
+    Map<String, JavaType> finderReturnTypes = new HashMap<String, JavaType>();
+    Map<String, JavaType> finderFormBeans = new HashMap<String, JavaType>();
     if (controllerMetadata.getType() == ControllerType.SEARCH && searchAnnotationValues != null
         && searchAnnotationValues.getFinders() != null) {
       List<String> finders =
@@ -383,6 +386,15 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
 
           // FormBean parameters is always the first finder parameter
           JavaType formBean = serviceFinder.getParameterTypes().get(0).getJavaType();
+
+          // Save the associated formBean to the current finder
+          finderFormBeans.put(finderName, formBean);
+
+          // Getting the returnType for this finder
+          JavaType returnType = serviceFinder.getReturnType();
+
+          // Save the associated returnType to the current finder
+          finderReturnTypes.put(finderName, returnType);
 
           // Get dateTime and Enum of formBean
           MemberDetails formBeanDetails = getMemberDetails(formBean);
@@ -492,89 +504,32 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
         break;
 
       case SEARCH:
-        // TODO
+        // Check if this search controller have finders included 
+        // in @RooSearch annotation
+        if (searchAnnotationValues != null && searchAnnotationValues.getFinders() != null) {
+          List<String> finders =
+              new ArrayList<String>(Arrays.asList(searchAnnotationValues.getFinders()));
+          // Generating views for all finders
+          for (String finderName : finders) {
+
+            // Getting the formBean for this finder
+            JavaType formBean = finderFormBeans.get(finderName);
+            viewGenerationService.addFinderFormView(module, entityMetadata, viewMetadata, formBean,
+                finderName, ctx);
+
+            // Getting the returnType for this finder
+            JavaType returnType = finderReturnTypes.get(finderName);
+            if (!returnType.getParameters().isEmpty()) {
+              returnType = returnType.getParameters().get(0);
+            }
+            viewGenerationService.addFinderListView(module, entityMetadata, viewMetadata, formBean,
+                returnType, finderName, ctx);
+          }
+        }
         break;
       default:
         throw new IllegalArgumentException();
     }
-
-    // Add finder views
-    /* TODO
-    if (finders != null) {
-      for (MethodMetadata finderMethod : finders) {
-
-        // For each finder, create form and list view exposing only finder params
-        // from form bean object
-        JavaType formBean = finderMethod.getParameterTypes().get(0).getJavaType();
-        List<FieldMetadata> fieldsToAdd = new ArrayList<FieldMetadata>();
-
-        // Check if finder form bean is a DTO or the entity
-        if (getTypeLocationService().getTypeDetails(formBean) != null
-            && getTypeLocationService().getTypeDetails(formBean).getAnnotation(RooJavaType.ROO_DTO) == null) {
-          formBean = entity;
-
-          // Register dependency between DTO JavaBeanMetadata and this one
-          final LogicalPath logicalPath =
-              PhysicalTypeIdentifier.getPath(getTypeLocationService().getTypeDetails(formBean)
-                  .getDeclaredByMetadataId());
-          final String javaBeanMetadataKey =
-              JavaBeanMetadata.createIdentifier(getTypeLocationService().getTypeDetails(formBean)
-                  .getType(), logicalPath);
-          registerDependency(javaBeanMetadataKey, metadataIdentificationString);
-
-        }
-
-        // Add formBean to viewContext
-        ctx.addExtraParameter("formBean", "formBean");
-
-        // Use method from FinderOperationsImpl to fill maps
-        Map<JavaType, Map<String, String>> typesFieldMaps =
-            new HashMap<JavaType, Map<String, String>>();
-        Map<JavaType, Map<String, FieldMetadata>> typeFieldMetadataMap =
-            new HashMap<JavaType, Map<String, FieldMetadata>>();
-        Map<JavaSymbolName, List<FinderParameter>> finderParametersMap =
-            new HashMap<JavaSymbolName, List<FinderParameter>>();
-        getFinderOperations().buildFormBeanFieldNamesMap(entity, formBean, typesFieldMaps,
-            typeFieldMetadataMap, finderMethod.getMethodName(), finderParametersMap);
-
-        // Get finder parameters for each finder method and FieldMetadata for each finder param
-        List<FinderParameter> finderParameters =
-            finderParametersMap.get(finderMethod.getMethodName());
-        Map<String, FieldMetadata> formBeanFields = typeFieldMetadataMap.get(formBean);
-
-        for (FinderParameter finderParam : finderParameters) {
-          fieldsToAdd.add(formBeanFields.get(finderParam.getName().getSymbolName()));
-        }
-
-        viewGenerationService.addFinderFormView(module, entityMemberDetails, finderMethod
-            .getMethodName().getSymbolName(), fieldsToAdd, ctx);
-
-        // If return type is a projection, use its details
-        ClassOrInterfaceTypeDetails returnTypeDetails =
-            getTypeLocationService().getTypeDetails(
-                finderMethod.getReturnType().getParameters().get(0));
-        if (returnTypeDetails != null
-            && returnTypeDetails.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION) != null) {
-          viewGenerationService.addFinderListView(module, getMemberDetails(returnTypeDetails),
-              finderMethod.getMethodName().getSymbolName(), ctx);
-
-          // Register dependency between projection JavaBeanMetadata and this one
-          final LogicalPath logicalPath =
-              PhysicalTypeIdentifier.getPath(getTypeLocationService().getTypeDetails(
-                  returnTypeDetails.getType()).getDeclaredByMetadataId());
-          final String javaBeanMetadataKey =
-              JavaBeanMetadata.createIdentifier(
-                  getTypeLocationService().getTypeDetails(returnTypeDetails.getType()).getType(),
-                  logicalPath);
-          registerDependency(javaBeanMetadataKey, metadataIdentificationString);
-
-        } else {
-          viewGenerationService.addFinderListView(module, entityMemberDetails, finderMethod
-              .getMethodName().getSymbolName(), ctx);
-        }
-      }
-    }
-    */
 
     // Update menu view every time that new controller has been modified
     // TODO: Maybe, instead of modify all menu view, only new generated controller should

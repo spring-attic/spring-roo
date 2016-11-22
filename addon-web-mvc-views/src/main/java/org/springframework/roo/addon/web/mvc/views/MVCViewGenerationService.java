@@ -165,14 +165,14 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    *
    * @param moduleName the module where finder form view will be added
    * @param entityMetadata entity metadata which contains information about it
-   * @param entity the details of an entity to be able to generate view
+   * @param viewMetadata
+   * @param formBean the type that should provided by the model when the form view loads
    * @param finderName the name of the finder for which this form will be created
-   * @param fieldsToAdd
    * @param ctx the ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addFinderFormView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
-      String finderName, List<FieldMetadata> fieldsToAdd, ViewContext<T> ctx);
+  void addFinderFormView(String moduleName, JpaEntityMetadata entityMetadata, T viewMetadata,
+      JavaType formBean, String finderName, ViewContext<T> ctx);
 
   /**
    * This operation will add a finder list view using entityDetails and the
@@ -180,13 +180,14 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    *
    * @param moduleName the module where finder list view will be added
    * @param entityMetadata entity metadata which contains information about it
-   * @param entity the details of an entity to be able to generate view
+   * @param viewMetadata
+   * @param returnType the JavaType that will be returned by this list view.
    * @param finderName the name of the finder for which this form will be created
    * @param ctx the ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addFinderListView(String moduleName, JpaEntityMetadata entityMetadada, MemberDetails entity,
-      String finderName, ViewContext<T> ctx);
+  void addFinderListView(String moduleName, JpaEntityMetadata entityMetadada, T viewMetadata,
+      JavaType formBean, JavaType returnType, String finderName, ViewContext<T> ctx);
 
   /**
    * This operation will add the application index view using

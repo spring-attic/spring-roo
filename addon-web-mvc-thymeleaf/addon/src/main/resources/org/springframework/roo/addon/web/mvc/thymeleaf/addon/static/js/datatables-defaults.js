@@ -56,6 +56,7 @@
       'columnDefs': [
         {
           'targets': 'dttools', // First column from the right
+          'width': 100,
           'render': {
             'display': $.fn.dataTable.renderTools
           }
@@ -169,6 +170,18 @@
     function loadDataFromUrl(datatables, data, callback, url) {
       var $token = $("meta[name='_csrf']");
       var $header = $("meta[name='_csrf_header']");
+      
+      var prefix = 'loadUrlParam';
+      var dataAttrs = getAllDataValues(datatables);
+      $.each(dataAttrs, function(property, value) {        
+        if (property.length > prefix.length && property.lastIndexOf(prefix, 0) === 0) {
+          var param = toLowerCaseFirst(property.substring(prefix.length));
+          data[param] = value;
+        }
+      });
+      
+      //data['name'] = getDataValue(datatables, 'load-param-name');
+      //data['description'] = getDataValue(datatables, 'load-param-description');
 
       $.ajax({
         url : url,
@@ -200,6 +213,21 @@
         $('#datatablesErrorModal').modal('show');
         callback(emptyData(data.draw));
       });
+    }
+    
+    /**
+     * Converts the first char of the given string to lower case.
+     * @param str the string to convert
+     * @returns the converted string
+     */
+    function toLowerCaseFirst(str) {
+      if (str.length > 0) {
+        var value = str.charAt(0).toLowerCase();
+        if (str.length > 1) {
+          value = value.concat(str.slice(1));
+        }
+        return value;
+      }
     }
 
     /**
@@ -277,7 +305,7 @@
       // _PARENTID_ variable in the given URL.
       if (url && url.indexOf('_PARENTID_') > -1 && hasParentTable(datatables)) {
         var parentRowId = getParentSelectedRowId(datatables);
-        if (parentRowId  !== undefined) {
+        if (parentRowId !== undefined) {
           processedUrl = url.replace('_PARENTID_', parentRowId);
         } else {
           processedUrl = undefined;
@@ -411,6 +439,15 @@
       return $dt.data(name);
     }
 
+    /**
+     * Returns all the 'data-*' attributes of a datatables.
+     * @param datatables DataTable on which the calling should act upon
+     */
+    function getAllDataValues(datatables) {
+      var $dt = jQueryTable(datatables);
+      return $dt.data();
+    }
+    
     /**
      * Returns the jQuery object for the given datatables element.
      */
@@ -556,7 +593,7 @@
         parentDatatables.on('xhr.dt', function () {
           datatables.ajax.reload();
         });
-
+        
         datatables.button('add:name').disable();
       }
     }
@@ -601,21 +638,21 @@
 
       var showUrl = getShowUrl(datatables, rowId);
       if (showUrl) {
-        buttons = buttons.concat('<a role="button" class="btn btn-action showInfo" href="')
-                         .concat(showUrl).concat('" ></a>');
+        buttons = buttons.concat('<a class="btn btn-action btn-sm" href="')
+                         .concat(showUrl).concat('" ><span class="glyphicon glyphicon-eye-open"></span></a>');
       }
 
       var editUrl = getEditUrl(datatables, rowId);
       if (editUrl) {
-        buttons = buttons.concat('<a role="button" class="btn btn-action edit" href="')
-                         .concat(editUrl).concat('"></a>');
+        buttons = buttons.concat('<a class="btn btn-action btn-sm" href="')
+                         .concat(editUrl).concat('"><span class="glyphicon glyphicon-pencil"></span></a>');
       }
 
       var deleteUrl = getDeleteUrl(datatables, rowId);
       if (deleteUrl) {
-        buttons = buttons.concat('<a role="button" class="btn btn-action delete" data-toggle="modal" data-target="#')
+        buttons = buttons.concat('<a role="button" class="btn btn-action btn-sm" data-toggle="modal" data-target="#')
                          .concat(tableId).concat('DeleteConfirm" data-row-id="')
-                         .concat(data).concat('"/>');
+                         .concat(data).concat('"><span class="glyphicon glyphicon-trash"></span></a>');
       }
 
       buttons = buttons.concat('</div>');

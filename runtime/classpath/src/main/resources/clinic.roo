@@ -60,6 +60,10 @@ field string --fieldName name
 field number --fieldName weight --type java.lang.Float
 finder add --entity ~.domain.Pet --name findByNameAndWeight --formBean ~.domain.PetNameAndWeightFormBean
 
+dto --class ~.domain.OwnerCityFormBean
+field string --fieldName city
+entity projection --class ~.domain.OwnerInfo --entity ~.domain.Owner --fields firstName,lastName,city
+finder add --entity ~.domain.Owner --name findByCityLike --formBean ~.domain.OwnerCityFormBean --returnType ~.domain.OwnerInfo 
 
 finder add --entity ~.domain.Pet --name findByOwner
 finder add --entity ~.domain.Pet --name findBySendRemindersAndWeightLessThan

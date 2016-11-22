@@ -164,6 +164,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
   // Finder Methods
   private final Map<String, MethodMetadata> finderFormMethods;
+  private final Map<String, MethodMetadata> finderListMethods;
   private final Map<String, MethodMetadata> finderDatatableMethods;
 
   // TODO
@@ -330,6 +331,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.showURIMethod = null;
         this.modelAttributeDetailsMethod = null;
         this.listDatatablesDetailsMethod = null;
+        this.finderListMethods = null;
         this.finderDatatableMethods = null;
         this.finderFormMethods = null;
         this.createDetailsMethod = null;
@@ -371,6 +373,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.createFormMethod = null;
         this.modelAttributeDetailsMethod = null;
         this.listDatatablesDetailsMethod = null;
+        this.finderListMethods = null;
         this.finderDatatableMethods = null;
         this.finderFormMethods = null;
         this.select2Method = null;
@@ -386,6 +389,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       }
       case SEARCH: {
         Map<String, MethodMetadata> tmpFindersDtt = new TreeMap<String, MethodMetadata>();
+        Map<String, MethodMetadata> tmpFinderLists = new TreeMap<String, MethodMetadata>();
         Map<String, MethodMetadata> tmpFinderForms = new TreeMap<String, MethodMetadata>();
         MethodMetadata finderFormMethod, finderMethod, finderDtMethod;
         for (Entry<String, MethodMetadata> finder : findersToAdd.entrySet()) {
@@ -394,7 +398,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
           tmpFinderForms.put(finder.getKey(), addAndGet(finderFormMethod, allMethods));
 
           finderMethod = getFinderMethodForFinderInService(finder.getKey(), finder.getValue());
-          tmpFinderForms.put(finder.getKey(), addAndGet(finderMethod, allMethods));
+          tmpFinderLists.put(finder.getKey(), addAndGet(finderMethod, allMethods));
 
           finderDtMethod =
               getFinderDatatablesMethodForFinderInService(finder.getKey(), finder.getValue());
@@ -403,6 +407,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
         }
         this.finderDatatableMethods = Collections.unmodifiableMap(tmpFindersDtt);
+        this.finderListMethods = Collections.unmodifiableMap(tmpFinderLists);
         this.finderFormMethods = Collections.unmodifiableMap(tmpFinderForms);
         // FIXME We need more method to handle it... To Be Defined!!!
 
@@ -475,6 +480,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.deleteMethod = null;
         this.showMethod = null;
         this.showURIMethod = null;
+        this.finderListMethods = null;
         this.finderDatatableMethods = null;
         this.finderFormMethods = null;
         this.select2Method = null;
@@ -522,6 +528,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.showMethod = null;
         this.showURIMethod = null;
         this.finderDatatableMethods = null;
+        this.finderListMethods = null;
         this.finderFormMethods = null;
         this.select2Method = null;
         this.listDatatablesDetailsMethod = null;
@@ -3158,5 +3165,17 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
   public JavaType getRelatedItemController() {
     return relatedItemController;
+  }
+
+  public Map<String, MethodMetadata> getFinderFormMethods() {
+    return finderFormMethods;
+  }
+
+  public Map<String, MethodMetadata> getFinderDatatableMethods() {
+    return finderDatatableMethods;
+  }
+
+  public Map<String, MethodMetadata> getFinderListMethods() {
+    return finderListMethods;
   }
 }

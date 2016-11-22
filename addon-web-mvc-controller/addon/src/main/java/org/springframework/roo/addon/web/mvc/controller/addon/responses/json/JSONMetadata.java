@@ -5,6 +5,7 @@ import static org.springframework.roo.model.SpringJavaType.GET_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.POST_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.PUT_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.RESPONSE_ENTITY;
+import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -67,12 +68,23 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       new AnnotationMetadataBuilder(SpringJavaType.REQUEST_BODY).build();
   private static final AnnotationMetadata ANN_METADATA_VALID = new AnnotationMetadataBuilder(
       Jsr303JavaType.VALID).build();
-  private static final JavaSymbolName PAGEABLE_NAME = new JavaSymbolName("pageable");
+  private static final AnnotatedJavaType PAGEABLE_PARAM = new AnnotatedJavaType(
+      SpringJavaType.PAGEABLE);
+  private static final JavaSymbolName PAGEABLE_PARAM_NAME = new JavaSymbolName("pageable");
   private static final JavaSymbolName GLOBAL_SEARCH_NAME = new JavaSymbolName("globalSearch");
+  private static final JavaSymbolName GLOBAL_SEARCH_PARAM_NAME = new JavaSymbolName("search");
 
   private static final String PROVIDES_TYPE_STRING = JSONMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
+
+  private static final JavaSymbolName FORM_BEAN_PARAM_NAME = new JavaSymbolName("formBean");
+
+  private static final AnnotatedJavaType GLOBAL_SEARCH_PARAM = new AnnotatedJavaType(
+      SPRINGLETS_GLOBAL_SEARCH);
+
+  private static final AnnotationMetadataBuilder RESPONSE_BODY_ANNOTATION =
+      new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
 
   private final boolean readOnly;
   private final ControllerMetadata controllerMetadata;
@@ -530,10 +542,27 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       MethodMetadata serviceFinderMethod) {
 
     // Define methodName
-    final JavaSymbolName methodName = new JavaSymbolName(finderName);
+    String pathName = finderName;
+    if (pathName.startsWith("findBy")) {
+      pathName = pathName.replace("findBy", "by");
+    }
+    final JavaSymbolName methodName = new JavaSymbolName(pathName);
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.addAll(serviceFinderMethod.getParameterTypes());
+
+    // Form Bean is always the first parameter of finder
+    final JavaType formBean = serviceFinderMethod.getParameterTypes().get(0).getJavaType();
+    List<AnnotationMetadata> formBeanAnnotations = new ArrayList<AnnotationMetadata>();
+    AnnotationMetadataBuilder formBeanAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
+    formBeanAnnotation.addStringAttribute("value", FORM_BEAN_PARAM_NAME.getSymbolName());
+    formBeanAnnotations.add(formBeanAnnotation.build());
+    AnnotatedJavaType annotatedFormBean = new AnnotatedJavaType(formBean, formBeanAnnotations);
+    parameterTypes.add(annotatedFormBean);
+
+    // Including GlobalSearch parameter and DatatablesPageable parameter
+    parameterTypes.add(GLOBAL_SEARCH_PARAM);
+    parameterTypes.add(PAGEABLE_PARAM);
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -544,10 +573,12 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     final List<String> parameterStrings = new ArrayList<String>();
-    for (JavaSymbolName param : serviceFinderMethod.getParameterNames()) {
-      parameterNames.add(param);
-      parameterStrings.add(param.getSymbolName());
-    }
+    parameterNames.add(FORM_BEAN_PARAM_NAME);
+    parameterStrings.add(FORM_BEAN_PARAM_NAME.getSymbolName());
+    parameterNames.add(GLOBAL_SEARCH_PARAM_NAME);
+    parameterStrings.add(GLOBAL_SEARCH_PARAM_NAME.getSymbolName());
+    parameterNames.add(PAGEABLE_PARAM_NAME);
+    parameterStrings.add(PAGEABLE_PARAM_NAME.getSymbolName());
 
     // Adding annotations
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -555,13 +586,18 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Adding @GetMapping annotation
     AnnotationMetadataBuilder getMappingAnnotation = new AnnotationMetadataBuilder(GET_MAPPING);
     getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
-    getMappingAnnotation.addStringAttribute("value", "/" + finderName);
+    // TODO Delegates on ControllerOperations to obtain the URL for this finder
+    getMappingAnnotation.addStringAttribute("value", "/" + pathName);
     annotations.add(getMappingAnnotation);
-
 
     // Generating returnType
     JavaType serviceReturnType = serviceFinderMethod.getReturnType();
-    JavaType returnType = JavaType.wrapperOf(RESPONSE_ENTITY, serviceReturnType);
+    JavaType datatablesDataReturnType =
+        serviceReturnType.getParameters().isEmpty() ? serviceReturnType.getBaseType()
+            : serviceReturnType.getParameters().get(0);
+    JavaType returnType =
+        JavaType.wrapperOf(RESPONSE_ENTITY,
+            JavaType.wrapperOf(SpringJavaType.PAGE, datatablesDataReturnType));
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -574,7 +610,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         itemNames, controllerMetadata.getServiceField().getFieldName(),
         serviceFinderMethod.getMethodName(), StringUtils.join(parameterStrings, ","));
 
-    // return ResponseEntity.status(HttpStatus.FOUND).body(customers);
+    // return ResponseEntity.status(HttpStatus.FOUND).body(owners);
     bodyBuilder.appendFormalLine(String.format("return %s.status(%s.FOUND).body(%s);",
         getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS),
         itemNames));
@@ -852,7 +888,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     final JavaSymbolName parentParamName = findAllMethod.getParameterNames().get(0);
     parameterNames.add(parentParamName);
     parameterNames.add(GLOBAL_SEARCH_NAME);
-    parameterNames.add(PAGEABLE_NAME);
+    parameterNames.add(PAGEABLE_PARAM_NAME);
 
     // Adding annotations
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -882,7 +918,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine("%s %s = %s.%s(%s, %s, %s);",
         getNameOfJavaType(serviceReturnType), itemNames, detailsServiceField.getFieldName(),
-        findAllMethod.getMethodName(), parentParamName, GLOBAL_SEARCH_NAME, PAGEABLE_NAME);
+        findAllMethod.getMethodName(), parentParamName, GLOBAL_SEARCH_NAME, PAGEABLE_PARAM_NAME);
 
     // return ResponseEntity.status(HttpStatus.FOUND).body(customers);
     bodyBuilder.appendFormalLine(String.format("return %s.status(%s.FOUND).body(%s);",
@@ -1324,7 +1360,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(GLOBAL_SEARCH_NAME);
-    parameterNames.add(PAGEABLE_NAME);
+    parameterNames.add(PAGEABLE_PARAM_NAME);
 
     // Adding annotations
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -1354,7 +1390,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine("%s %s = %s.%s(%s, %s);", getNameOfJavaType(serviceReturnType),
         itemNames, controllerMetadata.getServiceField().getFieldName(),
-        findAllMethod.getMethodName(), GLOBAL_SEARCH_NAME, PAGEABLE_NAME);
+        findAllMethod.getMethodName(), GLOBAL_SEARCH_NAME, PAGEABLE_PARAM_NAME);
 
     // return ResponseEntity.status(HttpStatus.FOUND).body(customers);
     bodyBuilder.appendFormalLine(String.format("return %s.status(%s.FOUND).body(%s);",

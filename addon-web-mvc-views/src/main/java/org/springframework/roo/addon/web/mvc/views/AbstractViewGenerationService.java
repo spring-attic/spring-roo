@@ -323,97 +323,14 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
   @Override
   public void addFinderFormView(String moduleName, JpaEntityMetadata entityMetadata,
-      MemberDetails entityDetails, String finderName, List<FieldMetadata> fieldsToAdd,
-      ViewContext<T> ctx) {
-
-    // Getting entity fields that should be included on view
-    List<FieldItem> fields =
-        getFieldViewItems(fieldsToAdd, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
-
-    ctx.addExtraParameter("fields", fields);
-
-    // Build action path
-    String path = "";
-    if (StringUtils.startsWith(finderName, "count")) {
-      path = StringUtils.removeStart(finderName, "count");
-    } else if (StringUtils.startsWith(finderName, "find")) {
-      path = StringUtils.removeStart(finderName, "find");
-    } else if (StringUtils.startsWith(finderName, "query")) {
-      path = StringUtils.removeStart(finderName, "query");
-    } else if (StringUtils.startsWith(finderName, "read")) {
-      path = StringUtils.removeStart(finderName, "read");
-    } else {
-      path = finderName;
-    }
-    path = StringUtils.uncapitalize(path);
-    ctx.addExtraParameter("action", path);
-
-    // Process elements to generate
-    DOC newDoc = null;
-
-    // Getting new viewName
-    String viewName =
-        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat(finderName)
-            .concat("Form").concat(getViewsExtension());
-
-    // Check if new view to generate exists or not
-    if (existsFile(viewName)) {
-      newDoc = merge("finderForm", loadExistingDoc(viewName), ctx);
-    } else {
-      newDoc = process("finderForm", ctx);
-    }
-
-    // Write newDoc on disk
-    writeDoc(newDoc, viewName);
+      T viewMetadata, JavaType formBean, String finderName, ViewContext<T> ctx) {
+    // To be implemented by View Provider
   }
 
   @Override
   public void addFinderListView(String moduleName, JpaEntityMetadata entityMetadata,
-      MemberDetails returnTypeDetails, String finderName, ViewContext<T> ctx) {
-
-    // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = getPersistentFields(returnTypeDetails.getFields());
-    List<FieldItem> fields =
-        getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, StringUtils.EMPTY);
-
-    // Build URL path to get data
-    String path = "";
-    if (StringUtils.startsWith(finderName, "count")) {
-      path = StringUtils.removeStart(finderName, "count");
-    } else if (StringUtils.startsWith(finderName, "find")) {
-      path = StringUtils.removeStart(finderName, "find");
-    } else if (StringUtils.startsWith(finderName, "query")) {
-      path = StringUtils.removeStart(finderName, "query");
-    } else if (StringUtils.startsWith(finderName, "read")) {
-      path = StringUtils.removeStart(finderName, "read");
-    } else {
-      path = finderName;
-    }
-    path = StringUtils.uncapitalize(path);
-    ctx.addExtraParameter("finderPath", path);
-
-    // Process elements to generate
-    DOC newDoc = null;
-
-    // Getting new viewName
-    String viewName =
-        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat(finderName)
-            .concat("List").concat(getViewsExtension());
-
-    EntityItem entityItem = createEntityItem(entityMetadata, ctx, FINDER_SUFFIX);
-
-    // Check if new view to generate exists or not
-    if (existsFile(viewName)) {
-      newDoc =
-          mergeListView("finderList", loadExistingDoc(viewName), ctx, entityItem, fields,
-              new ArrayList<List<DetailEntityItem>>());
-    } else {
-      ctx.addExtraParameter("fields", fields);
-      newDoc = process("finderList", ctx);
-    }
-
-    // Write newDoc on disk
-    writeDoc(newDoc, viewName);
+      T viewMetadata, JavaType formBean, JavaType returnType, String finderName, ViewContext<T> ctx) {
+    // To be implemented by View Provider
   }
 
   @Override
@@ -644,6 +561,12 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
       // Generate path
       String path = getControllerOperations().getBaseUrlForController(controller);
+      if (controllerSearchAnnotation != null) {
+        // Prevent that /search will be included in every menu entry
+        // The /search is already included in the step before only for
+        // finder entries
+        path = path.replace("/search", "");
+      }
 
       // Create new menuEntry element for controller
       MenuEntry menuEntry =
