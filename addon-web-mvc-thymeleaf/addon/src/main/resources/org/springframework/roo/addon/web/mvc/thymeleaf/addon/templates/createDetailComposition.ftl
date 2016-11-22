@@ -23,8 +23,8 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
       data-th-remove="all"/>
 
-    <title data-th-text="|${r"#{"}label_edit_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}|">
-    Edit ${entityName} - Spring Roo application</title>
+    <title data-th-text="|${r"#{"}label_create_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}|">
+    Create ${entityName} - ${projectName} - SpringRoo Application</title>
 
     <!--/* Bootstrap */-->
     <link rel="stylesheet" type="text/css"
@@ -61,18 +61,17 @@
 
     <!--/* Roo CSS */-->
     <link rel="stylesheet" type="text/css"
-      href="../../static/public/css/springroo.css"
-      data-th-remove="all"/>
+       href="../../static/public/css/springroo.css"
+       data-th-remove="all"/>
 
     <!--/* HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries */-->
     <!--/* WARNING: Respond.js doesn't work if you view the page via file:// */-->
     <!--/*[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js" data-th-remove="all"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js" data-th-remove="all"></script>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js" data-th-remove="all"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js" data-th-remove="all"></script>
     <![endif]*/-->
 
   </head>
-
 <#if userManagedComponents?has_content && userManagedComponents["body"]??>
   ${userManagedComponents["body"]}
 <#else>
@@ -197,25 +196,24 @@
       <!-- CONTENT -->
       <section data-layout-fragment="content">
         <div class="container-fluid content">
-      	<!--
-      	  Only the inner content of the following tag "section" is included
-      	  within the template, in the section "content"
-      	-->
+  	<!--
+  	  Only the inner content of the following tag "section" is included
+  	  within the template, in the section "content"
+  	-->
 
-          <h1 data-th-text="${r"#{"}label_edit_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Edit ${entityName}</h1>
+          <h1 data-th-text="${r"#{"}label_create_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Create ${entityName}</h1>
+          <#assign dconfig=detail.configuration>
 
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="@{${"${"}(#mvc.url('${mvcUrl_update}')).buildAndExpand(${entity.modelAttribute}.${entity.configuration.identifierField})}}">
-            <input type="hidden" name="_method" value="PUT" />
+            data-th-action="@{${r"${"}(#mvc.url('${dconfig.mvcUrl_create}')).buildAndExpand(${entity.modelAttribute}.${entity.configuration.identifierField})}}">
 
-             <fieldset id="containerFields">
+            <fieldset id="containerFields">
               <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} data </legend>
-
 
               <#list fields as field>
                   <#if field.userManaged>
-                    ${field.codeManaged}
+                      ${field.codeManaged}
                   <#elseif field.type == "TEXT">
                       <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required maxLength=field.configuration.maxLength />
                   <#elseif field.type == "NUMBER">
@@ -250,16 +248,12 @@
 
               <!-- buttons form -->
               <div class="form-group">
-                <div class="col-md-12">
-                  <div class="pull-left">
+                <div class="col-md-9 col-md-offset-3">
                     <button type="reset" class="btn btn-default"
                       onclick="location.href='list.html'"
-                      data-th-onclick="'location.href=\'' + @{${"${"}(#mvc.url('${mvcUrl_list}')).build()}} + '\''"
+                      data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
                       data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
-                  </div>
-                  <div class="pull-right">
-                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit${r"}"}" >Save</button>
-                  </div>
+                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit${r"}"}">Save</button>
                 </div>
               </div>
 
@@ -269,12 +263,11 @@
         </div>
 
       </section>
-      <!--  /CONTENT -->
+      <!-- /CONTENT-->
+  </div>
+  <!-- /CONTAINER-->
 
-   </div>
-   <!-- /CONTAINER-->
-
-   <footer class="container">
+  <footer class="container">
      <div class="row">
       <div class="col-sm-6 col-sm-offset-3">
         <small class="clearfix">
@@ -397,32 +390,75 @@
     </script>
 
     <!-- Select2 -->
-    <div data-th-replace="fragments/js/select2 :: select2-js">
-      // TODO add js CDN
+    <div data-layout-include="fragments/js/select2 :: select2">
+
+       <!-- Select2 scripts ONLY for HTML templates
+	    Content replaced by the select2 template fragment select2.html
+       -->
+       <script
+         src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.full.js"
+         data-th-src="@{/webjars/select2/4.0.2/dist/js/select2.full.js}"></script>
+       <script
+         src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/i18n/es.js"
+         data-th-src="@{/webjars/select2/4.0.2/dist/js/i18n/}+${r"${#"}locale.language${r"}"}+'.js'"
+         data-th-if="${r"${#"}locale.language${r"}"} != 'en'"></script>
+
+       <script type="text/javascript" data-th-inline="javascript">
+         /*<![CDATA[*/
+	 jQuery('.dropdown-select-simple').select2({
+	   debug : false,
+           theme : 'bootstrap',
+           allowClear : true,
+         });
+         jQuery('.dropdown-select-ajax').select2(
+           {
+             debug : false,
+	     theme : 'bootstrap',
+	     allowClear : true,
+	     ajax : {
+               data : function(params) {
+		 var query = {
+		   'search[value]' : params.term,
+		   'page' : params.page - 1,
+		 }
+		 return query;
+	       },
+	       processResults : function(data, page) {
+		 var idField = this.options.get('idField');
+		 var txtFields = this.options.get('textFields');
+		 var fields = txtFields.split(',');
+		 var results = [];
+		 jQuery.each(data.content, function(i, entity) {
+		   var id = entity[idField];
+		   var text = '';
+		   jQuery.each(fields, function(i, fieldName) {
+		     text = text.concat(' ', entity[fieldName]);
+		   });
+		   var obj = {
+		     'id' : id,
+		     'text' : jQuery.trim(text)
+		   };
+		   jQuery.each(entity, function(key, val) {
+		     var attribute = jQuery.trim(key);
+		     var value = jQuery.trim(val);
+		     obj[attribute] = value;
+		    });
+		    results.push(obj);
+		  });
+		  var morePages = !data.last;
+		  return {
+		    results : results,
+		    pagination : {
+		      more : morePages
+		    }
+		  };
+		},
+	      },
+            });
+         /*]]>*/
+       </script>
+
      </div>
-
-    <script type="text/javascript" data-th-inline="javascript">
-      // IIFE - Immediately Invoked Function Expression
-      (function(list) {
-
-        // The global jQuery object is passed as a parameter
-        list(window.jQuery, window, document);
-
-      }(function($, window, document) {
-
-        // The $ is now locally scoped, it won't collide with other libraries
-
-        // Listen for the jQuery ready event on the document
-        // READY EVENT BEGIN
-        $(function() {
-
-          // Put this page local javascript here!
-
-        });
-
-        // READY EVENT END
-      }));
-    </script>
 
     </div>
 

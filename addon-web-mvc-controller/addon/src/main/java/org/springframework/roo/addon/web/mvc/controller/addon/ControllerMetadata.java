@@ -1,5 +1,14 @@
 package org.springframework.roo.addon.web.mvc.controller.addon;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -23,15 +32,6 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-import java.util.logging.Logger;
-
 /**
  * Metadata for {@link RooController}.
  *
@@ -47,6 +47,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
+  private final ControllerAnnotationValues annotationValues;
   private final JavaType service;
   private final ControllerType type;
   private final JavaType entity;
@@ -58,12 +59,16 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
   private final String requestMappingValue;
   private final FieldMetadata identifierField;
   private final JpaEntityMetadata entityMetadata;
-  private final List<RelationInfo> detailsFieldInfo;
+  private final List<RelationInfoExtended> detailsFieldInfo;
   private final FieldMetadata serviceField;
   private final FieldMetadata lastDetailsServiceField;
   private final JavaType lastDetailsService;
   private final JavaType lastDetailsEntity;
-  private final RelationInfo lastDetailsInfo;
+  private final RelationInfoExtended lastDetailsInfo;
+  private final String detailAnnotaionFieldValue;
+
+  private Map<String, RelationInfoExtended> relationInfos;
+
 
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
@@ -122,6 +127,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
    *            this controller
    * @param serviceMetadata
    *            ServiceMetadata of the service used by controller
+   * @param relationInfos
    * @param controllerDetailInfo
    *            Contains information relative to detail controller
    */
@@ -129,10 +135,14 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
       ControllerAnnotationValues controllerValues,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType entity,
       final JpaEntityMetadata entityMetadata, final JavaType service, final String path,
-      final ControllerType type, ServiceMetadata serviceMetadata,
-      Map<JavaType, ServiceMetadata> detailsServiceMetadata, List<RelationInfo> detailsFieldInfo) {
+      final String baseUrl, final ControllerType type, final ServiceMetadata serviceMetadata,
+      final String detailAnnotaionFieldValue,
+      final Map<JavaType, ServiceMetadata> detailsServiceMetadata,
+      final List<RelationInfoExtended> detailsFieldInfo,
+      Map<String, RelationInfoExtended> relationInfos) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
+    this.annotationValues = controllerValues;
     this.type = type;
     this.service = service;
     this.serviceMetadata = serviceMetadata;
@@ -142,40 +152,16 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     this.identifierField = entityMetadata.getCurrentIndentifierField();
     this.identifierType = identifierField.getFieldType();
     this.path = path;
+    this.relationInfos = Collections.unmodifiableMap(relationInfos);
+    this.detailAnnotaionFieldValue = detailAnnotaionFieldValue;
     if (detailsFieldInfo == null) {
       this.detailsFieldInfo = null;
     } else {
       this.detailsFieldInfo = Collections.unmodifiableList(detailsFieldInfo);
     }
 
-    switch (this.type) {
-      case ITEM:
-        this.requestMappingValue =
-            StringUtils.lowerCase(path).concat(
-                "/{" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "}");
-        break;
-      case COLLECTION:
-        this.requestMappingValue = StringUtils.lowerCase(path);
-        break;
-      case SEARCH:
-        this.requestMappingValue = StringUtils.lowerCase(path).concat("/search");
-        break;
-      case DETAIL:
-        Validate.isTrue(detailsFieldInfo != null & detailsFieldInfo.size() > 0,
-            "Missing details information for %s", governorPhysicalTypeMetadata.getType());
-        StringBuilder sbuilder = new StringBuilder(path);
-        JavaType curEntity = entity;
-        for (RelationInfo info : detailsFieldInfo) {
-          sbuilder.append("/{" + StringUtils.uncapitalize(curEntity.getSimpleTypeName()) + "}/"
-              + info.fieldName);
-          curEntity = info.childType;
-        }
-        this.requestMappingValue = sbuilder.toString();
-        break;
-      default:
-        throw new IllegalArgumentException(String.format("Unsupported @%s.type '%s' on %s",
-            RooJavaType.ROO_CONTROLLER, this.type.name(), governorPhysicalTypeMetadata.getType()));
-    }
+    // Generate request mapping value for controller
+    requestMappingValue = baseUrl;
 
     // Adding service field
     this.serviceField = getFieldFor(this.service);
@@ -183,7 +169,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
     Map<JavaType, FieldMetadata> detailServiceFields = new TreeMap<JavaType, FieldMetadata>();
     FieldMetadata curServiceField;
-    if (this.type == ControllerType.DETAIL) {
+    if (this.type == ControllerType.DETAIL || this.type == ControllerType.DETAIL_ITEM) {
       // Adding service field
       for (Entry<JavaType, ServiceMetadata> entry : detailsServiceMetadata.entrySet()) {
         curServiceField = getFieldFor(entry.getValue().getDestination());
@@ -193,8 +179,8 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
       this.detailsServiceField = Collections.unmodifiableMap(detailServiceFields);
       this.lastDetailsInfo = detailsFieldInfo.get(detailServiceFields.size() - 1);
       this.lastDetailsEntity = lastDetailsInfo.childType;
-      this.lastDetailsService = detailServiceFields.get(lastDetailsEntity).getFieldType();
-      this.lastDetailsServiceField = detailServiceFields.get(lastDetailsService);
+      this.lastDetailsServiceField = detailServiceFields.get(lastDetailsEntity);
+      this.lastDetailsService = lastDetailsServiceField.getFieldType();
     } else {
       this.lastDetailsInfo = null;
       this.lastDetailsEntity = null;
@@ -261,8 +247,26 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     return identifierType;
   }
 
-  public List<RelationInfo> getDetailsFieldInfo() {
+  public List<RelationInfoExtended> getDetailsFieldInfo() {
     return detailsFieldInfo;
+  }
+
+  /**
+   * Return the string result to join {@link #getDetailsFieldInfo()} fieldName
+   * with provided separator string
+   *
+   * @param separator
+   * @return null if {@link #getDetailsFieldInfo()} == null, string
+   */
+  public String getDetailsPathAsString(String separator) {
+    if (detailsFieldInfo == null) {
+      return null;
+    }
+    List<String> fields = new ArrayList<String>();
+    for (RelationInfo info : detailsFieldInfo) {
+      fields.add(info.fieldName);
+    }
+    return StringUtils.join(fields, separator);
   }
 
   public String getRequestMappingValue() {
@@ -280,7 +284,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     return getDetailsServiceFields().get(entityType);
   }
 
-  public RelationInfo getLastDetailsInfo() {
+  public RelationInfoExtended getLastDetailsInfo() {
     return lastDetailsInfo;
   }
 
@@ -300,10 +304,26 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     return serviceField;
   }
 
-  public ServiceMetadata getSericeMetadataForEntity(JavaType entityType) {
+  public JpaEntityMetadata getEntityMetadata() {
+    return entityMetadata;
+  }
+
+  public String getDetailAnnotaionFieldValue() {
+    return detailAnnotaionFieldValue;
+  }
+
+  public Map<String, RelationInfoExtended> getRelationInfos() {
+    return relationInfos;
+  }
+
+  public ServiceMetadata getServiceMetadataForEntity(JavaType entityType) {
     if (entity.equals(entityType)) {
       return serviceMetadata;
     }
     return detailsServiceMetadata.get(entityType);
+  }
+
+  public ControllerAnnotationValues getAnnotationValues() {
+    return annotationValues;
   }
 }

@@ -2,38 +2,43 @@ package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_THYMELEAF;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.RelationInfoExtended;
+import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.views.AbstractViewGeneratorMetadataProvider;
 import org.springframework.roo.addon.web.mvc.views.MVCViewGenerationService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Implementation of {@link ThymeleafMetadataProvider}.
@@ -43,8 +48,8 @@ import java.util.logging.Logger;
  */
 @Component
 @Service
-public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadataProvider implements
-    ThymeleafMetadataProvider {
+public class ThymeleafMetadataProviderImpl extends
+    AbstractViewGeneratorMetadataProvider<ThymeleafMetadata> implements ThymeleafMetadataProvider {
 
   protected final static Logger LOGGER = HandlerUtils
       .getLogger(ThymeleafMetadataProviderImpl.class);
@@ -54,8 +59,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
   protected MetadataDependencyRegistryTracker registryTracker = null;
   protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
-
-  private MVCViewGenerationService viewGenerationService;
 
   /**
    * This service is being activated so setup it:
@@ -145,52 +148,71 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   @Override
-  protected ItdTypeDetailsProvidingMetadataItem createMetadataInstance(
-      String metadataIdentificationString, JavaType aspectName,
-      PhysicalTypeMetadata governorPhysicalTypeMetadata, ControllerMetadata controllerMetadata,
-      ServiceMetadata serviceMetadata, JpaEntityMetadata entityMetadata, String entityPlural,
-      String entityIdentifierPlural,
-      List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne,
-      JavaType itemController, JavaType collectionController, List<FieldMetadata> dateTimeFields,
-      List<FieldMetadata> enumFields, Map<String, MethodMetadata> findersToAdd,
-      Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields,
-      Map<JavaType, List<FieldMetadata>> formBeansEnumFields) {
+  protected ThymeleafMetadata createMetadataInstance(final String metadataIdentificationString,
+      final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+      final ControllerMetadata controllerMetadata, final ServiceMetadata serviceMetadata,
+      final JpaEntityMetadata entityMetadata, final String entityPlural,
+      final String entityIdentifierPlural,
+      final List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne,
+      final JavaType itemController, final JavaType collectionController,
+      final List<FieldMetadata> dateTimeFields, final List<FieldMetadata> enumFields,
+      final Map<String, MethodMetadata> findersToAdd,
+      final Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields,
+      final Map<JavaType, List<FieldMetadata>> formBeansEnumFields,
+      final JavaType detailsItemController, final JavaType detailsCollectionController) {
 
-    return new ThymeleafMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
-        entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
-        collectionController, dateTimeFields, enumFields, findersToAdd, formBeansDateTimeFields,
-        formBeansEnumFields);
-  }
 
-  /**
-   * Returns the value of the mapped by attribute for OneToMany relations only
-   * if it matches with the referenced side field name.
-   *
-   * @param entityFields
-   * @param field
-   * @param fieldNameOnReferenceSide
-   * @return a String with field name on the reference side if matches with
-   *         provided field on the owning side.
-   */
-  private String getMappedByField(List<FieldMetadata> entityFields, FieldMetadata field,
-      String fieldNameOnReferenceSide) {
-    String fieldName = null;
-    for (FieldMetadata entityField : entityFields) {
+    // Get related controller for select2 request
+    JavaType relatedCollectionController = null;
+    JavaType relatedItemController = null;
+    RelationInfoExtended info = controllerMetadata.getLastDetailsInfo();
+    if (controllerMetadata.getType() == ControllerType.DETAIL
+        && info.type == JpaRelationType.AGGREGATION) {
 
-      if (entityField.getFieldType().equals(field.getFieldType())) {
-        AnnotationMetadata oneToManyAnnotation = entityField.getAnnotation(JpaJavaType.ONE_TO_MANY);
-        if (oneToManyAnnotation != null
-            && oneToManyAnnotation.getAttribute("mappedBy") != null
-            && oneToManyAnnotation.getAttribute("mappedBy").getValue()
-                .equals(fieldNameOnReferenceSide)) {
-          fieldName = entityField.getFieldName().getSymbolName();
+      Collection<ClassOrInterfaceTypeDetails> controllers =
+          getControllerLocator().getControllers(info.childType, ControllerType.COLLECTION,
+              RooJavaType.ROO_THYMELEAF);
+      final String prefix = controllerMetadata.getAnnotationValues().getPathPrefix();
+      for (ClassOrInterfaceTypeDetails controller : controllers) {
+        // use annotation values to avoid cyclic dependencies
+        ControllerAnnotationValues valuesToCheck = new ControllerAnnotationValues(controller);
+        if (StringUtils.equals(prefix, valuesToCheck.getPathPrefix())) {
+          relatedCollectionController = controller.getType();
           break;
         }
-        // TODO: Implement the same for ManyToMany relations
       }
+      Validate
+          .notNull(
+              relatedCollectionController,
+              "Can't found Collection-type controller of entity '%s' and pathPrefix '%s' required by '%s' controller",
+              info.childType, prefix, controllerMetadata.getDestination());
+      controllers =
+          getControllerLocator().getControllers(info.childType, ControllerType.ITEM,
+              RooJavaType.ROO_THYMELEAF);
+      for (ClassOrInterfaceTypeDetails controller : controllers) {
+        // use annotation values to avoid cyclic dependencies
+        ControllerAnnotationValues valuesToCheck = new ControllerAnnotationValues(controller);
+        if (StringUtils.equals(prefix, valuesToCheck.getPathPrefix())) {
+          relatedItemController = controller.getType();
+          break;
+        }
+      }
+      Validate
+          .notNull(
+              relatedItemController,
+              "Can't found Item-type controller of entity '%s' and pathPrefix '%s' required by '%s' controller",
+              info.childType, prefix, controllerMetadata.getDestination());
     }
-    return fieldName;
+
+    final ThymeleafMetadata metadata =
+        new ThymeleafMetadata(metadataIdentificationString, aspectName,
+            governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
+            entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
+            collectionController, dateTimeFields, enumFields, findersToAdd,
+            formBeansDateTimeFields, formBeansEnumFields, detailsItemController,
+            detailsCollectionController, relatedCollectionController, relatedItemController);
+
+    return metadata;
   }
 
   public String getProvidesType() {

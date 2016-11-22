@@ -1,19 +1,25 @@
 package org.springframework.roo.addon.web.mvc.views;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
 
 /**
  * This class contains all necessary information about views.
- * 
+ *
  * It will be provided to view generator to be able to generate
  * views taking in mind some context parameters if needed.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
-public class ViewContext {
+public class ViewContext<T extends AbstractViewMetadata> {
+
+  // view Metadata
+
+  private T viewMetadata;
+  private ControllerMetadata controllerMetadata;
 
   // Project information
   private String projectName;
@@ -36,6 +42,7 @@ public class ViewContext {
 
   // Security information
   private boolean securityEnabled;
+
 
   public String getControllerPath() {
     return controllerPath;
@@ -125,4 +132,19 @@ public class ViewContext {
     this.securityEnabled = securityEnabled;
   }
 
+  public T getViewMetadata() {
+    return viewMetadata;
+  }
+
+  public void setViewMetadata(T viewMetadata) {
+    this.viewMetadata = viewMetadata;
+  }
+
+  public ControllerMetadata getControllerMetadata() {
+    return controllerMetadata;
+  }
+
+  public void setControllerMetadata(ControllerMetadata controllerMetadata) {
+    this.controllerMetadata = controllerMetadata;
+  }
 }

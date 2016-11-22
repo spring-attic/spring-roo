@@ -131,7 +131,7 @@ public class FinderOperationsImpl implements FinderOperations {
 
     // Add returnType attribute
     if (returnType != null) {
-      if (!repository.equals(entity)) {
+      if (!returnType.equals(entity)) {
         singleFinderAnnotation.addClassAttribute("returnType", returnType);
       }
       getProjectOperations().addModuleDependency(repository.getName().getModule(),

@@ -12,10 +12,10 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
@@ -39,8 +39,8 @@ public class ThymeleafMainControllerMetadata extends AbstractItdTypeDetailsProvi
   private static final JavaType CONTROLLER_ANNOTATION = new JavaType(
       "org.springframework.stereotype.Controller");
 
-  private ImportRegistrationResolver importResolver;
-  private MethodMetadata indexMethod;
+  private final MethodMetadata indexMethod;
+  private final MethodMetadata javasrcriptTemplatesMethod;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -79,11 +79,14 @@ public class ThymeleafMainControllerMetadata extends AbstractItdTypeDetailsProvi
 
     this.indexMethod = getIndexMethod();
 
+    this.javasrcriptTemplatesMethod = getJavascriptTemplatesmethod();
+
     // Add @Controller annotation
     ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(CONTROLLER_ANNOTATION));
 
-    // Add index method
+    // Add methods
     ensureGovernorHasMethod(new MethodMetadataBuilder(indexMethod));
+    ensureGovernorHasMethod(new MethodMetadataBuilder(javasrcriptTemplatesMethod));
 
     // Build the ITD
     itdTypeDetails = builder.build();
@@ -92,6 +95,69 @@ public class ThymeleafMainControllerMetadata extends AbstractItdTypeDetailsProvi
   /*
    * =====================================================================================
    */
+
+  /**
+   * @return
+   */
+  private MethodMetadata getJavascriptTemplatesmethod() {
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("javascriptTemplates");
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+
+    // Create @PathVariable("templeate") String template parameter
+    AnnotationMetadataBuilder pathVarialbeAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
+    pathVarialbeAnnotation.addStringAttribute("value", "template");
+    AnnotatedJavaType templateParameter =
+        new AnnotatedJavaType(JavaType.STRING, pathVarialbeAnnotation.build());
+    parameterTypes.add(templateParameter);
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("template"));
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    AnnotationMetadataBuilder requestMapping =
+        new AnnotationMetadataBuilder(SpringJavaType.REQUEST_MAPPING);
+    requestMapping.addStringAttribute("value", "/js/{template}.js");
+    getNameOfJavaType(SpringJavaType.REQUEST_METHOD);
+    requestMapping.addEnumAttribute("method", SpringJavaType.REQUEST_METHOD, "GET");
+    annotations.add(requestMapping);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // if (StringUtils.hasLength(template)) {
+    //    return template.concat(".js");
+    // }
+    bodyBuilder.appendFormalLine("if (%s.hasLength(template)) {",
+        getNameOfJavaType(SpringJavaType.STRING_UTILS));
+    bodyBuilder.indent();
+    bodyBuilder.appendFormalLine("return template.concat(\".js\");");
+    bodyBuilder.indentRemove();
+    bodyBuilder.appendFormalLine("}");
+
+    // throw new NotFoundException("File not found")
+    bodyBuilder.appendFormalLine("throw new %s(\"File not found\");",
+        getNameOfJavaType(SpringletsJavaType.SPRINGLETS_NOT_FOUND_EXCEPTION));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING,
+            parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
   /**
    * This method provides the "index" method that returns Thymeleaf view
    *
@@ -150,6 +216,15 @@ public class ThymeleafMainControllerMetadata extends AbstractItdTypeDetailsProvi
    */
   public MethodMetadata getCurrentIndexMethod() {
     return this.indexMethod;
+  }
+
+
+  /**
+   * Returns the method which handles javascript templates request
+   * @return
+   */
+  public MethodMetadata getJavasrcriptTemplates() {
+    return javasrcriptTemplatesMethod;
   }
 
 

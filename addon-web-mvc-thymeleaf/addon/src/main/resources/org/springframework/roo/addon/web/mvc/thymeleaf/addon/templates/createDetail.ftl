@@ -1,9 +1,3 @@
-<#import "fields/input-text.ftl" as text>
-<#import "fields/input-number.ftl" as number>
-<#import "fields/input-date.ftl" as date>
-<#import "fields/reference.ftl" as reference>
-<#import "fields/checkbox.ftl" as checkbox>
-<#import "fields/enum.ftl" as enum>
 <!DOCTYPE html>
 <html lang="en" data-layout-decorator="layouts/default-layout">
   <head>
@@ -23,8 +17,8 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
       data-th-remove="all"/>
 
-    <title data-th-text="|${r"#{"}label_edit_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}|">
-    Edit ${entityName} - Spring Roo application</title>
+    <title data-th-text="|${r"#{"}label_create_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}|">
+    Create ${entityName} - ${projectName} - SpringRoo Application</title>
 
     <!--/* Bootstrap */-->
     <link rel="stylesheet" type="text/css"
@@ -44,15 +38,15 @@
     <!-- Select2 -->
     <link rel="stylesheet" type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css"
-      data-th-href="@{/webjars/select2/4.0.3/dist/css/select2.css}"/>
+      data-th-href="@{/webjars/select2/dist/css/select2.css}"/>
     <link rel="stylesheet" type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.7/select2-bootstrap.css"
-      data-th-href="@{/webjars/select2-bootstrap-theme/0.1.0-beta.7/dist/select2-bootstrap.css}"/>
+      data-th-href="@{/webjars/select2-bootstrap-theme/dist/select2-bootstrap.css}"/>
 
     <!-- DateTimePicker -->
     <link rel="stylesheet" type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.min.css"
-      data-th-href="@{/webjars/datetimepicker/2.5.4/build/jquery.datetimepicker.min.css}"/>
+      data-th-href="@{/webjars/datetimepicker/build/jquery.datetimepicker.min.css}"/>
 
     <!--/* Bootswatch CSS custom */-->
     <link rel="stylesheet" type="text/css"
@@ -61,18 +55,17 @@
 
     <!--/* Roo CSS */-->
     <link rel="stylesheet" type="text/css"
-      href="../../static/public/css/springroo.css"
-      data-th-remove="all"/>
+       href="../../static/public/css/springroo.css"
+       data-th-remove="all"/>
 
     <!--/* HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries */-->
     <!--/* WARNING: Respond.js doesn't work if you view the page via file:// */-->
     <!--/*[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js" data-th-remove="all"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js" data-th-remove="all"></script>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js" data-th-remove="all"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js" data-th-remove="all"></script>
     <![endif]*/-->
 
   </head>
-
 <#if userManagedComponents?has_content && userManagedComponents["body"]??>
   ${userManagedComponents["body"]}
 <#else>
@@ -197,69 +190,54 @@
       <!-- CONTENT -->
       <section data-layout-fragment="content">
         <div class="container-fluid content">
-      	<!--
-      	  Only the inner content of the following tag "section" is included
-      	  within the template, in the section "content"
-      	-->
+  	<!--
+  	  Only the inner content of the following tag "section" is included
+  	  within the template, in the section "content"
+  	-->
 
-          <h1 data-th-text="${r"#{"}label_edit_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Edit ${entityName}</h1>
+          <h1 data-th-text="${r"#{"}label_edit_entity(${r"#{"}${entityLabel}})}">Edit ${entityName}</h1>
 
+          <#assign dconfig=detail.configuration>
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="@{${"${"}(#mvc.url('${mvcUrl_update}')).buildAndExpand(${entity.modelAttribute}.${entity.configuration.identifierField})}}">
-            <input type="hidden" name="_method" value="PUT" />
+            data-th-action="${r"${"}(#mvc.url('${dconfig.mvcUrl_create}')).buildAndExpand(${modelAttributeName}.${identifierField})}">
 
-             <fieldset id="containerFields">
-              <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} data </legend>
+            <fieldset id="containerFields">
+              <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${detail.configuration.entityLabel}})}">${detail.entityName} data </legend>
 
-
-              <#list fields as field>
-                  <#if field.userManaged>
-                    ${field.codeManaged}
-                  <#elseif field.type == "TEXT">
-                      <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required maxLength=field.configuration.maxLength />
-                  <#elseif field.type == "NUMBER">
-                      <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
-                  <#elseif field.type == "DATE">
-                      <@date.input label=field.label
-                          fieldName=field.fieldName
-                          fieldId=field.fieldId
-                          z=field.z
-                          format=field.configuration.format required=field.configuration.required />
-                  <#elseif field.type == "REFERENCE">
-                      <@reference.input label=field.label
-                          fieldName=field.fieldName
-                          fieldId=field.fieldId
-                          z=field.z
-                          referencedEntity=field.configuration.referencedEntity
-                          identifierField=field.configuration.identifierField
-                          referecedMvcUrl_select2=field.configuration.referecedMvcUrl_select2
-                          required=field.configuration.required />
-                  <#elseif field.type == "ENUM">
-                      <@enum.input label=field.label
-                          fieldName=field.fieldName
-                          fieldId=field.fieldId
-                          z=field.z
-                          items=field.configuration.items required=field.configuration.required />
-                  <#elseif field.type == "BOOLEAN">
-                      <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
-                  </#if>
-              </#list>
-
+              <#if detail.userManaged>
+                ${detail.codeManaged}
+              <#else>
+                <div class="form-group has-error has-feedback" data-z="${detail.z}" id="${detail.entityItemId}"
+                    data-th-class="form-group">
+                    <div class="col-md-6">
+                      <!-- Select2 -->
+                      <select id="${detail.fieldName}" name="${detail.fieldName}Ids"
+                        class="form-control dropdown-select-ajax"
+                        data-allow-clear="true"
+                        data-ajax--cache="true"
+                        data-ajax--data-type="json"
+                        data-ajax--delay="250"
+                        multiple="multiple"
+                        data-data-ajax--url="${r"${"}(#mvc.url('${dconfig.mvcUrl_select2}')).build()}"
+                        data-data-placeholder="${r"#{"}${select2_placeholder}}">
+                          <option data-th-each="item: *{${detail.pathStringFieldNames}}"
+                             selected="true"
+                             data-th-text="${r"${"}item}" data-th-value="${r"${"}item.${dconfig.identifierField}}">Another product to select</option>
+                      </select>
+                    </div>
+                </div>
+              </#if>
               </fieldset>
 
               <!-- buttons form -->
               <div class="form-group">
-                <div class="col-md-12">
-                  <div class="pull-left">
+                <div class="col-md-9 col-md-offset-3">
                     <button type="reset" class="btn btn-default"
                       onclick="location.href='list.html'"
-                      data-th-onclick="'location.href=\'' + @{${"${"}(#mvc.url('${mvcUrl_list}')).build()}} + '\''"
-                      data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
-                  </div>
-                  <div class="pull-right">
-                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit${r"}"}" >Save</button>
-                  </div>
+                      data-th-onclick="'location.href=\'' + ${r"${"}(#mvc.url('${mvcUrl_list}')).build()} + '\''"
+                      data-th-text="${r"#{"}label_reset}">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit}">Save</button>
                 </div>
               </div>
 
@@ -269,12 +247,11 @@
         </div>
 
       </section>
-      <!--  /CONTENT -->
+      <!-- /CONTENT-->
+  </div>
+  <!-- /CONTAINER-->
 
-   </div>
-   <!-- /CONTAINER-->
-
-   <footer class="container">
+  <footer class="container">
      <div class="row">
       <div class="col-sm-6 col-sm-offset-3">
         <small class="clearfix">
@@ -315,92 +292,13 @@
   ================================================== -->
   <!-- Placed at the end of the document so that the pages load faster -->
   <!-- JQuery -->
-  <script type="text/javascript" charset="utf8"
-    src="https://code.jquery.com/jquery-1.12.3.js"></script>
 
-  <!--/* Bootstrap */-->
-  <script type="text/javascript"
-    src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.js"></script>
-
-  <!--/* IE10 viewport hack for Surface/desktop Windows 8 bug */-->
-  <script type="text/javascript" charset="utf8"
-    src="../../static/public/js/ie10-viewport-bug-workaround.js"></script>
-
-  <!-- MomentJS -->
-  <script
-     src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.js">
-  </script>
-  <script src="../../static/public/js/moment-locale-es.js">
-  </script>
-  <script src="../../static/public/js/moment-defaults.js">
-  </script>
 
   <div data-layout-fragment="javascript">
-
-    <!-- DateTimePicker -->
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.full.min.js"
-      data-th-src="@{/webjars/datetimepicker/2.5.4/build/jquery.datetimepicker.full.min.js}"></script>
-    <script src="../../static/public/js/datetimepicker-defaults.js"
-      data-th-src="@{/public/js/datetimepicker-defaults.js}"></script>
-
-    <!-- jquery.inputmask -->
-    <script
-       src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.3.1/jquery.inputmask.bundle.min.js"
-       data-th-src="@{/webjars/jquery.inputmask/3.3.1/min/jquery.inputmask.bundle.min.js}"></script>
-    <script type="text/javascript" data-th-inline="javascript">
-      (function(jQuery) {
-        jQuery(document).ready(
-	  function() {
-	    Inputmask.extendAliases({
-	      'numeric' : {
-	         'groupSeparator' : /*[[${r"#{"}label_inputmask_groupSeparator${r"}"}]]*/'.',
-	         'radixPoint' : /*[[${r"#{"}label_inputmask_radixPoint${r"}"}]]*/','
-	       },
-	       'currency' : {
-	          'prefix' : /*[[${r"#{"}label_inputmask_prefix${r"}"}]]*/'',
-	          'suffix' : /*[[${r"#{"}label_inputmask_suffix${r"}"}]]*/' €'
-	        }
-	    });
-	 });
-       })(jQuery);
-    </script>
-    <script src="../../static/public/js/inputmask-defaults.js"
-      data-th-src="@{/public/js/inputmask-defaults.js}"></script>
-
-    <!-- JQuery Validation -->
-    <script
-      src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/jquery.validate.min.js"
-      data-th-src="@{/webjars/jquery-validation/1.15.0/dist/jquery.validate.min.js}">
-    </script>
-    <script
-      src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/additional-methods.min.js"
-      data-th-src="@{/webjars/jquery-validation/1.15.0/dist/additional-methods.min.js}">
-    </script>
-    <script
-      src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/localization/messages_es.js"
-      data-th-src="@{/webjars/jquery-validation/1.15.0/src/localization/messages_}+${r"${#"}locale.language${r"}"}+'.js'"
-      data-th-if="${r"${#"}locale.language${r"}"} != 'en'">
-    </script>
-    <script src="../../static/public/js/validation-defaults.js"
-      data-th-src="@{/public/js/validation-defaults.js}">
-    </script>
-    <script type="text/javascript" data-th-inline="javascript">
-      (function(jQuery) {
-         jQuery(document).ready(function() {
-	   jQuery.extend( jQuery.validator.messages, {
-	     'dateformat' : /*[[${r"#{"}error_invalid_date${r"}"}]]*/ 'Please enter a correct date/time',
-	     'inputmask': /*[[${r"#{"}lerror_invalid_maskValue${r"}"}]]*/ 'Please enter a valid value',
-	   });
-	 });
-      })(jQuery);
-    </script>
-
-    <!-- Select2 -->
-    <div data-th-replace="fragments/js/select2 :: select2-js">
+       <!-- Datatables fragment -->
+     <div data-th-replace="fragments/js/select2 :: select2-js">
       // TODO add js CDN
      </div>
-
     <script type="text/javascript" data-th-inline="javascript">
       // IIFE - Immediately Invoked Function Expression
       (function(list) {
@@ -424,7 +322,7 @@
       }));
     </script>
 
-    </div>
+  </div>
 
     <!-- Application -->
     <script type="text/javascript" charset="utf8"

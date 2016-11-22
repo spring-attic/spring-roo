@@ -1,4 +1,5 @@
 <#import "fields/input-text.ftl" as text>
+<#import "fields/input-number.ftl" as number>
 <#import "fields/input-date.ftl" as date>
 <#import "fields/reference.ftl" as reference>
 <#import "fields/checkbox.ftl" as checkbox>
@@ -22,12 +23,13 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
       data-th-remove="all"/>
 
-    <title data-th-text="|${r"#{"}label_search_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}|">${entityName} Search - Spring Roo application</title>
+    <title data-th-text="|${r"#{"}label_search_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}|">
+    Search ${entityName} - ${projectName} - SpringRoo Application</title>
 
     <!--/* Bootstrap */-->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
-      data-th-remove="all"/></link>
+      data-th-remove="all"></link>
 
     <!--/* IE10 viewport hack for Surface/desktop Windows 8 bug */-->
     <link rel="stylesheet" type="text/css"
@@ -41,8 +43,8 @@
 
     <!-- Select2 -->
     <link rel="stylesheet" type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.css"
-      data-th-href="@{/webjars/select2/4.0.2/dist/css/select2.css}"/>
+      href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css"
+      data-th-href="@{/webjars/select2/4.0.3/dist/css/select2.css}"/>
     <link rel="stylesheet" type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.7/select2-bootstrap.css"
       data-th-href="@{/webjars/select2-bootstrap-theme/0.1.0-beta.7/dist/select2-bootstrap.css}"/>
@@ -59,17 +61,17 @@
 
     <!--/* Roo CSS */-->
     <link rel="stylesheet" type="text/css"
-      href="../../static/public/css/springroo.css"
-      data-th-remove="all"/>
+       href="../../static/public/css/springroo.css"
+       data-th-remove="all"/>
 
     <!--/* HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries */-->
     <!--/* WARNING: Respond.js doesn't work if you view the page via file:// */-->
     <!--/*[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js" data-th-remove="all"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js" data-th-remove="all"></script>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js" data-th-remove="all"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js" data-th-remove="all"></script>
     <![endif]*/-->
-  </head>
 
+  </head>
 <#if userManagedComponents?has_content && userManagedComponents["body"]??>
   ${userManagedComponents["body"]}
 <#else>
@@ -190,82 +192,80 @@
     <!--CONTAINER-->
     <div class="container bg-container">
 
-      <!--CONTENT-->
+
+      <!-- CONTENT -->
       <section data-layout-fragment="content">
         <div class="container-fluid content">
-      	<!--
-      	  Only the inner content of the following tag "section" is included
-      	  within the template, in the section "content"
-              -->
-          <h1 data-th-text="${r"#{"}label_search_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} Search</h1>
+  	<!--
+  	  Only the inner content of the following tag "section" is included
+  	  within the template, in the section "content"
+  	-->
 
-        	<div class="panel panel-default">
-        	  <div class="panel-body">
-                  <!--FORM-->
-                <form id="search-form" class="form-horizontal" method="POST" data-th-object="${r"${formBean}"}"
-                  data-th-action="@{${controllerPath}/search/${action}}" action="finderList.html">
-                  <fieldset id="containerFields">
-                    <#list fields as field>
-                        <#if field.type == "TEXT">
-                            <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required maxLength=field.configuration.maxLength />
-                        <#elseif field.type == "NUMBER">
-                            <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
-                        <#elseif field.type == "DATE">
-                            <@date.input label=field.label
-                            fieldName=field.fieldName
-                            fieldId=field.fieldId
-                            z=field.z
-                            format=field.configuration.format required=field.configuration.required />
-                        <#elseif field.type == "REFERENCE">
-                            <@reference.input label=field.label
-                                fieldName=field.fieldName
-                                fieldId=field.fieldId
-                                z=field.z
-                                referencedEntity=field.configuration.referencedEntity
-                                identifierField=field.configuration.identifierField
-                                referencedPath=field.configuration.referencedPath
-                                fieldOne=field.configuration.fieldOne
-                                fieldTwo=field.configuration.fieldTwo required=field.configuration.required />
-                        <#elseif field.type == "ENUM">
-                            <@enum.input label=field.label
-                            fieldName=field.fieldName
-                            fieldId=field.fieldId
-                            z=field.z
-                            items=field.configuration.items required=field.configuration.required />
-                        <#elseif field.type == "BOOLEAN">
-                            <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
-                        </#if>
-                    </#list>
-                  </fieldset>
-                    <!-- form buttons -->
-                    <div class="form-group">
-                      <div class="col-md-9 col-md-offset-3">
-                          <button type="reset" class="btn btn-default"
-                            onclick="location.href='list.html'"
-                            data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
-                            data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
-                          <button type="submit" class="btn btn-primary">
-        		              <span class="glyphicon glyphicon-search" aria-hidden="true"></span>&nbsp;<span
-                              data-th-text="${r"#{"}label_search${r"}"}">Search</span>
-                          </button>
-                      </div>
-                    </div>
-                </form>
-                <!-- /FORM -->
-           </div>
-         </div>
-         <!-- panel -->
+          <h1 data-th-text="${r"#{"}label_search_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Search ${entityName}</h1>
 
-         <!-- RESULT -->
-         <div id="result"></div>
+          <!-- FORM -->
+          <form class="form-horizontal validate" method="GET" data-th-object="${r"${formBean}"}"
+            data-th-action="${r"${"}(#mvc.url('${mvcUrl_search}')).build()}">
+
+            <fieldset id="containerFields">
+              <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} data </legend>
+
+              <#list fields as field>
+                  <#if field.userManaged>
+                      ${field.codeManaged}
+                  <#elseif field.type == "TEXT">
+                      <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required maxLength=field.configuration.maxLength />
+                  <#elseif field.type == "NUMBER">
+                      <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
+                  <#elseif field.type == "DATE">
+                      <@date.input label=field.label
+                      fieldName=field.fieldName
+                        fieldId=field.fieldId
+                      z=field.z
+                      format=field.configuration.format required=field.configuration.required />
+                  <#elseif field.type == "REFERENCE">
+                      <@reference.input label=field.label
+                          fieldName=field.fieldName
+                          fieldId=field.fieldId
+                          z=field.z
+                          referencedEntity=field.configuration.referencedEntity
+                          identifierField=field.configuration.identifierField
+                          referencedPath=field.configuration.referencedPath
+                          fieldOne=field.configuration.fieldOne
+                          fieldTwo=field.configuration.fieldTwo required=field.configuration.required />
+                  <#elseif field.type == "ENUM">
+                      <@enum.input label=field.label
+                      fieldName=field.fieldName
+                      fieldId=field.fieldId
+                      z=field.z
+                      items=field.configuration.items required=field.configuration.required />
+                  <#elseif field.type == "BOOLEAN">
+                      <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
+                  </#if>
+              </#list>
+
+              </fieldset>
+
+              <!-- buttons form -->
+              <div class="form-group">
+                <div class="col-md-9 col-md-offset-3">
+                    <button type="reset" class="btn btn-default"
+                      onclick="location.href='list.html'"
+                      data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
+                      data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit${r"}"}">Save</button>
+                </div>
+              </div>
+
+          </form>
+          <!-- /FORM -->
 
         </div>
 
       </section>
       <!-- /CONTENT-->
-
-    </div>
-    <!-- /CONTAINER -->
+  </div>
+  <!-- /CONTAINER-->
 
   <footer class="container">
      <div class="row">
@@ -323,9 +323,7 @@
   <script
      src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.js">
   </script>
-  <script
-     src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/locale/es.js"
-     data-th-if="${r"${#"}locale.language${r"}"} != 'en'">
+  <script src="../../static/public/js/moment-locale-es.js">
   </script>
   <script src="../../static/public/js/moment-defaults.js">
   </script>
@@ -384,8 +382,8 @@
       (function(jQuery) {
          jQuery(document).ready(function() {
 	   jQuery.extend( jQuery.validator.messages, {
-	     'dateformat' : /*[[${r"#{"}error_invalidDate${r"}"}]]*/ 'Please enter a correct date/time',
-	     'inputmask': /*[[${r"#{"}lerror_invalidMaskValue${r"}"}]]*/ 'Please enter a valid value',
+	     'dateformat' : /*[[${r"#{"}error_invalid_date${r"}"}]]*/ 'Please enter a correct date/time',
+	     'inputmask': /*[[${r"#{"}lerror_invalid_maskValue${r"}"}]]*/ 'Please enter a valid value',
 	   });
 	 });
       })(jQuery);

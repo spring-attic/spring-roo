@@ -1,10 +1,13 @@
 package org.springframework.roo.addon.web.mvc.views;
 
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -17,8 +20,12 @@ import java.util.List;
  * @author Juan Carlos García
  * @since 2.0
  */
-public interface MVCViewGenerationService {
+public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
 
+  public static final String FIELD_SUFFIX = "field";
+  public static final String TABLE_SUFFIX = "entity";
+  public static final String DETAIL_SUFFIX = "detail";
+  public static final String FINDER_SUFFIX = "finder";
 
   /**
    * Return JavaType which identifies the view Type (usually annotation java type)
@@ -73,70 +80,114 @@ public interface MVCViewGenerationService {
    * and the provided context
    *
    * @param moduleName module where list view will be added
+   * @param entityMetadata entity metadata which contains information about it
    * @param entity Details of an entity to be able to generate view
+   * @param detailsControllers list of related details controller to include
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addListView(String moduleName, MemberDetails entity, ViewContext ctx);
+  void addListView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
+      List<T> detailsControllers, ViewContext<T> ctx);
 
   /**
    * This operation will add a show view using entityDetails
    * and the provided context
    *
    * @param moduleName module where show view will be added
+   * @param entityMetadata entity metadata which contains information about it
    * @param entity Details of an entity to be able to generate view
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addShowView(String moduleName, MemberDetails entity, ViewContext ctx);
+  void addShowView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
+      ViewContext<T> ctx);
+
+  /**
+   * This operation will add views related to a details controller using entityDetails
+   * and the provided context
+   *
+   * @param moduleName module where create view will be added
+   * @param entityMetadata entity metadata which contains information about it
+   * @param entity Details of an entity to be able to generate view
+   * @param controllerMetadata controller metadata
+   * @param viewMetadata
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addDetailsViews(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
+      ControllerMetadata controllerMetadata, T viewMetadata, ViewContext<T> ctx);
+
+  /**
+   * This operation will add views related to a details item controller using entityDetails
+   * and the provided context
+   *
+   * @param moduleName module where create view will be added
+   * @param entityMetadata entity metadata which contains information about it
+   * @param entity Details of an entity to be able to generate view
+   * @param controllerMetadata controller metadata
+   * @param viewMetadata
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addDetailsItemViews(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, ControllerMetadata controllerMetadata, T viewMetadata,
+      ViewContext<T> ctx);
 
   /**
    * This operation will add a create view using entityDetails
    * and the provided context
    *
    * @param moduleName module where create view will be added
+   * @param entityMetadata entity metadata which contains information about it
    * @param entity Details of an entity to be able to generate view
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addCreateView(String moduleName, MemberDetails entity, ViewContext ctx);
+  void addCreateView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
+      ViewContext<T> ctx);
 
   /**
    * This operation will add an update view using entityDetails
    * and the provided context
    *
    * @param moduleName module where update view will be added
+   * @param entityMetadata entity metadata which contains information about it
    * @param entity Details of an entity to be able to generate view
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addUpdateView(String moduleName, MemberDetails entity, ViewContext ctx);
+  void addUpdateView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
+      ViewContext<T> ctx);
 
   /**
    * This operation will add a finder form view using entityDetails and the
    * provided context
    *
    * @param moduleName the module where finder form view will be added
-   * @param entity the details of an entity to be able to generate view
+   * @param entityMetadata entity metadata which contains information about it
+   * @param viewMetadata
+   * @param formBean the type that should provided by the model when the form view loads
    * @param finderName the name of the finder for which this form will be created
-   * @param fieldsToAdd
    * @param ctx the ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addFinderFormView(String moduleName, MemberDetails entity, String finderName,
-      List<FieldMetadata> fieldsToAdd, ViewContext ctx);
+  void addFinderFormView(String moduleName, JpaEntityMetadata entityMetadata, T viewMetadata,
+      JavaType formBean, String finderName, ViewContext<T> ctx);
 
   /**
    * This operation will add a finder list view using entityDetails and the
    * provided context. This view will show finder result list
    *
    * @param moduleName the module where finder list view will be added
-   * @param entity the details of an entity to be able to generate view
+   * @param entityMetadata entity metadata which contains information about it
+   * @param viewMetadata
+   * @param returnType the JavaType that will be returned by this list view.
    * @param finderName the name of the finder for which this form will be created
    * @param ctx the ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addFinderListView(String moduleName, MemberDetails entity, String finderName, ViewContext ctx);
+  void addFinderListView(String moduleName, JpaEntityMetadata entityMetadada, T viewMetadata,
+      JavaType formBean, JavaType returnType, String finderName, ViewContext<T> ctx);
 
   /**
    * This operation will add the application index view using
@@ -146,7 +197,7 @@ public interface MVCViewGenerationService {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addIndexView(String moduleName, ViewContext ctx);
+  void addIndexView(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the login view using the provided
@@ -156,7 +207,7 @@ public interface MVCViewGenerationService {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addLoginView(String moduleName, ViewContext ctx);
+  void addLoginView(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the application accessibility view using
@@ -166,7 +217,7 @@ public interface MVCViewGenerationService {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addAccessibilityView(String moduleName, ViewContext ctx);
+  void addAccessibilityView(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the application error view using
@@ -175,7 +226,7 @@ public interface MVCViewGenerationService {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addErrorView(String moduleName, ViewContext ctx);
+  void addErrorView(String moduleName, ViewContext<T> ctx);
 
 
   /**
@@ -186,7 +237,7 @@ public interface MVCViewGenerationService {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addDefaultLayout(String moduleName, ViewContext ctx);
+  void addDefaultLayout(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the default-layout-no-menu view using
@@ -196,7 +247,7 @@ public interface MVCViewGenerationService {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addDefaultLayoutNoMenu(String moduleName, ViewContext ctx);
+  void addDefaultLayoutNoMenu(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the footer fragment using
@@ -206,7 +257,7 @@ public interface MVCViewGenerationService {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addFooter(String moduleName, ViewContext ctx);
+  void addFooter(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the header fragment using
@@ -216,7 +267,7 @@ public interface MVCViewGenerationService {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addHeader(String moduleName, ViewContext ctx);
+  void addHeader(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the menu fragment using
@@ -226,7 +277,7 @@ public interface MVCViewGenerationService {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addMenu(String moduleName, ViewContext ctx);
+  void addMenu(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the modal fragment using
@@ -236,7 +287,7 @@ public interface MVCViewGenerationService {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addModal(String moduleName, ViewContext ctx);
+  void addModal(String moduleName, ViewContext<T> ctx);
 
 
   /**
@@ -247,7 +298,7 @@ public interface MVCViewGenerationService {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addModalConfirm(String moduleName, ViewContext ctx);
+  void addModalConfirm(String moduleName, ViewContext<T> ctx);
 
 
   /**
@@ -258,7 +309,7 @@ public interface MVCViewGenerationService {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addSessionLinks(String moduleName, ViewContext ctx);
+  void addSessionLinks(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will add the languages fragment using
@@ -268,7 +319,7 @@ public interface MVCViewGenerationService {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addLanguages(String moduleName, ViewContext ctx);
+  void addLanguages(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will updates menu view.
@@ -280,7 +331,7 @@ public interface MVCViewGenerationService {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void updateMenuView(String moduleName, ViewContext ctx);
+  void updateMenuView(String moduleName, ViewContext<T> ctx);
 
   /**
    * This operation will install all necessary templates on generated project.
@@ -288,5 +339,32 @@ public interface MVCViewGenerationService {
    * to be able to generate views with their custom code.
    */
   void installTemplates();
+
+  /**
+   * Get labels to add or update in i18n system for a specific entity
+   *
+   * @param entityMemberDetails
+   * @param entity
+   * @param entityMetadata
+   * @param controllerMetadata
+   * @param module
+   * @param ctx
+   * @return
+   */
+  Map<String, String> getI18nLabels(MemberDetails entityMemberDetails, JavaType entity,
+      JpaEntityMetadata entityMetadata, ControllerMetadata controllerMetadata, String module,
+      ViewContext<T> ctx);
+
+  /**
+   * Create a view Context for controller
+   *
+   * @param controllerMetadata
+   * @param entity
+   * @param entityMetadata
+   * @param viewMetadata
+   * @return
+   */
+  ViewContext<T> createViewContext(ControllerMetadata controllerMetadata, JavaType entity,
+      JpaEntityMetadata entityMetadata, T viewMetadata);
 
 }

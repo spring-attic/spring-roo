@@ -75,7 +75,7 @@ public class JavaType implements Comparable<JavaType> {
       null, null);
   public static final JavaType OVERRIDE = new JavaType("java.lang.Override");
   public static final JavaType ITERABLE = new JavaType("java.lang.Iterable");
-  public static final JavaType ITERATOR = new JavaType("java.lang.Iterator");
+  public static final JavaType ITERATOR = new JavaType("java.util.Iterator");
   public static final JavaType ARRAYS = new JavaType("java.util.Arrays");
   public static final JavaType COLLECTIONS = new JavaType("java.util.Collections");
   public static final JavaType ARRAY_LIST = new JavaType("java.util.ArrayList");

@@ -1,13 +1,18 @@
 package org.springframework.roo.addon.web.mvc.views;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,9 +23,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.plural.addon.PluralService;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerAnnotationValues;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerLocator;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerOperations;
+import org.springframework.roo.addon.web.mvc.controller.addon.RelationInfoExtended;
+import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
-import org.springframework.roo.addon.web.mvc.i18n.I18nOperationsImpl;
 import org.springframework.roo.addon.web.mvc.i18n.components.I18n;
 import org.springframework.roo.addon.web.mvc.views.components.DetailEntityItem;
 import org.springframework.roo.addon.web.mvc.views.components.EntityItem;
@@ -37,14 +48,18 @@ import org.springframework.roo.classpath.details.annotations.StringAttributeValu
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.Jsr303JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
+import org.springframework.roo.support.util.XmlUtils;
 
 /**
  *
@@ -52,12 +67,14 @@ import org.springframework.roo.support.osgi.ServiceInstaceManager;
  * provides all necessary elements to generate views inside project.
  *
  * @param <DOC>
+ * @param <T>
  *
  * @author Juan Carlos García
  * @since 2.0
  */
 @Component(componentAbstract = true)
-public abstract class AbstractViewGenerationService<DOC> implements MVCViewGenerationService {
+public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewMetadata> implements
+    MVCViewGenerationService<T> {
 
   // Max fields that will be included on generated view
   private static final int MAX_FIELDS_TO_ADD = 5;
@@ -74,40 +91,39 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     serviceInstaceManager.activate(this.context);
   }
 
-  protected abstract DOC process(String templateName, ViewContext ctx);
+  protected abstract DOC process(String templateName, ViewContext<T> ctx);
 
   protected abstract DOC parse(String content);
 
-  protected abstract DOC merge(String templateName, DOC loadExistingDoc, ViewContext ctx);
+  protected abstract DOC merge(String templateName, DOC loadExistingDoc, ViewContext<T> ctx);
 
 
-  protected abstract DOC merge(String templateName, DOC existingDoc, ViewContext ctx,
+  protected abstract DOC merge(String templateName, DOC existingDoc, ViewContext<T> ctx,
       List<FieldItem> fields);
 
-  protected abstract DOC mergeListView(String templateName, DOC loadExistingDoc, ViewContext ctx,
-      EntityItem entity, List<FieldItem> fields, List<DetailEntityItem> details);
+  protected abstract DOC mergeListView(String templateName, DOC loadExistingDoc,
+      ViewContext<T> ctx, EntityItem entity, List<FieldItem> fields,
+      List<List<DetailEntityItem>> detailsLevels);
 
-  protected abstract DOC mergeMenu(String templateName, DOC loadExistingDoc, ViewContext ctx,
+  protected abstract DOC mergeMenu(String templateName, DOC loadExistingDoc, ViewContext<T> ctx,
       List<MenuEntry> menuEntries);
 
   protected abstract String getTemplatesLocation();
 
   protected abstract void writeDoc(DOC document, String viewPath);
 
-  private static final String FIELD_SUFFIX = "field";
-  private static final String TABLE_SUFFIX = "entity";
-  private static final String DETAIL_SUFFIX = "detail";
-  private static final String FINDER_SUFFIX = "finder";
+
 
   @Override
-  public void addListView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
+  public void addListView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, List<T> detailsControllers, ViewContext<T> ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = entityDetails.getFields();
+    List<FieldMetadata> entityFields = getPersistentFields(entity.getFields());
     List<FieldItem> fields =
         getFieldViewItems(entityFields, ctx.getEntityName(), true, ctx, TABLE_SUFFIX);
-    List<DetailEntityItem> details =
-        getDetailsFieldViewItems(entityDetails, ctx.getEntityName(), ctx, DETAIL_SUFFIX);
+
+
 
     // Process elements to generate
     DOC newDoc = null;
@@ -117,17 +133,57 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
         getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat("/list")
             .concat(getViewsExtension());
 
-    EntityItem entityItem =
-        new EntityItem(ctx.getEntityName(), ctx.getIdentifierField(), ctx.getControllerPath(),
-            TABLE_SUFFIX);
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
+
+    List<List<DetailEntityItem>> detailsLevels = new ArrayList<List<DetailEntityItem>>();
+    if (detailsControllers != null) {
+      List<DetailEntityItem> details = new ArrayList<DetailEntityItem>();
+      for (T detailController : detailsControllers) {
+        DetailEntityItem detailItem =
+            createDetailEntityItem(detailController, entity, entityMetadata, ctx.getEntityName(),
+                ctx, DETAIL_SUFFIX, entityItem);
+        details.add(detailItem);
+      }
+
+      // Sort details by path
+      Collections.sort(details, new Comparator<DetailEntityItem>() {
+        @Override
+        public int compare(DetailEntityItem o1, DetailEntityItem o2) {
+          return o1.getPathString().compareTo(o2.getPathString());
+        }
+      });
+
+      // Locates parent details for children, grandsons, etc and make groups by levels
+      for (DetailEntityItem detail : details) {
+        // Create group until item level
+        while (detailsLevels.size() < detail.getLevel()) {
+          detailsLevels.add(new ArrayList<DetailEntityItem>());
+        }
+        // Include detail in its group
+        detailsLevels.get(detail.getLevel() - 1).add(detail);
+        if (detail.getLevel() < 1) {
+          // Nothing more to do with detail
+          continue;
+        }
+        // look for parent
+        for (DetailEntityItem parent : details) {
+          if (detail.isTheParentEntity(parent)) {
+            // set parent
+            detail.setParentEntity(parent);
+            break;
+          }
+        }
+      }
+    }
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = mergeListView("list", loadExistingDoc(viewName), ctx, entityItem, fields, details);
+      newDoc =
+          mergeListView("list", loadExistingDoc(viewName), ctx, entityItem, fields, detailsLevels);
     } else {
       ctx.addExtraParameter("entity", entityItem);
       ctx.addExtraParameter("fields", fields);
-      ctx.addExtraParameter("details", details);
+      ctx.addExtraParameter("detailsLevels", detailsLevels);
       newDoc = process("list", ctx);
     }
 
@@ -136,19 +192,46 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   }
 
+  protected List<FieldMetadata> getPersistentFields(List<FieldMetadata> fields) {
+    List<FieldMetadata> result = new ArrayList<FieldMetadata>(fields.size());
+    for (FieldMetadata field : fields) {
+      int modifier = field.getModifier();
+      if (Modifier.isStatic(modifier) || Modifier.isFinal(modifier)
+          || Modifier.isTransient(modifier)) {
+        continue;
+      }
+      if (field.getAnnotation(JpaJavaType.TRANSIENT) != null) {
+        continue;
+      }
+      result.add(field);
+    }
+    return result;
+  }
+
+  protected EntityItem createEntityItem(JpaEntityMetadata entityMetadata, ViewContext<T> ctx,
+      String suffix) {
+    return new EntityItem(ctx.getEntityName(), ctx.getIdentifierField(), ctx.getControllerPath(),
+        suffix, entityMetadata.isReadOnly());
+  }
+
   @Override
-  public void addShowView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
+  public void addShowView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entityDetails, ViewContext<T> ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = entityDetails.getFields();
+    List<FieldMetadata> entityFields = getPersistentFields(entityDetails.getFields());
     List<FieldItem> fields =
         getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
+
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
 
     // TODO: TO BE FIXED when implements details
     List<FieldItem> details = new ArrayList<FieldItem>();
     // getDetailsFieldViewItems(entityDetails, ctx.getEntityName(), ctx);
 
     ctx.addExtraParameter("details", details);
+    ctx.addExtraParameter("fields", fields);
+    ctx.addExtraParameter("entity", entityItem);
 
     // Process elements to generate
     DOC newDoc = null;
@@ -162,7 +245,6 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     if (existsFile(viewName)) {
       newDoc = merge("show", loadExistingDoc(viewName), ctx, fields);
     } else {
-      ctx.addExtraParameter("fields", fields);
       newDoc = process("show", ctx);
     }
 
@@ -172,12 +254,15 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addCreateView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
+  public void addCreateView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entityDetails, ViewContext<T> ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = entityDetails.getFields();
+    List<FieldMetadata> entityFields = getPersistentFields(entityDetails.getFields());
     List<FieldItem> fields =
         getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
+
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
 
     // Process elements to generate
     DOC newDoc = null;
@@ -187,11 +272,13 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
         getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat("/create")
             .concat(getViewsExtension());
 
+    ctx.addExtraParameter("fields", fields);
+    ctx.addExtraParameter("entity", entityItem);
+
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
       newDoc = merge("create", loadExistingDoc(viewName), ctx, fields);
     } else {
-      ctx.addExtraParameter("fields", fields);
       newDoc = process("create", ctx);
     }
 
@@ -201,10 +288,11 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addUpdateView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
+  public void addUpdateView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entityDetails, ViewContext<T> ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = entityDetails.getFields();
+    List<FieldMetadata> entityFields = getPersistentFields(entityDetails.getFields());
     List<FieldItem> fields =
         getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
 
@@ -216,11 +304,15 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
         getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat("/edit")
             .concat(getViewsExtension());
 
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
+
+    ctx.addExtraParameter("fields", fields);
+    ctx.addExtraParameter("entity", entityItem);
+
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
       newDoc = merge("edit", loadExistingDoc(viewName), ctx, fields);
     } else {
-      ctx.addExtraParameter("fields", fields);
       newDoc = process("edit", ctx);
     }
 
@@ -230,103 +322,19 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addFinderFormView(String moduleName, MemberDetails entityDetails, String finderName,
-      List<FieldMetadata> fieldsToAdd, ViewContext ctx) {
-
-    // Getting entity fields that should be included on view
-    List<FieldItem> fields =
-        getFieldViewItems(fieldsToAdd, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
-
-    ctx.addExtraParameter("fields", fields);
-
-    // Build action path
-    String path = "";
-    if (StringUtils.startsWith(finderName, "count")) {
-      path = StringUtils.removeStart(finderName, "count");
-    } else if (StringUtils.startsWith(finderName, "find")) {
-      path = StringUtils.removeStart(finderName, "find");
-    } else if (StringUtils.startsWith(finderName, "query")) {
-      path = StringUtils.removeStart(finderName, "query");
-    } else if (StringUtils.startsWith(finderName, "read")) {
-      path = StringUtils.removeStart(finderName, "read");
-    } else {
-      path = finderName;
-    }
-    path = StringUtils.uncapitalize(path);
-    ctx.addExtraParameter("action", path);
-
-    // Process elements to generate
-    DOC newDoc = null;
-
-    // Getting new viewName
-    String viewName =
-        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat(finderName)
-            .concat("Form").concat(getViewsExtension());
-
-    // Check if new view to generate exists or not
-    if (existsFile(viewName)) {
-      newDoc = merge("finderForm", loadExistingDoc(viewName), ctx);
-    } else {
-      newDoc = process("finderForm", ctx);
-    }
-
-    // Write newDoc on disk
-    writeDoc(newDoc, viewName);
+  public void addFinderFormView(String moduleName, JpaEntityMetadata entityMetadata,
+      T viewMetadata, JavaType formBean, String finderName, ViewContext<T> ctx) {
+    // To be implemented by View Provider
   }
 
   @Override
-  public void addFinderListView(String moduleName, MemberDetails returnTypeDetails,
-      String finderName, ViewContext ctx) {
-
-    // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = returnTypeDetails.getFields();
-    List<FieldItem> fields =
-        getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, StringUtils.EMPTY);
-
-    // Build URL path to get data
-    String path = "";
-    if (StringUtils.startsWith(finderName, "count")) {
-      path = StringUtils.removeStart(finderName, "count");
-    } else if (StringUtils.startsWith(finderName, "find")) {
-      path = StringUtils.removeStart(finderName, "find");
-    } else if (StringUtils.startsWith(finderName, "query")) {
-      path = StringUtils.removeStart(finderName, "query");
-    } else if (StringUtils.startsWith(finderName, "read")) {
-      path = StringUtils.removeStart(finderName, "read");
-    } else {
-      path = finderName;
-    }
-    path = StringUtils.uncapitalize(path);
-    ctx.addExtraParameter("finderPath", path);
-
-    // Process elements to generate
-    DOC newDoc = null;
-
-    // Getting new viewName
-    String viewName =
-        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat(finderName)
-            .concat("List").concat(getViewsExtension());
-
-    EntityItem entityItem =
-        new EntityItem(ctx.getEntityName(), ctx.getIdentifierField(), ctx.getControllerPath(),
-            FINDER_SUFFIX);
-
-    // Check if new view to generate exists or not
-    if (existsFile(viewName)) {
-      newDoc =
-          mergeListView("finderList", loadExistingDoc(viewName), ctx, entityItem, fields,
-              new ArrayList<DetailEntityItem>());
-    } else {
-      ctx.addExtraParameter("fields", fields);
-      newDoc = process("finderList", ctx);
-    }
-
-    // Write newDoc on disk
-    writeDoc(newDoc, viewName);
+  public void addFinderListView(String moduleName, JpaEntityMetadata entityMetadata,
+      T viewMetadata, JavaType formBean, JavaType returnType, String finderName, ViewContext<T> ctx) {
+    // To be implemented by View Provider
   }
 
   @Override
-  public void addIndexView(String moduleName, ViewContext ctx) {
+  public void addIndexView(String moduleName, ViewContext<T> ctx) {
 
     // Process elements to generate
     DOC newDoc = null;
@@ -348,7 +356,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addLoginView(String moduleName, ViewContext ctx) {
+  public void addLoginView(String moduleName, ViewContext<T> ctx) {
 
     // Process elements to generate
     DOC newDoc = null;
@@ -369,7 +377,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addAccessibilityView(String moduleName, ViewContext ctx) {
+  public void addAccessibilityView(String moduleName, ViewContext<T> ctx) {
 
     // Process elements to generate
     DOC newDoc = null;
@@ -391,7 +399,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addErrorView(String moduleName, ViewContext ctx) {
+  public void addErrorView(String moduleName, ViewContext<T> ctx) {
 
     // Process elements to generate
     DOC newDoc = null;
@@ -413,7 +421,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addDefaultLayout(String moduleName, ViewContext ctx) {
+  public void addDefaultLayout(String moduleName, ViewContext<T> ctx) {
 
     // Process elements to generate
     DOC newDoc = null;
@@ -435,7 +443,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addDefaultLayoutNoMenu(String moduleName, ViewContext ctx) {
+  public void addDefaultLayoutNoMenu(String moduleName, ViewContext<T> ctx) {
 
     // Process elements to generate
     DOC newDoc = null;
@@ -457,7 +465,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addFooter(String moduleName, ViewContext ctx) {
+  public void addFooter(String moduleName, ViewContext<T> ctx) {
     // Process elements to generate
     DOC newDoc = null;
 
@@ -477,7 +485,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addHeader(String moduleName, ViewContext ctx) {
+  public void addHeader(String moduleName, ViewContext<T> ctx) {
     // Process elements to generate
     DOC newDoc = null;
 
@@ -497,22 +505,26 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addMenu(String moduleName, ViewContext ctx) {
+  public void addMenu(String moduleName, ViewContext<T> ctx) {
 
     Map<String, MenuEntry> mapMenuEntries = new HashMap<String, MenuEntry>();
 
     Set<ClassOrInterfaceTypeDetails> existingControllers =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_CONTROLLER);
+        new HashSet<ClassOrInterfaceTypeDetails>();
+    existingControllers.addAll(getControllerLocator().getControllers(null,
+        ControllerType.COLLECTION, getType()));
+    existingControllers.addAll(getControllerLocator().getControllers(null, ControllerType.SEARCH,
+        getType()));
+
 
     Iterator<ClassOrInterfaceTypeDetails> it = existingControllers.iterator();
 
     while (it.hasNext()) {
       // Getting controller and its information
       ClassOrInterfaceTypeDetails controller = it.next();
-      AnnotationMetadata controllerAnnotation =
-          controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
-      JavaType entity = (JavaType) controllerAnnotation.getAttribute("entity").getValue();
+
+      ControllerAnnotationValues controllerValues = new ControllerAnnotationValues(controller);
+      JavaType entity = controllerValues.getEntity();
 
       // Get finders for each controller
       AnnotationMetadata controllerSearchAnnotation =
@@ -545,28 +557,23 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       }
 
       // Getting pathPrefix
-      AnnotationAttributeValue<Object> pathPrefixAttr =
-          controllerAnnotation.getAttribute("pathPrefix");
-      String pathPrefix = "";
-      if (pathPrefixAttr != null) {
-        pathPrefix = (String) pathPrefixAttr.getValue();
-      }
-      // Generate path
-      String path = "/".concat(StringUtils.uncapitalize(getPluralService().getPlural(entity)));
-      if (StringUtils.isNotEmpty(pathPrefix)) {
-        if (pathPrefix.startsWith("/")) {
-          path = pathPrefix.concat(path);
+      String pathPrefix = StringUtils.defaultString(controllerValues.getPathPrefix(), "");
 
-        } else {
-          path = "/".concat(pathPrefix).concat(path);
-        }
+      // Generate path
+      String path = getControllerOperations().getBaseUrlForController(controller);
+      if (controllerSearchAnnotation != null) {
+        // Prevent that /search will be included in every menu entry
+        // The /search is already included in the step before only for
+        // finder entries
+        path = path.replace("/search", "");
       }
 
       // Create new menuEntry element for controller
       MenuEntry menuEntry =
-          new MenuEntry(entity.getSimpleTypeName(), path, pathPrefix, FieldItem.buildLabel(
-              entity.getSimpleTypeName(), ""), FieldItem.buildLabel(entity.getSimpleTypeName(),
-              "plural"), finderNamesAndPaths, false);
+          createMenuEntry(entity.getSimpleTypeName(), path, pathPrefix,
+              FieldItem.buildLabel(entity.getSimpleTypeName(), ""),
+              FieldItem.buildLabel(entity.getSimpleTypeName(), "plural"), finderNamesAndPaths,
+              false);
       String keyThatRepresentsEntry = pathPrefix.concat(entity.getSimpleTypeName());
 
       // Add new menu entry to menuEntries list if doesn't exist
@@ -590,7 +597,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
       // Creating the menu entry
       MenuEntry menuEntry =
-          new MenuEntry(webFlowView, webFlowView, "", FieldItem.buildLabel(webFlowView, ""),
+          createMenuEntry(webFlowView, webFlowView, "", FieldItem.buildLabel(webFlowView, ""),
               FieldItem.buildLabel(webFlowView, "plural"), null, true);
 
       mapMenuEntries.put(webFlowView, menuEntry);
@@ -625,9 +632,16 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   }
 
+  protected MenuEntry createMenuEntry(String entityName, String path, String pathPrefix,
+      String entityLabel, String entityPluralLabel, Map<String, String> finderNamesAndPaths,
+      boolean simple) {
+    return new MenuEntry(entityName, path, pathPrefix, entityLabel, entityPluralLabel,
+        finderNamesAndPaths, false);
+  }
+
   /**
    * THis method obtains the WebFlow views generated in the project.
-   * 
+   *
    * @param viewsFolder
    * @param views
    * @return
@@ -653,7 +667,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addModal(String moduleName, ViewContext ctx) {
+  public void addModal(String moduleName, ViewContext<T> ctx) {
     // Process elements to generate
     DOC newDoc = null;
 
@@ -673,7 +687,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addModalConfirm(String moduleName, ViewContext ctx) {
+  public void addModalConfirm(String moduleName, ViewContext<T> ctx) {
     // Process elements to generate
     DOC newDoc = null;
 
@@ -694,7 +708,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addSessionLinks(String moduleName, ViewContext ctx) {
+  public void addSessionLinks(String moduleName, ViewContext<T> ctx) {
     // Process elements to generate
     DOC newDoc = null;
 
@@ -715,10 +729,10 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addLanguages(String moduleName, ViewContext ctx) {
+  public void addLanguages(String moduleName, ViewContext<T> ctx) {
 
     // Add installed languages
-    List<I18n> installedLanguages = getI18nOperationsImpl().getInstalledLanguages(moduleName);
+    List<I18n> installedLanguages = getI18nOperations().getInstalledLanguages(moduleName);
     ctx.addExtraParameter("languages", installedLanguages);
 
     // Process elements to generate
@@ -746,7 +760,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void updateMenuView(String moduleName, ViewContext ctx) {
+  public void updateMenuView(String moduleName, ViewContext<T> ctx) {
     // TODO: This method should update menu view with the new
     // controller to include, instead of regenerate menu view page.
     addMenu(moduleName, ctx);
@@ -781,128 +795,18 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
    * @return List that contains FieldMetadata that will be added to the view.
    */
   protected List<FieldItem> getFieldViewItems(List<FieldMetadata> entityFields, String entityName,
-      boolean checkMaxFields, ViewContext ctx, String suffixId) {
-    int addedFields = 0;
-
-    // Getting all controllers
-    Set<ClassOrInterfaceTypeDetails> allControllers =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_CONTROLLER);
+      boolean checkMaxFields, ViewContext<T> ctx, String suffixId) {
 
     // Get the MAX_FIELDS_TO_ADD
     List<FieldItem> fieldViewItems = new ArrayList<FieldItem>();
     for (FieldMetadata entityField : entityFields) {
-      // Exclude id and version fields
-      if (entityField.getAnnotation(JpaJavaType.ID) == null
-          && entityField.getAnnotation(JpaJavaType.VERSION) == null) {
+      FieldItem fieldItem = createFieldItem(entityField, entityName, suffixId, ctx);
 
-        // Generating new FieldItem element
-        FieldItem fieldItem =
-            new FieldItem(entityField.getFieldName().getSymbolName(), entityName, suffixId);
-
-        // Calculate fieldType
-        JavaType type = entityField.getFieldType();
-        ClassOrInterfaceTypeDetails typeDetails = getTypeLocationService().getTypeDetails(type);
-
-        // ROO-3810: Getting @NotNull annotation to include required attr
-        AnnotationMetadata notNullAnnotation = entityField.getAnnotation(Jsr303JavaType.NOT_NULL);
-        if (notNullAnnotation != null) {
-          fieldItem.addConfigurationElement("required", true);
-        } else {
-          fieldItem.addConfigurationElement("required", false);
-        }
-
-        // Check if is a referenced field
-        if (typeDetails != null && typeDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
-          boolean shouldBeAdded = getReferenceField(fieldItem, typeDetails, allControllers);
-          if (!shouldBeAdded) {
-            continue;
-          }
-        } else if (type.isBoolean()) {
-          // Check if is a boolean field
-          fieldItem.setType(FieldTypes.BOOLEAN.toString());
-        } else if (typeDetails != null
-            && typeDetails.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
-          // Saving enum and items to display. Same name as
-          // populateForm method
-          fieldItem.setType(FieldTypes.ENUM.toString());
-          fieldItem.addConfigurationElement(
-              "items",
-              StringUtils.uncapitalize(getPluralService().getPlural(
-                  entityField.getFieldName().getSymbolName())));
-
-        } else if (type.getFullyQualifiedTypeName().equals(Date.class.getName())
-            || type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
-          // Check if is a date field
-          fieldItem.setType(FieldTypes.DATE.toString());
-          // Getting datetime format to use
-          AnnotationMetadata dateTimeFormatAnnotation =
-              entityField.getAnnotation(SpringJavaType.DATE_TIME_FORMAT);
-          String format = "d/m/Y";
-          if (dateTimeFormatAnnotation != null) {
-            AnnotationAttributeValue<String> styleAttribute =
-                dateTimeFormatAnnotation.getAttribute("style");
-            if (styleAttribute != null) {
-              String annotationFormat = styleAttribute.getValue();
-              if (annotationFormat.equals("M-")) {
-                format = "d-M-Y";
-              } else {
-                format = annotationFormat;
-              }
-            }
-          }
-          fieldItem.addConfigurationElement("format", format);
-        } else if (type.getFullyQualifiedTypeName().equals("java.util.Set")
-            || type.getFullyQualifiedTypeName().equals("java.util.List")) {
-          // Ignore details. To obtain details uses
-          // getDetailsFieldViewItems method
-          continue;
-        } else if (type.isNumber()) {
-          // ROO-3810: Getting @Min and @Max annotations to add validations if necessary
-          AnnotationMetadata minAnnotation = entityField.getAnnotation(Jsr303JavaType.MIN);
-          if (minAnnotation != null) {
-            AnnotationAttributeValue<Object> min = minAnnotation.getAttribute("value");
-            if (min != null) {
-              fieldItem.addConfigurationElement("min", min.getValue().toString());
-            } else {
-              fieldItem.addConfigurationElement("min", "NULL");
-            }
-          } else {
-            fieldItem.addConfigurationElement("min", "NULL");
-          }
-          AnnotationMetadata maxAnnotation = entityField.getAnnotation(Jsr303JavaType.MAX);
-          if (maxAnnotation != null) {
-            AnnotationAttributeValue<Object> max = maxAnnotation.getAttribute("value");
-            if (max != null) {
-              fieldItem.addConfigurationElement("max", max.getValue().toString());
-            } else {
-              fieldItem.addConfigurationElement("max", "NULL");
-            }
-          } else {
-            fieldItem.addConfigurationElement("max", "NULL");
-          }
-          fieldItem.setType(FieldTypes.NUMBER.toString());
-        } else {
-          // ROO-3810:  Getting @Size annotation
-          AnnotationMetadata sizeAnnotation = entityField.getAnnotation(Jsr303JavaType.SIZE);
-          if (sizeAnnotation != null) {
-            AnnotationAttributeValue<Object> maxLength = sizeAnnotation.getAttribute("max");
-            if (maxLength != null) {
-              fieldItem.addConfigurationElement("maxLength", maxLength.getValue().toString());
-            } else {
-              fieldItem.addConfigurationElement("maxLength", "NULL");
-            }
-          } else {
-            fieldItem.addConfigurationElement("maxLength", "NULL");
-          }
-          fieldItem.setType(FieldTypes.TEXT.toString());
-        }
-
+      if (fieldItem != null) {
         fieldViewItems.add(fieldItem);
-        addedFields++;
       }
 
-      if (addedFields == MAX_FIELDS_TO_ADD && checkMaxFields) {
+      if (fieldViewItems.size() >= MAX_FIELDS_TO_ADD && checkMaxFields) {
         break;
       }
     }
@@ -910,89 +814,190 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     return fieldViewItems;
   }
 
-  /**
-   * This method obtains all necessary information about details fields from
-   * entity and returns a List of FieldItem.
-   *
-   * @param entityDetails
-   * @param entityName
-   * @param ctx
-   *
-   * @return List that contains FieldMetadata that will be added to the view.
-   */
-  protected List<DetailEntityItem> getDetailsFieldViewItems(MemberDetails entityDetails,
-      String entityName, ViewContext ctx, String suffixId) {
-    // Getting entity fields
-    List<FieldMetadata> entityFields = entityDetails.getFields();
 
-    List<DetailEntityItem> detailFieldViewItems = new ArrayList<DetailEntityItem>();
-    for (FieldMetadata entityField : entityFields) {
-      // Exclude id and version fields
-      if (entityField.getAnnotation(JpaJavaType.ID) == null
-          && entityField.getAnnotation(JpaJavaType.VERSION) == null) {
+  protected FieldItem createFieldItem(FieldMetadata entityField, String entityName,
+      String suffixId, ViewContext<T> ctx) {
 
-        // Generating new FieldItem element
-        DetailEntityItem detailItem =
-            new DetailEntityItem(entityField.getFieldName().getSymbolName(), suffixId);
-
-        // Calculate fieldType
-        JavaType type = entityField.getFieldType();
-
-        // Check if is a referenced field
-        if (type.getFullyQualifiedTypeName().equals("java.util.Set")
-            || type.getFullyQualifiedTypeName().equals("java.util.List")) {
-          // Getting base type
-          JavaType referencedField = type.getBaseType();
-          ClassOrInterfaceTypeDetails referencedFieldDetails =
-              getTypeLocationService().getTypeDetails(referencedField);
-
-          if (referencedFieldDetails != null
-              && referencedFieldDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
-
-            //fieldItem.setType(FieldTypes.LIST.toString());
-
-            // Saving necessary configuration
-            detailItem.addConfigurationElement("referencedFieldType",
-                referencedField.getSimpleTypeName());
-
-            // Getting identifier field
-            List<FieldMetadata> identifierFields =
-                getPersistenceMemberLocator().getIdentifierFields(referencedField);
-            detailItem.addConfigurationElement("identifierField", identifierFields.get(0)
-                .getFieldName().getSymbolName());
-
-            detailItem.addConfigurationElement("controllerPath", "/"
-                + entityField.getFieldName().getSymbolName().toLowerCase());
-
-            // Getting referencedfield label plural
-            detailItem.addConfigurationElement("referencedFieldLabel",
-                FieldItem.buildLabel(entityName, entityField.getFieldName().getSymbolName()));
-
-            // Getting all referenced fields
-            List<FieldMetadata> referencedFields =
-                getMemberDetailsScanner().getMemberDetails(getClass().toString(),
-                    referencedFieldDetails).getFields();
-            detailItem.addConfigurationElement(
-                "referenceFieldFields",
-                getFieldViewItems(referencedFields, entityName + "."
-                    + entityField.getFieldName().getSymbolName(), true, ctx, StringUtils.EMPTY));
-
-          } else {
-            // Ignore set or list which base types are not entity
-            // field
-            continue;
-          }
-
-        } else {
-          // Ignore not details fields
-          continue;
-        }
-
-        detailFieldViewItems.add(detailItem);
-      }
+    // Exclude id and version fields
+    if (entityField.getAnnotation(JpaJavaType.ID) != null
+        || entityField.getAnnotation(JpaJavaType.VERSION) != null) {
+      return null;
     }
 
-    return detailFieldViewItems;
+    FieldItem fieldItem =
+        new FieldItem(entityField.getFieldName().getSymbolName(), entityName, suffixId);
+    // Generating new FieldItem element
+
+    // Calculate fieldType
+    JavaType type = entityField.getFieldType();
+    ClassOrInterfaceTypeDetails typeDetails = getTypeLocationService().getTypeDetails(type);
+
+    // ROO-3810: Getting @NotNull annotation to include required attr
+    AnnotationMetadata notNullAnnotation = entityField.getAnnotation(Jsr303JavaType.NOT_NULL);
+    if (notNullAnnotation != null) {
+      fieldItem.addConfigurationElement("required", true);
+    } else {
+      fieldItem.addConfigurationElement("required", false);
+    }
+
+    // Check if is a referenced field
+    if (typeDetails != null && typeDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
+      boolean shouldBeAdded = getReferenceField(fieldItem, typeDetails, ctx);
+      if (!shouldBeAdded) {
+        return null;
+      }
+    } else if (type.isBoolean()) {
+      // Check if is a boolean field
+      fieldItem.setType(FieldTypes.BOOLEAN.toString());
+    } else if (typeDetails != null
+        && typeDetails.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
+      // Saving enum and items to display. Same name as
+      // populateForm method
+      fieldItem.setType(FieldTypes.ENUM.toString());
+      fieldItem.addConfigurationElement("items", fieldItem.getFieldName());
+
+    } else if (type.getFullyQualifiedTypeName().equals(Date.class.getName())
+        || type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
+      // Check if is a date field
+      fieldItem.setType(FieldTypes.DATE.toString());
+      // Getting datetime format to use
+      AnnotationMetadata dateTimeFormatAnnotation =
+          entityField.getAnnotation(SpringJavaType.DATE_TIME_FORMAT);
+      String format = "d/m/Y";
+      if (dateTimeFormatAnnotation != null) {
+        AnnotationAttributeValue<String> styleAttribute =
+            dateTimeFormatAnnotation.getAttribute("style");
+        if (styleAttribute != null) {
+          String annotationFormat = styleAttribute.getValue();
+          if (annotationFormat.equals("M-")) {
+            format = "d-M-Y";
+          } else {
+            format = annotationFormat;
+          }
+        }
+      }
+      fieldItem.addConfigurationElement("format", format);
+    } else if (type.getFullyQualifiedTypeName().equals("java.util.Set")
+        || type.getFullyQualifiedTypeName().equals("java.util.List")) {
+      // Ignore details. To obtain details uses
+      // getDetailsFieldViewItems method
+      return null;
+    } else if (type.isNumber()) {
+      // ROO-3810: Getting @Min and @Max annotations to add validations if necessary
+      AnnotationMetadata minAnnotation = entityField.getAnnotation(Jsr303JavaType.MIN);
+      if (minAnnotation != null) {
+        AnnotationAttributeValue<Object> min = minAnnotation.getAttribute("value");
+        if (min != null) {
+          fieldItem.addConfigurationElement("min", min.getValue().toString());
+        } else {
+          fieldItem.addConfigurationElement("min", "NULL");
+        }
+      } else {
+        fieldItem.addConfigurationElement("min", "NULL");
+      }
+      AnnotationMetadata maxAnnotation = entityField.getAnnotation(Jsr303JavaType.MAX);
+      if (maxAnnotation != null) {
+        AnnotationAttributeValue<Object> max = maxAnnotation.getAttribute("value");
+        if (max != null) {
+          fieldItem.addConfigurationElement("max", max.getValue().toString());
+        } else {
+          fieldItem.addConfigurationElement("max", "NULL");
+        }
+      } else {
+        fieldItem.addConfigurationElement("max", "NULL");
+      }
+      fieldItem.setType(FieldTypes.NUMBER.toString());
+    } else {
+      // ROO-3810:  Getting @Size annotation
+      AnnotationMetadata sizeAnnotation = entityField.getAnnotation(Jsr303JavaType.SIZE);
+      if (sizeAnnotation != null) {
+        AnnotationAttributeValue<Object> maxLength = sizeAnnotation.getAttribute("max");
+        if (maxLength != null) {
+          fieldItem.addConfigurationElement("maxLength", maxLength.getValue().toString());
+        } else {
+          fieldItem.addConfigurationElement("maxLength", "NULL");
+        }
+      } else {
+        fieldItem.addConfigurationElement("maxLength", "NULL");
+      }
+      fieldItem.setType(FieldTypes.TEXT.toString());
+    }
+    return fieldItem;
+  }
+
+  @Override
+  public void addDetailsViews(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, ControllerMetadata controllerMetadata, T viewMetadata,
+      ViewContext<T> ctx) {
+    // Nothing to do here
+
+  }
+
+
+  @Override
+  public void addDetailsItemViews(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, ControllerMetadata controllerMetadata, T viewMetadata,
+      ViewContext<T> ctx) {
+    // Nothing to do here
+
+  }
+
+  /**
+   * Create a new instance of {@link DetailEntityItem}.
+   *
+   * Implementation can override this method to include it own information or
+   * extend defaults.
+   *
+   * @param detailController
+   * @param detailSuffix
+   * @param ctx
+   * @param string
+   * @param entityMetadata
+   * @param entity
+   * @return
+   */
+  protected DetailEntityItem createDetailEntityItem(T detailController,
+      MemberDetails entityMembers, JpaEntityMetadata entityMetadata, String entityName,
+      ViewContext<T> ctx, String detailSuffix, EntityItem rootEntity) {
+    ControllerMetadata controllerMetadata = detailController.getControllerMetadata();
+
+    RelationInfoExtended last = controllerMetadata.getLastDetailsInfo();
+    ClassOrInterfaceTypeDetails childEntityDetails =
+        getTypeLocationService().getTypeDetails(last.childType);
+    JpaEntityMetadata childEntityMetadata = last.childEntityMetadata;
+
+
+
+    DetailEntityItem detailItem =
+        new DetailEntityItem(childEntityMetadata, controllerMetadata, detailSuffix, rootEntity);
+    // Saving necessary configuration
+    detailItem.addConfigurationElement("referencedFieldType", last.childType.getSimpleTypeName());
+
+    // Getting identifier field
+    detailItem.addConfigurationElement("identifierField", childEntityMetadata
+        .getCurrentIndentifierField().getFieldName().getSymbolName());
+
+    // Getting referencedfield label plural
+    detailItem.addConfigurationElement("referencedFieldLabel",
+        FieldItem.buildLabel(entityName, last.fieldName));
+
+    // Getting all referenced fields
+    List<FieldMetadata> referencedFields =
+        getPersistentFields(getMemberDetailsScanner().getMemberDetails(getClass().toString(),
+            childEntityDetails).getFields());
+    detailItem.addConfigurationElement(
+        "referenceFieldFields",
+        getFieldViewItems(referencedFields, entityName + "." + last.fieldName, true, ctx,
+            StringUtils.EMPTY));
+    detailItem.addConfigurationElement(
+        "fields",
+        getFieldViewItems(referencedFields, detailItem.getEntityName(), true, ctx,
+            StringUtils.EMPTY));
+    return detailItem;
+  }
+
+  protected MetadataService getMetadataService() {
+    return serviceInstaceManager.getServiceInstance(this, MetadataService.class);
   }
 
   /**
@@ -1009,8 +1014,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
    * @param allControllers
    * @return
    */
-  private boolean getReferenceField(FieldItem fieldItem, ClassOrInterfaceTypeDetails typeDetails,
-      Set<ClassOrInterfaceTypeDetails> allControllers) {
+  protected boolean getReferenceField(FieldItem fieldItem, ClassOrInterfaceTypeDetails typeDetails,
+      ViewContext<T> viewContext) {
     // Set type as REFERENCE
     fieldItem.setType(FieldTypes.REFERENCE.toString());
 
@@ -1018,78 +1023,129 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     fieldItem
         .addConfigurationElement("referencedEntity", typeDetails.getType().getSimpleTypeName());
 
-    // Add identifierField to configuration
-    List<FieldMetadata> identifierFields =
-        getPersistenceMemberLocator().getIdentifierFields(typeDetails.getType());
-    if (identifierFields.isEmpty()) {
-      return false;
-    }
-    fieldItem.addConfigurationElement("identifierField", identifierFields.get(0).getFieldName()
-        .getSymbolName());
-
     // Add the controllerPath related to the referencedEntity to
     // configuration
+    final String controllerPrefix =
+        viewContext.getViewMetadata().getControllerMetadata().getAnnotationValues().getPathPrefix();
+    Collection<ClassOrInterfaceTypeDetails> allControllers =
+        getControllerLocator().getControllers(typeDetails.getType(), ControllerType.COLLECTION,
+            getType());
     Iterator<ClassOrInterfaceTypeDetails> it = allControllers.iterator();
     String referencedPath = "";
+    ClassOrInterfaceTypeDetails referencedController = null;
     while (it.hasNext()) {
       ClassOrInterfaceTypeDetails controller = it.next();
+      ControllerAnnotationValues values = new ControllerAnnotationValues(controller);
+
       AnnotationMetadata controllerAnnotation =
           controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
-      AnnotationAttributeValue<JavaType> entityAttr = controllerAnnotation.getAttribute("entity");
-      if (entityAttr != null && entityAttr.getValue().equals(typeDetails.getType())) {
-        AnnotationAttributeValue<String> pathPrefixAttr =
-            controllerAnnotation.getAttribute("pathPrefix");
-        String pathPrefix = "";
-        if (pathPrefixAttr != null) {
-          pathPrefix = (String) pathPrefixAttr.getValue();
-        }
-        // Generate path
-        String path =
-            "/".concat(StringUtils.uncapitalize(getPluralService().getPlural(entityAttr.getValue())));
-        if (StringUtils.isNotEmpty(pathPrefix)) {
-          if (!pathPrefix.startsWith("/")) {
-            pathPrefix = "/".concat(pathPrefix);
-          }
-          path = pathPrefix.concat(path);
-        }
-        referencedPath = path;
+      AnnotationAttributeValue<String> prefixAttr = controllerAnnotation.getAttribute("pathPrefix");
+      if (StringUtils.equals(values.getPathPrefix(), controllerPrefix)) {
+        // Get path
+        referencedPath = getControllerOperations().getBaseUrlForController(controller);
+        referencedController = controller;
+
+        // Get target entity metadata to get identifier field
+        ClassOrInterfaceTypeDetails relatedEntityCid =
+            getTypeLocationService().getTypeDetails(typeDetails.getType());
+        JpaEntityMetadata relatedEntityMetadata =
+            getMetadataService().get(JpaEntityMetadata.createIdentifier(relatedEntityCid));
+        fieldItem.addConfigurationElement("identifierField", relatedEntityMetadata
+            .getCurrentIndentifierField().getFieldName().getSymbolName());
+        break;
       }
+    }
+
+    if (referencedController == null) {
+      return false;
     }
 
     fieldItem.addConfigurationElement("referencedPath", referencedPath);
-
-    // Add one or more fields to configuration, to be able to display
-    // content
-    String fieldOne = "";
-    String fieldTwo = "";
-    MemberDetails referencedEntityDetails =
-        getMemberDetailsScanner().getMemberDetails(getClass().toString(), typeDetails);
-    List<FieldMetadata> referencedEntityFields = referencedEntityDetails.getFields();
-    for (FieldMetadata referencedEntityField : referencedEntityFields) {
-      // Exclude id and version fields
-      // TODO: Check audit fields
-      if (referencedEntityField.getAnnotation(JpaJavaType.ID) == null
-          && referencedEntityField.getAnnotation(JpaJavaType.VERSION) == null) {
-        if (StringUtils.isBlank(fieldOne)) {
-          fieldOne = referencedEntityField.getFieldName().getSymbolName();
-        } else {
-          fieldTwo = referencedEntityField.getFieldName().getSymbolName();
-          break;
-        }
-      }
-    }
-
-    // At least, one field is necessary.
-    if (StringUtils.isBlank(fieldOne)) {
-      return false;
-    }
-
-    fieldItem.addConfigurationElement("fieldOne", fieldOne);
-    fieldItem.addConfigurationElement("fieldTwo", fieldTwo);
+    fieldItem.addConfigurationElement("referencedController", referencedController);
 
     return true;
 
   }
+
+  @Override
+  public Map<String, String> getI18nLabels(MemberDetails entityMemberDetails, JavaType entity,
+      JpaEntityMetadata entityMetadata, ControllerMetadata controllerMetadata, String module,
+      ViewContext<T> ctx) {
+    final Map<String, String> properties = new LinkedHashMap<String, String>();
+
+    final String entityName = entity.getSimpleTypeName();
+
+    properties.put(buildLabel(entityName), new JavaSymbolName(entity.getSimpleTypeName()
+        .toLowerCase()).getReadableSymbolName());
+
+    final String pluralResourceId = buildLabel(entity.getSimpleTypeName(), "plural");
+    final String plural = getPluralService().getPlural(entity);
+    properties.put(pluralResourceId, new JavaSymbolName(plural).getReadableSymbolName());
+
+    final List<FieldMetadata> javaTypePersistenceMetadataDetails =
+        getPersistenceMemberLocator().getIdentifierFields(entity);
+
+    if (!javaTypePersistenceMetadataDetails.isEmpty()) {
+      for (final FieldMetadata idField : javaTypePersistenceMetadataDetails) {
+        properties.put(buildLabel(entityName, idField.getFieldName().getSymbolName()), idField
+            .getFieldName().getReadableSymbolName());
+      }
+    }
+
+    for (final FieldMetadata field : entityMemberDetails.getFields()) {
+      final String fieldResourceId = buildLabel(entityName, field.getFieldName().getSymbolName());
+
+      properties.put(fieldResourceId, field.getFieldName().getReadableSymbolName());
+
+      // Add related entity fields
+      if (field.getFieldType().getFullyQualifiedTypeName().equals(Set.class.getName())
+          || field.getFieldType().getFullyQualifiedTypeName().equals(List.class.getName())) {
+
+        // Getting inner type
+        JavaType referencedEntity = field.getFieldType().getBaseType();
+
+        ClassOrInterfaceTypeDetails referencedEntityDetails =
+            getTypeLocationService().getTypeDetails(referencedEntity);
+
+        if (referencedEntityDetails != null
+            && referencedEntityDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
+
+          for (final FieldMetadata referencedEntityField : getMemberDetailsScanner()
+              .getMemberDetails(this.getClass().getName(), referencedEntityDetails).getFields()) {
+
+            final String referenceEntityFieldResourceId =
+                buildLabel(entityName, field.getFieldName().getSymbolName(), referencedEntityField
+                    .getFieldName().getSymbolName());
+            properties.put(referenceEntityFieldResourceId, referencedEntityField.getFieldName()
+                .getReadableSymbolName());
+          }
+        }
+      }
+    }
+    return properties;
+  }
+
+
+
+  /**
+   * Builds the label of the specified field by joining its names and adding
+   * it to the entity label
+   *
+   * @param entity
+   *            the entity name
+   * @param fieldNames
+   *            list of fields
+   * @return label
+   */
+  private static String buildLabel(String entityName, String... fieldNames) {
+    String label = XmlUtils.convertId("label." + entityName.toLowerCase());
+
+    for (String fieldName : fieldNames) {
+      label = XmlUtils.convertId(label.concat(".").concat(fieldName.toLowerCase()));
+    }
+    return label;
+  }
+
 
   /**
    * This method load the provided file and get its content in String format.
@@ -1123,30 +1179,60 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     return getFileManager().exists(viewPath);
   }
 
+  @Override
+  public ViewContext<T> createViewContext(final ControllerMetadata controllerMetadata,
+      final JavaType entity, final JpaEntityMetadata entityMetadata, T viewMetadata) {
+    ViewContext<T> ctx = new ViewContext<T>();
+    ctx.setControllerPath(controllerMetadata.getPath());
+    ctx.setProjectName(getProjectOperations().getProjectName(""));
+    ctx.setVersion(getProjectOperations().getPomFromModuleName("").getVersion());
+    ctx.setEntityName(entity.getSimpleTypeName());
+    ctx.setModelAttribute(StringUtils.uncapitalize(entity.getSimpleTypeName()));
+    ctx.setModelAttributeName(StringUtils.uncapitalize(entity.getSimpleTypeName()));
+    ctx.setIdentifierField(entityMetadata.getCurrentIndentifierField().getFieldName()
+        .getSymbolName());
+    ctx.setViewMetadata(viewMetadata);
+    ctx.setControllerMetadata(controllerMetadata);
+    return ctx;
+  }
+
+
+
   // Getting OSGi Services
 
-  public FileManager getFileManager() {
+  protected FileManager getFileManager() {
     return serviceInstaceManager.getServiceInstance(this, FileManager.class);
   }
 
-  public TypeLocationService getTypeLocationService() {
+  protected TypeLocationService getTypeLocationService() {
     return serviceInstaceManager.getServiceInstance(this, TypeLocationService.class);
   }
 
-  public PersistenceMemberLocator getPersistenceMemberLocator() {
+  protected PersistenceMemberLocator getPersistenceMemberLocator() {
     return serviceInstaceManager.getServiceInstance(this, PersistenceMemberLocator.class);
   }
 
-  public MemberDetailsScanner getMemberDetailsScanner() {
+  protected MemberDetailsScanner getMemberDetailsScanner() {
     return serviceInstaceManager.getServiceInstance(this, MemberDetailsScanner.class);
   }
 
-  public I18nOperationsImpl getI18nOperationsImpl() {
-    return (I18nOperationsImpl) serviceInstaceManager
-        .getServiceInstance(this, I18nOperations.class);
+  protected I18nOperations getI18nOperations() {
+    return serviceInstaceManager.getServiceInstance(this, I18nOperations.class);
   }
 
-  public PluralService getPluralService() {
+  protected PluralService getPluralService() {
     return serviceInstaceManager.getServiceInstance(this, PluralService.class);
+  }
+
+  protected ControllerLocator getControllerLocator() {
+    return serviceInstaceManager.getServiceInstance(this, ControllerLocator.class);
+  }
+
+  protected ControllerOperations getControllerOperations() {
+    return serviceInstaceManager.getServiceInstance(this, ControllerOperations.class);
+  }
+
+  protected ProjectOperations getProjectOperations() {
+    return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
   }
 }

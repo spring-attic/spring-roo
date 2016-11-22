@@ -534,7 +534,7 @@ public class ControllerCommands implements CommandMarker {
   @CliOptionAutocompleteIndicator(
       command = "web mvc detail",
       param = "field",
-      help = "--field parameter must be an existing @OneToMany field of the specified entity in parameter --entity.",
+      help = "--field parameter must be an existing @OneToMany or @ManyToMany field of the specified entity in parameter --entity.",
       includeSpaceOnFinish = false)
   public List<String> getDetailFieldsRelatedToEntity(ShellContext shellContext) {
 
@@ -765,7 +765,8 @@ public class ControllerCommands implements CommandMarker {
 
     for (FieldMetadata field : fields) {
       AnnotationMetadata oneToManyAnnotation = field.getAnnotation(JpaJavaType.ONE_TO_MANY);
-      if (oneToManyAnnotation != null
+      AnnotationMetadata manyToManyAnnotation = field.getAnnotation(JpaJavaType.MANY_TO_MANY);
+      if ((oneToManyAnnotation != null || manyToManyAnnotation != null)
           && (field.getFieldType().getFullyQualifiedTypeName()
               .equals(JavaType.LIST.getFullyQualifiedTypeName()) || field.getFieldType()
               .getFullyQualifiedTypeName().equals(JavaType.SET.getFullyQualifiedTypeName()))) {

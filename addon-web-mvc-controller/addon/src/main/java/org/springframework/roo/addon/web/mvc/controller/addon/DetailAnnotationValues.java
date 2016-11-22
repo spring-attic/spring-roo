@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
@@ -13,6 +14,11 @@ public class DetailAnnotationValues extends AbstractAnnotationValues {
 
   public DetailAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
     super(governorPhysicalTypeMetadata, RooJavaType.ROO_DETAIL);
+    AutoPopulationUtils.populate(this, annotationMetadata);
+  }
+
+  public DetailAnnotationValues(final ClassOrInterfaceTypeDetails cid) {
+    super(cid, RooJavaType.ROO_DETAIL);
     AutoPopulationUtils.populate(this, annotationMetadata);
   }
 

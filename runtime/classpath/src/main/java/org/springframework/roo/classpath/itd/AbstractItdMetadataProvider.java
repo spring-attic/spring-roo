@@ -1,13 +1,7 @@
 package org.springframework.roo.classpath.itd;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.ItdDiscoveryService;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -33,6 +27,10 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Provides common functionality used by ITD-based generators.
@@ -133,6 +131,19 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
    *         {@link #getProvidesType()} (never null or empty)
    */
   protected abstract String createLocalIdentifier(JavaType javaType, LogicalPath path);
+
+  /**
+   * Called whenever there is a requirement to produce a local identifier (ie
+   * an instance identifier consistent with {@link #getProvidesType()}) for
+   * the indicated {@link ClassOrInterfaceTypeDetails}.
+   * @param details
+   * @return
+   */
+  protected String createLocalIdentifier(ClassOrInterfaceTypeDetails details) {
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(details.getDeclaredByMetadataId());
+    return createLocalIdentifier(details.getType(), logicalPath);
+  }
 
   /**
    * Deletes the given ITD, either now or later.

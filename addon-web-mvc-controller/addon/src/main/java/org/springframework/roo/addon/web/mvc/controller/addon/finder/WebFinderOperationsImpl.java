@@ -354,7 +354,9 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
     AnnotationMetadataBuilder controllerAnnotation =
         new AnnotationMetadataBuilder(RooJavaType.ROO_CONTROLLER);
     controllerAnnotation.addClassAttribute("entity", entity);
-    controllerAnnotation.addStringAttribute("pathPrefix", pathPrefix);
+    if (StringUtils.isNotBlank(pathPrefix)) {
+      controllerAnnotation.addStringAttribute("pathPrefix", pathPrefix);
+    }
     controllerAnnotation.addEnumAttribute("type", new EnumDetails(
         RooJavaType.ROO_ENUM_CONTROLLER_TYPE, new JavaSymbolName("SEARCH")));
     controllerBuilder.addAnnotation(controllerAnnotation.build());

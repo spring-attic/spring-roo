@@ -1,5 +1,13 @@
 package org.springframework.roo.addon.web.mvc.views;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -8,16 +16,19 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.FinderOperations;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.FinderOperationsImpl;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.plural.addon.PluralService;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerLocator;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.DetailAnnotationValues;
+import org.springframework.roo.addon.web.mvc.controller.addon.RelationInfoExtended;
 import org.springframework.roo.addon.web.mvc.controller.addon.finder.SearchAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
-import org.springframework.roo.addon.web.mvc.i18n.I18nOperationsImpl;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -33,18 +44,11 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.JpaJavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.propfiles.manager.PropFilesManagerService;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * This abstract class will be extended by MetadataProviders focused on
@@ -57,7 +61,7 @@ import java.util.Map;
  * @since 2.0
  */
 @Component(componentAbstract = true)
-public abstract class AbstractViewGeneratorMetadataProvider extends
+public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractViewMetadata> extends
     AbstractMemberDiscoveringItdMetadataProvider {
 
   protected ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
@@ -84,7 +88,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
    *
    * @return MVCViewGenerationService
    */
-  protected abstract MVCViewGenerationService getViewGenerationService();
+  protected abstract MVCViewGenerationService<T> getViewGenerationService();
 
   /**
    * This operations returns the necessary Metadata that will generate .aj file.
@@ -105,23 +109,21 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
    * @param findersToAdd
    * @param formBeansEnumFields
    * @param formBeansDateTimeFields
+   * @param detailItemController
+   * @param detailCollectionController
    *
    * @return ItdTypeDetailsProvidingMetadataItem
    */
-  protected abstract ItdTypeDetailsProvidingMetadataItem createMetadataInstance(
-      String metadataIdentificationString, JavaType aspectName,
-      PhysicalTypeMetadata governorPhysicalTypeMetadata, ControllerMetadata controllerMetadata,
-      ServiceMetadata serviceMetadata, JpaEntityMetadata entityMetadata, String entityPlural,
-      String entityIdentifierPlural,
+  protected abstract T createMetadataInstance(String metadataIdentificationString,
+      JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata,
+      ControllerMetadata controllerMetadata, ServiceMetadata serviceMetadata,
+      JpaEntityMetadata entityMetadata, String entityPlural, String entityIdentifierPlural,
       List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne,
       JavaType itemController, JavaType collectionController, List<FieldMetadata> dateTimeFields,
       List<FieldMetadata> enumFields, Map<String, MethodMetadata> findersToAdd,
       Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields,
-      Map<JavaType, List<FieldMetadata>> formBeansEnumFields);
-
-  protected void fillContext(ViewContext ctx) {
-    // To be overridden if needed
-  }
+      Map<JavaType, List<FieldMetadata>> formBeansEnumFields, JavaType detailsItemController,
+      JavaType detailCollectionController);
 
   @Override
   protected ItdTypeDetailsProvidingMetadataItem getMetadata(
@@ -129,7 +131,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
     // Use provided MVCViewGenerationService to generate views
-    MVCViewGenerationService viewGenerationService = getViewGenerationService();
+    MVCViewGenerationService<T> viewGenerationService = getViewGenerationService();
 
     ClassOrInterfaceTypeDetails controllerDetail =
         governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
@@ -146,6 +148,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     JavaType itemController = null;
     JavaType collectionController = null;
     final JavaPackage controllerPackage = controllerDetail.getType().getPackage();
+    final String pathPrefix = controllerMetadata.getAnnotationValues().getPathPrefix();
     if (controllerMetadata.getType() != ControllerType.ITEM) {
       // Locate ItemController
       Collection<ClassOrInterfaceTypeDetails> itemControllers =
@@ -156,12 +159,8 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
         return null;
       } else {
         // Get controller with the same package
-        for (ClassOrInterfaceTypeDetails controller : itemControllers) {
-          if (controllerPackage.equals(controller.getType().getPackage())) {
-            itemController = controller.getType();
-            break;
-          }
-        }
+        itemController =
+            filterControllerByPackageAndPrefix(itemControllers, controllerPackage, pathPrefix);
         Validate.notNull(itemControllers,
             "ERROR: Can't find ITEM-type controller related to controller '%s'", controllerDetail
                 .getType().getFullyQualifiedTypeName());
@@ -173,36 +172,125 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
       Collection<ClassOrInterfaceTypeDetails> collectionControllers =
           getControllerLocator().getControllers(entity, ControllerType.COLLECTION, viewType);
 
-      if (collectionControllers.isEmpty()) {
-        // We can't create metadata "Jet"
-        return null;
-      } else {
-        // Get controller with the same package
-        for (ClassOrInterfaceTypeDetails controller : collectionControllers) {
-          if (controllerPackage.equals(controller.getType().getPackage())) {
-            collectionController = controller.getType();
-            break;
-          }
-        }
-        Validate.notNull(collectionController,
-            "ERROR: Can't find ITEM-type controller related to controller '%s'", controllerDetail
-                .getType().getFullyQualifiedTypeName());
-      }
+      // Get controller with the same package
+      collectionController =
+          filterControllerByPackageAndPrefix(collectionControllers, controllerPackage, pathPrefix);
+      Validate.notNull(collectionController,
+          "ERROR: Can't find Collection-type controller related to controller '%s'",
+          controllerDetail.getType().getFullyQualifiedTypeName());
     }
-    List<ClassOrInterfaceTypeDetails> detailsControllers = null;
+
+    List<T> detailsControllers = null;
     if (controllerMetadata.getType() == ControllerType.COLLECTION) {
       // Locate Details controllers
       Collection<ClassOrInterfaceTypeDetails> detailsControllersToCheck =
           getControllerLocator().getControllers(entity, ControllerType.DETAIL, viewType);
-      List<ClassOrInterfaceTypeDetails> found = new ArrayList<ClassOrInterfaceTypeDetails>();
+      List<T> found = new ArrayList<T>();
       for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
         if (controllerPackage.equals(controller.getType().getPackage())) {
-          found.add(controller);
+          // Get view metadata
+          T detailViewMetadata = getMetadataService().get(createLocalIdentifier(controller));
+          if (detailViewMetadata == null) {
+            // Can't generate metadata YET!!
+            return null;
+          }
+
+          found.add(detailViewMetadata);
         }
       }
       if (!found.isEmpty()) {
         detailsControllers = Collections.unmodifiableList(found);
       }
+    }
+
+    JavaType detailItemController = null;
+    JavaType detailCollectionController = null;
+    if (controllerMetadata.getType() == ControllerType.DETAIL) {
+      if (controllerMetadata.getLastDetailsInfo().type == JpaRelationType.AGGREGATION) {
+        // Locate controller item which handles details elements
+        JavaType detailEntity = controllerMetadata.getLastDetailEntity();
+        Collection<ClassOrInterfaceTypeDetails> detailsControllersToCheck =
+            getControllerLocator().getControllers(detailEntity, ControllerType.ITEM, viewType);
+
+        for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
+          if (controllerPackage.equals(controller.getType().getPackage())) {
+            detailItemController = controller.getType();
+            break;
+          }
+        }
+        Validate
+            .notNull(
+                detailItemController,
+                "ERROR: Can't find Item-type controller for details entity '%s' related to controller '%s'",
+                detailEntity.getFullyQualifiedTypeName(), controllerDetail.getType()
+                    .getFullyQualifiedTypeName());
+
+        // Locate controller collection which handles details elements
+        detailsControllersToCheck =
+            getControllerLocator()
+                .getControllers(detailEntity, ControllerType.COLLECTION, viewType);
+
+        for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
+          if (controllerPackage.equals(controller.getType().getPackage())) {
+            detailCollectionController = controller.getType();
+            break;
+          }
+        }
+        Validate
+            .notNull(
+                detailItemController,
+                "ERROR: Can't find Collection-type controller for details entity '%s' related to controller '%s'",
+                detailEntity.getFullyQualifiedTypeName(), controllerDetail.getType()
+                    .getFullyQualifiedTypeName());
+
+
+      } else {
+        // ** COMPOSITION **
+
+        // Locate controller item which handles details elements
+        Collection<ClassOrInterfaceTypeDetails> detailsControllersToCheck =
+            getControllerLocator().getControllers(entity, ControllerType.DETAIL_ITEM, viewType);
+
+        for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
+          if (controllerPackage.equals(controller.getType().getPackage())) {
+            DetailAnnotationValues annotationValues = new DetailAnnotationValues(controller);
+            if (controllerMetadata.getDetailAnnotaionFieldValue().equals(
+                annotationValues.getRelationField())) {
+              detailItemController = controller.getType();
+            }
+            break;
+          }
+        }
+        Validate
+            .notNull(
+                detailItemController,
+                "ERROR: Can't find Detail-Item-type controller for details entity '%s' related to controller '%s' (relation '%s')",
+                entity.getFullyQualifiedTypeName(), controllerDetail.getType()
+                    .getFullyQualifiedTypeName(), controllerMetadata.getDetailAnnotaionFieldValue());
+
+      }
+    }
+    if (controllerMetadata.getType() == ControllerType.DETAIL_ITEM) {
+      // Locate controller item which handles details elements
+      Collection<ClassOrInterfaceTypeDetails> detailsControllersToCheck =
+          getControllerLocator().getControllers(entity, ControllerType.DETAIL, viewType);
+
+      for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
+        if (controllerPackage.equals(controller.getType().getPackage())) {
+          DetailAnnotationValues annotationValues = new DetailAnnotationValues(controller);
+          if (controllerMetadata.getDetailAnnotaionFieldValue().equals(
+              annotationValues.getRelationField())) {
+            detailCollectionController = controller.getType();
+          }
+          break;
+        }
+      }
+      Validate
+          .notNull(
+              detailCollectionController,
+              "ERROR: Can't find Detail-type controller for details entity '%s' related to controller '%s' (relation '%s')",
+              entity.getFullyQualifiedTypeName(), controllerDetail.getType()
+                  .getFullyQualifiedTypeName(), controllerMetadata.getDetailAnnotaionFieldValue());
     }
 
 
@@ -256,8 +344,21 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
       }
     }
 
-    List<FieldMetadata> dateTimeFields = getDateTimeFields(entityMemberDetails);
-    List<FieldMetadata> enumFields = getEnumFields(entityMemberDetails);
+    List<FieldMetadata> dateTimeFields;
+    List<FieldMetadata> enumFields;
+    if (controllerMetadata.getType() == ControllerType.DETAIL
+        || controllerMetadata.getType() == ControllerType.DETAIL_ITEM) {
+
+      ClassOrInterfaceTypeDetails childCid =
+          getTypeLocationService().getTypeDetails(controllerMetadata.getLastDetailEntity());
+      MemberDetails childMemberDetails = getMemberDetails(childCid);
+      dateTimeFields = getDateTimeFields(childMemberDetails);
+      enumFields = getEnumFields(childMemberDetails);
+
+    } else {
+      dateTimeFields = getDateTimeFields(entityMemberDetails);
+      enumFields = getEnumFields(entityMemberDetails);
+    }
 
     Map<String, MethodMetadata> findersToAdd = new HashMap<String, MethodMetadata>();
     Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields =
@@ -270,6 +371,8 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
         new SearchAnnotationValues(governorPhysicalTypeMetadata);
 
     // Add finders only if controller is of search type
+    Map<String, JavaType> finderReturnTypes = new HashMap<String, JavaType>();
+    Map<String, JavaType> finderFormBeans = new HashMap<String, JavaType>();
     if (controllerMetadata.getType() == ControllerType.SEARCH && searchAnnotationValues != null
         && searchAnnotationValues.getFinders() != null) {
       List<String> finders =
@@ -283,6 +386,15 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
 
           // FormBean parameters is always the first finder parameter
           JavaType formBean = serviceFinder.getParameterTypes().get(0).getJavaType();
+
+          // Save the associated formBean to the current finder
+          finderFormBeans.put(finderName, formBean);
+
+          // Getting the returnType for this finder
+          JavaType returnType = serviceFinder.getReturnType();
+
+          // Save the associated returnType to the current finder
+          finderReturnTypes.put(finderName, returnType);
 
           // Get dateTime and Enum of formBean
           MemberDetails formBeanDetails = getMemberDetails(formBean);
@@ -327,124 +439,97 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     }
 
 
+
+    T viewMetadata =
+        createMetadataInstance(metadataIdentificationString, aspectName,
+            governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
+            entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
+            collectionController, dateTimeFields, enumFields, findersToAdd,
+            formBeansDateTimeFields, formBeansEnumFields, detailItemController,
+            detailCollectionController);
+
     // Fill view context
-    ViewContext ctx = new ViewContext();
-    ctx.setControllerPath(controllerMetadata.getPath());
-    ctx.setProjectName(getProjectOperations().getProjectName(""));
-    ctx.setVersion(getProjectOperations().getPomFromModuleName("").getVersion());
-    ctx.setEntityName(entity.getSimpleTypeName());
-    ctx.setModelAttribute(StringUtils.uncapitalize(entity.getSimpleTypeName()));
-    ctx.setModelAttributeName(StringUtils.uncapitalize(entity.getSimpleTypeName()));
-    ctx.setIdentifierField(entityMetadata.getCurrentIndentifierField().getFieldName()
-        .getSymbolName());
+    ViewContext ctx =
+        viewGenerationService.createViewContext(controllerMetadata, entity, entityMetadata,
+            viewMetadata);
 
     // Checking if Spring Security has been installed
     if (getProjectOperations().isFeatureInstalled(FeatureNames.SECURITY)) {
       ctx.setSecurityEnabled(true);
     }
 
-    // Call Abstract Method fillContext to fill context with view provider custom implementation
-    fillContext(ctx);
-
 
     final String module = controllerDetail.getType().getModule();
 
-    if (controllerMetadata.getType() == ControllerType.COLLECTION) {
-      // Add list view
-      viewGenerationService.addListView(module, entityMemberDetails, ctx);
-      if (!entityMetadata.isReadOnly()) {
-        // If not readOnly, add create view
-        viewGenerationService.addCreateView(module, entityMemberDetails, ctx);
-      }
-    } else if (controllerMetadata.getType() == ControllerType.ITEM) {
-      // Add show view
-      viewGenerationService.addShowView(module, entityMemberDetails, ctx);
+    switch (controllerMetadata.getType()) {
+      case COLLECTION:
+        // Add list view
+        viewGenerationService.addListView(module, entityMetadata, entityMemberDetails,
+            detailsControllers, ctx);
+        if (!entityMetadata.isReadOnly()) {
+          // If not readOnly, add create view
+          viewGenerationService.addCreateView(module, entityMetadata, entityMemberDetails, ctx);
+        }
 
-      if (!entityMetadata.isReadOnly()) {
-        // If not readOnly, add update view
-        viewGenerationService.addUpdateView(module, entityMemberDetails, ctx);
-      }
-    } else if (controllerMetadata.getType() == ControllerType.DETAIL) {
-      viewGenerationService.addListView(module, entityMemberDetails, ctx);
+        break;
+      case ITEM:
+        // Add show view
+        viewGenerationService.addShowView(module, entityMetadata, entityMemberDetails, ctx);
+
+        if (!entityMetadata.isReadOnly()) {
+          // If not readOnly, add update view
+          viewGenerationService.addUpdateView(module, entityMetadata, entityMemberDetails, ctx);
+        }
+        break;
+      case DETAIL:
+        viewGenerationService.addDetailsViews(module, entityMetadata, entityMemberDetails,
+            controllerMetadata, viewMetadata, ctx);
+        break;
+
+      case DETAIL_ITEM:
+        viewGenerationService.addDetailsItemViews(module, entityMetadata, entityMemberDetails,
+            controllerMetadata, viewMetadata, ctx);
+
+        RelationInfoExtended last = controllerMetadata.getLastDetailsInfo();
+        ClassOrInterfaceTypeDetails childCid =
+            getTypeLocationService().getTypeDetails(last.childType);
+
+        MemberDetails detailMemberDetails = getMemberDetails(childCid);
+
+        // Update i18n labels of detail entity
+        Map<String, String> labels =
+            viewGenerationService.getI18nLabels(detailMemberDetails, last.childType,
+                last.childEntityMetadata, controllerMetadata, module, ctx);
+        getI18nOperations().addOrUpdateLabels(module, labels);
+        break;
+
+      case SEARCH:
+        // Check if this search controller have finders included 
+        // in @RooSearch annotation
+        if (searchAnnotationValues != null && searchAnnotationValues.getFinders() != null) {
+          List<String> finders =
+              new ArrayList<String>(Arrays.asList(searchAnnotationValues.getFinders()));
+          // Generating views for all finders
+          for (String finderName : finders) {
+
+            // Getting the formBean for this finder
+            JavaType formBean = finderFormBeans.get(finderName);
+            viewGenerationService.addFinderFormView(module, entityMetadata, viewMetadata, formBean,
+                finderName, ctx);
+
+            // Getting the returnType for this finder
+            JavaType returnType = finderReturnTypes.get(finderName);
+            if (!returnType.getParameters().isEmpty()) {
+              returnType = returnType.getParameters().get(0);
+            }
+            viewGenerationService.addFinderListView(module, entityMetadata, viewMetadata, formBean,
+                returnType, finderName, ctx);
+          }
+        }
+        break;
+      default:
+        throw new IllegalArgumentException();
     }
-
-    // Add finder views
-    /* TODO
-    if (finders != null) {
-      for (MethodMetadata finderMethod : finders) {
-
-        // For each finder, create form and list view exposing only finder params
-        // from form bean object
-        JavaType formBean = finderMethod.getParameterTypes().get(0).getJavaType();
-        List<FieldMetadata> fieldsToAdd = new ArrayList<FieldMetadata>();
-
-        // Check if finder form bean is a DTO or the entity
-        if (getTypeLocationService().getTypeDetails(formBean) != null
-            && getTypeLocationService().getTypeDetails(formBean).getAnnotation(RooJavaType.ROO_DTO) == null) {
-          formBean = entity;
-
-          // Register dependency between DTO JavaBeanMetadata and this one
-          final LogicalPath logicalPath =
-              PhysicalTypeIdentifier.getPath(getTypeLocationService().getTypeDetails(formBean)
-                  .getDeclaredByMetadataId());
-          final String javaBeanMetadataKey =
-              JavaBeanMetadata.createIdentifier(getTypeLocationService().getTypeDetails(formBean)
-                  .getType(), logicalPath);
-          registerDependency(javaBeanMetadataKey, metadataIdentificationString);
-
-        }
-
-        // Add formBean to viewContext
-        ctx.addExtraParameter("formBean", "formBean");
-
-        // Use method from FinderOperationsImpl to fill maps
-        Map<JavaType, Map<String, String>> typesFieldMaps =
-            new HashMap<JavaType, Map<String, String>>();
-        Map<JavaType, Map<String, FieldMetadata>> typeFieldMetadataMap =
-            new HashMap<JavaType, Map<String, FieldMetadata>>();
-        Map<JavaSymbolName, List<FinderParameter>> finderParametersMap =
-            new HashMap<JavaSymbolName, List<FinderParameter>>();
-        getFinderOperations().buildFormBeanFieldNamesMap(entity, formBean, typesFieldMaps,
-            typeFieldMetadataMap, finderMethod.getMethodName(), finderParametersMap);
-
-        // Get finder parameters for each finder method and FieldMetadata for each finder param
-        List<FinderParameter> finderParameters =
-            finderParametersMap.get(finderMethod.getMethodName());
-        Map<String, FieldMetadata> formBeanFields = typeFieldMetadataMap.get(formBean);
-
-        for (FinderParameter finderParam : finderParameters) {
-          fieldsToAdd.add(formBeanFields.get(finderParam.getName().getSymbolName()));
-        }
-
-        viewGenerationService.addFinderFormView(module, entityMemberDetails, finderMethod
-            .getMethodName().getSymbolName(), fieldsToAdd, ctx);
-
-        // If return type is a projection, use its details
-        ClassOrInterfaceTypeDetails returnTypeDetails =
-            getTypeLocationService().getTypeDetails(
-                finderMethod.getReturnType().getParameters().get(0));
-        if (returnTypeDetails != null
-            && returnTypeDetails.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION) != null) {
-          viewGenerationService.addFinderListView(module, getMemberDetails(returnTypeDetails),
-              finderMethod.getMethodName().getSymbolName(), ctx);
-
-          // Register dependency between projection JavaBeanMetadata and this one
-          final LogicalPath logicalPath =
-              PhysicalTypeIdentifier.getPath(getTypeLocationService().getTypeDetails(
-                  returnTypeDetails.getType()).getDeclaredByMetadataId());
-          final String javaBeanMetadataKey =
-              JavaBeanMetadata.createIdentifier(
-                  getTypeLocationService().getTypeDetails(returnTypeDetails.getType()).getType(),
-                  logicalPath);
-          registerDependency(javaBeanMetadataKey, metadataIdentificationString);
-
-        } else {
-          viewGenerationService.addFinderListView(module, entityMemberDetails, finderMethod
-              .getMethodName().getSymbolName(), ctx);
-        }
-      }
-    }
-    */
 
     // Update menu view every time that new controller has been modified
     // TODO: Maybe, instead of modify all menu view, only new generated controller should
@@ -452,19 +537,35 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     viewGenerationService.updateMenuView(module, ctx);
 
     // Update i18n labels
-    getI18nOperationsImpl().updateI18n(entityMemberDetails, entity, module);
+    Map<String, String> labels =
+        viewGenerationService.getI18nLabels(entityMemberDetails, entity, entityMetadata,
+            controllerMetadata, module, ctx);
+    getI18nOperations().addOrUpdateLabels(module, labels);
 
     // Register dependency between JavaBeanMetadata and this one
     final String javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails);
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
-
-    return createMetadataInstance(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
-        entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
-        collectionController, dateTimeFields, enumFields, findersToAdd, formBeansDateTimeFields,
-        formBeansEnumFields);
+    return viewMetadata;
   }
+
+
+  private JavaType filterControllerByPackageAndPrefix(
+      Collection<ClassOrInterfaceTypeDetails> itemControllers, JavaPackage controllerPackage,
+      String pathPrefix) {
+    for (ClassOrInterfaceTypeDetails controller : itemControllers) {
+      ControllerAnnotationValues values = new ControllerAnnotationValues(controller);
+      if (controllerPackage.equals(controller.getType().getPackage())) {
+        if (StringUtils.isBlank(pathPrefix) && StringUtils.isBlank(values.getPathPrefix())) {
+          return controller.getType();
+        } else if (StringUtils.equals(pathPrefix, values.getPathPrefix())) {
+          return controller.getType();
+        }
+      }
+    }
+    return null;
+  }
+
 
   private List<FieldMetadata> getEnumFields(MemberDetails entityMemberDetails) {
     List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
@@ -538,9 +639,8 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     return serviceInstaceManager.getServiceInstance(this, PropFilesManagerService.class);
   }
 
-  protected I18nOperationsImpl getI18nOperationsImpl() {
-    return (I18nOperationsImpl) serviceInstaceManager
-        .getServiceInstance(this, I18nOperations.class);
+  protected I18nOperations getI18nOperations() {
+    return serviceInstaceManager.getServiceInstance(this, I18nOperations.class);
   }
 
   protected FinderOperationsImpl getFinderOperations() {

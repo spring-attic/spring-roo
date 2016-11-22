@@ -385,7 +385,6 @@ field number --fieldName quantity --type java.lang.Integer
 field string --fieldName productName
 
 dto --class ~.OrderDetailQuantityBean --immutable
-field number --fieldName orderDetailId --type java.lang.Long --notNull
 field number --fieldName customerOrderId --type java.lang.Long --notNull
 field number --fieldName quantityToAdd --type java.lang.Integer --notNull
 
@@ -525,7 +524,6 @@ security setup --provider SPRINGLETS_JPA
 // Restrict delete method to user with roles ADMIN or EMPLEADO
 security authorize --class service-api:~.CustomerService --method delete --roles ADMIN,EMPLEADO
 
-
 // Add audit to Category entity
 jpa audit setup
 jpa audit add --entity model:~.Category --createdDateColumn CREATED_DATE --modifiedDateColumn MODIFIED_DATE --createdByColumn CREATED_BY --modifiedByColumn MODIFIED_BY
@@ -551,13 +549,15 @@ web mvc controller --entity model:~.Supplier --responseType THYMELEAF
 
 // Required controller to generate its detail
 web mvc controller --entity model:~.Region --responseType THYMELEAF
+web mvc controller --entity model:~.PurchaseOrder --responseType THYMELEAF
 
 // Add details to controllers
 web mvc detail --entity model:~.Category --field products --responseType THYMELEAF
 web mvc detail --entity model:~.Category --responseType THYMELEAF --field products.purchaseOrders
 web mvc detail --entity model:~.Product --field purchaseOrders --responseType THYMELEAF
 web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions
-web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions.cities
+//web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions.cities
+web mvc detail --entity model:~.Region --responseType THYMELEAF --field cities
 
 // Add finders
 web mvc finder --all --responseType THYMELEAF

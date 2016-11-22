@@ -214,6 +214,10 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
     // Get count methods
     countMethods.addAll(repositoryMetadata.getCountMethods());
 
+    // Get finders and its associated count method from repository metadata
+    Map<JavaSymbolName, MethodMetadata> repositoryFindersAndCounts =
+        repositoryMetadata.getFinderMethodsAndCounts();
+
     // Getting methods declared on related RepositoryJpaCustomMetadata
     final JavaType customRepository = repositoryMetadata.getCustomRepository();
 
@@ -223,6 +227,10 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
         RepositoryJpaCustomMetadata.createIdentifier(customRepositoryDetails);
     final RepositoryJpaCustomMetadata repositoryCustomMetadata =
         getMetadataService().get(customRepositoryMetadataKey);
+
+    // Get finders and its associated count method from custom repository metadata
+    Map<JavaSymbolName, MethodMetadata> repositoryCustomFindersAndCounts =
+        repositoryCustomMetadata.getFinderMethodsAndCounts();
 
     // Check if we have a valid custom repository
     Validate
@@ -297,7 +305,8 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
         governorPhysicalTypeMetadata, entity, identifierType, entityMetadata, repositoryMetadata,
         finders, repositoryCustomMetadata.getCurrentFindAllGlobalSearchMethod(),
         repositoryCustomMetadata.getReferencedFieldsFindAllMethods(),
-        countByReferencedFieldMethods, countMethods, relatedEntities);
+        countByReferencedFieldMethods, countMethods, relatedEntities, repositoryFindersAndCounts,
+        repositoryCustomFindersAndCounts);
   }
 
   private void registerDependencyModolesOfFinder(

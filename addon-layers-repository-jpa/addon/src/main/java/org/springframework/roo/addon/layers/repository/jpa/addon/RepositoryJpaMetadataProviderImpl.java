@@ -408,10 +408,14 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
                 formBeanDetails != null
                     && formBeanDetails.getAnnotation(RooJavaType.ROO_DTO) != null,
                 "ERROR: finder '%s' declared 'formBean' (%s) is not annotated with @%s annotation",
-                finderName, returnType.getSimpleTypeName(),
+                finderName, formBean.getSimpleTypeName(),
                 RooJavaType.ROO_ENTITY_PROJECTION.getSimpleTypeName());
 
             checkDtoFieldsForFinder(formBeanDetails, finder, governorPhysicalTypeMetadata.getType());
+
+            if (returnType == null) {
+              returnType = entity;
+            }
 
             finderMethod =
                 new FinderMethod(returnType, new JavaSymbolName(finderName),

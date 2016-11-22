@@ -8,7 +8,9 @@ import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerTy
 import org.springframework.roo.classpath.MetadataLocatorUtils;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
@@ -113,8 +115,17 @@ public class ControllerLocatorImpl implements ControllerLocator {
 
     @Override
     public Set<ClassOrInterfaceTypeDetails> getAllPosibilities(ControllerType context) {
-      return typeLocationService
-          .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_CONTROLLER);
+      Set<ClassOrInterfaceTypeDetails> found =
+          typeLocationService
+              .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_CONTROLLER);
+      Set<ClassOrInterfaceTypeDetails> result = new HashSet<ClassOrInterfaceTypeDetails>();
+      for (ClassOrInterfaceTypeDetails item : found) {
+        ControllerAnnotationValues values = new ControllerAnnotationValues(item);
+        if (values.getType() == context) {
+          result.add(item);
+        }
+      }
+      return result;
     }
   }
 }

@@ -109,6 +109,9 @@ public class MetadataLocatorUtils<CONTEXT> implements MetadataNotificationListen
    */
   public Collection<ClassOrInterfaceTypeDetails> getValue(final JavaType type, final CONTEXT context) {
     Map<CONTEXT, Set<ClassOrInterfaceTypeDetails>> currentMap;
+    if (type == null) {
+      return evaluator.getAllPosibilities(context);
+    }
     if (!cacheMap.containsKey(type)) {
       currentMap = new HashMap<CONTEXT, Set<ClassOrInterfaceTypeDetails>>();
       cacheMap.put(type, currentMap);

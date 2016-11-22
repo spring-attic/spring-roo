@@ -29,7 +29,7 @@ public class FieldItem {
   private String entityName;
   private String fieldId;
   private Map<String, String> javascriptCode;
-  private int z;
+  private String z;
 
   /**
    * Constructs a FieldItem using the name and entityName
@@ -102,7 +102,7 @@ public class FieldItem {
     this.codeManaged = "";
     buildId(suffixId);
 
-    // Calculate the Z parameter as the hash code of the other parameters
+    // Calculate the Z parameter as the hash code of the other parametersString
     this.z = calculateZ();
   }
 
@@ -156,13 +156,13 @@ public class FieldItem {
    *
    * @return hash code
    */
-  private int calculateZ() {
+  private String calculateZ() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((fieldName == null) ? 0 : fieldName.hashCode());
     result = prime * result + ((label == null) ? 0 : label.hashCode());
     result = prime * result + ((type == null) ? 0 : type.hashCode());
-    return result;
+    return Integer.toHexString(result);
   }
 
   public String getFieldName() {
@@ -177,7 +177,7 @@ public class FieldItem {
     return type;
   }
 
-  public int getZ() {
+  public String getZ() {
     return z;
   }
 
@@ -193,7 +193,7 @@ public class FieldItem {
     this.type = type;
   }
 
-  public void setZ(int z) {
+  public void setZ(String z) {
     this.z = z;
   }
 

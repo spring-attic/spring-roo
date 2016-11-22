@@ -1,7 +1,10 @@
 package org.springframework.roo.addon.web.mvc.controller.addon;
 
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProvider;
+import org.springframework.roo.addon.web.mvc.controller.annotations.RooController;
+import org.springframework.roo.addon.web.mvc.controller.annotations.finder.RooSearch;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
@@ -137,5 +140,83 @@ public interface ControllerOperations extends Feature {
    * @param operations Service operations names that will be created
    */
   public void exportOperation(JavaType controller, List<String> operations);
+
+  /**
+   * Return a list of {@link RelationInfoExtended} for a field relation path of a entity.
+   *
+   * path is split by dot char and every return item is information for every path element.
+   *
+   * by example: entity could be Customer and path "order.details"
+   *
+   * @param entity
+   * @param path
+   * @return list of infos
+   * @throws NullPointerException if entity is null
+   * @throws IllegalArgumentException if path is incorrect
+   */
+  public List<RelationInfoExtended> getRelationInfoFor(JavaType entity, String path);
+
+  /**
+   * Return a list of {@link RelationInfoExtended} for a field relation path of a entity.
+   *
+   * path is split by dot char and every return item is information for every path element.
+   *
+   * by example: entity could be Customer and path "order.details"
+   *
+   * @param entity
+   * @param path
+   * @return
+   */
+  public List<RelationInfoExtended> getRelationInfoFor(JpaEntityMetadata entity, String path);
+
+  /**
+   * Gets base Path for referenced controller
+   *
+   * @param controller JavaType correctly annotated with {@link RooController}
+   * @return
+   */
+  public String getBasePathForController(JavaType controller);
+
+  /**
+   * Gets base Path for referenced controller
+   *
+   * @param controller details correctly annotated with {@link RooController}
+   * @return
+   */
+  public String getBasePathForController(ClassOrInterfaceTypeDetails controller);
+
+  /**
+   * Gets base URL for referenced controller
+   *
+   * @param controller JavaType correctly annotated with {@link RooController}
+   * @return
+   */
+  public String getBaseUrlForController(JavaType controller);
+
+  /**
+   * Gets base URL for referenced controller
+   *
+   * @param controller details correctly annotated with {@link RooController}
+   * @return
+   */
+  public String getBaseUrlForController(ClassOrInterfaceTypeDetails controller);
+
+  /**
+   * Gets finder base URL for referenced controller
+   *
+   * @param controller JavaType correctly annotated with {@link RooController} and {@link RooSearch}
+   * @param finder target. Should be one of {@link RooSearch#finders()}
+   * @return
+   */
+  public String getBaseUrlControllerForFinder(JavaType controller, String finder);
+
+  /**
+   * Gets finder base URL for referenced controller
+   *
+   * @param controller details correctly annotated with {@link RooController} and {@link RooSearch}
+   * @param finder target. Should be one of {@link RooSearch#finders()}
+   * @return
+   */
+  public String getBaseUrlControllerForFinder(ClassOrInterfaceTypeDetails controller, String finder);
 
 }

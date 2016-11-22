@@ -206,7 +206,7 @@
 
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="@{${"${"}(#mvc.url('${mvcUrl_update}')).buildAndExpand(${entity.modelAttribute}.${entity.configuration.identifierField})}}">
+            data-th-action="@{${"${"}(#mvc.url('${detail.configuration.mvcUrl_update}')).buildAndExpand(${entity.modelAttribute}.${entity.configuration.identifierField},${detail.modelAttribute}.${detail.configuration.identifierField})}}">
             <input type="hidden" name="_method" value="PUT" />
 
              <fieldset id="containerFields">
@@ -254,7 +254,7 @@
                   <div class="pull-left">
                     <button type="reset" class="btn btn-default"
                       onclick="location.href='list.html'"
-                      data-th-onclick="'location.href=\'' + @{${"${"}(#mvc.url('${mvcUrl_list}')).build()}} + '\''"
+                      data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
                       data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
                   </div>
                   <div class="pull-right">
@@ -397,32 +397,75 @@
     </script>
 
     <!-- Select2 -->
-    <div data-th-replace="fragments/js/select2 :: select2-js">
-      // TODO add js CDN
+    <div data-layout-include="fragments/js/select2 :: select2">
+
+       <!-- Select2 scripts ONLY for HTML templates
+	    Content replaced by the select2 template fragment select2.html
+       -->
+       <script
+         src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.full.js"
+         data-th-src="@{/webjars/select2/4.0.2/dist/js/select2.full.js}"></script>
+       <script
+         src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/i18n/es.js"
+         data-th-src="@{/webjars/select2/4.0.2/dist/js/i18n/}+${r"${#"}locale.language${r"}"}+'.js'"
+         data-th-if="${r"${#"}locale.language${r"}"} != 'en'"></script>
+
+       <script type="text/javascript" data-th-inline="javascript">
+         /*<![CDATA[*/
+	 jQuery('.dropdown-select-simple').select2({
+	   debug : false,
+           theme : 'bootstrap',
+           allowClear : true,
+         });
+         jQuery('.dropdown-select-ajax').select2(
+           {
+             debug : false,
+	     theme : 'bootstrap',
+	     allowClear : true,
+	     ajax : {
+               data : function(params) {
+		 var query = {
+		   'search[value]' : params.term,
+		   'page' : params.page - 1,
+		 }
+		 return query;
+	       },
+	       processResults : function(data, page) {
+		 var idField = this.options.get('idField');
+		 var txtFields = this.options.get('textFields');
+		 var fields = txtFields.split(',');
+		 var results = [];
+		 jQuery.each(data.content, function(i, entity) {
+		   var id = entity[idField];
+		   var text = '';
+		   jQuery.each(fields, function(i, fieldName) {
+		     text = text.concat(' ', entity[fieldName]);
+		   });
+		   var obj = {
+		     'id' : id,
+		     'text' : jQuery.trim(text)
+		   };
+		   jQuery.each(entity, function(key, val) {
+		     var attribute = jQuery.trim(key);
+		     var value = jQuery.trim(val);
+		     obj[attribute] = value;
+		    });
+		    results.push(obj);
+		  });
+		  var morePages = !data.last;
+		  return {
+		    results : results,
+		    pagination : {
+		      more : morePages
+		    }
+		  };
+		},
+	      },
+            });
+         /*]]>*/
+       </script>
+
      </div>
-
-    <script type="text/javascript" data-th-inline="javascript">
-      // IIFE - Immediately Invoked Function Expression
-      (function(list) {
-
-        // The global jQuery object is passed as a parameter
-        list(window.jQuery, window, document);
-
-      }(function($, window, document) {
-
-        // The $ is now locally scoped, it won't collide with other libraries
-
-        // Listen for the jQuery ready event on the document
-        // READY EVENT BEGIN
-        $(function() {
-
-          // Put this page local javascript here!
-
-        });
-
-        // READY EVENT END
-      }));
-    </script>
 
     </div>
 

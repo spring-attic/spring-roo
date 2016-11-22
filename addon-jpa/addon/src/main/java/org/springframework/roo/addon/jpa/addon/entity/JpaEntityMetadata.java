@@ -1321,9 +1321,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   }
 
   /**
-   * This method obtains the constant that contains the message 
+   * This method obtains the constant that contains the message
    * "The given Iterable of items to add can't be null!".
-   * 
+   *
    * @return name of the generated constant
    */
   private JavaSymbolName getIterableToAddCantBeNullConstant() {
@@ -1346,9 +1346,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   }
 
   /**
-   * This method obtains the constant that contains the message 
+   * This method obtains the constant that contains the message
    * "The given Iterable of items to remove can't be null!".
-   * 
+   *
    * @return name of the generated constant
    */
   private JavaSymbolName getIterableToRemoveCantBeNullConstant() {
@@ -1569,6 +1569,46 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       this.mappedBy = mappedBy;
       this.type = type;
     }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((entityType == null) ? 0 : entityType.hashCode());
+      result = prime * result + ((fieldName == null) ? 0 : fieldName.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (!(obj instanceof RelationInfo)) {
+        return false;
+      }
+      RelationInfo other = (RelationInfo) obj;
+      if (entityType == null) {
+        if (other.entityType != null) {
+          return false;
+        }
+      } else if (!entityType.equals(other.entityType)) {
+        return false;
+      }
+      if (fieldName == null) {
+        if (other.fieldName != null) {
+          return false;
+        }
+      } else if (!fieldName.equals(other.fieldName)) {
+        return false;
+      }
+      return true;
+    }
+
+
 
     @Override
     public int compareTo(RelationInfo o) {

@@ -23,7 +23,7 @@ public class MenuEntry {
   private String codeManaged;
   private String id;
   private boolean simple;
-  private int z;
+  private String z;
 
   public MenuEntry(String entityName, String path, String pathPrefix, String entityLabel,
       String entityPluralLabel, Map<String, String> finderNamesAndPaths, boolean simple) {
@@ -90,11 +90,11 @@ public class MenuEntry {
     this.pathPrefix = pathPrefix;
   }
 
-  public int getZ() {
+  public String getZ() {
     return z;
   }
 
-  public void setZ(int z) {
+  public void setZ(String z) {
     this.z = z;
   }
 
@@ -156,7 +156,7 @@ public class MenuEntry {
      *
      * @return hash code
      */
-  private int calculateZ() {
+  private String calculateZ() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((entityName == null) ? 0 : entityName.hashCode());
@@ -164,7 +164,7 @@ public class MenuEntry {
     result = prime * result + ((pathPrefix == null) ? 0 : pathPrefix.hashCode());
     result = prime * result + ((entityLabel == null) ? 0 : entityLabel.hashCode());
     result = prime * result + ((entityPluralLabel == null) ? 0 : entityPluralLabel.hashCode());
-    return result;
+    return Integer.toHexString(result);
   }
 
   public boolean isSimple() {

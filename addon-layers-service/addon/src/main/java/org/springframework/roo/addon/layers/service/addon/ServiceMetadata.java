@@ -72,6 +72,9 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   private final Set<MethodMetadata> allMethods;
   private final Map<RelationInfo, MethodMetadata> addToRelationMethods;
   private final Map<RelationInfo, MethodMetadata> removeFromRelationMethods;
+  private final Map<RelationInfo, MethodMetadata> setRelationMethods;
+  private final Map<JavaSymbolName, MethodMetadata> repositoryFindersAndCounts;
+  private final Map<JavaSymbolName, MethodMetadata> repositoryCustomFindersAndCounts;
 
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
@@ -131,7 +134,9 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       final Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods,
       final Map<FieldMetadata, MethodMetadata> countByReferencedFieldsMethods,
       final List<MethodMetadata> customCountMethods,
-      Map<JavaType, JpaEntityMetadata> relatedEntities) {
+      Map<JavaType, JpaEntityMetadata> relatedEntities,
+      Map<JavaSymbolName, MethodMetadata> repositoryFindersAndCounts,
+      Map<JavaSymbolName, MethodMetadata> repositoryCustomFindersAndCounts) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     Validate.notNull(entity, "ERROR: Entity required to generate service interface");
@@ -145,6 +150,9 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     this.repositoryMetadata = repositoryMetadata;
     this.finders = finders;
     this.findAllGlobalSearchMethod = findAllGlobalSearchMethod;
+    this.repositoryFindersAndCounts = repositoryFindersAndCounts;
+    this.repositoryCustomFindersAndCounts = repositoryCustomFindersAndCounts;
+
     Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllDefinedMethods =
         new HashMap<FieldMetadata, MethodMetadata>();
     List<MethodMetadata> transactionalDefinedMethod = new ArrayList<MethodMetadata>();
@@ -157,19 +165,15 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     notTransactionalDefinedMethod.add(findOneMethod);
     ensureGovernorHasMethod(new MethodMetadataBuilder(findOneMethod));
 
+
     // Generating persistent methods for modifiable entities
     // (not reandOnly an no composition child)
     if (entityMetadata.isReadOnly() || entityMetadata.isCompositionChild()) {
-      this.saveMethod = null;
       this.deleteMethod = null;
       this.saveBatchMethod = null;
       this.deleteBatchMethod = null;
     } else {
       // Add modification methods
-      this.saveMethod = getSaveMethod();
-      transactionalDefinedMethod.add(saveMethod);
-      ensureGovernorHasMethod(new MethodMetadataBuilder(saveMethod));
-
       this.deleteMethod = getDeleteMethod();
       transactionalDefinedMethod.add(deleteMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(deleteMethod));
@@ -181,6 +185,14 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       this.deleteBatchMethod = getDeleteBatchMethod();
       transactionalDefinedMethod.add(deleteBatchMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(deleteBatchMethod));
+    }
+
+    if (entityMetadata.isReadOnly()) {
+      this.saveMethod = null;
+    } else {
+      this.saveMethod = getSaveMethod();
+      transactionalDefinedMethod.add(saveMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(saveMethod));
     }
 
     // Add standard finders methods (if not composition child)
@@ -215,10 +227,12 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         new TreeMap<RelationInfo, MethodMetadata>();
     Map<RelationInfo, MethodMetadata> removeFromRelationMethodsTemp =
         new TreeMap<RelationInfo, MethodMetadata>();
+    Map<RelationInfo, MethodMetadata> setRelationMethodsTemp =
+        new TreeMap<RelationInfo, MethodMetadata>();
     MethodMetadata tmpMethod;
     for (RelationInfo relationInfo : entityMetadata.getRelationInfos().values()) {
 
-      if (!(relationInfo.type == JpaRelationType.COMPOSITION && relationInfo.cardinality == Cardinality.ONE_TO_ONE)) {
+      if (relationInfo.cardinality != Cardinality.ONE_TO_ONE) {
         // addToRELATION
         tmpMethod = getAddToRelationMethod(relationInfo);
         addToRelationMethodsTemp.put(relationInfo, tmpMethod);
@@ -230,9 +244,19 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         removeFromRelationMethodsTemp.put(relationInfo, tmpMethod);
         transactionalDefinedMethod.add(tmpMethod);
         ensureGovernorHasMethod(new MethodMetadataBuilder(tmpMethod));
+
+
+        if (relationInfo.type == JpaRelationType.AGGREGATION) {
+          // setRELATION
+          tmpMethod = getSetRelationMethod(relationInfo);
+          setRelationMethodsTemp.put(relationInfo, tmpMethod);
+          transactionalDefinedMethod.add(tmpMethod);
+          ensureGovernorHasMethod(new MethodMetadataBuilder(tmpMethod));
+        }
       }
     }
     addToRelationMethods = Collections.unmodifiableMap(addToRelationMethodsTemp);
+    setRelationMethods = Collections.unmodifiableMap(setRelationMethodsTemp);
     removeFromRelationMethods = Collections.unmodifiableMap(removeFromRelationMethodsTemp);
 
     // ROO-3765: Prevent ITD regeneration applying the same sort to provided map. If this sort is not applied, maybe some
@@ -331,13 +355,8 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
     if (relationInfo.cardinality != Cardinality.ONE_TO_ONE) {
       // add child entity parameter
-      if (relationInfo.type == JpaRelationType.COMPOSITION) {
-        parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType
-            .iterableOf(relationInfo.childType)));
-      } else {
-        parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType
-            .iterableOf(childEntityMetadata.getCurrentIndentifierField().getFieldType())));
-      }
+      parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType
+          .iterableOf(childEntityMetadata.getCurrentIndentifierField().getFieldType())));
       parameterNames.add(entityRemoveMethod.getParameterNames().get(0));
     }
 
@@ -357,6 +376,11 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     // instance
   }
 
+  /**
+   * Generates "AddToRelation" Method for this service
+   * @param relationInfo
+   * @return
+   */
   private MethodMetadata getAddToRelationMethod(RelationInfo relationInfo) {
     final MethodMetadata entityAddMethod = relationInfo.addMethod;
     // Define method name
@@ -406,6 +430,63 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
   }
+
+  /**
+   * Generates "setRelation" Method for this service
+   * @param relationInfo
+   * @return
+   */
+  private MethodMetadata getSetRelationMethod(RelationInfo relationInfo) {
+    // Define method name
+    final JavaSymbolName methodName =
+        new JavaSymbolName("set"
+            + relationInfo.fieldMetadata.getFieldName().getSymbolNameCapitalisedFirstLetter());
+
+    // Define method parameter types
+    final List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    // add parent entity parameter
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(entity));
+    parameterNames.add(new JavaSymbolName(StringUtils.uncapitalize(entity.getSimpleTypeName())));
+
+
+
+    // add child entity parameter
+    parameterNames.add(relationInfo.fieldMetadata.getFieldName());
+    if (relationInfo.cardinality == Cardinality.ONE_TO_ONE) {
+      parameterTypes.add(AnnotatedJavaType.convertFromJavaType(relationInfo.childType));
+    } else if (relationInfo.type == JpaRelationType.COMPOSITION) {
+      // Use objects
+      parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType
+          .iterableOf(relationInfo.childType)));
+    } else {
+      // AGGREGATION: Use Child Pk: Get related entity metadata
+      JpaEntityMetadata childEntityMetadata = relatedEntitiesMetadata.get(relationInfo.childType);
+      Validate.notNull(childEntityMetadata,
+          "Can't get entity metadata for %s entity generating %s", relationInfo.childType,
+          aspectName);
+      parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType
+          .iterableOf(childEntityMetadata.getCurrentIndentifierField().getFieldType())));
+    }
+
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName, entity,
+            parameterTypes, parameterNames, null);
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
+  }
+
 
   /**
    * Method that generates method "findAll" method. This method includes
@@ -995,6 +1076,13 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   }
 
   /**
+   * @return methods setRelation generated in service
+   */
+  public Map<RelationInfo, MethodMetadata> getSetRelationMethods() {
+    return setRelationMethods;
+  }
+
+  /**
    * @return related entity
    */
   public JavaType getEntity() {
@@ -1015,6 +1103,24 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   public Set<MethodMetadata> getAllMethods() {
     return allMethods;
+  }
+
+  /**
+   * Obtains the finder methods and the associated counts
+   * 
+   * @return
+   */
+  public Map<JavaSymbolName, MethodMetadata> getRepositoryFindersAndCounts() {
+    return repositoryFindersAndCounts;
+  }
+
+  /**
+   * Obtains the finder methods and the associated counts
+   * 
+   * @return
+   */
+  public Map<JavaSymbolName, MethodMetadata> getRepositoryCustomFindersAndCounts() {
+    return repositoryCustomFindersAndCounts;
   }
 
 

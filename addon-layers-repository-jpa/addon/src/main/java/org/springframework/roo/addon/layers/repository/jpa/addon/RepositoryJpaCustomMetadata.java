@@ -62,6 +62,8 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
 
   private final MethodMetadata findAllGlobalSearchMethod;
 
+  private Map<JavaSymbolName, MethodMetadata> finderMethodsAndCounts;
+
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
   }
@@ -117,6 +119,8 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
 
     this.defaultReturnType = repositoryMetadata.getDefaultReturnType();
 
+    this.finderMethodsAndCounts = new HashMap<JavaSymbolName, MethodMetadata>();
+
     ArrayList<Pair<MethodMetadata, PartTree>> tmpCustomFinderMethods =
         new ArrayList<Pair<MethodMetadata, PartTree>>();
     ArrayList<Pair<MethodMetadata, PartTree>> tmpCustomCountMethods =
@@ -170,18 +174,20 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
         if (!isAlreadyDeclaredMethod(method, allFinderMethods)) {
           ensureGovernorHasMethod(new MethodMetadataBuilder(method));
           tmpCustomFinderMethods.add(Pair.of(method, finderInfo.getRight()));
-          allFinderMethods.add(method);
         }
+        allFinderMethods.add(method);
 
         // Generate a count method for each custom finder if they aren't count methods
+        MethodMetadata countMethod = null;
         if (!StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "count")) {
-          MethodMetadata countMethod = getCustomCount(fromBean, finderMethod.getMethodName());
+          countMethod = getCustomCount(fromBean, finderMethod.getMethodName());
           if (!isAlreadyDeclaredMethod(countMethod, allCountMethods)) {
             ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
             tmpCustomCountMethods.add(Pair.of(countMethod, finderInfo.getRight()));
-            allCountMethods.add(countMethod);
           }
+          allCountMethods.add(countMethod);
         }
+        finderMethodsAndCounts.put(method.getMethodName(), countMethod);
       }
     }
     customCountMethods = Collections.unmodifiableList(tmpCustomCountMethods);
@@ -397,6 +403,15 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
    */
   public List<Pair<MethodMetadata, PartTree>> getCustomCountMethods() {
     return customCountMethods;
+  }
+
+  /**
+   * Return the finder name methods and the related count method if exists.
+   * 
+   * @return
+   */
+  public Map<JavaSymbolName, MethodMetadata> getFinderMethodsAndCounts() {
+    return finderMethodsAndCounts;
   }
 
   /**

@@ -15,6 +15,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.springframework.roo.addon.web.mvc.views.AbstractViewGenerationService;
+import org.springframework.roo.addon.web.mvc.views.AbstractViewMetadata;
 import org.springframework.roo.addon.web.mvc.views.ViewContext;
 import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
 import org.springframework.roo.process.manager.FileManager;
@@ -27,8 +28,8 @@ import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.Version;
 
 @Component(componentAbstract = true)
-public abstract class AbstractFreeMarkerViewGenerationService<DOC> extends
-    AbstractViewGenerationService<DOC> {
+public abstract class AbstractFreeMarkerViewGenerationService<DOC, T extends AbstractViewMetadata>
+    extends AbstractViewGenerationService<DOC, T> {
 
   @Reference
   FileManager fileManager;
@@ -40,7 +41,7 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC> extends
     return fileManager.exists(location.concat("/").concat(templateName).concat(".ftl"));
   }
 
-  protected DOC process(String templateName, ViewContext ctx) {
+  protected DOC process(String templateName, ViewContext<T> ctx) {
     String content = "";
 
     try {

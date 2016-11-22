@@ -173,8 +173,10 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Obtain parameterList
     // Is necessary to change the method name to prevent errors
     String paramList = "";
-    for (JavaSymbolName param : parameterNames) {
-      paramList = paramList.concat(param.getSymbolNameCapitalisedFirstLetter()).concat("And");
+    for (AnnotatedJavaType param : parameterTypes) {
+      paramList =
+          paramList.concat(StringUtils.capitalize(param.getJavaType().getSimpleTypeName())).concat(
+              "And");
     }
 
     if (StringUtils.isNotBlank(paramList)) {

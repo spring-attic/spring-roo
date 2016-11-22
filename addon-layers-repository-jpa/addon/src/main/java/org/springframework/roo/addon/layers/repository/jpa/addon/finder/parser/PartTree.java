@@ -1,5 +1,13 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -8,13 +16,7 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaType;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.springframework.roo.model.JpaJavaType;
 
 /**
  * This class is based on PartTree.java class from Spring Data commons project.
@@ -199,8 +201,11 @@ public class PartTree {
 
   /**
    * Filters the entity properties that can be used to build Spring Data
-   * expressions. Persistence version property is excluded as well as multivalued properties
-   * since Spring Data does not support operations with them
+   * expressions. 
+   * 
+   * Persistence version property, multivalued properties, static fields and 
+   * transient fields are excluded since Spring Data does not support 
+   * operations with them.
    *
    * @param memberDetails
    * @return entity properties which type is supported  by SpringData
@@ -209,17 +214,46 @@ public class PartTree {
 
     List<FieldMetadata> validProperties = new ArrayList<FieldMetadata>();
 
-    for (FieldMetadata fieldMetadata : fields) {
+    for (FieldMetadata field : fields) {
 
       // Check if its type is List/Map/etc
-      if (fieldMetadata.getFieldType().isMultiValued())
+      if (field.getFieldType().isMultiValued()) {
         continue;
+      }
 
       // Check if it is annotated with @Version
-      if (fieldMetadata.getAnnotation(new JavaType("javax.persistence.Version")) != null)
+      if (field.getAnnotation(new JavaType("javax.persistence.Version")) != null) {
         continue;
+      }
 
-      validProperties.add(fieldMetadata);
+      // Exclude static fields
+      int staticFinal = Modifier.STATIC + Modifier.FINAL;
+      int publicStatic = Modifier.PUBLIC + Modifier.STATIC;
+      int publicStaticFinal = Modifier.PUBLIC + Modifier.STATIC + Modifier.FINAL;
+      int privateStatic = Modifier.PRIVATE + Modifier.STATIC;
+      int privateStaticFinal = Modifier.PRIVATE + Modifier.STATIC + Modifier.FINAL;
+
+      if (field.getModifier() == Modifier.STATIC || field.getModifier() == staticFinal
+          || field.getModifier() == publicStatic || field.getModifier() == publicStaticFinal
+          || field.getModifier() == privateStatic || field.getModifier() == privateStaticFinal) {
+        continue;
+      }
+
+      // Exclude transient fields and the fields annotated with @Transient
+      int transientFinal = Modifier.TRANSIENT + Modifier.FINAL;
+      int publicTransient = Modifier.PUBLIC + Modifier.TRANSIENT;
+      int publicTransientFinal = Modifier.PUBLIC + Modifier.TRANSIENT + Modifier.FINAL;
+      int privateTransient = Modifier.PRIVATE + Modifier.TRANSIENT;
+      int privateTransientFinal = Modifier.PRIVATE + Modifier.TRANSIENT + Modifier.FINAL;
+      if (field.getAnnotation(JpaJavaType.TRANSIENT) != null
+          || field.getModifier() == Modifier.TRANSIENT || field.getModifier() == transientFinal
+          || field.getModifier() == publicTransient || field.getModifier() == publicTransientFinal
+          || field.getModifier() == privateTransient
+          || field.getModifier() == privateTransientFinal) {
+        continue;
+      }
+
+      validProperties.add(field);
     }
 
     return validProperties;

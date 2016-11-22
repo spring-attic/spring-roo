@@ -205,7 +205,8 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
       // ROO-3834: Include default documentation
       CommentStructure defaultCommentStructure = new CommentStructure();
 
-      String defaultComment = "/**\n * TODO Auto-generated field documentation\n".concat(" */\n");
+      String defaultComment =
+          "/**\n * TODO Auto-generated field documentation\n *\n".concat(" */\n");
 
       defaultCommentStructure.addComment(new JavadocComment(defaultComment),
           CommentLocation.BEGINNING);
