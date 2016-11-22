@@ -161,7 +161,6 @@ public class ReferenceField extends FieldDetails {
    * Add @JoinColumn annotation to field
    *
    * @param joinColumn
-   * @param referencedColumn
    */
   public void setJoinColumn(String joinColumn) {
     setJoinAnnotations(null, new String[] {joinColumn}, null, null, null);

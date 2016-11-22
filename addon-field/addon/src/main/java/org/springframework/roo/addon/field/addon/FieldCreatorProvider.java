@@ -70,7 +70,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -78,7 +78,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -86,7 +86,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -94,7 +94,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -102,7 +102,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -110,7 +110,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -118,7 +118,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -126,7 +126,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -134,7 +134,39 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
+   * @param shellContext
+   * @return
+   */
+  boolean areOptionalParametersVisibleForFieldList(ShellContext shellContext);
+
+  /**
+   * Whether join column related parameter is mandatory for field list command.
+   *
+   * @param shellContext
+   * @return true when parameter is mandatory
+   */
+  boolean isJoinColumnNameMandatoryForFieldList(ShellContext shellContext);
+
+  /**
+   * Whether join column related parameter is visible for field list command.
+   *
+   * @param shellContext
+   * @return true when parameter is mandatory
+   */
+  boolean isJoinColumnNameVisibleForFieldList(ShellContext shellContext);
+
+  /**
+   * Whether 'referencedColumn' parameter is visible for field list command.
+   *
+   * @param shellContext
+   * @return true when parameter is mandatory
+   */
+  boolean isReferencedColumnNameVisibleForFieldList(ShellContext shellContext);
+
+  /**
+   * TODO
+   *
    * @param shellContext
    * @return
    */
@@ -142,7 +174,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -150,7 +182,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -158,7 +190,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -166,7 +198,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -174,7 +206,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -182,7 +214,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -190,7 +222,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -198,7 +230,39 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
+   * @param shellContext
+   * @return
+   */
+  boolean areOptionalParametersVisibleForFieldSet(ShellContext shellContext);
+
+  /**
+  * Whether join column related parameter is mandatory for field set command.
+  *
+  * @param shellContext
+  * @return parameter is mandatory
+  */
+  boolean isJoinColumnNameMandatoryForFieldSet(ShellContext shellContext);
+
+  /**
+   * Whether join column related parameter is visible for field set command.
+   *
+   * @param shellContext
+   * @return parameter is mandatory
+   */
+  boolean isJoinColumnNameVisibleForFieldSet(ShellContext shellContext);
+
+  /**
+   * Whether 'referencedColumn' parameter is visible for field list command.
+   *
+   * @param shellContext
+   * @return true when parameter is mandatory
+   */
+  boolean isReferencedColumnNameVisibleForFieldSet(ShellContext shellContext);
+
+  /**
+   * TODO
+   *
    * @param shellContext
    * @return
    */
@@ -206,7 +270,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -214,7 +278,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -222,7 +286,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -230,7 +294,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -238,7 +302,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -246,7 +310,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -254,7 +318,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -262,7 +326,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -270,7 +334,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -278,7 +342,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -286,7 +350,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -294,7 +358,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -302,7 +366,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -310,7 +374,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -318,7 +382,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -326,7 +390,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -334,7 +398,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -342,7 +406,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -350,7 +414,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -358,7 +422,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -366,7 +430,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -374,7 +438,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -382,7 +446,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -390,7 +454,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -398,7 +462,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -406,7 +470,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -414,7 +478,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -422,7 +486,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param javaTypeDetails
    * @param primitive
    * @param fieldName
@@ -443,7 +507,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param javaTypeDetails
    * @param primitive
    * @param fieldName
@@ -465,7 +529,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param javaTypeDetails
    * @param fieldType
    * @param fieldName
@@ -491,7 +555,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param javaTypeDetails
    * @param fieldType
    * @param fieldName
@@ -519,7 +583,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param typeName
    * @param fieldType
    * @param fieldName
@@ -530,7 +594,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param typeName
    * @param fieldType
    * @param fieldName
@@ -542,7 +606,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param cid
    * @param fieldType
    * @param fieldName
@@ -560,7 +624,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param cid
    * @param fieldType
    * @param fieldName
@@ -580,7 +644,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param javaTypeDetails
    * @param fieldType
    * @param primitive
@@ -610,7 +674,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param javaTypeDetails
    * @param fieldType
    * @param primitive
@@ -641,7 +705,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param typeName
    * @param fieldType
    * @param fieldName
@@ -664,7 +728,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param typeName
    * @param fieldType
    * @param fieldName
@@ -676,6 +740,8 @@ public interface FieldCreatorProvider {
    * @param mappedBy
    * @param fetch
    * @param comment
+   * @param joinColumnName
+   * @param referencedColumnName
    * @param joinTable
    * @param joinColumns
    * @param referencedColumns
@@ -688,15 +754,15 @@ public interface FieldCreatorProvider {
    */
   void createSetField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       Cardinality cardinality, Cascade cascadeType[], boolean notNull, Integer sizeMin,
-      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable,
-      String joinColumns, String referencedColumns, String inverseJoinColumns,
-      String inverseReferencedColumns, boolean permitReservedWords, Boolean aggregation,
-      Boolean orphanRemoval, boolean isForce);
+      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumnName,
+      String referencedColumnName, String joinTable, String joinColumns, String referencedColumns,
+      String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce);
 
 
   /**
    * TODO
-   * 
+   *
    * @param typeName
    * @param fieldType
    * @param fieldName
@@ -708,6 +774,8 @@ public interface FieldCreatorProvider {
    * @param mappedBy
    * @param fetch
    * @param comment
+   * @param joinColumnName
+   * @param referencedColumnName
    * @param joinTable
    * @param joinColumns
    * @param referencedColumns
@@ -720,15 +788,15 @@ public interface FieldCreatorProvider {
    */
   void createListField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       Cardinality cardinality, Cascade cascadeType[], boolean notNull, Integer sizeMin,
-      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable,
-      String joinColumns, String referencedColumns, String inverseJoinColumns,
-      String inverseReferencedColumns, boolean permitReservedWords, Boolean aggregation,
-      Boolean orphanRemoval, boolean isForce);
+      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumnName,
+      String referencedColumnName, String joinTable, String joinColumns, String referencedColumns,
+      String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce);
 
 
   /**
    * TODO
-   * 
+   *
    * @param cid
    * @param fieldName
    * @param notNull
@@ -753,7 +821,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param cid
    * @param fieldName
    * @param notNull
@@ -780,7 +848,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param cid
    * @param fieldName
    * @param contentType
@@ -795,7 +863,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param cid
    * @param fieldName
    * @param contentType
@@ -811,7 +879,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param cid
    * @param fieldType
    * @param fieldName
@@ -828,7 +896,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param cid
    * @param fieldType
    * @param fieldName
@@ -847,7 +915,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param fieldDetails
    * @param permitReservedWords
    * @param transientModifier
@@ -857,14 +925,14 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param fieldDetails
    */
   void formatFieldComment(FieldDetails fieldDetails);
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -872,7 +940,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -880,7 +948,7 @@ public interface FieldCreatorProvider {
 
   /**
    * TODO
-   * 
+   *
    * @param shellContext
    * @return
    */

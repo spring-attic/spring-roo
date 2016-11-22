@@ -5,13 +5,6 @@ import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
 import static org.springframework.roo.model.SpringJavaType.PERSISTENT;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -69,6 +62,13 @@ import org.springframework.roo.settings.project.ProjectSettingsService;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
+
 /**
  * Provides field creation operations support for JPA entities by implementing
  * FieldCreatorProvider.
@@ -76,6 +76,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * @author Sergio Clares
  * @author Jose Manuel Vivó
  * @author Juan Carlos García
+ * @author Fran Cardoso
  * @since 2.0
  */
 @Component
@@ -107,6 +108,9 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
   private static final String SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME =
       "spring.roo.jpa.require.schema-object-name";
+  private static final String CARDINALITY = "cardinallity";
+  private static final String JOIN_TABLE = "joinTable";
+  private static final String JOIN_COLUMN_NAME = "joinColumnName";
 
   @Override
   public boolean isValid(JavaType javaType) {
@@ -260,6 +264,170 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     return true;
   }
 
+
+  @Override
+  public boolean areOptionalParametersVisibleForFieldList(ShellContext shellContext) {
+    String cardinality = shellContext.getParameters().get(CARDINALITY);
+    String joinColumnNameParam = shellContext.getParameters().get(JOIN_COLUMN_NAME);
+    String joinTableParam = shellContext.getParameters().get(JOIN_TABLE);
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on project settings
+    boolean requiredSchemaObjectName =
+        "true".equals(projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME));
+
+    if (!requiredSchemaObjectName) {
+      return true;
+    }
+
+    if (!Cardinality.ONE_TO_MANY.equals(cardinality)) {
+      return true;
+    }
+
+    if (joinColumnNameParam == null && joinTableParam == null) {
+      return false;
+    }
+
+    return true;
+  }
+
+  @Override
+  public boolean areJoinTableParamsVisibleForFieldList(ShellContext shellContext) {
+
+    String joinTableParam = shellContext.getParameters().get(JOIN_TABLE);
+
+    if (joinTableParam != null) {
+      return true;
+    }
+
+    return false;
+  }
+
+  @Override
+  public boolean isJoinTableMandatoryForFieldList(ShellContext shellContext) {
+
+    String cardinality = shellContext.getParameters().get(CARDINALITY);
+    String joinTableParam = shellContext.getParameters().get(JOIN_TABLE);
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+      // property 'spring.roo.jpa.require.schema-object-name' is defined 'true'
+      if (cardinality != null && cardinality.equals(Cardinality.MANY_TO_MANY)) {
+        // mandatory if cardinality is MANY_TO_MANY
+        return true;
+      } else if ((cardinality == null || cardinality.equals(Cardinality.ONE_TO_MANY))
+          && joinTableParam != null) {
+        // mandatory if cardinality is ONE_TO_MANY and '--joinTable' is already specified
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+
+  @Override
+  public boolean isJoinTableVisibleForFieldList(ShellContext shellContext) {
+
+    String joinColumnNameParam = shellContext.getParameters().get(JOIN_COLUMN_NAME);
+
+    if (joinColumnNameParam == null) {
+      // Visible if '--joinColumnName' is not specified
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public boolean isJoinColumnNameVisibleForFieldList(ShellContext shellContext) {
+    String joinTableParam = shellContext.getParameters().get(JOIN_TABLE);
+
+    if (joinTableParam == null) {
+      // Visible if '--joinTable' is not specified
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public boolean isReferencedColumnNameVisibleForFieldList(ShellContext shellContext) {
+    String joinColumnNameParam = shellContext.getParameters().get(JOIN_COLUMN_NAME);
+
+    if (joinColumnNameParam == null) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * ROO-3710: Indicator that checks if exists some project setting that makes
+   * table column parameter mandatory.
+   *
+   * @param shellContext
+   * @return true if exists property
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
+   *         settings and its value is "true". If not, return false.
+   */
+  @Override
+  public boolean areJoinTableParamsMandatoryForFieldList(ShellContext shellContext) {
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    // See if joinTable param has been specified
+    String joinTableParam = shellContext.getParameters().get(JOIN_TABLE);
+
+    if (joinTableParam != null && requiredSchemaObjectName != null
+        && requiredSchemaObjectName.equals("true")) {
+      return true;
+    }
+
+    return false;
+  }
+
+  @Override
+  public boolean isMappedByVisibleForFieldList(ShellContext shellContext) {
+    return true;
+  }
+
+  @Override
+  public boolean isCardinalityVisibleForFieldList(ShellContext shellContext) {
+    // Can't be MANY_TO_MANY if '--joinColumnName' has been specified
+    return !isJoinColumnNameMandatoryForFieldList(shellContext);
+  }
+
+  @Override
+  public boolean isFetchVisibleForFieldList(ShellContext shellContext) {
+    return true;
+  }
+
+  @Override
+  public boolean isJoinColumnNameMandatoryForFieldList(ShellContext shellContext) {
+
+    String cardinality = shellContext.getParameters().get(CARDINALITY);
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    // Check if param 'joinTable' is already defined
+    String joinColumnNameParam = shellContext.getParameters().get(JOIN_COLUMN_NAME);
+
+    if ((cardinality == null || cardinality.equals(Cardinality.ONE_TO_MANY))
+        && requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")
+        && joinColumnNameParam != null) {
+      return true;
+    }
+    return false;
+  }
+
   /**
    * ROO-3710: Indicator that checks if exists some project setting that makes
    * table column parameter mandatory.
@@ -345,6 +513,52 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     return true;
   }
 
+  @Override
+  public boolean areOptionalParametersVisibleForFieldSet(ShellContext shellContext) {
+    String cardinality = shellContext.getParameters().get(CARDINALITY);
+    String joinColumnNameParam = shellContext.getParameters().get(JOIN_COLUMN_NAME);
+    String joinTableParam = shellContext.getParameters().get(JOIN_TABLE);
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on project settings
+    boolean requiredSchemaObjectName =
+        "true".equals(projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME));
+
+    if (!requiredSchemaObjectName) {
+      return true;
+    }
+
+    if (!Cardinality.ONE_TO_MANY.equals(cardinality)) {
+      return true;
+    }
+
+    if (joinColumnNameParam == null && joinTableParam == null) {
+      return false;
+    }
+
+    return true;
+  }
+
+  @Override
+  public boolean isJoinColumnNameMandatoryForFieldSet(ShellContext shellContext) {
+    String cardinality = shellContext.getParameters().get(CARDINALITY);
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    // Check if param 'joinTable' is already defined
+    String joinColumnNameParam = shellContext.getParameters().get(JOIN_COLUMN_NAME);
+
+    if ((cardinality == null || cardinality.equals(Cardinality.ONE_TO_MANY))
+        && requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")
+        && joinColumnNameParam != null) {
+      return true;
+    }
+    return false;
+  }
+
   /**
    * ROO-3710: Indicator that checks if exists some project setting that makes
    * table column parameter mandatory.
@@ -363,7 +577,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
         projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
     // See if joinTable param has been specified
-    String joinTableParam = shellContext.getParameters().get("joinTable");
+    String joinTableParam = shellContext.getParameters().get(JOIN_TABLE);
 
     if (joinTableParam != null && requiredSchemaObjectName != null
         && requiredSchemaObjectName.equals("true")) {
@@ -385,16 +599,24 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
   @Override
   public boolean isJoinTableMandatoryForFieldSet(ShellContext shellContext) {
 
-    String cardinality = shellContext.getParameters().get("cardinality");
+    String cardinality = shellContext.getParameters().get(CARDINALITY);
+    String joinTableParam = shellContext.getParameters().get(JOIN_TABLE);
 
     // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
     // on project settings
     String requiredSchemaObjectName =
         projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (cardinality != null && cardinality.equals("MANY_TO_MANY")
-        && requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
-      return true;
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+      // property 'spring.roo.jpa.require.schema-object-name' is defined 'true'
+      if (cardinality != null && cardinality.equals(Cardinality.MANY_TO_MANY)) {
+        // mandatory if cardinality is MANY_TO_MANY
+        return true;
+      } else if ((cardinality == null || cardinality.equals(Cardinality.ONE_TO_MANY))
+          && joinTableParam != null) {
+        // mandatory if cardinality is ONE_TO_MANY and '--joinTable' is already specified
+        return true;
+      }
     }
 
     return false;
@@ -403,7 +625,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
   @Override
   public boolean areJoinTableParamsVisibleForFieldSet(ShellContext shellContext) {
 
-    String joinTableParam = shellContext.getParameters().get("joinTable");
+    String joinTableParam = shellContext.getParameters().get(JOIN_TABLE);
 
     if (joinTableParam != null) {
       return true;
@@ -419,7 +641,8 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
   @Override
   public boolean isCardinalityVisibleForFieldSet(ShellContext shellContext) {
-    return true;
+    // Can't be MANY_TO_MANY if '--joinColumnName' has been specified
+    return !isJoinColumnNameMandatoryForFieldSet(shellContext);
   }
 
   @Override
@@ -429,84 +652,37 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
   @Override
   public boolean isJoinTableVisibleForFieldSet(ShellContext shellContext) {
-    return true;
-  }
 
-  @Override
-  public boolean areJoinTableParamsVisibleForFieldList(ShellContext shellContext) {
+    String joinColumnNameParam = shellContext.getParameters().get(JOIN_COLUMN_NAME);
 
-    String joinTableParam = shellContext.getParameters().get("joinTable");
-
-    if (joinTableParam != null) {
+    if (joinColumnNameParam == null) {
+      // Visible if '--joinColumnName' is not specified
       return true;
     }
-
     return false;
   }
 
   @Override
-  public boolean isJoinTableMandatoryForFieldList(ShellContext shellContext) {
+  public boolean isJoinColumnNameVisibleForFieldSet(ShellContext shellContext) {
 
-    String cardinality = shellContext.getParameters().get("cardinality");
+    String cardinality = shellContext.getParameters().get(CARDINALITY);
+    String joinTableParam = shellContext.getParameters().get(JOIN_TABLE);
 
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
-    // on project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
-
-    if (cardinality != null && cardinality.equals("MANY_TO_MANY")
-        && requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+    if (!Cardinality.MANY_TO_MANY.equals(cardinality) && joinTableParam == null) {
+      // Visible if '--joinTable' is not specified
       return true;
     }
-
-    return false;
-  }
-
-  /**
-   * ROO-3710: Indicator that checks if exists some project setting that makes
-   * table column parameter mandatory.
-   *
-   * @param shellContext
-   * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
-   *         settings and its value is "true". If not, return false.
-   */
-  @Override
-  public boolean areJoinTableParamsMandatoryForFieldList(ShellContext shellContext) {
-
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
-    // on project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
-
-    // See if joinTable param has been specified
-    String joinTableParam = shellContext.getParameters().get("joinTable");
-
-    if (joinTableParam != null && requiredSchemaObjectName != null
-        && requiredSchemaObjectName.equals("true")) {
-      return true;
-    }
-
     return false;
   }
 
   @Override
-  public boolean isMappedByVisibleForFieldList(ShellContext shellContext) {
-    return true;
-  }
+  public boolean isReferencedColumnNameVisibleForFieldSet(ShellContext shellContext) {
 
-  @Override
-  public boolean isCardinalityVisibleForFieldList(ShellContext shellContext) {
-    return true;
-  }
+    String joinColumnNameParam = shellContext.getParameters().get(JOIN_COLUMN_NAME);
 
-  @Override
-  public boolean isFetchVisibleForFieldList(ShellContext shellContext) {
-    return true;
-  }
-
-  @Override
-  public boolean isJoinTableVisibleForFieldList(ShellContext shellContext) {
+    if (joinColumnNameParam == null) {
+      return false;
+    }
     return true;
   }
 
@@ -978,15 +1154,15 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
   @Override
   public void createSetField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       Cardinality cardinality, Cascade[] cascadeType, boolean notNull, Integer sizeMin,
-      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable,
-      String joinColumns, String referencedColumns, String inverseJoinColumns,
-      String inverseReferencedColumns, boolean permitReservedWords, Boolean aggregation,
-      Boolean orphanRemoval, boolean isForce) {
+      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumnName,
+      String referencedColumnName, String joinTable, String joinColumns, String referencedColumns,
+      String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce) {
 
     createCollectionField(typeName, fieldType, fieldName, cardinality, cascadeType, notNull,
-        sizeMin, sizeMax, mappedBy, fetch, comment, joinTable, joinColumns, referencedColumns,
-        inverseJoinColumns, inverseReferencedColumns, permitReservedWords, aggregation,
-        orphanRemoval, isForce, false);
+        sizeMin, sizeMax, mappedBy, fetch, comment, joinColumnName, referencedColumnName,
+        joinTable, joinColumns, referencedColumns, inverseJoinColumns, inverseReferencedColumns,
+        permitReservedWords, aggregation, orphanRemoval, isForce, false);
   }
 
   /**
@@ -994,15 +1170,49 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
    * and
    * {@link #createListField(ClassOrInterfaceTypeDetails, Cardinality, JavaType, JavaType, JavaSymbolName, Cascade, boolean, boolean, Integer, Integer, JavaSymbolName, Fetch, String, String, String, String, String, String, boolean, boolean)}
    *
-   * @param isList true generates List, flase generates Set
+   * @param typeName
+   * @param fieldType
+   * @param fieldName
+   * @param cardinality
+   * @param cascadeType
+   * @param notNull
+   * @param sizeMin
+   * @param sizeMax
+   * @param mappedBy
+   * @param fetch
+   * @param comment
+   * @param joinColumnName
+   * @param referencedColumnName
+   * @param joinTable
+   * @param joinColumns
+   * @param referencedColumns
+   * @param inverseJoinColumns
+   * @param inverseReferencedColumns
+   * @param permitReservedWords
+   * @param aggregation
+   * @param orphanRemoval
+   * @param isForce
+   * @param isList true generates List, false generates Set
    */
   public void createCollectionField(JavaType typeName, JavaType fieldType,
       JavaSymbolName fieldName, Cardinality cardinality, Cascade[] cascadeType, boolean notNull,
       Integer sizeMin, Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment,
-      String joinTable, String joinColumns, String referencedColumns, String inverseJoinColumns,
-      String inverseReferencedColumns, boolean permitReservedWords, Boolean aggregation,
-      Boolean orphanRemoval, boolean isForce, boolean isList) {
+      String joinColumnName, String referencedColumnName, String joinTable, String joinColumns,
+      String referencedColumns, String inverseJoinColumns, String inverseReferencedColumns,
+      boolean permitReservedWords, Boolean aggregation, Boolean orphanRemoval, boolean isForce,
+      boolean isList) {
 
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on
+    // project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    // 'joinTable' or 'joinColumnName' is required if property is true
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")
+        && joinTable == null && joinColumnName == null) {
+      throw new IllegalArgumentException("--joinTable or --joinColumnName are required");
+    }
 
     final ClassOrInterfaceTypeDetails childCid = typeLocationService.getTypeDetails(fieldType);
     final ClassOrInterfaceTypeDetails parentCid = typeLocationService.getTypeDetails(typeName);
@@ -1063,8 +1273,8 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
               mappedBy, fetch, aggregation, orphanRemoval, cascadeType, isList);
 
           createChildFieldOfOneToManyRelation(childCid, typeName, permitReservedWords, mappedBy,
-              fetch, joinTable, joinColumns, referencedColumns, inverseJoinColumns,
-              inverseReferencedColumns);
+              fetch, joinColumnName, referencedColumnName, joinTable, joinColumns,
+              referencedColumns, inverseJoinColumns, inverseReferencedColumns);
           break;
         case MANY_TO_MANY:
           createParentFieldOfToManyRelation(parentCid, childCid, fieldName, fieldType,
@@ -1093,6 +1303,8 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
    * @param permitReservedWords
    * @param mappedBy
    * @param fetch
+   * @param joinColumnName
+   * @param referencedColumnName
    * @param joinTable
    * @param joinColumns
    * @param referencedColumns
@@ -1101,8 +1313,8 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
    */
   private void createChildFieldOfOneToManyRelation(ClassOrInterfaceTypeDetails childCid,
       JavaType parentType, boolean permitReservedWords, JavaSymbolName mappedBy, Fetch fetch,
-      String joinTable, String joinColumns, String referencedColumns, String inverseJoinColumns,
-      String inverseReferencedColumns) {
+      String joinColumnName, String referencedColumnName, String joinTable, String joinColumns,
+      String referencedColumns, String inverseJoinColumns, String inverseReferencedColumns) {
     final ReferenceField childFieldDetails =
         new ReferenceField(childCid.getDeclaredByMetadataId(), parentType, mappedBy,
             Cardinality.MANY_TO_ONE, null);
@@ -1145,6 +1357,13 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       // JoinTable set
       childFieldDetails.setJoinAnnotations(joinTable, joinColumnsArray, referencedColumnsArray,
           inverseJoinColumnsArray, inverseReferencedColumnsArray);
+
+    } else if (StringUtils.isNotBlank(joinColumnName)) {
+      if (StringUtils.isNotBlank(referencedColumnName)) {
+        childFieldDetails.setJoinColumn(joinColumnName, referencedColumnName);
+      } else {
+        childFieldDetails.setJoinColumn(joinColumnName);
+      }
     }
 
     insertField(childFieldDetails, permitReservedWords, false);
@@ -1357,15 +1576,15 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
   @Override
   public void createListField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       Cardinality cardinality, Cascade[] cascadeType, boolean notNull, Integer sizeMin,
-      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable,
-      String joinColumns, String referencedColumns, String inverseJoinColumns,
-      String inverseReferencedColumns, boolean permitReservedWords, Boolean aggregation,
-      Boolean orphanRemoval, boolean isForce) {
+      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumnName,
+      String referencedColumnName, String joinTable, String joinColumns, String referencedColumns,
+      String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce) {
 
     createCollectionField(typeName, fieldType, fieldName, cardinality, cascadeType, notNull,
-        sizeMin, sizeMax, mappedBy, fetch, comment, joinTable, joinColumns, referencedColumns,
-        inverseJoinColumns, inverseReferencedColumns, permitReservedWords, aggregation,
-        orphanRemoval, isForce, true);
+        sizeMin, sizeMax, mappedBy, fetch, comment, joinColumnName, referencedColumnName,
+        joinTable, joinColumns, referencedColumns, inverseJoinColumns, inverseReferencedColumns,
+        permitReservedWords, aggregation, orphanRemoval, isForce, true);
   };
 
 
@@ -1768,5 +1987,4 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       }
     }
   }
-
 }
