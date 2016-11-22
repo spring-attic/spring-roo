@@ -23,24 +23,32 @@ public class SettingsCommands implements CommandMarker {
   @Reference
   private SettingsOperations settingsOperations;
 
-  @CliCommand(value = "settings list", help = "Lists all settings added into configuration")
+  @CliCommand(value = "settings list",
+      help = "Lists all settings added into Roo project configuration. "
+          + "These settings are located in _[PROJECT-ROOT]/.roo/config/project.properties_.")
   public void listSettings() {
     settingsOperations.listSettings();
   }
 
-  @CliCommand(value = "settings add", help = "Adds or updates a particular setting")
-  public void addSetting(@CliOption(key = "name", mandatory = true,
-      help = "The setting name that should be changed (mandatory)") final String name,
-      @CliOption(key = "value", mandatory = true,
-          help = "The new vale for this settings name (mandatory)") final String value,
+  @CliCommand(
+      value = "settings add",
+      help = "Adds or updates a Roo project setting, which can modify the "
+          + "configuration of some commands acting in the current project. These settings are located in "
+          + "_[PROJECT-ROOT]/.roo/config/project.properties_.")
+  public void addSetting(
+      @CliOption(key = "name", mandatory = true,
+          help = "The setting name that should be added or changed.") final String name,
+      @CliOption(key = "value", mandatory = true, help = "The value for this settings name.") final String value,
       ShellContext shellContext) {
 
     settingsOperations.addSetting(name, value, shellContext.isForce());
   }
 
-  @CliCommand(value = "settings remove", help = "Removes an specific setting from configuration")
+  @CliCommand(value = "settings remove",
+      help = "Removes a specific setting from Roo project configuration."
+          + " Use 'settings list' to see the Roo settings added to the project.")
   public void removeSetting(@CliOption(key = "name", mandatory = true,
-      help = "The settings name that should be removed (mandatory)") final String name) {
+      help = "The settings name that should be removed.") final String name) {
 
     settingsOperations.removeSetting(name);
   }

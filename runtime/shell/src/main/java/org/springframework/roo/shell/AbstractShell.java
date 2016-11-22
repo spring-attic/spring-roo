@@ -2,6 +2,16 @@ package org.springframework.roo.shell;
 
 import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.osgi.service.component.annotations.Component;
+import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
+import org.springframework.roo.shell.event.ShellStatus;
+import org.springframework.roo.shell.event.ShellStatus.Status;
+import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.CollectionUtils;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,16 +33,6 @@ import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.osgi.service.component.annotations.Component;
-import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
-import org.springframework.roo.shell.event.ShellStatus;
-import org.springframework.roo.shell.event.ShellStatus.Status;
-import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Provides a base {@link Shell} implementation.
@@ -458,7 +458,8 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     }
   }
 
-  @CliCommand(value = {"system properties"}, help = "Shows the shell's properties")
+  @CliCommand(value = {"system properties"}, help = "Shows the shell's properties such as if "
+      + "'addon development mode' is enabled, JVM version, file encoding...")
   public String props() {
     final Set<String> data = new TreeSet<String>();
     for (final Entry<Object, Object> entry : System.getProperties().entrySet()) {
@@ -474,18 +475,19 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     return Math.round(interestedInZeroDPs) / multiplicationFactor;
   }
 
-  @CliCommand(value = {"script"},
-      help = "Parses the specified resource file and executes its commands")
+  @CliCommand(
+      value = {"script"},
+      help = "Parses the specified resource file and executes its Roo commands. You can as well execute "
+          + "_*.roo_ example scripts in the Roo classpath. Ex.: `script clinic.roo`.")
   public void script(
-      @CliOption(key = {"", "file"}, help = "The file to locate and execute (mandatory)",
-          mandatory = true) final File script,
+      @CliOption(key = {"", "file"}, help = "The file to locate and execute.", mandatory = true) final File script,
       @CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "Display line numbers when executing the script") final boolean lineNumbers,
-      @CliOption(
-          key = "ignoreLines",
-          mandatory = false,
-          help = "Comma-list of prefixes to ignore the lines that starts with any of the provided case-sensitive prefixes.") final String ignoreLines) {
+          help = "Display line numbers when executing the script."
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean lineNumbers,
+      @CliOption(key = "ignoreLines", mandatory = false,
+          help = "Comma-list of prefixes to ignore the lines that starts with any of the provided "
+              + "case-sensitive prefixes.") final String ignoreLines) {
 
     Validate.notNull(script, "Script file to parse is required");
     final double startedNanoseconds = System.nanoTime();
@@ -610,8 +612,9 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     }
   }
 
-  @CliCommand(value = {"version"}, help = "Displays shell version")
-  public String version(@CliOption(key = "", help = "Special version flags") final String extra) {
+  @CliCommand(value = {"version"}, help = "Displays Roo Shell banner and version.")
+  public String version(
+      @CliOption(key = "", help = "Special version flags, like `roorocks`.") final String extra) {
     final StringBuilder sb = new StringBuilder();
 
     if ("roorocks".equals(extra)) {

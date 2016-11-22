@@ -41,7 +41,8 @@ public class SpringletsJpaSecurityProvider implements SecurityProvider {
   private static final Dependency SPRINGLETS_SECURITY_AUTHENTICATION_STARTER = new Dependency(
       "io.springlets", "springlets-boot-starter-authentication", "${springlets.version}");
 
-  protected final static Logger LOGGER = HandlerUtils.getLogger(SpringletsJpaSecurityProvider.class);
+  protected final static Logger LOGGER = HandlerUtils
+      .getLogger(SpringletsJpaSecurityProvider.class);
 
   // ------------ OSGi component attributes ----------------
   private BundleContext context;

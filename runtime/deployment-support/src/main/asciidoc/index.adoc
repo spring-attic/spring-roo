@@ -97,8 +97,15 @@ To install Spring Roo on your STS 3.8.2+ follow the instructions below:
 . Go to link:https://spring.io/tools/sts/all[Spring Tool Suite™ Downloads] and follow the instructions to download and install the STS.
 +
 [IMPORTANT]
-In Windows, to force the STS use of JDK VM you need to modify STS params by opening _STS.ini_ and adding the following line *before* the `-vmargs` line:
-`-vm [JDK-DIR]/bin/javaw.exe`.
+====
+Sometimes, when use STS/Eclipse in Windows platform, there are difficulties while trying to use the JDK VM specified in the PATH. In that case, the solution is to modify the STS/Eclipse configuration by opening _STS.ini_/_Eclipse.ini_ and adding the following lines *before* the `-vmargs` line:
+
+* `-vm`
+* `[JDK-DIR]/bin/javaw.exe`
+
+(Don't put everything in a single line).
+====
++
 . Open your STS IDE.
 . Install the Roo Extension from update site.
 +
@@ -3376,18 +3383,6 @@ roo> addon create wrapper --topLevelPackage --groupId --artifactId --version --v
 --osgiImports::
   Contents of Import-Package in OSGi manifest
 
-=== metadata cache
-
-Shows detailed metadata for the indicated type
-
-[source,sh]
-----
-roo> metadata cache --maximumCapacity
-----
-
---maximumCapacity::
-  The maximum number of metadata items to cache (mandatory)
-
 [[addon-development-mode]]
 === addon development mode
 
@@ -3401,6 +3396,18 @@ roo> addon development mode
 
 --enabled::
   Activates addon development mode; default: `true`
+
+=== metadata cache
+
+Shows detailed metadata for the indicated type
+
+[source,sh]
+----
+roo> metadata cache --maximumCapacity
+----
+
+--maximumCapacity::
+  The maximum number of metadata items to cache (mandatory)
 
 === metadata for id
 

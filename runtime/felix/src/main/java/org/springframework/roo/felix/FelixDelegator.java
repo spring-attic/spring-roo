@@ -57,20 +57,20 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
   }
 
   @CliCommand(value = "!g",
-      help = "Passes a command directly through to the Felix shell infrastructure")
+      help = "Passes a command directly through to the Felix shell infrastructure.")
   public void shell(
       @CliOption(
           key = "",
           mandatory = false,
           specifiedDefaultValue = "help",
           unspecifiedDefaultValue = "help",
-          help = "The command to pass to Felix (WARNING: no validation or security checks are performed)") final String commandLine)
-      throws Exception {
+          help = "The command to pass to Felix (WARNING: no validation or security checks are performed)."
+              + "Default: `help`.") final String commandLine) throws Exception {
 
     perform(commandLine);
   }
 
-  @CliCommand(value = {"exit", "quit"}, help = "Exits the shell. You can also use `quit` command.")
+  @CliCommand(value = {"exit", "quit"}, help = "Exits the shell. You can also use `exit` command.")
   public ExitShellRequest quit() {
     return ExitShellRequest.NORMAL_EXIT;
   }
