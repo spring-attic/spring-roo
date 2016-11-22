@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
 import static org.springframework.roo.model.SpringJavaType.DELETE_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.GET_MAPPING;
+import static org.springframework.roo.model.SpringJavaType.INIT_BINDER;
 import static org.springframework.roo.model.SpringJavaType.POST_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.REQUEST_PARAM;
 import static org.springframework.roo.model.SpringJavaType.RESPONSE_ENTITY;
@@ -9,15 +10,6 @@ import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_DATATA
 import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_DATATABLES_DATA;
 import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH;
 import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_NOT_FOUND_EXCEPTION;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -56,6 +48,15 @@ import org.springframework.roo.model.SpringEnumDetails;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 /**
  * Metadata for {@link RooThymeleaf}.
@@ -459,12 +460,14 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.populateFormMethod = addAndGet(getPopulateFormMethod(), allMethods);
         this.listDatatablesDetailsMethod = addAndGet(getListDatatablesDetailMethod(), allMethods);
         this.createFormDetailsMethod = addAndGet(getCreateFormDetailsMethod(), allMethods);
-        this.initBinderMethod =
-            addAndGet(getInitBinderMethod(controllerMetadata.getLastDetailEntity()), allMethods);
+
         if (controllerMetadata.getLastDetailsInfo().type == JpaRelationType.AGGREGATION) {
           this.removeFromDetailsMethod = addAndGet(getRemoveFromDetailsMethod(), allMethods);
           this.createDetailsMethod = addAndGet(getCreateDetailsMethod(), allMethods);
+          this.initBinderMethod = null;
         } else {
+          this.initBinderMethod =
+              addAndGet(getInitBinderMethod(controllerMetadata.getLastDetailEntity()), allMethods);
           this.createDetailsMethod = addAndGet(getCreateDetailsCompositionMethod(), allMethods);
           this.removeFromDetailsMethod = null;
         }
@@ -1010,6 +1013,17 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
             parameterTypes, parameterNames, body);
+
+    // Adding annotation
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @InitBinder annotation
+    AnnotationMetadataBuilder getInitBinderAnnotation = new AnnotationMetadataBuilder(INIT_BINDER);
+    getInitBinderAnnotation.addStringAttribute("value",
+        StringUtils.uncapitalize(entity.getSimpleTypeName()));
+    annotations.add(getInitBinderAnnotation);
+
+    methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
   }
