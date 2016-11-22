@@ -972,6 +972,35 @@ public class FieldCommands implements CommandMarker {
         permitReservedWords, orphanRemoval, shellContext.isForce());
   }
 
+  @CliOptionMandatoryIndicator(command = "field set", params = {"joinColumnName"})
+  public boolean isColumnMandatoryForFieldSet(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isJoinColumnNameMandatoryForFieldSet(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field set", params = {"joinColumnName"},
+      help = "Option 'joinColumnName' is not available for this type of class")
+  public boolean isJoinColumnNameVisibleForFieldSet(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isJoinColumnNameVisibleForFieldSet(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field set", params = {"referencedColumnName"},
+      help = "Option 'referencedColumnName' is not available for this type of class")
+  public boolean isReferencedColumnNameVisibleForFieldSet(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isReferencedColumnNameVisibleForFieldSet(shellContext);
+    }
+    return false;
+  }
+
   @CliOptionMandatoryIndicator(command = "field set", params = {"joinColumns", "referencedColumns",
       "inverseJoinColumns", "inverseReferencedColumns"})
   public boolean areJoinTableParamsMandatoryForFieldSet(ShellContext shellContext) {
@@ -1071,6 +1100,18 @@ public class FieldCommands implements CommandMarker {
     return new ArrayList<String>();
   }
 
+  @CliOptionVisibilityIndicator(command = "field set", params = {"aggregation", "cardinality",
+      "comment", "fetch", "force", "mappedBy", "notNull", "nullRequired", "orphanRemoval",
+      "permitReservedWords", "profile", "sizeMax", "sizeMin"},
+      help = "--joinTable or --joinColumnName must be defined")
+  public boolean areOptionalParametersVisibleForFieldSet(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).areOptionalParametersVisibleForFieldSet(shellContext);
+    }
+    return false;
+  }
+
   @CliCommand(
       value = "field set",
       help = "Adds a private `Set` field to an existing Java source file, representing (always) a "
@@ -1098,6 +1139,15 @@ public class FieldCommands implements CommandMarker {
               + "is assumed that the class is in the module which has the focus."
               + "This option is mandatory for this command when the focus is not set to one class."
               + "Default if option not present: the class focused by Roo shell.") final JavaType typeName,
+      @CliOption(
+          key = "joinColumnName",
+          mandatory = true,
+          help = "The JPA `@JoinColumn` `name` attribute."
+              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
+              + "This option is only available for JPA entities and embeddable classes.") final String joinColumnName,
+      @CliOption(key = "referencedColumnName", mandatory = false,
+          help = "The JPA `@JoinColumn` `referencedColumnName` attribute."
+              + "This option is only available for JPA entities and embeddable classes.") final String referencedColumnName,
       @CliOption(
           key = "joinTable",
           mandatory = true,
@@ -1221,8 +1271,9 @@ public class FieldCommands implements CommandMarker {
 
     getFieldCreatorProvider(typeName).createSetField(typeName, fieldType, fieldName,
         cardinality.getCardinality(), null, notNull, sizeMin, sizeMax, mappedBy, fetch, comment,
-        joinTable, joinColumns, referencedColumns, inverseJoinColumns, inverseReferencedColumns,
-        permitReservedWords, aggregation, orphanRemoval, shellContext.isForce());
+        joinColumnName, referencedColumnName, joinTable, joinColumns, referencedColumns,
+        inverseJoinColumns, inverseReferencedColumns, permitReservedWords, aggregation,
+        orphanRemoval, shellContext.isForce());
 
   }
 
@@ -1237,6 +1288,36 @@ public class FieldCommands implements CommandMarker {
     }
     return false;
   }
+
+  @CliOptionMandatoryIndicator(command = "field list", params = {"joinColumnName"})
+  public boolean isColumnMandatoryForFieldList(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isJoinColumnNameMandatoryForFieldList(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field list", params = {"joinColumnName"},
+      help = "Option 'joinColumnName' is not available for this type of class")
+  public boolean isJoinColumnNameVisibleForFieldList(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isJoinColumnNameVisibleForFieldList(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field list", params = {"referencedColumnName"},
+      help = "Option 'referencedColumnName' is not available for this type of class")
+  public boolean isReferencedColumnNameVisibleForFieldList(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isReferencedColumnNameVisibleForFieldList(shellContext);
+    }
+    return false;
+  }
+
 
   @CliOptionMandatoryIndicator(command = "field list", params = {"joinTable"})
   public boolean isJoinTableMandatoryForFieldList(ShellContext shellContext) {
@@ -1325,6 +1406,17 @@ public class FieldCommands implements CommandMarker {
     return new ArrayList<String>();
   }
 
+  @CliOptionVisibilityIndicator(command = "field set", params = {"aggregation", "cardinality",
+      "comment", "fetch", "force", "mappedBy", "notNull", "orphanRemoval", "permitReservedWords",
+      "profile", "sizeMax", "sizeMin"}, help = "--joinTable or --joinColumnName must be defined")
+  public boolean areOptionalParametersVisibleForFieldList(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).areOptionalParametersVisibleForFieldList(shellContext);
+    }
+    return false;
+  }
+
   @CliCommand(
       value = "field list",
       help = "Adds a private `List` field to an existing Java source file, representing (always) a "
@@ -1359,6 +1451,15 @@ public class FieldCommands implements CommandMarker {
               + "This option is mandatory for this command if `--cardinality` is set to `MANY_TO_MANY` "
               + "and `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
               + "This option is only available for JPA entities and embeddable classes.") final String joinTable,
+      @CliOption(
+          key = "joinColumnName",
+          mandatory = true,
+          help = "The JPA `@JoinColumn` `name` attribute."
+              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
+              + "This option is only available for JPA entities and embeddable classes.") final String joinColumnName,
+      @CliOption(key = "referencedColumnName", mandatory = false,
+          help = "The JPA `@JoinColumn` `referencedColumnName` attribute."
+              + "This option is only available for JPA entities and embeddable classes.") final String referencedColumnName,
       @CliOption(
           key = "joinColumns",
           mandatory = true,
@@ -1467,8 +1568,9 @@ public class FieldCommands implements CommandMarker {
 
     getFieldCreatorProvider(typeName).createListField(typeName, fieldType, fieldName,
         cardinality.getCardinality(), null, notNull, sizeMin, sizeMax, mappedBy, fetch, comment,
-        joinTable, joinColumns, referencedColumns, inverseJoinColumns, inverseReferencedColumns,
-        permitReservedWords, aggregation, orphanRemoval, shellContext.isForce());
+        joinColumnName, referencedColumnName, joinTable, joinColumns, referencedColumns,
+        inverseJoinColumns, inverseReferencedColumns, permitReservedWords, aggregation,
+        orphanRemoval, shellContext.isForce());
 
   }
 

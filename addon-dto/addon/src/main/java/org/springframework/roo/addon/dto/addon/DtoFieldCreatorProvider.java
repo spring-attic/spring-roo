@@ -146,6 +146,21 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
+  public boolean isJoinColumnNameMandatoryForFieldList(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean isJoinColumnNameVisibleForFieldList(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean isReferencedColumnNameVisibleForFieldList(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
   public boolean isEnumTypeVisibleForFieldEnum(ShellContext shellContext) {
     return false;
   }
@@ -197,6 +212,16 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
 
   @Override
   public boolean isCascadeTypeVisibleForFieldReference(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean areOptionalParametersVisibleForFieldSet(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean areOptionalParametersVisibleForFieldList(ShellContext shellContext) {
     return false;
   }
 
@@ -271,7 +296,22 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
+  public boolean isJoinColumnNameMandatoryForFieldSet(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean isJoinColumnNameVisibleForFieldSet(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
   public boolean isColumnMandatoryForFieldString(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean isReferencedColumnNameVisibleForFieldSet(ShellContext shellContext) {
     return false;
   }
 
@@ -546,20 +586,20 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
   @Override
   public void createSetField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       Cardinality cardinality, Cascade[] cascadeType, boolean notNull, Integer sizeMin,
-      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable,
-      String joinColumns, String referencedColumns, String inverseJoinColumns,
-      String inverseReferencedColumns, boolean permitReservedWords, Boolean aggregation,
-      Boolean orphanRemoval, boolean isForce) {
+      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumn,
+      String referencedColumn, String joinTable, String joinColumns, String referencedColumns,
+      String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce) {
     throw new IllegalArgumentException("'field set' command is not available for DTO classes.");
   }
 
   @Override
   public void createListField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       Cardinality cardinality, Cascade[] cascadeType, boolean notNull, Integer sizeMin,
-      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable,
-      String joinColumns, String referencedColumns, String inverseJoinColumns,
-      String inverseReferencedColumns, boolean permitReservedWords, Boolean aggregation,
-      Boolean orphanRemoval, boolean isForce) {
+      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumn,
+      String referencedColumn, String joinTable, String joinColumns, String referencedColumns,
+      String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce) {
     throw new IllegalArgumentException("'field list' command is not available for DTO classes.");
   }
 
@@ -882,7 +922,4 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
 
     return javaTypeString;
   }
-
-
-
 }

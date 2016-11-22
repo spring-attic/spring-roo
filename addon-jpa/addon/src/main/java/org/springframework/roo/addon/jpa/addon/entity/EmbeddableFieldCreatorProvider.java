@@ -238,6 +238,21 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
     return true;
   }
 
+  @Override
+  public boolean isJoinColumnNameMandatoryForFieldList(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean isJoinColumnNameVisibleForFieldList(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean isReferencedColumnNameVisibleForFieldList(ShellContext shellContext) {
+    return false;
+  }
+
   /**
    * ROO-3710: Indicator that checks if exists some project setting that makes
    * table column parameter mandatory.
@@ -321,6 +336,26 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   @Override
   public boolean isCascadeTypeVisibleForFieldReference(ShellContext shellContext) {
     return true;
+  }
+
+  @Override
+  public boolean areOptionalParametersVisibleForFieldSet(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean isJoinColumnNameMandatoryForFieldSet(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean isJoinColumnNameVisibleForFieldSet(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean isReferencedColumnNameVisibleForFieldSet(ShellContext shellContext) {
+    return false;
   }
 
   /**
@@ -407,7 +442,17 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
 
   @Override
   public boolean isJoinTableVisibleForFieldSet(ShellContext shellContext) {
-    return true;
+    String joinColumnNameParam = shellContext.getParameters().get("joinColumnName");
+
+    if (joinColumnNameParam == null) {
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public boolean areOptionalParametersVisibleForFieldList(ShellContext shellContext) {
+    return false;
   }
 
   @Override
@@ -479,7 +524,12 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
 
   @Override
   public boolean isJoinTableVisibleForFieldList(ShellContext shellContext) {
-    return true;
+    String joinColumnNameParam = shellContext.getParameters().get("joinColumnName");
+
+    if (joinColumnNameParam == null) {
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -855,25 +905,25 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   @Override
   public void createSetField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       Cardinality cardinality, Cascade[] cascadeType, boolean notNull, Integer sizeMin,
-      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable,
-      String joinColumns, String referencedColumns, String inverseJoinColumns,
-      String inverseReferencedColumns, boolean permitReservedWords, Boolean aggregation,
-      Boolean orphanRemoval, boolean isForce) {
+      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumnName,
+      String referencedColumnName, String joinTable, String joinColumns, String referencedColumns,
+      String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce) {
     // This method shouldn't be executed as
     // EmbeddableFieldCreatorProvider.isFieldCollectionAvailable() *ALWAYS* returns false
-    throw new IllegalArgumentException("'reference set' is not supported for Embedables objects");
+    throw new IllegalArgumentException("'set field' is not supported for Embedables objects");
   }
 
   @Override
   public void createListField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       Cardinality cardinality, Cascade[] cascadeType, boolean notNull, Integer sizeMin,
-      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable,
-      String joinColumns, String referencedColumns, String inverseJoinColumns,
-      String inverseReferencedColumns, boolean permitReservedWords, Boolean aggregation,
-      Boolean orphanRemoval, boolean isForce) {
+      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumnName,
+      String referencedColumnName, String joinTable, String joinColumns, String referencedColumns,
+      String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce) {
     // This method shouldn't be executed as
     // EmbeddableFieldCreatorProvider.isFieldCollectionAvailable() *ALWAYS* returns false
-    throw new IllegalArgumentException("'reference list' is not supported for Embedables objects");
+    throw new IllegalArgumentException("'list field' is not supported for Embedables objects");
   }
 
   @Override
@@ -1197,5 +1247,4 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
 
     return javaTypeString;
   }
-
 }
