@@ -311,44 +311,66 @@ public class WebFinderCommands implements CommandMarker {
    * @param finder
    * @param responseType
    */
-  @CliCommand(value = "web mvc finder",
-      help = "Adds @RooWebFinder annotation to MVC controller type")
+  @CliCommand(
+      value = "web mvc finder",
+      help = "Publishes existing finders to web layer, generating controllers and additional views for "
+          + "them. It adds `@RooWebFinder` annotation to MVC controller type.")
   public void addController(
       @CliOption(
           key = "entity",
           mandatory = false,
-          help = "The entity owning the finders that should be published. Not avalaible if 'all' parameter has been specified before") JavaType entity,
+          help = "The entity owning the finders that should be published. When working on a single module "
+              + "project, simply specify the name of the entity. If you consider it necessary, you can "
+              + "also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base "
+              + "package). When working with multiple modules, you should specify the name of the entity "
+              + "and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not "
+              + "specified, it is assumed that the entity is in the module which has the focus."
+              + "Possible values are: any of the entities in the project."
+              + "This option is mandatory if `--all` is not specified. Otherwise, using `--all` "
+              + "will cause the parameter `--entity` won't be available.") JavaType entity,
       @CliOption(
           key = "all",
           mandatory = false,
           specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "Indicates if developer wants to publish in web layer all finders from "
-              + "all entities in project. Not avalaible if 'entity' parameter has been specified before") boolean all,
-      @CliOption(
-          key = "queryMethod",
-          mandatory = false,
-          help = "Indicates the name of the finder to add to web layer. Not avalaible if 'entity' parameter has not been specified before") String queryMethod,
+          help = "Indicates if developer wants to publish in web layer all finders from all entities in "
+              + "project. "
+              + "This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` "
+              + "will cause the parameter `--all` won't be available."
+              + "Default if option present: `true`; default if option not present: `false`.") boolean all,
+      @CliOption(key = "queryMethod", mandatory = false,
+          help = "Indicates the name of the finder to add to web layer. "
+              + "Possible values are: any of the finder names created for the entity, included in "
+              + "`@RooJpaRepository` of the `--entity` associated repository."
+              + "This option is available only when `--entity` has been specified.") String queryMethod,
       @CliOption(
           key = "responseType",
           mandatory = false,
-          help = "Indicates the responseType to be used by generated controller. Depending "
-              + "of the selected responseType, generated methods and views will vary. Not avalaible if 'all' or 'entity' parameters have not been specified before") String responseType,
+          help = "Indicates the responseType to be used by generated finder controllers. Depending on "
+              + "the selected responseType, generated methods and views will vary."
+              + "Possible values are: `JSON` plus any response type installed with `web mvc view setup` "
+              + "command. "
+              + "This option is only available if `--all` or `--entity` parameters have been specified."
+              + "Default: `JSON`.") String responseType,
       @CliOption(
           key = "package",
           mandatory = true,
           unspecifiedDefaultValue = "~.web",
-          help = "Indicates the package where generated controller will be located. If "
-              + "multimodule project, package must be in an application module (those "
-              + "with @SpringBootApplication class). Not avalaible if 'all' or 'entity' parameters have not been specified before (mandatory if project has more than one "
-              + "'application' modules)") JavaPackage controllerPackage,
+          help = "Indicates the Java package where the finder controllers should be generated. In"
+              + " multi-module project you should specify the module name before the package name. "
+              + "Ex.: `--package application:org.springframework.roo.web` but, if module name is not "
+              + "present, the Roo Shell focused module will be used. "
+              + "This option is available only if `--all` or `--entity` option has been specified."
+              + "Default value if not present: `~.web` package, or 'application:~.web' if multi-module "
+              + "project.") JavaPackage controllerPackage,
       @CliOption(
           key = "pathPrefix",
           mandatory = false,
           unspecifiedDefaultValue = "",
           specifiedDefaultValue = "",
-          help = "Indicates the default path value for accesing finder resources in "
-              + "controller, excluding first '/'. Not avalaible if 'all' or 'entity' parameters have not been specified before") String pathPrefix) {
+          help = "Indicates the default path value for accesing finder resources in controller, used for "
+              + "this controller `@RequestMapping` excluding first '/'."
+              + "This option is available only if `--all` or `--entity` option has been specified.") String pathPrefix) {
 
     // Getting --responseType service
     Map<String, ControllerMVCResponseService> responseTypeServices =

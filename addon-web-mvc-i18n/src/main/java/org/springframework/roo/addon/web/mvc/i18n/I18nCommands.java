@@ -95,21 +95,29 @@ public class I18nCommands implements CommandMarker {
 
   @CliCommand(
       value = "web mvc language",
-      help = "Install new language in generated project. Also, could be used to specify the default language of the project.")
+      help = "Installs new language in generated project views. Also, could be used to specify the "
+          + "default language of the project.")
   public void language(
-      @CliOption(key = "code", mandatory = true,
-          help = "The language code for the desired bundle (mandatory)") final I18n i18n,
       @CliOption(
-          key = "useAsDefault",
-          mandatory = false,
-          help = "Indicates if selected language should be used as default on this application. By default false.",
-          specifiedDefaultValue = "false", unspecifiedDefaultValue = "false") boolean useAsDefault,
+          key = "code",
+          mandatory = true,
+          help = "The language code for the desired bundle."
+              + "Possible values are: supported languages. Currently `en` (English, default) and `es` (Spanish).") final I18n i18n,
+      @CliOption(key = "useAsDefault", mandatory = false,
+          help = "Indicates if selected language should be used as default on this application. "
+              + "Default: `false`.", specifiedDefaultValue = "false",
+          unspecifiedDefaultValue = "false") boolean useAsDefault,
       @CliOption(
           key = "module",
           mandatory = true,
-          help = "The application module where to install message bundles. This option is not available if there is only one "
-              + "application module (mandatory if the focus is not set in application module)",
-          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
+          help = "The application module where to install the language support. "
+              + "This option is mandatory if the focus is not set in an application module, that is, a "
+              + "module containing an `@SpringBootApplication` class. "
+              + "This option is available only if there are more than one application module and none of"
+              + " them is focused. "
+              + "Default if option not present: the unique 'application' module, or focused 'application'"
+              + " module.", unspecifiedDefaultValue = ".",
+          optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
 
     if (i18n == null) {
       LOGGER.log(Level.INFO, "ERROR: You should provide a valid language code.");

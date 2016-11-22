@@ -118,17 +118,37 @@ public class IntegrationTestCommands implements CommandMarker {
     return results;
   }
 
-  @CliCommand(value = "test integration",
-      help = "Creates a new integration test for the specified entity")
+  @CliCommand(
+      value = "test integration",
+      help = "Creates a new integration test class for the specified entity using its associated "
+          + "repository. The generated test class will contain a basic structure and the necessary "
+          + "testing components.")
   public void newIntegrationTest(
-      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
-          help = "The name of the repository to create an integration test") final JavaType klass,
-      @CliOption(key = "module", mandatory = true,
-          help = "The application module where generate the integration test",
-          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
+      @CliOption(
+          key = "class",
+          mandatory = false,
+          unspecifiedDefaultValue = "*",
+          help = "The name of the repository to create an integration test. If you consider it necessary, you can "
+              + "also specify the package. Ex.: `--class ~.repository.MyRepository` (where `~` is the "
+              + "base package). When working with multiple modules, you should specify the name of the "
+              + "class and the module where it is. Ex.: `--class repository:~.MyRepository`. If the "
+              + "module is not specified, it is assumed that the repository is in the module which has the "
+              + "focus. " + "Possible values are: any of the repositories in the project.") final JavaType klass,
+      @CliOption(
+          key = "module",
+          mandatory = true,
+          help = "The application module where generate the integration test."
+              + "This option is mandatory if the focus is not set in an application module, that is, a "
+              + "module containing an `@SpringBootApplication` class. "
+              + "This option is available only if there are more than one application module and none of"
+              + " them is focused. "
+              + "Default if option not present: the unique 'application' module, or focused 'application'"
+              + " module.", unspecifiedDefaultValue = ".",
+          optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+          help = "Indicates whether reserved words are ignored by Roo. "
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords) {
 
     if (!permitReservedWords) {
       ReservedWords.verifyReservedWordsNotPresent(klass);

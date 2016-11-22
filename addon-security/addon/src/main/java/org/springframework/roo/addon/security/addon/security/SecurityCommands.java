@@ -131,17 +131,27 @@ public class SecurityCommands implements CommandMarker {
 
   }
 
-  @CliCommand(value = "security setup", help = "Install Spring Security into your project")
+  @CliCommand(value = "security setup", help = "Install Spring Security into your project.")
   public void installSecurity(
-      @CliOption(key = "provider", mandatory = false,
-          help = "The Spring Security provider to install.", unspecifiedDefaultValue = "DEFAULT",
-          specifiedDefaultValue = "DEFAULT") String type,
+      @CliOption(
+          key = "provider",
+          mandatory = false,
+          help = "The Spring Security provider to install. "
+              + "Possible values are: `DEFAULT` (default Spring Security configuration provided by "
+              + "Spring Boot will be used), and `SPRINGLETS_JPA` (advanced Spring Security configuration "
+              + "will be included using Springlets JPA Authentication).",
+          unspecifiedDefaultValue = "DEFAULT", specifiedDefaultValue = "DEFAULT") String type,
       @CliOption(
           key = "module",
           mandatory = true,
-          help = "The application module where to install the persistence. Not available if there is only one application module "
-              + "(mandatory if the focus is not set in application module)",
-          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
+          help = "The application module where to install the security support. "
+              + "This option is mandatory if the focus is not set in an application module, that is, a "
+              + "module containing an `@SpringBootApplication` class. "
+              + "This option is available only if there are more than one application module and none of"
+              + " them is focused. "
+              + "Default if option not present: the unique 'application' module, or focused 'application'"
+              + " module.", unspecifiedDefaultValue = ".",
+          optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
 
     securityOperations.installSecurity(getSecurityProviderFromName(type), module);
 
@@ -215,23 +225,35 @@ public class SecurityCommands implements CommandMarker {
     return results;
   }
 
-  @CliCommand(value = "security authorize",
-      help = "Include @PreAuthorize annotation to an specific method.")
+  @CliCommand(
+      value = "security authorize",
+      help = "Includes @PreAuthorize annotation to an specific method for controlling access to its "
+          + "invocation.")
   public void authorizeOperation(
       @CliOption(
           key = "class",
           mandatory = true,
-          help = "The service class that contains the method to annotate with @PreAuthorize (mandatory)") JavaType klass,
+          help = "The service class that contains the method to annotate with @PreAuthorize. When working"
+              + " on a single module project, simply specify the name of the class. If you consider it "
+              + "necessary, you can also specify the package. Ex.: `--class ~.service.MyClass` (where `~` "
+              + "is the base package). When working with multiple modules, you should specify the name of the class and the "
+              + "module where it is. Ex.: `--class service:~.MyClass`. If the module is not specified, "
+              + "it is assumed that the class is in the module which has the focus.") JavaType klass,
       @CliOption(
           key = "method",
           mandatory = true,
-          help = "The service method name and its params that will be annotated with @PreAuthorize. Is possible to specify a regular expression (mandatory)") String methodName,
+          help = "The service method name (including its params) that will be annotated with "
+              + "@PreAuthorize. Is possible to specify a regular expression."
+              + "Possible values are: any of the existing methods of the class specified in `--class` "
+              + "option, or regular expression.") String methodName,
       @CliOption(key = "roles", mandatory = false,
-          help = "Comma separated list with all the roles to add inside 'hasAnyRole' instruction. ") String roles,
+          help = "Comma separated list with all the roles to add inside 'hasAnyRole' instruction."
+              + "This option is mandatory if `--usernames` is not specified.") String roles,
       @CliOption(
           key = "usernames",
           mandatory = false,
-          help = "Comma separated list with all the usernames to add inside Spring Security annotation.") String usernames) {
+          help = "Comma separated list with all the usernames to add inside Spring Security annotation. "
+              + "This option is mandatory if `--roles` is not specified.") String usernames) {
 
     if (StringUtils.isEmpty(roles) && StringUtils.isEmpty(usernames)) {
       LOGGER
@@ -322,29 +344,43 @@ public class SecurityCommands implements CommandMarker {
     return results;
   }
 
-  @CliCommand(value = "security filtering",
-      help = "Include @PreFilter/@PostFilter annotation to an specific method.")
+  @CliCommand(
+      value = "security filtering",
+      help = "Include @PreFilter/@PostFilter annotation to an specific method to filter results of a "
+          + "method invocation based on an expression.")
   public void filterOperation(
       @CliOption(
           key = "class",
           mandatory = true,
-          help = "The service class that contains the method to annotate with @PreFilter/@PostFilter (mandatory)") JavaType klass,
+          help = "The service class that contains the method to annotate. When working on a single module"
+              + " project, simply specify the name of the class. If you consider it necessary, you can "
+              + "also specify the package. Ex.: `--class ~.service.MyClass` (where `~` is the base "
+              + "package). When working with multiple modules, you should specify the name of the class "
+              + "and the module where it is. Ex.: `--class service:~.MyClass`. If the module is not "
+              + "specified, it is assumed that the class is in the module which has the focus.") JavaType klass,
       @CliOption(
           key = "method",
           mandatory = true,
-          help = "The service method name and its params that will be annotated with @PreFilter/@PostFilter. Is possible to specify a regular expression (mandatory)") String methodName,
+          help = "The service method name (including its params), that will be annotated with "
+              + "@PreFilter/@PostFilter. Is possible to specify a regular expression."
+              + "Possible values are: any of the existing methods of the class specified in `--class` "
+              + "option, or regular expression.") String methodName,
       @CliOption(key = "roles", mandatory = false,
-          help = "Comma separated list with all the roles to add inside 'hasAnyRole' instruction") String roles,
+          help = "Comma separated list with all the roles to add inside 'hasAnyRole' instruction."
+              + "This option is mandatory if `--usernames` is not specified.") String roles,
       @CliOption(
           key = "usernames",
           mandatory = false,
-          help = "Comma separated list with all the usernames to add inside Spring Security annotation") String usernames,
+          help = "Comma separated list with all the usernames to add inside Spring Security annotation."
+              + "This option is mandatory if `--roles` is not specified.") String usernames,
       @CliOption(
           key = "when",
           mandatory = false,
           unspecifiedDefaultValue = PRE_FILTER,
           specifiedDefaultValue = PRE_FILTER,
-          help = "Indicates if filtering should be after or before to execute the operation. Depends of the specified value, @PreFilter annotation or @PostFilter annotation will be included") String when) {
+          help = "Indicates if filtering should be after or before to execute the operation. Depends of "
+              + "the specified value, @PreFilter annotation or @PostFilter annotation will be included."
+              + "Possible values are: `PRE` and `POST`." + "Default: `PRE`.") String when) {
 
     if (StringUtils.isEmpty(roles) && StringUtils.isEmpty(usernames)) {
       LOGGER

@@ -221,25 +221,44 @@ public class PushInCommands implements CommandMarker {
    */
   @CliCommand(
       value = "push-in",
-      help = "Push-in all methods, fields, annotations, imports, extends, etc.. declared on  ITDs to its .java files. You could specify --all parameter to apply push-in on every component of generated project, or you could define package, class or method where wants to apply push-in.")
+      help = "Allows to push-in elements declared in the ITDs to its .java files. You could specify "
+          + "`--all` option to apply push-in on every component of generated project, or you could "
+          + "define any package, class or method to apply push-in, combining them.")
   public void pushIn(
       @CliOption(
           key = "all",
           mandatory = false,
           specifiedDefaultValue = "",
-          help = "Parameter that indicates if push-in process should be applied to entire project. If specified, 'package', 'class' or 'method' parameters will be unavailable. This option is avalaible if 'package', 'class' and 'method' parameters have not specified.. It doesn't allow any value.") String all,
+          help = "Option that indicates if push-in process should be applied to entire project. "
+              + "This option is mandatory if none of `--package`, `--class` or `--method` are specified. "
+              + "Otherwise, using `--package`, `--class` or `--method` will cause the parameter `--all` "
+              + "won't be available.") String all,
       @CliOption(
           key = "package",
           mandatory = false,
-          help = "JavaPackage with the specified package where developers wants to make push-in. This option is avalaible if 'all' parameter is not specified.") JavaPackage specifiedPackage,
+          help = "JavaPackage with the specified package where developer wants to make push-in. In "
+              + "multi-module project you should specify the module name before the package name. "
+              + "Ex.: `--package model:org.springframework.roo` but, if module name is not present, "
+              + "the Roo Shell focused module will be used. "
+              + "This option is not avalaible if `--all` parameter has been already specified.") JavaPackage specifiedPackage,
       @CliOption(
           key = "class",
           mandatory = false,
-          help = "JavaType with the specified class where developer wants to make push-in. This option is avalaible if 'all' parameter is not specified.") final JavaType klass,
+          help = "JavaType with the specified class where developer wants to make push-in. When working "
+              + "on a single module project, simply specify the name of the class. If you consider it "
+              + "necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` "
+              + "is the base package). When working with multiple modules, you should specify the name "
+              + "of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the "
+              + "module is not specified, it is assumed that the class is in the module which has the "
+              + "focus."
+              + "This option is not avalaible if `--all` parameter has been already specified.") final JavaType klass,
       @CliOption(
           key = "method",
           mandatory = false,
-          help = "String with the specified name of the method that developer wants to push-in. You could use a Regular Expression to make push-in of more than one method on the same execution. This option is avalaible if 'all' parameter is not specified.") String method,
+          help = "String with the specified name of the method which developer wants to push-in. "
+              + "You could use a Regular Expression to make push-in of more than one method on the same "
+              + "execution. "
+              + "This option is not avalaible if `--all` parameter has been already specified.") String method,
       ShellContext shellContext) {
 
     // Developer must specify at least one parameter

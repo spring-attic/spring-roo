@@ -3,15 +3,6 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE;
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -44,10 +35,18 @@ import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
 import org.springframework.roo.shell.CliOptionMandatoryIndicator;
 import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class provides necessary commands to be able to include Spring MVC on
@@ -147,22 +146,28 @@ public class ControllerCommands implements CommandMarker {
    * @param module
    * @param appServer
    */
-  @CliCommand(value = "web mvc setup", help = "Includes Spring MVC on generated project")
+  @CliCommand(value = "web mvc setup",
+      help = "Includes Spring MVC configuration on generated project. "
+          + "Needed for several MVC related commands.")
   public void setup(
       @CliOption(
           key = "module",
           mandatory = true,
-          help = "The application module where to install the persistence. This option is available if there is more than "
-              + "one application module (mandatory if the focus is not set in application module)",
-          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
-      @CliOption(key = "appServer", mandatory = false,
-          help = "The server where deploy the application", unspecifiedDefaultValue = "EMBEDDED") String appServer) {
+          help = "The application module where to install the Spring MVC support. "
+              + "This option is mandatory if the focus is not set in an application module, that is, a "
+              + "module containing an `@SpringBootApplication` class. "
+              + "This option is available only if there are more than one application module and none of"
+              + " them is focused. "
+              + "Default if option not present: the unique 'application' module, or focused 'application'"
+              + " module.", unspecifiedDefaultValue = ".",
+          optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
 
-    if (!getServerProviders().containsKey(appServer)) {
+    // TODO: Arbitrary value until more server providers will be available
+    if (!getServerProviders().containsKey("EMBEDDED")) {
       throw new IllegalArgumentException("ERROR: Invalid server provider");
     }
 
-    getControllerOperations().setup(module, serverProviders.get(appServer));
+    getControllerOperations().setup(module, serverProviders.get("EMBEDDED"));
   }
 
   /**
@@ -191,7 +196,7 @@ public class ControllerCommands implements CommandMarker {
    * @return
    */
   @CliOptionVisibilityIndicator(params = "entity", command = "web mvc controller",
-      help = "--entity parameter is not be visible if --all parameter has been specified before.")
+      help = "--entity parameter is not visible if --all parameter has been specified before.")
   public boolean isEntityParameterVisible(ShellContext context) {
     if (context.getParameters().containsKey("all")) {
       return false;
@@ -211,7 +216,7 @@ public class ControllerCommands implements CommandMarker {
   @CliOptionVisibilityIndicator(
       params = {"package", "pathPrefix", "responseType"},
       command = "web mvc controller",
-      help = "--package, --pathPrefix and --responseType parameters are not be visible if --all parameter or --entity parameter has been specified before.")
+      help = "--package, --pathPrefix and --responseType parameters are not visible if --all parameter or --entity parameter has not been specified before.")
   public boolean areParametersVisibles(ShellContext context) {
     if (context.getParameters().containsKey("all") || context.getParameters().containsKey("entity")) {
       return true;
@@ -312,41 +317,61 @@ public class ControllerCommands implements CommandMarker {
    */
   @CliCommand(
       value = "web mvc controller",
-      help = "Generates new `@RooController's` in the directory _src/main/java_ of the selected project module"
-          + "(if any). The generated controllers should manage specific entities in the project.")
+      help = "Generates new `@RooController's` in the directory _src/main/java_ of the selected project "
+          + "module (if any). The generated controllers should manage specific entities in the project.")
   public void addController(
       @CliOption(
           key = "all",
           mandatory = false,
           specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "Indicates if developer wants to generate controllers for every entity of current project."
-              + "This param will be available if `--entity` parameter has not been specified.") boolean all,
-      @CliOption(key = "entity", mandatory = false,
-          help = "Indicates the entity that new controller will be manage."
-              + "This param will be available if `--all` parameter has not been specified") JavaType entity,
+          help = "Indicates if developer wants to generate controllers for every entity of current "
+              + "project."
+              + "This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` "
+              + "will cause the parameter `--all` won't be available."
+              + "Default if option present: `true`; default if option not present: `false`.") boolean all,
+      @CliOption(
+          key = "entity",
+          mandatory = false,
+          help = "The domain entity this controller should manage. When working on a single module "
+              + "project, simply specify the name of the entity. If you consider it necessary, you can "
+              + "also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). "
+              + "When working with multiple modules, you should specify the name of the entity and the "
+              + "module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not "
+              + "specified, it is assumed that the entity is in the module which has the focus."
+              + "Possible values are: any of the entities in the project."
+              + "This option is mandatory if `--all` is not specified. Otherwise, using `--all` "
+              + "will cause the parameter `--entity` won't be available.") JavaType entity,
       @CliOption(
           key = "responseType",
           mandatory = false,
           unspecifiedDefaultValue = "JSON",
           specifiedDefaultValue = "JSON",
-          help = "Indicates the responseType to be used by generated controller. Depending of the selected"
+          help = "Indicates the responseType to be used by generated controller. Depending on the selected "
               + "responseType, generated methods and views will vary."
-              + "This param will be available once `--all` or `--entity` parameters have been specified") String responseType,
+              + "Possible values are: `JSON` plus any response type installed with `web mvc view setup` "
+              + "command. "
+              + "This option is available once `--all` or `--entity` parameters have been specified."
+              + "Default: `JSON`.") String responseType,
       @CliOption(
           key = "package",
           mandatory = false,
           optionContext = APPLICATION_FEATURE,
-          help = "Indicates which package should be used to include generated controllers."
-              + "This param will be available once `--all` or `--entity` parameters have been specified") JavaPackage controllersPackage,
+          help = "Indicates which package should be used to include generated controllers. In "
+              + "multi-module project you should specify the module name before the package name. "
+              + "Ex.: `--package application:org.springframework.roo.web` but, if module name is not "
+              + "present, the Roo Shell focused module will be used. "
+              + "This option is available only if `--all` or `--entity` option has been specified."
+              + "Default value if not present: `~.web` package, or 'application:~.web' if multi-module "
+              + "project.") JavaPackage controllersPackage,
       @CliOption(
           key = "pathPrefix",
           mandatory = false,
           specifiedDefaultValue = "",
           unspecifiedDefaultValue = "",
-          help = "Indicates `@ResquestMapping` prefix to be used on this controller. Is not necessary to specify '/'."
-              + "Spring Roo shell will include it automatically."
-              + "This param will be visible once `--all` or `--entity` parameters have been specified") String pathPrefix) {
+          help = "Indicates `@RequestMapping` prefix to be used on this controller. It is not necessary "
+              + "to specify '/' as Spring Roo shell will include it automatically."
+              + "This option is available only if `--all` or `--entity` option has been specified.") String pathPrefix) {
 
     // Getting --responseType service
     Map<String, ControllerMVCResponseService> responseTypeServices =
@@ -605,38 +630,64 @@ public class ControllerCommands implements CommandMarker {
    */
   @CliCommand(
       value = "web mvc detail",
-      help = "Generates new @RooController's for relation fields which detail wants to be managed. It must be a @OneToMany field. Generated controllers will have @RooDetail with info about the parent entity")
+      help = "Generates new `@RooController` for relation fields which detail wants to be managed. "
+          + "It must be a `@OneToMany` field. Generated controllers will have `@RooDetail` with info "
+          + "about the parent entity")
   public void addDetailController(
       @CliOption(
           key = "all",
           mandatory = false,
           specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "Indicates if developer wants to generate first detail controllers for every entity"
-              + " that has a controller of current project. This param will be visible if 'entity' parameter has not been specified") boolean all,
+          help = "Indicates if developer wants to generate detail controllers for each `@OneToMany` "
+              + "relation of field in each entity in the project."
+              + "This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` "
+              + "will cause the parameter `--all` won't be available."
+              + "Default if option present: `true`; default if option not present: `false`.") boolean all,
       @CliOption(
           key = "entity",
           mandatory = false,
-          help = "Indicates the entity on which the detail controller is generated. This param will be visible if 'all' parameter has not been specified ") JavaType entity,
+          help = "Indicates the entity which this detail controller manages. When working on a single "
+              + "module project, simply specify the name of the entity. If you consider it necessary, you "
+              + "can also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base "
+              + "package). When working with multiple modules, you should specify the name of the entity "
+              + "and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is "
+              + "not specified, it is assumed that the entity is in the module which has the focus."
+              + "Possible values are: any of the entities in the project."
+              + "This option is mandatory if `--all` is not specified. Otherwise, using `--all` "
+              + "will cause the parameter `--entity` won't be available.") JavaType entity,
       @CliOption(
           key = "field",
           mandatory = false,
           specifiedDefaultValue = "",
           unspecifiedDefaultValue = "",
-          help = "Indicates the entity's field on which the detail controller is generated. It must be a @OneToMany field. This param will be visible if 'entity' parameter has been specified before. ") String field,
+          help = "Indicates the entity's field on which the detail controller is generated. It must be "
+              + "a `@OneToMany` field. "
+              + "Possible values are: fields representing a `@OneToMany` relation of the entity specified"
+              + " in `--entity` parameter."
+              + "This param is only available if `--entity` parameter has been specified before.") String field,
       @CliOption(
           key = "package",
           mandatory = false,
           optionContext = APPLICATION_FEATURE,
-          help = "Indicates which package has the controllers on which the detail controllers are generated. This param will be visible if 'all' or 'entity' parameters "
-              + "have been specified") JavaPackage controllersPackage,
+          help = "Indicates the Java package where the detail controllers should be generated. In"
+              + " multi-module project you should specify the module name before the package name. "
+              + "Ex.: `--package application:org.springframework.roo.web` but, if module name is not "
+              + "present, the Roo Shell focused module will be used. "
+              + "This option is available only if `--all` or `--entity` option has been specified."
+              + "Default value if not present: `~.web` package, or 'application:~.web' if multi-module "
+              + "project.") JavaPackage controllersPackage,
       @CliOption(
           key = "responseType",
           mandatory = false,
           unspecifiedDefaultValue = "JSON",
           specifiedDefaultValue = "JSON",
-          help = "Indicates the responseType to be used by generated controller. Depending of the selected responseType, generated methods and views will vary. This param "
-              + "will be visible if 'all' or 'entity' parameters have been specified") String responseType) {
+          help = "Indicates the responseType to be used by generated detail controllers. Depending on "
+              + "the selected responseType, generated methods and views will vary."
+              + "Possible values are: `JSON` plus any response type installed with `web mvc view setup` "
+              + "command. "
+              + "This option is available once `--all` or `--entity` parameters have been specified."
+              + "Default: `JSON`.") String responseType) {
 
     // Getting --responseType service
     Map<String, ControllerMVCResponseService> responseTypeServices =

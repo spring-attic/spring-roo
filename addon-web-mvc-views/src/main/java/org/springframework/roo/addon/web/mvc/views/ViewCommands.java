@@ -141,18 +141,25 @@ public class ViewCommands implements CommandMarker {
    * @param type
    * @param module
    */
-  @CliCommand(value = "web mvc view setup",
-      help = "Includes all necessary resources of provided responseType on generated project")
+  @CliCommand(
+      value = "web mvc view setup",
+      help = "Includes all necessary resources of provided response type on generated project. This "
+          + "response type will be needed by `web mvc controller`, `web mvc detail` and "
+          + "`web mvc templates setup` commands.")
   public void setup(
-      @CliOption(
-          key = "type",
-          mandatory = true,
-          help = "View identifier you want to install. Install your necessary views before to be used on controller generation command (mandatory") String type,
+      @CliOption(key = "type", mandatory = true,
+          help = "View identifier you want to install. This is known as 'responseType' in other "
+              + "`web mvc` commands.") String type,
       @CliOption(
           key = "module",
           mandatory = true,
-          help = "The application module where to install views. Not available if there is only one application module (mandatory if the focus is not "
-              + "set in application module)", unspecifiedDefaultValue = ".",
+          help = "The application module where to install views. "
+              + "This option is mandatory if the focus is not set in an application module, that is, a "
+              + "module containing an `@SpringBootApplication` class. "
+              + "This option is available only if there are more than one application module and none of"
+              + " them is focused. "
+              + "Default if option not present: the unique 'application' module, or focused 'application'"
+              + " module.)", unspecifiedDefaultValue = ".",
           optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
 
     Map<String, ControllerMVCResponseService> responseTypes = getControllerMVCResponseTypes(false);
@@ -218,12 +225,14 @@ public class ViewCommands implements CommandMarker {
    */
   @CliCommand(
       value = "web mvc templates setup",
-      help = "Includes view generation templates on current project. Will allow developers to customize view generation.")
+      help = "Includes view generation templates on current project. Will allow developers to customize "
+          + "view generation by modifying the templates from _[PROJECT-ROOT]/.roo/templates/..._")
   public void installTemplates(
       @CliOption(
           key = "type",
           mandatory = true,
-          help = "View identifier of templates you want to install. Only installed views are available (mandatory)") String type) {
+          help = "View identifier of templates you want to install. Only installed views are available. "
+              + "Views can be installed with `web mvc view setup` command.") String type) {
 
     Map<String, ControllerMVCResponseService> responseTypes = getControllerMVCResponseTypes(true);
     if (!responseTypes.containsKey(type)) {
