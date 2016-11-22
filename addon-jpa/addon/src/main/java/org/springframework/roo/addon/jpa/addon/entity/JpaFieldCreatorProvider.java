@@ -1071,8 +1071,15 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     if (mappedBy == null) {
       // generate mappedBy name from uncapitalized parentClass name
       mappedBy = new JavaSymbolName(StringUtils.uncapitalize(typeName.getSimpleTypeName()));
-
     }
+
+    // Check that child 'mappedBy' field isn't equal to child type name uncapitalized
+    Validate.isTrue(
+        !StringUtils.uncapitalize(fieldType.getSimpleTypeName()).equals(mappedBy.getSymbolName()),
+        "Child entity field can not have the same name as the referenced entity ('%s') name in "
+            + "lower camel case ('%s'). Please assign it other value using '--mappedBy' option.",
+        fieldType.getSimpleTypeName(), mappedBy.getSymbolName());
+
     // Check if child field exist
     checkFieldExists(mappedBy, false, childCid, "mappedBy");
 
@@ -1262,6 +1269,16 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
               new JavaSymbolName(StringUtils.uncapitalize(parentCid.getType().getSimpleTypeName()));
         }
       }
+
+      // Check that child 'mappedBy' field isn't equal to child type name uncapitalized
+      Validate
+          .isTrue(
+              !StringUtils.uncapitalize(fieldType.getSimpleTypeName()).equals(
+                  mappedBy.getSymbolName()),
+              "Child entity field can not have the same name as the referenced entity ('%s') name in "
+                  + "lower camel case ('%s'). Please assign it other value using '--mappedBy' option.",
+              fieldType.getSimpleTypeName(), mappedBy.getSymbolName());
+
       if (fetch == null) {
         fetch = Fetch.LAZY;
       }
