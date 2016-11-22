@@ -367,4 +367,9 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
   ViewContext<T> createViewContext(ControllerMetadata controllerMetadata, JavaType entity,
       JpaEntityMetadata entityMetadata, T viewMetadata);
 
+  /**
+   * Return the templates base path
+   */
+  String getTemplatesLocation();
+
 }
