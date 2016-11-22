@@ -8,29 +8,29 @@ settings add --name spring.roo.jpa.require.schema-object-name --value true
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 
 // Temporary removed 'readOnly' feature
-//entity jpa --class ~.domain.City --table NW_CITIES --sequenceName NW_CITIES_CITY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CITY_ID --versionField version --versionType long --versionColumn VERSION --readOnly
-//entity jpa --class ~.domain.Country --table NW_COUNTRIES --sequenceName NW_COUNTRIES_COUNTRY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn COUNTRY_ID --versionField version --versionType long --versionColumn VERSION --readOnly
-//entity jpa --class ~.domain.Region --table NW_REGIONS --sequenceName NW_REGIONS_REGION_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REGION_ID --versionField version --versionType long --versionColumn VERSION --readOnly
-entity jpa --class ~.domain.City --table NW_CITIES --sequenceName NW_CITIES_CITY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CITY_ID --versionField version --versionType long --versionColumn VERSION
-entity jpa --class ~.domain.Country --table NW_COUNTRIES --sequenceName NW_COUNTRIES_COUNTRY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn COUNTRY_ID --versionField version --versionType long --versionColumn VERSION
-entity jpa --class ~.domain.Region --table NW_REGIONS --sequenceName NW_REGIONS_REGION_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REGION_ID --versionField version --versionType long --versionColumn VERSION
+//entity jpa --class ~.domain.City --table NW_CITIES --sequenceName NW_CITIES_CITY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CITY_ID --versionField version --versionType java.lang.Long --versionColumn VERSION --readOnly
+//entity jpa --class ~.domain.Country --table NW_COUNTRIES --sequenceName NW_COUNTRIES_COUNTRY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn COUNTRY_ID --versionField version --versionType java.lang.Long --versionColumn VERSION --readOnly
+//entity jpa --class ~.domain.Region --table NW_REGIONS --sequenceName NW_REGIONS_REGION_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REGION_ID --versionField version --versionType java.lang.Long --versionColumn VERSION --readOnly
+entity jpa --class ~.domain.City --table NW_CITIES --sequenceName NW_CITIES_CITY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CITY_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
+entity jpa --class ~.domain.Country --table NW_COUNTRIES --sequenceName NW_COUNTRIES_COUNTRY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn COUNTRY_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
+entity jpa --class ~.domain.Region --table NW_REGIONS --sequenceName NW_REGIONS_REGION_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REGION_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
 
 // Not read-only entities
-entity jpa --class ~.domain.Category --table NW_CATEGORIES --sequenceName NW_CATEGORIES_CATEGORY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CATEGORY_ID --versionField version --versionType long --versionColumn VERSION
-entity jpa --class ~.domain.CustomerOrder --table NW_CUSTOMER_ORDERS --sequenceName NW_CUSTOMER_ORDERS_CUSTOMER_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CUSTOMER_ORDER_ID --versionField version --versionType long --versionColumn VERSION
-entity jpa --class ~.domain.OrderDetail --table NW_ORDER_DETAILS --sequenceName NW_ORDER_DETAILS_ORDER_DETAIL_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn ORDER_DETAIL_ID --versionField version --versionType long --versionColumn VERSION
-entity jpa --class ~.domain.Party --table NW_PARTIES --sequenceName NW_PARTIES_PARTY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PARTY_ID --versionField version --versionType long --versionColumn VERSION --inheritanceType JOINED
-entity jpa --class ~.domain.Product --table NW_PRODUCTS --sequenceName NW_PRODUCTS_PRODUCT_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PRODUCT_ID --versionField version --versionType long --versionColumn VERSION
-entity jpa --class ~.domain.PurchaseOrder --table NW_PURCHASE_ORDERS --sequenceName NW_PURCHASE_ORDERS_PURCHASE_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PURCHASE_ORDER_ID --versionField version --versionType long --versionColumn VERSION
-entity jpa --class ~.domain.Report --table NW_REPORTS --sequenceName NW_REPORTS_REPORT_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REPORT_ID --versionField version --versionType long --versionColumn VERSION
-entity jpa --class ~.domain.Shipper --table NW_SHIPPERS --sequenceName NW_SHIPPERS_SHIPPER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn SHIPPER_ID --versionField version --versionType long --versionColumn VERSION
-entity jpa --class ~.domain.SoldProduct --table NW_SOLD_PRODUCT_VIEW --sequenceName NW_SHIPPERS_SHIPPER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn ID --versionField version --versionType long --versionColumn VERSION
-entity jpa --class ~.domain.Store --table NW_STORES --sequenceName NW_STORES_STORE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn STORE_ID --versionField version --versionType long --versionColumn VERSION
-entity jpa --class ~.domain.Supplier --table NW_SUPPLIERS --sequenceName NW_SUPPLIERS_SUPPLIER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn SUPPLIER_ID --versionField version --versionType long --versionColumn VERSION
+entity jpa --class ~.domain.Category --table NW_CATEGORIES --sequenceName NW_CATEGORIES_CATEGORY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CATEGORY_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
+entity jpa --class ~.domain.CustomerOrder --table NW_CUSTOMER_ORDERS --sequenceName NW_CUSTOMER_ORDERS_CUSTOMER_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CUSTOMER_ORDER_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
+entity jpa --class ~.domain.OrderDetail --table NW_ORDER_DETAILS --sequenceName NW_ORDER_DETAILS_ORDER_DETAIL_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn ORDER_DETAIL_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
+entity jpa --class ~.domain.Party --table NW_PARTIES --sequenceName NW_PARTIES_PARTY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PARTY_ID --versionField version --versionType java.lang.Long --versionColumn VERSION --inheritanceType JOINED
+entity jpa --class ~.domain.Product --table NW_PRODUCTS --sequenceName NW_PRODUCTS_PRODUCT_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PRODUCT_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
+entity jpa --class ~.domain.PurchaseOrder --table NW_PURCHASE_ORDERS --sequenceName NW_PURCHASE_ORDERS_PURCHASE_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PURCHASE_ORDER_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
+entity jpa --class ~.domain.Report --table NW_REPORTS --sequenceName NW_REPORTS_REPORT_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REPORT_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
+entity jpa --class ~.domain.Shipper --table NW_SHIPPERS --sequenceName NW_SHIPPERS_SHIPPER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn SHIPPER_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
+entity jpa --class ~.domain.SoldProduct --table NW_SOLD_PRODUCT_VIEW --sequenceName NW_SHIPPERS_SHIPPER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn ID --versionField version --versionType java.lang.Long --versionColumn VERSION
+entity jpa --class ~.domain.Store --table NW_STORES --sequenceName NW_STORES_STORE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn STORE_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
+entity jpa --class ~.domain.Supplier --table NW_SUPPLIERS --sequenceName NW_SUPPLIERS_SUPPLIER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn SUPPLIER_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
 
 // Extended entities (identifierColumn still mandatory, but overrided)
-entity jpa --class ~.domain.Customer --table NW_CUSTOMERS --extends ~.domain.Party --identifierColumn PARTY_ID --sequenceName NW_CUSTOMERS_CUSTOMER_ID_SEQ --identifierStrategy SEQUENCE --versionField version --versionType long --versionColumn VERSION --force
-entity jpa --class ~.domain.Employee --table NW_EMPLOYEES --extends ~.domain.Party --identifierColumn PARTY_ID --sequenceName NW_EMPLOYEES_EMPLOYEE_ID_SEQ --identifierStrategy SEQUENCE --versionField version --versionType long --versionColumn VERSION --force
+entity jpa --class ~.domain.Customer --table NW_CUSTOMERS --extends ~.domain.Party --identifierColumn PARTY_ID --sequenceName NW_CUSTOMERS_CUSTOMER_ID_SEQ --identifierStrategy SEQUENCE --versionField version --versionType java.lang.Long --versionColumn VERSION --force
+entity jpa --class ~.domain.Employee --table NW_EMPLOYEES --extends ~.domain.Party --identifierColumn PARTY_ID --sequenceName NW_EMPLOYEES_EMPLOYEE_ID_SEQ --identifierStrategy SEQUENCE --versionField version --versionType java.lang.Long --versionColumn VERSION --force
 
 // Create enumerated types
 enum type --class ~.domain.Period
