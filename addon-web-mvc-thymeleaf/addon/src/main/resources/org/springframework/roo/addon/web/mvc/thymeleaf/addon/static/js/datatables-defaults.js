@@ -180,9 +180,6 @@
         }
       });
       
-      //data['name'] = getDataValue(datatables, 'load-param-name');
-      //data['description'] = getDataValue(datatables, 'load-param-description');
-
       $.ajax({
         url : url,
         type : 'GET',
@@ -191,6 +188,7 @@
         headers : {
           Accept : "application/vnd.datatables+json",
         },
+        context : datatables,
         beforeSend: function (request) {
           if($token != null && $token.length > 0 && $header != null && $header.length > 0) {
             request.setRequestHeader($header.attr("content"), $token.attr("content"));
@@ -210,10 +208,15 @@
         }
       })
       .fail(function(jqXHR, status) {
-        $('#datatablesErrorModal').modal('show');
+        if(jqXHR.responseJSON != null && jqXHR.responseJSON.status == 403){
+          var settings = this.settings()[0];
+          settings.oLanguage.sEmptyTable = "<p>Your session has expired or you have insufficient permissions</p>"
+          + "<a class='btn btn-primary' onclick='javascript:location.reload();'><span>Refresh</span></a>";
+        }
         callback(emptyData(data.draw));
       });
     }
+
     
     /**
      * Converts the first char of the given string to lower case.

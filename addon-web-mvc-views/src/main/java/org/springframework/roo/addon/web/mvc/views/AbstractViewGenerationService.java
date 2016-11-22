@@ -108,8 +108,6 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
   protected abstract DOC mergeMenu(String templateName, DOC loadExistingDoc, ViewContext<T> ctx,
       List<MenuEntry> menuEntries);
 
-  protected abstract String getTemplatesLocation();
-
   protected abstract void writeDoc(DOC document, String viewPath);
 
 
