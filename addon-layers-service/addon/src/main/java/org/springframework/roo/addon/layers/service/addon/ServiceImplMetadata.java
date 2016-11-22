@@ -724,7 +724,9 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
      * entity.addToRelatedEntity(entity.getRelatedEntity());
      */
     boolean commentAdded = false;
-    for (RelationInfo info : entityMetadata.getRelationInfos().values()) {
+    Map<String, RelationInfo> relationInfos = entityMetadata.getRelationInfos();
+    for (Entry<String, RelationInfo> entry : relationInfos.entrySet()) {
+      RelationInfo info = entry.getValue();
       if (info.cardinality == Cardinality.ONE_TO_ONE) {
         if (!commentAdded) {
           bodyBuilder.newLine();
@@ -732,7 +734,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
           commentAdded = true;
         }
         bodyBuilder.appendFormalLine("%s.%s(%s.get%s());", param0, info.addMethod.getMethodName(),
-            param0, StringUtils.capitalize(info.childType.getSimpleTypeName()));
+            param0, StringUtils.capitalize(entry.getKey()));
         bodyBuilder.newLine();
       }
     }

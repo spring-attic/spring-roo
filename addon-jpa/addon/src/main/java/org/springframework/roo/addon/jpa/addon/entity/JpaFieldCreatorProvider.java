@@ -1145,10 +1145,10 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     childFieldDetails.setNotNull(notNull);
 
     // insert child field
-    insertField(childFieldDetails, permitReservedWords, false);
+    insertField(childFieldDetails, permitReservedWords, false, true);
 
     // insert parent field
-    insertField(parentFieldDetails, permitReservedWords, false);
+    insertField(parentFieldDetails, permitReservedWords, false, true);
   }
 
   @Override
@@ -1366,7 +1366,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       }
     }
 
-    insertField(childFieldDetails, permitReservedWords, false);
+    insertField(childFieldDetails, permitReservedWords, false, true);
   }
 
   /**
@@ -1443,7 +1443,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
           inverseJoinColumnsArray, inverseReferencedColumnsArray);
     }
 
-    insertField(childFieldDetails, permitReservedWords, false);
+    insertField(childFieldDetails, permitReservedWords, false, true);
   }
 
 
@@ -1527,7 +1527,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     parentFieldDetails.addAdditionaAnnotation(rooJpaRelationAnnotation);
 
     // insert parent field
-    insertField(parentFieldDetails, permitReservedWords, false);
+    insertField(parentFieldDetails, permitReservedWords, false, true);
   }
 
   /**
@@ -1570,7 +1570,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       parentFieldDetails.setSizeMax(sizeMax);
     }
     // Handle enumeration Set
-    insertField(parentFieldDetails, permitReservedWords, false);
+    insertField(parentFieldDetails, permitReservedWords, false, true);
   }
 
   @Override
@@ -1777,12 +1777,16 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
   public void insertField(final FieldDetails fieldDetails, final boolean permitReservedWords,
       final boolean transientModifier) {
+    insertField(fieldDetails, permitReservedWords, transientModifier, false);
+  }
 
+  public void insertField(final FieldDetails fieldDetails, final boolean permitReservedWords,
+      final boolean transientModifier, boolean evictCacheForTargetClass) {
     String module = getFieldModule(fieldDetails);
 
     final FieldMetadataBuilder fieldBuilder =
         generateFieldBuilder(fieldDetails, permitReservedWords, transientModifier);
-    typeManagementService.addField(fieldBuilder.build());
+    typeManagementService.addField(fieldBuilder.build(), evictCacheForTargetClass);
 
     if (module != null) {
       projectOperations.addModuleDependency(module);
