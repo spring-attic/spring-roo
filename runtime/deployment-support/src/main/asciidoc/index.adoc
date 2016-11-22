@@ -29,7 +29,8 @@ DISID CORPORATION S.L.
 :doctype: book
 :lang: es
 :source-highlighter: pygments
-:sectnums:
+:sectanchors:
+:sectnums!:
 :toc:
 :toclevels: 5
 :toc-placement: left
@@ -50,13 +51,10 @@ provided that you do not charge any fee for such copies and further provided tha
 each copy contains this Copyright Notice, whether distributed in print or
 electronically._
 
-// Disable auto-numbering on Getting started only in order to chapter one start at 1. Then on first chapter
-// re-enable the auto-numbering.
-:numbered!:
-[[gettingStarted]]
+[[getting-started]]
 == Getting started
 
-[[gettingStarted-overview]]
+[[getting-started-overview]]
 === 1. Overview
 
 Spring Roo is an easy-to-use development tool for quickly building web applications in the Java programming language, which can be used as an standalone application or as an Eclipse or STS plugin. It allows you to build high-quality, high-performance, lock-in-free enterprise applications in just minutes.
@@ -69,12 +67,12 @@ _What does it mean "Roo is a development tool"?_
 
 Best of all, Roo works alongside your existing Java and Spring knowledge, skills and experience. You probably will not need to learn anything new to use Roo, as there is no new language or runtime platform needed. You simply program in your normal Java way and Roo just works, sitting in the background taking care of the things you do not want to worry about.
 
-[[gettingStarted-whatsNew]]
+[[getting-started-whatsNew]]
 === 2. What's new
 
 TODO
 
-[[gettingStarted-requirements]]
+[[getting-started-requirements]]
 === 3. Requirements
 
 To get started, please ensure you have the following system dependencies:
@@ -87,7 +85,7 @@ or newer installed. Java JDK 7 is recommended.
 
 We always recommend you use the latest version of Java and Maven that are available for your platform.
 
-[[gettingStarted-install-roo]]
+[[getting-started-install-roo]]
 === 4. Install Spring Roo
 
 We recommend you use http://spring.io/tools/sts[Spring Tool Suite (STS)] which includes a number of features that make working with Spring Roo even easier (you can of course link:#roo-without-ide[use Roo without an IDE] at all if you prefer).
@@ -97,6 +95,10 @@ To install Spring Roo on your STS 3.8.2+ follow the instructions below:
 . Download the current release from Spring Roo project page http://projects.spring.io/spring-roo/#download-widget[downloads section].
 . Unzip the distribution, which will unpack to a single installation directory; we will refer to it as `$ROO_HOME` from now on.
 . Go to link:https://spring.io/tools/sts/all[Spring Tool Suite™ Downloads] and follow the instructions to download and install the STS.
++
+[IMPORTANT]
+In Windows, to force the STS use of JDK VM you need to modify STS params by opening _STS.ini_ and adding the following line *before* the `-vmargs` line:
+`-vm [JDK-DIR]/bin/javaw.exe`.
 . Open your STS IDE.
 . Install the Roo Extension from update site.
 +
@@ -132,6 +134,7 @@ image::install-roo-extension.png["STS Spring IDE - Roo Extension", width="60%"]
 .. Review and accept licence agreement and click _"Finish"_.
 . Restart the STS IDE
 
+[#configure-spring-roo]
 *Configure Spring Roo 2.0.0*
 
 . Open _"Window > Preferences > Spring > Roo Support"_.
@@ -149,12 +152,12 @@ image::sts-add-installation-02.png["Confirm Roo installation", width="60%"]
 [align="center"]
 image::sts-add-installation-03.png["Roo support installed", width="60%"]
 
-[[usingSpringRoo]]
+[[using-spring-roo]]
 == Using Spring Roo
 
 In this tutorial you will learn to create a complete multimodule web application from scratch using Roo. The application we are going to develop will demonstrate many of the core features offered by Roo.
 
-[[usingSpringRoo-usage-roo-shell]]
+[[using-spring-roo-shell]]
 === 1. The Roo shell
 
 The Spring Roo shell is an interactive shell that allows you to type _Roo_ commands to perform code generation tasks.
@@ -183,7 +186,7 @@ There are two ways to work with Spring Roo:
 . Import existing Spring Roo projects. A simple import of the project using _Eclipse's File > Import > General > Maven Projects_ menu option is sufficient.
 . Create new projects, as we will see in the next section.
 
-[[usingSpringRoo-build-multimodule-app]]
+[[using-spring-roo-build-multimodule-app]]
 === 2. Create projects
 
 We will build an app step-by-step together in a relatively fast manner so that you can see how to typically use Roo in a multimodule project: 'Northwind'
@@ -191,7 +194,7 @@ We will build an app step-by-step together in a relatively fast manner so that y
 [align="center"]
 image::northwind-diagram.png["Northwind diagram", width="60%"]
 
-[[usingSpringRoo-project-creation]]
+[[using-spring-roo-project-creation]]
 ==== Project creation
 
 You can create projects from STS IDE by following the instructions below:
@@ -213,7 +216,7 @@ image::sts-roo-shell.png["STS Roo Shell", width="60%"]
 [align="center"]
 image::sts-folder-structure.png["Folder structure", width="25%"]
 
-[[usingSpringRoo-northwind-script]]
+[[using-spring-roo-northwind-script]]
 ==== Northwind multimodule project Step-by-step
 
 .Dynamically define mandatory parameters (link:#settings-commands[Settings commands])
@@ -841,7 +844,7 @@ roo> web mvc detail --entity model:~.Country --responseType THYMELEAF --field re
 NOTE: You can see executed commands in "log.roo" file. Use the link:#script-command[script command] to execute all "log.roo" commands again.
 
 
-[[usingSpringRoo-customize-roo-generated-code]]
+[[using-spring-roo-customize-roo-generated-code]]
 === 3. Customize the Roo-generated code
 
 You can easily modify the Roo-generated code by using AJDT Refactoring Push-in feature.
@@ -866,7 +869,7 @@ image::sts-cross-references.png["Cross References View", width="60%"]
 
 At this point, the developer can modify the Java source file, Roo will not overwrite or modify any Java source file.
 
-[[usingSpringRoo-running-app]]
+[[using-spring-roo-running-app]]
 === 4. Running the application
 
 You can deploy your project using "Boot Dashboard":
@@ -885,7 +888,7 @@ password: you can find the password on the console when the application is runni
 [align="center"]
 image::sts-console-password.png["Password", width="80%"]
 
-[[usingSpringRoo-deployment-and-backup]]
+[[using-spring-roo-deployment-and-backup]]
 === 5. Backup and deployment
 
 A very useful command is the link:#backup-command[backup] command. Using this command you will create a backup of the current workspace with all sources, log files and the script log file (excluding the target directory):
@@ -914,7 +917,7 @@ $ java -jar name-exec.war
 NOTE: The provider dependencies are added only in "*exec.war" file.
 
 
-[[usingSpringRoo-generating-javadoc]]
+[[using-spring-roo-generating-javadoc]]
 === 6. Generating JavaDoc
 
 Spring Roo generated projects automatically include the "maven-javadoc-plugin" to generate project documentation following AsciiDoc syntax. This configuration it's done by using https://github.com/asciidoctor/asciidoclet["Asciidoclet"]. 
@@ -936,7 +939,7 @@ image::generate-javadoc-config.png["images/generate-javadoc-config.png"]
 . The generated JavaDoc will be in "[ROOT-PROJECT]/target/site/apidocs/".
 
 
-[[usingSpringRoo-remove-roo]]
+[[using-spring-roo-remove-roo]]
 === 7. Remove Roo
 
 If you do decide to stop using Roo, it can be done in just a few minutes. There is no need to write any code or otherwise make significant changes. 
@@ -3530,7 +3533,7 @@ roo> version
 
 === Installing Spring Roo
 
-Once you have met the initial link:#gettingStarted-requirements[requirements], you are ready to install Roo by following these steps:
+Once you have met the initial link:#getting-started-requirements[requirements], you are ready to install Roo by following these steps:
 
 . Download the current release from Spring Roo project page http://projects.spring.io/spring-roo/#download-widget[downloads section].
 +
@@ -3570,7 +3573,7 @@ You can create Northwind multimodule project executing the link:#script-command[
 roo> script --file northwind-multimodule.roo
 ----
 
-This project is used as an link:#usingSpringRoo-northwind-script[example] in the documentation.
+This project is used as an link:#using-spring-roo-northwind-script[example] in the documentation.
 
 === Generating project's JavaDoc from command line
 
@@ -3641,7 +3644,7 @@ the problem this way instead...." are very helpful to other community
 members.
 
 When you ask a question on the forum, it's highly recommended you
-include a small Roo link:#usingSpringRoo-northwind-script[sample script] that can be used to
+include a small Roo link:#using-spring-roo-northwind-script[sample script] that can be used to
 reproduce your problem. If that's infeasible, using Roo's
 "link:#backup-command[backup]" command is another alternative and you
 can attach the resulting ZIP file to your post. Other tips include
@@ -3734,7 +3737,7 @@ Enhancement requests are easier to complete (and therefore more probable
 to be actioned) if they represent fine-grained units of work that
 include as much detail as possible. Enhancement requests should describe
 a specific use case or user story that is trying to be achieved. It is
-usually helpful to provide a Roo link:#usingSpringRoo-northwind-script[sample script] that
+usually helpful to provide a Roo link:#using-spring-roo-northwind-script[sample script] that
 can be used to explain the issue. You should also consider whether a
 particular enhancement is likely to appeal to most Roo users, and if
 not, whether perhaps writing it as an add-on would
