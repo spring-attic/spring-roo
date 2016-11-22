@@ -23,10 +23,8 @@ public class ObrRepositoryCommands implements CommandMarker {
 
   @CliCommand(value = "addon repository add", help = "Adds a new OBR Repository to ROO Shell")
   public void addRepo(
-      @CliOption(
-          key = "url",
-          mandatory = true,
-          help = "URL file that defines repository. Ex: 'http://localhost/repo/index.xml' (mandatory)") final String url)
+      @CliOption(key = "url", mandatory = true,
+          help = "URL file that defines repository. Ex: 'http://localhost/repo/index.xml'") final String url)
       throws Exception {
     operations.addRepository(url);
   }
@@ -34,10 +32,8 @@ public class ObrRepositoryCommands implements CommandMarker {
   @CliCommand(value = "addon repository remove",
       help = "Removes an existing OBR Repository from ROO Shell")
   public void removeRepo(
-      @CliOption(
-          key = "url",
-          mandatory = true,
-          help = "URL file that defines repository. Ex: 'http://localhost/repo/index.xml' (mandatory)") final String url)
+      @CliOption(key = "url", mandatory = true,
+          help = "URL file that defines repository. Ex: 'http://localhost/repo/index.xml'") final String url)
       throws Exception {
     operations.removeRepo(url);
   }

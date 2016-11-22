@@ -24,21 +24,20 @@ public class AddonSuiteCommands implements CommandMarker {
       help = "Install some 'Roo Addon Suite' from installed OBR Repository")
   public void installAddonSuiteByName(
       @CliOption(key = "symbolicName", mandatory = true,
-          help = "Name that identifies the 'Roo Addon Suite' (mandatory)") final ObrAddonSuiteSymbolicName suiteSymbolicName)
+          help = "Name that identifies the 'Roo Addon Suite'") final ObrAddonSuiteSymbolicName suiteSymbolicName)
       throws Exception {
     operations.installRooAddonSuiteByName(suiteSymbolicName);
   }
 
   @CliCommand(value = "addon suite install url", help = "Install some 'Roo Addon Suite' from URL")
   public void installAddonSuiteByURL(@CliOption(key = "url", mandatory = true,
-      help = "URL of Roo Addon Suite .esa file (mandatory)") final String url) throws Exception {
+      help = "URL of Roo Addon Suite .esa file") final String url) throws Exception {
     operations.installRooAddonSuiteByUrl(url);
   }
 
   @CliCommand(value = "addon suite uninstall", help = "Uninstall some installed 'Roo Addon Suite'")
-  public void uninstallAddonSuite(
-      @CliOption(key = "symbolicName", mandatory = true,
-          help = "Name that identifies the 'Roo Addon Suite' (mandatory)") final AddonSuiteSymbolicName symbolicName)
+  public void uninstallAddonSuite(@CliOption(key = "symbolicName", mandatory = true,
+      help = "Name that identifies the 'Roo Addon Suite'") final AddonSuiteSymbolicName symbolicName)
       throws Exception {
     operations.uninstallRooAddonSuite(symbolicName);
   }
@@ -46,17 +45,15 @@ public class AddonSuiteCommands implements CommandMarker {
   @CliCommand(
       value = "addon suite start",
       help = "Start some installed 'Roo Addon Suite'. By default, an installed 'Roo Addon Suite' is started automatically.")
-  public void startAddonSuite(
-      @CliOption(key = "symbolicName", mandatory = true,
-          help = "Name that identifies the 'Roo Addon Suite' (mandatory)") final AddonSuiteSymbolicName symbolicName)
+  public void startAddonSuite(@CliOption(key = "symbolicName", mandatory = true,
+      help = "Name that identifies the 'Roo Addon Suite'") final AddonSuiteSymbolicName symbolicName)
       throws Exception {
     operations.startRooAddonSuite(symbolicName);
   }
 
   @CliCommand(value = "addon suite stop", help = "Stop some started 'Roo Addon Suite'")
-  public void stopAddonSuite(
-      @CliOption(key = "symbolicName", mandatory = true,
-          help = "Name that identifies the 'Roo Addon Suite' (mandatory)") final AddonSuiteSymbolicName symbolicName)
+  public void stopAddonSuite(@CliOption(key = "symbolicName", mandatory = true,
+      help = "Name that identifies the 'Roo Addon Suite'") final AddonSuiteSymbolicName symbolicName)
       throws Exception {
     operations.stopRooAddonSuite(symbolicName);
   }

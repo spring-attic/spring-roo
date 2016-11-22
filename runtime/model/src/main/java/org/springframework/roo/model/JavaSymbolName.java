@@ -137,7 +137,7 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
    * <li>The rules listed in {@link #assertJavaNameLegal(String)}
    * </ul>
    * 
-   * @param symbolName the name (mandatory)
+   * @param symbolName the name
    */
   public JavaSymbolName(final String symbolName) {
     Validate.notBlank(symbolName, "Fully qualified type name required");

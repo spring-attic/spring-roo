@@ -169,8 +169,7 @@ public class FieldCommands implements CommandMarker {
   @CliCommand(value = "field boolean",
       help = "Adds a private boolean field to an existing Java source file")
   public void addFieldBoolean(
-      @CliOption(key = {"", "fieldName"}, mandatory = true,
-          help = "The name of the field to add (mandatory)") final JavaSymbolName fieldName,
+      @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
       @CliOption(
           key = "class",
           mandatory = true,
@@ -894,10 +893,9 @@ public class FieldCommands implements CommandMarker {
           + "This command is only available for entities annotated with `@RooJpaEntity`, so you "
           + "should focus the desired entity in the Roo Shell to make this command available.")
   public void addFieldReferenceJpa(
-      @CliOption(key = {"", "fieldName"}, mandatory = true,
-          help = "The name of the field to add (mandatory)") final JavaSymbolName fieldName,
+      @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add.") final JavaSymbolName fieldName,
       @CliOption(key = "type", mandatory = true, optionContext = PROJECT,
-          help = "The Java type of the entity to reference (mandatory)") final JavaType fieldType,
+          help = "The Java type of the entity to reference.") final JavaType fieldType,
       @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT,
           help = "The name of the class to generate the field. When working on a mono module "
