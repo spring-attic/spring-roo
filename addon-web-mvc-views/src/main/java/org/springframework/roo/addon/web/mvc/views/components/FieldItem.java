@@ -21,6 +21,7 @@ public class FieldItem {
 
   private String fieldName;
   private String fieldNameCapitalized;
+  private String fieldWithoutCamelCase;
   private String label;
   private String type;
   private Map<String, Object> configuration;
@@ -44,6 +45,7 @@ public class FieldItem {
   public FieldItem(String fieldName, String entityName) {
     this.fieldName = fieldName;
     this.fieldNameCapitalized = StringUtils.capitalize(fieldName);
+    this.fieldWithoutCamelCase = buildFieldWithoutCamelCase(fieldName);
     this.label = buildLabel(entityName, fieldName);
     this.configuration = new HashMap<String, Object>();
     this.entityName = entityName;
@@ -56,20 +58,21 @@ public class FieldItem {
   }
 
   /**
-   * Constructs a FieldItem using the name, entityName and type of a field
-   *
-   * @param fieldName
-   *            the field name
-   * @param entityName
-   *            the entity where this field is defined
-   * @param type
-   *            the field java type
-   * @param configuration
-   */
+     * Constructs a FieldItem using the name, entityName and type of a field
+     *
+     * @param fieldName
+     *            the field name
+     * @param entityName
+     *            the entity where this field is defined
+     * @param type
+     *            the field java type
+     * @param configuration
+     */
   public FieldItem(String fieldName, String entityName, String type,
       Map<String, Object> configuration) {
     this.fieldName = fieldName;
     this.fieldNameCapitalized = StringUtils.capitalize(fieldName);
+    this.fieldWithoutCamelCase = buildFieldWithoutCamelCase(fieldName);
     this.label = buildLabel(entityName, fieldName);
     this.type = type;
     this.configuration = configuration;
@@ -95,6 +98,7 @@ public class FieldItem {
   public FieldItem(String fieldName, String entityName, String suffixId) {
     this.fieldName = fieldName;
     this.fieldNameCapitalized = StringUtils.capitalize(fieldName);
+    this.fieldWithoutCamelCase = buildFieldWithoutCamelCase(fieldName);
     this.label = buildLabel(entityName, fieldName);
     this.configuration = new HashMap<String, Object>();
     this.entityName = entityName;
@@ -104,6 +108,29 @@ public class FieldItem {
 
     // Calculate the Z parameter as the hash code of the other parametersString
     this.z = calculateZ();
+  }
+
+  /**
+   * This method builds the fieldname without the camel case style.
+   * 
+   * @param fieldName
+   * @return
+   */
+  private String buildFieldWithoutCamelCase(String fieldName) {
+    String fieldWithoutCamelCase = "";
+    String[] camelCase = StringUtils.splitByCharacterTypeCamelCase(fieldName);
+    for (String part : camelCase) {
+      fieldWithoutCamelCase = fieldWithoutCamelCase.concat(part).concat("-");
+    }
+    if (fieldWithoutCamelCase.endsWith("-")) {
+      fieldWithoutCamelCase =
+          fieldWithoutCamelCase.substring(0, fieldWithoutCamelCase.length() - 1);
+    } else {
+      fieldWithoutCamelCase = fieldName;
+    }
+
+    return fieldWithoutCamelCase;
+
   }
 
   /**
@@ -211,6 +238,14 @@ public class FieldItem {
 
   public void setFieldNameCapitalized(String fieldNameCapitalized) {
     this.fieldNameCapitalized = fieldNameCapitalized;
+  }
+
+  public String getFieldWithoutCamelCase() {
+    return this.fieldWithoutCamelCase;
+  }
+
+  public void setFieldWithoutCamelCase(String fieldWithoutCamelCase) {
+    this.fieldWithoutCamelCase = fieldWithoutCamelCase;
   }
 
   public boolean isUserManaged() {

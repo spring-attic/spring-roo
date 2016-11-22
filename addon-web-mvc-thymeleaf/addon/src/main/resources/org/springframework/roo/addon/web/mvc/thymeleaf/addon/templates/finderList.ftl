@@ -296,7 +296,7 @@
                    data-z="${entity.z}"
                    data-order="[[ 0, &quot;asc&quot; ]]"
                    <#list formbeanfields as field>
-                   data-data-load-url-param-${field.fieldName}="${r"${formBean."}${field.fieldName}${r"}"}"
+                   data-data-load-url-param-${field.fieldWithoutCamelCase}="${r"${formBean."}${field.fieldName}${r"}"}"
                    </#list>
                    data-data-load-url="${r"${"}(#mvc.url('${mvcUrl_search_datatables}')).build()}"
                    data-data-show-url="${r"${"}(#mvc.url('${mvcUrl_show}')).buildAndExpand('_ID_')}"
