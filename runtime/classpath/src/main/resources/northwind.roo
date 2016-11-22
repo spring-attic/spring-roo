@@ -55,22 +55,22 @@ enum constant --name FOURTH_TRIM --class ~.domain.Trimester
 focus --class ~.domain.Category
 field string --fieldName name --column NAME
 field string --fieldName description --column DESCRIPTION
-field set --fieldName products --type ~.domain.Product --cardinality ONE_TO_MANY --mappedBy category --joinColumnName CATEGORY
+field set --fieldName products --type ~.domain.Product --mappedBy category --joinColumnName CATEGORY
 
 focus --class ~.domain.City
 field string --fieldName description --column DESCRIPTION
-field set --fieldName parties --type ~.domain.Party --cardinality ONE_TO_MANY --mappedBy city --joinColumnName CITY
-field set --fieldName customerOrders --type ~.domain.CustomerOrder --cardinality ONE_TO_MANY --mappedBy city --joinColumnName CITY
-field set --fieldName stores --type ~.domain.Store --cardinality ONE_TO_MANY --mappedBy city --joinColumnName CITY
-field set --fieldName suppliers --type ~.domain.Supplier --cardinality ONE_TO_MANY --mappedBy city --joinColumnName CITY
+field set --fieldName parties --type ~.domain.Party  --mappedBy city --joinColumnName CITY
+field set --fieldName customerOrders --type ~.domain.CustomerOrder --mappedBy city --joinColumnName CITY
+field set --fieldName stores --type ~.domain.Store --mappedBy city --joinColumnName CITY
+field set --fieldName suppliers --type ~.domain.Supplier --mappedBy city --joinColumnName CITY
 
 focus --class ~.domain.Country
 field string --fieldName description --column DESCRIPTION
-field set --fieldName parties --type ~.domain.Party --cardinality ONE_TO_MANY --mappedBy country --joinColumnName COUNTRY
-field set --fieldName regions --type ~.domain.Region --cardinality ONE_TO_MANY --mappedBy country --joinColumnName COUNTRY
-field set --fieldName customerOrders --type ~.domain.CustomerOrder --cardinality ONE_TO_MANY --mappedBy country --joinColumnName COUNTRY
-field set --fieldName stores --type ~.domain.Store --cardinality ONE_TO_MANY --mappedBy country --joinColumnName COUNTRY
-field set --fieldName suppliers --type ~.domain.Supplier --cardinality ONE_TO_MANY --mappedBy country --joinColumnName COUNTRY
+field set --fieldName parties --type ~.domain.Party --mappedBy country --joinColumnName COUNTRY
+field set --fieldName regions --type ~.domain.Region --mappedBy country --joinColumnName COUNTRY
+field set --fieldName customerOrders --type ~.domain.CustomerOrder --mappedBy country --joinColumnName COUNTRY
+field set --fieldName stores --type ~.domain.Store --mappedBy country --joinColumnName COUNTRY
+field set --fieldName suppliers --type ~.domain.Supplier --mappedBy country --joinColumnName COUNTRY
 
 focus --class ~.domain.Customer
 field string --fieldName companyName --column COMPANY_NAME
@@ -78,7 +78,7 @@ field string --fieldName contactName --column CONTACT_NAME
 field string --fieldName contactTitle --column CONTACT_TITLE
 field string --fieldName fax --column FAX
 field string --fieldName email --column EMAIL
-field set --fieldName customerOrders --type ~.domain.CustomerOrder --cardinality ONE_TO_MANY --mappedBy customer --joinColumnName CUSTOMER
+field set --fieldName customerOrders --type ~.domain.CustomerOrder --mappedBy customer --joinColumnName CUSTOMER
 
 focus --class ~.domain.CustomerOrder
 field date --fieldName orderDate --type java.util.Calendar --column ORDER_DATE --persistenceType JPA_TIMESTAMP
@@ -92,7 +92,7 @@ field enum --fieldName status --type ~.domain.Status --column STATUS --enumType 
 field string --fieldName shipPhone --column SHIP_PHONE
 field date --fieldName invoiceDate --type java.util.Calendar --column INVOICE_DATE --persistenceType JPA_TIMESTAMP
 field date --fieldName closeDate --type java.util.Calendar --column CLOSE_DATE --persistenceType JPA_TIMESTAMP
-field set --fieldName orderDetails --type ~.domain.OrderDetail --cardinality ONE_TO_MANY --mappedBy customerOrder --joinColumnName CUSTOMER_ORDER
+field set --fieldName orderDetails --type ~.domain.OrderDetail --mappedBy customerOrder --joinColumnName CUSTOMER_ORDER
 
 focus --class ~.domain.Employee
 field string --fieldName firstName --column FIRST_NAME
@@ -104,9 +104,9 @@ field string --fieldName extension --column EXTENSION
 field string --fieldName photo --column PHOTO --lob
 field string --fieldName notes --column NOTES
 // Commented until reactivation of field set on DTO's
-//field set --fieldName employees --type ~.domain.Employee --cardinality ONE_TO_MANY --mappedBy supervisor
-field set --fieldName purchaseOrders --type ~.domain.PurchaseOrder --cardinality ONE_TO_MANY --mappedBy employee --joinColumnName EMPLOYEE
-field set --fieldName customerOrders --type ~.domain.CustomerOrder --cardinality ONE_TO_MANY --mappedBy employee --joinColumnName EMPLOYEE
+//field set --fieldName employees --type ~.domain.Employee --mappedBy supervisor
+field set --fieldName purchaseOrders --type ~.domain.PurchaseOrder --mappedBy employee --joinColumnName EMPLOYEE
+field set --fieldName customerOrders --type ~.domain.CustomerOrder --mappedBy employee --joinColumnName EMPLOYEE
 
 focus --class ~.domain.OrderDetail
 field number --fieldName unitPrice --type java.math.BigDecimal --column UNIT_PRICE
@@ -127,8 +127,8 @@ field number --fieldName unitPrice --type java.math.BigDecimal --column UNIT_PRI
 field number --fieldName unitsInStock --type java.lang.Integer --column UNITS_IN_STOCK
 field number --fieldName reorderLevel --type java.lang.Integer --column REORDER_LEVEL
 field other --fieldName discontinued --type java.lang.Boolean --column DISCONTINUED
-field set --fieldName purchaseOrders --type ~.domain.PurchaseOrder --cardinality ONE_TO_MANY --mappedBy product --joinColumnName PRODUCT
-field set --fieldName orderDetails --type ~.domain.OrderDetail --cardinality ONE_TO_MANY --mappedBy product --joinColumnName PRODUCT
+field set --fieldName purchaseOrders --type ~.domain.PurchaseOrder --mappedBy product --joinColumnName PRODUCT
+field set --fieldName orderDetails --type ~.domain.OrderDetail --mappedBy product --joinColumnName PRODUCT
 
 focus --class ~.domain.PurchaseOrder
 field number --fieldName unitCost --type java.math.BigDecimal --column UNIT_COST
@@ -137,11 +137,11 @@ field date --fieldName orderDate --type java.util.Calendar --column ORDER_DATE -
 
 focus --class ~.domain.Region
 field string --fieldName description --column DESCRIPTION
-field set --fieldName cities --type ~.domain.City --cardinality ONE_TO_MANY --mappedBy region --joinColumnName REGION
-field set --fieldName parties --type ~.domain.Party --cardinality ONE_TO_MANY --mappedBy region --joinColumnName REGION
-field set --fieldName customerOrders --type ~.domain.CustomerOrder --cardinality ONE_TO_MANY --mappedBy region --joinColumnName REGION
-field set --fieldName stores --type ~.domain.Store --cardinality ONE_TO_MANY --mappedBy region --joinColumnName REGION
-field set --fieldName suppliers --type ~.domain.Supplier --cardinality ONE_TO_MANY --mappedBy region --joinColumnName REGION
+field set --fieldName cities --type ~.domain.City --mappedBy region --joinColumnName REGION
+field set --fieldName parties --type ~.domain.Party --mappedBy region --joinColumnName REGION
+field set --fieldName customerOrders --type ~.domain.CustomerOrder --mappedBy region --joinColumnName REGION
+field set --fieldName stores --type ~.domain.Store --mappedBy region --joinColumnName REGION
+field set --fieldName suppliers --type ~.domain.Supplier --mappedBy region --joinColumnName REGION
 
 focus --class ~.domain.Report
 field string --fieldName type --column TYPE
@@ -149,7 +149,7 @@ field string --fieldName type --column TYPE
 focus --class ~.domain.Shipper
 field string --fieldName companyName --column COMPANY_NAME
 field string --fieldName phone --column PHONE
-field set --fieldName customerOrders --type ~.domain.CustomerOrder --cardinality ONE_TO_MANY --mappedBy shipper --joinColumnName SHIPPER
+field set --fieldName customerOrders --type ~.domain.CustomerOrder --mappedBy shipper --joinColumnName SHIPPER
 
 focus --class ~.domain.Store
 field string --fieldName name --column NAME
@@ -166,10 +166,10 @@ field string --fieldName postalCode --column POSTAL_CODE
 field string --fieldName phone --column PHONE
 field string --fieldName fax --column FAX
 field string --fieldName web --column WEB
-field set --fieldName products --type ~.domain.Product --cardinality ONE_TO_MANY --mappedBy supplier --joinColumnName SUPPLIER
+field set --fieldName products --type ~.domain.Product --mappedBy supplier --joinColumnName SUPPLIER
 
 // Temporary deactivated field with --joinTable and associated params
-// field set --fieldName stores --type ~.domain.Store --cardinality MANY_TO_MANY --joinTable NW_SUPPLIER_STORES --joinColumns SUPPLIER --referencedColumns SUPPLIER_ID --inverseJoinColumns STORE --inverseReferencedColumns STORE_ID
+// field set --fieldName stores --type ~.domain.Store --joinTable NW_SUPPLIER_STORES --joinColumns SUPPLIER --referencedColumns SUPPLIER_ID --inverseJoinColumns STORE --inverseReferencedColumns STORE_ID
 
 // Generate DTO's
 dto --class ~.domain.CustomerOrderStatusAndEmployeeProjection --immutable
@@ -542,6 +542,7 @@ web mvc controller --entity ~.domain.Shipper --responseType THYMELEAF
 web mvc controller --entity ~.domain.SoldProduct --responseType THYMELEAF
 web mvc controller --entity ~.domain.Store --responseType THYMELEAF
 web mvc controller --entity ~.domain.Supplier --responseType THYMELEAF
+web mvc controller --entity ~.domain.City --responseType THYMELEAF
 
 // Required controller to generate its detail
 web mvc controller --entity ~.domain.Region --responseType THYMELEAF

@@ -108,9 +108,12 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
   private static final String SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME =
       "spring.roo.jpa.require.schema-object-name";
-  private static final String CARDINALITY = "cardinallity";
+  private static final String CARDINALITY = "cardinality";
   private static final String JOIN_TABLE = "joinTable";
   private static final String JOIN_COLUMN_NAME = "joinColumnName";
+  private static final String ONE_TO_MANY = "ONE_TO_MANY";
+  private static final String MANY_TO_MANY = "MANY_TO_MANY";
+  private static final String TRUE = "true";
 
   @Override
   public boolean isValid(JavaType javaType) {
@@ -167,7 +170,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     String requiredSchemaObjectName =
         projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals(TRUE)) {
       return true;
     }
 
@@ -202,7 +205,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     String requiredSchemaObjectName =
         projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals(TRUE)) {
       return true;
     }
 
@@ -242,7 +245,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     String requiredSchemaObjectName =
         projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals(TRUE)) {
       return true;
     }
 
@@ -274,13 +277,13 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
     // on project settings
     boolean requiredSchemaObjectName =
-        "true".equals(projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME));
+        TRUE.equals(projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME));
 
     if (!requiredSchemaObjectName) {
       return true;
     }
 
-    if (!Cardinality.ONE_TO_MANY.equals(cardinality)) {
+    if (MANY_TO_MANY.equals(cardinality)) {
       return true;
     }
 
@@ -314,13 +317,12 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     String requiredSchemaObjectName =
         projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals(TRUE)) {
       // property 'spring.roo.jpa.require.schema-object-name' is defined 'true'
-      if (cardinality != null && cardinality.equals(Cardinality.MANY_TO_MANY)) {
+      if (cardinality != null && cardinality.equals(MANY_TO_MANY)) {
         // mandatory if cardinality is MANY_TO_MANY
         return true;
-      } else if ((cardinality == null || cardinality.equals(Cardinality.ONE_TO_MANY))
-          && joinTableParam != null) {
+      } else if ((cardinality == null || cardinality.equals(ONE_TO_MANY)) && joinTableParam != null) {
         // mandatory if cardinality is ONE_TO_MANY and '--joinTable' is already specified
         return true;
       }
@@ -345,6 +347,12 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
   @Override
   public boolean isJoinColumnNameVisibleForFieldList(ShellContext shellContext) {
     String joinTableParam = shellContext.getParameters().get(JOIN_TABLE);
+    String cardinality = shellContext.getParameters().get(CARDINALITY);
+
+    if ("MANY_TO_MANY".equals(cardinality)) {
+      // Never available for MANY-TO-MANY relationships
+      return false;
+    }
 
     if (joinTableParam == null) {
       // Visible if '--joinTable' is not specified
@@ -384,7 +392,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     String joinTableParam = shellContext.getParameters().get(JOIN_TABLE);
 
     if (joinTableParam != null && requiredSchemaObjectName != null
-        && requiredSchemaObjectName.equals("true")) {
+        && requiredSchemaObjectName.equals(TRUE)) {
       return true;
     }
 
@@ -398,8 +406,13 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
   @Override
   public boolean isCardinalityVisibleForFieldList(ShellContext shellContext) {
-    // Can't be MANY_TO_MANY if '--joinColumnName' has been specified
-    return !isJoinColumnNameMandatoryForFieldList(shellContext);
+
+    if (!areOptionalParametersVisibleForFieldList(shellContext)) {
+      return false;
+    }
+
+    // Only can be ONE-TO-MANY if '--joinColumnName' has been specified
+    return !StringUtils.isNotBlank(shellContext.getParameters().get(JOIN_COLUMN_NAME));
   }
 
   @Override
@@ -411,18 +424,20 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
   public boolean isJoinColumnNameMandatoryForFieldList(ShellContext shellContext) {
 
     String cardinality = shellContext.getParameters().get(CARDINALITY);
-
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
-    // on project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+    if (MANY_TO_MANY.equals(cardinality)) {
+      // Never available for MANY-TO-MANY relationships
+      return false;
+    }
 
     // Check if param 'joinTable' is already defined
     String joinColumnNameParam = shellContext.getParameters().get(JOIN_COLUMN_NAME);
 
-    if ((cardinality == null || cardinality.equals(Cardinality.ONE_TO_MANY))
-        && requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")
-        && joinColumnNameParam != null) {
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on project settings
+    boolean requiredSchemaObjectName =
+        (TRUE).equals(projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME));
+
+    if (requiredSchemaObjectName && joinColumnNameParam != null) {
       return true;
     }
     return false;
@@ -446,7 +461,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     String requiredSchemaObjectName =
         projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals(TRUE)) {
       return true;
     }
 
@@ -486,7 +501,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     String requiredSchemaObjectName =
         projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals(TRUE)) {
       return true;
     }
 
@@ -522,13 +537,13 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
     // on project settings
     boolean requiredSchemaObjectName =
-        "true".equals(projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME));
+        TRUE.equals(projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME));
 
     if (!requiredSchemaObjectName) {
       return true;
     }
 
-    if (!Cardinality.ONE_TO_MANY.equals(cardinality)) {
+    if (MANY_TO_MANY.equals(cardinality)) {
       return true;
     }
 
@@ -541,19 +556,22 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
   @Override
   public boolean isJoinColumnNameMandatoryForFieldSet(ShellContext shellContext) {
-    String cardinality = shellContext.getParameters().get(CARDINALITY);
 
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
-    // on project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+    String cardinality = shellContext.getParameters().get(CARDINALITY);
+    if (MANY_TO_MANY.equals(cardinality)) {
+      // Never available for MANY-TO-MANY relationships
+      return false;
+    }
 
     // Check if param 'joinTable' is already defined
     String joinColumnNameParam = shellContext.getParameters().get(JOIN_COLUMN_NAME);
 
-    if ((cardinality == null || cardinality.equals(Cardinality.ONE_TO_MANY))
-        && requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")
-        && joinColumnNameParam != null) {
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on project settings
+    boolean requiredSchemaObjectName =
+        (TRUE).equals(projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME));
+
+    if (requiredSchemaObjectName && joinColumnNameParam != null) {
       return true;
     }
     return false;
@@ -580,7 +598,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     String joinTableParam = shellContext.getParameters().get(JOIN_TABLE);
 
     if (joinTableParam != null && requiredSchemaObjectName != null
-        && requiredSchemaObjectName.equals("true")) {
+        && requiredSchemaObjectName.equals(TRUE)) {
       return true;
     }
 
@@ -607,13 +625,12 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     String requiredSchemaObjectName =
         projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals(TRUE)) {
       // property 'spring.roo.jpa.require.schema-object-name' is defined 'true'
-      if (cardinality != null && cardinality.equals(Cardinality.MANY_TO_MANY)) {
+      if (cardinality != null && cardinality.equals(MANY_TO_MANY)) {
         // mandatory if cardinality is MANY_TO_MANY
         return true;
-      } else if ((cardinality == null || cardinality.equals(Cardinality.ONE_TO_MANY))
-          && joinTableParam != null) {
+      } else if ((cardinality == null || cardinality.equals(ONE_TO_MANY)) && joinTableParam != null) {
         // mandatory if cardinality is ONE_TO_MANY and '--joinTable' is already specified
         return true;
       }
@@ -641,8 +658,12 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
   @Override
   public boolean isCardinalityVisibleForFieldSet(ShellContext shellContext) {
-    // Can't be MANY_TO_MANY if '--joinColumnName' has been specified
-    return !isJoinColumnNameMandatoryForFieldSet(shellContext);
+    if (!areOptionalParametersVisibleForFieldList(shellContext)) {
+      return false;
+    }
+
+    // Only can be ONE-TO-MANY if '--joinColumnName' has been specified
+    return !StringUtils.isNotBlank(shellContext.getParameters().get(JOIN_COLUMN_NAME));
   }
 
   @Override
@@ -665,10 +686,15 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
   @Override
   public boolean isJoinColumnNameVisibleForFieldSet(ShellContext shellContext) {
 
-    String cardinality = shellContext.getParameters().get(CARDINALITY);
     String joinTableParam = shellContext.getParameters().get(JOIN_TABLE);
+    String cardinality = shellContext.getParameters().get(CARDINALITY);
 
-    if (!Cardinality.MANY_TO_MANY.equals(cardinality) && joinTableParam == null) {
+    if (MANY_TO_MANY.equals(cardinality)) {
+      // Never available for MANY-TO-MANY relationships
+      return false;
+    }
+
+    if (joinTableParam == null) {
       // Visible if '--joinTable' is not specified
       return true;
     }
@@ -704,7 +730,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     String requiredSchemaObjectName =
         projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals(TRUE)) {
       return true;
     }
 
@@ -749,7 +775,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     String requiredSchemaObjectName =
         projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals(TRUE)) {
       return true;
     }
 
@@ -778,7 +804,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     String requiredSchemaObjectName =
         projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals(TRUE)) {
       return true;
     }
 
@@ -1067,7 +1093,6 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     // Check if parent field exist
     checkFieldExists(fieldName, isForce, parentCid, "fieldName");
 
-
     if (mappedBy == null) {
       // generate mappedBy name from uncapitalized parentClass name
       mappedBy = new JavaSymbolName(StringUtils.uncapitalize(typeName.getSimpleTypeName()));
@@ -1216,9 +1241,9 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
         projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
     // 'joinTable' or 'joinColumnName' is required if property is true
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals(TRUE)
         && joinTable == null && joinColumnName == null) {
-      throw new IllegalArgumentException("--joinTable or --joinColumnName are required");
+      throw new IllegalArgumentException("You must specify one of: 'joinTable' or 'joinColumnName'");
     }
 
     final ClassOrInterfaceTypeDetails childCid = typeLocationService.getTypeDetails(fieldType);

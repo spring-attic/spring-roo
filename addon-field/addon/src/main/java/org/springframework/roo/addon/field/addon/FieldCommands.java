@@ -1098,10 +1098,9 @@ public class FieldCommands implements CommandMarker {
     return new ArrayList<String>();
   }
 
-  @CliOptionVisibilityIndicator(command = "field set", params = {"aggregation", "cardinality",
-      "comment", "fetch", "force", "mappedBy", "notNull", "nullRequired", "orphanRemoval",
-      "permitReservedWords", "profile", "sizeMax", "sizeMin"},
-      help = "--joinTable or --joinColumnName must be defined")
+  @CliOptionVisibilityIndicator(command = "field set", params = {"aggregation", "comment", "fetch",
+      "force", "mappedBy", "notNull", "nullRequired", "orphanRemoval", "permitReservedWords",
+      "profile", "sizeMax", "sizeMin"}, help = "--joinTable or --joinColumnName must be defined")
   public boolean areOptionalParametersVisibleForFieldSet(ShellContext shellContext) {
     JavaType type = getTypeFromCommand(shellContext);
     if (type != null) {
@@ -1140,19 +1139,20 @@ public class FieldCommands implements CommandMarker {
       @CliOption(
           key = "joinColumnName",
           mandatory = true,
-          help = "The JPA `@JoinColumn` `name` attribute."
-              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
-              + "This option is only available for JPA entities and embeddable classes.") final String joinColumnName,
-      @CliOption(key = "referencedColumnName", mandatory = false,
-          help = "The JPA `@JoinColumn` `referencedColumnName` attribute."
-              + "This option is only available for JPA entities and embeddable classes.") final String referencedColumnName,
+          help = "The JPA `@JoinColumn` `name` attribute. When this option is set, cardinality will be set as `ONE_TO_MANY`."
+              + "This option is mandatory for 'ONE_TO_MANY' relationships without join table, "
+              + "if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.") final String joinColumnName,
+      @CliOption(
+          key = "referencedColumnName",
+          mandatory = false,
+          help = "The JPA `@JoinColumn` `referencedColumnName` attribute. This option is only available"
+              + " when `--joinColumnName` option is set.") final String referencedColumnName,
       @CliOption(
           key = "joinTable",
           mandatory = true,
           help = "Join table name. Most usually used in @ManyToMany relations."
               + "This option is mandatory for this command if `--cardinality` is set to `MANY_TO_MANY` "
-              + "and `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
-              + "This option is only available for JPA entities and embeddable classes.") final String joinTable,
+              + "and `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.") final String joinTable,
       @CliOption(
           key = "joinColumns",
           mandatory = true,
@@ -1160,8 +1160,7 @@ public class FieldCommands implements CommandMarker {
               + "of the related entity (the owner entity in bidirectional relations)."
               + "This option is mandatory if `--joinTable` option has been specified and if "
               + "`spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
-              + "This option is only available for JPA entities and embeddable classes when `--joinTable` "
-              + "option is set.") final String joinColumns,
+              + "This option is only available when `--joinTable` " + "option is set.") final String joinColumns,
       @CliOption(
           key = "referencedColumns",
           mandatory = true,
@@ -1169,8 +1168,7 @@ public class FieldCommands implements CommandMarker {
               + "related entity (the owner entity in bidirectional relations)."
               + "This option is mandatory if `--joinTable` option has been specified and if "
               + "`spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
-              + "This option is only available for JPA entities and embeddable classes when `--joinTable` "
-              + "option is set.") final String referencedColumns,
+              + "This option is only available when `--joinTable` " + "option is set.") final String referencedColumns,
       @CliOption(
           key = "inverseJoinColumns",
           mandatory = true,
@@ -1178,8 +1176,7 @@ public class FieldCommands implements CommandMarker {
               + "the entity that does not own the relation (current entity)."
               + "This option is mandatory if `--joinTable` option has been specified and if "
               + "`spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
-              + "This option is only available for JPA entities and embeddable classes when `--joinTable` "
-              + "option is set.") final String inverseJoinColumns,
+              + "This option is only available when `--joinTable` " + "option is set.") final String inverseJoinColumns,
       @CliOption(
           key = "inverseReferencedColumns",
           mandatory = true,
@@ -1187,8 +1184,7 @@ public class FieldCommands implements CommandMarker {
               + "entity that does not own the relation (current entity)."
               + "This option is mandatory if `--joinTable` option has been specified and if "
               + "`spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
-              + "This option is only available for JPA entities and embeddable classes when `--joinTable` "
-              + "option is set.") final String inverseReferencedColumns,
+              + "This option is only available when `--joinTable` " + "option is set.") final String inverseReferencedColumns,
       @CliOption(
           key = "mappedBy",
           mandatory = false,
@@ -1208,9 +1204,7 @@ public class FieldCommands implements CommandMarker {
           mandatory = false,
           help = "The fetch semantics at a JPA level. It adds the provided value to `fetch` attribute of "
               + "JPA `@OneToMany`, `@ManyToMany` and `@ManyToOne`. If this option is not provided, default"
-              + " fetch type will be `LAZY`."
-              + "Possible values are `LAZY`and `EAGER`."
-              + "This option is only available for JPA entities and embeddable classes.") final Fetch fetch,
+              + " fetch type will be `LAZY`." + "Possible values are `LAZY`and `EAGER`.") final Fetch fetch,
       @CliOption(
           key = "aggregation",
           mandatory = false,
@@ -1404,9 +1398,9 @@ public class FieldCommands implements CommandMarker {
     return new ArrayList<String>();
   }
 
-  @CliOptionVisibilityIndicator(command = "field set", params = {"aggregation", "cardinality",
-      "comment", "fetch", "force", "mappedBy", "notNull", "orphanRemoval", "permitReservedWords",
-      "profile", "sizeMax", "sizeMin"}, help = "--joinTable or --joinColumnName must be defined")
+  @CliOptionVisibilityIndicator(command = "field list", params = {"aggregation", "comment",
+      "fetch", "force", "mappedBy", "notNull", "orphanRemoval", "permitReservedWords", "profile",
+      "sizeMax", "sizeMin"}, help = "--joinTable or --joinColumnName must be defined")
   public boolean areOptionalParametersVisibleForFieldList(ShellContext shellContext) {
     JavaType type = getTypeFromCommand(shellContext);
     if (type != null) {
@@ -1443,21 +1437,22 @@ public class FieldCommands implements CommandMarker {
               + "This option is mandatory for this command when the focus is not set to one class."
               + "Default if option not present: the class focused by Roo shell.") final JavaType typeName,
       @CliOption(
+          key = "joinColumnName",
+          mandatory = true,
+          help = "The JPA `@JoinColumn` `name` attribute. When this option is set, cardinality will be set as `ONE_TO_MANY`."
+              + "This option is mandatory for 'ONE_TO_MANY' relationships without join table, "
+              + "if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.") final String joinColumnName,
+      @CliOption(
+          key = "referencedColumnName",
+          mandatory = false,
+          help = "The JPA `@JoinColumn` `referencedColumnName` attribute. This option is only available"
+              + " when `--joinColumnName` option is set.") final String referencedColumnName,
+      @CliOption(
           key = "joinTable",
           mandatory = true,
           help = "Join table name. Most usually used in @ManyToMany relations."
               + "This option is mandatory for this command if `--cardinality` is set to `MANY_TO_MANY` "
-              + "and `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
-              + "This option is only available for JPA entities and embeddable classes.") final String joinTable,
-      @CliOption(
-          key = "joinColumnName",
-          mandatory = true,
-          help = "The JPA `@JoinColumn` `name` attribute."
-              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
-              + "This option is only available for JPA entities and embeddable classes.") final String joinColumnName,
-      @CliOption(key = "referencedColumnName", mandatory = false,
-          help = "The JPA `@JoinColumn` `referencedColumnName` attribute."
-              + "This option is only available for JPA entities and embeddable classes.") final String referencedColumnName,
+              + "and `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.") final String joinTable,
       @CliOption(
           key = "joinColumns",
           mandatory = true,
@@ -1465,8 +1460,7 @@ public class FieldCommands implements CommandMarker {
               + "of the related entity (the owner entity in bidirectional relations)."
               + "This option is mandatory if `--joinTable` option has been specified and if "
               + "`spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
-              + "This option is only available for JPA entities and embeddable classes when `--joinTable` "
-              + "option is set.") final String joinColumns,
+              + "This option is only available when `--joinTable` " + "option is set.") final String joinColumns,
       @CliOption(
           key = "referencedColumns",
           mandatory = true,
@@ -1474,8 +1468,7 @@ public class FieldCommands implements CommandMarker {
               + "related entity (the owner entity in bidirectional relations)."
               + "This option is mandatory if `--joinTable` option has been specified and if "
               + "`spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
-              + "This option is only available for JPA entities and embeddable classes when `--joinTable` "
-              + "option is set.") final String referencedColumns,
+              + "This option is only available when `--joinTable` " + "option is set.") final String referencedColumns,
       @CliOption(
           key = "inverseJoinColumns",
           mandatory = true,
@@ -1483,8 +1476,7 @@ public class FieldCommands implements CommandMarker {
               + "the entity that does not own the relation (current entity)."
               + "This option is mandatory if `--joinTable` option has been specified and if "
               + "`spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
-              + "This option is only available for JPA entities and embeddable classes when `--joinTable` "
-              + "option is set.") final String inverseJoinColumns,
+              + "This option is only available when `--joinTable` " + "option is set.") final String inverseJoinColumns,
       @CliOption(
           key = "inverseReferencedColumns",
           mandatory = true,
@@ -1492,8 +1484,7 @@ public class FieldCommands implements CommandMarker {
               + "entity that does not own the relation (current entity)."
               + "This option is mandatory if `--joinTable` option has been specified and if "
               + "`spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
-              + "This option is only available for JPA entities and embeddable classes when `--joinTable` "
-              + "option is set.") final String inverseReferencedColumns,
+              + "This option is only available when `--joinTable` " + "option is set.") final String inverseReferencedColumns,
       @CliOption(
           key = "mappedBy",
           mandatory = false,
@@ -1505,17 +1496,13 @@ public class FieldCommands implements CommandMarker {
               + "Default if not present: current entity name in lower camel case.") final JavaSymbolName mappedBy,
       @CliOption(key = "cardinality", mandatory = false, unspecifiedDefaultValue = "ONE_TO_MANY",
           specifiedDefaultValue = "ONE_TO_MANY",
-          help = "The relationship cardinality at a JPA level. "
-              + "This option is only available for JPA entities and embeddable classes."
-              + "Default: `ONE_TO_MANY`.") CardinalitySupported cardinality,
+          help = "The relationship cardinality at a JPA level. " + "Default: `ONE_TO_MANY`.") CardinalitySupported cardinality,
       @CliOption(
           key = "fetch",
           mandatory = false,
           help = "The fetch semantics at a JPA level. It adds the provided value to `fetch` attribute of "
               + "JPA `@OneToMany`, `@ManyToMany` and `@ManyToOne`. If this option is not provided, default"
-              + " fetch type will be `LAZY`."
-              + "Possible values are `LAZY`and `EAGER`."
-              + "This option is only available for JPA entities and embeddable classes.") final Fetch fetch,
+              + " fetch type will be `LAZY`." + "Possible values are `LAZY`and `EAGER`.") final Fetch fetch,
       @CliOption(
           key = "aggregation",
           mandatory = false,
