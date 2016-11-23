@@ -212,6 +212,15 @@ There are two ways to work with Spring Roo:
 
 TODO
 
+You can create Northwind multimodule project executing the link:#script-command[script command]:
+
+[source,subs="quotes"]
+----
+*roo>* script --file northwind-multimodule.roo
+----
+
+This project is used as an link:#using-spring-roo-northwind-script[example] in the documentation.
+
 [[using-spring-roo-create-boot-app]]
 == Create your Spring Boot application
 
@@ -841,34 +850,6 @@ Since Spring Roo 2.0, the multimodule support lets to prefix the module name to 
 *roo>* web mvc setup
 ----
 
-== The infraestructure layer
-
-[source,subs="quotes"]
-----
-*roo>* test unit --class model:~.CustomerOrder
-     test unit --class model:~.Category
-     test unit --class repository:~.CustomerOrderRepository
-     test unit --class service-api:~.CustomerOrderService
-     test unit --class service-impl:~.CustomerServiceImpl
-----
-
-== The security layer
-
-[source,subs="quotes"]
-----
-*roo>* security setup
-----
-
-=== 
-
-Adds support for auditing a JPA entity. This will add JPA and Spring listeners to this entity to record the entity changes.
-
-[source,subs="quotes"]
-----
-*roo>* jpa audit setup
-     jpa audit add --entity model:~.Category
-----
-
 .Install THYMELEAF view (link:#web-mvc-view-setup-command[web mvc view setup command])
 [source,sh]
 ----
@@ -906,11 +887,37 @@ roo> web mvc detail --entity model:~.Country --responseType THYMELEAF --field re
 roo> web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions.cities
 ----
 
-NOTE: You can see executed commands in "log.roo" file. Use the link:#script-command[script command] to execute all "log.roo" commands again.
+== The security layer
+
+[source,subs="quotes"]
+----
+*roo>* security setup
+----
+
+=== Auditing JPA entities
+
+Adds support for auditing a JPA entity. It will add the Spring Data JPA entity listener to capture auditing information on persiting and updating entities.
+
+[source,subs="quotes"]
+----
+*roo>* jpa audit setup
+     jpa audit add --entity model:~.Category
+----
+
+== The infraestructure layer
+
+[source,subs="quotes"]
+----
+*roo>* test unit --class model:~.CustomerOrder
+     test unit --class model:~.Category
+     test unit --class repository:~.CustomerOrderRepository
+     test unit --class service-api:~.CustomerOrderService
+     test unit --class service-impl:~.CustomerServiceImpl
+----
 
 
 [[using-spring-roo-customize-roo-generated-code]]
-=== 3. Customize the Roo-generated code
+== Customize the code
 
 You can easily modify the Roo-generated code by using AJDT Refactoring Push-in feature.
 
@@ -945,310 +952,27 @@ You can deploy your project using "Boot Dashboard":
 image::sts-boot-dashboard.png["Boot Dashboard", width="50%"]
 2. The application should be available under the following URL http://localhost:8080/Northwind, where Northwind is the project name.
 
-NOTE: Login for Nortwind project example:
-----------
+[NOTE]
+.Login for Northwind project example
+====
 user: user
 password: you can find the password on the console when the application is running
-----------
+
+====
+
 [align="center"]
 image::sts-console-password.png["Password", width="80%"]
 
-[[using-spring-roo-deployment-and-backup]]
-=== 5. Backup and deployment
-
-A very useful command is the link:#backup-command[backup] command. Using this command you will create a backup of the current workspace with all sources, log files and the script log file (excluding the target directory):
-
-[source,sh]
-----
-roo> backup
-----
-
-Finally, you may wish to deploy your application to a production Web container. For this you can easily create two war files, by taking advantage of the link:#perform-package-command[perform package command]:
-
-[source,sh]
-----
-roo> perform package
-----
-
-This command generates a "*.war" file which can then be easily copied into your production Web container and a "*exec.war" file that uses a embedded web server.
-
-You can execute "*exec.war" as follows:
-
-[source,sh]
-----
-$ java -jar name-exec.war
-----
-
-NOTE: The provider dependencies are added only in "*exec.war" file.
-
-
-[[using-spring-roo-generating-javadoc]]
-=== 6. Generating JavaDoc
-
-Spring Roo generated projects automatically include the "maven-javadoc-plugin" to generate project documentation following AsciiDoc syntax. This configuration it's done by using https://github.com/asciidoctor/asciidoclet["Asciidoclet"]. 
-
-To generate project's documentation you can follow the following steps:
-
-. Select the project from STS "Package Explorer".
-. Right click in the project and go to menu:RunAs[Run Configurations...]
-+
-image::sts-maven-run-configurations.png["images/sts-maven-run-configurations.png"]
-+
-. In the window that will open, double click in _Maven Build_ from the list on the left side.
-. In the configuration window, specify "javadoc:aggregate" as Maven goal.
-. Specify project's root directory as "Base directory". You can easily do it by clicking _Workspace..._ and selecting the root module of your project.
-+
-image::generate-javadoc-config.png["images/generate-javadoc-config.png"]
-+
-. Apply configuration and close the window, or execute it directly with _Run_.
-. The generated JavaDoc will be in "[ROOT-PROJECT]/target/site/apidocs/".
-
-
-[[using-spring-roo-remove-roo]]
-=== 7. Remove Roo
-
-If you do decide to stop using Roo, it can be done in just a few minutes. There is no need to write any code or otherwise make significant changes. 
-
-Roo is not involved with your project when it runs in production. You will not find any Roo JARs in your runtime classpath or Roo annotations compiled into your classes. 
-
-As long as Roo does not exist at runtime, you can decide to stop using Roo and implement that decision without changing any production deployment of the application.
-
-A simple way of stopping to use Roo is to simply never load it again. The *_Roo_*.aj files will still be on disk and your project will continue to work regardless of whether the Roo shell is never launched again. You can even uninstall the Roo system from your computer and your project will still work. The advantage of working in this way is that you have not lost the benefits of using Roo, and it is very easy to use Roo shell again in the future. 
-
-Spring Roo needs that .aj files to maintain the generated code automatically. Is not possible to know which code has been generated by Spring Roo shell and which code has been modified by developers without the .aj files.
-
-Anyway, if you don't want to have .aj files in your generated project, you could use the following command to make push-in of all the generated code:
-
-[source,sh]
-----
-roo> push-in --all --force
-----
+= Appendix
 
 [appendix]
 [[application-development-command-index]]
-== Command Index for Application Development
+== Command index for application development
 
 Commands are listed in alphabetic order, and are shown in monospaced
 font with any mandatory options you must specify when using the command.
 Most commands accept a large number of options, and all of the possible
 options for each command are presented in this appendix.
-
-=== addon info bundle
-
-Provide information about a specific Spring Roo Add-on from installed repositories.
-
-[source,sh]
-----
-roo> addon info bundle --bundleSymbolicName
-----
-
-* _Mandatory:_
-
---bundleSymbolicName::
-  The bundle symbolic name of the add-on of interest.
-
-=== addon install bundle
-
-Installs Spring Roo Add-on.
-
-[source,sh]
-----
-roo> addon install bundle --bundleSymbolicName
-----
-
-* _Mandatory:_
-
---bundleSymbolicName::
-  The bundle symbolic name of the add-on of interest from installed repositories.
-
-=== addon install url
-
-Installs Spring Roo Add-on using an URL.
-
-[source,sh]
-----
-roo> addon install url --url
-----
-
-* _Mandatory:_
-
---url::
-  The url of the add-on of interest.
-
-=== addon list
-
-Lists all installed add-ons.
-
-[source,sh]
-----
-roo> addon list
-----
-
-This command does not accept any options.
-
-=== addon remove
-
-Removes an installed Spring Roo Add-on.
-
-[source,sh]
-----
-roo> addon remove --bundleSymbolicName
-----
-
-* _Mandatory:_
-
---bundleSymbolicName::
-  The bundle symbolic name of the add-on of interest.
-
-=== addon repository add
-
-Adds a new OBR Repository to Roo Shell.
-
-[source,sh]
-----
-roo> addon repository add --url
-----
-
-* _Mandatory:_
-
---url::
-  URL file that defines repository. Ex: 'http://localhost/repo/index.xml'.
-
-[NOTE] See that in Windows systems, you must use file:\ protocol when you specify a local repository URL. However, in nix systems the protocol for local repositories URL must be file://.
-
-=== addon repository introspect
-
-Introspects all installed OBR Repositories and list all their add-ons.
-
-[source,sh]
-----
-roo> addon repository introspect
-----
-
-This command does not accept any options.
-
-=== addon repository list
-
-Lists installed OBR Repositories.
-
-[source,sh]
-----
-roo> addon repository list
-----
-
-This command does not accept any options.
-
-=== addon repository remove
-
-Removes an existing OBR Repository from Roo Shell.
-
-[source,sh]
-----
-roo> addon repository remove --url
-----
-
-* _Mandatory:_
-
---url::
-  URL file that defines repository. Ex: 'http://localhost/repo/index.xml'.
-
-=== addon search
-
-Searches all known Spring Roo Add-ons from installed repositories.
-
-[source,sh]
-----
-roo> addon search --requiresCommand
-----
-
-* _Mandatory:_
-
---requiresCommand::
-  Only display add-ons in search results that offer this command.
-
-=== addon suite install name
-
-Installs some 'Roo Addon Suite' from installed OBR Repository.
-
-[source,sh]
-----
-roo> addon suite install name --symbolicName
-----
-
-* _Mandatory:_
-
---symbolicName::
-  Name that identifies the 'Roo Addon Suite'.
-
-=== addon suite install url
-
-Installs some 'Roo Addon Suite' from URL.
-
-[source,sh]
-----
-roo> addon suite install url --url
-----
-
-* _Mandatory:_
-
---url::
-  URL of Roo Addon Suite .esa file.
-
-=== addon suite list
-
-Lists all installed 'Roo Addon Suite'. If you want to list all available 'Roo Addon Suites' on Repository, use `--repository` parameter.
-
-[source,sh]
-----
-roo> addon suite list
-----
-
-* _Optional:_
-
---repository::
-  OBR Repository where the 'Roo Addon Suite' are located.
-
-=== addon suite start
-
-Starts some installed 'Roo Addon Suite'. By default, an installed 'Roo Addon Suite' is started automatically.
-
-[source,sh]
-----
-roo> addon suite start --symbolicName
-----
-
-* _Mandatory:_
-
---symbolicName::
-  Name that identifies the 'Roo Addon Suite'.
-
-=== addon suite stop
-
-Stops some started 'Roo Addon Suite'.
-
-[source,sh]
-----
-roo> addon suite stop --symbolicName
-----
-
-* _Mandatory:_
-
---symbolicName::
-  Name that identifies the 'Roo Addon Suite'.
-
-=== addon suite uninstall
-
-Uninstall some installed 'Roo Addon Suite'.
-
-[source,sh]
-----
-roo> addon suite uninstall --symbolicName
-----
-
-* _Mandatory:_
-
---symbolicName::
-  Name that identifies the 'Roo Addon Suite'.
 
 [[backup-command]]
 === backup
@@ -3296,10 +3020,244 @@ roo> web mvc view setup --type --module
   The application module where to install views. Not available if there is only one application module (mandatory if the focus is not set in application module); default if option not present: '.' 
 
 
+[[version-command]]
+=== version
+
+Displays shell version
+
+[source,sh]
+----
+roo> version
+----
+
+--[default]::
+  Special version flags
+
+[appendix]
+[[application-development-command-index]]
+== Command index for add-on management
+
+=== addon info bundle
+
+Provide information about a specific Spring Roo Add-on from installed repositories.
+
+[source,sh]
+----
+roo> addon info bundle --bundleSymbolicName
+----
+
+* _Mandatory:_
+
+--bundleSymbolicName::
+  The bundle symbolic name of the add-on of interest.
+
+=== addon install bundle
+
+Installs Spring Roo Add-on.
+
+[source,sh]
+----
+roo> addon install bundle --bundleSymbolicName
+----
+
+* _Mandatory:_
+
+--bundleSymbolicName::
+  The bundle symbolic name of the add-on of interest from installed repositories.
+
+=== addon install url
+
+Installs Spring Roo Add-on using an URL.
+
+[source,sh]
+----
+roo> addon install url --url
+----
+
+* _Mandatory:_
+
+--url::
+  The url of the add-on of interest.
+
+=== addon list
+
+Lists all installed add-ons.
+
+[source,sh]
+----
+roo> addon list
+----
+
+This command does not accept any options.
+
+=== addon remove
+
+Removes an installed Spring Roo Add-on.
+
+[source,sh]
+----
+roo> addon remove --bundleSymbolicName
+----
+
+* _Mandatory:_
+
+--bundleSymbolicName::
+  The bundle symbolic name of the add-on of interest.
+
+=== addon repository add
+
+Adds a new OBR Repository to Roo Shell.
+
+[source,sh]
+----
+roo> addon repository add --url
+----
+
+* _Mandatory:_
+
+--url::
+  URL file that defines repository. Ex: 'http://localhost/repo/index.xml'.
+
+[NOTE] See that in Windows systems, you must use file:\ protocol when you specify a local repository URL. However, in nix systems the protocol for local repositories URL must be file://.
+
+=== addon repository introspect
+
+Introspects all installed OBR Repositories and list all their add-ons.
+
+[source,sh]
+----
+roo> addon repository introspect
+----
+
+This command does not accept any options.
+
+=== addon repository list
+
+Lists installed OBR Repositories.
+
+[source,sh]
+----
+roo> addon repository list
+----
+
+This command does not accept any options.
+
+=== addon repository remove
+
+Removes an existing OBR Repository from Roo Shell.
+
+[source,sh]
+----
+roo> addon repository remove --url
+----
+
+* _Mandatory:_
+
+--url::
+  URL file that defines repository. Ex: 'http://localhost/repo/index.xml'.
+
+=== addon search
+
+Searches all known Spring Roo Add-ons from installed repositories.
+
+[source,sh]
+----
+roo> addon search --requiresCommand
+----
+
+* _Mandatory:_
+
+--requiresCommand::
+  Only display add-ons in search results that offer this command.
+
+=== addon suite install name
+
+Installs some 'Roo Addon Suite' from installed OBR Repository.
+
+[source,sh]
+----
+roo> addon suite install name --symbolicName
+----
+
+* _Mandatory:_
+
+--symbolicName::
+  Name that identifies the 'Roo Addon Suite'.
+
+=== addon suite install url
+
+Installs some 'Roo Addon Suite' from URL.
+
+[source,sh]
+----
+roo> addon suite install url --url
+----
+
+* _Mandatory:_
+
+--url::
+  URL of Roo Addon Suite .esa file.
+
+=== addon suite list
+
+Lists all installed 'Roo Addon Suite'. If you want to list all available 'Roo Addon Suites' on Repository, use `--repository` parameter.
+
+[source,sh]
+----
+roo> addon suite list
+----
+
+* _Optional:_
+
+--repository::
+  OBR Repository where the 'Roo Addon Suite' are located.
+
+=== addon suite start
+
+Starts some installed 'Roo Addon Suite'. By default, an installed 'Roo Addon Suite' is started automatically.
+
+[source,sh]
+----
+roo> addon suite start --symbolicName
+----
+
+* _Mandatory:_
+
+--symbolicName::
+  Name that identifies the 'Roo Addon Suite'.
+
+=== addon suite stop
+
+Stops some started 'Roo Addon Suite'.
+
+[source,sh]
+----
+roo> addon suite stop --symbolicName
+----
+
+* _Mandatory:_
+
+--symbolicName::
+  Name that identifies the 'Roo Addon Suite'.
+
+=== addon suite uninstall
+
+Uninstall some installed 'Roo Addon Suite'.
+
+[source,sh]
+----
+roo> addon suite uninstall --symbolicName
+----
+
+* _Mandatory:_
+
+--symbolicName::
+  Name that identifies the 'Roo Addon Suite'.
+
 
 [appendix]
 [[addon-development-command-index]]
-== Command Index for Add-on Development
+== Command index for add-on development
 
 These commands are specific for developing Spring Roo add-ons and will be only available if user enables the add-on "development mode" with `addon development mode` command.
 
@@ -3578,19 +3536,6 @@ roo> system properties
 
 This command does not accept any options.
 
-[[version-command]]
-=== version
-
-Displays shell version
-
-[source,sh]
-----
-roo> version
-----
-
---[default]::
-  Special version flags
-
 
 [appendix]
 [[roo-without-ide]]
@@ -3613,32 +3558,23 @@ $ sudo ln -s $ROO_HOME/bin/roo.sh /usr/bin/roo
 ----
 . Next verify Roo has been installed correctly. This can be done, using the following commands:
 +
-[source,sh]
+[source,subs="quotes"]
 ----
 $ mkdir roo-test
 $ cd roo-test
 $ roo
-    ____  ____  ____
-   / __ \/ __ \/ __ \
-  / /_/ / / / / / / /
- / _, _/ /_/ / /_/ /
-/_/ |_|\____/\____/    W.X.Y.ZZ [rev RRR]
+                _                               
+ ___ _ __  _ __(_)_ __   __ _   _ __ ___   ___  
+/ __| '_ \| '__| | '_ \ / _` | | '__/ _ \ / _ \ 
+\__ \ |_) | |  | | | | | (_| | | | | (_) | (_) |
+|___/ .__/|_|  |_|_| |_|\__, | |_|  \___/ \___/ 
+    |_|                 |___/           W.X.Y.ZZ
 
 Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
+*roo>*
 ----
 +
 If Roo logo appears, you have installed Roo successfully. For those curious, the "[rev RRR]" refers to the Git commit ID used to compile that particular build of Roo.
-
-=== Generating projects with Spring Roo
-
-You can create Northwind multimodule project executing the link:#script-command[script command]:
-
-[source,sh]
-----
-roo> script --file northwind-multimodule.roo
-----
-
-This project is used as an link:#using-spring-roo-northwind-script[example] in the documentation.
 
 === Generating project's JavaDoc from command line
 
@@ -3648,6 +3584,77 @@ To generate the project documentation using "maven-javadoc-plugin" just move to 
 
 This will work either in Linux or Windows, buy you must have Maven in your *PATH* variable.
 
+
+[[using-spring-roo-deployment-and-backup]]
+== Backup and deployment
+
+A very useful command is the link:#backup-command[backup] command. Using this command you will create a backup of the current workspace with all sources, log files and the script log file (excluding the target directory):
+
+[source,sh]
+----
+roo> backup
+----
+
+Finally, you may wish to deploy your application to a production Web container. For this you can easily create two war files, by taking advantage of the link:#perform-package-command[perform package command]:
+
+[source,sh]
+----
+roo> perform package
+----
+
+This command generates a "*.war" file which can then be easily copied into your production Web container and a "*exec.war" file that uses a embedded web server.
+
+You can execute "*exec.war" as follows:
+
+[source,sh]
+----
+$ java -jar name-exec.war
+----
+
+NOTE: The provider dependencies are added only in "*exec.war" file.
+
+
+[[using-spring-roo-generating-javadoc]]
+== Generating JavaDoc
+
+Spring Roo generated projects automatically include the "maven-javadoc-plugin" to generate project documentation following AsciiDoc syntax. This configuration it's done by using https://github.com/asciidoctor/asciidoclet["Asciidoclet"]. 
+
+To generate project's documentation you can follow the following steps:
+
+. Select the project from STS "Package Explorer".
+. Right click in the project and go to menu:RunAs[Run Configurations...]
++
+image::sts-maven-run-configurations.png["images/sts-maven-run-configurations.png"]
++
+. In the window that will open, double click in _Maven Build_ from the list on the left side.
+. In the configuration window, specify "javadoc:aggregate" as Maven goal.
+. Specify project's root directory as "Base directory". You can easily do it by clicking _Workspace..._ and selecting the root module of your project.
++
+image::generate-javadoc-config.png["images/generate-javadoc-config.png"]
++
+. Apply configuration and close the window, or execute it directly with _Run_.
+. The generated JavaDoc will be in "[ROOT-PROJECT]/target/site/apidocs/".
+
+
+[[using-spring-roo-remove-roo]]
+== Remove Roo
+
+If you do decide to stop using Roo, it can be done in just a few minutes. There is no need to write any code or otherwise make significant changes. 
+
+Roo is not involved with your project when it runs in production. You will not find any Roo JARs in your runtime classpath or Roo annotations compiled into your classes. 
+
+As long as Roo does not exist at runtime, you can decide to stop using Roo and implement that decision without changing any production deployment of the application.
+
+A simple way of stopping to use Roo is to simply never load it again. The *_Roo_*.aj files will still be on disk and your project will continue to work regardless of whether the Roo shell is never launched again. You can even uninstall the Roo system from your computer and your project will still work. The advantage of working in this way is that you have not lost the benefits of using Roo, and it is very easy to use Roo shell again in the future. 
+
+Spring Roo needs that .aj files to maintain the generated code automatically. Is not possible to know which code has been generated by Spring Roo shell and which code has been modified by developers without the .aj files.
+
+Anyway, if you don't want to have .aj files in your generated project, you could use the following command to make push-in of all the generated code:
+
+[source,sh]
+----
+roo> push-in --all --force
+----
 
 [appendix]
 [[resources]]
