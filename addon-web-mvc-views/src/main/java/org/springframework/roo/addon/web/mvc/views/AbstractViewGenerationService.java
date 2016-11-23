@@ -1,23 +1,5 @@
 package org.springframework.roo.addon.web.mvc.views;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -60,6 +42,25 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.XmlUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.logging.Logger;
 
 /**
  *
@@ -505,7 +506,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
   @Override
   public void addMenu(String moduleName, ViewContext<T> ctx) {
 
-    Map<String, MenuEntry> mapMenuEntries = new HashMap<String, MenuEntry>();
+    Map<String, MenuEntry> mapMenuEntries = new TreeMap<String, MenuEntry>();
 
     Set<ClassOrInterfaceTypeDetails> existingControllers =
         new HashSet<ClassOrInterfaceTypeDetails>();
