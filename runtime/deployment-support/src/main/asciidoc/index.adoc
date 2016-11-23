@@ -100,11 +100,12 @@ Also Roo 2 generates as few code as possible, letting the other Spring technolog
 
 === Improved usability
 
-The code generation has been updated thinking in the developer, the generated code will be easier to customize. And thanks to Thymeleaf the developers will modifiy the view layer with less effort.
-
-
+The code generation has been updated thinking in the developer, the generated code will be easier to customize. And thanks to Thymeleaf the developers will modify the view layer with less effort.
 
 === Application architecture
+
+[align="center"]
+image::n-layer-arch-full_en.png["New application architecture", width="40%"]
 
 [[getting-started-requirements]]
 == Requirements
