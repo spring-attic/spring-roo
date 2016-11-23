@@ -106,6 +106,52 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     return sb.toString();
   }
 
+  public static String buildInfo() {
+    // Try to determine the bundle version
+    String bundleVersion = null;
+    String gitCommitHash = null;
+    JarFile jarFile = null;
+    try {
+      final URL classContainer =
+          AbstractShell.class.getProtectionDomain().getCodeSource().getLocation();
+      if (classContainer.toString().endsWith(".jar")) {
+        // Attempt to obtain the "Bundle-Version" version from the
+        // manifest
+        jarFile = new JarFile(new File(classContainer.toURI()), false);
+        final ZipEntry manifestEntry = jarFile.getEntry("META-INF/MANIFEST.MF");
+        final Manifest manifest = new Manifest(jarFile.getInputStream(manifestEntry));
+        bundleVersion = manifest.getMainAttributes().getValue("Bundle-Version");
+        gitCommitHash = manifest.getMainAttributes().getValue("Git-Commit-Hash");
+      }
+    } catch (final IOException ignoreAndMoveOn) {
+    } catch (final URISyntaxException ignoreAndMoveOn) {
+    } finally {
+      if (jarFile != null) {
+        try {
+          jarFile.close();
+        } catch (final IOException ignored) {
+        }
+      }
+    }
+
+    final StringBuilder sb = new StringBuilder();
+
+    if (gitCommitHash != null && gitCommitHash.length() > 7) {
+      if (sb.length() > 0) {
+        sb.append(" ");
+      }
+      sb.append("[rev ");
+      sb.append(gitCommitHash.substring(0, 7));
+      sb.append("]");
+    }
+
+    if (sb.length() == 0) {
+      sb.append("UNKNOWN BUILD ID");
+    }
+
+    return sb.toString();
+  }
+
   public static String versionInfoWithoutGit() {
     // Try to determine the bundle version
     String bundleVersion = null;
@@ -617,42 +663,42 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
       @CliOption(key = "", help = "Special version flags, like `roorocks`.") final String extra) {
     final StringBuilder sb = new StringBuilder();
 
-    if ("roorocks".equals(extra)) {
-      sb.append("               /\\ /l").append(LINE_SEPARATOR);
-      sb.append("               ((.Y(!").append(LINE_SEPARATOR);
-      sb.append("                \\ |/").append(LINE_SEPARATOR);
-      sb.append("                /  6~6,").append(LINE_SEPARATOR);
-      sb.append("                \\ _    +-.").append(LINE_SEPARATOR);
-      sb.append("                 \\`-=--^-' \\").append(LINE_SEPARATOR);
-      sb.append("                  \\   \\     |\\--------------------------+").append(
-          LINE_SEPARATOR);
-      sb.append("                 _/    \\    |  Thanks for loading Roo!  |")
+    // By default show version without Git commit ID. To see the Git commit
+    // ID use the "version" command.
+    String versionInfo = versionInfoWithoutGit();
+
+    if ("roorocks".equals(extra) || "about".equals(extra)) {
+      sb.append("           /\\ /l").append(LINE_SEPARATOR);
+      sb.append("           ((.Y(!").append(LINE_SEPARATOR);
+      sb.append("            \\ |/").append(LINE_SEPARATOR);
+      sb.append("            /  6~6,").append(LINE_SEPARATOR);
+      sb.append("            \\ _    +-.").append(LINE_SEPARATOR);
+      sb.append("             \\`-=--^-' \\").append(LINE_SEPARATOR);
+      sb.append("              \\   \\     |\\--------------------------+").append(LINE_SEPARATOR);
+      sb.append("             _/    \\    |      About Spring Roo     |").append(LINE_SEPARATOR);
+      sb.append("            (  .    Y   +---------------------------+").append(LINE_SEPARATOR);
+      sb.append("           /\"\\ `---^--v---.").append(LINE_SEPARATOR);
+      sb.append("          / _ `---\"T~~\\/~\\/    Version:    ").append(versionInfo)
           .append(LINE_SEPARATOR);
-      sb.append("                (  .    Y   +---------------------------+").append(LINE_SEPARATOR);
-      sb.append("               /\"\\ `---^--v---.").append(LINE_SEPARATOR);
-      sb.append("              / _ `---\"T~~\\/~\\/").append(LINE_SEPARATOR);
-      sb.append("             / \" ~\\.      !").append(LINE_SEPARATOR);
-      sb.append("       _    Y      Y.~~~ /'").append(LINE_SEPARATOR);
-      sb.append("      Y^|   |      | Roo 7").append(LINE_SEPARATOR);
-      sb.append("      | l   |     / .   /'").append(LINE_SEPARATOR);
-      sb.append("      | `L  | Y .^/   ~T").append(LINE_SEPARATOR);
-      sb.append("      |  l  ! | |/  | |               ____  ____  ____").append(LINE_SEPARATOR);
-      sb.append("      | .`\\/' | Y   | !              / __ \\/ __ \\/ __ \\").append(
+      sb.append("         / \" ~\\.      !        Build ID:   ").append(buildInfo())
+          .append(LINE_SEPARATOR);
+      sb.append("   _    Y      Y.~~~ /'        Platform:   OSGi R6 - Java").append(LINE_SEPARATOR);
+      sb.append("  Y^|   |      | Roo 7         Created By: DISID Corporation S.L.").append(
           LINE_SEPARATOR);
-      sb.append("      l  \"~   j l   j L______       / /_/ / / / / / / /").append(LINE_SEPARATOR);
-      sb.append("       \\,____{ __\"\" ~ __ ,\\_,\\_    / _, _/ /_/ / /_/ /").append(
+      sb.append("  | |   |      |     |                     Visit http://www.disid.com").append(
           LINE_SEPARATOR);
-      sb.append("    ~~~~~~~~~~~~~~~~~~~~~~~~~~~   /_/ |_|\\____/\\____/").append(" ")
-          .append(versionInfo()).append(LINE_SEPARATOR);
+      sb.append("  | l   |     / .   /'").append(LINE_SEPARATOR);
+      sb.append("  | `L  | Y .^/   ~T           Copyright (c) 2016 the original author or authors")
+          .append(LINE_SEPARATOR);
+      sb.append("  |  l  ! | |/  | |            All rights reserved.").append(LINE_SEPARATOR);
+      sb.append("  | .`\\/' | Y   | !").append(LINE_SEPARATOR);
+      sb.append("  l  \"~   j l   j L______      Visit http://projects.spring.io/spring-roo")
+          .append(LINE_SEPARATOR);
+      sb.append("   \\,____{ __\"\" ~ __ ,\\_,\\_").append(LINE_SEPARATOR);
+      sb.append(" ~~~~~~~~~~~~~~~~~~~~~~~~~~    Licensed under the Apache License, v2.0").append(
+          LINE_SEPARATOR);
       return sb.toString();
     }
-
-    //    sb.append("    ____  ____  ____  ").append(LINE_SEPARATOR);
-    //    sb.append("   / __ \\/ __ \\/ __ \\ ").append(LINE_SEPARATOR);
-    //    sb.append("  / /_/ / / / / / / / ").append(LINE_SEPARATOR);
-    //    sb.append(" / _, _/ /_/ / /_/ /  ").append(LINE_SEPARATOR);
-    //    sb.append("/_/ |_|\\____/\\____/   ").append(" ").append(versionInfo()).append(LINE_SEPARATOR);
-    //    sb.append(LINE_SEPARATOR);
 
     sb.append("                _                               ").append(LINE_SEPARATOR);
     sb.append(" ___ _ __  _ __(_)_ __   __ _   _ __ ___   ___  ").append(LINE_SEPARATOR);
@@ -660,10 +706,6 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     sb.append("\\__ \\ |_) | |  | | | | | (_| | | | | (_) | (_) |").append(LINE_SEPARATOR);
     sb.append("|___/ .__/|_|  |_|_| |_|\\__, | |_|  \\___/ \\___/ ").append(LINE_SEPARATOR);
     sb.append("    |_|                 |___/  ");
-
-    // By default show version without Git commit ID. To see the Git commit
-    // ID use the "version" command.
-    String versionInfo = versionInfoWithoutGit();
 
     // We have only an space of 17 chars to put the version info.
     if (versionInfo.length() < 17) {
