@@ -13,13 +13,13 @@ body {
 img {border: 0; max-width: 100%; outline: none;}
 
 a{
-    color: #6db33f;
-    transition: color 150ms ease;
-    }
+  color: #6db33f;
+  transition: color 150ms ease;
+  }
 a:focus, a:hover{
-    outline: none;
-    color: #3f6824;
-    }
+  outline: none;
+  color: #3f6824;
+  }
 .content a:hover {text-decoration: underline}
 .content a.btn-action:hover,
 .content .paginate_button a:hover,
@@ -35,8 +35,6 @@ section {padding: 1em 0}
 .navbar-header .application-name strong {}
 .navbar-header .application-name a {color: #fff; text-decoration: none;}
 .navbar-header .application-name small {}
-
-.navbar-nav > li > .dropdown-menu {  margin-top: 4px;}
 
 .dropdown-menu > li button.btn-link {
   display: block;
@@ -67,11 +65,11 @@ section {padding: 1em 0}
 /*--FOOTER-------------*/
 
 footer {
-    padding: 1em 0 3em;
+  padding: 1em 0 3em;
   text-align: center;
-    }
+  }
 footer p{
-    font-size: 0.875em
+  font-size: 0.875em
   }
 
 
@@ -116,7 +114,7 @@ body.home .navbar {  margin-bottom: 0px;}
   font-size: 4em;
 }
 .jumbotron .project-tagline {
-     color: #fff;
+   color: #fff;
     margin-bottom: 2rem;
     font-weight: normal;
     opacity: 0.7;
@@ -135,15 +133,15 @@ body.home .navbar {  margin-bottom: 0px;}
 }
 
 body.home .content{
-    background: none;
-    padding: 0;
-    box-shadow: none;
-    }
+  background: none;
+  padding: 0;
+  box-shadow: none;
+  }
 body.home .box-center{
-    padding: 1em 2em;
+  padding: 1em 2em;
   background: #fff;
   box-shadow: 0 0 0 0,0 6px 12px rgba(34,34,34,.1);
-    }
+  }
 
 /*--SHOW-------------*/
 
@@ -165,6 +163,9 @@ body.home .box-center{
 
 
 /*--BTN-------------*/
+.btn{
+  text-transform: none;
+}
 
 .btn-action {
     display: inline-block;
@@ -220,10 +221,10 @@ table a.btn-action {
   content:"\f00c";
   }
 .btn-action.add:before {
-    content:"\f067";
-    }
+  content:"\f067";
+  }
 .btn-action.showInfo:before {
-    content:"\f06e";
+  content:"\f06e";
 }
 .alert a.btn{
   color: #555555;
@@ -266,6 +267,9 @@ div.dataTables_wrapper div.dataTables_filter {
 div.dataTables_wrapper div.dataTables_filter,
 div.dataTables_wrapper div.dt-buttons.btn-group{
   padding: 1em 0;
+}
+.pagination{
+  text-transform: none;
 }
 
 /*--SHOW-------------*/
@@ -436,10 +440,10 @@ table.dataTable.no-footer {
 }
 
 @media (max-width: 768px) {
-    .jumbotron .project-name{font-size: 3em;}
+  .jumbotron .project-name{font-size: 3em;}
 
-    /* navbar fixes */
-    .navbar-nav#entitiesMenuEntries {
+  /* navbar fixes */
+  .navbar-nav#entitiesMenuEntries {
       max-width: 410px;
   }
 }
@@ -462,5 +466,6 @@ table.dataTable.no-footer {
       max-width: 50%;
   }
 }
+
 
 

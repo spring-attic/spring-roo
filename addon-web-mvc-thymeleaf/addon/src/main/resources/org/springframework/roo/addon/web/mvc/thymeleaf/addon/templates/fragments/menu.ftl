@@ -12,7 +12,7 @@
     Only the internal content of the following div is included within
     the template, in menu fragment
     -->
-    <nav class="navbar navbar-inverse navbar-static-top" data-th-fragment="menu">
+    <nav class="navbar navbar-default navbar-static-top" data-th-fragment="menu">
 
          <div class="container">
 
@@ -96,7 +96,7 @@
     Only the internal content of the following div is included within
     the template, in menu-languages fragment
     -->
-    <nav class="navbar navbar-inverse navbar-static-top" data-th-fragment="menu-languages">
+    <nav class="navbar navbar-default navbar-static-top" data-th-fragment="menu-languages">
 
          <div class="container">
 

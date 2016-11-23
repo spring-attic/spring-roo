@@ -54,7 +54,7 @@
   <body id="body">
 
      <header role="banner">
-        <nav class="navbar navbar-inverse navbar-static-top" data-th-replace="fragments/menu :: menu">
+        <nav class="navbar navbar-default navbar-static-top" data-th-replace="fragments/menu :: menu">
           <!-- Content replaced by the menu template fragment menu.html -->
           <span>Application menu</span>
         </nav>
