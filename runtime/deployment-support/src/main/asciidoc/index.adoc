@@ -845,6 +845,14 @@ Since Spring Roo 2.0, the multimodule support lets to prefix the module name to 
 
 == The view layer
 
+Spring Roo allows you to scaffold Spring MVC controllers, Thymeleaf views and REST API for an existing domain model.
+
+The Spring Roo Web MVC scaffolding can deliver a fully functional web frontend and REST API to your domain business logic.
+
+=== Create the view layer
+
+To setup the view layer use the command:
+
 [source,subs="quotes"]
 ----
 *roo>* web mvc setup
