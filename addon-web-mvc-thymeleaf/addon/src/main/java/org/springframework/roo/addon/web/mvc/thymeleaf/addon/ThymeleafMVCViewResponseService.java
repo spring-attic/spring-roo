@@ -395,7 +395,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
    */
   private void addWebMVCThymeleafUIConfiguration(Pom module) {
 
-    // Check if already exists other main controller annotated with @RooWebMvcThymeleafUIConfiguration
+    // Obtain the class annotated with @RooWebMvcConfiguration
     Set<ClassOrInterfaceTypeDetails> webMvcConfigurationSet =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
             RooJavaType.ROO_WEB_MVC_CONFIGURATION);
@@ -407,15 +407,19 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
 
     ClassOrInterfaceTypeDetails webMvcConfiguration = webMvcConfigurationSet.iterator().next();
 
-    AnnotationMetadataBuilder thymeleaftConfigurationAnnotation =
-        new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION);
+    // Prevent to include the @RooWebMvcThymeleafUIConfiguration more than once
+    if (webMvcConfiguration.getAnnotation(RooJavaType.ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION) == null) {
+      AnnotationMetadataBuilder thymeleaftConfigurationAnnotation =
+          new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION);
 
-    ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-        new ClassOrInterfaceTypeDetailsBuilder(webMvcConfiguration);;
+      ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+          new ClassOrInterfaceTypeDetailsBuilder(webMvcConfiguration);;
 
-    cidBuilder.addAnnotation(thymeleaftConfigurationAnnotation);
+      cidBuilder.addAnnotation(thymeleaftConfigurationAnnotation);
 
-    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+      getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
+
   }
 
   /**
