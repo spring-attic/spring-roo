@@ -67,16 +67,44 @@ Spring Roo is an easy-to-use development tool for quickly building web applicati
 
 _What does it mean "Roo is a development tool"?_
 
-* *Roo is not a runtime*. Roo is not involved with your project when it runs in production. You won't find any Roo JARs in your runtime classpath. This is actually a wonderful thing. It means you have no lock-in to worry about. It also means there is no technical way possible for Roo to slow your project down at runtime, waste memory or bloat your deployment artefacts with JARs. We're really proud of the fact that Roo imposes no engineering trade-offs, as it was one of our central design objectives.
+* *Roo isn't neither a library nor a framework*. Roo is not involved with your project when it runs in production. You won't find any Roo JARs in your runtime classpath. This is actually a wonderful thing. It means you have no lock-in to worry about. It also means there is no technical way possible for Roo to slow your project down at runtime, waste memory or bloat your deployment artefacts with JARs. We're really proud of the fact that Roo imposes no engineering trade-offs, as it was one of our central design objectives.
 * *Roo is not an IDE plugin*. There is no requirement for a "Roo Eclipse plugin" or "Roo IntelliJ plugin". Roo works perfectly fine in its own operating system command window. It sits there and monitors your file system, intelligently and incrementally responding to changes as appropriate. This means you're perfectly able to use vi or emacs if you'd like (Roo doesn't mind how your project files get changed).
 * *Roo is not an annotation processing library*. This allows Roo to work with a much more sophisticated and extensible internal model.
 
 Best of all, Roo works alongside your existing Java and Spring knowledge, skills and experience. You probably will not need to learn anything new to use Roo, as there is no new language or runtime platform needed. You simply program in your normal Java way and Roo just works, sitting in the background taking care of the things you do not want to worry about.
 
 [[getting-started-whatsNew]]
-== What's new
+== What's new in Spring Roo 2.0
 
-TODO
+=== Improved extensibility
+
+Due to the OSGi container has been upgraded to OSGi R5, now Roo provides a new way to package and distribute a set of addons together: the Roo Addon Suite.
+
+Roo Addon Suite is based on OSGi R5 Subsystems that provides a really convenient deployment model, without compromising the modularity of Roo.
+
+=== No backward compatibility
+
+Spring Roo 2.0 has important changes to achieve its goals, due to that, it contains API changes and less add-ons than previous version so *this release is not backward compatible with 1.x*.
+
+It means Spring Roo 2.0 cannot neither update nor modify applications created with Spring Roo 1.x.
+
+=== Centered in Spring technologies
+
+Now Spring Roo is centered in Spring technologies so addons like GWT addon and JSF addon have been moved to their own projects in order to be maintained by Roo community.
+
+Moreover the generated applications are focused on newer Spring technologies like Spring IO platform, Spring Data, etc. Indeed, Spring Roo 2 creates Spring Boot applications.
+
+Therefore, the XML configuration model has been replaced with the Java-based one.
+
+Also Roo 2 generates as few code as possible, letting the other Spring technologies do their work.
+
+=== Improved usability
+
+The code generation has been updated thinking in the developer, the generated code will be easier to customize. And thanks to Thymeleaf the developers will modifiy the view layer with less effort.
+
+
+
+=== Application architecture
 
 [[getting-started-requirements]]
 == Requirements
@@ -236,7 +264,11 @@ Note we selected the _Multimodule Standard_ project type, so Roo created you a S
 [align="center"]
 image::sts-folder-structure.png["Folder structure", width="25%"]
 
-For those familiar with Maven you will notice that this folder structure follows standard Maven conventions by creating separate folders for your main project resources and tests. Roo also created the default application architecture for you.
+For those familiar with Maven you will notice that this folder structure follows standard Maven conventions by creating separate folders for your main project resources and tests.
+
+As you can see, the project extends the Spring IO platform, and it also adds the _spring boot starter_ and the _spring boot starter test_ dependencies.
+
+Also Roo creates the Boot main application class.
 
 Finally, both the parent pom and the modules pom files contain all required module dependencies, 3rd party dependencies and configurations to get started with the Northwind project.
 
@@ -851,38 +883,54 @@ The Spring Roo Web MVC scaffolding can deliver a fully functional web frontend a
 
 === Create the view layer
 
-To setup the view layer use the command:
-
 [source,subs="quotes"]
+.Setup the view layer
 ----
 *roo>* web mvc setup
 ----
 
-.Install THYMELEAF view (link:#web-mvc-view-setup-command[web mvc view setup command])
-[source,sh]
+=== Thymeleaf based view templates
+
+[source,subs="quotes"]
 ----
-roo> web mvc view setup --type THYMELEAF
+*roo>* web mvc view setup --type THYMELEAF
 ----
 
-.Add necessary controllers (link:#web-mvc-controller-command[web mvc controller command])
-[source,sh]
+Tell Roo to copy the templates it uses to generate the view pages to the application's _.roo/templates/thymeleaf/_ directory, allowing the developers to customize them for code generation.
+
+[source,subs="quotes"]
 ----
-roo> web mvc controller --entity model:~.Category --responseType THYMELEAF
-roo> web mvc controller --entity model:~.Country --responseType THYMELEAF
-roo> web mvc controller --entity model:~.CustomerOrder --responseType THYMELEAF
-roo> web mvc controller --entity model:~.Customer --responseType THYMELEAF
-roo> web mvc controller --entity model:~.Employee --responseType THYMELEAF
-roo> web mvc controller --entity model:~.Product --responseType THYMELEAF
-roo> web mvc controller --entity model:~.Shipper --responseType THYMELEAF
-roo> web mvc controller --entity model:~.SoldProduct --responseType THYMELEAF
-roo> web mvc controller --entity model:~.Store --responseType THYMELEAF
-roo> web mvc controller --entity model:~.Supplier --responseType THYMELEAF 
+*roo>* web mvc templates setup --type THYMELEAF
 ----
 
-.Required controller to generate its detail (link:#web-mvc-controller-command[web mvc controller command])
-[source,sh]
+Generate CRUD views for the given entities:
+
+[source,subs="quotes"]
 ----
-roo> web mvc controller --entity model:~.Region --responseType THYMELEAF 
+*roo>* web mvc controller --entity model:~.Category --responseType THYMELEAF
+     web mvc controller --entity model:~.Country --responseType THYMELEAF
+     web mvc controller --entity model:~.CustomerOrder --responseType THYMELEAF
+     web mvc controller --entity model:~.Customer --responseType THYMELEAF
+     web mvc controller --entity model:~.Employee --responseType THYMELEAF
+     web mvc controller --entity model:~.Product --responseType THYMELEAF
+     web mvc controller --entity model:~.Shipper --responseType THYMELEAF
+     web mvc controller --entity model:~.SoldProduct --responseType THYMELEAF
+     web mvc controller --entity model:~.Store --responseType THYMELEAF
+     web mvc controller --entity model:~.Supplier --responseType THYMELEAF
+     web mvc controller --entity model:~.City --responseType THYMELEAF
+     web mvc controller --entity model:~.Region --responseType THYMELEAF
+     web mvc controller --entity model:~.PurchaseOrder --responseType THYMELEAF
+----
+
+You can generate master-detail views to manage the entity relations as follows:
+
+[source,subs="quotes"]
+----
+*roo>* web mvc detail --entity model:~.Category --field products --responseType THYMELEAF
+     web mvc detail --entity model:~.Category --responseType THYMELEAF --field products.purchaseOrders
+     web mvc detail --entity model:~.Product --field purchaseOrders --responseType THYMELEAF
+     web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions
+     web mvc detail --entity model:~.Region --responseType THYMELEAF --field cities
 ----
 
 .Add details to controllers (link:#web-mvc-detail-command[web mvc detail command])
