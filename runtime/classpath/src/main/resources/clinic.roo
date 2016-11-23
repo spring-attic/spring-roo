@@ -75,8 +75,7 @@ finder add --entity ~.domain.Owner --name findByFirstNameLike --formBean ~.domai
 
 dto --class ~.domain.OwnerCityFormBean
 field string --fieldName city
-entity projection --class ~.domain.OwnerInfo --entity ~.domain.Owner --fields firstName,lastName,city
-finder add --entity ~.domain.Owner --name findByCityLike --formBean ~.domain.OwnerCityFormBean --returnType ~.domain.OwnerInfo 
+finder add --entity ~.domain.Owner --name findByCityLike --formBean ~.domain.OwnerCityFormBean 
 
 finder add --entity ~.domain.Pet --name findByOwner
 finder add --entity ~.domain.Pet --name findBySendRemindersAndWeightLessThan

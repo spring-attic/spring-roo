@@ -195,10 +195,6 @@ field set --fieldName products --type ~.Product --mappedBy supplier --joinColumn
 //// Many to many relation with --joinTable and associated parameters
 field set --fieldName stores --type ~.Store --cardinality MANY_TO_MANY --joinTable NW_SUPPLIER_STORES --joinColumns STORE --referencedColumns STORE_ID --inverseJoinColumns SUPPLIER --inverseReferencedColumns SUPPLIER_ID
 
-// Projection DTOs
-
-entity projection --class ~.ShipperProjection --entity model:~.Shipper --fields id,companyName,phone
-
 // Form Bean DTOs
 
 dto --class ~.ShipperPhoneFormBean
@@ -215,7 +211,7 @@ finder add --entity model:~.Shipper --name findByCompanyName
 finder add --entity model:~.Region --name findByCountryIdOrderByDescriptionAsc
 finder add --entity model:~.City --name findByRegionIdOrderByDescriptionAsc
 finder add --entity model:~.Product --name findByDiscontinuedOrderByNameAsc
-finder add --entity model:~.Shipper --name findByPhone --formBean model:~.ShipperPhoneFormBean --returnType model:~.ShipperProjection
+finder add --entity model:~.Shipper --name findByPhone --formBean model:~.ShipperPhoneFormBean
 
 // The service layer
 //////////////////////
