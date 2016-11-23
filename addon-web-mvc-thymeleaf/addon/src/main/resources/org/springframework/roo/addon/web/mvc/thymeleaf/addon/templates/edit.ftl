@@ -44,10 +44,10 @@
     <!-- Select2 -->
     <link rel="stylesheet" type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css"
-      data-th-href="@{/webjars/select2/4.0.3/dist/css/select2.css}"/>
+      data-th-href="@{/webjars/select2/dist/css/select2.css}"/>
     <link rel="stylesheet" type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.7/select2-bootstrap.css"
-      data-th-href="@{/webjars/select2-bootstrap-theme/0.1.0-beta.7/dist/select2-bootstrap.css}"/>
+      data-th-href="@{/webjars/select2-bootstrap-theme/dist/select2-bootstrap.css}"/>
 
     <!-- DateTimePicker -->
     <link rel="stylesheet" type="text/css"
@@ -340,7 +340,7 @@
     <!-- DateTimePicker -->
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.full.min.js"
-      data-th-src="@{/webjars/datetimepicker/2.5.4/build/jquery.datetimepicker.full.min.js}"></script>
+      data-th-src="@{/webjars/datetimepicker/build/jquery.datetimepicker.full.min.js}"></script>
     <script src="../../static/public/js/datetimepicker-defaults.js"
       data-th-src="@{/public/js/datetimepicker-defaults.js}"></script>
 

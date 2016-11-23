@@ -162,7 +162,7 @@
                    <label for="username" class="col-md-3 control-label" data-th-text="${r"#{label_login_username}"}">Username</label>
                    <div class="col-md-6">
                     <input id="username" name="username" type="text"
-                        class="form-control" placeholder="${r"#{label_login_username}"}"
+                        class="form-control" placeholder="Username"
                         data-th-placeholder="${r"#{label_login_username}"}" data-toggle="tooltip"
                         aria-describedby="usernameStatus" />
                     <span data-th-classappend="${r"${param.error}"}? 'glyphicon glyphicon-remove form-control-feedback'"
@@ -175,7 +175,7 @@
                    <label for="password" class="col-md-3 control-label" data-th-text="${r"#{label_login_password}"}">Password</label>
                    <div class="col-md-6">
                     <input id="password" name="password" type="password"
-                        class="form-control" placeholder="${r"#{label_login_password}"}" data-th-placeholder="${r"#{label_login_password}"}"
+                        class="form-control" placeholder="Password" data-th-placeholder="${r"#{label_login_password}"}"
                         data-toggle="tooltip" aria-describedby="passwordStatus" />
                     <span data-th-classappend="${r"${param.error}"}? 'glyphicon glyphicon-remove form-control-feedback'"
                         class="glyphicon glyphicon-remove form-control-feedback" data-th-if="${r"${param.error}"}"

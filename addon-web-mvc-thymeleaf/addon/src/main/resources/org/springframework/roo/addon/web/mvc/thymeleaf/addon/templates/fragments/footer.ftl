@@ -37,7 +37,7 @@
                  src="http://www.w3.org/WAI/wcag2AA"
                  data-th-alt="${r"#{label_accessibility_alt}"}"
                  alt="Level Double-A conformance, W3C WAI Web Content
-                 Accessibility Guidelines 2.0">
+                 Accessibility Guidelines 2.0"/>
          </a>
          &nbsp;
          <a title="Application developed and tested with OWASP -
@@ -49,7 +49,7 @@
                data-th-src="@{/public/img/owasp_logo.png}"
                src="../static/public/img/owasp_logo.png"
                data-th-alt="${r"#{label_owasp_alt}"}"
-               alt="Application developed and tested with OWASP">
+               alt="Application developed and tested with OWASP"/>
          </a>
         </div>
        </div>

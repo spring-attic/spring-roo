@@ -253,7 +253,7 @@
                       onclick="location.href='list.html'"
                       data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
                       data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
-                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit${r"}"}">Save</button>
+                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_search${r"}"}">Search</button>
                 </div>
               </div>
 
@@ -333,14 +333,14 @@
     <!-- DateTimePicker -->
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.full.min.js"
-      data-th-src="@{/webjars/datetimepicker/2.5.4/build/jquery.datetimepicker.full.min.js}"></script>
+      data-th-src="@{/webjars/datetimepicker/build/jquery.datetimepicker.full.min.js}"></script>
     <script src="../../static/public/js/datetimepicker-defaults.js"
       data-th-src="@{/public/js/datetimepicker-defaults.js}"></script>
 
     <!-- jquery.inputmask -->
     <script
        src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.3.1/jquery.inputmask.bundle.min.js"
-       data-th-src="@{/webjars/jquery.inputmask/3.3.1/min/jquery.inputmask.bundle.min.js}"></script>
+       data-th-src="@{/webjars/jquery.inputmask/min/jquery.inputmask.bundle.min.js}"></script>
     <script type="text/javascript" data-th-inline="javascript">
       (function(jQuery) {
         jQuery(document).ready(
@@ -364,15 +364,15 @@
     <!-- JQuery Validation -->
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/jquery.validate.min.js"
-      data-th-src="@{/webjars/jquery-validation/1.15.0/dist/jquery.validate.min.js}">
+      data-th-src="@{/webjars/jquery-validation/dist/jquery.validate.min.js}">
     </script>
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/additional-methods.min.js"
-      data-th-src="@{/webjars/jquery-validation/1.15.0/dist/additional-methods.min.js}">
+      data-th-src="@{/webjars/jquery-validation/dist/additional-methods.min.js}">
     </script>
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/localization/messages_es.js"
-      data-th-src="@{/webjars/jquery-validation/1.15.0/src/localization/messages_}+${r"${#"}locale.language${r"}"}+'.js'"
+      data-th-src="@{/webjars/jquery-validation/src/localization/messages_}+${r"${#"}locale.language${r"}"}+'.js'"
       data-th-if="${r"${#"}locale.language${r"}"} != 'en'">
     </script>
     <script src="../../static/public/js/validation-defaults.js"
@@ -383,7 +383,7 @@
          jQuery(document).ready(function() {
 	   jQuery.extend( jQuery.validator.messages, {
 	     'dateformat' : /*[[${r"#{"}error_invalid_date${r"}"}]]*/ 'Please enter a correct date/time',
-	     'inputmask': /*[[${r"#{"}lerror_invalid_maskValue${r"}"}]]*/ 'Please enter a valid value',
+	     'inputmask': /*[[${r"#{"}error_invalid_maskValue${r"}"}]]*/ 'Please enter a valid value',
 	   });
 	 });
       })(jQuery);
@@ -396,8 +396,7 @@
     </div>
 
     <!-- Application -->
-    <script type="text/javascript" charset="utf8"
-      src="../../static/public/js/main.js"></script>
+    <script type="text/javascript" src="../../static/public/js/main.js"></script>
 
 </body>
 </#if>
