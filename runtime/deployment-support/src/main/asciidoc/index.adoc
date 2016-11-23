@@ -117,10 +117,10 @@ Sometimes, when use STS/Eclipse in Windows platform, there are difficulties whil
 +
 Because the release cycle of STS and Roo differ a version of Spring Roo may be in the Nightly or in the Release repository. This is not a problem, the installation process below will guide you which repository you should use depending on a given Roo version.
 [lowerroman]
-.. Open _"Help >> Install New Software"_.
-.. Click _"Available Software sites"_.
-.. Click the _"Import" button_.
-.. Find the _"$ROO_HOME/conf/sts-sites-bookmarks.xml"_ file and click "OK".
+.. Open menu:Help[Install New Software].
+.. Click btn:[Available Software sites].
+.. Press the btn:[Import] button.
+.. Find the _"$ROO_HOME/conf/sts-sites-bookmarks.xml"_ file and press btn:[OK] buttom.
 .. Select the _Nightly_ or _Release_ site depending on the versions table below:
 +
 [cols="2*", options="header", width="75"]
@@ -142,9 +142,9 @@ a|_Spring Roo 2.0 (Release)_
 +
 [align="center"]
 image::install-roo-extension.png["STS Spring IDE - Roo Extension", width="60%"]
-.. Click _"Next"_
-.. Review the list of software that will be installed. Click _"Next"_ again.
-.. Review and accept licence agreement and click _"Finish"_.
+.. Press btn:[Next]
+.. Review the list of software that will be installed. Press btn:[Next] again.
+.. Review and accept licence agreement and press btn:[Finish].
 . Restart the STS IDE
 
 [#configure-spring-roo]
@@ -915,7 +915,6 @@ Adds support for auditing a JPA entity. It will add the Spring Data JPA entity l
      test unit --class service-impl:~.CustomerServiceImpl
 ----
 
-
 [[using-spring-roo-customize-roo-generated-code]]
 == Customize the code
 
@@ -941,27 +940,38 @@ image::sts-cross-references.png["Cross References View", width="60%"]
 
 At this point, the developer can modify the Java source file, Roo will not overwrite or modify any Java source file.
 
+[[javadoc-asciidoc]]
+== Javadoc in AsciiDoc
+
+Spring Roo generated projects automatically include the "maven-javadoc-plugin" to generate project documentation following AsciiDoc syntax. This configuration it's done by using https://github.com/asciidoctor/asciidoclet["Asciidoclet"]. 
+
+To generate the project's documentation you can follow the following steps:
+
+. Go to the STS "Package Explorer".
+. Right click in the project and go to menu:RunAs[Run Configurations...]
++
+image::sts-maven-run-configurations.png["images/sts-maven-run-configurations.png"]
++
+. In the window that will open, double click in btn:[Maven Build] item from submenu.
+. In the configuration window, specify *javadoc:aggregate* as Maven goal.
+. Set the project's root directory as "Base directory". You can easily do it by clicking _Workspace..._ and selecting the root module of your project.
++
+image::generate-javadoc-config.png["images/generate-javadoc-config.png"]
++
+. Apply configuration and close the window, or execute it directly with _Run_.
+. The generated JavaDoc will be in _"[ROOT-PROJECT]/target/site/apidocs/"_.
+
 [[using-spring-roo-running-app]]
 == Running the application
 
 You can deploy your project using "Boot Dashboard":
 
-1. Click "Boot Dashboard" view, select your project and press btn:[Start] button. 
-+ 
+. Go to the _"Boot Dashboard"_ view.
+. Select the right module of your project, one of the modules that contain a class annotated with `@SpringBootApplication`. Then press btn:[Start] button
++
 [align="center"]
 image::sts-boot-dashboard.png["Boot Dashboard", width="50%"]
-2. The application should be available under the following URL http://localhost:8080/Northwind, where Northwind is the project name.
-
-[NOTE]
-.Login for Northwind project example
-====
-user: user
-password: you can find the password on the console when the application is running
-
-====
-
-[align="center"]
-image::sts-console-password.png["Password", width="80%"]
+. The application should be available under the following URL http://localhost:8080/Northwind
 
 = Appendix
 
@@ -2732,11 +2742,28 @@ roo> repository jpa --interface
 --package::
   The package where repositories will be generated. Not avalaible if 'all' parameter has not been specified before
 
+[[script-command]]
+=== script
+
+Parses the specified resource file and executes its commands
+
+[source,sh]
+----
+roo> script --file
+----
+
+--file::
+  The file to locate and execute (mandatory)
+--ignoreLines::
+  Comma-list of prefixes to ignore the lines that starts with any of the provided case-sensitive prefixes.
+--lineNumbers::
+  Display line numbers when executing the script; default if option present: `true`; default if option not present: `false`
+
 === security authorize
 
 Include @PreAuthorize annotation to an specific method.
 
-[source,sh]            
+[source,sh]
 ----
 roo> security authorize --class --method
 ----
@@ -3509,22 +3536,6 @@ roo> reference guide
 
 This command does not accept any options.
 
-[[script-command]]
-=== script
-
-Parses the specified resource file and executes its commands
-
-[source,sh]
-----
-roo> script --file
-----
-
---file::
-  The file to locate and execute (mandatory)
---lineNumbers::
-  Display line numbers when executing the script; default if option
-  present: `true`; default if option not present: `false`
-
 === system properties
 
 Shows the shell's properties
@@ -3576,13 +3587,6 @@ Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
 +
 If Roo logo appears, you have installed Roo successfully. For those curious, the "[rev RRR]" refers to the Git commit ID used to compile that particular build of Roo.
 
-=== Generating project's JavaDoc from command line
-
-To generate the project documentation using "maven-javadoc-plugin" just move to the project's root folder and execute:
-
- mvn javadoc:aggregate
-
-This will work either in Linux or Windows, buy you must have Maven in your *PATH* variable.
 
 
 [[using-spring-roo-deployment-and-backup]]
@@ -3612,28 +3616,6 @@ $ java -jar name-exec.war
 ----
 
 NOTE: The provider dependencies are added only in "*exec.war" file.
-
-
-[[using-spring-roo-generating-javadoc]]
-== Generating JavaDoc
-
-Spring Roo generated projects automatically include the "maven-javadoc-plugin" to generate project documentation following AsciiDoc syntax. This configuration it's done by using https://github.com/asciidoctor/asciidoclet["Asciidoclet"]. 
-
-To generate project's documentation you can follow the following steps:
-
-. Select the project from STS "Package Explorer".
-. Right click in the project and go to menu:RunAs[Run Configurations...]
-+
-image::sts-maven-run-configurations.png["images/sts-maven-run-configurations.png"]
-+
-. In the window that will open, double click in _Maven Build_ from the list on the left side.
-. In the configuration window, specify "javadoc:aggregate" as Maven goal.
-. Specify project's root directory as "Base directory". You can easily do it by clicking _Workspace..._ and selecting the root module of your project.
-+
-image::generate-javadoc-config.png["images/generate-javadoc-config.png"]
-+
-. Apply configuration and close the window, or execute it directly with _Run_.
-. The generated JavaDoc will be in "[ROOT-PROJECT]/target/site/apidocs/".
 
 
 [[using-spring-roo-remove-roo]]
