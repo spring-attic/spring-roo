@@ -751,11 +751,11 @@
                 <artifactId>org.springframework.roo.converters</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
+            <!-- <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.rest.publisher</artifactId>
                 <version>${project.version}</version>
-            </dependency>
+            </dependency>-->
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.shell</artifactId>
