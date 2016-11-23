@@ -1,20 +1,43 @@
-// Creating Northwind project
+// Project setup
+/////////////////
+
+// Create the Spring Boot application
 project setup --topLevelPackage org.springframework.roo.northwind --projectName Northwind --java 7 --multimodule
 
-// Configuring project settings
+// Configure the project settings
 settings add --name spring.roo.jpa.require.schema-object-name --value true
 
-// Configure data access layer
+// Setup the data access layer
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 jpa setup --provider HIBERNATE --database H2_IN_MEMORY --profile dev
 
-// Create domain entities
+// The domain model
+////////////////////
+
 module focus --moduleName model
 
-// Temporary removed 'readOnly' feature
-//entity jpa --class ~.City --table NW_CITIES --sequenceName NW_CITIES_CITY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CITY_ID --versionField version --versionType java.lang.Long --versionColumn VERSION --readOnly
-//entity jpa --class ~.Country --table NW_COUNTRIES --sequenceName NW_COUNTRIES_COUNTRY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn COUNTRY_ID --versionField version --versionType java.lang.Long --versionColumn VERSION --readOnly
-//entity jpa --class ~.Region --table NW_REGIONS --sequenceName NW_REGIONS_REGION_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REGION_ID --versionField version --versionType java.lang.Long --versionColumn VERSION --readOnly
+// Enumerations
+
+enum type --class ~.Period
+enum constant --name QUARTERLY --class ~.Period
+enum constant --name ANNUAL --class ~.Period
+
+enum type --class ~.Status
+enum constant --name NEWLY --class ~.Status
+enum constant --name SEND_BILL --class ~.Status
+enum constant --name SENT --class ~.Status
+enum constant --name CLOSED --class ~.Status
+enum constant --name CANCELED --class ~.Status
+
+enum type --class ~.Trimester
+enum constant --name FIRST_TRIM --class ~.Trimester
+enum constant --name SECOND_TRIM --class ~.Trimester
+enum constant --name THIRD_TRIM --class ~.Trimester
+enum constant --name FOURTH_TRIM --class ~.Trimester
+
+// The JPA entities
+
+/// Read-only entities (--readOnly parameter temporarily removed)
 
 entity jpa --class ~.City --table NW_CITIES --sequenceName NW_CITIES_CITY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CITY_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
 
@@ -22,7 +45,8 @@ entity jpa --class ~.Country --table NW_COUNTRIES --sequenceName NW_COUNTRIES_CO
 
 entity jpa --class ~.Region --table NW_REGIONS --sequenceName NW_REGIONS_REGION_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REGION_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
 
-// read-write entities
+/// Read-write entities
+
 entity jpa --class ~.Category --table NW_CATEGORIES --sequenceName NW_CATEGORIES_CATEGORY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CATEGORY_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
 
 entity jpa --class ~.CustomerOrder --table NW_CUSTOMER_ORDERS --sequenceName NW_CUSTOMER_ORDERS_CUSTOMER_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CUSTOMER_ORDER_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
@@ -45,30 +69,12 @@ entity jpa --class ~.Store --table NW_STORES --sequenceName NW_STORES_STORE_ID_S
 
 entity jpa --class ~.Supplier --table NW_SUPPLIERS --sequenceName NW_SUPPLIERS_SUPPLIER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn SUPPLIER_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
 
-// Extended entities (identifierColumn still mandatory, but overrided)
+/// Entity inheritance (identifierColumn still mandatory, but overrided)
 entity jpa --class ~.Customer --table NW_CUSTOMERS --extends ~.Party --identifierColumn PARTY_ID --sequenceName NW_CUSTOMERS_CUSTOMER_ID_SEQ --identifierStrategy SEQUENCE --versionField version --versionType java.lang.Long --versionColumn VERSION --force
 
 entity jpa --class ~.Employee --table NW_EMPLOYEES --extends ~.Party --identifierColumn PARTY_ID --sequenceName NW_EMPLOYEES_EMPLOYEE_ID_SEQ --identifierStrategy SEQUENCE --versionField version --versionType java.lang.Long --versionColumn VERSION --force
 
-// Create enumerated types
-enum type --class ~.Period
-enum constant --name QUARTERLY --class ~.Period
-enum constant --name ANNUAL --class ~.Period
-
-enum type --class ~.Status
-enum constant --name NEWLY --class ~.Status
-enum constant --name SEND_BILL --class ~.Status
-enum constant --name SENT --class ~.Status
-enum constant --name CLOSED --class ~.Status
-enum constant --name CANCELED --class ~.Status
-
-enum type --class ~.Trimester
-enum constant --name FIRST_TRIM --class ~.Trimester
-enum constant --name SECOND_TRIM --class ~.Trimester
-enum constant --name THIRD_TRIM --class ~.Trimester
-enum constant --name FOURTH_TRIM --class ~.Trimester
-
-// Create fields
+/// Entity attributes and relationships
 focus --class ~.Category
 field string --fieldName name --column NAME
 field string --fieldName description --column DESCRIPTION
@@ -121,7 +127,7 @@ field string --fieldName extension --column EXTENSION
 field string --fieldName photo --column PHOTO --lob
 field string --fieldName notes --column NOTES
 
-// Commented until reactivation of reflexive relationships
+//// Commented until reactivation of reflexive relationships
 //field set --fieldName employees --type ~.Employee --mappedBy supervisor
 field set --fieldName purchaseOrders --type ~.PurchaseOrder --mappedBy employee --joinColumnName EMPLOYEE
 field set --fieldName customerOrders --type ~.CustomerOrder --mappedBy employee --joinColumnName EMPLOYEE
@@ -186,371 +192,55 @@ field string --fieldName fax --column FAX
 field string --fieldName web --column WEB
 field set --fieldName products --type ~.Product --mappedBy supplier --joinColumnName SUPPLIER
 
-// Many to many relation with --joinTable and associated parameters
+//// Many to many relation with --joinTable and associated parameters
 field set --fieldName stores --type ~.Store --cardinality MANY_TO_MANY --joinTable NW_SUPPLIER_STORES --joinColumns STORE --referencedColumns STORE_ID --inverseJoinColumns SUPPLIER --inverseReferencedColumns SUPPLIER_ID
 
-// Generate DTO's
-dto --class ~.CustomerOrderStatusAndEmployeeProjection --immutable
-field number --fieldName orderId --type java.lang.Long
-field number --fieldName customerId --type java.lang.Long
-field number --fieldName employeeId --type java.lang.Long
-field other --fieldName status --type ~.Status
-field date --fieldName orderDate --type java.util.Calendar
-field string --fieldName customerCompanyName
-
-dto --class ~.CustomerOrderStatusProjection --immutable
-field number --fieldName orderId --type java.lang.Long
-field other --fieldName status --type ~.Status
-field date --fieldName orderDate --type java.util.Calendar
-field string --fieldName customerCompanyName
-
-dto --class ~.CategoryProjection --immutable
-field number --fieldName categoryId --type java.lang.Long
-field string --fieldName name
-field string --fieldName description
-
-dto --class ~.UserCertificateDniMessageBean --immutable
-field number --fieldName status --type int
-field string --fieldName statusMsg
-field string --fieldName dni
-
-dto --class ~.CityProjection --immutable
-field number --fieldName cityId --type java.lang.Long
-field number --fieldName regionId --type java.lang.Long
-field string --fieldName description
-
-dto --class ~.CustomerOrderClosedDateAndCustomerProjection --immutable
-field number --fieldName customerId --type java.lang.Long
-field date --fieldName closedDate --type java.util.Calendar
-field string --fieldName customerCompanyName
-field number --fieldName total --type java.math.BigDecimal
-
-dto --class ~.CustomerOrderProductAndTotalProjection --immutable
-field number --fieldName productId --type java.lang.Long
-field string --fieldName productName
-field number --fieldName quantity --type java.lang.Integer
-field number --fieldName total --type java.math.BigDecimal
-
-dto --class ~.CountryProjection --immutable
-field number --fieldName countryId --type java.lang.Long
-field string --fieldName description
-
-dto --class ~.CustomerProjection --immutable
-field number --fieldName customerId --type java.lang.Long
-field string --fieldName companyName
-field string --fieldName contactName
-field string --fieldName email
-field string --fieldName phone
-field string --fieldName fax
-
-dto --class ~.CustomerMailMessageBean --immutable
-field number --fieldName customerId --type java.lang.Long
-field string --fieldName companyName
-field string --fieldName message
-
-dto --class ~.CustomerOrderProjection --immutable
-field number --fieldName orderId --type java.lang.Long
-field number --fieldName employeeId --type java.lang.Long
-field number --fieldName customerId --type java.lang.Long
-field date --fieldName orderDate --type java.util.Calendar
-field string --fieldName employeeName
-field string --fieldName customerCompanyName
-field other --fieldName status --type ~.Status
-field date --fieldName shippedDate --type java.util.Calendar
-field number --fieldName freight --type java.math.BigDecimal
-
-dto --class ~.CustomerOrderProductProjection --immutable
-field number --fieldName customerOrderId --type java.lang.Long
-field number --fieldName productId --type java.lang.Long
-field number --fieldName employeeId --type java.lang.Long
-field number --fieldName customerId --type java.lang.Long
-field date --fieldName orderDate --type java.util.Calendar
-field other --fieldName status --type ~.Status
-field string --fieldName employeeName
-field string --fieldName customerCompanyName
-field date --fieldName shippedDate --type java.util.Calendar
-field number --fieldName freight --type java.math.BigDecimal
-
-dto --class ~.CustomerOrderFormBean --immutable
-field number --fieldName customerId --type java.lang.Long
-field number --fieldName employeeId --type java.lang.Long
-// Commented until reactivation of field set on DTO's
-//field set --fieldName statuses --type ~.Status
-field date --fieldName orderDateStart --type java.util.Calendar
-field date --fieldName orderDateEnd --type java.util.Calendar
-
-dto --class ~.CustomerOrderCustomerProjection --immutable
-field number --fieldName employeeId --type java.lang.Long
-field number --fieldName customerId --type java.lang.Long
-field string --fieldName employeeName
-field date --fieldName fromDate --type java.util.Calendar
-field date --fieldName thruDate --type java.util.Calendar
-field string --fieldName customerCompanyName
-field number --fieldName total --type java.math.BigDecimal
-// Commented until reactivation of field set on DTO's
-//field set --fieldName customerOrderClosedDateAndCustomerProjection --type ~.CustomerOrderClosedDateAndCustomerProjection
-
-dto --class ~.CustomerUserLoginFormBean --immutable
-field number --fieldName customerId --type java.lang.Long
-field string --fieldName companyName --notNull --sizeMax 50
-field string --fieldName contactName --notNull --sizeMax 100
-field string --fieldName contactTitle --sizeMax 80
-field string --fieldName email --notNull --sizeMax 80
-field string --fieldName address --notNull --sizeMax 200
-field other --fieldName city --type model:~.City --notNull
-field other --fieldName region --type model:~.Region --notNull
-field other --fieldName country --type model:~.Country --notNull
-field string --fieldName postalCode --notNull --sizeMax 6
-field string --fieldName phone --sizeMax 15
-field string --fieldName fax --sizeMax 15
-field string --fieldName username --notNull --sizeMax 30
-// Add @Pattern(regexp = "^[^<>\\\\'\"&;%]*$") to this field
-field string --fieldName password --notNull --sizeMin 8 --sizeMax 128
-// Add @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./])[A-Za-z\\d`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./]*") to this field
-field string --fieldName repeatPassword --notNull --sizeMin 8 --sizeMax 128
-
-dto --class ~.EmployeeProjection --immutable
-field number --fieldName employeeId --type java.lang.Long
-field number --fieldName supervisorId --type java.lang.Long
-field string --fieldName firstName
-field string --fieldName lastName
-field string --fieldName phone
-field string --fieldName extension
-field string --fieldName supervisorName
-
-dto --class ~.EmployeeUserLoginFormBean --immutable
-field number --fieldName employeeId --type java.lang.Long
-field string --fieldName firstName --notNull --sizeMax 50
-field string --fieldName lastName --notNull --sizeMax 120
-field string --fieldName title --notNull --sizeMax 120
-field date --fieldName birthDate --notNull --type java.util.Calendar
-field date --fieldName hireDate --notNull --type java.util.Calendar
-field string --fieldName extension --notNull --sizeMax 50
-field string --fieldName notes --notNull --sizeMax 3500
-field other --fieldName supervisor --type model:~.Employee
-field string --fieldName address --notNull --sizeMax 200
-field other --fieldName city --type model:~.City --notNull
-field other --fieldName region --type model:~.Region --notNull
-field other --fieldName country --type model:~.Country --notNull
-field string --fieldName postalCode --notNull --sizeMax 6
-field string --fieldName phone --sizeMax 15
-field string --fieldName username --notNull --sizeMax 30
-// Add @Pattern(regexp = "^[^<>\\\\'\"&;%]*$") to this field
-field string --fieldName password --notNull --sizeMin 8 --sizeMax 128
-// Add @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./])[A-Za-z\\d`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./]*") to this field
-field string --fieldName repeatPassword --notNull --sizeMin 8 --sizeMax 128
-
-dto --class ~.InventoryProjection --immutable
-field number --fieldName productId --type java.lang.Long
-field string --fieldName name
-field number --fieldName unitsInStock --type java.lang.Integer
-field number --fieldName assignedStock --type java.lang.Integer
-field number --fieldName availableStock --type java.lang.Integer
-field number --fieldName reorderLevel --type java.lang.Integer
-field number --fieldName replenishStock --type java.lang.Integer
-
-dto --class ~.InvoiceProjection --immutable
-field number --fieldName customerOrderId --type java.lang.Long
-field number --fieldName shipCountryId --type java.lang.Long
-field number --fieldName shipRegionId --type java.lang.Long
-field number --fieldName shipCityId --type java.lang.Long
-field number --fieldName customerId --type java.lang.Long
-field number --fieldName customerCountryId --type java.lang.Long
-field number --fieldName customerRegionId --type java.lang.Long
-field number --fieldName customerCityId --type java.lang.Long
-field number --fieldName employeeId --type java.lang.Long
-field number --fieldName shippedId --type java.lang.Long
-field date --fieldName invoiceDate --type java.util.Calendar
-field string --fieldName shipName
-field string --fieldName shipAddress
-field string --fieldName shipCountryDescription
-field string --fieldName shipRegionDescription
-field string --fieldName shipCityDescription
-field string --fieldName shipPostalCode
-field string --fieldName customerCompanyName
-field string --fieldName customerCountryDescription
-field string --fieldName customerRegionDescription
-field string --fieldName customerCityDescription
-field string --fieldName customerPostalCode
-field date --fieldName orderDate --type java.util.Calendar
-field date --fieldName shippedDate --type java.util.Calendar
-field string --fieldName employeeName
-field string --fieldName shipperCompanyName
-field number --fieldName freight --type java.math.BigDecimal
-field number --fieldName subtotal --type java.math.BigDecimal
-field number --fieldName total --type java.math.BigDecimal
-// Commented until reactivation of field set on DTO's
-//field set --fieldName orderDetailsProjection --type ~.OrderDetailProjection
-
-dto --class ~.OrderDetailProjection --immutable
-field number --fieldName orderDetailId --type java.lang.Long
-field number --fieldName customerOrderId --type java.lang.Long
-field number --fieldName productId --type java.lang.Long
-field string --fieldName productName
-field number --fieldName quantity --type java.lang.Integer
-field number --fieldName unitPrice --type java.math.BigDecimal
-field number --fieldName discount --type java.math.BigDecimal
-field number --fieldName total --type java.math.BigDecimal
-
-dto --class ~.OrderDetailCustomerProjection --immutable
-field number --fieldName orderDetailId --type java.lang.Long
-field string --fieldName customerName
-field other --fieldName status --type ~.Status
-field number --fieldName quantity --type java.lang.Integer
-field string --fieldName productName
-
-dto --class ~.OrderDetailQuantityBean --immutable
-field number --fieldName customerOrderId --type java.lang.Long --notNull
-field number --fieldName quantityToAdd --type java.lang.Integer --notNull
-
-dto --class ~.OrderDetailFormBean --immutable
-field number --fieldName customerId --type java.lang.Long
-
-dto --class ~.ProductProjection --immutable
-field number --fieldName productId --type java.lang.Long
-field number --fieldName categoryId --type java.lang.Long
-field number --fieldName supplierId --type java.lang.Long
-field string --fieldName code
-field string --fieldName name
-field string --fieldName supplierCompanyName
-field number --fieldName unitCost --type java.math.BigDecimal
-field number --fieldName unitPrice --type java.math.BigDecimal
-field string --fieldName quantityPerUnit
-field boolean --fieldName discontinued
-
-dto --class ~.ProductOrdersProjection --immutable
-field number --fieldName productId --type java.lang.Long
-field number --fieldName categoryId --type java.lang.Long
-field number --fieldName supplierId --type java.lang.Long
-field string --fieldName code
-field string --fieldName name
-field string --fieldName supplierCompanyName
-field number --fieldName unitCost --type java.math.BigDecimal
-field number --fieldName unitPrice --type java.math.BigDecimal
-field string --fieldName quantityPerUnit
-field boolean --fieldName discontinued
-field number --fieldName purchaseOrdersCount --type java.lang.Long
-field number --fieldName orderDetailsCount --type java.lang.Long
-
-dto --class ~.CustomerOrderClosedDateAndProductProjection --immutable
-field number --fieldName employeeId --type java.lang.Long
-field number --fieldName productId --type java.lang.Long
-field string --fieldName employeeName
-field date --fieldName fromDate --type java.util.Calendar
-field date --fieldName thruDate --type java.util.Calendar
-field string --fieldName productName
-field number --fieldName total --type java.math.BigDecimal
-// Commented until reactivation of field set on DTO's
-//field set --fieldName CustomerOrderClosedDateAndProduct --type ~.CustomerOrderClosedDateAndProduct
-
-dto --class ~.PurchaseOrderProjection --immutable
-field number --fieldName purchaseOrderId --type java.lang.Long
-field number --fieldName productId --type java.lang.Long
-field number --fieldName employeeId --type java.lang.Long
-field date --fieldName orderDate --type java.util.Calendar
-field string --fieldName employeeName
-field number --fieldName quantity --type java.lang.Integer
-field number --fieldName totalCost --type java.math.BigDecimal
-
-dto --class ~.InboxMailMessageBean --immutable
-field string --fieldName subject
-field string --fieldName content
-field string --fieldName from --permitReservedWords
-
-dto --class ~.RegionProjection --immutable
-field number --fieldName regionId --type java.lang.Long
-field number --fieldName countryId --type java.lang.Long
-field string --fieldName description
-
-dto --class ~.ProductAvailableStockAndReorderLevelProjection --immutable
-field number --fieldName productId --type java.lang.Long
-field string --fieldName name
-field number --fieldName avalaibleStock --type java.lang.Integer
-field number --fieldName reorderLevel --type java.lang.Integer
+// Projection DTOs
 
 entity projection --class ~.ShipperProjection --entity model:~.Shipper --fields id,companyName,phone
+
+// Form Bean DTOs
 
 dto --class ~.ShipperPhoneFormBean
 field string --fieldName phone
 
-dto --class ~.StoreProjection --immutable
-field number --fieldName storeId --type java.lang.Long
-field number --fieldName countryId --type java.lang.Long
-field number --fieldName regionId --type java.lang.Long
-field number --fieldName cityId --type java.lang.Long
-field string --fieldName name
-field string --fieldName address
-field string --fieldName countryDescription
-field string --fieldName regionDescription
-field string --fieldName cityDescription
+// The data access layer
+/////////////////////////
 
-dto --class ~.StoreSupplierProjection --immutable
-field number --fieldName storeId --type java.lang.Long
-field number --fieldName supplierId --type java.lang.Long
-field string --fieldName name
-
-dto --class ~.SupplierProjection --immutable
-field number --fieldName supplierId --type java.lang.Long
-field number --fieldName countryId --type java.lang.Long
-field number --fieldName regionId --type java.lang.Long
-field number --fieldName cityId --type java.lang.Long
-field string --fieldName companyName
-field string --fieldName contactName
-field string --fieldName contactTitle
-field string --fieldName address
-field string --fieldName countryDescription
-field string --fieldName regionDescription
-field string --fieldName cityDescription
-field string --fieldName postalCode
-field string --fieldName phone
-field string --fieldName fax
-field string --fieldName web
-
-// Generate repositories
+// Spring Data repositories
 repository jpa --all
 
-
-// Generate services
-service --all
-
-
-// Create finders
+// Default queries
 finder add --entity model:~.Shipper --name findByCompanyName
 finder add --entity model:~.Region --name findByCountryIdOrderByDescriptionAsc
 finder add --entity model:~.City --name findByRegionIdOrderByDescriptionAsc
 finder add --entity model:~.Product --name findByDiscontinuedOrderByNameAsc
 finder add --entity model:~.Shipper --name findByPhone --formBean model:~.ShipperPhoneFormBean --returnType model:~.ShipperProjection
 
-// Add tests
-test unit --class model:~.CustomerOrder
-test unit --class model:~.Category
-test unit --class repository:~.CustomerOrderRepository
-test unit --class service-api:~.CustomerOrderService
-test unit --class service-impl:~.CustomerServiceImpl
+// The service layer
+//////////////////////
 
+// Service API and Implementation
+service --all
 
-// Add Spring MVC
+// The view layer
+//////////////////
+
+// Spring MVC setup
 web mvc setup
 
+// JSON Rest controllers
+web mvc controller --all --responseType JSON --pathPrefix /api
 
-// Install security
-security setup --provider SPRINGLETS_JPA
-
-// Restrict delete method to user with roles ADMIN or EMPLEADO
-security authorize --class service-api:~.CustomerService --method delete --roles ADMIN,EMPLEADO
-
-// Add audit to Category entity
-jpa audit setup
-jpa audit add --entity model:~.Category --createdDateColumn CREATED_DATE --modifiedDateColumn MODIFIED_DATE --createdByColumn CREATED_BY --modifiedByColumn MODIFIED_BY
-
-
-// Install THYMELEAF view
+// THYMELEAF views
 web mvc view setup --type THYMELEAF
 
-// Include templates inside generated project to allow developers to customize them
+/// Include templates inside generated project to allow developers to customize them
 web mvc templates setup --type THYMELEAF
 
-// Add necessary controllers
+/// Thymeleaf controllers
+
+//// Main controllers
 web mvc controller --entity model:~.Category --responseType THYMELEAF
 web mvc controller --entity model:~.Country --responseType THYMELEAF
 web mvc controller --entity model:~.CustomerOrder --responseType THYMELEAF
@@ -562,12 +252,10 @@ web mvc controller --entity model:~.SoldProduct --responseType THYMELEAF
 web mvc controller --entity model:~.Store --responseType THYMELEAF
 web mvc controller --entity model:~.Supplier --responseType THYMELEAF
 web mvc controller --entity model:~.City --responseType THYMELEAF
-
-// Required controller to generate its detail
 web mvc controller --entity model:~.Region --responseType THYMELEAF
 web mvc controller --entity model:~.PurchaseOrder --responseType THYMELEAF
 
-// Add details to controllers
+//// Relationship controllers
 web mvc detail --entity model:~.Category --field products --responseType THYMELEAF
 web mvc detail --entity model:~.Category --responseType THYMELEAF --field products.purchaseOrders
 web mvc detail --entity model:~.Product --field purchaseOrders --responseType THYMELEAF
@@ -575,15 +263,39 @@ web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions
 //web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions.cities
 web mvc detail --entity model:~.Region --responseType THYMELEAF --field cities
 
-
-// Create the REST API
-web mvc controller --all --responseType JSON --pathPrefix /api
-
-
-// Add finders
+//// Search controllers
 web mvc finder --all --responseType THYMELEAF
 
-// Add integration tests
+// The security layer
+//////////////////////
+
+// Spring security setup
+security setup --provider SPRINGLETS_JPA
+
+// Method security
+
+/// Restrict delete method to user with roles ADMIN or EMPLEADO
+security authorize --class service-api:~.CustomerService --method delete --roles ADMIN,EMPLEADO
+
+// Auditing
+
+jpa audit setup
+
+/// Add audit to Category entity
+// Disabled until #20828 is solved
+jpa audit add --entity model:~.Category --createdDateColumn CREATED_DATE --modifiedDateColumn MODIFIED_DATE --createdByColumn CREATED_BY --modifiedByColumn MODIFIED_BY
+
+// The infraestructure layer
+/////////////////////////////
+
+// Unit tests
+test unit --class model:~.CustomerOrder
+test unit --class model:~.Category
+test unit --class repository:~.CustomerOrderRepository
+test unit --class service-api:~.CustomerOrderService
+test unit --class service-impl:~.CustomerServiceImpl
+
+// Integration tests
 test integration --class repository:~.CategoryRepository
 test integration --class repository:~.CityRepository
 test integration --class repository:~.CountryRepository

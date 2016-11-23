@@ -330,13 +330,21 @@
      * @param datatables DataTable on which the calling should act upon
      */
     function deleteElement(datatables) {
+      var $token = $("meta[name='_csrf']");
+      var $header = $("meta[name='_csrf_header']");
+      
       var tableId = getTableId(datatables);
       var rowId = $('#' + tableId + 'DeleteRowId').data('row-id');
       var url = getDeleteUrl(datatables, rowId);
 
       $.ajax({
          url: url,
-         type: 'DELETE'
+         type: 'DELETE',
+         beforeSend: function (request) {
+           if($token != null && $token.length > 0 && $header != null && $header.length > 0) {
+             request.setRequestHeader($header.attr("content"), $token.attr("content"));
+           }
+         }
       })
       .done(function(result) {
         var $deleteSuccess = $('#' + tableId + 'DeleteSuccess');

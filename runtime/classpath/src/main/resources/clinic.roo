@@ -1,7 +1,15 @@
-project setup --topLevelPackage com.springsource.petclinic
+// Project setup
+/////////////////
 
+// Create the Spring Boot application
+project setup --topLevelPackage org.springframework.roo.petclinic
+
+// Setup the data access layer
 jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 
+// The domain model
+
+/// Enumerations
 enum type --class ~.reference.PetType
 enum constant --name DOG
 enum constant --name CAT
@@ -12,6 +20,7 @@ enum constant --name CARDIOLOGY
 enum constant --name DENTISTRY
 enum constant --name NUTRITION
 
+/// The JPA entities 
 entity jpa --class ~.domain.Pet --sequenceName PET_SEQ
 entity jpa --class ~.domain.Visit --sequenceName VISIT_SEQ
 entity jpa --class ~.domain.AbstractPerson --abstract
