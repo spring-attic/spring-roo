@@ -19,10 +19,8 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
@@ -91,6 +89,16 @@ public class FinderOperationsImpl implements FinderOperations {
         .notNull(
             repository,
             "ERROR: You must generate a repository to the provided entity before to add new finder. You could use 'repository jpa' commands.");
+
+    // Check if provided formBean contains the field names and types indicated as finder params
+    if (formBean != null) {
+      MemberDetails entityMemberDetails =
+          getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
+              getTypeLocationService().getTypeDetails(entity));
+      PartTree finderPartTree = new PartTree(finderName.getSymbolName(), entityMemberDetails);
+      checkDtoFieldsForFinder(getTypeLocationService().getTypeDetails(formBean), finderPartTree,
+          repository.getType());
+    }
 
     // Get repository annotation
     AnnotationMetadata repositoryAnnotation =
@@ -329,6 +337,32 @@ public class FinderOperationsImpl implements FinderOperations {
     finderParametersMap.put(finderName, finderParametersList);
   }
 
+  /**
+   * Validates that all dto fields matches with parameters on finder of a repository
+   *
+   * @param formBeanDetails
+   * @param finder
+   * @param repository
+   */
+  private void checkDtoFieldsForFinder(ClassOrInterfaceTypeDetails formBeanDetails,
+      PartTree finder, JavaType repository) {
+    final JavaType dtoType = formBeanDetails.getName();
+    final String finderName = finder.getOriginalQuery();
+    FieldMetadata paramField, dtoField;
+    JavaType paramType, dtoFieldType;
+    for (FinderParameter param : finder.getParameters()) {
+      paramField = param.getPath().peek();
+      dtoField = formBeanDetails.getField(paramField.getFieldName());
+      Validate.notNull(dtoField, "Field '%s' not found on DTO %s for finder '%s' of %s",
+          paramField.getFieldName(), dtoType, finderName, repository);
+      paramType = paramField.getFieldType().getBaseType();
+      dtoFieldType = dtoField.getFieldType().getBaseType();
+      Validate.isTrue(paramType.equals(dtoFieldType),
+          "Type missmatch for field '%s' on DTO %s for finder '%s' of %s: excepted %s and got %s",
+          dtoField.getFieldName(), dtoType, finderName, repository, paramType, dtoFieldType);
+    }
+  }
+
   private boolean findDtoFieldRecursivelyAndAddToMappings(JavaType entity,
       Map<String, String> fieldNamesMap, Map<String, FieldMetadata> fieldMetadataMap,
       boolean found, FieldMetadata field, JavaSymbolName finderFieldName, JavaType finderFieldType,
@@ -380,14 +414,6 @@ public class FinderOperationsImpl implements FinderOperations {
 
   private MemberDetailsScanner getMemberDetailsScanner() {
     return serviceInstaceManager.getServiceInstance(this, MemberDetailsScanner.class);
-  }
-
-  private MetadataService getMetadataService() {
-    return serviceInstaceManager.getServiceInstance(this, MetadataService.class);
-  }
-
-  private PersistenceMemberLocator getPersistenceMemberLocator() {
-    return serviceInstaceManager.getServiceInstance(this, PersistenceMemberLocator.class);
   }
 
   private ProjectOperations getProjectOperations() {
