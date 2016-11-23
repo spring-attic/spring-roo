@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-layout-decorator="layouts/default-layout">
+<html lang="en" data-layout-decorate="layouts/default-layout">
 <head>
     <meta charset="UTF-8" data-th-remove="all"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all"/>
@@ -17,7 +17,7 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
       data-th-remove="all"/>
 
-    <title data-th-text="|${r"#{"}label_error${r"}"}|">Error - Spring Roo application</title>
+    <title data-th-text="${r"#{"}label_error}">Error - Spring Roo application</title>
 
     <!--/* Bootstrap */-->
     <link rel="stylesheet" type="text/css"
@@ -69,10 +69,10 @@
     <div class="alert alert-danger fade in" role="alert">
       <h4 data-th-text="${r"#{"}label_errorpage_header${r"}"}">¡Error!</h4>
       <p>
-        <span data-th-text="${r"#{info_error}"}">An unexpected error has occurred</span>
-        (type=<span data-th-text="${r"${error}"}">Bad</span>, status=<span data-th-text="${r"${status}"}">500</span>).
+        <span data-th-text="${r"#"}{info_error}">An unexpected error has occurred</span>
+        (type=<span data-th-text="${r"$"}{error}">Bad</span>, status=<span data-th-text="${r"${status}"}">500</span>).
       </p>
-      <div data-th-text="${r"${message}"}"></div>
+      <div data-th-text="${r"$"}{message}"></div>
     </div>
 
   </section>

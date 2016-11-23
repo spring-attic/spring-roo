@@ -185,7 +185,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     addWebJars(module);
 
     // Delegate on view generation to create view elements
-    ViewContext ctx = new ViewContext();
+    ViewContext<ThymeleafMetadata> ctx = new ViewContext<ThymeleafMetadata>();
     ctx.setProjectName(getProjectOperations().getProjectName(""));
     ctx.setVersion(getProjectOperations().getPomFromModuleName("").getVersion());
 
@@ -194,6 +194,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     getViewGenerationService().addErrorView(module.getModuleName(), ctx);
     getViewGenerationService().addDefaultLayout(module.getModuleName(), ctx);
     getViewGenerationService().addDefaultLayoutNoMenu(module.getModuleName(), ctx);
+    getViewGenerationService().addDefaultListLayout(module.getModuleName(), ctx);
     getViewGenerationService().addFooter(module.getModuleName(), ctx);
     getViewGenerationService().addHeader(module.getModuleName(), ctx);
     getViewGenerationService().addMenu(module.getModuleName(), ctx);

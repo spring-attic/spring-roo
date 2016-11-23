@@ -12,7 +12,7 @@
     Only the internal content of the following div is included within
     the template, in session fragment
     -->
-    <ul data-layout-fragment="languages">
+    <ul data-th-fragment="languages" class="nav navbar-nav navbar-right upper-nav languages">
       <!-- Language -->
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" role="button"
@@ -30,7 +30,7 @@
       			   data-th-src="@{/public/img/${language.localePrefix}.png}"
       			   src="/public/img/${language.localePrefix}.png"
       			   alt="${language.language}" />&nbsp;
-      			   <span data-th-text="${r"#{language_label_"}${language.localePrefix}${r"}"}">
+      			   <span data-th-text="${r"#"}{language_label_${language.localePrefix}}">
       			   ${language.language}</span>
       			 </a>
       			</li>

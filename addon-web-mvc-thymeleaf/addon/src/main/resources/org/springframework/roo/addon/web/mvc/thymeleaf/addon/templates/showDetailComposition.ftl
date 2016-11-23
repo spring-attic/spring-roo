@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-layout-decorator="layouts/default-layout">
+<html lang="en" data-layout-decorate="layouts/default-list-layout">
   <head>
     <meta charset="UTF-8" data-th-remove="all"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all"/>
@@ -35,29 +35,29 @@
       href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
       data-th-remove="all"/>
 
-    <!-- Datatables -->
+    <!--/* Datatables */-->
     <link
-      data-th-href="@{/webjars/datatables/1.10.11/media/css/jquery.dataTables.css}"
+      data-th-remove="all"
       rel="stylesheet" type="text/css"
       href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.css"></link>
 
     <link
-      data-th-href="@{/webjars/datatables.net-bs/1.10.11/css/dataTables.bootstrap.css}"
+      data-th-remove="all"
       rel="stylesheet" type="text/css"
       href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.css"></link>
 
     <link
-      data-th-href="@{/webjars/datatables.net-responsive-bs/2.0.2/css/responsive.bootstrap.css}"
+      data-th-remove="all"
       rel="stylesheet" type="text/css"
       href="https://cdn.datatables.net/responsive/2.0.2/css/responsive.bootstrap.css"></link>
 
     <link
-      data-th-href="@{/webjars/datatables.net-buttons-bs/1.1.2/css/buttons.bootstrap.css}"
+      data-th-remove="all"
       rel="stylesheet" type="text/css"
       href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.css"></link>
 
     <link
-      data-th-href="@{/webjars/datatables.net-select-bs/1.1.2/css/select.bootstrap.css}"
+      data-th-remove="all"
       rel="stylesheet" type="text/css"
       href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css"></link>
 
@@ -205,7 +205,7 @@
           <div class="container-fluid content">
 
             <!-- CONTENT -->
-            <h1 data-th-text="${r"#{"}label_show_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Show ${entityName}</h1>
+            <h1 data-th-text="${r"#{"}label_show_entity(${r"#{"}${entityLabel}})}">Show ${entityName}</h1>
 
             <ul class="list-unstyled" id="containerFields">
               <#list fields as field>
@@ -213,7 +213,7 @@
                   ${field.codeManaged}
                 <#else>
                   <li id="${field.fieldId}" data-z="${field.z}">
-              	    <strong data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</strong>
+              	    <strong data-th-text="${r"#{"}${field.label}}">${field.fieldName}</strong>
                     <span data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</span>
            	      </li>
                </#if>
@@ -390,108 +390,25 @@
   <script src="../../static/public/js/moment-defaults.js">
   </script>
 
+  <!-- Datatables scripts ONLY for HTML templates -->
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.js"></script>
+  <!-- Datatables responsive plugin -->
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/responsive/2.0.2/js/dataTables.responsive.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/responsive/2.0.2/js/responsive.bootstrap.js"></script>
+  <!-- Datatables buttons plugins -->
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.colVis.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.flash.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.js"></script>
+  <!-- Datatables select plugin -->
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.js"></script>
+  <script type="text/javascript" charset="utf8" src="../fragments/js/datatables-locale.js"></script>
+  <script type="text/javascript" charset="utf8" src="../../static/public/js/datatables-defaults.js"></script>
+
   <!-- Javascript fragment -->
   <div data-layout-fragment="javascript">
-
-    <!-- Progress bar -->
-    <script type="text/javascript">
-      function loading() {
-        jQuery('.progress').removeClass('hide');
-      }
-     </script>
-
-     <!-- Datatables fragment -->
-     <div data-layout-include="fragments/js/datatables :: datatables">
-
-       <!-- Datatables scripts ONLY for HTML templates
-            Content replaced by the datatables template fragment datatables.html
-       -->
-       <script type="text/javascript" charset="utf8"
-         src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.js"
-         data-th-src="@{/webjars/datatables/1.10.11/media/js/jquery.dataTables.js}"></script>
-       <script type="text/javascript" charset="utf8"
-         src="https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.js"
-         data-th-src="@{/webjars/datatables.net-bs/1.10.11/js/dataTables.bootstrap.js}"></script>
-        <!-- Datatables responsive plugin -->
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/responsive/2.0.2/js/dataTables.responsive.js"
-          data-th-src="@{/webjars/datatables.net-responsive/2.0.2/js/dataTables.responsive.js}"></script>
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/responsive/2.0.2/js/responsive.bootstrap.js"
-          data-th-src="@{/webjars/datatables.net-responsive-bs/2.0.2/js/responsive.bootstrap.js}"></script>
-        <!-- Datatables buttons plugins -->
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.js"
-          data-th-src="@{/webjars/datatables.net-buttons/1.1.2/js/dataTables.buttons.js}"></script>
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.js"
-          data-th-src="@{/webjars/datatables.net-buttons-bs/1.1.2/js/buttons.bootstrap.js}"></script>
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.colVis.js"
-          data-th-src="@{/webjars/datatables.net-buttons/1.1.2/js/buttons.colVis.js}"></script>
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.flash.js"
-          data-th-src="@{/webjars/datatables.net-buttons/1.1.2/js/buttons.flash.js}"></script>
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.js"
-          data-th-src="@{/webjars/datatables.net-buttons/1.1.2/js/buttons.html5.js}"></script>
-        <!-- Datatables select plugin -->
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.js"
-          data-th-src="@{/webjars/datatables.net-select/1.1.2/js/dataTables.select.js}"></script>
-
-    </div>
-
-    <!-- Datatables page configs -->
-    <script type="text/javascript" data-th-inline="javascript">
-    $(document).ready( function () {
-    	<#assign firstDetail = true>
-        <#list details as field>
-            var ${field.fieldNameCapitalized}BaseUrl = ${r"[["}@{${controllerPath}/${r"{"}${identifierField}${r"}"}${field.configuration.controllerPath}/(${identifierField}=${r"${"}${modelAttributeName}${r"."}${identifierField}${r"})}]]"} +  '';
-            <#if firstDetail == false>
-              function initialize${field.fieldNameCapitalized}Table() {
-            </#if>
-
-            jQuery('#${field.fieldNameCapitalized}Table').DataTable({
-                'ajax': function (data, callback, settings) {
-                    loadData(data, callback, settings, [[@{${entity.configuration.controllerPath}/}]], this);
-                },
-                'buttons' : [
-                    {
-                        'extend' : 'colvis',
-                        'className' : 'btn-action'
-                    },
-                    {
-                        'extend' : 'pageLength',
-                        'className' : 'btn-action'
-                    }
-                ],
-                'columns': [
-                  <#list field.configuration.referenceFieldFields as referencedFieldField>
-                  { 'data': '${referencedFieldField.fieldName}' },
-                  </#list>
-                  {
-                    'data': '${field.configuration.identifierField}',
-                    'orderable': false,
-                    'searchable': false,
-                    'render': function ( data, type, full, meta ) {
-                        return '<a role="button" class="btn-action showInfo" href="${field.configuration.controllerPath}/' + data + '" data-th-text="${r"#{label_show}"}">Show</a>'
-                    }
-                  }
-                ]
-            });
-            <#if firstDetail == false>
-            }
-            jQuery('#${field.fieldNameCapitalized}Tab').on('shown.bs.tab', function (e) {
-				if (jQuery.fn.DataTable.isDataTable('#${field.fieldNameCapitalized}Table') === false) {
-					initialize${field.fieldNameCapitalized}Table();
-				}
-	    	});
-            </#if>
-            <#assign firstDetail = false>
-        </#list>
-    });
-    </script>
 
   </div>
 

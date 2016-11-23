@@ -12,7 +12,7 @@
     Only the internal content of the following div is included within
     the template, in header fragment
     -->
-    <div class="bg-header" data-layout-fragment="header">
+    <div class="bg-header" data-th-fragment="header">
         <div class="jumbotron bg-banner">
             <div class="container">
               <h1 class="project-name">${projectName}</h1>

@@ -5,7 +5,7 @@
 <#import "fields/checkbox.ftl" as checkbox>
 <#import "fields/enum.ftl" as enum>
 <!DOCTYPE html>
-<html lang="en" data-layout-decorator="layouts/default-layout">
+<html lang="en" data-layout-decorate="layouts/default-layout">
   <head>
     <meta charset="UTF-8" data-th-remove="all"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all"/>
@@ -23,7 +23,7 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
       data-th-remove="all"/>
 
-    <title data-th-text="|${r"#{"}label_search_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}|">
+    <title data-th-text="${r"#{"}label_search_entity(${r"#{"}${entityLabel}})}">
     Search ${entityName} - ${projectName} - SpringRoo Application</title>
 
     <!--/* Bootstrap */-->
@@ -44,15 +44,15 @@
     <!-- Select2 -->
     <link rel="stylesheet" type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css"
-      data-th-href="@{/webjars/select2/4.0.3/dist/css/select2.css}"/>
+      data-th-href="@{/webjars/select2/dist/css/select2.css}"/>
     <link rel="stylesheet" type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.7/select2-bootstrap.css"
-      data-th-href="@{/webjars/select2-bootstrap-theme/0.1.0-beta.7/dist/select2-bootstrap.css}"/>
+      data-th-href="@{/webjars/select2-bootstrap-theme/dist/select2-bootstrap.css}"/>
 
     <!-- DateTimePicker -->
     <link rel="stylesheet" type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.min.css"
-      data-th-href="@{/webjars/datetimepicker/2.5.4/build/jquery.datetimepicker.min.css}"/>
+      data-th-href="@{/webjars/datetimepicker/build/jquery.datetimepicker.min.css}"/>
 
     <!--/* Bootswatch CSS custom */-->
     <link rel="stylesheet" type="text/css"
@@ -390,76 +390,9 @@
     </script>
 
     <!-- Select2 -->
-    <div data-layout-include="fragments/js/select2 :: select2">
-
-       <!-- Select2 scripts ONLY for HTML templates
-	    Content replaced by the select2 template fragment select2.html
-       -->
-       <script
-         src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.full.js"
-         data-th-src="@{/webjars/select2/4.0.2/dist/js/select2.full.js}"></script>
-       <script
-         src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/i18n/es.js"
-         data-th-src="@{/webjars/select2/4.0.2/dist/js/i18n/}+${r"${#"}locale.language${r"}"}+'.js'"
-         data-th-if="${r"${#"}locale.language${r"}"} != 'en'"></script>
-
-       <script type="text/javascript" data-th-inline="javascript">
-         /*<![CDATA[*/
-	 jQuery('.dropdown-select-simple').select2({
-	   debug : false,
-           theme : 'bootstrap',
-           allowClear : true,
-         });
-         jQuery('.dropdown-select-ajax').select2(
-           {
-             debug : false,
-	     theme : 'bootstrap',
-	     allowClear : true,
-	     ajax : {
-               data : function(params) {
-		 var query = {
-		   'search[value]' : params.term,
-		   'page' : params.page - 1,
-		 }
-		 return query;
-	       },
-	       processResults : function(data, page) {
-		 var idField = this.options.get('idField');
-		 var txtFields = this.options.get('textFields');
-		 var fields = txtFields.split(',');
-		 var results = [];
-		 jQuery.each(data.content, function(i, entity) {
-		   var id = entity[idField];
-		   var text = '';
-		   jQuery.each(fields, function(i, fieldName) {
-		     text = text.concat(' ', entity[fieldName]);
-		   });
-		   var obj = {
-		     'id' : id,
-		     'text' : jQuery.trim(text)
-		   };
-		   jQuery.each(entity, function(key, val) {
-		     var attribute = jQuery.trim(key);
-		     var value = jQuery.trim(val);
-		     obj[attribute] = value;
-		    });
-		    results.push(obj);
-		  });
-		  var morePages = !data.last;
-		  return {
-		    results : results,
-		    pagination : {
-		      more : morePages
-		    }
-		  };
-		},
-	      },
-            });
-         /*]]>*/
-       </script>
-
+    <div data-th-replace="fragments/js/select2 :: select2-js">
+      // TODO add js CDN
      </div>
-
     </div>
 
     <!-- Application -->

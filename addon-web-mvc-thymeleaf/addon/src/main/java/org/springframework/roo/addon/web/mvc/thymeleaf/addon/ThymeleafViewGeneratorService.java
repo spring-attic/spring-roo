@@ -14,4 +14,6 @@ public interface ThymeleafViewGeneratorService extends MVCViewGenerationService<
 
   void addModalConfirmDelete(String moduleName, ViewContext<ThymeleafMetadata> ctx);
 
+  void addDefaultListLayout(String moduleName, ViewContext<ThymeleafMetadata> ctx);
+
 }

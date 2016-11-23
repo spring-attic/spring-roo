@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" data-layout-decorator="layouts/default-layout">
+<html lang="en" data-layout-decorate="layouts/default-layout">
   <head>
     <meta charset="UTF-8" data-th-remove="all"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all"/>
@@ -17,7 +17,7 @@
     <link rel="apple-touch-icon" href="../static/public/img/apple-touch-icon.png"
       data-th-remove="all"/>
 
-    <title data-th-text="|${r"#{"}label_accessibility${r"}"}|">Accessibility - Spring Roo application</title>
+    <title data-th-text="${r"#{"}label_accessibility}">Accessibility - Spring Roo application</title>
 
     <!--/* Bootstrap */-->
     <link rel="stylesheet" type="text/css"
@@ -174,13 +174,13 @@
       <!--Content-->
       <section data-layout-fragment="content">
 
-        <div class="container content">
+        <div class="container-fluid content">
 
           <div class="box-center">
 
           <h2 data-th-text="${r"#{"}label_accessibility${r"}"}">Accessibility</h2>
 
-          <p class="lead" data-th-text="${r"#{"}label_accessibility_lead${r"}"}">Accessibility policy application</p>
+          <p class="lead" data-th-text="${r"#{"}label_accessibility_lead}">Accessibility policy application</p>
           <p data-th-utext="${r"#{"}label_accessibility_text${r"}"}">
            Spring Roo Application is committed to ensuring the accessibility of
            its web content to people with disabilities. All of the content on

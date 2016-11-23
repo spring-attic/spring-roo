@@ -30,6 +30,22 @@
       href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
       data-th-href="@{/webjars/font-awesome/css/font-awesome.min.css}"/>
 
+		<!-- Datatables -->
+		<link data-th-href="@{/webjars/datatables/media/css/jquery.dataTables.css}" rel="stylesheet" type="text/css"
+		  href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.css" />
+
+		<link data-th-href="@{/webjars/datatables.net-bs/css/dataTables.bootstrap.css}" rel="stylesheet" type="text/css"
+		  href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.css" />
+
+		<link data-th-href="@{/webjars/datatables.net-responsive-bs/css/responsive.bootstrap.css}" rel="stylesheet" type="text/css"
+		  href="https://cdn.datatables.net/responsive/2.0.2/css/responsive.bootstrap.css" />
+
+		<link data-th-href="@{/webjars/datatables.net-buttons-bs/css/buttons.bootstrap.css}" rel="stylesheet" type="text/css"
+		  href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.css" />
+
+		<link data-th-href="@{/webjars/datatables.net-select-bs/css/select.bootstrap.css}" rel="stylesheet" type="text/css"
+		  href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css" />
+
     <!-- Bootswatch CSS custom -->
     <link rel="stylesheet" type="text/css"
       href="../../static/public/css/theme.css"
@@ -48,14 +64,13 @@
     <![endif]-->
 
   </head>
-
 <#if userManagedComponents?has_content && userManagedComponents["body"]??>
   ${userManagedComponents["body"]}
 <#else>
   <body id="body">
 
      <header role="banner">
-        <nav class="navbar navbar-inverse navbar-static-top" data-th-replace="fragments/menu :: menu-languages">
+        <nav class="navbar navbar-inverse navbar-static-top" data-th-replace="fragments/menu :: menu">
           <!-- Content replaced by the menu template fragment menu.html -->
           <span>Application menu</span>
         </nav>
@@ -66,7 +81,7 @@
     </header>
 
     <div class="container bg-container">
-      <!-- content -->
+      <!-- CONTENT -->
       <section data-layout-fragment="content">
         <!-- Content replaced by the content fragment of the page displayed -->
         <h2>Sample static body for direct display of the template</h2>
@@ -76,7 +91,7 @@
           Praesent scelerisque neque neque, ac elementum quam dignissim interdum.
           Phasellus et placerat elit.</p>
       </section>
-      <!-- /content -->
+      <!-- /CONTENT -->
     </div>
 
     <footer class="container" data-th-replace="fragments/footer :: footer">
@@ -108,7 +123,7 @@
        data-th-src="@{/webjars/momentjs/moment.min.js}">
       </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/locale/es.js"
-      data-th-src="@{/webjars/momentjs/locale/}+ ${r"${#"}locale.language${r"}"}+'.js'"
+      data-th-src="@{/webjars/momentjs//locale/}+ ${r"${#"}locale.language${r"}"}+'.js'"
       data-th-if="${r"${#"}locale.language${r"}"} != 'en' and ${r"${#"}locale.language${r"}"} != 'es'">
       </script>
     <script src="../../static/public/js/moment-locale-es.js"
@@ -118,6 +133,10 @@
     <script src="../../static/public/js/moment-defaults.js"
       data-th-src="@{/public/js/moment-defaults.js}">
       </script>
+
+    <!-- Datatables fragment -->
+    <div data-th-replace="fragments/js/datatables :: datatables-js">
+    </div>
 
     <div data-layout-fragment="javascript">
       <!-- This includes javascript own code of each page -->

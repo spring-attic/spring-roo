@@ -5,7 +5,7 @@
 <#import "fields/checkbox.ftl" as checkbox>
 <#import "fields/enum.ftl" as enum>
 <!DOCTYPE html>
-<html lang="en" data-layout-decorator="layouts/default-layout">
+<html lang="en" data-layout-decorate="layouts/default-layout">
   <head>
     <meta charset="UTF-8" data-th-remove="all"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all"/>
@@ -23,7 +23,7 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
       data-th-remove="all"/>
 
-    <title data-th-text="|${r"#{"}label_create_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}|">
+    <title data-th-text="${r"#{"}label_create_entity(${r"#{"}${entityLabel}})}">
     Create ${entityName} - ${projectName} - SpringRoo Application</title>
 
     <!--/* Bootstrap */-->
@@ -44,15 +44,15 @@
     <!-- Select2 -->
     <link rel="stylesheet" type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css"
-      data-th-href="@{/webjars/select2/4.0.3/dist/css/select2.css}"/>
+      data-th-href="@{/webjars/select2/dist/css/select2.css}"/>
     <link rel="stylesheet" type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.7/select2-bootstrap.css"
-      data-th-href="@{/webjars/select2-bootstrap-theme/0.1.0-beta.7/dist/select2-bootstrap.css}"/>
+      data-th-href="@{/webjars/select2-bootstrap-theme/dist/select2-bootstrap.css}"/>
 
     <!-- DateTimePicker -->
     <link rel="stylesheet" type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.min.css"
-      data-th-href="@{/webjars/datetimepicker/2.5.4/build/jquery.datetimepicker.min.css}"/>
+      data-th-href="@{/webjars/datetimepicker/build/jquery.datetimepicker.min.css}"/>
 
     <!--/* Bootswatch CSS custom */-->
     <link rel="stylesheet" type="text/css"
@@ -209,7 +209,7 @@
             data-th-action="@{${r"${"}(#mvc.url('${dconfig.mvcUrl_create}')).buildAndExpand(${entity.modelAttribute}.${entity.configuration.identifierField})}}">
 
             <fieldset id="containerFields">
-              <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} data </legend>
+              <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data </legend>
 
               <#list fields as field>
                   <#if field.userManaged>
@@ -333,26 +333,26 @@
     <!-- DateTimePicker -->
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.full.min.js"
-      data-th-src="@{/webjars/datetimepicker/2.5.4/build/jquery.datetimepicker.full.min.js}"></script>
+      data-th-src="@{/webjars/datetimepicker/build/jquery.datetimepicker.full.min.js}"></script>
     <script src="../../static/public/js/datetimepicker-defaults.js"
       data-th-src="@{/public/js/datetimepicker-defaults.js}"></script>
 
     <!-- jquery.inputmask -->
     <script
        src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.3.1/jquery.inputmask.bundle.min.js"
-       data-th-src="@{/webjars/jquery.inputmask/3.3.1/min/jquery.inputmask.bundle.min.js}"></script>
+       data-th-src="@{/webjars/jquery.inputmask/min/jquery.inputmask.bundle.min.js}"></script>
     <script type="text/javascript" data-th-inline="javascript">
       (function(jQuery) {
         jQuery(document).ready(
 	  function() {
 	    Inputmask.extendAliases({
 	      'numeric' : {
-	         'groupSeparator' : /*[[${r"#{"}label_inputmask_groupSeparator${r"}"}]]*/'.',
-	         'radixPoint' : /*[[${r"#{"}label_inputmask_radixPoint${r"}"}]]*/','
+	         'groupSeparator' : /*[[${r"#{"}label_inputmask_groupSeparator}]]*/'.',
+	         'radixPoint' : /*[[${r"#{"}label_inputmask_radixPoint}]]*/','
 	       },
 	       'currency' : {
-	          'prefix' : /*[[${r"#{"}label_inputmask_prefix${r"}"}]]*/'',
-	          'suffix' : /*[[${r"#{"}label_inputmask_suffix${r"}"}]]*/' €'
+	          'prefix' : /*[[${r"#{"}label_inputmask_prefix}]]*/'',
+	          'suffix' : /*[[${r"#{"}label_inputmask_suffix}]]*/' €'
 	        }
 	    });
 	 });
@@ -364,15 +364,15 @@
     <!-- JQuery Validation -->
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/jquery.validate.min.js"
-      data-th-src="@{/webjars/jquery-validation/1.15.0/dist/jquery.validate.min.js}">
+      data-th-src="@{/webjars/jquery-validation/dist/jquery.validate.min.js}">
     </script>
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/additional-methods.min.js"
-      data-th-src="@{/webjars/jquery-validation/1.15.0/dist/additional-methods.min.js}">
+      data-th-src="@{/webjars/jquery-validation/dist/additional-methods.min.js}">
     </script>
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/localization/messages_es.js"
-      data-th-src="@{/webjars/jquery-validation/1.15.0/src/localization/messages_}+${r"${#"}locale.language${r"}"}+'.js'"
+      data-th-src="@{/webjars/jquery-validation/src/localization/messages_}+${r"${#"}locale.language${r"}"}+'.js'"
       data-th-if="${r"${#"}locale.language${r"}"} != 'en'">
     </script>
     <script src="../../static/public/js/validation-defaults.js"
@@ -382,83 +382,41 @@
       (function(jQuery) {
          jQuery(document).ready(function() {
 	   jQuery.extend( jQuery.validator.messages, {
-	     'dateformat' : /*[[${r"#{"}error_invalid_date${r"}"}]]*/ 'Please enter a correct date/time',
-	     'inputmask': /*[[${r"#{"}lerror_invalid_maskValue${r"}"}]]*/ 'Please enter a valid value',
+	     'dateformat' : /*[[${r"#{"}error_invalid_date}]]*/ 'Please enter a correct date/time',
+	     'inputmask': /*[[${r"#{"}error_invalid_maskValue}]]*/ 'Please enter a valid value',
 	   });
 	 });
       })(jQuery);
     </script>
 
     <!-- Select2 -->
-    <div data-layout-include="fragments/js/select2 :: select2">
-
-       <!-- Select2 scripts ONLY for HTML templates
-	    Content replaced by the select2 template fragment select2.html
-       -->
-       <script
-         src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.full.js"
-         data-th-src="@{/webjars/select2/4.0.2/dist/js/select2.full.js}"></script>
-       <script
-         src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/i18n/es.js"
-         data-th-src="@{/webjars/select2/4.0.2/dist/js/i18n/}+${r"${#"}locale.language${r"}"}+'.js'"
-         data-th-if="${r"${#"}locale.language${r"}"} != 'en'"></script>
-
-       <script type="text/javascript" data-th-inline="javascript">
-         /*<![CDATA[*/
-	 jQuery('.dropdown-select-simple').select2({
-	   debug : false,
-           theme : 'bootstrap',
-           allowClear : true,
-         });
-         jQuery('.dropdown-select-ajax').select2(
-           {
-             debug : false,
-	     theme : 'bootstrap',
-	     allowClear : true,
-	     ajax : {
-               data : function(params) {
-		 var query = {
-		   'search[value]' : params.term,
-		   'page' : params.page - 1,
-		 }
-		 return query;
-	       },
-	       processResults : function(data, page) {
-		 var idField = this.options.get('idField');
-		 var txtFields = this.options.get('textFields');
-		 var fields = txtFields.split(',');
-		 var results = [];
-		 jQuery.each(data.content, function(i, entity) {
-		   var id = entity[idField];
-		   var text = '';
-		   jQuery.each(fields, function(i, fieldName) {
-		     text = text.concat(' ', entity[fieldName]);
-		   });
-		   var obj = {
-		     'id' : id,
-		     'text' : jQuery.trim(text)
-		   };
-		   jQuery.each(entity, function(key, val) {
-		     var attribute = jQuery.trim(key);
-		     var value = jQuery.trim(val);
-		     obj[attribute] = value;
-		    });
-		    results.push(obj);
-		  });
-		  var morePages = !data.last;
-		  return {
-		    results : results,
-		    pagination : {
-		      more : morePages
-		    }
-		  };
-		},
-	      },
-            });
-         /*]]>*/
-       </script>
-
+    <div data-th-replace="fragments/js/select2 :: select2-js">
+      // TODO add js CDN
      </div>
+
+
+    <script type="text/javascript" data-th-inline="javascript">
+      // IIFE - Immediately Invoked Function Expression
+      (function(list) {
+
+        // The global jQuery object is passed as a parameter
+        list(window.jQuery, window, document);
+
+      }(function($, window, document) {
+
+        // The $ is now locally scoped, it won't collide with other libraries
+
+        // Listen for the jQuery ready event on the document
+        // READY EVENT BEGIN
+        $(function() {
+
+          // Put this page local javascript here!
+
+        });
+
+        // READY EVENT END
+      }));
+    </script>
 
     </div>
 

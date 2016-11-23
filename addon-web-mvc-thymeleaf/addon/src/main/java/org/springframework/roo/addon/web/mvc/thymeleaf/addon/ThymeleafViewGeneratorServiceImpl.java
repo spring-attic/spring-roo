@@ -1,5 +1,11 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -29,12 +35,6 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.settings.project.ProjectSettingsService;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -781,6 +781,27 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
 
     return true;
+
+  }
+
+  @Override
+  public void addDefaultListLayout(String moduleName, ViewContext<ThymeleafMetadata> ctx) {
+    // Process elements to generate
+    Document newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getLayoutsFolder(moduleName).concat("/default-list-layout").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge("layouts/default-list-layout", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("layouts/default-list-layout", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
 
   }
 

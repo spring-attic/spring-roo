@@ -1,5 +1,6 @@
 <#macro section detailsLevel>
-            <hr>
+        <hr>
+        <div id="details-level-${detailsLevel[0].level}">
             <ul class="nav nav-tabs" id="nav-tabs">
             <#assign firstDetail=true>
             <#list detailsLevel as detail>
@@ -80,9 +81,10 @@
                     <div data-th-replace="fragments/modal-confirm-delete :: modalConfirmDelete(tableId='${detail.entityItemId}-table',
                         title=${r"#{"}label_delete_entity(${r"#"}{${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_item_confirm})">
                     </div>
-                </div>
+                </div> <!--/table-responsive">
                 <!--END TABLE-->
-              </div>
+              </div> <!--/tab-pane -->
               </#list>
-            </div>
+            </div> <!--/tab-content-->
+        </div>
 </#macro>

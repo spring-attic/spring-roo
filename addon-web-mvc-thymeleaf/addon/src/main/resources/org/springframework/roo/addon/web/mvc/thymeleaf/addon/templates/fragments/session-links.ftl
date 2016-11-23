@@ -12,7 +12,7 @@
     Only the internal content of the following div is included within
     the template, in session fragment
     -->
-    <ul data-layout-fragment="session">
+    <ul class="nav navbar-nav navbar-right upper-nav session" data-th-fragment="session">
       <!-- User menu -->
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" role="button"
@@ -38,7 +38,7 @@
         </li>
     </ul>
 
-    <ul data-layout-fragment="links">
+    <ul class="nav navbar-nav navbar-right upper-nav links" data-th-fragment="links">
       <!-- User menu links -->
       <li><a href="#"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
       &nbsp;<span class="hidden-sm" data-th-text="${r"#{"}label_contact${r"}"}">Contact</span></a></li>

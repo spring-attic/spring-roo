@@ -5,7 +5,7 @@
 <#import "fields/checkbox.ftl" as checkbox>
 <#import "fields/enum.ftl" as enum>
 <!DOCTYPE html>
-<html lang="en" data-layout-decorator="layouts/default-layout">
+<html lang="en" data-layout-decorate="layouts/default-layout">
   <head>
     <meta charset="UTF-8" data-th-remove="all"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all"/>
@@ -23,7 +23,7 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
       data-th-remove="all"/>
 
-    <title data-th-text="|${r"#{"}label_create_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}|">
+    <title data-th-text="${r"#{"}label_create_entity(${r"#{"}${entityLabel}})}">
     Create ${entityName} - ${projectName} - SpringRoo Application</title>
 
     <!--/* Bootstrap */-->
@@ -205,10 +205,10 @@
 
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="@{${"${"}(#mvc.url('${mvcUrl_create}')).build()}}">
+            data-th-action="@{${r"${"}(#mvc.url('${mvcUrl_create}')).build()}}">
 
             <fieldset id="containerFields">
-              <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} data </legend>
+              <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data </legend>
 
               <#list fields as field>
                   <#if field.userManaged>
@@ -332,26 +332,26 @@
     <!-- DateTimePicker -->
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.full.min.js"
-      data-th-src="@{/webjars/datetimepicker/2.5.4/build/jquery.datetimepicker.full.min.js}"></script>
+      data-th-src="@{/webjars/datetimepicker/build/jquery.datetimepicker.full.min.js}"></script>
     <script src="../../static/public/js/datetimepicker-defaults.js"
       data-th-src="@{/public/js/datetimepicker-defaults.js}"></script>
 
     <!-- jquery.inputmask -->
     <script
        src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.3.1/jquery.inputmask.bundle.min.js"
-       data-th-src="@{/webjars/jquery.inputmask/3.3.1/min/jquery.inputmask.bundle.min.js}"></script>
+       data-th-src="@{/webjars/jquery.inputmask/min/jquery.inputmask.bundle.min.js}"></script>
     <script type="text/javascript" data-th-inline="javascript">
       (function(jQuery) {
         jQuery(document).ready(
 	  function() {
 	    Inputmask.extendAliases({
 	      'numeric' : {
-	         'groupSeparator' : /*[[${r"#{"}label_inputmask_groupSeparator${r"}"}]]*/'.',
-	         'radixPoint' : /*[[${r"#{"}label_inputmask_radixPoint${r"}"}]]*/','
+	         'groupSeparator' : /*[[${r"#{"}label_inputmask_groupSeparator}]]*/'.',
+	         'radixPoint' : /*[[${r"#{"}label_inputmask_radixPoint}]]*/','
 	       },
 	       'currency' : {
-	          'prefix' : /*[[${r"#{"}label_inputmask_prefix${r"}"}]]*/'',
-	          'suffix' : /*[[${r"#{"}label_inputmask_suffix${r"}"}]]*/' €'
+	          'prefix' : /*[[${r"#{"}label_inputmask_prefix}]]*/'',
+	          'suffix' : /*[[${r"#{"}label_inputmask_suffix}]]*/' €'
 	        }
 	    });
 	 });
@@ -363,15 +363,15 @@
     <!-- JQuery Validation -->
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/jquery.validate.min.js"
-      data-th-src="@{/webjars/jquery-validation/1.15.0/dist/jquery.validate.min.js}">
+      data-th-src="@{/webjars/jquery-validation/dist/jquery.validate.min.js}">
     </script>
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/additional-methods.min.js"
-      data-th-src="@{/webjars/jquery-validation/1.15.0/dist/additional-methods.min.js}">
+      data-th-src="@{/webjars/jquery-validation/dist/additional-methods.min.js}">
     </script>
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/localization/messages_es.js"
-      data-th-src="@{/webjars/jquery-validation/1.15.0/src/localization/messages_}+${r"${#"}locale.language${r"}"}+'.js'"
+      data-th-src="@{/webjars/jquery-validation/src/localization/messages_}+${r"${#"}locale.language${r"}"}+'.js'"
       data-th-if="${r"${#"}locale.language${r"}"} != 'en'">
     </script>
     <script src="../../static/public/js/validation-defaults.js"
@@ -381,8 +381,8 @@
       (function(jQuery) {
          jQuery(document).ready(function() {
 	   jQuery.extend( jQuery.validator.messages, {
-	     'dateformat' : /*[[${r"#{"}error_invalid_date${r"}"}]]*/ 'Please enter a correct date/time',
-	     'inputmask': /*[[${r"#{"}lerror_invalid_maskValue${r"}"}]]*/ 'Please enter a valid value',
+	     'dateformat' : /*[[${r"#{"}error_invalid_date}]]*/ 'Please enter a correct date/time',
+	     'inputmask': /*[[${r"#{"}error_invalid_maskValue}]]*/ 'Please enter a valid value',
 	   });
 	 });
       })(jQuery);

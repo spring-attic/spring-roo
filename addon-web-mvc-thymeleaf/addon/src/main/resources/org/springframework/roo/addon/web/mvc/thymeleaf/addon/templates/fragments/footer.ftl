@@ -12,14 +12,14 @@
     Only the internal content of the following div is included within
     the template, in footer fragment
     -->
-    <div class="container" data-layout-fragment="footer">
+    <footer class="container" data-th-fragment="footer">
 
        <div class="row">
       	 <div class="col-sm-6 col-sm-offset-3">
            <small class="clearfix">
              Made with <a href="http://projects.spring.io/spring-roo/" target="_blank" data-th-text="| Spring Roo © ${r"${#calendars.format(#dates.createNow(),'yyyy')}"}|">
              Spring Roo &copy; 2016</a> •
-             We <span class="glyphicon glyphicon-heart"></span> 
+             We <span class="glyphicon glyphicon-heart"></span>
              <a href="https://github.com/spring-projects/spring-roo/" target="_blank">Open source</a> •
              <a data-th-href="@{/accessibility}" href="/accessibility"><span data-th-text="${r"#{"}label_accessibility${r"}"}">Accessibility</span></a>
             </small>
@@ -54,7 +54,7 @@
         </div>
        </div>
 
-    </div>
+    </footer>
 
   </body>
 </#if>

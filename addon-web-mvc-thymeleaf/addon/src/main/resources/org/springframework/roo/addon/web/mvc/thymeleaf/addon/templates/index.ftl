@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-layout-decorator="layouts/default-layout">
+<html lang="en" data-layout-decorate="layouts/default-layout">
   <head>
     <meta charset="UTF-8" data-th-remove="all"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all"/>
@@ -18,7 +18,7 @@
        data-th-remove="all"/>
 
     <!--Title inicio -->
-    <title data-th-text="${r"#{welcome_label}"}">Welcome - SpringRoo Application</title>
+    <title data-th-text="${r"#"}{welcome_label}">Welcome - SpringRoo Application</title>
 
     <!--/* Bootstrap */-->
     <link rel="stylesheet" type="text/css"
@@ -175,7 +175,7 @@
         <!--Content-->
         <section data-layout-fragment="content">
 
-          <div class="container content">
+          <div class="container-fluid content">
 
             <div class="box-center">
 
@@ -212,7 +212,7 @@
                       </div>
                       <div class="text">
                        <h2><a href="http://docs.spring.io/spring-roo/docs/current/reference/html/" data-th-title="${r"#{"}label_spring_documentation${r"}"}" title="Spring Roo reference documentation" target="_blank" data-th-text="${r"#{"}label_documentation${r"}"}">Doc</a></h2>
-                       <small data-th-text="${r"#{"}info_spring_documentation${r"}"}">If you are looking for Reference Documentation you can get it here.</small>
+                       <small data-th-text="${r"#{"}info_spring_documentation}">If you are looking for Reference Documentation you can get it here.</small>
                       </div>
                   </div>
               </div>
@@ -226,8 +226,8 @@
                           <i class="fa fa-envira"></i>
                         </div>
                         <div class="text">
-                          <h2><a href="http://projects.spring.io/spring-roo/" data-th-title="${r"#{"}label_spring_site${r"}"}" title="Spring Roo project site" target="_blank" data-th-text="${r"#{"}label_projectpage${r"}"}">Project Page</a></h2>
-                          <small data-th-text="${r"#{"}info_spring_site${r"}"}">All the info about Spring Roo development.</small>
+                          <h2><a href="http://projects.spring.io/spring-roo/" data-th-title="${r"#{"}label_spring_site}" title="Spring Roo project site" target="_blank" data-th-text="${r"#{"}label_projectpage${r"}"}">Project Page</a></h2>
+                          <small data-th-text="${r"#{"}info_spring_site}">All the info about Spring Roo development.</small>
                       </div>
                   </div>
               </div>
@@ -241,8 +241,8 @@
                                   <i class="fa fa-stack-overflow"></i>
                                 </div>
                                 <div class="text">
-                                  <h2><a href="http://stackoverflow.com/questions/tagged/spring-roo" data-th-title="${r"#{"}label_spring_support${r"}"}" title="Spring Roo Stackoverflow support" target="_blank" data-th-text="${r"#{"}label_support${r"}"}">Support</a></h2>
-                                  <small data-th-text="${r"#{"}label_spring_support${r"}"}">If you have any question about the project,
+                                  <h2><a href="http://stackoverflow.com/questions/tagged/spring-roo" data-th-title="${r"#{"}label_spring_support}" title="Spring Roo Stackoverflow support" target="_blank" data-th-text="${r"#{"}label_support${r"}"}">Support</a></h2>
+                                  <small data-th-text="${r"#{"}label_spring_support}">If you have any question about the project,
                                   you can check it.</small>
                               </div>
                         </div>
@@ -256,8 +256,8 @@
                                   <i class="fa fa-code"></i>
                                 </div>
                                 <div class="text">
-                                  <h2><a href="https://github.com/spring-projects/spring-roo/" data-th-title="${r"#{"}label_spring_code${r"}"}" title="Spring Roo source code" target="_blank" data-th-text="${r"#{"}label_code${r"}"}">Code</a></h2>
-                                  <small data-th-text="${r"#{"}label_spring_sourcecode${r"}"}">Known, modify and redistribute the source code.</small>
+                                  <h2><a href="https://github.com/spring-projects/spring-roo/" data-th-title="${r"#{"}label_spring_code}" title="Spring Roo source code" target="_blank" data-th-text="${r"#{"}label_code${r"}"}">Code</a></h2>
+                                  <small data-th-text="${r"#{"}label_spring_sourcecode}">Known, modify and redistribute the source code.</small>
                               </div>
                         </div>
                     </div>
@@ -270,7 +270,7 @@
               <div class="row">
                 <div class="col-md-12">
                   <ul class="pull-right list-inline social-links">
-                    <li><small data-th-text="${r"#{"}info_twitter${r"}"}">As always, you can find us also on </small></li>
+                    <li><small data-th-text="${r"#{"}info_twitter}">As always, you can find us also on </small></li>
                     <li>
                     <a href="http://twitter.com/springroo" class="icon-twitter" target="_blank">
                     <i class="fa fa-twitter"></i>

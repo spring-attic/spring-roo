@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <meta name="description" data-th-attr="content=${r"#{info_description}"}"/>
-    <meta name="author" data-th-attr="content=${r"#{info_author}"}"/>
+    <meta name="description" data-data-content="${r"#{info_description}"}"/>
+    <meta name="author" data-data-content="${r"#{info_author}"}"/>
 
     <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
       data-th-href="@{/public/img/favicon.ico}"/>
@@ -18,7 +18,7 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
-      data-th-href="@{/webjars/bootstrap/3.3.6/dist/css/bootstrap.css}"></link>
+      data-th-href="@{/webjars/bootstrap/dist/css/bootstrap.css}"></link>
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <link rel="stylesheet" type="text/css"
@@ -28,7 +28,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
-      data-th-href="@{/webjars/font-awesome/4.6.2/css/font-awesome.min.css}"/>
+      data-th-href="@{/webjars/font-awesome/css/font-awesome.min.css}"/>
 
     <!-- Bootswatch CSS custom -->
     <link rel="stylesheet" type="text/css"
@@ -54,11 +54,11 @@
   <body id="body">
 
      <header role="banner">
-        <nav class="navbar navbar-inverse navbar-static-top" data-layout-include="fragments/menu :: menu">
+        <nav class="navbar navbar-inverse navbar-static-top" data-th-replace="fragments/menu :: menu">
           <!-- Content replaced by the menu template fragment menu.html -->
           <span>Application menu</span>
         </nav>
-        <div class="bg-header" data-layout-include="fragments/header :: header">
+        <div class="bg-header" data-th-replace="fragments/header :: header">
           <!-- Content replaced by the header template fragment header.html -->
           <h1>Sample page header for direct display of the template</h1>
         </div>
@@ -78,7 +78,7 @@
       <!-- /content -->
     </div>
 
-    <footer class="container" data-layout-include="fragments/footer :: footer">
+    <footer class="container" data-th-replace="fragments/footer :: footer">
       <!-- Content replaced by the footer template fragment footer.html -->
       &copy; 2016 Spring Roo (footer for example for direct display of the template)
     </footer>

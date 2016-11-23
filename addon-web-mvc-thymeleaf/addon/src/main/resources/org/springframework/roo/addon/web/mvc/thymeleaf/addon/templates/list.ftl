@@ -1,6 +1,6 @@
 <#import "listDetails.ftl" as details>
 <!DOCTYPE html>
-<html lang="en" data-layout-decorator="layouts/default-layout">
+<html lang="en" data-layout-decorate="layouts/default-list-layout">
 
 <head>
   <meta charset="UTF-8" data-th-remove="all"/>
@@ -23,7 +23,7 @@
  <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
     data-th-remove="all"/>
 
- <title data-th-text="|${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}|">
+ <title data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}})}">
  List ${entityName} - ${projectName} - SpringRoo Application</title>
 
  <!--/* Bootstrap */-->
@@ -41,29 +41,29 @@
    href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
    data-th-remove="all"/>
 
- <!-- Datatables -->
+ <!--/* Datatables */-->
  <link
-   data-th-href="@{/webjars/datatables/1.10.11/media/css/jquery.dataTables.css}"
+   data-th-remove="all"
    rel="stylesheet" type="text/css"
    href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.css"></link>
 
  <link
-   data-th-href="@{/webjars/datatables.net-bs/1.10.11/css/dataTables.bootstrap.css}"
+   data-th-remove="all"
    rel="stylesheet" type="text/css"
    href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.css"></link>
 
  <link
-   data-th-href="@{/webjars/datatables.net-responsive-bs/2.0.2/css/responsive.bootstrap.css}"
+   data-th-remove="all"
    rel="stylesheet" type="text/css"
    href="https://cdn.datatables.net/responsive/2.0.2/css/responsive.bootstrap.css"></link>
 
  <link
-   data-th-href="@{/webjars/datatables.net-buttons-bs/1.1.2/css/buttons.bootstrap.css}"
+   data-th-remove="all"
    rel="stylesheet" type="text/css"
    href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.css"></link>
 
  <link
-   data-th-href="@{/webjars/datatables.net-select-bs/1.1.2/css/select.bootstrap.css}"
+   data-th-remove="all"
    rel="stylesheet" type="text/css"
    href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css"></link>
 
@@ -236,7 +236,7 @@
                    data-data-delete-url="${r"${"}(#mvc.url('${mvcUrl_remove}')).buildAndExpand('_ID_')}"
                    </#if>
                    >
-                <caption data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}})}">${entityName} List</caption>
+                <caption class="sr-only" data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}})}">${entityName} List</caption>
                 <thead>
                   <tr>
                     <#list fields as field>
@@ -350,55 +350,27 @@
   <script src="../../static/public/js/moment-defaults.js">
   </script>
 
+
+  <!-- Datatables scripts ONLY for HTML templates -->
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.js"></script>
+  <!-- Datatables responsive plugin -->
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/responsive/2.0.2/js/dataTables.responsive.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/responsive/2.0.2/js/responsive.bootstrap.js"></script>
+  <!-- Datatables buttons plugins -->
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.colVis.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.flash.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.js"></script>
+  <!-- Datatables select plugin -->
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.js"></script>
+  <script type="text/javascript" charset="utf8" src="../fragments/js/datatables-locale.js"></script>
+  <script type="text/javascript" charset="utf8" src="../../static/public/js/datatables-defaults.js"></script>
+
+
   <!-- Javascript fragment -->
   <div data-layout-fragment="javascript">
-
-       <!-- Datatables fragment -->
-     <div data-th-replace="fragments/js/datatables :: datatables-js">
-
-       <!-- Datatables scripts ONLY for HTML templates
-            Content replaced by the datatables template fragment datatables.html
-       -->
-       <script type="text/javascript" charset="utf8"
-         src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.js"
-         data-th-src="@{/webjars/datatables/1.10.11/media/js/jquery.dataTables.js}"></script>
-       <script type="text/javascript" charset="utf8"
-         src="https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.js"
-         data-th-src="@{/webjars/datatables.net-bs/1.10.11/js/dataTables.bootstrap.js}"></script>
-        <!-- Datatables responsive plugin -->
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/responsive/2.0.2/js/dataTables.responsive.js"
-          data-th-src="@{/webjars/datatables.net-responsive/2.0.2/js/dataTables.responsive.js}"></script>
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/responsive/2.0.2/js/responsive.bootstrap.js"
-          data-th-src="@{/webjars/datatables.net-responsive-bs/2.0.2/js/responsive.bootstrap.js}"></script>
-        <!-- Datatables buttons plugins -->
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.js"
-          data-th-src="@{/webjars/datatables.net-buttons/1.1.2/js/dataTables.buttons.js}"></script>
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.js"
-          data-th-src="@{/webjars/datatables.net-buttons-bs/1.1.2/js/buttons.bootstrap.js}"></script>
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.colVis.js"
-          data-th-src="@{/webjars/datatables.net-buttons/1.1.2/js/buttons.colVis.js}"></script>
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.flash.js"
-          data-th-src="@{/webjars/datatables.net-buttons/1.1.2/js/buttons.flash.js}"></script>
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.js"
-          data-th-src="@{/webjars/datatables.net-buttons/1.1.2/js/buttons.html5.js}"></script>
-        <!-- Datatables select plugin -->
-        <script type="text/javascript" charset="utf8"
-          src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.js"
-          data-th-src="@{/webjars/datatables.net-select/1.1.2/js/dataTables.select.js}"></script>
-
-
-        <script type="text/javascript" charset="utf8"
-          src="/js/datatables-locale.js"></script>
-        <script type="text/javascript" charset="utf8"
-          src="/public/js/datatables-defaults.js"></script>
-    </div>
 
   </div>
 

@@ -12,7 +12,7 @@
     Only the internal content of the following div is included within
     the template, in menu fragment
     -->
-    <nav class="navbar navbar-inverse navbar-static-top" data-layout-fragment="menu">
+    <nav class="navbar navbar-inverse navbar-static-top" data-th-fragment="menu">
 
          <div class="container">
 
@@ -65,26 +65,28 @@
               </ul>
 
               <!-- Language select -->
-              <ul class="nav navbar-nav navbar-right upper-nav languages" data-layout-include="fragments/languages :: languages">
+              <ul class="nav navbar-nav navbar-right upper-nav languages" data-th-replace="fragments/languages :: languages">
                 <!-- Content replaced by the session template fragment language.html
                 -->
                 <span>Language data</span>
               </ul>
 
+			  <#if isSecurityEnabled>
               <!-- User menu -->
-              <ul class="nav navbar-nav navbar-right upper-nav session" data-layout-include="fragments/session-links :: session">
+              <ul class="nav navbar-nav navbar-right upper-nav session" data-th-replace="fragments/session-links :: session">
                 <!-- Content replaced by the session template fragment session-links.html
                 -->
                 <span>User session data</span>
               </ul>
+              </#if>
+
 
               <!-- User menu links -->
-              <ul class="nav navbar-nav navbar-right upper-nav links" data-layout-include="fragments/session-links :: links">
+              <ul class="nav navbar-nav navbar-right upper-nav links" data-th-replace="fragments/session-links :: links">
                 <!-- Content replaced by the links template fragment session-links.html
                 -->
                 <span>User session data</span>
               </ul>
-
            </div>
 
           </div>
@@ -94,7 +96,7 @@
     Only the internal content of the following div is included within
     the template, in menu-languages fragment
     -->
-    <nav class="navbar navbar-inverse navbar-static-top" data-layout-fragment="menu-languages">
+    <nav class="navbar navbar-inverse navbar-static-top" data-th-fragment="menu-languages">
 
          <div class="container">
 
@@ -114,7 +116,7 @@
             <div id="mainnav" class="navbar-collapse collapse">
 
               <!-- Language select -->
-              <ul class="nav navbar-nav navbar-right upper-nav languages" data-layout-include="fragments/languages :: languages">
+              <ul class="nav navbar-nav navbar-right upper-nav languages" data-th-replace="fragments/languages :: languages">
                 <!-- Content replaced by the session template fragment language.html
                 -->
                 <span>Language data</span>
