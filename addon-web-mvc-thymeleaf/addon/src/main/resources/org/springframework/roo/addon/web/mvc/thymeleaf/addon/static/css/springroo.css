@@ -42,10 +42,11 @@ section {padding: 1em 0}
   clear: both;
   font-weight: normal;
   line-height: 1.42857143;
-  color: #999999;
   white-space: nowrap;
-  text-transform: none;
-  font-size: 1em;
+  font-size: 11px;
+  line-height: 22px;
+  font-weight: 500;
+  text-transform: uppercase;
 }
 .dropdown-menu > li button.btn-link:hover,
 .dropdown-menu > li button.btn-link:focus {
@@ -238,6 +239,16 @@ table a.btn-action {
    font-size: inherit;
 }
 
+/*--FORMS-------------*/
+
+legend{
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.form-horizontal .form-group input[type="radio"],
+.form-horizontal .form-group input[type="checkbox"] {
+    margin: 14px 0 0;
+}
 
 /*--TABLES-------------*/
 
