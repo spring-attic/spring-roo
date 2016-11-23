@@ -668,36 +668,35 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     String versionInfo = versionInfoWithoutGit();
 
     if ("roorocks".equals(extra) || "about".equals(extra)) {
-      sb.append("            /\\ /l").append(LINE_SEPARATOR);
-      sb.append("            ((.Y(!").append(LINE_SEPARATOR);
-      sb.append("             \\ |/").append(LINE_SEPARATOR);
-      sb.append("             /  6~6,").append(LINE_SEPARATOR);
-      sb.append("             \\ _    +-.").append(LINE_SEPARATOR);
-      sb.append("              \\`-=--^-' \\").append(LINE_SEPARATOR);
-      sb.append("               \\   \\     |\\--------------------------+").append(LINE_SEPARATOR);
-      sb.append("              _/    \\    |      About Spring Roo     |").append(LINE_SEPARATOR);
-      sb.append("             (  .    Y   +---------------------------+").append(LINE_SEPARATOR);
-      sb.append("            /\"\\ `---^--v---.").append(LINE_SEPARATOR);
-      sb.append("           / _ `---\"T~~\\/~\\/    Version:    ").append(versionInfo)
+      sb.append("           /\\ /l").append(LINE_SEPARATOR);
+      sb.append("           ((.Y(!").append(LINE_SEPARATOR);
+      sb.append("            \\ |/").append(LINE_SEPARATOR);
+      sb.append("            /  6~6,").append(LINE_SEPARATOR);
+      sb.append("            \\ _    +-.").append(LINE_SEPARATOR);
+      sb.append("             \\`-=--^-' \\").append(LINE_SEPARATOR);
+      sb.append("              \\   \\     |\\--------------------------+").append(LINE_SEPARATOR);
+      sb.append("             _/    \\    |      About Spring Roo     |").append(LINE_SEPARATOR);
+      sb.append("            (  .    Y   +---------------------------+").append(LINE_SEPARATOR);
+      sb.append("           /\"\\ `---^--v---.").append(LINE_SEPARATOR);
+      sb.append("          / _ `---\"T~~\\/~\\/    Version:    ").append(versionInfo)
           .append(LINE_SEPARATOR);
-      sb.append("          / \" ~\\.      !        Build ID:   ").append(buildInfo())
+      sb.append("         / \" ~\\.      !        Build ID:   ").append(buildInfo())
           .append(LINE_SEPARATOR);
-      sb.append("    _    Y      Y.~~~ /'        Platform:   OSGi R6 - Java")
-          .append(LINE_SEPARATOR);
-      sb.append("   Y^|   |      | Roo 7         Created By: DISID Corporation S.L.").append(
+      sb.append("   _    Y      Y.~~~ /'        Platform:   OSGi R6 - Java").append(LINE_SEPARATOR);
+      sb.append("  Y^|   |      | Roo 7         Created By: DISID Corporation S.L.").append(
           LINE_SEPARATOR);
-      sb.append("   | |   |      |     |                     Visit http://www.disid.com").append(
+      sb.append("  | |   |      |     |                     Visit http://www.disid.com").append(
           LINE_SEPARATOR);
-      sb.append("   | l   |     / .   /'").append(LINE_SEPARATOR);
-      sb.append("   | `L  | Y .^/   ~T           Copyright (c) 2016 Pivotal Software Inc.").append(
+      sb.append("  | l   |     / .   /'").append(LINE_SEPARATOR);
+      sb.append("  | `L  | Y .^/   ~T           Copyright (c) 2016 the original author or authors")
+          .append(LINE_SEPARATOR);
+      sb.append("  |  l  ! | |/  | |            All rights reserved.").append(LINE_SEPARATOR);
+      sb.append("  | .`\\/' | Y   | !").append(LINE_SEPARATOR);
+      sb.append("  l  \"~   j l   j L______      Visit http://projects.spring.io/spring-roo")
+          .append(LINE_SEPARATOR);
+      sb.append("   \\,____{ __\"\" ~ __ ,\\_,\\_").append(LINE_SEPARATOR);
+      sb.append(" ~~~~~~~~~~~~~~~~~~~~~~~~~~    Licensed under the Apache License, v2.0").append(
           LINE_SEPARATOR);
-      sb.append("   |  l  ! | |/  | |            All rights reserved.").append(LINE_SEPARATOR);
-      sb.append("   | .`\\/' | Y   | !").append(LINE_SEPARATOR);
-      sb.append("   l  \"~   j l   j L______      Visit http://projects.spring.io/spring-roo")
-          .append(LINE_SEPARATOR);
-      sb.append("    \\,____{ __\"\" ~ __ ,\\_,\\_").append(LINE_SEPARATOR);
-      sb.append("  ~~~~~~~~~~~~~~~~~~~~~~~~~~    Roo is licensed under the Apache License, v2.0")
-          .append(LINE_SEPARATOR);
       return sb.toString();
     }
 
