@@ -202,9 +202,26 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       if (field.getAnnotation(JpaJavaType.TRANSIENT) != null) {
         continue;
       }
+
       result.add(field);
     }
     return result;
+  }
+
+  protected List<FieldMetadata> getEditableFields(List<FieldMetadata> fields) {
+    List<FieldMetadata> persistentFields = getPersistentFields(fields);
+    Iterator<FieldMetadata> it = persistentFields.iterator();
+    while (it.hasNext()) {
+      FieldMetadata field = it.next();
+      if (field.getAnnotation(SpringJavaType.LAST_MODIFIED_DATE) != null
+          || field.getAnnotation(SpringJavaType.LAST_MODIFIED_BY) != null
+          || field.getAnnotation(SpringJavaType.CREATED_BY) != null
+          || field.getAnnotation(SpringJavaType.CREATED_DATE) != null) {
+        it.remove();
+      }
+    }
+
+    return persistentFields;
   }
 
   protected EntityItem createEntityItem(JpaEntityMetadata entityMetadata, ViewContext<T> ctx,
@@ -257,7 +274,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       MemberDetails entityDetails, ViewContext<T> ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = getPersistentFields(entityDetails.getFields());
+    List<FieldMetadata> entityFields = getEditableFields(entityDetails.getFields());
     List<FieldItem> fields =
         getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
 
@@ -291,7 +308,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       MemberDetails entityDetails, ViewContext<T> ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = getPersistentFields(entityDetails.getFields());
+    List<FieldMetadata> entityFields = getEditableFields(entityDetails.getFields());
     List<FieldItem> fields =
         getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
 
@@ -982,7 +999,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Getting all referenced fields
     List<FieldMetadata> referencedFields =
-        getPersistentFields(getMemberDetailsScanner().getMemberDetails(getClass().toString(),
+        getEditableFields(getMemberDetailsScanner().getMemberDetails(getClass().toString(),
             childEntityDetails).getFields());
     detailItem.addConfigurationElement(
         "referenceFieldFields",
