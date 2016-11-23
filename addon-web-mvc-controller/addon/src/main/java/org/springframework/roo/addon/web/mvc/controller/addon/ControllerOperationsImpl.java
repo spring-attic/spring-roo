@@ -1541,7 +1541,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
   private StringBuilder getBasePathStringBuilder(ClassOrInterfaceTypeDetails controller,
       ControllerAnnotationValues values) {
     StringBuilder sbuilder = new StringBuilder("/");
-    final String prefix = StringUtils.trim(values.getPathPrefix());
+    String prefix = StringUtils.trim(values.getPathPrefix());
     final JavaType entity = values.getEntity();
 
     // Add prefix
@@ -1550,6 +1550,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
         sbuilder.append(prefix.substring(1));
       } else {
         sbuilder.append(prefix);
+      }
+
+      // Include last / if provided prefix doesn't include it
+      if (!prefix.endsWith("/")) {
+        sbuilder.append("/");
       }
     }
     // add Entity

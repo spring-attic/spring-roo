@@ -556,6 +556,11 @@ web mvc detail --entity ~.domain.Country --responseType THYMELEAF --field region
 //web mvc detail --entity ~.domain.Country --responseType THYMELEAF --field regions.cities
 web mvc detail --entity ~.domain.Region --responseType THYMELEAF --field cities
 
+
+// Create the REST API
+web mvc controller --all --responseType JSON --pathPrefix /api
+
+
 // Add finders
 web mvc finder --all --responseType THYMELEAF
 
