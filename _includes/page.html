@@ -1,13 +1,12 @@
 <head>
-    <title>{{ page.title }}</title>
+    <title>{{ site.name }}</title>
 
-    <link rel="icon" type="image/png" href="{{site.baseurl}}/favicon.png"/>
+    <link rel="icon" type="image/png" href="{{site.baseurl}}/favicon.png" />
 
     <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/bootstrap/css/bootstrap.min.css" />
-    <link href='http://fonts.googleapis.com/css?family=Varela+Round|Montserrat:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Varela+Round|Montserrat:400,700" />
     <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/font-awesome/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/bootstrap/css/bootstrap-select.css" />
-    <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/bootstrap/css/bootstrap-responsive.css" />
 
     <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/css/main.css.css" />
     <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/css/typography.css.css" />
@@ -19,21 +18,39 @@
 
     {{ head_links }}
 
-    <script type="text/javascript" src="{{site.baseurl}}/js/jquery.js"></script>
-    <script type="text/javascript" src="{{site.baseurl}}/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="{{site.baseurl}}/bootstrap/js/bootstrap-select.js"></script>
+    <script src="{{site.baseurl}}/js/jquery.js"></script>
+    <script src="{{site.baseurl}}/bootstrap/js/bootstrap.min.js"></script>
+    <script src="{{site.baseurl}}/bootstrap/js/bootstrap-select.js"></script>
 
-    <script type="text/javascript" src="{{site.baseurl}}/js/underscore.js"></script>
-    <script type="text/javascript" src="{{site.baseurl}}/js/backbone.js"></script>
-    <script type="text/javascript" src="{{site.baseurl}}/js/projectDocumentationWidget.js"></script>
-    <script type="text/javascript" src="{{site.baseurl}}/js/application.js"></script>
-    <script type="text/javascript" src="{{site.baseurl}}/js/ZeroClipboard.min.js"></script>
-    <script type="text/javascript">
-        var apiBaseUrl = "{{ site.main_site_url }}";
-        var projectId = "{{ site.project }}";
-        var siteBaseUrl = "{{ site.baseurl }}";
+    <script src="{{site.baseurl}}/js/underscore.js"></script>
+    <script src="{{site.baseurl}}/js/backbone.js"></script>
+    <script src="{{site.baseurl}}/js/projectDocumentationWidget.js"></script>
+    <script src="{{site.baseurl}}/js/application.js"></script>
+    <script src="{{site.baseurl}}/js/clipboard.min.js"></script>
+    <script>
+        var apiBaseUrl  = "{{ site.main_site_url }}",
+            projectId   = "{{ site.project }}",
+            siteBaseUrl = "{{ site.baseurl }}";
     </script>
-    <script type="text/javascript" src="{{site.baseurl}}/js/copySnippets.js"></script>
+    <script src="{{site.baseurl}}/js/copySnippets.js"></script>
+    <meta name="google-site-verification" content="7qGntFPD9lWAVCtUu5U77v4l68PsTHf6xpzgjQv2j2M" />
+    <script>
+        var _gaq = _gaq || [];
+        var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+        _gaq.push(
+            ['_require', 'inpage_linkid', pluginUrl],
+            ['_setAccount', 'UA-2728886-22'],
+            ['_trackPageview'],
+            ['b._require', 'inpage_linkid', pluginUrl],
+            ['b._setAccount', 'UA-2728886-19'],
+            ['b._trackPageview']
+        );
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
 
     <!-- meta info -->
     <meta name="description" content="{{ site.description }}">
@@ -53,35 +70,13 @@
     <meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }} {% endif %}">
     <meta property="og:url" content="{{ site.url }}">
     <meta property="og:site_name" content="{{ site.title }}">
-
     <meta property="og:image" content="{% if page.image.thumb %}{{ site.url }}/img/{{ page.image.thumb }}{% else %}{{ site.url }}{{ ASSET_PATH }}/img/{{ site..default_bg }}{% endif %}">
-
-    <meta name="google-site-verification" content="7qGntFPD9lWAVCtUu5U77v4l68PsTHf6xpzgjQv2j2M" />
 
     <!-- http://t.co/dKP3o1e -->
     <meta name="HandheldFriendly" content="True">
     <meta name="MobileOptimized" content="320">
     <!-- Enable responsive viewport -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-    <script>
-        var _gaq = _gaq || [];
-        var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
-        _gaq.push(
-            ['_require', 'inpage_linkid', pluginUrl],
-            ['_setAccount', 'UA-2728886-22'],
-            ['_trackPageview'],
-            ['b._require', 'inpage_linkid', pluginUrl],
-            ['b._setAccount', 'UA-2728886-19'],
-            ['b._trackPageview']
-        );
-        (function() {
-            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-        })();
-    </script>
 
     {{ head }}
 
@@ -91,60 +86,36 @@
     <header class="navbar header--navbar">
         <div class="navbar-inner">
             <div class="container-fluid">
-
-                <!-- Be sure to leave the brand out there if you want it shown -->
-                <div class="spring-logo--container pull-left">
+                <div class="spring-logo--container">
                     <a class="spring-logo" href="{{site.main_site_url}}"><span></span></a>
                 </div>
-
-                <!-- ico search -->
-                <!-- <div class="navbar-link nav-search pull-right">
-                  <i class="icon-search navbar-search--icon js-search-input-open"></i>
-                  <div class="search-input-close js-search-input-close">x</div>
-                </div> -->
-
-                <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
-                <div class="navbar-inverse">
-                  <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                  </a>
-                </div>
-
-                <!-- Everything you want hidden at 940px or less, place within here -->
-                <div class="nav-collapse collapse">
-                  <ul class="nav pull-right">
-                      <li class="navbar-link"><a href="{{site.main_site_url}}/docs">Docs</a>
-                      </li>
-                      <li class="navbar-link"><a
-                          href="{{site.main_site_url}}/guides">Guides</a></li>
-                      <li class="navbar-link active"><a
-                          href="{{site.main_site_url}}/projects">Projects</a></li>
-                      <li class="navbar-link"><a href="{{site.main_site_url}}/blog">Blog</a>
-                      </li>
-                      <li class="navbar-link"><a href="{{site.questions_url}}">Questions</a>
-                      </li>
-                      <li class="navbar-link nav-search"><i
-                      class="icon-search navbar-search--icon js-search-input-open"></i>
-                        <div class="search-input-close js-search-input-close">x</div>
-                      </li>
-                  </ul>
-                </div>
+                <ul class="nav pull-right">
+                    <li class="navbar-link"><a href="{{site.main_site_url}}/docs">Docs</a>
+                    </li>
+                    <li class="navbar-link"><a
+                        href="{{site.main_site_url}}/guides">Guides</a></li>
+                    <li class="navbar-link active"><a
+                        href="{{site.main_site_url}}/projects">Projects</a></li>
+                    <li class="navbar-link"><a href="{{site.main_site_url}}/blog">Blog</a>
+                    </li>
+                    <li class="navbar-link"><a href="{{site.questions_url}}">Questions</a>
+                    </li>
+                    <li class="navbar-link nav-search"><i
+                        class="icon-search navbar-search--icon js-search-input-open"></i>
+                        <div class="search-input-close js-search-input-close">x</div></li>
+                </ul>
             </div>
         </div>
-
-        <!-- search box -->
         <div class="search-dropdown--container js-search-dropdown">
             <div class="container-fluid">
                 <div class="search-form--container">
                     <form class="form-inline form-search"
-                        action="{{site.main_site_url}}/search" method="get">
-                        <input type="text"
+                        action="{{site.main_site_url}}/search">
+                        <input type="search"
                             class="search-query search-form--form js-search-input"
                             placeholder="Search for documention, guides, and posts..."
                             name="q" />
-                        <button type="submit" class="search-form--submit">
+                        <button class="search-form--submit">
                             <i class="icon-search"></i>
                         </button>
                     </form>
@@ -158,7 +129,7 @@
     <footer class="footer">
         <div class="container-fluid">
             <div class="row-fluid">
-                <div class="span7">
+                <div class="span8">
                     <div class="navbar">
                         <div class="container">
                             <ul class="nav">
@@ -168,18 +139,10 @@
                             </ul>
                         </div>
                     </div>
-                    &copy; <script type="text/javascript"> var d = new Date();
-                    document.write(d.getFullYear());</script> <a href="http://www.pivotal.io">Pivotal Software</a>, Inc. All Rights Reserved.
-                    <a href="http://www.pivotal.io/terms-of-use">Terms of Use</a> and
-                    <a href="http://www.pivotal.io/privacy-policy">Privacy</a>
-                </div>
-                <div class="span5">
-                  <div class="footer-newsletter--wrapper pull-right">
-                    <div class="footer-newsletter--container">
-                        <label>Subscribe to our newsletter</label>
-                        <iframe frameborder="0" height="42px" scrolling="no" src="http://play.gopivotal.com/OSS_Website_Spring_SpringNewsletterSubscriptionEmailOnly.html" style="border:none" width="100%"></iframe>
-                    </div>
-
+                    &copy; <script> var d = new Date();
+                    document.write(d.getFullYear());</script> <a href="https://www.pivotal.io">Pivotal Software</a>, Inc. All Rights Reserved.
+                    <a href="https://pivotal.io/terms-of-use">Terms of Use</a> and
+                    <a href="https://pivotal.io/privacy-policy">Privacy</a>
                 </div>
             </div>
         </div>
