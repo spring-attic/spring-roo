@@ -167,46 +167,6 @@ body.home .box-center{
 .btn{
   text-transform: none;
 }
-
-.btn-action {
-    display: inline-block;
-    text-align: center;
-    vertical-align: middle;
-    touch-action: manipulation;
-    cursor: pointer;
-    background-image: none;
-    border: 1px solid transparent;
-    white-space: nowrap;
-    line-height: 1.42857143;
-    border-radius: 4px;
-    -webkit-user-select: none;
-    padding: 8px 12px 7px;
-    border-width: 0 1px 4px 1px;
-    font-size: 11px;
-    font-weight: bold;
-    text-transform: uppercase;
-    color: #555555;
-    background-color: #eeeeee;
-    border-color: #e2e2e2;
-    text-decoration: none;
-}
-
-.btn-action + .btn-action {
-    margin: 0 0 0 0.35em;
-}
-table a.btn-action {
-    text-decoration: none;
-}
-
-.btn-action:hover,.btn-action:focus, .btn-action:active {
-    background-color: #eeeeee;
-    border-color: #e2e2e2;
-    margin-top: 1px;
-    border-bottom-width: 3px;
-    color: #555555;
-    text-decoration: none;
-}
-
 .btn-action:before {
     font-family: 'FontAwesome';
     padding: 0 0.3em 0 0;
@@ -252,15 +212,6 @@ legend{
 
 /*--TABLES-------------*/
 
-.table thead {
-    background: #EEEEEE;
-}
-
-table caption {
-    color: #333333;
-    font-size: 1.2em;
-}
-
 table.dataTable thead .sorting,
 table.dataTable thead .sorting_asc,
 table.dataTable thead .sorting_desc {
@@ -269,18 +220,35 @@ table.dataTable thead .sorting_desc {
 
 /** toolbars datatables **/
 div.dataTables_wrapper div.dataTables_paginate,
-div.dataTables_wrapper div.dataTables_filter {
-  padding-right: 0;
+div.dataTables_wrapper div.dataTables_info{
+  padding: 0;
 }
-.dt-buttons.btn-group.col-sm-6{
-  padding-left: 0;
-}
+
 div.dataTables_wrapper div.dataTables_filter,
 div.dataTables_wrapper div.dt-buttons.btn-group{
   padding: 1em 0;
 }
 .pagination{
   text-transform: none;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button{
+  padding: 0;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+   background: none;
+}
+/** btn datatables **/
+table a.btn-action {
+  text-decoration: none;
+  color: #3e3f3a;
+}
+table .btn-action + .btn-action {
+    margin: 0 0 0 0.35em;
+}
+table a.btn-action:hover,
+table a.btn-action:focus,
+table a.btn-action:active {
+  color: #79a736;
 }
 
 /*--SHOW-------------*/
@@ -424,24 +392,6 @@ dd, dt {
 }
 
 
-/* DATATABLES fixed
-----------------------------------------------------------------------------------------------------*/
-
-
-.table-responsive {
-    margin: 0 0 2em;
-    overflow: hidden;
-}
-.dataTables_wrapper .dataTables_paginate .paginate_button{ margin: 0; padding: 0 !important}
-table.dataTable thead th, table.dataTable thead td {
-    padding: 10px 18px;
-    border-bottom: 4px solid #E7E7E7 !important;
-}
-table.dataTable.no-footer {
-    border-bottom: 4px solid #E7E7E7 !important;
-}
-
-
 /* MEDIA QUERIES
 ----------------------------------------------------------------------------------------------------*/
 
@@ -477,6 +427,3 @@ table.dataTable.no-footer {
       max-width: 50%;
   }
 }
-
-
-
