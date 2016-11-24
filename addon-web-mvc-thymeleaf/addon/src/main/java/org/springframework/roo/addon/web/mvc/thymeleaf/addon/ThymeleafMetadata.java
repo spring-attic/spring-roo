@@ -2036,7 +2036,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(GLOBAL_SEARCH_PARAM);
-    parameterTypes.add(PAGEABLE_PARAM);
+    parameterTypes.add(DATATABLES_PAGEABLE_PARAM);
     AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM);
     requestParamAnnotation.addStringAttribute("value", "draw");
     parameterTypes.add(new AnnotatedJavaType(JavaType.INT_OBJECT, requestParamAnnotation.build()));
@@ -2512,7 +2512,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     parameterTypes.add(new AnnotatedJavaType(
         findAllMethod.getParameterTypes().get(0).getJavaType(), ANN_METADATA_MODEL_ATTRIBUTE));
     parameterTypes.add(GLOBAL_SEARCH_PARAM);
-    parameterTypes.add(PAGEABLE_PARAM);
+    parameterTypes.add(DATATABLES_PAGEABLE_PARAM);
     AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM);
     requestParamAnnotation.addStringAttribute("value", "draw");
     parameterTypes.add(new AnnotatedJavaType(JavaType.INT_OBJECT, requestParamAnnotation.build()));
