@@ -48,7 +48,7 @@
                    data-th-utext="${r"#{"}label_menu_entry(${r"#{"}${entry.entityLabel}${r"}"})${r"}"}">${entry.entityName}<span class="caret"></span></a>
                  <ul class="dropdown-menu">
                   <#if entry.simple == true>
-					  <li><a href="${entry.path}" data-th-href="@{${entry.path}}" data-th-text="${r"#{label_"}${entry.entityName}${r"}"}">${entry.entityName}</a></li>
+					          <li><a href="${entry.path}" data-th-href="@{${entry.path}}" data-th-text="${r"#{label_"}${entry.entityName}${r"}"}">${entry.entityName}</a></li>
                   <#else>
 	                  <li><a href="${entry.path}/create-form" data-th-href="@{${entry.path}/create-form}" data-th-text="${r"#{"}label_create_entity(${r"#{"}${entry.entityLabel}${r"}"})${r"}"}">Create ${entry.entityName}</a></li>
 	                  <li><a href="${entry.path}" data-th-href="@{${entry.path}}" data-th-text="${r"#{"}label_list_entity(${r"#{"}${entry.entityPluralLabel}${r"}"})${r"}"}">List ${entry.entityName}</a></li>

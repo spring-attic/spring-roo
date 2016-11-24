@@ -652,7 +652,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       String entityLabel, String entityPluralLabel, Map<String, String> finderNamesAndPaths,
       boolean simple) {
     return new MenuEntry(entityName, path, pathPrefix, entityLabel, entityPluralLabel,
-        finderNamesAndPaths, false);
+        finderNamesAndPaths, simple);
   }
 
   /**
