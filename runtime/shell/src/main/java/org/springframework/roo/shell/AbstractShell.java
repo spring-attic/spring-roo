@@ -711,7 +711,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     if (versionInfo.length() < 17) {
 
       // Align version info to the right
-      versionInfo = StringUtils.leftPad(versionInfo, 17 - versionInfo.length());
+      sb.append(StringUtils.repeat(" ", 17 - versionInfo.length()));
     }
 
     sb.append(versionInfo).append(LINE_SEPARATOR);
