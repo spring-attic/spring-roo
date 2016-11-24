@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -703,7 +704,7 @@ public class WsOperationsImpl implements WsOperations {
     // After create the SEI and the Endpoint, is necessary to annotate related entity with
     // some JAX-B annotations if has not been annotated before
 
-    ClassOrInterfaceTypeDetails entityDetails =
+    /*ClassOrInterfaceTypeDetails entityDetails =
         getTypeLocationService().getTypeDetails(relatedEntity);
     if (entityDetails != null) {
       // Annotate the entity with @RooJaxbEntity. If this entity has a super class or that 
@@ -712,6 +713,19 @@ public class WsOperationsImpl implements WsOperations {
       // Also, is necessary to annotate @OneToMany, @ManyToOne and @ManyToMany fields detected in 
       // this class and in the super classes.
       annotateRelatedFieldsIfNeeded(entityDetails);
+    }*/
+
+    // Provisional changes to annotate all entities
+    Set<ClassOrInterfaceTypeDetails> allEntities =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_JPA_ENTITY);
+    for (ClassOrInterfaceTypeDetails entity : allEntities) {
+      // Annotate the entity with @RooJaxbEntity. If this entity has a super class or that 
+      // super class has another super class, etc. is necessary to annotate it too.
+      annotateClassIfNeeded(entity);
+      // Also, is necessary to annotate @OneToMany, @ManyToOne and @ManyToMany fields detected in 
+      // this class and in the super classes.
+      annotateRelatedFieldsIfNeeded(entity);
     }
 
   }
@@ -793,7 +807,6 @@ public class WsOperationsImpl implements WsOperations {
 
         if (fieldType.isCommonCollectionType()) {
           fieldType = fieldType.getBaseType();
-          System.out.println(fieldType.toString());
         }
 
         ClassOrInterfaceTypeDetails fieldDetails =
