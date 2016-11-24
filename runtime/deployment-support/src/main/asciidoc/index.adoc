@@ -682,20 +682,6 @@ Spring Roo generate SOAP Services easily, available under `/services` URL.
 *roo>* ws endpoint --service service-api:~.CategoryService --sei application:~.ws.api.CategoryWebService --class application:~.ws.endpoint.CategoryWebServiceEndpoint --config application:~.config.WsEndpointsConfiguration
 ----
 
-=== JMS
-
-[source,subs="quotes"]
-.Send message
-----
-*roo>* jms receiver --destinationName QUEUE_RECEIVER_NAME --endpoint application:org.springframework.roo.jms.JmsReceiverService --jndiConnectionFactory JMS_JNDI 
-----
-
-[source,subs="quotes"]
-.Receive message
-----
-*roo>* jms sender --destinationName QUEUE_SENDER_NAME --class service-impl:~.CustomerOrderServiceImpl --jndiConnectionFactory JMS_JNDI --force
-----
-
 === Email
 
 [source,subs="quotes"]
