@@ -200,6 +200,17 @@ field set --fieldName stores --type ~.Store --cardinality MANY_TO_MANY --joinTab
 dto --class ~.ShipperPhoneFormBean
 field string --fieldName phone
 
+dto --class ~.CustomerOrderFormBean --serializable
+field number --fieldName orderId --type java.lang.Long
+field number --fieldName employeeId --type java.lang.Long
+field number --fieldName customerId --type java.lang.Long
+field date --fieldName orderDate --type java.util.Calendar
+field string --fieldName employeeName
+field string --fieldName customerCompanyName
+field other --fieldName status --type ~.Status
+field date --fieldName shippedDate --type java.util.Calendar
+field number --fieldName freight --type java.math.BigDecimal
+
 // The data access layer
 /////////////////////////
 
@@ -261,6 +272,22 @@ web mvc detail --entity model:~.Region --responseType THYMELEAF --field cities
 
 //// Search controllers
 web mvc finder --all --responseType THYMELEAF
+
+//// Create web flow
+web flow --flowName customerOrdersFlow --class ~.CustomerOrderFormBean 
+
+// Integration layer
+////
+
+//// Create SOAP Service that will be available under "/services" URL
+ws endpoint --service service-api:~.CategoryService --sei application:~.ws.api.CategoryWebService --class application:~.ws.endpoint.CategoryWebServiceEndpoint --config application:~.config.WsEndpointsConfiguration
+
+//// Email support
+email sender setup --service service-impl:~.CustomerServiceImpl --username USERNAME --password PASSWORD --host HOST --port 1000 --protocol PROTOCOL  --starttls true
+email receiver setup --service service-impl:~.EmployeeServiceImpl --username USERNAME --password PASSWORD --host HOST --port 1000 --protocol PROTOCOL  --starttls true
+
+//// Cache support
+cache setup --provider GUAVA
 
 // The security layer
 //////////////////////
