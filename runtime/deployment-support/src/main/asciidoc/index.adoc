@@ -329,39 +329,11 @@ This class diagram represents a simplified model of the problem domain for the N
 
 Following the above class diagram, run the next commands to generate the Northwind domain entities:
 
-. Create the entities:
+. Move to the module in which the model will be created:
 +
 [source,subs="quotes"]
-.Read-only entities
 ----
-*roo>* entity jpa --class *model:*~.City --readOnly
-     entity jpa --class ~.Country --readOnly
-     entity jpa --class ~.Region --readOnly
-----
-+
-Since Spring Roo 2.0, the multimodule support lets to prefix the module name to the entity path to select the Maven module in which the new entity will be created. Spring Roo will propose the available module names when hit kbd:[Ctrl+Space].
-+
-[source,subs="quotes"]
-.Read-write entities
-----
-*roo>* entity jpa --class ~.Category 
-     entity jpa --class ~.CustomerOrder 
-     entity jpa --class ~.OrderDetail
-     entity jpa --class ~.Party 
-     entity jpa --class ~.Product 
-     entity jpa --class ~.PurchaseOrder 
-     entity jpa --class ~.Report 
-     entity jpa --class ~.Shipper
-     entity jpa --class ~.SoldProduct
-     entity jpa --class ~.Store
-     entity jpa --class ~.Supplier
-----
-+
-[source,subs="quotes"]
-.Entity inheritance
-----
-*roo>* entity jpa --class ~.Customer --extends ~.Party
-     entity jpa --class ~.Employee --extends ~.Party
+*roo>* module focus --moduleName model
 ----
 . Create the enums to use in the application:
 +
@@ -385,20 +357,57 @@ Since Spring Roo 2.0, the multimodule support lets to prefix the module name to 
      enum constant --name THIRD_TRIM --class ~.Trimester
      enum constant --name FOURTH_TRIM --class ~.Trimester
 ----
+. Create the entities:
++
+[source,subs="quotes"]
+.Domain entities
+----
+*roo>* entity jpa --class ~.City --readOnly
+     entity jpa --class ~.Country --readOnly
+     entity jpa --class ~.Region --readOnly
+     entity jpa --class ~.Category 
+     entity jpa --class ~.CustomerOrder 
+     entity jpa --class ~.OrderDetail
+     entity jpa --class ~.Party 
+     entity jpa --class ~.Product 
+     entity jpa --class ~.PurchaseOrder 
+     entity jpa --class ~.Report 
+     entity jpa --class ~.Shipper
+     entity jpa --class ~.SoldProduct
+     entity jpa --class ~.Store
+     entity jpa --class ~.Supplier
+----
++
+[source,subs="quotes"]
+.Entity inheritance
+----
+*roo>* entity jpa --class ~.Customer --extends ~.Party --force
+     entity jpa --class ~.Employee --extends ~.Party --force
+----
 . Add the attributes to the entites:
 +
 [source,subs="quotes"]
-.Entity attributes
+.Entity attributes and relationships
 ----
 *roo>* focus --class ~.Category
      field string --fieldName name
      field string --fieldName description
-    
+     field set --fieldName products --type ~.Product --mappedBy category
+
      focus --class ~.City
      field string --fieldName description
+     field set --fieldName parties --type ~.Party --mappedBy city
+     field set --fieldName customerOrders --type ~.CustomerOrder --mappedBy city
+     field set --fieldName stores --type ~.Store --mappedBy city
+     field set --fieldName suppliers --type ~.Supplier --mappedBy city
 
      focus --class ~.Country
      field string --fieldName description
+     field set --fieldName parties --type ~.Party --mappedBy country
+     field set --fieldName regions --type ~.Region --mappedBy country
+     field set --fieldName customerOrders --type ~.CustomerOrder --mappedBy country
+     field set --fieldName stores --type ~.Store --mappedBy country
+     field set --fieldName suppliers --type ~.Supplier --mappedBy country
 
      focus --class ~.Customer
      field string --fieldName companyName
@@ -406,6 +415,7 @@ Since Spring Roo 2.0, the multimodule support lets to prefix the module name to 
      field string --fieldName contactTitle
      field string --fieldName fax
      field string --fieldName email
+     field set --fieldName customerOrders --type ~.CustomerOrder --mappedBy customer
 
      focus --class ~.CustomerOrder
      field date --fieldName orderDate --type java.util.Calendar --column ORDER_DATE --persistenceType JPA_TIMESTAMP
@@ -419,7 +429,8 @@ Since Spring Roo 2.0, the multimodule support lets to prefix the module name to 
      field string --fieldName shipPhone
      field date --fieldName invoiceDate --type java.util.Calendar --persistenceType JPA_TIMESTAMP
      field date --fieldName closeDate --type java.util.Calendar --persistenceType JPA_TIMESTAMP
-    
+     field set --fieldName orderDetails --type ~.OrderDetail --mappedBy customerOrder
+
      focus --class ~.Employee
      field string --fieldName firstName
      field string --fieldName lastName
@@ -429,6 +440,8 @@ Since Spring Roo 2.0, the multimodule support lets to prefix the module name to 
      field string --fieldName extension
      field string --fieldName photo
      field string --fieldName notes
+     field set --fieldName purchaseOrders --type ~.PurchaseOrder --mappedBy employee
+     field set --fieldName customerOrders --type ~.CustomerOrder --mappedBy employee
 
      focus --class ~.OrderDetail
      field number --fieldName unitPrice --type java.math.BigDecimal
@@ -449,6 +462,8 @@ Since Spring Roo 2.0, the multimodule support lets to prefix the module name to 
      field number --fieldName unitsInStock --type java.lang.Integer
      field number --fieldName reorderLevel --type java.lang.Integer
      field other --fieldName discontinued --type java.lang.Boolean
+     field set --fieldName purchaseOrders --type ~.PurchaseOrder --mappedBy product
+     field set --fieldName orderDetails --type ~.OrderDetail --mappedBy product
 
      focus --class ~.PurchaseOrder
      field number --fieldName unitCost --type java.math.BigDecimal
@@ -457,6 +472,11 @@ Since Spring Roo 2.0, the multimodule support lets to prefix the module name to 
 
      focus --class ~.Region
      field string --fieldName description
+     field set --fieldName cities --type ~.City --mappedBy region
+     field set --fieldName parties --type ~.Party --mappedBy region
+     field set --fieldName customerOrders --type --mappedBy region
+     field set --fieldName stores --type ~.Store --mappedBy region
+     field set --fieldName suppliers --type ~.Supplier --mappedBy region
     
      focus --class ~.Report
      field string --fieldName type
@@ -464,6 +484,7 @@ Since Spring Roo 2.0, the multimodule support lets to prefix the module name to 
      focus --class ~.Shipper
      field string --fieldName companyName
      field string --fieldName phone
+     field set --fieldName customerOrders --type ~.CustomerOrder --mappedBy shipper
 
      focus --class ~.Store
      field string --fieldName name
@@ -480,371 +501,16 @@ Since Spring Roo 2.0, the multimodule support lets to prefix the module name to 
      field string --fieldName phone
      field string --fieldName fax
      field string --fieldName web
-----
-+
-[source,subs="quotes"]
-.Entity relationships
-----
-*roo>* focus --class ~.Category
-     field set --fieldName products --type ~.Product --mappedBy category
-
-     focus --class ~.City
-     field set --fieldName parties --type ~.Party --mappedBy city
-     field set --fieldName customerOrders --type ~.CustomerOrder --mappedBy city
-     field set --fieldName stores --type ~.Store --mappedBy city
-     field set --fieldName suppliers --type ~.Supplier --mappedBy city
-
-     focus --class ~.Country
-     field set --fieldName parties --type ~.Party --mappedBy country
-     field set --fieldName regions --type ~.Region --mappedBy country
-     field set --fieldName customerOrders --type ~.CustomerOrder --mappedBy country
-     field set --fieldName stores --type ~.Store --mappedBy country
-     field set --fieldName suppliers --type ~.Supplier --mappedBy country
-
-     focus --class ~.Customer
-     field set --fieldName customerOrders --type ~.CustomerOrder --mappedBy customer
-
-     focus --class ~.CustomerOrder
-     field set --fieldName orderDetails --type ~.OrderDetail --mappedBy customerOrder
-
-     focus --class ~.Employee
-     field set --fieldName purchaseOrders --type ~.PurchaseOrder --mappedBy employee
-     field set --fieldName customerOrders --type ~.CustomerOrder --mappedBy employee
-
-     focus --class ~.Product
-     field set --fieldName purchaseOrders --type ~.PurchaseOrder --mappedBy product
-     field set --fieldName orderDetails --type ~.OrderDetail --mappedBy product
-
-     focus --class ~.Region
-     field set --fieldName cities --type ~.City --mappedBy region
-     field set --fieldName parties --type ~.Party --mappedBy region
-     field set --fieldName customerOrders --type --mappedBy region
-     field set --fieldName stores --type ~.Store --mappedBy region
-     field set --fieldName suppliers --type ~.Supplier --mappedBy region
-
-     focus --class ~.Shipper
-     field set --fieldName customerOrders --type ~.CustomerOrder --mappedBy shipper
-
-     focus --class ~.Supplier
      field set --fieldName products --type ~.Product --mappedBy supplier
-     field set --fieldName stores --type ~.Store --cardinality MANY_TO_MANY --joinTable NW_SUPPLIER_STORES --joinColumns STORE --referencedColumns STORE_ID --inverseJoinColumns SUPPLIER --inverseReferencedColumns SUPPLIER_ID
 ----
 
-=== DTOs and projections
+=== DTOs
 
 [source,subs="quotes"]
 .DTOs (Data Transfer Objects)
 ----
-*roo>* dto --class ~.CustomerOrderStatusAndEmployeeProjection --immutable
-     field number --fieldName orderId --type java.lang.Long
-     field number --fieldName customerId --type java.lang.Long
-     field number --fieldName employeeId --type java.lang.Long
-     field other --fieldName status --type ~.Status
-     field date --fieldName orderDate --type java.util.Calendar
-     field string --fieldName customerCompanyName
-     
-     dto --class ~.CustomerOrderStatusProjection --immutable
-     field number --fieldName orderId --type java.lang.Long
-     field other --fieldName status --type ~.Status
-     field date --fieldName orderDate --type java.util.Calendar
-     field string --fieldName customerCompanyName
-     
-     dto --class ~.CategoryProjection --immutable
-     field number --fieldName categoryId --type java.lang.Long
-     field string --fieldName name
-     field string --fieldName description
-     
-     dto --class ~.UserCertificateDniMessageBean --immutable
-     field number --fieldName status --type int
-     field string --fieldName statusMsg
-     field string --fieldName dni
-     
-     dto --class ~.CityProjection --immutable
-     field number --fieldName cityId --type java.lang.Long
-     field number --fieldName regionId --type java.lang.Long
-     field string --fieldName description
-     
-     dto --class ~.CustomerOrderClosedDateAndCustomerProjection --immutable
-     field number --fieldName customerId --type java.lang.Long
-     field date --fieldName closedDate --type java.util.Calendar
-     field string --fieldName customerCompanyName
-     field number --fieldName total --type java.math.BigDecimal
-     
-     dto --class ~.CustomerOrderProductAndTotalProjection --immutable
-     field number --fieldName productId --type java.lang.Long
-     field string --fieldName productName
-     field number --fieldName quantity --type java.lang.Integer
-     field number --fieldName total --type java.math.BigDecimal
-     
-     dto --class ~.CountryProjection --immutable
-     field number --fieldName countryId --type java.lang.Long
-     field string --fieldName description
-     
-     dto --class ~.CustomerProjection --immutable
-     field number --fieldName customerId --type java.lang.Long
-     field string --fieldName companyName
-     field string --fieldName contactName
-     field string --fieldName email
+*roo>* dto --class ~.ShipperPhoneFormBean
      field string --fieldName phone
-     field string --fieldName fax
-     field number --fieldName customerId --type java.lang.Long
-     field string --fieldName companyName
-     field string --fieldName message
-     
-     dto --class ~.CustomerOrderProjection --immutable
-     field number --fieldName orderId --type java.lang.Long
-     field number --fieldName employeeId --type java.lang.Long
-     field number --fieldName customerId --type java.lang.Long
-     field date --fieldName orderDate --type java.util.Calendar
-     field string --fieldName employeeName
-     field string --fieldName customerCompanyName
-     field other --fieldName status --type ~.Status
-     field date --fieldName shippedDate --type java.util.Calendar
-     field number --fieldName freight --type java.math.BigDecimal
-     
-     to --class ~.CustomerOrderProductProjection --immutable
-     field number --fieldName customerOrderId --type java.lang.Long
-     field number --fieldName productId --type java.lang.Long
-     field number --fieldName employeeId --type java.lang.Long
-     field number --fieldName customerId --type java.lang.Long
-     field date --fieldName orderDate --type java.util.Calendar
-     field other --fieldName status --type ~.Status
-     field string --fieldName employeeName
-     field string --fieldName customerCompanyName
-     field date --fieldName shippedDate --type java.util.Calendar
-     field number --fieldName freight --type java.math.BigDecimal
-     
-     dto --class ~.CustomerOrderFormBean --immutable
-     field number --fieldName customerId --type java.lang.Long
-     field number --fieldName employeeId --type java.lang.Long
-     // Commented until reactivation of field set on DTO's
-     //field set --fieldName statuses --type ~.Status
-     field date --fieldName orderDateStart --type java.util.Calendar
-     field date --fieldName orderDateEnd --type java.util.Calendar
-     
-     dto --class ~.CustomerOrderCustomerProjection --immutable
-     field number --fieldName employeeId --type java.lang.Long
-     field number --fieldName customerId --type java.lang.Long
-     field string --fieldName employeeName
-     field date --fieldName fromDate --type java.util.Calendar
-     field date --fieldName thruDate --type java.util.Calendar
-     field string --fieldName customerCompanyName
-     field number --fieldName total --type java.math.BigDecimal
-     
-     dto --class ~.CustomerUserLoginFormBean --immutable
-     field number --fieldName customerId --type java.lang.Long
-     field string --fieldName companyName --notNull --sizeMax 50
-     field string --fieldName contactName --notNull --sizeMax 100
-     field string --fieldName contactTitle --sizeMax 80
-     field string --fieldName email --notNull --sizeMax 80
-     field string --fieldName address --notNull --sizeMax 200
-     field other --fieldName city --type model:~.City --notNull
-     field other --fieldName region --type model:~.Region --notNull
-     field other --fieldName country --type model:~.Country --notNull
-     field string --fieldName postalCode --notNull --sizeMax 6
-     field string --fieldName phone --sizeMax 15
-     field string --fieldName fax --sizeMax 15
-     field string --fieldName username --notNull --sizeMax 30
-     // Add @Pattern(regexp = "^[^<>\\\\'\"&;%]*$") to this field
-     field string --fieldName password --notNull --sizeMin 8 --sizeMax 128
-     // Add @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./])[A-Za-z\\d`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./]*") to this field
-     field string --fieldName repeatPassword --notNull --sizeMin 8 --sizeMax 128
-     
-     dto --class ~.EmployeeProjection --immutable
-     field number --fieldName employeeId --type java.lang.Long
-     field number --fieldName supervisorId --type java.lang.Long
-     field string --fieldName firstName
-     field string --fieldName lastName
-     field string --fieldName phone
-     field string --fieldName extension
-     field string --fieldName supervisorName
-     
-     dto --class ~.EmployeeUserLoginFormBean --immutable
-     field number --fieldName employeeId --type java.lang.Long
-     field string --fieldName firstName --notNull --sizeMax 50
-     field string --fieldName lastName --notNull --sizeMax 120
-     field string --fieldName title --notNull --sizeMax 120
-     field date --fieldName birthDate --notNull --type java.util.Calendar
-     field date --fieldName hireDate --notNull --type java.util.Calendar
-     field string --fieldName extension --notNull --sizeMax 50
-     field string --fieldName notes --notNull --sizeMax 3500
-     field other --fieldName supervisor --type model:~.Employee
-     field string --fieldName address --notNull --sizeMax 200
-     field other --fieldName city --type model:~.City --notNull
-     field other --fieldName region --type model:~.Region --notNull
-     field other --fieldName country --type model:~.Country --notNull
-     field string --fieldName postalCode --notNull --sizeMax 6
-     field string --fieldName phone --sizeMax 15
-     field string --fieldName username --notNull --sizeMax 30
-     // Add @Pattern(regexp = "^[^<>\\\\'\"&;%]*$") to this field
-     field string --fieldName password --notNull --sizeMin 8 --sizeMax 128
-     // Add @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./])[A-Za-z\\d`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./]*") to this field
-     field string --fieldName repeatPassword --notNull --sizeMin 8 --sizeMax 128
-     
-     dto --class ~.InventoryProjection --immutable
-     field number --fieldName productId --type java.lang.Long
-     field string --fieldName name
-     field number --fieldName unitsInStock --type java.lang.Integer
-     field number --fieldName assignedStock --type java.lang.Integer
-     field number --fieldName availableStock --type java.lang.Integer
-     field number --fieldName reorderLevel --type java.lang.Integer
-     field number --fieldName replenishStock --type java.lang.Integer
-     
-     dto --class ~.InvoiceProjection --immutable
-     field number --fieldName customerOrderId --type java.lang.Long
-     field number --fieldName shipCountryId --type java.lang.Long
-     field number --fieldName shipRegionId --type java.lang.Long
-     field number --fieldName shipCityId --type java.lang.Long
-     field number --fieldName customerId --type java.lang.Long
-     field number --fieldName customerCountryId --type java.lang.Long
-     field number --fieldName customerRegionId --type java.lang.Long
-     field number --fieldName customerCityId --type java.lang.Long
-     field number --fieldName employeeId --type java.lang.Long
-     field number --fieldName shippedId --type java.lang.Long
-     field date --fieldName invoiceDate --type java.util.Calendar
-     field string --fieldName shipName
-     field string --fieldName shipAddress
-     field string --fieldName shipCountryDescription
-     field string --fieldName shipRegionDescription
-     field string --fieldName shipCityDescription
-     field string --fieldName shipPostalCode
-     field string --fieldName customerCompanyName
-     field string --fieldName customerCountryDescription
-     field string --fieldName customerRegionDescription
-     field string --fieldName customerCityDescription
-     field string --fieldName customerPostalCode
-     field date --fieldName orderDate --type java.util.Calendar
-     field date --fieldName shippedDate --type java.util.Calendar
-     field string --fieldName employeeName
-     field string --fieldName shipperCompanyName
-     field number --fieldName freight --type java.math.BigDecimal
-     field number --fieldName subtotal --type java.math.BigDecimal
-     field number --fieldName total --type java.math.BigDecimal
-     
-     dto --class ~.OrderDetailProjection --immutable
-     field number --fieldName orderDetailId --type java.lang.Long
-     field number --fieldName customerOrderId --type java.lang.Long
-     field number --fieldName productId --type java.lang.Long
-     field string --fieldName productName
-     field number --fieldName quantity --type java.lang.Integer
-     field number --fieldName unitPrice --type java.math.BigDecimal
-     field number --fieldName discount --type java.math.BigDecimal
-     field number --fieldName total --type java.math.BigDecimal
-     
-     dto --class ~.OrderDetailCustomerProjection --immutable
-     field number --fieldName orderDetailId --type java.lang.Long
-     field string --fieldName customerName
-     field other --fieldName status --type ~.Status
-     field number --fieldName quantity --type java.lang.Integer
-     field string --fieldName productName
-     
-     dto --class ~.OrderDetailQuantityBean --immutable
-     field number --fieldName customerOrderId --type java.lang.Long --notNull
-     field number --fieldName quantityToAdd --type java.lang.Integer --notNull
-     
-     dto --class ~.OrderDetailFormBean --immutable
-     field number --fieldName customerId --type java.lang.Long
-     
-     dto --class ~.ProductProjection --immutable
-     field number --fieldName productId --type java.lang.Long
-     field number --fieldName categoryId --type java.lang.Long
-     field number --fieldName supplierId --type java.lang.Long
-     field string --fieldName code
-     field string --fieldName name
-     field string --fieldName supplierCompanyName
-     field number --fieldName unitCost --type java.math.BigDecimal
-     field number --fieldName unitPrice --type java.math.BigDecimal
-     field string --fieldName quantityPerUnit
-     field boolean --fieldName discontinued
-     
-     dto --class ~.ProductOrdersProjection --immutable
-     field number --fieldName productId --type java.lang.Long
-     field number --fieldName categoryId --type java.lang.Long
-     field number --fieldName supplierId --type java.lang.Long
-     field string --fieldName code
-     field string --fieldName name
-     field string --fieldName supplierCompanyName
-     field number --fieldName unitCost --type java.math.BigDecimal
-     field number --fieldName unitPrice --type java.math.BigDecimal
-     field string --fieldName quantityPerUnit
-     field boolean --fieldName discontinued
-     field number --fieldName purchaseOrdersCount --type java.lang.Long
-     field number --fieldName orderDetailsCount --type java.lang.Long
-     
-     dto --class ~.CustomerOrderClosedDateAndProductProjection --immutable
-     field number --fieldName employeeId --type java.lang.Long
-     field number --fieldName productId --type java.lang.Long
-     field string --fieldName employeeName
-     field date --fieldName fromDate --type java.util.Calendar
-     field date --fieldName thruDate --type java.util.Calendar
-     field string --fieldName productName
-     field number --fieldName total --type java.math.BigDecimal
-     // Commented until reactivation of field set on DTO's
-     //field set --fieldName CustomerOrderClosedDateAndProduct --type ~.CustomerOrderClosedDateAndProduct
-     
-     dto --class ~.PurchaseOrderProjection --immutable
-     field number --fieldName purchaseOrderId --type java.lang.Long
-     field number --fieldName productId --type java.lang.Long
-     field number --fieldName employeeId --type java.lang.Long
-     field date --fieldName orderDate --type java.util.Calendar
-     field string --fieldName employeeName
-     field number --fieldName quantity --type java.lang.Integer
-     field number --fieldName totalCost --type java.math.BigDecimal
-     
-     
-     dto --class ~.InboxMailMessageBean --immutable
-     field string --fieldName subject
-     field string --fieldName content
-     field string --fieldName from --permitReservedWords
-     
-     dto --class ~.RegionProjection --immutable
-     field number --fieldName regionId --type java.lang.Long
-     field number --fieldName countryId --type java.lang.Long
-     field string --fieldName description
-     
-     dto --class ~.ProductAvailableStockAndReorderLevelProjection --immutable
-     field number --fieldName productId --type java.lang.Long
-     field string --fieldName name
-     field number --fieldName avalaibleStock --type java.lang.Integer
-     field number --fieldName reorderLevel --type java.lang.Integer
-     
-     entity projection --class ~.ShipperProjection --entity model:~.Shipper --fields id,companyName,phone
-     
-     dto --class ~.ShipperPhoneFormBean
-     field string --fieldName phone
-     
-     dto --class ~.StoreProjection --immutable
-     field number --fieldName storeId --type java.lang.Long
-     field number --fieldName countryId --type java.lang.Long
-     field number --fieldName regionId --type java.lang.Long
-     field number --fieldName cityId --type java.lang.Long
-     field string --fieldName name
-     field string --fieldName address
-     field string --fieldName countryDescription
-     field string --fieldName regionDescription
-     field string --fieldName cityDescription
-     
-     dto --class ~.StoreSupplierProjection --immutable
-     field number --fieldName storeId --type java.lang.Long
-     field number --fieldName supplierId --type java.lang.Long
-     field string --fieldName name
-     
-     dto --class ~.SupplierProjection --immutable
-     field number --fieldName supplierId --type java.lang.Long
-     field number --fieldName countryId --type java.lang.Long
-     field number --fieldName regionId --type java.lang.Long
-     field number --fieldName cityId --type java.lang.Long
-     field string --fieldName companyName
-     field string --fieldName contactName
-     field string --fieldName contactTitle
-     field string --fieldName address
-     field string --fieldName countryDescription
-     field string --fieldName regionDescription
-     field string --fieldName cityDescription
-     field string --fieldName postalCode
-     field string --fieldName phone
-     field string --fieldName fax
-     field string --fieldName web
 ----
 
 == The data access layer
@@ -856,6 +522,19 @@ Since Spring Roo 2.0, the multimodule support lets to prefix the module name to 
 *roo>* repository jpa --all
 ----
 
+=== Default queries
+
+[source,subs="quotes"]
+----
+*roo>* finder add --entity *model:*~.Shipper --name findByCompanyName
+     finder add --entity model:~.Region --name findByCountryIdOrderByDescriptionAsc
+     finder add --entity model:~.City --name findByRegionIdOrderByDescriptionAsc
+     finder add --entity model:~.Product --name findByDiscontinuedOrderByNameAsc
+     finder add --entity model:~.Shipper --name findByPhone --formBean model:~.ShipperPhoneFormBean
+----
+
+Since Spring Roo 2.0, the multimodule support lets to prefix the module name to the entity path to select the Maven module in which the new entity will be created. Spring Roo will propose the available module names when hit kbd:[Ctrl+Space] (or kbd:[TAB] if you're in a bash-like shell).
+
 == The service layer
 
 === Service API and Impl
@@ -863,17 +542,6 @@ Since Spring Roo 2.0, the multimodule support lets to prefix the module name to 
 [source,subs="quotes"]
 ----
 *roo>* service --all
-----
-
-=== Add default queries
-
-[source,subs="quotes"]
-----
-*roo>* finder add --entity model:~.Shipper --name findByCompanyName
-     finder add --entity model:~.Region --name findByCountryIdOrderByDescriptionAsc
-     finder add --entity model:~.City --name findByRegionIdOrderByDescriptionAsc
-     finder add --entity model:~.Product --name findByDiscontinuedOrderByNameAsc
-     finder add --entity model:~.Shipper --name findByPhone --formBean model:~.ShipperPhoneFormBean --returnType model:~.ShipperProjection
 ----
 
 == The view layer
@@ -884,11 +552,15 @@ The Spring Roo Web MVC scaffolding can deliver a fully functional web frontend a
 
 === Create the view layer
 
+First of all, you must add the web support to the application. All needed updates in the project will be performed by Roo.
+
 [source,subs="quotes"]
 .Setup the view layer
 ----
 *roo>* web mvc setup
 ----
+
+Remember that now, Roo generates applications centered in Spring technologies, you will notice that the generated artifacts configure Spring MVC in your application.
 
 === Thymeleaf based view templates
 
@@ -904,7 +576,7 @@ Tell Roo to copy the templates it uses to generate the view pages to the applica
 *roo>* web mvc templates setup --type THYMELEAF
 ----
 
-Generate CRUD views for the given entities:
+Generate both the CRUD to manage the domain entities.
 
 [source,subs="quotes"]
 ----
@@ -923,9 +595,12 @@ Generate CRUD views for the given entities:
      web mvc controller --entity model:~.PurchaseOrder --responseType THYMELEAF
 ----
 
+The controller command will scaffold the given domain entity and it will create the Spring MVC controllers and the Thymeleaf templates for entity default management.
+
 You can generate master-detail views to manage the entity relations as follows:
 
 [source,subs="quotes"]
+.Relationship controllers and views
 ----
 *roo>* web mvc detail --entity model:~.Category --field products --responseType THYMELEAF
      web mvc detail --entity model:~.Category --responseType THYMELEAF --field products.purchaseOrders
@@ -934,21 +609,37 @@ You can generate master-detail views to manage the entity relations as follows:
      web mvc detail --entity model:~.Region --responseType THYMELEAF --field cities
 ----
 
-.Add details to controllers (link:#web-mvc-detail-command[web mvc detail command])
-[source,sh]
+Finally, create the views to search entities.
+
+[source,subs="quotes"]
+.Search controllers and views
 ----
-roo> web mvc detail --entity model:~.Category --field products --responseType THYMELEAF
-roo> web mvc detail --entity model:~.Category --responseType THYMELEAF --field products.purchaseOrders
-roo> web mvc detail --entity model:~.Product --field purchaseOrders --responseType THYMELEAF
-roo> web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions
-roo> web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions.cities
+*roo>* web mvc finder --all --responseType THYMELEAF
 ----
 
 == The security layer
 
+Create and configure the Spring Security artifacts that will protect your application.
+
 [source,subs="quotes"]
 ----
-*roo>* security setup
+*roo>* security setup --provider SPRINGLETS_JPA
+----
+
+As you can see, since Spring Roo 2.0 the `security setup` has the parameter `--provider` that will let to indicate which security provider will create the security artifacts.
+
+A security provider is simply a configurer that will create and configure the security artifacts in its way.
+
+Currently you can chose one of the two available providers:
+
+* _DEFAULT_, configures the Spring Boot security defaults.
+* _SPRINGLETS_JPA_, sets the Spring Boot defaults plus the Springlets JPA authentication provider.
+
+Now, grant the permissions that restricts executing the domain logic, for example, only the users with roles `ADMIN` or `EMPLOYEE` are granted to delete customers.
+
+[source,subs="quotes"]
+----
+*roo>* security authorize --class service-api:~.CustomerService --method delete --roles ADMIN,EMPLOYEE
 ----
 
 === Auditing JPA entities
@@ -970,6 +661,23 @@ Adds support for auditing a JPA entity. It will add the Spring Data JPA entity l
      test unit --class repository:~.CustomerOrderRepository
      test unit --class service-api:~.CustomerOrderService
      test unit --class service-impl:~.CustomerServiceImpl
+     
+     test integration --class repository:~.CategoryRepository
+     test integration --class repository:~.CityRepository
+     test integration --class repository:~.CountryRepository
+     test integration --class repository:~.CustomerOrderRepository
+     test integration --class repository:~.CustomerRepository
+     test integration --class repository:~.EmployeeRepository
+     test integration --class repository:~.OrderDetailRepository
+     test integration --class repository:~.PartyRepository
+     test integration --class repository:~.ProductRepository
+     test integration --class repository:~.PurchaseOrderRepository
+     test integration --class repository:~.RegionRepository
+     test integration --class repository:~.ReportRepository
+     test integration --class repository:~.ShipperRepository
+     test integration --class repository:~.SoldProductRepository
+     test integration --class repository:~.StoreRepository
+     test integration --class repository:~.SupplierRepository
 ----
 
 [[using-spring-roo-customize-roo-generated-code]]
