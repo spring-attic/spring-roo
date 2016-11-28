@@ -1,7 +1,16 @@
 package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE;
-import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -11,7 +20,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
-import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProvider;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -39,15 +47,6 @@ import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * This class provides necessary commands to be able to include Spring MVC on
  * generated project and generate new controllers.
@@ -66,7 +65,6 @@ public class ControllerCommands implements CommandMarker {
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
 
-  private Map<String, ServerProvider> serverProviders = new HashMap<String, ServerProvider>();
   private Map<String, ControllerMVCResponseService> responseTypes =
       new HashMap<String, ControllerMVCResponseService>();
 
@@ -114,16 +112,10 @@ public class ControllerCommands implements CommandMarker {
     return true;
   }
 
-  /**
-   * This indicator returns the servers where the application can be deployed
-   *
-   * @param context
-   * @return
-   */
-  @CliOptionAutocompleteIndicator(command = "web mvc setup", param = "appServer",
-      help = "Only valid application servers are available")
-  public List<String> getAllAppServers(ShellContext context) {
-    return new ArrayList<String>(getServerProviders().keySet());
+  @CliOptionAutocompleteIndicator(command = "web mvc setup", param = "module",
+      help = "--module parameter" + " should be autocomplete with an application module.")
+  public List<String> getAllApplicationModules(ShellContext shellContext) {
+    return new ArrayList(getTypeLocationService().getModuleNames(ModuleFeatureName.APPLICATION));
   }
 
   /**
@@ -159,15 +151,19 @@ public class ControllerCommands implements CommandMarker {
               + "This option is available only if there are more than one application module and none of"
               + " them is focused. "
               + "Default if option not present: the unique 'application' module, or focused 'application'"
-              + " module.", unspecifiedDefaultValue = ".",
-          optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
+              + " module.") Pom module) {
 
-    // TODO: Arbitrary value until more server providers will be available
-    if (!getServerProviders().containsKey("EMBEDDED")) {
-      throw new IllegalArgumentException("ERROR: Invalid server provider");
+    // If module is null and only exists one APPLICATION module, use that by default
+    boolean usesDefaultModule = false;
+    if (module == null) {
+      Collection<Pom> applicationModules =
+          getTypeLocationService().getModules(ModuleFeatureName.APPLICATION);
+      if (applicationModules.size() == 1) {
+        module = applicationModules.iterator().next();
+        usesDefaultModule = true;
+      }
     }
-
-    getControllerOperations().setup(module, serverProviders.get("EMBEDDED"));
+    getControllerOperations().setup(module, usesDefaultModule);
   }
 
   /**
@@ -398,35 +394,6 @@ public class ControllerCommands implements CommandMarker {
     }
   }
 
-
-
-  /**
-   * This method gets all implementations of ServerProvider interface to be
-   * able to locate all availbale appServers
-   *
-   * @return Map with appServer identifier and the ServerProvider
-   *         implementation
-   */
-  public Map<String, ServerProvider> getServerProviders() {
-    if (serverProviders.isEmpty()) {
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ServerProvider.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          ServerProvider serverProvider = (ServerProvider) this.context.getService(ref);
-          serverProviders.put(serverProvider.getName(), serverProvider);
-        }
-        return serverProviders;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ServerProviders on ControllerCommands.");
-        return null;
-      }
-    } else {
-      return serverProviders;
-    }
-  }
 
   /**
    * This method gets all implementations of ControllerMVCResponseService

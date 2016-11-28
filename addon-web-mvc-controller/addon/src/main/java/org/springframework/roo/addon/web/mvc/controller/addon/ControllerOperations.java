@@ -1,8 +1,9 @@
 package org.springframework.roo.addon.web.mvc.controller.addon;
 
+import java.util.List;
+
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
-import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProvider;
 import org.springframework.roo.addon.web.mvc.controller.annotations.RooController;
 import org.springframework.roo.addon.web.mvc.controller.annotations.finder.RooSearch;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -11,8 +12,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Feature;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.maven.Pom;
-
-import java.util.List;
 
 /**
  * Provides an API with the available Operations to include Spring MVC on
@@ -39,10 +38,11 @@ public interface ControllerOperations extends Feature {
    *
    * @param module
    *            Pom module where Spring MVC should be included
-   * @param appServer
-   *            Server where application should be deployed
+   * @param usesDefaultModule
+   * 			boolean that indicates if the setup command is using the default 
+   * 			application module
    */
-  void setup(Pom module, ServerProvider appServer);
+  void setup(Pom module, boolean usesDefaultModule);
 
   /**
    * This operation will check if add controllers operation is available

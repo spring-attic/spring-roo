@@ -36,7 +36,6 @@ import org.springframework.roo.addon.web.mvc.controller.addon.config.EntityDeser
 import org.springframework.roo.addon.web.mvc.controller.addon.config.EntityDeserializerMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.config.JSONMixinAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
-import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProvider;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.controller.annotations.config.RooDomainModelModule;
 import org.springframework.roo.application.config.ApplicationConfigService;
@@ -128,7 +127,16 @@ public class ControllerOperationsImpl implements ControllerOperations {
    */
   @Override
   public boolean isSetupAvailable() {
-    return getProjectOperations().isFocusedProjectAvailable();
+    Collection<Pom> applicationModules =
+        getTypeLocationService().getModules(ModuleFeatureName.APPLICATION);
+    boolean notInstalledInSomeModule = false;
+    for (Pom module : applicationModules) {
+      if (!isInstalledInModule(module.getModuleName())) {
+        notInstalledInSomeModule = true;
+        break;
+      }
+    }
+    return getProjectOperations().isFocusedProjectAvailable() && notInstalledInSomeModule;
   }
 
   /**
@@ -136,20 +144,39 @@ public class ControllerOperationsImpl implements ControllerOperations {
    *
    * @param module
    *            Pom module where Spring MVC should be included
-   * @param appServer
-   *            Server where application should be deployed
+   * @param usesDefaultModule
+   * 			boolean that indicates if the setup command is using the default 
+   * 			application module
    */
   @Override
-  public void setup(Pom module, ServerProvider appServer) {
+  public void setup(Pom module, boolean usesDefaultModule) {
 
-    Validate.notNull(appServer, "Application server required");
+    // If provided module is null, use the focused one
+    if (module == null) {
+      module = getProjectOperations().getFocusedModule();
+    }
 
     // Checks that provided module matches with Application properties
     // modules
     Validate
         .isTrue(
             getTypeLocationService().hasModuleFeature(module, ModuleFeatureName.APPLICATION),
-            "ERROR: You are trying to install Spring MVC inside module that doesn't match with APPLICATION modules features.");
+            "ERROR: You are trying to install Spring MVC inside module that doesn't match with APPLICATION modules features. "
+                + "Use --module parameter to specify a valid APPLICATION module where install Spring MVC.");
+
+    // Check if is already installed in the provided module, to show a message
+    if (isInstalledInModule(module.getModuleName())) {
+
+      String message = "";
+      if (usesDefaultModule) {
+        message = String.format("the default module '%s'.", module.getModuleName());
+      } else {
+        message = String.format("the provided module '%s'.", module.getModuleName());
+      }
+
+      LOGGER.log(Level.INFO, String.format("INFO: Spring MVC is already installed in %s", message));
+      return;
+    }
 
     // Add Spring MVC dependency
     getProjectOperations().addDependency(module.getModuleName(),
@@ -214,9 +241,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
     // Adding spring.jackson.serialization.indent-output property
     getApplicationConfigService().addProperty(module.getModuleName(),
         "spring.jackson.serialization.indent-output", "true", "dev", true);
-
-    // Add server configuration
-    appServer.setup(module);
   }
 
   /**
@@ -780,25 +804,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
     } else {
       return responseTypes;
     }
-  }
-
-  @Override
-  public String getName() {
-    return FEATURE_NAME;
-  }
-
-  @Override
-  public boolean isInstalledInModule(String moduleName) {
-    Pom module = getProjectOperations().getPomFromModuleName(moduleName);
-    for (JavaType javaType : getTypeLocationService().findTypesWithAnnotation(
-        RooJavaType.ROO_WEB_MVC_CONFIGURATION)) {
-      if (javaType.getModule().equals(moduleName)
-          && module.hasDependencyExcludingVersion(new Dependency("org.springframework.boot",
-              "spring-boot-starter-web", null))) {
-        return true;
-      }
-    }
-    return false;
   }
 
   @Override
@@ -1600,6 +1605,27 @@ public class ControllerOperationsImpl implements ControllerOperations {
     ClassOrInterfaceTypeDetails cid = getTypeLocationService().getTypeDetails(controller);
     Validate.notNull(cid, "%s not found", controller.getFullyQualifiedTypeName());
     return getBasePathForController(cid);
+  }
+
+  // Feature methods
+
+  @Override
+  public String getName() {
+    return FEATURE_NAME;
+  }
+
+  @Override
+  public boolean isInstalledInModule(String moduleName) {
+    Pom module = getProjectOperations().getPomFromModuleName(moduleName);
+    for (JavaType javaType : getTypeLocationService().findTypesWithAnnotation(
+        RooJavaType.ROO_WEB_MVC_CONFIGURATION)) {
+      if (javaType.getModule().equals(moduleName)
+          && module.hasDependencyExcludingVersion(new Dependency("org.springframework.boot",
+              "spring-boot-starter-web", null))) {
+        return true;
+      }
+    }
+    return false;
   }
 
   //Methods to obtain OSGi Services
