@@ -106,9 +106,15 @@ Spring Roo 2.0 has important changes to achieve its goals, due to that, it conta
 
 It means Spring Roo 2.0 cannot neither update nor modify applications created with Spring Roo 1.x.
 
-=== Improved usability
+=== Usability improvements
 
-The code generation has been updated thinking in the developer, the generated code will be easier to customize. And thanks to Thymeleaf the developers will modify the view layer with less effort.
+* Module support.
+* Conditional parameter visibility.
+
+=== UI Components
+
+* Select2
+* Datatables
 
 === Application architecture
 
@@ -295,7 +301,7 @@ Finally, both the parent pom and the modules pom files contain all required modu
 
 == Configure the project settings
 
-Project settings allows to set the configuration of some Roo commands. For example, in the <<TODO, entity jpa>> and <<TODO, field>> commands, the table and column names are optional, the `project settings` can modify this behaviour and set those parameters as mandatory so you don't forget to set the names.
+Project settings allows to set the configuration of some Roo commands. For example, in the <<entity-jpa-command, entity jpa>> and `field` commands, the table and column names are optional, the `project settings` can modify this behaviour and set those parameters as mandatory so you don't forget to set the names.
 
 [align="center"]
 image::sts-project-settings.png["Setup the project settings", width="60%"]
@@ -575,11 +581,10 @@ Since Spring Roo 2.0, the multimodule support lets to prefix the module name to 
 *roo>* service --all
 ----
 
+[[the-view-layer]]
 == The view layer
 
-Spring Roo allows you to scaffold Spring MVC controllers, Thymeleaf views and REST API for an existing domain model.
-
-The Spring Roo Web MVC scaffolding can deliver a fully functional web frontend and REST API to your domain business logic.
+The Spring Roo Web MVC scaffolding can deliver a fully functional web frontend and REST API to your domain business logic. The scaffolding support allows you to scaffold Spring MVC controllers, Thymeleaf views and REST API for an existing domain model.
 
 First of all, you must add the web support to the application. All needed updates in the project will be performed by Roo.
 
@@ -591,25 +596,35 @@ First of all, you must add the web support to the application. All needed update
 
 Remember that now, Roo generates applications centered in Spring technologies, you will notice that the generated artifacts configure Spring MVC in your application.
 
+In Spring Roo 2 the view layer generation system has been refactored to support several technologies for rendering views. Spring Roo 2 supports <<thymeleaf-view-engine,Thymeleaf>> and <<rest-api,Jackson>>.
+
+[[thymeleaf-view-engine]]
 === Thymeleaf view engine
+
+The `web mvc view setup` allows you to install and configure the artifacts that will let to scaffold a Thymeleaf based view layer.
 
 [source,subs="quotes"]
 ----
 *roo>* web mvc view setup --type THYMELEAF
 ----
 
-Tell Roo to copy the templates it uses to generate the view pages to the application's _.roo/templates/thymeleaf/_ directory, allowing the developers to customize them for code generation.
+Optionally, you can tell Roo to copy the templates it uses to generate the view templates to the application's _.roo/templates/thymeleaf/_ directory, allowing the developers to customize them for code generation:
 
 [source,subs="quotes"]
+.Install the templates to generate the view templates
 ----
 *roo>* web mvc templates setup --type THYMELEAF
 ----
 
+Spring Roo uses http://freemarker.org/[Freemarker] templates for generating the Thymeleaf view templates, you will notice that the _.roo/templates/thymeleaf/_ contains the _.ftl_ files. 
+
+[[spring-mvc-contollers]]
 === Spring MVC Controllers
 
-Generate both the CRUD to manage the domain entities.
+The controller command will scaffold the given domain entity and it will create both the Spring MVC controllers and the templates to generate the view response .
 
 [source,subs="quotes"]
+.Generate the views and controllers to manage the domain entities (CRUD)
 ----
 *roo>* web mvc controller --entity model:~.Category --responseType THYMELEAF
      web mvc controller --entity model:~.Country --responseType THYMELEAF
@@ -626,7 +641,12 @@ Generate both the CRUD to manage the domain entities.
      web mvc controller --entity model:~.PurchaseOrder --responseType THYMELEAF
 ----
 
-The controller command will scaffold the given domain entity and it will create the Spring MVC controllers and the Thymeleaf templates for entity default management.
+As you can see, since Spring Roo 2.0 the `web mvc controller` has the parameter `--responseType` that lets to indicate the rendering view technology to scaffold. You can chose one of the two available rendering view technologies:
+
+* _JSON_ (default), generate JSON messages using Jackson 2.
+* _THYMELEAF_, generate HTML5 pages using Thymeleaf template engine.
+
+==== Entity relationship management
 
 You can generate master-detail views to manage the entity relations as follows:
 
@@ -639,6 +659,8 @@ You can generate master-detail views to manage the entity relations as follows:
      web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions
      web mvc detail --entity model:~.Region --responseType THYMELEAF --field cities
 ----
+
+==== Search support
 
 Finally, create the views to search entities.
 
@@ -660,6 +682,7 @@ Finally, create the views to search entities.
 
 Today, applications must necessarily connect to many types of external systems. Spring Roo generate the connectors to send data  and the endpoints to receive information to and from those systems in the outside.
 
+[[rest-api]]
 === REST API
 
 Spring Roo can create a full REST API to manage the entities. You only have to execute the command below and Roo will generate one Spring MVC REST controller for each entity.
@@ -696,6 +719,7 @@ Spring Roo generate SOAP Services easily, available under `/services` URL.
 *roo>* email receiver:: email receiver setup --service service-impl:~.EmployeeServiceImpl --username USERNAME --password PASSWORD --host HOST --port PORT --protocol PROTOCOL --starttls true
 ----
 
+[[the-security-layer]]
 == The security layer
 
 Create and configure the Spring Security artifacts that will protect your application.
@@ -852,6 +876,18 @@ Commands are listed in alphabetic order, and are shown in monospaced
 font with any mandatory options you must specify when using the command.
 Most commands accept a large number of options, and all of the possible
 options for each command are presented in this appendix.
+
+=== !os
+
+Allows execution of operating system (OS) commands.
+
+[source,sh]
+----
+roo> !os
+----
+
+--command::
+  The command to execute; default: ''
 
 [[backup-command]]
 === backup
@@ -2443,40 +2479,6 @@ roo> module focus --moduleName
 --moduleName::
   The module to focus on (mandatory)
 
-=== project scan now
-
-Perform a manual file system scan
-
-[source,sh]
-----
-roo> project scan now
-----
-
-This command does not accept any options.
-
-=== project scan speed
-
-Changes the file system scanning speed
-
-[source,sh]
-----
-roo> project scan speed --ms
-----
-
---ms::
-  The number of milliseconds between each scan (mandatory)
-
-=== project scan status
-
-Display file system scanning information
-
-[source,sh]
-----
-roo> project scan status
-----
-
-This command does not accept any options.
-
 === project setup
 
 Creates a new Maven project
@@ -3157,18 +3159,6 @@ roo> addon suite uninstall --symbolicName
 
 These commands are specific for developing Spring Roo add-ons and will be only available if user enables the add-on "development mode" with `addon development mode` command.
 
-=== !os
-
-Allows execution of operating system (OS) commands.
-
-[source,sh]
-----
-roo> !
-----
-
---command::
-  The command to execute; default: ''
-
 === !g
 
 Passes a command directly through to the Felix shell infrastructure
@@ -3392,6 +3382,40 @@ roo> process manager debug
 
 --enabled::
   Activates debug mode; default: `true`
+
+=== project scan now
+
+Scan the project directory looking for artifacts that have changed since the last scan and if any, update the internal metadata cache.
+
+[source,sh]
+----
+roo> project scan now
+----
+
+This command does not accept any options.
+
+=== project scan speed
+
+Changes the file system scanning frequency.
+
+[source,sh]
+----
+roo> project scan speed --ms
+----
+
+--ms::
+  The number of milliseconds between each scan (mandatory)
+
+=== project scan status
+
+Display scanning process information.
+
+[source,sh]
+----
+roo> project scan status
+----
+
+This command does not accept any options.
 
 === reference guide
 
