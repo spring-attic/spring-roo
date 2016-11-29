@@ -32,12 +32,20 @@ import static org.springframework.roo.model.JpaJavaType.TRANSIENT;
 import static org.springframework.roo.model.JpaJavaType.VERSION;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.jpa.addon.AbstractIdentifierServiceAwareMetadataProvider;
 import org.springframework.roo.addon.jpa.addon.identifier.Identifier;
 import org.springframework.roo.addon.jpa.addon.identifier.IdentifierMetadata;
@@ -54,6 +62,7 @@ import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
 import org.springframework.roo.classpath.customdata.taggers.MidTypeMatcher;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
@@ -73,13 +82,6 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * The {@link JpaEntityMetadataProvider} implementation.
@@ -267,9 +269,6 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
     // Get the governor's members
     final MemberDetails governorMemberDetails = getMemberDetails(governorPhysicalType);
 
-    // Get the governor's ID field, if any
-    final Identifier identifier = getIdentifier(metadataIdentificationString);
-
     final String moduleName =
         PhysicalTypeIdentifierNamingUtils.getPath(metadataIdentificationString).getModule();
     if (projectOperations.isProjectAvailable(moduleName)) {
@@ -283,10 +282,18 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
     JavaType entity = JpaEntityMetadata.getJavaType(metadataIdentificationString);
     ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
 
+    // Getting JavaBeanMetadata
+    String javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails);
+    JavaBeanMetadata entityJavaBeanMetadata = getMetadataService().get(javaBeanMetadataKey);
+
+    // This metadata is not available yet
+    if (entityJavaBeanMetadata == null) {
+      return null;
+    }
+
     // Locate relation fields to process
     List<FieldMetadata> fieldsParent = new ArrayList<FieldMetadata>();
     Map<String, FieldMetadata> relationsAsChild = new HashMap<String, FieldMetadata>();
-
 
     for (FieldMetadata field : entityDetails.getDeclaredFields()) {
       if (field.getAnnotation(RooJavaType.ROO_JPA_RELATION) != null) {
@@ -308,9 +315,48 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
           "Problems found when trying to identify composition relationship", e);
     }
 
+    // Getting identifier field and version field and its accessors
+    FieldMetadata identifierField = null;
+    MethodMetadata identifierAccessor = null;
+    FieldMetadata versionField = null;
+    MethodMetadata versionAccessor = null;
+    if (parent == null) {
+
+      // Obtain identifier field from entity details
+      List<FieldMetadata> identifierFields = entityDetails.getFieldsWithAnnotation(ID);
+      List<FieldMetadata> embeddedIdentifierFields =
+          entityDetails.getFieldsWithAnnotation(EMBEDDED_ID);
+
+      Validate.isTrue(!(identifierFields.isEmpty() && embeddedIdentifierFields.isEmpty()),
+          "ERROR: The annotated entity doesn't contain any identifier field.");
+
+      if (!identifierFields.isEmpty()) {
+        identifierField = identifierFields.get(0);
+      } else if (!embeddedIdentifierFields.isEmpty()) {
+        identifierField = embeddedIdentifierFields.get(0);
+      }
+
+      identifierAccessor = entityJavaBeanMetadata.getAccesorMethod(identifierField);
+
+      // Obtain version field from entity details
+      List<FieldMetadata> versionFields = entityDetails.getFieldsWithAnnotation(VERSION);
+
+      Validate.notEmpty(versionFields,
+          "ERROR: The annotated entity doesn't contain any version field.");
+
+      versionField = versionFields.get(0);
+
+      versionAccessor = entityJavaBeanMetadata.getAccesorMethod(versionField);
+
+    } else {
+      identifierField = parent.getCurrentIndentifierField();
+      versionField = parent.getCurrentVersionField();
+    }
+
     return new JpaEntityMetadata(metadataIdentificationString, aspectName, governorPhysicalType,
-        parent, governorMemberDetails, identifier, jpaEntityAnnotationValues, entityDetails,
-        fieldsParent, relationsAsChild, compositionRelationField);
+        parent, governorMemberDetails, identifierField, identifierAccessor, versionField,
+        versionAccessor, jpaEntityAnnotationValues, entityDetails, fieldsParent, relationsAsChild,
+        compositionRelationField);
   }
 
   /**

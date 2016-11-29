@@ -1,30 +1,51 @@
 package org.springframework.roo.addon.jpa.addon.entity;
 
-import static org.springframework.roo.model.GoogleJavaType.GAE_DATASTORE_KEY;
-import static org.springframework.roo.model.JavaType.LONG_OBJECT;
-import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
-import static org.springframework.roo.model.JpaJavaType.*;
+import static org.springframework.roo.model.JpaJavaType.DISCRIMINATOR_COLUMN;
+import static org.springframework.roo.model.JpaJavaType.ENTITY;
+import static org.springframework.roo.model.JpaJavaType.INHERITANCE;
+import static org.springframework.roo.model.JpaJavaType.INHERITANCE_TYPE;
+import static org.springframework.roo.model.JpaJavaType.MAPPED_SUPERCLASS;
+import static org.springframework.roo.model.JpaJavaType.TABLE;
 
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.addon.jpa.addon.identifier.Identifier;
 import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.*;
-import org.springframework.roo.classpath.details.annotations.*;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataItem;
-import org.springframework.roo.model.*;
+import org.springframework.roo.model.EnumDetails;
+import org.springframework.roo.model.ImportRegistrationResolver;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
+import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
@@ -64,12 +85,11 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
 
   private final JpaEntityAnnotationValues annotationValues;
-  private final MemberDetails entityMemberDetails;
-  private final Identifier identifier;
   private final JpaEntityMetadata parent;
   private FieldMetadata identifierField;
+  private MethodMetadata identifierAccessor;
   private FieldMetadata versionField;
-  private ClassOrInterfaceTypeDetails entityDetails;
+  private MethodMetadata versionAccessor;
   private FieldMetadata iterableToAddCantBeNullConstant;
   private FieldMetadata iterableToRemoveCantBeNullConstant;
 
@@ -106,9 +126,10 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * @param parent can be <code>null</code> if none of the governor's
    *            ancestors provide {@link JpaEntityMetadata}
    * @param entityMemberDetails details of the entity's members (required)
-   * @param identifier information about the entity's identifier field in the
-   *            event that the annotation doesn't provide such information;
-   *            can be <code>null</code>
+   * @param identifierField
+   * @param identifierAccessor
+   * @param versionField
+   * @param versionAccessor
    * @param annotationValues the effective annotation values taking into
    *            account the presence of a {@link RooJpaEntity} annotation (required)
    * @param entityDetails
@@ -118,8 +139,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    */
   public JpaEntityMetadata(final String metadataIdentificationString, final JavaType itdName,
       final PhysicalTypeMetadata entityPhysicalType, final JpaEntityMetadata parent,
-      final MemberDetails entityMemberDetails, final Identifier identifier,
-      final JpaEntityAnnotationValues annotationValues,
+      final MemberDetails entityMemberDetails, final FieldMetadata identifierField,
+      final MethodMetadata identifierAccessor, final FieldMetadata versionField,
+      final MethodMetadata versionAccessor, final JpaEntityAnnotationValues annotationValues,
       final ClassOrInterfaceTypeDetails entityDetails, List<FieldMetadata> fieldsRelationAsParent,
       Map<String, FieldMetadata> fieldsRelationAsChild, FieldMetadata compositionRelationField) {
     super(metadataIdentificationString, itdName, entityPhysicalType);
@@ -132,10 +154,11 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
      * to the parent entity.
      */
     this.annotationValues = annotationValues;
-    this.entityMemberDetails = entityMemberDetails;
-    this.identifier = identifier;
     this.parent = parent;
-    this.entityDetails = entityDetails;
+    this.identifierField = identifierField;
+    this.identifierAccessor = identifierAccessor;
+    this.versionField = versionField;
+    this.versionAccessor = versionAccessor;
 
     // Add @Entity or @MappedSuperclass annotation
     builder
@@ -153,33 +176,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     // Ensure there's a no-arg constructor (explicit or default)
     builder.addConstructor(getNoArgConstructor());
-
-    // Add identifier field and accessor
-    identifierField = getIdentifierField();
-    builder.addField(identifierField);
-
-    MethodMetadataBuilder identifierAccessor = getIdentifierAccessor();
-    if (identifierAccessor != null) {
-      builder.addMethod(identifierAccessor);
-    }
-
-    MethodMetadataBuilder identifierMutator = getIdentifierMutator();
-    if (identifierMutator != null) {
-      builder.addMethod(identifierMutator);
-    }
-    // Add version field and accessor
-    versionField = getVersionField();
-    builder.addField(versionField);
-
-    MethodMetadataBuilder versionAccessor = getVersionAccessor();
-    if (versionAccessor != null) {
-      builder.addMethod(versionAccessor);
-    }
-
-    MethodMetadataBuilder versionMutator = getVersionMutator();
-    if (versionMutator != null) {
-      builder.addMethod(versionMutator);
-    }
 
     // Manage relations
 
@@ -328,330 +324,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     return entityAnnotation;
   }
 
-  /**
-   * Locates the identifier accessor method.
-   * <p>
-   * If {@link #getIdentifierField()} returns a field created by this ITD or
-   * if the field is declared within the entity itself, a public accessor will
-   * automatically be produced in the declaring class.
-   *
-   * @return the accessor (never returns null)
-   */
-  public MethodMetadataBuilder getIdentifierAccessor() {
-    if (parent != null) {
-      return parent.getIdentifierAccessor();
-    }
-
-    // Locate the identifier field, and compute the name of the accessor
-    // that will be produced
-    JavaSymbolName requiredAccessorName = BeanInfoUtils.getAccessorMethodName(identifierField);
-
-    // See if the user provided the field
-    if (!getId().equals(identifierField.getDeclaredByMetadataId())) {
-      // Locate an existing accessor
-      final MethodMetadata method =
-          entityMemberDetails.getMethod(requiredAccessorName, new ArrayList<JavaType>());
-      if (method != null) {
-        if (Modifier.isPublic(method.getModifier())) {
-          // Method exists and is public so return it
-          return new MethodMetadataBuilder(method);
-        }
-
-        // Method is not public so make the required accessor name
-        // unique
-        requiredAccessorName = new JavaSymbolName(requiredAccessorName.getSymbolName() + "_");
-      }
-    }
-
-    // We declared the field in this ITD, so produce a public accessor for
-    // it
-    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder.appendFormalLine("return this." + identifierField.getFieldName().getSymbolName()
-        + ";");
-
-    MethodMetadataBuilder methodMetadata =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName,
-            identifierField.getFieldType(), bodyBuilder);
-
-    // If method exists, return null to prevent method creation
-    if (existsMethod(methodMetadata)) {
-      return null;
-    }
-
-    return methodMetadata;
-  }
-
-  /**
-  * Method that checks if method exists on Java target
-  *
-  * @param methodMetadata
-  * @return
-  */
-  private boolean existsMethod(MethodMetadataBuilder methodMetadata) {
-    MethodMetadata method = entityDetails.getMethod(methodMetadata.getMethodName());
-
-    if (method == null) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private String getIdentifierColumn() {
-    if (StringUtils.isNotBlank(annotationValues.getIdentifierColumn())) {
-      return annotationValues.getIdentifierColumn();
-    } else if (identifier != null && StringUtils.isNotBlank(identifier.getColumnName())) {
-      return identifier.getColumnName();
-    }
-    return "";
-  }
-
-  /**
-   * Locates the identifier field.
-   * <p>
-   * If a parent is defined, it must provide the field.
-   * <p>
-   * If no parent is defined, one will be located or created. Any declared or
-   * inherited field which has the {@link javax.persistence.Id @Id} or
-   * {@link javax.persistence.EmbeddedId @EmbeddedId} annotation will be taken
-   * as the identifier and returned. If no such field is located, a private
-   * field will be created as per the details contained in the
-   * {@link RooJpaEntity} annotation, as applicable.
-   *
-   * @param parent (can be <code>null</code>)
-   * @param project the user's project (required)
-   * @param annotationValues
-   * @param identifier can be <code>null</code>
-   * @return the identifier (never returns null)
-   */
-  private FieldMetadata getIdentifierField() {
-    if (parent != null) {
-      final FieldMetadata idField = parent.getIdentifierField();
-      if (idField != null) {
-        if (MemberFindingUtils.getAnnotationOfType(idField.getAnnotations(), ID) != null) {
-          return idField;
-        } else if (MemberFindingUtils.getAnnotationOfType(idField.getAnnotations(), EMBEDDED_ID) != null) {
-          return idField;
-        }
-      }
-      return parent.getIdentifierField();
-    }
-
-    // Try to locate an existing field with @javax.persistence.Id
-    final List<FieldMetadata> idFields = governorTypeDetails.getFieldsWithAnnotation(ID);
-    if (!idFields.isEmpty()) {
-      return getIdentifierField(idFields, ID);
-    }
-
-    // Try to locate an existing field with @javax.persistence.EmbeddedId
-    final List<FieldMetadata> embeddedIdFields =
-        governorTypeDetails.getFieldsWithAnnotation(EMBEDDED_ID);
-    if (!embeddedIdFields.isEmpty()) {
-      return getIdentifierField(embeddedIdFields, EMBEDDED_ID);
-    }
-
-    // Ensure there isn't already a field called "id"; if so, compute a
-    // unique name (it's not really a fatal situation at the end of the day)
-    final JavaSymbolName idField = governorTypeDetails.getUniqueFieldName(getIdentifierFieldName());
-
-    // We need to create one
-    final JavaType identifierType = getIdentifierType();
-
-    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-    final boolean hasIdClass =
-        !(identifierType.isCoreType() || identifierType.equals(GAE_DATASTORE_KEY));
-    final JavaType annotationType = hasIdClass ? EMBEDDED_ID : ID;
-    annotations.add(new AnnotationMetadataBuilder(annotationType));
-
-    // Compute the column name, as required
-    if (!hasIdClass) {
-      if (!"".equals(annotationValues.getSequenceName())) {
-
-        // ROO-3719: Add SEQUENCE as @GeneratedValue strategy
-        String identifierStrategy = annotationValues.getIdentifierStrategy();
-        // Check if provided identifierStrategy is valid
-        boolean isValidIdentifierStrategy = false;
-        for (IdentifierStrategy identifierStrategyType : IdentifierStrategy.values()) {
-          if (identifierStrategyType.name().equals(identifierStrategy)) {
-            isValidIdentifierStrategy = true;
-            break;
-          }
-        }
-
-        if (!isValidIdentifierStrategy) {
-          identifierStrategy = IdentifierStrategy.AUTO.name();
-        }
-
-        // ROO-746: Use @GeneratedValue(strategy = GenerationType.TABLE)
-        // If the root of the governor declares @Inheritance(strategy =
-        // InheritanceType.TABLE_PER_CLASS)
-        if (IdentifierStrategy.AUTO.name().equals(identifierStrategy)) {
-          AnnotationMetadata inheritance = governorTypeDetails.getAnnotation(INHERITANCE);
-          if (inheritance == null) {
-            inheritance = getInheritanceAnnotation();
-          }
-          if (inheritance != null) {
-            final AnnotationAttributeValue<?> value =
-                inheritance.getAttribute(new JavaSymbolName("strategy"));
-            if (value instanceof EnumAttributeValue) {
-              final EnumAttributeValue enumAttributeValue = (EnumAttributeValue) value;
-              final EnumDetails details = enumAttributeValue.getValue();
-              if (details != null && details.getType().equals(INHERITANCE_TYPE)) {
-                if ("TABLE_PER_CLASS".equals(details.getField().getSymbolName())) {
-                  identifierStrategy = IdentifierStrategy.TABLE.name();
-                }
-              }
-            }
-          }
-        }
-
-        final AnnotationMetadataBuilder generatedValueBuilder =
-            new AnnotationMetadataBuilder(GENERATED_VALUE);
-        generatedValueBuilder.addEnumAttribute("strategy", new EnumDetails(GENERATION_TYPE,
-            new JavaSymbolName(identifierStrategy)));
-
-        if (StringUtils.isNotBlank(annotationValues.getSequenceName())) {
-          final String sequenceKey =
-              StringUtils.uncapitalize(destination.getSimpleTypeName()) + "Gen";
-          generatedValueBuilder.addStringAttribute("generator", sequenceKey);
-          final AnnotationMetadataBuilder sequenceGeneratorBuilder =
-              new AnnotationMetadataBuilder(SEQUENCE_GENERATOR);
-          sequenceGeneratorBuilder.addStringAttribute("name", sequenceKey);
-          sequenceGeneratorBuilder.addStringAttribute("sequenceName",
-              annotationValues.getSequenceName());
-          annotations.add(sequenceGeneratorBuilder);
-        }
-        annotations.add(generatedValueBuilder);
-      }
-
-      final String identifierColumn = StringUtils.stripToEmpty(getIdentifierColumn());
-      String columnName = idField.getSymbolName();
-      if (StringUtils.isNotBlank(identifierColumn)) {
-        // User has specified an alternate column name
-        columnName = identifierColumn;
-      }
-
-      final AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
-      columnBuilder.addStringAttribute("name", columnName);
-      if (identifier != null && StringUtils.isNotBlank(identifier.getColumnDefinition())) {
-        columnBuilder.addStringAttribute("columnDefinition", identifier.getColumnDefinition());
-      }
-
-      // Add length attribute for String field
-      if (identifier != null && identifier.getColumnSize() > 0 && identifier.getColumnSize() < 4000
-          && identifierType.equals(JavaType.STRING)) {
-        columnBuilder.addIntegerAttribute("length", identifier.getColumnSize());
-      }
-
-      // Add precision and scale attributes for numeric field
-      if (identifier != null
-          && identifier.getScale() > 0
-          && (identifierType.equals(JavaType.DOUBLE_OBJECT)
-              || identifierType.equals(JavaType.DOUBLE_PRIMITIVE) || identifierType
-                .equals(BIG_DECIMAL))) {
-        columnBuilder.addIntegerAttribute("precision", identifier.getColumnSize());
-        columnBuilder.addIntegerAttribute("scale", identifier.getScale());
-      }
-
-      annotations.add(columnBuilder);
-    }
-
-    return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, idField, identifierType)
-        .build();
-  }
-
-  private FieldMetadata getIdentifierField(final List<FieldMetadata> identifierFields,
-      final JavaType identifierType) {
-    Validate.isTrue(identifierFields.size() == 1,
-        "More than one field was annotated with @%s in '%s'", identifierType.getSimpleTypeName(),
-        destination.getFullyQualifiedTypeName());
-    return new FieldMetadataBuilder(identifierFields.get(0)).build();
-  }
-
-  private String getIdentifierFieldName() {
-    if (StringUtils.isNotBlank(annotationValues.getIdentifierField())) {
-      return annotationValues.getIdentifierField();
-    } else if (identifier != null && identifier.getFieldName() != null) {
-      return identifier.getFieldName().getSymbolName();
-    }
-    // Use the default
-    return RooJpaEntity.ID_FIELD_DEFAULT;
-  }
-
-  /**
-   * Locates the identifier mutator method.
-   * <p>
-   * If {@link #getIdentifierField()} returns a field created by this ITD or
-   * if the field is declared within the entity itself, a public mutator will
-   * automatically be produced in the declaring class.
-   *
-   * @return the mutator (never returns null)
-   */
-  private MethodMetadataBuilder getIdentifierMutator() {
-    // TODO: This is a temporary workaround to support web data binding
-    // approaches; to be reviewed more thoroughly in future
-    if (parent != null) {
-      return parent.getIdentifierMutator();
-    }
-
-    // Locate the identifier field, and compute the name of the accessor
-    // that will be produced
-    JavaSymbolName requiredMutatorName = BeanInfoUtils.getMutatorMethodName(identifierField);
-
-    final List<JavaType> parameterTypes = Arrays.asList(identifierField.getFieldType());
-    final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("id"));
-
-    // See if the user provided the field
-    if (!getId().equals(identifierField.getDeclaredByMetadataId())) {
-      // Locate an existing mutator
-      final MethodMetadata method =
-          entityMemberDetails.getMethod(requiredMutatorName, parameterTypes);
-      if (method != null) {
-        if (Modifier.isPublic(method.getModifier())) {
-          // Method exists and is public so return it
-          return new MethodMetadataBuilder(method);
-        }
-
-        // Method is not public so make the required mutator name unique
-        requiredMutatorName = new JavaSymbolName(requiredMutatorName.getSymbolName() + "_");
-      }
-    }
-
-    // We declared the field in this ITD, so produce a public mutator for it
-    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder.appendFormalLine("this." + identifierField.getFieldName().getSymbolName()
-        + " = id;");
-
-    MethodMetadataBuilder methodMetadata =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName,
-            JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
-            parameterNames, bodyBuilder);
-
-    // If method exists, return null to prevent method creation
-    if (existsMethod(methodMetadata)) {
-      return null;
-    }
-
-    return methodMetadata;
-  }
-
-  /**
-   * Returns the {@link JavaType} of the identifier field
-   *
-   * @param annotationValues the values of the {@link RooJpaEntity} annotation
-   *            (required)
-   * @param identifier can be <code>null</code>
-   * @return a non-<code>null</code> type
-   */
-  private JavaType getIdentifierType() {
-    if (annotationValues.getIdentifierType() != null) {
-      return annotationValues.getIdentifierType();
-    } else if (identifier != null && identifier.getFieldType() != null) {
-      return identifier.getFieldType();
-    }
-    // Use the default
-    return LONG_OBJECT;
-  }
 
   /**
    * Returns the JPA @Inheritance annotation to be applied to the entity, if
@@ -742,192 +414,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     return null;
   }
 
-  /**
-   * Locates the version accessor method.
-   * <p>
-   * If {@link #getVersionField()} returns a field created by this ITD or if
-   * the version field is declared within the entity itself, a public accessor
-   * will automatically be produced in the declaring class.
-   *
-   * @param memberDetails
-   * @return the version accessor (may return null if there is no version
-   *         field declared in this class)
-   */
-  private MethodMetadataBuilder getVersionAccessor() {
-    if (versionField == null) {
-      // There's no version field, so there certainly won't be an accessor
-      // for it
-      return null;
-    }
-
-    if (parent != null) {
-      final FieldMetadata result = parent.getVersionField();
-      if (result != null) {
-        // It's the parent's responsibility to provide the accessor, not
-        // ours
-        return parent.getVersionAccessor();
-      }
-    }
-
-    // Compute the name of the accessor that will be produced
-    JavaSymbolName requiredAccessorName = BeanInfoUtils.getAccessorMethodName(versionField);
-
-    // See if the user provided the field
-    if (!getId().equals(versionField.getDeclaredByMetadataId())) {
-      // Locate an existing accessor
-      final MethodMetadata method =
-          entityMemberDetails.getMethod(requiredAccessorName, new ArrayList<JavaType>(), getId());
-      if (method != null) {
-        if (Modifier.isPublic(method.getModifier())) {
-          // Method exists and is public so return it
-          return new MethodMetadataBuilder(method);
-        }
-
-        // Method is not public so make the required accessor name
-        // unique
-        requiredAccessorName = new JavaSymbolName(requiredAccessorName.getSymbolName() + "_");
-      }
-    }
-
-    // We declared the field in this ITD, so produce a public accessor for
-    // it
-    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder
-        .appendFormalLine("return this." + versionField.getFieldName().getSymbolName() + ";");
-
-    MethodMetadataBuilder methodMetadata =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName,
-            versionField.getFieldType(), bodyBuilder);
-
-    // If method exists, return null to prevent method creation
-    if (existsMethod(methodMetadata)) {
-      return null;
-    }
-
-    return methodMetadata;
-  }
-
-  /**
-   * Locates the version field.
-   * <p>
-   * If a parent is defined, it may provide the field.
-   * <p>
-   * If no parent is defined, one may be located or created. Any declared or
-   * inherited field which is annotated with javax.persistence.Version will be
-   * taken as the version and returned. If no such field is located, a private
-   * field may be created as per the details contained in
-   * {@link RooJpaEntity} annotation, as applicable.
-   *
-   * @return the version field (may be null)
-   */
-  private FieldMetadata getVersionField() {
-    if (parent != null) {
-      final FieldMetadata result = parent.getVersionField();
-      if (result != null) {
-        return result;
-      }
-    }
-
-    // Try to locate an existing field with @Version
-    final List<FieldMetadata> versionFields = governorTypeDetails.getFieldsWithAnnotation(VERSION);
-    if (!versionFields.isEmpty()) {
-      Validate.isTrue(versionFields.size() == 1,
-          "More than 1 field was annotated with @Version in '%s'",
-          destination.getFullyQualifiedTypeName());
-      return versionFields.get(0);
-    }
-
-    // Quit at this stage if the user doesn't want a version field
-    final String versionField = annotationValues.getVersionField();
-    if ("".equals(versionField)) {
-      return null;
-    }
-
-    // Ensure there isn't already a field called "version"; if so, compute a
-    // unique name (it's not really a fatal situation at the end of the day)
-    final JavaSymbolName verField = governorTypeDetails.getUniqueFieldName(versionField);
-
-    // We're creating one
-    JavaType versionType = annotationValues.getVersionType();
-    String versionColumn =
-        StringUtils.defaultIfEmpty(annotationValues.getVersionColumn(), verField.getSymbolName());
-
-    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-    annotations.add(new AnnotationMetadataBuilder(VERSION));
-
-    final AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
-    columnBuilder.addStringAttribute("name", versionColumn);
-    annotations.add(columnBuilder);
-
-    return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, verField, versionType)
-        .build();
-  }
-
-  /**
-   * Locates the version mutator method.
-   * <p>
-   * If {@link #getVersionField()} returns a field created by this ITD or if
-   * the version field is declared within the entity itself, a public mutator
-   * will automatically be produced in the declaring class.
-   *
-   * @return the mutator (may return null if there is no version field
-   *         declared in this class)
-   */
-  private MethodMetadataBuilder getVersionMutator() {
-    // TODO: This is a temporary workaround to support web data binding
-    // approaches; to be reviewed more thoroughly in future
-    if (parent != null) {
-      return parent.getVersionMutator();
-    }
-
-    // Locate the version field, and compute the name of the mutator that
-    // will be produced
-    if (versionField == null) {
-      // There's no version field, so there certainly won't be a mutator
-      // for it
-      return null;
-    }
-
-    // Compute the name of the mutator that will be produced
-    JavaSymbolName requiredMutatorName = BeanInfoUtils.getMutatorMethodName(versionField);
-
-    final List<JavaType> parameterTypes = Arrays.asList(versionField.getFieldType());
-    final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("version"));
-
-    // See if the user provided the field
-    if (!getId().equals(versionField.getDeclaredByMetadataId())) {
-      // Locate an existing mutator
-      final MethodMetadata method =
-          entityMemberDetails.getMethod(requiredMutatorName, parameterTypes, getId());
-      if (method != null) {
-        if (Modifier.isPublic(method.getModifier())) {
-          // Method exists and is public so return it
-          return new MethodMetadataBuilder(method);
-        }
-
-        // Method is not public so make the required mutator name unique
-        requiredMutatorName = new JavaSymbolName(requiredMutatorName.getSymbolName() + "_");
-      }
-    }
-
-    // We declared the field in this ITD, so produce a public mutator for it
-    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder.appendFormalLine("this." + versionField.getFieldName().getSymbolName()
-        + " = version;");
-
-
-    MethodMetadataBuilder methodMetadata =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName,
-            JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
-            parameterNames, bodyBuilder);
-
-    // If method exists, return null to prevent method creation
-    if (existsMethod(methodMetadata)) {
-      return null;
-    }
-
-    return methodMetadata;
-  }
 
   /**
    * Returns cardinality value based on JPA field annotations
@@ -1454,12 +940,28 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     return identifierField;
   }
 
+
+  /**
+   * @return information about current identifier accessor
+   */
+  public MethodMetadata getCurrentIdentifierAccessor() {
+    return identifierAccessor;
+  }
+
   /**
    * @return information about current version field
    */
   public FieldMetadata getCurrentVersionField() {
     return versionField;
   }
+
+  /**
+   * @return information about current version accessor
+   */
+  public MethodMetadata getCurrentVersionAccessor() {
+    return versionAccessor;
+  }
+
 
   public boolean isReadOnly() {
     return annotationValues.isReadOnly();

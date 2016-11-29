@@ -1,12 +1,34 @@
 package org.springframework.roo.addon.jpa.addon;
 
 import static org.springframework.roo.model.JavaType.OBJECT;
+import static org.springframework.roo.model.JpaJavaType.COLUMN;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
+import static org.springframework.roo.model.JpaJavaType.EMBEDDED_ID;
+import static org.springframework.roo.model.JpaJavaType.GENERATED_VALUE;
+import static org.springframework.roo.model.JpaJavaType.GENERATION_TYPE;
+import static org.springframework.roo.model.JpaJavaType.ID;
+import static org.springframework.roo.model.JpaJavaType.SEQUENCE_GENERATOR;
+import static org.springframework.roo.model.JpaJavaType.VERSION;
 import static org.springframework.roo.model.RooJavaType.ROO_EQUALS;
 import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -15,9 +37,11 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.jpa.addon.entity.IdentifierStrategy;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
+import org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity;
 import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -26,9 +50,14 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.FieldDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.EnumDetails;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.RooJavaType;
@@ -46,21 +75,6 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Implementation of {@link JpaOperations}.
@@ -171,8 +185,11 @@ public class JpaOperationsImpl implements JpaOperations {
 
   @Override
   public void newEntity(final JavaType name, final boolean createAbstract,
-      final JavaType superclass, final JavaType implementsType,
-      final List<AnnotationMetadataBuilder> annotations) {
+      final JavaType superclass, final JavaType implementsType, final String identifierField,
+      final JavaType identifierType, final String identifierColumn, final String sequenceName,
+      final IdentifierStrategy identifierStrategy, final String versionField,
+      final JavaType versionType, final String versionColumn,
+      final InheritanceType inheritanceType, final List<AnnotationMetadataBuilder> annotations) {
 
     Validate.notNull(name, "Entity name required");
     Validate.isTrue(!JdkJavaType.isPartOfJavaLang(name.getSimpleTypeName()),
@@ -222,7 +239,19 @@ public class JpaOperationsImpl implements JpaOperations {
 
     cidBuilder.setAnnotations(annotations);
 
-    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+    // Write entity on disk
+    ClassOrInterfaceTypeDetails entityDetails = cidBuilder.build();
+    getTypeManagementService().createOrUpdateTypeOnDisk(entityDetails);
+
+    // If a parent is defined, it must provide the identifier field.
+    // Adding identifier and version fields
+    if (superclass.equals(OBJECT)) {
+      getTypeManagementService().addField(
+          getIdentifierField(name, identifierField, identifierType, identifierColumn, sequenceName,
+              identifierStrategy, inheritanceType), true);
+      getTypeManagementService().addField(
+          getVersionField(name, versionField, versionType, versionColumn), true);
+    }
 
     // Add persistence dependencies to entity module if necessary
     // Don't need to add them if spring-boot-starter-data-jpa is present, often in single module project
@@ -237,6 +266,9 @@ public class JpaOperationsImpl implements JpaOperations {
       getProjectOperations().addDependencies(getProjectOperations().getFocusedModuleName(),
           dependencies);
     }
+
+
+
   }
 
   @Override
@@ -811,6 +843,130 @@ public class JpaOperationsImpl implements JpaOperations {
   @Override
   public Pair<FieldMetadata, RelationInfo> getFieldChildPartOfCompositionRelation(JavaType entity) {
     return getFieldChildPartOfCompositionRelation(getTypeLocationService().getTypeDetails(entity));
+  }
+
+  /**
+   * This method generates the identifier field using the provided values.
+   * 
+   * @param entity
+   * @param identifierField
+   * @param identifierType
+   * @param identifierColumn
+   * @param sequenceName
+   * @param identifierStrategy
+   * @param inheritanceType
+   * @return
+   */
+  private FieldMetadata getIdentifierField(final JavaType entity, String identifierField,
+      final JavaType identifierType, final String identifierColumn, final String sequenceName,
+      IdentifierStrategy identifierStrategy, InheritanceType inheritanceType) {
+
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+    final boolean hasIdClass = !(identifierType.isCoreType());
+    final JavaType annotationType = hasIdClass ? EMBEDDED_ID : ID;
+    annotations.add(new AnnotationMetadataBuilder(annotationType));
+
+    if (StringUtils.isEmpty(identifierField)) {
+      identifierField = "id";
+    }
+
+    // Compute the column name, as required
+    if (!hasIdClass) {
+      if (!"".equals(sequenceName)) {
+
+        // ROO-3719: Add SEQUENCE as @GeneratedValue strategy
+        // Check if provided identifierStrategy is valid
+        boolean isValidIdentifierStrategy = false;
+        if (identifierStrategy != null) {
+          for (IdentifierStrategy identifierStrategyType : IdentifierStrategy.values()) {
+            if (identifierStrategyType.name().equals(identifierStrategy.name())) {
+              isValidIdentifierStrategy = true;
+              break;
+            }
+          }
+        }
+
+        if (!isValidIdentifierStrategy) {
+          identifierStrategy = IdentifierStrategy.AUTO;
+        }
+
+        // ROO-746: Use @GeneratedValue(strategy = GenerationType.TABLE)
+        // If the root of the governor declares @Inheritance(strategy =
+        // InheritanceType.TABLE_PER_CLASS)
+        if (IdentifierStrategy.AUTO.name().equals(identifierStrategy.name())) {
+          if (inheritanceType != null) {
+            if ("TABLE_PER_CLASS".equals(inheritanceType.name())) {
+              identifierStrategy = IdentifierStrategy.TABLE;
+            }
+          }
+        }
+
+        final AnnotationMetadataBuilder generatedValueBuilder =
+            new AnnotationMetadataBuilder(GENERATED_VALUE);
+        generatedValueBuilder.addEnumAttribute("strategy", new EnumDetails(GENERATION_TYPE,
+            new JavaSymbolName(identifierStrategy.name())));
+
+        if (StringUtils.isNotBlank(sequenceName)) {
+          final String sequenceKey = StringUtils.uncapitalize(entity.getSimpleTypeName()) + "Gen";
+          generatedValueBuilder.addStringAttribute("generator", sequenceKey);
+          final AnnotationMetadataBuilder sequenceGeneratorBuilder =
+              new AnnotationMetadataBuilder(SEQUENCE_GENERATOR);
+          sequenceGeneratorBuilder.addStringAttribute("name", sequenceKey);
+          sequenceGeneratorBuilder.addStringAttribute("sequenceName", sequenceName);
+          annotations.add(sequenceGeneratorBuilder);
+        }
+        annotations.add(generatedValueBuilder);
+      }
+
+      // User has specified alternative columnName
+      if (StringUtils.isNotBlank(identifierColumn)) {
+        final AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
+        columnBuilder.addStringAttribute("name", identifierColumn);
+        annotations.add(columnBuilder);
+      }
+    }
+
+    FieldDetails identifierFieldDetails =
+        new FieldDetails(getTypeLocationService().getPhysicalTypeIdentifier(entity),
+            identifierType, new JavaSymbolName(identifierField));
+    identifierFieldDetails.setModifiers(Modifier.PRIVATE);
+    identifierFieldDetails.addAnnotations(annotations);
+
+    return new FieldMetadataBuilder(identifierFieldDetails).build();
+  }
+
+  /**
+   * This method generates the version field using the provided values
+   * 
+   * @param entity
+   * @param versionField
+   * @param versionType
+   * @param versionColumn
+   * @return
+   */
+  private FieldMetadata getVersionField(final JavaType entity, String versionField,
+      final JavaType versionType, final String versionColumn) {
+
+    if (StringUtils.isEmpty(versionField)) {
+      versionField = "version";
+    }
+
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+    annotations.add(new AnnotationMetadataBuilder(VERSION));
+
+    if (StringUtils.isNotEmpty(versionColumn)) {
+      final AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
+      columnBuilder.addStringAttribute("name", versionColumn);
+      annotations.add(columnBuilder);
+    }
+
+    FieldDetails versionFieldDetails =
+        new FieldDetails(getTypeLocationService().getPhysicalTypeIdentifier(entity), versionType,
+            new JavaSymbolName(versionField));
+    versionFieldDetails.setModifiers(Modifier.PRIVATE);
+    versionFieldDetails.addAnnotations(annotations);
+
+    return new FieldMetadataBuilder(versionFieldDetails).build();
   }
 
 

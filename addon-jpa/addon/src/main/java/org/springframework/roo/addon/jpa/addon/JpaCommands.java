@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.jpa.addon;
 
-import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.RooJavaType.ROO_EQUALS;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
@@ -28,7 +27,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.entity.IdentifierStrategy;
-import org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -596,9 +594,8 @@ public class JpaCommands implements CommandMarker {
     }
     annotationBuilder.add(javaBeanAnnotationBuilder);
     annotationBuilder.add(ROO_TO_STRING_BUILDER);
-    annotationBuilder.add(getEntityAnnotationBuilder(table, schema, catalog, identifierField,
-        identifierColumn, identifierType, versionField, versionColumn, versionType,
-        inheritanceType, mappedSuperclass, entityName, sequenceName, identifierStrategy, readOnly));
+    annotationBuilder.add(getEntityAnnotationBuilder(table, schema, catalog, inheritanceType,
+        mappedSuperclass, entityName, readOnly));
     if (equals) {
       annotationBuilder.add(ROO_EQUALS_BUILDER);
     }
@@ -613,7 +610,9 @@ public class JpaCommands implements CommandMarker {
     }
 
     // Produce the entity itself
-    jpaOperations.newEntity(name, createAbstract, superclass, implementsType, annotationBuilder);
+    jpaOperations.newEntity(name, createAbstract, superclass, implementsType, identifierField,
+        identifierType, identifierColumn, sequenceName, identifierStrategy, versionField,
+        versionType, versionColumn, inheritanceType, annotationBuilder);
 
     // Update entity identifier class if required (identifierClass should be only an embeddable class)
     if (!(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java."))) {
@@ -628,26 +627,15 @@ public class JpaCommands implements CommandMarker {
      * @param table
      * @param schema
      * @param catalog
-     * @param identifierField
-     * @param identifierColumn
-     * @param identifierType
-     * @param versionField
-     * @param versionColumn
-     * @param versionType
      * @param inheritanceType
      * @param mappedSuperclass
      * @param entityName
-     * @param sequenceName
      * @param readOnly
      * @return a non-<code>null</code> builder
      */
   private AnnotationMetadataBuilder getEntityAnnotationBuilder(final String table,
-      final String schema, final String catalog, final String identifierField,
-      final String identifierColumn, final JavaType identifierType, final String versionField,
-      final String versionColumn, final JavaType versionType,
-      final InheritanceType inheritanceType, final boolean mappedSuperclass,
-      final String entityName, final String sequenceName,
-      final IdentifierStrategy identifierStrategy, final boolean readOnly) {
+      final String schema, final String catalog, final InheritanceType inheritanceType,
+      final boolean mappedSuperclass, final String entityName, final boolean readOnly) {
     final AnnotationMetadataBuilder entityAnnotationBuilder =
         new AnnotationMetadataBuilder(ROO_JPA_ENTITY);
 
@@ -657,18 +645,6 @@ public class JpaCommands implements CommandMarker {
     }
     if (entityName != null) {
       entityAnnotationBuilder.addStringAttribute("entityName", entityName);
-    }
-    if (sequenceName != null) {
-      entityAnnotationBuilder.addStringAttribute("sequenceName", sequenceName);
-    }
-    if (identifierColumn != null) {
-      entityAnnotationBuilder.addStringAttribute("identifierColumn", identifierColumn);
-    }
-    if (identifierField != null) {
-      entityAnnotationBuilder.addStringAttribute("identifierField", identifierField);
-    }
-    if (!LONG_OBJECT.equals(identifierType)) {
-      entityAnnotationBuilder.addClassAttribute("identifierType", identifierType);
     }
     if (inheritanceType != null) {
       entityAnnotationBuilder.addStringAttribute("inheritanceType", inheritanceType.name());
@@ -681,20 +657,6 @@ public class JpaCommands implements CommandMarker {
     }
     if (table != null) {
       entityAnnotationBuilder.addStringAttribute("table", table);
-    }
-    if (versionColumn != null && !RooJpaEntity.VERSION_COLUMN_DEFAULT.equals(versionColumn)) {
-      entityAnnotationBuilder.addStringAttribute("versionColumn", versionColumn);
-    }
-    if (versionField != null && !RooJpaEntity.VERSION_FIELD_DEFAULT.equals(versionField)) {
-      entityAnnotationBuilder.addStringAttribute("versionField", versionField);
-    }
-    if (!JavaType.INT_OBJECT.equals(versionType)) {
-      entityAnnotationBuilder.addClassAttribute("versionType", versionType);
-    }
-
-    // ROO-3719: Add SEQUENCE as @GeneratedValue strategy
-    if (identifierStrategy != null) {
-      entityAnnotationBuilder.addStringAttribute("identifierStrategy", identifierStrategy.name());
     }
 
     // ROO-3708: Generate readOnly entities

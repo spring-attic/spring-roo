@@ -194,7 +194,7 @@ public class JaxbEntityMetadataProviderImpl extends AbstractMemberDiscoveringItd
     // parent
     MethodMetadata identifierAccessor = null;
     if (jpaEntityMetadata != null && jpaEntityMetadata.getParent() == null) {
-      identifierAccessor = jpaEntityMetadata.getIdentifierAccessor().build();
+      identifierAccessor = jpaEntityMetadata.getCurrentIdentifierAccessor();
     }
 
     return new JaxbEntityMetadata(metadataIdentificationString, aspectName,

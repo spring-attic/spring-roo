@@ -1,10 +1,12 @@
 package org.springframework.roo.addon.jpa.addon;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.roo.addon.jpa.addon.entity.IdentifierStrategy;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Feature;
 import org.springframework.roo.project.maven.Pom;
@@ -74,10 +76,22 @@ public interface JpaOperations extends Feature {
    *            class
    * @param superclass the super class of the entity
    * @param implementsType the interface to implement
+   * @param identifierField
+   * @param identifierType
+   * @param identifierColumn
+   * @param sequenceName
+   * @param identifierStrategy
+   * @param versionField
+   * @param versionType
+   * @param versionColumn
+   * @param inheritanceType
    * @param annotations the entity's annotations
    */
   void newEntity(JavaType name, boolean createAbstract, JavaType superclass,
-      JavaType implementsType, List<AnnotationMetadataBuilder> annotations);
+      JavaType implementsType, String identifierField, JavaType identifierType,
+      String identifierColumn, String sequenceName, IdentifierStrategy identifierStrategy,
+      String versionField, JavaType versionType, String versionColumn,
+      InheritanceType inheritanceType, List<AnnotationMetadataBuilder> annotations);
 
   /**
    * Updates an existing embeddable class to a JPA identifier class.

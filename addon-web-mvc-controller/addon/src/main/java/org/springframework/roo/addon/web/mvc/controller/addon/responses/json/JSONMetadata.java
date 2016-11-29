@@ -438,7 +438,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     bodyBuilder.appendFormalLine("%s.%s(%s,%s.singleton(%s.%s()));", detailsServiceField
         .getFieldName(), removeFromMethod.getMethodName(), removeFromMethod.getParameterNames()
         .get(0), getNameOfJavaType(JavaType.COLLECTIONS), itemsName,
-        detailsInfo.childEntityMetadata.getIdentifierAccessor().getMethodName());
+        detailsInfo.childEntityMetadata.getCurrentIdentifierAccessor().getMethodName());
 
     // return ResponseEntity.ok().build();
     bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
