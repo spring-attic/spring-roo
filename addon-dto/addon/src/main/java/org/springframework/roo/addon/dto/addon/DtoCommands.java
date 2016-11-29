@@ -38,6 +38,7 @@ import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,21 +57,27 @@ public class DtoCommands implements CommandMarker {
 
   protected final static Logger LOGGER = HandlerUtils.getLogger(FieldCommands.class);
 
-  //------------ OSGi component attributes ----------------
+  // ------------ OSGi component attributes ----------------
   private BundleContext context;
 
   @Reference
   private DtoOperations dtoOperations;
+
   @Reference
   private TypeLocationService typeLocationService;
+
   @Reference
   private ProjectOperations projectOperations;
+
   @Reference
   private PathResolver pathResolver;
+
   @Reference
   private FileManager fileManager;
+
   @Reference
   private LastUsed lastUsed;
+
   @Reference
   private MemberDetailsScanner memberDetailsScanner;
 
@@ -273,7 +280,8 @@ public class DtoCommands implements CommandMarker {
   }
 
   /**
-   * Find entities in project and returns a list with their fully qualified names.
+   * Find entities in project and returns a list with their fully qualified
+   * names.
    *
    * @param shellContext
    * @return List<String> with available entity full qualified names.
@@ -302,9 +310,198 @@ public class DtoCommands implements CommandMarker {
     return results;
   }
 
+  /**
+   * Attempts to obtain entity specified in 'entity' option and returns an
+   * auto-complete list with the entity fields, separated by comma's.
+   * 
+   * @param shellContext
+   * @return a List<String> with the possible values.
+   */
+  @CliOptionAutocompleteIndicator(command = "entity projection", param = "fields",
+      help = "Option fields must have a comma-separated list of valid fields. Please, assign it a "
+          + "correct value. Transient, static and entity collection fields are not valid for "
+          + "projections.", includeSpaceOnFinish = false)
+  public List<String> returnFieldValues(ShellContext shellContext) {
+    List<String> fieldValuesToReturn = new ArrayList<String>();
+
+    // Get entity JavaType
+    JavaType entity = getTypeFromEntityParam(shellContext);
+
+    // Get current fields in --field value
+    String currentFieldValue = shellContext.getParameters().get("fields");
+    String[] fields = StringUtils.split(currentFieldValue, ",");
+
+    // Check for bad written separators and return no options
+    if (currentFieldValue.contains(",.") || currentFieldValue.contains(".,")) {
+      return fieldValuesToReturn;
+    }
+
+    // Check if it is first field
+    if (currentFieldValue.equals("")) {
+      for (FieldMetadata field : getEntityFieldList(entity)) {
+        fieldValuesToReturn.add(field.getFieldName().getSymbolName());
+      }
+      return fieldValuesToReturn;
+    }
+
+    // VALIDATION OF CURRENT SPECIFIED VALUES UNTIL LAST MEMBER
+    JavaType lastRelatedEntity = null;
+    String completedValue = "";
+    List<FieldMetadata> entityFields = null;
+    boolean fieldFound = false;
+    boolean lastFieldIsEntity = false;
+    boolean isMainEntityField = true;
+    for (int i = 0; i < fields.length; i++) {
+
+      JavaType lastFieldType = entity;
+
+      // Split field by ".", in case it was a relation field
+      String[] splittedByPeriod = StringUtils.split(fields[i], ".");
+
+      // Build auto-complete values
+      for (int t = 0; t < splittedByPeriod.length; t++) {
+        fieldFound = false;
+
+        // Find the field in entity fields
+        if (typeLocationService.getTypeDetails(lastFieldType) != null
+            && typeLocationService.getTypeDetails(lastFieldType).getAnnotation(
+                RooJavaType.ROO_JPA_ENTITY) != null) {
+          entityFields = getEntityFieldList(lastFieldType);
+        }
+
+        for (FieldMetadata entityField : entityFields) {
+          lastFieldIsEntity = false;
+          if (splittedByPeriod[t].equals(entityField.getFieldName().getSymbolName())) {
+
+            // Add auto-complete value
+            if (completedValue.equals("")) {
+              completedValue = entityField.getFieldName().getSymbolName();
+            } else {
+              if (splittedByPeriod.length > 1 && t > 0) {
+
+                // Field is from a relation
+                completedValue =
+                    completedValue.concat(".").concat(entityField.getFieldName().getSymbolName());
+              } else {
+
+                // Field is a simple field
+                completedValue =
+                    completedValue.concat(",").concat(entityField.getFieldName().getSymbolName());
+              }
+            }
+
+            // Record last field JavaType for auto-completing last value
+            lastFieldType = entityField.getFieldType();
+
+            // Check if field is an entity different from original entity
+            if (typeLocationService.getTypeDetails(lastFieldType) != null
+                && typeLocationService.getTypeDetails(lastFieldType).getAnnotation(
+                    RooJavaType.ROO_JPA_ENTITY) != null
+                && !entityField.getFieldType().equals(entity)) {
+              lastFieldIsEntity = true;
+              lastRelatedEntity = lastFieldType;
+            }
+
+            fieldFound = true;
+            break;
+          }
+        }
+
+        // Checks if field to autocomplete is from main entity
+        if (currentFieldValue.endsWith(".") || (splittedByPeriod.length > 1 && !fieldFound)) {
+          isMainEntityField = false;
+        }
+      }
+    }
+
+    // ADDITION OF NEW VALUES
+
+    // Add field separator if needed
+    if (fieldFound) {
+
+      // Always add current value for validation only
+      fieldValuesToReturn.add(completedValue);
+
+      // If field is entity, append , and . and return values
+      if (lastFieldIsEntity) {
+        fieldValuesToReturn.add(completedValue.concat(","));
+        fieldValuesToReturn.add(completedValue.concat("."));
+
+        if (!currentFieldValue.endsWith(",") && !currentFieldValue.endsWith(".")) {
+          return fieldValuesToReturn;
+        }
+      }
+    }
+
+    // Build auto-complete values for last member
+    String autocompleteValue = "";
+    if (isMainEntityField) {
+
+      // Complete simple fields. Add entity fields as auto-complete values
+      List<FieldMetadata> mainEntityFields = getEntityFieldList(entity);
+      for (FieldMetadata mainEntityField : mainEntityFields) {
+
+        if (completedValue.equals("")) {
+
+          // Is first field to complete
+          fieldValuesToReturn.add(mainEntityField.getFieldName().getSymbolName());
+        } else if (!completedValue.equals("")) {
+
+          // Check if field is specified and add it if not
+          boolean alreadySpecified = false;
+          // boolean relationField = false;
+          for (int i = 0; i < fields.length; i++) {
+            if (mainEntityField.getFieldName().getSymbolName().equals(fields[i])) {
+              alreadySpecified = true;
+            }
+          }
+          if (!alreadySpecified) {
+
+            // Add completion
+            autocompleteValue =
+                completedValue.concat(",").concat(mainEntityField.getFieldName().getSymbolName());
+          } else if (alreadySpecified && typeIsEntity(mainEntityField.getFieldType())) {
+
+            // Add completion as relation field
+            autocompleteValue =
+                completedValue.concat(",").concat(mainEntityField.getFieldName().getSymbolName())
+                    .concat(".");
+          }
+
+          // Add completion
+          fieldValuesToReturn.add(autocompleteValue);
+        }
+      }
+    } else if (lastRelatedEntity != null) {
+
+      // Complete with fields of current relation field
+      List<FieldMetadata> relatedEntityFields = getEntityFieldList(lastRelatedEntity);
+      for (FieldMetadata relatedEntityField : relatedEntityFields) {
+        autocompleteValue =
+            completedValue.concat(".").concat(relatedEntityField.getFieldName().getSymbolName());
+
+        // Check if value already exists
+        String additionalValueToAdd = StringUtils.substringAfterLast(autocompleteValue, ",");
+        if (!fieldValuesToReturn.contains(autocompleteValue)
+            && !currentFieldValue.contains(additionalValueToAdd)) {
+          fieldValuesToReturn.add(autocompleteValue);
+        } else if (!fieldValuesToReturn.contains(autocompleteValue)
+            && typeIsEntity(relatedEntityField.getFieldType())) {
+          fieldValuesToReturn.add(autocompleteValue);
+        } else if (additionalValueToAdd.equals("")) {
+          fieldValuesToReturn.add(autocompleteValue);
+        }
+      }
+    }
+
+    return fieldValuesToReturn;
+  }
+
   @CliCommand(
       value = "entity projection",
-      help = "Creates new projection classes from entities in the directory _src/main/java_ of the selected project module (if any) annotated with `@RooEntityProjection`.")
+      help = "Creates new projection classes from entities in the directory _src/main/java_ of the "
+          + "selected project module (if any) annotated with `@RooEntityProjection`. Transient, "
+          + "static and entity collection fields are not valid for projections.")
   public void newProjectionClass(
       @CliOption(
           key = "all",
@@ -333,7 +530,10 @@ public class DtoCommands implements CommandMarker {
           key = "fields",
           mandatory = true,
           help = "Comma separated list of entity fields to be included into the Projection. "
-              + "This option is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--fields` won't be available.") final String fields,
+              + "Possible values are: non-static, nor transient, nor entity collection fields from "
+              + "main entity or its related entities (only for one-to-one or many-to-one relations). "
+              + "This option is mandatory if `--class` is specified. Otherwise, not specifying "
+              + "`--class` will cause the parameter `--fields` won't be available.") final String fields,
       @CliOption(
           key = "suffix",
           mandatory = false,
@@ -376,7 +576,8 @@ public class DtoCommands implements CommandMarker {
   }
 
   /**
-   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
+   * TopLevelPackage
    *
    * @param cid ClassOrInterfaceTypeDetails of a JavaType
    * @param currentText String current text for option value
@@ -432,7 +633,8 @@ public class DtoCommands implements CommandMarker {
   }
 
   /**
-   * Gets a list of fields from an entity.
+   * Gets a list of fields from an entity. Static and transient fields are excluded
+   * as well as collection fields which type is an entity.
    *
    * @param entity the JavaType from which to obtain the field list.
    * @return a List<FieldMetadata> with info of the entity fields.
@@ -453,6 +655,34 @@ public class DtoCommands implements CommandMarker {
     // Get fields and check for other fields from relations
     List<FieldMetadata> entityFields = entityMemberDetails.getFields();
     for (FieldMetadata field : entityFields) {
+
+      // Exclude static fields
+      if (Modifier.isStatic(field.getModifier())) {
+        continue;
+      }
+
+      // Exclude transient fields
+      if (field.getAnnotation(JpaJavaType.TRANSIENT) != null) {
+        continue;
+      }
+
+      // Exclude entity collection fields
+      JavaType fieldType = field.getFieldType();
+      if (fieldType.isCommonCollectionType()) {
+        boolean isEntityCollectionField = false;
+        List<JavaType> parameters = fieldType.getParameters();
+        for (JavaType parameter : parameters) {
+          if (typeIsEntity(parameter)) {
+            isEntityCollectionField = true;
+            break;
+          }
+        }
+
+        if (isEntityCollectionField) {
+          continue;
+        }
+      }
+
       fieldList.add(field);
     }
 
@@ -460,12 +690,12 @@ public class DtoCommands implements CommandMarker {
   }
 
   /**
-   * Tries to obtain JavaType indicated in command or which has the focus
-   * in the Shell
+   * Tries to obtain JavaType indicated in command or which has the focus in the
+   * Shell
    *
    * @param shellContext the Roo Shell context
-   * @return JavaType or null if no class has the focus or no class is
-   * specified in the command
+   * @return JavaType or null if no class has the focus or no class is specified
+   *         in the command
    */
   private JavaType getTypeFromEntityParam(ShellContext shellContext) {
     // Try to get 'class' from ShellContext
@@ -483,6 +713,11 @@ public class DtoCommands implements CommandMarker {
             + "param '--entity' is specified with a right value.");
 
     return type;
+  }
+
+  private boolean typeIsEntity(JavaType type) {
+    return typeLocationService.getTypeDetails(type) != null
+        && typeLocationService.getTypeDetails(type).getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null;
   }
 
   @SuppressWarnings("unchecked")

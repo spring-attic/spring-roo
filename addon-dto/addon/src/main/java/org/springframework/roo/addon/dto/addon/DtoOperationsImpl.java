@@ -150,7 +150,11 @@ public class DtoOperationsImpl implements DtoOperations {
           memberDetailsScanner.getMemberDetails(this.getClass().getName(),
               typeLocationService.getTypeDetails(entity)).getFields();
       for (FieldMetadata field : allFields) {
-        fieldsToAdd.put(field.getFieldName().getSymbolName(), field);
+
+        // Add only valid fields
+        if (isFieldValidForProjection(field)) {
+          fieldsToAdd.put(field.getFieldName().getSymbolName(), field);
+        }
       }
     }
 
@@ -276,6 +280,7 @@ public class DtoOperationsImpl implements DtoOperations {
       // Iterate over all entity fields
       for (FieldMetadata field : allFields) {
         if (field.getFieldName().getSymbolName().equals(fields[i])) {
+
           // If found, add field to returned map
           fieldsToAdd.put(field.getFieldName().getSymbolName(), field);
           found = true;
@@ -430,6 +435,8 @@ public class DtoOperationsImpl implements DtoOperations {
           // Add validation dependency
           projectOperations.addDependency(projectionBuilder.getName().getModule(), new Dependency(
               "javax.validation", "validation-api", null));
+        } else if (annotation.getAnnotationType().equals(RooJavaType.ROO_JPA_RELATION)) {
+          fieldBuilder.removeAnnotation(annotation.getAnnotationType());
         }
       }
 
@@ -446,4 +453,37 @@ public class DtoOperationsImpl implements DtoOperations {
     }
   }
 
+  private boolean isFieldValidForProjection(FieldMetadata field) {
+
+    // Exclude static fields
+    if (Modifier.isStatic(field.getModifier())) {
+      return false;
+    }
+
+    // Exclude transient fields
+    if (field.getAnnotation(JpaJavaType.TRANSIENT) != null) {
+      return false;
+    }
+
+    // Exclude entity collection fields
+    JavaType fieldType = field.getFieldType();
+    if (fieldType.isCommonCollectionType()) {
+      boolean isEntityCollectionField = false;
+      List<JavaType> parameters = fieldType.getParameters();
+      for (JavaType parameter : parameters) {
+        if (typeLocationService.getTypeDetails(parameter) != null
+            && typeLocationService.getTypeDetails(parameter).getAnnotation(
+                RooJavaType.ROO_JPA_ENTITY) != null) {
+          isEntityCollectionField = true;
+          break;
+        }
+      }
+
+      if (isEntityCollectionField) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
