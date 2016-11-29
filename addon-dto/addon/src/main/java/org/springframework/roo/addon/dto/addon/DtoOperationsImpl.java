@@ -136,6 +136,9 @@ public class DtoOperationsImpl implements DtoOperations {
   @Override
   public void createProjection(JavaType entity, JavaType name, String fields, String suffix) {
     Validate.notNull(name, "Use --class to select the name of the Projection.");
+    
+    // TODO: Validate fields for excluding entity collection, transient and 
+    // static fields from operations (already doing when comming from commands).
 
     // Set focus on projection module
     projectOperations.setModule(projectOperations.getPomFromModuleName(name.getModule()));
