@@ -1,8 +1,5 @@
 package org.springframework.roo.addon.security.addon.security.providers;
 
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
@@ -22,12 +19,13 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
+import java.util.Set;
+import java.util.logging.Logger;
+
 /**
- * Implementation of SecurityProvider to work with the domain
- * model during the authentication process.
- * 
- * The name of this provider is "SPRINGLETS_JPA" and must be unique. It will be used to 
- * recognize this Spring Security Provider.
+ * Implementation of SecurityProvider to work with the domain model during the
+ * authentication process. The name of this provider is "SPRINGLETS_JPA" and
+ * must be unique. It will be used to recognize this Spring Security Provider.
  * 
  * @author Juan Carlos García
  * @since 2.0
@@ -38,8 +36,17 @@ public class SpringletsJpaSecurityProvider implements SecurityProvider {
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
       "1.0.0.RELEASE");
+
   private static final Dependency SPRINGLETS_SECURITY_AUTHENTICATION_STARTER = new Dependency(
       "io.springlets", "springlets-boot-starter-authentication", "${springlets.version}");
+
+  private static final String THYMELEAF_SPRING_SECURITY_VERSION = "3.0.0.RELEASE";
+
+  private static final Property THYMELEAF_SPRING_SECURITY_VERSION_PROPERTY = new Property(
+      "thymeleaf-extras-springsecurity4.version", THYMELEAF_SPRING_SECURITY_VERSION);
+
+  private static final Dependency THYMELEAF_SPRING_SECURITY = new Dependency(
+      "org.thymeleaf.extras", "thymeleaf-extras-springsecurity4", null);
 
   protected final static Logger LOGGER = HandlerUtils
       .getLogger(SpringletsJpaSecurityProvider.class);
@@ -48,8 +55,6 @@ public class SpringletsJpaSecurityProvider implements SecurityProvider {
   private BundleContext context;
 
   private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
-
-  private ProjectOperations projectOperations;
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
@@ -97,12 +102,11 @@ public class SpringletsJpaSecurityProvider implements SecurityProvider {
         "true", "dev", true);
 
     // Add thymeleaf-extras-springsecurity4 dependency with Thymeleaf 3 support
-    getProjectOperations().addProperty(module.getModuleName(),
-        new Property("thymeleaf-extras-springsecurity4.version", "3.0.0.RELEASE"));
-    getProjectOperations().addDependency(module.getModuleName(),
-        new Dependency("org.thymeleaf.extras", "thymeleaf-extras-springsecurity4", null));
+    getProjectOperations().addProperty("", THYMELEAF_SPRING_SECURITY_VERSION_PROPERTY);
+    getProjectOperations().addDependency(module.getModuleName(), THYMELEAF_SPRING_SECURITY);
 
-    // Add @EnableJpaRepositories and @EntityScan annotations to the @SpringBootApplication class
+    // Add @EnableJpaRepositories and @EntityScan annotations to the
+    // @SpringBootApplication class
     Set<ClassOrInterfaceTypeDetails> springBootApplicationClasses =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
             SpringJavaType.SPRING_BOOT_APPLICATION);

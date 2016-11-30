@@ -38,6 +38,14 @@ public class DefaultSecurityProvider implements SecurityProvider {
   private static final Dependency SPRING_SECURITY_STARTER = new Dependency(
       "org.springframework.boot", "spring-boot-starter-security", null);
 
+  private static final String THYMELEAF_SPRING_SECURITY_VERSION = "3.0.0.RELEASE";
+
+  private static final Property THYMELEAF_SPRING_SECURITY_VERSION_PROPERTY = new Property(
+      "thymeleaf-extras-springsecurity4.version", THYMELEAF_SPRING_SECURITY_VERSION);
+
+  private static final Dependency THYMELEAF_SPRING_SECURITY = new Dependency(
+      "org.thymeleaf.extras", "thymeleaf-extras-springsecurity4", null);
+
   private ServiceInstaceManager serviceManager = new ServiceInstaceManager();
 
   protected void activate(final ComponentContext context) {
@@ -78,10 +86,8 @@ public class DefaultSecurityProvider implements SecurityProvider {
     getProjectOperations().addDependency(module.getModuleName(), SPRING_SECURITY_STARTER);
 
     // Add thymeleaf-extras-springsecurity4 dependency with Thymeleaf 3 support
-    getProjectOperations().addProperty(module.getModuleName(),
-        new Property("thymeleaf-extras-springsecurity4.version", "3.0.0.RELEASE"));
-    getProjectOperations().addDependency(module.getModuleName(),
-        new Dependency("org.thymeleaf.extras", "thymeleaf-extras-springsecurity4", null));
+    getProjectOperations().addProperty("", THYMELEAF_SPRING_SECURITY_VERSION_PROPERTY);
+    getProjectOperations().addDependency(module.getModuleName(), THYMELEAF_SPRING_SECURITY);
   }
 
 
