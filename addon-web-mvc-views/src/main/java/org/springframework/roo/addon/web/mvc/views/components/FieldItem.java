@@ -31,6 +31,7 @@ public class FieldItem {
   private String fieldId;
   private Map<String, String> javascriptCode;
   private String z;
+  private Object legendLabel;
 
   /**
    * Constructs a FieldItem using the name and entityName
@@ -104,6 +105,38 @@ public class FieldItem {
     this.entityName = entityName;
     this.userManaged = false;
     this.codeManaged = "";
+    buildId(suffixId);
+
+    // Calculate the Z parameter as the hash code of the other parametersString
+    this.z = calculateZ();
+  }
+
+  /**
+   * Constructs a FieldItem  prepared to show in a parent entity view, using 
+   * the name, parentEntityName, parentEntityFieldName, entityName and suffixId.
+   *
+   * @param fieldName
+   *            the field name
+   * @param parentEntityName
+   *            the parent entity name
+   * @param parentEntityFieldName
+   *            the field name which references child entity on parent entity
+   * @param entityName
+   *            the entity where this field is defined
+   * @param suffixId
+   *            used to generate field id
+   */
+  public FieldItem(String fieldName, String parentEntityName, String parentEntityFieldName,
+      String entityName, String suffixId) {
+    this.fieldName = parentEntityFieldName.concat(".").concat(fieldName);
+    this.fieldNameCapitalized = StringUtils.capitalize(fieldName);
+    this.fieldWithoutCamelCase = buildFieldWithoutCamelCase(fieldName);
+    this.configuration = new HashMap<String, Object>();
+    this.label = buildLabel(entityName, fieldName);
+    this.entityName = entityName;
+    this.userManaged = false;
+    this.codeManaged = "";
+    this.legendLabel = buildLabel(parentEntityName, parentEntityFieldName);
     buildId(suffixId);
 
     // Calculate the Z parameter as the hash code of the other parametersString
@@ -285,5 +318,12 @@ public class FieldItem {
   }
 
 
+  public Object getLegendLabel() {
+    return legendLabel;
+  }
+
+  public void setLegendLabel(Object legendLabel) {
+    this.legendLabel = legendLabel;
+  }
 
 }

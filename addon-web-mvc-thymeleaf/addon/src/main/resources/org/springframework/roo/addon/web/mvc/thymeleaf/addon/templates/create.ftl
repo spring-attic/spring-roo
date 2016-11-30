@@ -1,77 +1,71 @@
-<#import "fields/input-text.ftl" as text>
-<#import "fields/input-number.ftl" as number>
-<#import "fields/input-date.ftl" as date>
-<#import "fields/reference.ftl" as reference>
-<#import "fields/checkbox.ftl" as checkbox>
-<#import "fields/enum.ftl" as enum>
-<!DOCTYPE html>
+<#import "fields/input-text.ftl" as text> <#import
+  "fields/input-number.ftl" as number> <#import
+  "fields/input-date.ftl" as date> <#import "fields/reference.ftl" as
+  reference> <#import "fields/checkbox.ftl" as checkbox> <#import
+  "fields/enum.ftl" as enum> <!DOCTYPE html>
 <html lang="en" data-layout-decorate="layouts/default-layout">
-  <head>
-    <meta charset="UTF-8" data-th-remove="all"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"
-      data-th-remove="all"/>
-    <meta name="description"
-      content="Spring Roo, a next-generation rapid application development tool for Java developers. With Roo you can easily build full Java applications in minutes."
-      data-th-remove="all"/>
-    <meta name="author"
-      content="Spring Roo development team"
-      data-th-remove="all"/>
+<head>
+<meta charset="UTF-8" data-th-remove="all" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all" />
+<meta name="viewport" content="width=device-width, initial-scale=1"
+  data-th-remove="all" />
+<meta name="description"
+  content="Spring Roo, a next-generation rapid application development tool for Java developers. With Roo you can easily build full Java applications in minutes."
+  data-th-remove="all" />
+<meta name="author" content="Spring Roo development team" data-th-remove="all" />
 
-    <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
-      data-th-remove="all"/>
-    <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
-      data-th-remove="all"/>
+<link rel="shortcut icon" href="../../static/public/img/favicon.ico"
+  data-th-remove="all" />
+<link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
+  data-th-remove="all" />
 
-    <title data-th-text="${r"#{"}label_create_entity(${r"#{"}${entityLabel}})}">
-    Create ${entityName} - ${projectName} - SpringRoo Application</title>
+<title data-th-text="${r"#{"}label_create_entity(${r"#{"}${entityLabel}})}">
+  Create ${entityName} - ${projectName} - SpringRoo Application</title>
 
-    <!--/* Bootstrap */-->
-    <link rel="stylesheet" type="text/css"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
-      data-th-remove="all"></link>
+<!--/* Bootstrap */-->
+<link rel="stylesheet" type="text/css"
+  href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
+  data-th-remove="all"></link>
 
-    <!--/* IE10 viewport hack for Surface/desktop Windows 8 bug */-->
-    <link rel="stylesheet" type="text/css"
-      href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
-      data-th-remove="all"></link>
+<!--/* IE10 viewport hack for Surface/desktop Windows 8 bug */-->
+<link rel="stylesheet" type="text/css"
+  href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
+  data-th-remove="all"></link>
 
-    <!--/* Font Awesome */-->
-    <link rel="stylesheet" type="text/css"
-      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
-      data-th-remove="all"/>
+<!--/* Font Awesome */-->
+<link rel="stylesheet" type="text/css"
+  href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
+  data-th-remove="all" />
 
-    <!-- Select2 -->
-    <link rel="stylesheet" type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css"
-      data-th-href="@{/webjars/select2/dist/css/select2.css}"/>
-    <link rel="stylesheet" type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.7/select2-bootstrap.css"
-      data-th-href="@{/webjars/select2-bootstrap-theme/dist/select2-bootstrap.css}"/>
+<!-- Select2 -->
+<link rel="stylesheet" type="text/css"
+  href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css"
+  data-th-href="@{/webjars/select2/dist/css/select2.css}" />
+<link rel="stylesheet" type="text/css"
+  href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.7/select2-bootstrap.css"
+  data-th-href="@{/webjars/select2-bootstrap-theme/dist/select2-bootstrap.css}" />
 
-    <!-- DateTimePicker -->
-    <link rel="stylesheet" type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.min.css"
-      data-th-href="@{/webjars/datetimepicker/build/jquery.datetimepicker.min.css}"/>
+<!-- DateTimePicker -->
+<link rel="stylesheet" type="text/css"
+  href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.min.css"
+  data-th-href="@{/webjars/datetimepicker/build/jquery.datetimepicker.min.css}" />
 
-    <!--/* Bootswatch CSS custom */-->
-    <link rel="stylesheet" type="text/css"
-      href="../../static/public/css/theme.css"
-      data-th-remove="all"/>
+<!--/* Bootswatch CSS custom */-->
+<link rel="stylesheet" type="text/css" href="../../static/public/css/theme.css"
+  data-th-remove="all" />
 
-    <!--/* Roo CSS */-->
-    <link rel="stylesheet" type="text/css"
-       href="../../static/public/css/springroo.css"
-       data-th-remove="all"/>
+<!--/* Roo CSS */-->
+<link rel="stylesheet" type="text/css"
+  href="../../static/public/css/springroo.css" data-th-remove="all" />
 
-    <!--/* HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries */-->
-    <!--/* WARNING: Respond.js doesn't work if you view the page via file:// */-->
-    <!--/*[if lt IE 9]>
+<!--/* HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries */-->
+<!--/* WARNING: Respond.js doesn't work if you view the page via file:// */-->
+<!--/*[if lt IE 9]>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js" data-th-remove="all"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js" data-th-remove="all"></script>
     <![endif]*/-->
 
-  </head>
+</head>
 <#if userManagedComponents?has_content && userManagedComponents["body"]??>
   ${userManagedComponents["body"]}
 <#else>
@@ -242,8 +236,50 @@
                       <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
                   </#if>
               </#list>
+            </fieldset>
+              
+              <#if compositeRelationFields?has_content>
+                <#list compositeRelationFields?keys as referencedField>
+                  <fieldset id="${referencedField}FieldSet">
+                    <#list compositeRelationFields[referencedField] as field>
+                      <#if field?index == 0>
+                        <legend data-th-text="${r"#{"}${field.legendLabel}}">${field.entityName} data </legend>
+                      </#if>
 
-              </fieldset>
+                      <#if field.userManaged>
+                        ${field.codeManaged}
+                      <#elseif field.type == "TEXT">
+                        <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required maxLength=field.configuration.maxLength />
+                      <#elseif field.type == "NUMBER">
+                        <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
+                      <#elseif field.type == "DATE">
+                        <@date.input label=field.label
+                          fieldName=field.fieldName
+                          fieldId=field.fieldId
+                          z=field.z
+                          format=field.configuration.format required=field.configuration.required />
+                      <#elseif field.type == "REFERENCE">
+                        <@reference.input label=field.label
+                          fieldName=field.fieldName
+                          fieldId=field.fieldId
+                          z=field.z
+                          referencedEntity=field.configuration.referencedEntity
+                          identifierField=field.configuration.identifierField
+                          referecedMvcUrl_select2=field.configuration.referecedMvcUrl_select2
+                          required=field.configuration.required />
+                      <#elseif field.type == "ENUM">
+                        <@enum.input label=field.label
+                          fieldName=field.fieldName
+                          fieldId=field.fieldId
+                          z=field.z
+                          items=field.configuration.items required=field.configuration.required />
+                      <#elseif field.type == "BOOLEAN">
+                        <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
+                      </#if>
+                    </#list>
+                  </fieldset>
+                </#list>
+              </#if>
 
               <!-- buttons form -->
               <div class="form-group">
@@ -321,11 +357,14 @@
   <!-- MomentJS -->
   <script
      src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.js">
-  </script>
+			
+		</script>
   <script src="../../static/public/js/moment-locale-es.js">
-  </script>
+			
+		</script>
   <script src="../../static/public/js/moment-defaults.js">
-  </script>
+			
+		</script>
 
   <div data-layout-fragment="javascript">
 
@@ -341,22 +380,24 @@
        src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.3.1/jquery.inputmask.bundle.min.js"
        data-th-src="@{/webjars/jquery.inputmask/min/jquery.inputmask.bundle.min.js}"></script>
     <script type="text/javascript" data-th-inline="javascript">
-      (function(jQuery) {
-        jQuery(document).ready(
-	  function() {
-	    Inputmask.extendAliases({
-	      'numeric' : {
-	         'groupSeparator' : /*[[${r"#{"}label_inputmask_groupSeparator}]]*/'.',
-	         'radixPoint' : /*[[${r"#{"}label_inputmask_radixPoint}]]*/','
-	       },
-	       'currency' : {
-	          'prefix' : /*[[${r"#{"}label_inputmask_prefix}]]*/'',
-	          'suffix' : /*[[${r"#{"}label_inputmask_suffix}]]*/' €'
-	        }
-	    });
-	 });
-       })(jQuery);
-    </script>
+					(function(jQuery) {
+						jQuery(document)
+								.ready(
+										function() {
+											Inputmask
+													.extendAliases({
+														'numeric' : {
+															'groupSeparator' : /*[[${r"#{"}label_inputmask_groupSeparator}]]*/'.',
+															'radixPoint' : /*[[${r"#{"}label_inputmask_radixPoint}]]*/','
+														},
+														'currency' : {
+															'prefix' : /*[[${r"#{"}label_inputmask_prefix}]]*/'',
+															'suffix' : /*[[${r"#{"}label_inputmask_suffix}]]*/' €'
+														}
+													});
+										});
+					})(jQuery);
+				</script>
     <script src="../../static/public/js/inputmask-defaults.js"
       data-th-src="@{/public/js/inputmask-defaults.js}"></script>
 
@@ -364,29 +405,38 @@
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/jquery.validate.min.js"
       data-th-src="@{/webjars/jquery-validation/dist/jquery.validate.min.js}">
-    </script>
+					
+				</script>
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/additional-methods.min.js"
       data-th-src="@{/webjars/jquery-validation/dist/additional-methods.min.js}">
-    </script>
+					
+				</script>
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/localization/messages_es.js"
       data-th-src="@{/webjars/jquery-validation/src/localization/messages_}+${r"${#"}locale.language${r"}"}+'.js'"
       data-th-if="${r"${#"}locale.language${r"}"} != 'en'">
-    </script>
+					
+				</script>
     <script src="../../static/public/js/validation-defaults.js"
       data-th-src="@{/public/js/validation-defaults.js}">
-    </script>
+					
+				</script>
     <script type="text/javascript" data-th-inline="javascript">
-      (function(jQuery) {
-         jQuery(document).ready(function() {
-	   jQuery.extend( jQuery.validator.messages, {
-	     'dateformat' : /*[[${r"#{"}error_invalid_date}]]*/ 'Please enter a correct date/time',
-	     'inputmask': /*[[${r"#{"}error_invalid_maskValue}]]*/ 'Please enter a valid value',
-	   });
-	 });
-      })(jQuery);
-    </script>
+					(function(jQuery) {
+						jQuery(document)
+								.ready(
+										function() {
+											jQuery
+													.extend(
+															jQuery.validator.messages,
+															{
+																'dateformat' : /*[[${r"#{"}error_invalid_date}]]*/'Please enter a correct date/time',
+																'inputmask' : /*[[${r"#{"}error_invalid_maskValue}]]*/'Please enter a valid value',
+															});
+										});
+					})(jQuery);
+				</script>
 
     <!-- Select2 -->
     <div data-th-replace="fragments/js/select2 :: select2-js">
@@ -395,27 +445,27 @@
 
 
     <script type="text/javascript" data-th-inline="javascript">
-      // IIFE - Immediately Invoked Function Expression
-      (function(list) {
+					// IIFE - Immediately Invoked Function Expression
+					(function(list) {
 
-        // The global jQuery object is passed as a parameter
-        list(window.jQuery, window, document);
+						// The global jQuery object is passed as a parameter
+						list(window.jQuery, window, document);
 
-      }(function($, window, document) {
+					}(function($, window, document) {
 
-        // The $ is now locally scoped, it won't collide with other libraries
+						// The $ is now locally scoped, it won't collide with other libraries
 
-        // Listen for the jQuery ready event on the document
-        // READY EVENT BEGIN
-        $(function() {
+						// Listen for the jQuery ready event on the document
+						// READY EVENT BEGIN
+						$(function() {
 
-          // Put this page local javascript here!
+							// Put this page local javascript here!
 
-        });
+						});
 
-        // READY EVENT END
-      }));
-    </script>
+						// READY EVENT END
+					}));
+				</script>
 
     </div>
 

@@ -6,6 +6,8 @@ import org.apache.felix.scr.annotations.Component;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerLocator;
@@ -27,6 +29,7 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
@@ -58,18 +61,17 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
- *
  * This abstract class implements MVCViewGenerationService interface that
  * provides all necessary elements to generate views inside project.
  *
  * @param <DOC>
  * @param <T>
- *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -98,7 +100,6 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
   protected abstract DOC merge(String templateName, DOC loadExistingDoc, ViewContext<T> ctx);
 
-
   protected abstract DOC merge(String templateName, DOC existingDoc, ViewContext<T> ctx,
       List<FieldItem> fields);
 
@@ -111,8 +112,6 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
   protected abstract void writeDoc(DOC document, String viewPath);
 
-
-
   @Override
   public void addListView(String moduleName, JpaEntityMetadata entityMetadata,
       MemberDetails entity, List<T> detailsControllers, ViewContext<T> ctx) {
@@ -121,8 +120,6 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     List<FieldMetadata> entityFields = getPersistentFields(entity.getFields());
     List<FieldItem> fields =
         getFieldViewItems(entityFields, ctx.getEntityName(), true, ctx, TABLE_SUFFIX);
-
-
 
     // Process elements to generate
     DOC newDoc = null;
@@ -146,13 +143,15 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
       // Sort details by path
       Collections.sort(details, new Comparator<DetailEntityItem>() {
+
         @Override
         public int compare(DetailEntityItem o1, DetailEntityItem o2) {
           return o1.getPathString().compareTo(o2.getPathString());
         }
       });
 
-      // Locates parent details for children, grandsons, etc and make groups by levels
+      // Locates parent details for children, grandsons, etc and make groups by
+      // levels
       for (DetailEntityItem detail : details) {
         // Create group until item level
         while (detailsLevels.size() < detail.getLevel()) {
@@ -235,11 +234,23 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       MemberDetails entityDetails, ViewContext<T> ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = getPersistentFields(entityDetails.getFields());
-    List<FieldItem> fields =
-        getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
+    List<FieldMetadata> entityFields = new ArrayList<FieldMetadata>();
 
     EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
+
+    Map<String, List<FieldItem>> compositeRelationFields =
+        manageChildcompositionFields(entityMetadata, entityDetails, ctx);
+
+    // Remove one-to-one fields from composite relations and create EntityItems
+    // for each referenced entity field
+    Set<String> compositeRelationFieldNames = compositeRelationFields.keySet();
+    for (FieldMetadata field : getPersistentFields(entityDetails.getFields())) {
+      if (!compositeRelationFieldNames.contains(field.getFieldName().getSymbolName())) {
+        entityFields.add(field);
+      }
+    }
+    List<FieldItem> fields =
+        getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
 
     // TODO: TO BE FIXED when implements details
     List<FieldItem> details = new ArrayList<FieldItem>();
@@ -248,6 +259,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     ctx.addExtraParameter("details", details);
     ctx.addExtraParameter("fields", fields);
     ctx.addExtraParameter("entity", entityItem);
+    ctx.addExtraParameter("compositeRelationFields", compositeRelationFields);
 
     // Process elements to generate
     DOC newDoc = null;
@@ -273,10 +285,8 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
   public void addCreateView(String moduleName, JpaEntityMetadata entityMetadata,
       MemberDetails entityDetails, ViewContext<T> ctx) {
 
-    // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = getEditableFields(entityDetails.getFields());
-    List<FieldItem> fields =
-        getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
+    // Create void list for adding main entity fields
+    List<FieldMetadata> entityFields = new ArrayList<FieldMetadata>();
 
     EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
 
@@ -288,8 +298,24 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
         getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat("/create")
             .concat(getViewsExtension());
 
+    Map<String, List<FieldItem>> compositeRelationFields =
+        manageChildcompositionFields(entityMetadata, entityDetails, ctx);
+
+    // Remove one-to-one fields from composite relations and create EntityItems
+    // for each referenced entity field
+    Set<String> compositeRelationFieldNames = compositeRelationFields.keySet();
+    for (FieldMetadata field : getEditableFields(entityDetails.getFields())) {
+      if (!compositeRelationFieldNames.contains(field.getFieldName().getSymbolName())) {
+        entityFields.add(field);
+      }
+    }
+
+    List<FieldItem> fields =
+        getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
+
     ctx.addExtraParameter("fields", fields);
     ctx.addExtraParameter("entity", entityItem);
+    ctx.addExtraParameter("compositeRelationFields", compositeRelationFields);
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
@@ -308,9 +334,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       MemberDetails entityDetails, ViewContext<T> ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = getEditableFields(entityDetails.getFields());
-    List<FieldItem> fields =
-        getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
+    List<FieldMetadata> entityFields = new ArrayList<FieldMetadata>();
 
     // Process elements to generate
     DOC newDoc = null;
@@ -320,10 +344,27 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
         getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat("/edit")
             .concat(getViewsExtension());
 
+    // Check and manage detail composition fields
+    Map<String, List<FieldItem>> compositeRelationFields =
+        manageChildcompositionFields(entityMetadata, entityDetails, ctx);
+
+    // Remove one-to-one fields from composite relations and create EntityItems
+    // for each referenced entity field
+    Set<String> compositeRelationFieldNames = compositeRelationFields.keySet();
+    for (FieldMetadata field : getEditableFields(entityDetails.getFields())) {
+      if (!compositeRelationFieldNames.contains(field.getFieldName().getSymbolName())) {
+        entityFields.add(field);
+      }
+    }
+
+    List<FieldItem> fields =
+        getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
+
     EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
 
     ctx.addExtraParameter("fields", fields);
     ctx.addExtraParameter("entity", entityItem);
+    ctx.addExtraParameter("compositeRelationFields", compositeRelationFields);
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
@@ -429,7 +470,6 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     } else {
       newDoc = process("error", ctx);
     }
-
 
     // Write newDoc on disk
     writeDoc(newDoc, viewName);
@@ -553,7 +593,6 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
         ControllerType.COLLECTION, getType()));
     existingControllers.addAll(getControllerLocator().getControllers(null, ControllerType.SEARCH,
         getType()));
-
 
     Iterator<ClassOrInterfaceTypeDetails> it = existingControllers.iterator();
 
@@ -818,18 +857,15 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
   }
 
   /**
-   * This method obtains all necessary information about fields from entity
-   * and returns a List of FieldItem.
-   *
-   * If provided entity has more than 5 fields, only the first 5 ones will be
-   * included on generated view.
+   * This method obtains all necessary information about fields from entity and
+   * returns a List of FieldItem. If provided entity has more than 5 fields,
+   * only the first 5 ones will be included on generated view.
    *
    * @param fields
    * @param entityName
    * @param checkMaxFields
    * @param ctx
    * @param suffixId
-   *
    * @return List that contains FieldMetadata that will be added to the view.
    */
   protected List<FieldItem> getFieldViewItems(List<FieldMetadata> entityFields, String entityName,
@@ -838,7 +874,8 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     // Get the MAX_FIELDS_TO_ADD
     List<FieldItem> fieldViewItems = new ArrayList<FieldItem>();
     for (FieldMetadata entityField : entityFields) {
-      FieldItem fieldItem = createFieldItem(entityField, entityName, suffixId, ctx);
+
+      FieldItem fieldItem = createFieldItem(entityField, entityName, suffixId, ctx, null);
 
       if (fieldItem != null) {
         fieldViewItems.add(fieldItem);
@@ -852,9 +889,8 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     return fieldViewItems;
   }
 
-
   protected FieldItem createFieldItem(FieldMetadata entityField, String entityName,
-      String suffixId, ViewContext<T> ctx) {
+      String suffixId, ViewContext<T> ctx, String referencedFieldName) {
 
     // Exclude id and version fields
     if (entityField.getAnnotation(JpaJavaType.ID) != null
@@ -862,9 +898,15 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       return null;
     }
 
-    FieldItem fieldItem =
-        new FieldItem(entityField.getFieldName().getSymbolName(), entityName, suffixId);
     // Generating new FieldItem element
+    FieldItem fieldItem = null;
+    if (referencedFieldName != null) {
+      fieldItem =
+          new FieldItem(entityField.getFieldName().getSymbolName(), ctx.getEntityName(),
+              referencedFieldName, entityName, suffixId);
+    } else {
+      fieldItem = new FieldItem(entityField.getFieldName().getSymbolName(), entityName, suffixId);
+    }
 
     // Calculate fieldType
     JavaType type = entityField.getFieldType();
@@ -921,7 +963,8 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       // getDetailsFieldViewItems method
       return null;
     } else if (type.isNumber()) {
-      // ROO-3810: Getting @Min and @Max annotations to add validations if necessary
+      // ROO-3810: Getting @Min and @Max annotations to add validations if
+      // necessary
       AnnotationMetadata minAnnotation = entityField.getAnnotation(Jsr303JavaType.MIN);
       if (minAnnotation != null) {
         AnnotationAttributeValue<Object> min = minAnnotation.getAttribute("value");
@@ -946,7 +989,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       }
       fieldItem.setType(FieldTypes.NUMBER.toString());
     } else {
-      // ROO-3810:  Getting @Size annotation
+      // ROO-3810: Getting @Size annotation
       AnnotationMetadata sizeAnnotation = entityField.getAnnotation(Jsr303JavaType.SIZE);
       if (sizeAnnotation != null) {
         AnnotationAttributeValue<Object> maxLength = sizeAnnotation.getAttribute("max");
@@ -971,7 +1014,6 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
   }
 
-
   @Override
   public void addDetailsItemViews(String moduleName, JpaEntityMetadata entityMetadata,
       MemberDetails entity, ControllerMetadata controllerMetadata, T viewMetadata,
@@ -981,10 +1023,8 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
   }
 
   /**
-   * Create a new instance of {@link DetailEntityItem}.
-   *
-   * Implementation can override this method to include it own information or
-   * extend defaults.
+   * Create a new instance of {@link DetailEntityItem}. Implementation can
+   * override this method to include it own information or extend defaults.
    *
    * @param detailController
    * @param detailSuffix
@@ -1003,8 +1043,6 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     ClassOrInterfaceTypeDetails childEntityDetails =
         getTypeLocationService().getTypeDetails(last.childType);
     JpaEntityMetadata childEntityMetadata = last.childEntityMetadata;
-
-
 
     DetailEntityItem detailItem =
         new DetailEntityItem(childEntityMetadata, controllerMetadata, detailSuffix, rootEntity);
@@ -1040,11 +1078,9 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
   /**
    * This method obtains all necessary configuration to be able to work with
-   * reference fields.
-   *
-   * Complete provided FieldItem with extra fields. If some extra
-   * configuration is not available, returns false to prevent that this field
-   * will be added. If everything is ok, returns true to add this field to
+   * reference fields. Complete provided FieldItem with extra fields. If some
+   * extra configuration is not available, returns false to prevent that this
+   * field will be added. If everything is ok, returns true to add this field to
    * generated view.
    *
    * @param fieldItem
@@ -1163,16 +1199,110 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     return properties;
   }
 
+  /**
+   * This method obtains all necessary information about fields from each
+   * one-to-one referenced entity.
+   * 
+   * @param fieldList the List with main entity fields.
+   * @param checkMaxFields whether field number is restricted.
+   * @param ctx the context with all the necessary information for view
+   *          generation.
+   * @param suffixId the suffix for items.
+   * @param compositeReferencedFields the entity fields with one-to-one and
+   *          composite relation
+   * @param parentEntity the parent entity type
+   * @return the Map where the key is the current entity field and the value is
+   *         the referenced entity editable field list.
+   */
+  private Map<String, List<FieldItem>> getRelationFieldItems(List<FieldMetadata> fieldList,
+      boolean checkMaxFields, ViewContext<T> ctx, String suffixId,
+      List<String> compositeReferencedFields, JavaType parentEntity) {
 
+    // Create the Map to return
+    Map<String, List<FieldItem>> relationFieldsMap = new HashMap<String, List<FieldItem>>();
+
+    for (FieldMetadata entityField : fieldList) {
+
+      // If one-to-one composition field, get referenced entity fields instead
+      // of parent field
+      if (compositeReferencedFields.contains(entityField.getFieldName().getSymbolName())) {
+
+        // Create the list for related entity fields
+        List<FieldItem> referencedEntityFieldItems = new ArrayList<FieldItem>();
+
+        // Get referenced entity fields
+        List<FieldMetadata> referencedEntityFields =
+            getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
+                getTypeLocationService().getTypeDetails(entityField.getFieldType())).getFields();
+        List<FieldMetadata> referencedEntityEditableFields =
+            getEditableFields(referencedEntityFields);
+
+        // Add referenced entity field view items
+        for (FieldMetadata referencedEntityField : referencedEntityEditableFields) {
+
+          // If references the parent entity, don't add it
+          if (referencedEntityField.getFieldType().equals(parentEntity)) {
+            continue;
+          }
+
+          FieldItem fieldItem =
+              createFieldItem(referencedEntityField,
+                  entityField.getFieldType().getSimpleTypeName(), suffixId, ctx, entityField
+                      .getFieldName().getSymbolName());
+
+          if (fieldItem != null) {
+            referencedEntityFieldItems.add(fieldItem);
+          }
+
+          if (referencedEntityFieldItems.size() >= MAX_FIELDS_TO_ADD && checkMaxFields) {
+            break;
+          }
+        }
+
+        // Add entity to referenced entities map
+        if (!relationFieldsMap.containsKey(entityField.getFieldName().getSymbolName())) {
+          relationFieldsMap.put(entityField.getFieldName().getSymbolName(),
+              referencedEntityFieldItems);
+        }
+      }
+    }
+    return relationFieldsMap;
+  }
 
   /**
-   * Builds the label of the specified field by joining its names and adding
-   * it to the entity label
+   * Checks if entity has child one-to-one composition relations and gets 
+   * referenced fields info for adding it to the view context.
+   * 
+   * @param entityMetadata the JpaEntityMetadata from parent entity 
+   * @param entityDetails the MemeberDetails from parent entity
+   * @param ctx the ViewContext of view to create
+   * @return a Map<String, List<FieldItem>> where the keys are the referenced 
+   *            field names on parent entity and the values are the referenced 
+   *            entity fields info to add to ViewContext
+   */
+  private Map<String, List<FieldItem>> manageChildcompositionFields(
+      JpaEntityMetadata entityMetadata, MemberDetails entityDetails, ViewContext<T> ctx) {
+    // Manage referenced fields from one-to-one composite relations
+    Map<String, RelationInfo> relationInfos = entityMetadata.getRelationInfos();
+    List<String> compositeReferencedFields = new ArrayList<String>();
+    for (Entry<String, RelationInfo> entry : relationInfos.entrySet()) {
+      if (entry.getValue().type.name().equals(JpaRelationType.COMPOSITION.name())
+          && entry.getValue().cardinality.name().equals(Cardinality.ONE_TO_ONE.name())) {
+        compositeReferencedFields.add(entry.getKey());
+      }
+    }
+    Map<String, List<FieldItem>> compositeRelationFields =
+        getRelationFieldItems(getEditableFields(entityDetails.getFields()), false, ctx,
+            FIELD_SUFFIX, compositeReferencedFields, entityMetadata.getAnnotatedEntity());
+    return compositeRelationFields;
+  }
+
+  /**
+   * Builds the label of the specified field by joining its names and adding it
+   * to the entity label
    *
-   * @param entity
-   *            the entity name
-   * @param fieldNames
-   *            list of fields
+   * @param entity the entity name
+   * @param fieldNames list of fields
    * @return label
    */
   private static String buildLabel(String entityName, String... fieldNames) {
@@ -1184,10 +1314,8 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     return label;
   }
 
-
   /**
    * This method load the provided file and get its content in String format.
-   *
    * After that, uses parse method to generate a valid DOC object.
    *
    * @param path
@@ -1233,8 +1361,6 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     ctx.setControllerMetadata(controllerMetadata);
     return ctx;
   }
-
-
 
   // Getting OSGi Services
 

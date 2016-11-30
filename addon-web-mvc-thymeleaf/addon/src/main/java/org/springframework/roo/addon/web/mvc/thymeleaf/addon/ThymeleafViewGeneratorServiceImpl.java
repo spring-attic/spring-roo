@@ -1,11 +1,5 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -35,6 +29,12 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.settings.project.ProjectSettingsService;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -345,7 +345,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
     Map<String, String> labels =
         super.getI18nLabels(entityMemberDetails, entity, entityMetadata, controllerMetadata,
             module, ctx);
-    if (controllerMetadata.getType() == ControllerType.DETAIL) {
+    if (controllerMetadata != null && controllerMetadata.getType() == ControllerType.DETAIL) {
       String key = getCreateDetailsSelect2PlaceholderLabelKey(controllerMetadata, ctx);
 
       String value = "Select " + controllerMetadata.getLastDetailsInfo().fieldName + " to add";

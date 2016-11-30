@@ -218,6 +218,26 @@
            	      </li>
                </#if>
               </#list>
+              
+              <#if compositeRelationFields?has_content>
+                <#list compositeRelationFields?keys as referencedField>
+                  <fieldset id="${referencedField}FieldSet">
+                    <#list compositeRelationFields[referencedField] as field>
+                      <#if field?index == 0>
+                        <legend data-th-text="${r"#{"}${field.legendLabel}}">${field.entityName} data </legend>
+                      </#if>
+                      <#if field.userManaged>
+                        ${field.codeManaged}
+                      <#else>
+                        <li id="${field.fieldId}" data-z="${field.z}">
+                          <strong data-th-text="${r"#{"}${field.label}}">${field.fieldName}</strong>
+                          <span data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</span>
+                        </li>
+                      </#if>
+                    </#list>
+                  </fieldset>
+                </#list>
+              </#if>    
 
               <#if details?size != 0>
                   <hr>

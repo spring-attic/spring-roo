@@ -10,5 +10,13 @@ package org.springframework.roo.addon.jpa.annotations.entity;
  * @see RooJpaRelation#type()
  */
 public enum JpaRelationType {
-  AGGREGATION, COMPOSITION
+  AGGREGATION, COMPOSITION;
+
+  public static JpaRelationType getJpaRelationType(final String typeName) {
+    try {
+      return JpaRelationType.valueOf(typeName);
+    } catch (final IllegalArgumentException e) {
+      return null;
+    }
+  }
 }

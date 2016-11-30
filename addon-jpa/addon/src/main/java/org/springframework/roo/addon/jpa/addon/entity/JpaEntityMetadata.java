@@ -84,6 +84,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
 
 
+  private final JavaType annotatedEntity;
   private final JpaEntityAnnotationValues annotationValues;
   private final JpaEntityMetadata parent;
   private FieldMetadata identifierField;
@@ -153,6 +154,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
      * storing them in fields, but this isn't an option due to various calls
      * to the parent entity.
      */
+    this.annotatedEntity = entityPhysicalType.getType();
     this.annotationValues = annotationValues;
     this.parent = parent;
     this.identifierField = identifierField;
@@ -986,6 +988,10 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    */
   public JpaEntityMetadata getParent() {
     return this.parent;
+  }
+
+  public JavaType getAnnotatedEntity() {
+    return annotatedEntity;
   }
 
   /**

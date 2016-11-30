@@ -1,13 +1,5 @@
 package org.springframework.roo.addon.web.mvc.views;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -44,18 +36,24 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.JpaJavaType;
-import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.propfiles.manager.PropFilesManagerService;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
- * This abstract class will be extended by MetadataProviders focused on
- * view generation.
- *
- * As a result, it will be possible that all MetadataProviders that manages
- * view generation follows the same steps and the same operations to do it.
+ * This abstract class will be extended by MetadataProviders focused on view
+ * generation. As a result, it will be possible that all MetadataProviders that
+ * manages view generation follows the same steps and the same operations to do
+ * it.
  *
  * @author Juan Carlos García
  * @since 2.0
@@ -78,13 +76,10 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
     serviceInstaceManager.activate(this.context);
   }
 
-
   /**
-   * This operation returns the MVCViewGenerationService that should be used
-   * to generate views.
-   *
-   * Implements this operations in you views metadata providers to be able to
-   * generate all necessary views.
+   * This operation returns the MVCViewGenerationService that should be used to
+   * generate views. Implements this operations in you views metadata providers
+   * to be able to generate all necessary views.
    *
    * @return MVCViewGenerationService
    */
@@ -92,9 +87,9 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
 
   /**
    * This operations returns the necessary Metadata that will generate .aj file.
-   *
    * This operation is called from getMetadata operation to obtain the return
    * element.
+   * 
    * @param itemController
    * @param compositionRelationOneToOne
    * @param entityIdentifierPlural
@@ -111,7 +106,6 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
    * @param formBeansDateTimeFields
    * @param detailItemController
    * @param detailCollectionController
-   *
    * @return ItdTypeDetailsProvidingMetadataItem
    */
   protected abstract T createMetadataInstance(String metadataIdentificationString,
@@ -243,7 +237,6 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
                 detailEntity.getFullyQualifiedTypeName(), controllerDetail.getType()
                     .getFullyQualifiedTypeName());
 
-
       } else {
         // ** COMPOSITION **
 
@@ -293,8 +286,6 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
                   .getFullyQualifiedTypeName(), controllerMetadata.getDetailAnnotaionFieldValue());
     }
 
-
-
     Validate.notNull(entity, "ERROR: You should provide a valid entity for controller '%s'",
         controllerDetail.getType().getFullyQualifiedTypeName());
 
@@ -303,7 +294,6 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
 
     Validate.notNull(entityDetails, "ERROR: Can't load details of %s",
         entity.getFullyQualifiedTypeName());
-
 
     final JpaEntityMetadata entityMetadata =
         getMetadataService().get(JpaEntityMetadata.createIdentifier(entityDetails));
@@ -328,7 +318,6 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
     registerDependency(serviceMetadataKey, metadataIdentificationString);
 
     final ServiceMetadata serviceMetadata = getMetadataService().get(serviceMetadataKey);
-
 
     // Prepare information about ONE-TO-ONE relations
     final List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne =
@@ -410,7 +399,6 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
             formBeansEnumFields.put(formBean, formBeanEnumFields);
           }
 
-
           // Add dependencies between modules
           List<JavaType> types = new ArrayList<JavaType>();
           types.add(serviceFinder.getReturnType());
@@ -438,8 +426,6 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
       }
     }
 
-
-
     T viewMetadata =
         createMetadataInstance(metadataIdentificationString, aspectName,
             governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
@@ -457,7 +443,6 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
     if (getProjectOperations().isFeatureInstalled(FeatureNames.SECURITY)) {
       ctx.setSecurityEnabled(true);
     }
-
 
     final String module = controllerDetail.getType().getModule();
 
@@ -504,7 +489,7 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
         break;
 
       case SEARCH:
-        // Check if this search controller have finders included 
+        // Check if this search controller have finders included
         // in @RooSearch annotation
         if (searchAnnotationValues != null && searchAnnotationValues.getFinders() != null) {
           List<String> finders =
@@ -532,7 +517,8 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
     }
 
     // Update menu view every time that new controller has been modified
-    // TODO: Maybe, instead of modify all menu view, only new generated controller should
+    // TODO: Maybe, instead of modify all menu view, only new generated
+    // controller should
     // be included on it. Must be fixed on future versions.
     viewGenerationService.updateMenuView(module, ctx);
 
@@ -542,13 +528,28 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
             controllerMetadata, module, ctx);
     getI18nOperations().addOrUpdateLabels(module, labels);
 
+    // Add labels for child composite entity as well
+    for (Pair<RelationInfo, JpaEntityMetadata> compositionRelation : compositionRelationOneToOne) {
+      MemberDetails childMemberDetails =
+          getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
+              getTypeLocationService().getTypeDetails(compositionRelation.getKey().childType));
+      Map<String, String> i18nLabels =
+          viewGenerationService.getI18nLabels(childMemberDetails,
+              compositionRelation.getKey().childType, compositionRelation.getValue(), null, module,
+              ctx);
+      getI18nOperations().addOrUpdateLabels(module, i18nLabels);
+    }
+
     // Register dependency between JavaBeanMetadata and this one
     final String javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails);
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
+    // Register dependency between JpaEntityMetadata and this one
+    final String jpaEntityMetadataKey = JpaEntityMetadata.createIdentifier(entityDetails);
+    registerDependency(jpaEntityMetadataKey, metadataIdentificationString);
+
     return viewMetadata;
   }
-
 
   private JavaType filterControllerByPackageAndPrefix(
       Collection<ClassOrInterfaceTypeDetails> itemControllers, JavaPackage controllerPackage,
@@ -566,7 +567,6 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
     return null;
   }
 
-
   private List<FieldMetadata> getEnumFields(MemberDetails entityMemberDetails) {
     List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
     for (FieldMetadata field : entityMemberDetails.getFields()) {
@@ -576,7 +576,6 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
     }
     return fields;
   }
-
 
   private List<FieldMetadata> getDateTimeFields(MemberDetails entityMemberDetails) {
     List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
@@ -616,7 +615,6 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
     }
     return false;
   }
-
 
   protected void registerDependency(final String upstreamDependency,
       final String downStreamDependency) {
