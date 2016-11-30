@@ -250,6 +250,16 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
   void addDefaultLayoutNoMenu(String moduleName, ViewContext<T> ctx);
 
   /**
+   * This operation will add the home-layout view using
+   * the provided context
+   *
+   * @param moduleName module where default view will be added
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addHomeLayout(String moduleName, ViewContext<T> ctx);
+
+  /**
    * This operation will add the footer fragment using
    * the provided context
    *

@@ -194,6 +194,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     getViewGenerationService().addErrorView(module.getModuleName(), ctx);
     getViewGenerationService().addDefaultLayout(module.getModuleName(), ctx);
     getViewGenerationService().addDefaultLayoutNoMenu(module.getModuleName(), ctx);
+    getViewGenerationService().addHomeLayout(module.getModuleName(), ctx);
     getViewGenerationService().addDefaultListLayout(module.getModuleName(), ctx);
     getViewGenerationService().addFooter(module.getModuleName(), ctx);
     getViewGenerationService().addHeader(module.getModuleName(), ctx);

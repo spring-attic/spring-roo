@@ -481,6 +481,28 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
   }
 
   @Override
+  public void addHomeLayout(String moduleName, ViewContext<T> ctx) {
+
+    // Process elements to generate
+    DOC newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getLayoutsFolder(moduleName).concat("/home-layout").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge("layouts/home-layout", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("layouts/home-layout", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
   public void addFooter(String moduleName, ViewContext<T> ctx) {
     // Process elements to generate
     DOC newDoc = null;

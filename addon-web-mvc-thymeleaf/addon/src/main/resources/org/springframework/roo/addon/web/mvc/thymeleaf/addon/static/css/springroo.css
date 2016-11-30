@@ -80,8 +80,6 @@ footer p{
 
 /*--HEADER-------------*/
 
-body .bg-header{ display: none;}
-body.home .bg-header{ display: block;}
 body.home .navbar {  margin-bottom: 0px;}
 
 .jumbotron {

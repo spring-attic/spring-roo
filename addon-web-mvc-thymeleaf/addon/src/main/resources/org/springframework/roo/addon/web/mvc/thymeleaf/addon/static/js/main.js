@@ -16,11 +16,6 @@
         //tooltip
         jQuery('[data-toggle="tooltip"]').tooltip();
 
-        //remove banner, only visible in homepage
-        $("body.page .bg-header").empty();
-        //$("body.home .bg-header").display();
-
-
       });
 })(jQuery);
 

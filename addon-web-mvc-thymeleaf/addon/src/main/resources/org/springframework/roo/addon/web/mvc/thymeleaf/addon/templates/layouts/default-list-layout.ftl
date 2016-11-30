@@ -74,10 +74,6 @@
           <!-- Content replaced by the menu template fragment menu.html -->
           <span>Application menu</span>
         </nav>
-        <div class="bg-header" data-th-replace="fragments/header :: header">
-          <!-- Content replaced by the header template fragment header.html -->
-          <h1>Sample page header for direct display of the template</h1>
-        </div>
     </header>
 
     <div class="container bg-container">

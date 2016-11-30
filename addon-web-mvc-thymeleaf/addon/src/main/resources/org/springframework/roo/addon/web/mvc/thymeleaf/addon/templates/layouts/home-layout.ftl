@@ -48,17 +48,20 @@
     <![endif]-->
 
   </head>
-
 <#if userManagedComponents?has_content && userManagedComponents["body"]??>
   ${userManagedComponents["body"]}
 <#else>
   <body id="body">
 
      <header role="banner">
-        <nav class="navbar navbar-default navbar-static-top" data-th-replace="fragments/menu :: menu-languages">
+        <nav class="navbar navbar-default navbar-static-top" data-th-replace="fragments/menu :: menu">
           <!-- Content replaced by the menu template fragment menu.html -->
           <span>Application menu</span>
         </nav>
+        <div class="bg-header" data-th-replace="fragments/header :: header">
+          <!-- Content replaced by the header template fragment header.html -->
+          <h1>Sample page header for direct display of the template</h1>
+        </div>
     </header>
 
     <div class="container bg-container">
@@ -104,7 +107,7 @@
        data-th-src="@{/webjars/momentjs/moment.min.js}">
       </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/locale/es.js"
-      data-th-src="@{/webjars/momentjs/locale/}+ ${r"${#"}locale.language${r"}"}+'.js'"
+      data-th-src="@{/webjars/momentjs//locale/}+ ${r"${#"}locale.language${r"}"}+'.js'"
       data-th-if="${r"${#"}locale.language${r"}"} != 'en' and ${r"${#"}locale.language${r"}"} != 'es'">
       </script>
     <script src="../../static/public/js/moment-locale-es.js"
