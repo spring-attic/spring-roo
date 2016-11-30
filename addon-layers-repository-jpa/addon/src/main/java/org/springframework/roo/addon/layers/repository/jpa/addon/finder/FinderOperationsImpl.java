@@ -1,5 +1,14 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon.finder;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -23,21 +32,11 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Implementation of {@link FinderOperations}.
@@ -260,19 +259,10 @@ public class FinderOperationsImpl implements FinderOperations {
         if (field.getFieldName().equals(fieldName) && field.getFieldType().equals(fieldType)) {
 
           // Field found, build field "path" name and add it to map
-          String fieldPathName = "";
-
-          // Check if field is @Id or @EmbeddedId field
-          if (field.getAnnotation(JpaJavaType.ID) != null
-              || field.getAnnotation(JpaJavaType.EMBEDDED_ID) != null) {
-            fieldPathName = "getEntityId()";
-          } else {
-
-            // Path name for DTO's should be the path to entity's fields
-            fieldPathName =
-                String.format("%s.%s", StringUtils.uncapitalize(entity.getSimpleTypeName()),
-                    field.getFieldName());
-          }
+          // Path name for DTO's should be the path to entity's fields
+          String fieldPathName =
+              String.format("%s.%s", StringUtils.uncapitalize(entity.getSimpleTypeName()),
+                  field.getFieldName());
 
           if (typesFieldMaps != null) {
             fieldNamesMap.put(fieldName.getSymbolName(), fieldPathName);

@@ -19,12 +19,8 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.dto.addon.DtoOperations;
-import org.springframework.roo.addon.dto.addon.DtoOperationsImpl;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
-import org.springframework.roo.addon.layers.repository.jpa.addon.finder.FinderOperations;
-import org.springframework.roo.addon.layers.repository.jpa.addon.finder.FinderOperationsImpl;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.PartTree;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -292,15 +288,10 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     typesAreProjections.put(entity, false);
     for (FieldMetadata field : validFields) {
       entityFieldMetadata.put(field.getFieldName().getSymbolName(), field);
-      if (field.getAnnotation(JpaJavaType.ID) != null
-          || field.getAnnotation(JpaJavaType.EMBEDDED_ID) != null) {
-        entityFieldMappings.add(Pair.of(field.getFieldName().getSymbolName(), "getEntityId()"));
-      } else {
-        entityFieldMappings.add(Pair.of(
-            field.getFieldName().getSymbolName(),
-            StringUtils.uncapitalize(entity.getSimpleTypeName()).concat(".")
-                .concat(field.getFieldName().getSymbolName())));
-      }
+      entityFieldMappings.add(Pair.of(
+          field.getFieldName().getSymbolName(),
+          StringUtils.uncapitalize(entity.getSimpleTypeName()).concat(".")
+              .concat(field.getFieldName().getSymbolName())));
     }
     typesFieldsMetadataMap.put(entity, entityFieldMetadata);
     typesFieldMaps.put(entity, entityFieldMappings);
@@ -351,49 +342,9 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         JavaType associatedEntity =
             (JavaType) projectionAnnotation.getAttribute("entity").getValue();
 
-        // Get field values in "path" format from annotation
-        AnnotationAttributeValue<?> projectionFields = projectionAnnotation.getAttribute("fields");
-        List<String> projectionFieldList = new ArrayList<String>();
-        for (StringAttributeValue value : (List<StringAttributeValue>) projectionFields.getValue()) {
-          projectionFieldList.add(value.getValue());
-        }
-
         // Add fields to typesFieldMaps
         buildFieldNamesMap(associatedEntity, type, projectionAnnotation, typesFieldMaps);
 
-        // Get the original FieldMetadata with its Java name in Projection
-        Map<String, FieldMetadata> projectionOriginalFieldMetadataValues =
-            getDtoOperations().buildFieldsFromString(StringUtils.join(projectionFieldList, ','),
-                associatedEntity);
-        List<FieldMetadata> projectionIdentifierFields =
-            getPersistenceMemberLocator().getIdentifierFields(associatedEntity);
-        if (!getPersistenceMemberLocator().getEmbeddedIdentifierFields(associatedEntity).isEmpty()) {
-          projectionIdentifierFields.addAll(getPersistenceMemberLocator()
-              .getEmbeddedIdentifierFields(associatedEntity));
-        }
-
-        // Check if any projection field is an identifier field
-        for (Entry<String, FieldMetadata> projectionOriginalValue : projectionOriginalFieldMetadataValues
-            .entrySet()) {
-          for (FieldMetadata field : projectionIdentifierFields) {
-            if (field.getFieldName().equals(projectionOriginalValue.getValue().getFieldName())
-                && field.getDeclaredByMetadataId().equals(
-                    projectionOriginalValue.getValue().getDeclaredByMetadataId())) {
-
-              // The projection contains identifier fields, so replace its value in the Map
-              String fieldPathName = "getEntityId()";
-              List<Pair<String, String>> fieldList = typesFieldMaps.get(type);
-              Pair<String, String> value;
-              for (int i = 0; i < fieldList.size(); i++) {
-                value = fieldList.get(i);
-                if (value.getKey().equals(projectionOriginalValue.getKey())) {
-                  fieldList.set(i, Pair.of(projectionOriginalValue.getKey(), fieldPathName));
-                  break;
-                }
-              }
-            }
-          }
-        }
       }
     }
 
@@ -550,15 +501,6 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
   public String getProvidesType() {
     return RepositoryJpaCustomImplMetadata.getMetadataIdentiferType();
-  }
-
-  private DtoOperationsImpl getDtoOperations() {
-    return (DtoOperationsImpl) getServiceManager().getServiceInstance(this, DtoOperations.class);
-  }
-
-  private FinderOperationsImpl getFinderOperations() {
-    return (FinderOperationsImpl) getServiceManager().getServiceInstance(this,
-        FinderOperations.class);
   }
 
   private RepositoryJpaLocator getRepositoryJpaLocator() {

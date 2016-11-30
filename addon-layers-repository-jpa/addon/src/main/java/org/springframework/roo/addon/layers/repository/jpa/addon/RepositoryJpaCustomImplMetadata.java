@@ -373,7 +373,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
   /**
      * Builds the query return sentence
      *
-     * @param bodyBuilder ITD boidy builder
+     * @param bodyBuilder ITD body builder
      * @param pageable the Page implementation variable name
      * @param entityVariable the name of the variable owning the query
      * @param projection the projection expression for returning the query
@@ -390,7 +390,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       List<Pair<String, String>> projectionFields = this.typesFieldMaps.get(returnType);
 
       // return loadPage(query, pageable, Projection.constructor(MyProjection.class,
-      //                    getEntityId(), myEntity.field1, myEntity.field2);
+      //                    myEntity.field1, myEntity.field2);
       bodyBuilder.appendFormalLine(String.format(
           "return loadPage(query, %s, %s.constructor(%s.class, %s ));", pageable,
           getNameOfJavaType(projection), getNameOfJavaType(returnType),
@@ -809,16 +809,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
           // query.where(myEntity.field.eq(formBean.getField()));
           bodyBuilder.appendIndent();
           bodyBuilder.appendIndent();
-          if (pathFieldName.equals("getEntityId()")) {
-
-            // Field is an id field
-            bodyBuilder.appendFormalLine(String.format("query.where(getEntityId().eq(%s.%s()));",
-                formBeanParameterName, accessorMethodName));
-          } else {
-            bodyBuilder.appendFormalLine(String.format("query.where(%s.eq(%s.%s()));",
-                pathFieldName, formBeanParameterName, accessorMethodName));
-          }
-
+          bodyBuilder.appendFormalLine(String.format("query.where(%s.eq(%s.%s()));", pathFieldName,
+              formBeanParameterName, accessorMethodName));
           // }
           bodyBuilder.appendIndent();
           bodyBuilder.appendFormalLine("}");
@@ -921,16 +913,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       // query.where(myEntity.field.eq(formBean.getField()));
       bodyBuilder.appendIndent();
       bodyBuilder.appendIndent();
-      if (pathFieldName.equals("getEntityId()")) {
-
-        // Field is an id field
-        bodyBuilder.appendFormalLine(String.format(
-            "searchCondition.and(getEntityId().eq(%s.%s()));", formBeanParameterName,
-            accessorMethodName));
-      } else {
-        bodyBuilder.appendFormalLine(String.format("searchCondition.and(%s.eq(%s.%s()));",
-            pathFieldName, formBeanParameterName, accessorMethodName));
-      }
+      bodyBuilder.appendFormalLine(String.format("searchCondition.and(%s.eq(%s.%s()));",
+          pathFieldName, formBeanParameterName, accessorMethodName));
 
       // }
       bodyBuilder.appendIndent();
