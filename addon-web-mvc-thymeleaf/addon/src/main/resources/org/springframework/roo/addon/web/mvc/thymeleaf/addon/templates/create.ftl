@@ -243,7 +243,7 @@
                   <fieldset id="${referencedField}FieldSet">
                     <#list compositeRelationFields[referencedField] as field>
                       <#if field?index == 0>
-                        <legend data-th-text="${r"#{"}${field.legendLabel}}">${field.entityName} data </legend>
+                        <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${field.legendLabel}})}">${field.entityName} data </legend>
                       </#if>
 
                       <#if field.userManaged>

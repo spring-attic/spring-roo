@@ -208,23 +208,26 @@
             <h1 data-th-text="${r"#{"}label_show_entity(${r"#{"}${entityLabel}})}">Show ${entityName}</h1>
 
             <ul class="list-unstyled" id="containerFields">
-              <#list fields as field>
-                <#if field.userManaged>
-                  ${field.codeManaged}
-                <#else>
-                  <li id="${field.fieldId}" data-z="${field.z}">
-              	    <strong data-th-text="${r"#{"}${field.label}}">${field.fieldName}</strong>
-                    <span data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</span>
-           	      </li>
-               </#if>
-              </#list>
+              <fieldset id="mainEntityFieldSet">
+                <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data </legend>
+                <#list fields as field>
+                  <#if field.userManaged>
+                    ${field.codeManaged}
+                  <#else>
+                    <li id="${field.fieldId}" data-z="${field.z}">
+              	      <strong data-th-text="${r"#{"}${field.label}}">${field.fieldName}</strong>
+                      <span data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</span>
+           	        </li>
+                  </#if>
+                </#list>
+              </fieldset>
               
               <#if compositeRelationFields?has_content>
                 <#list compositeRelationFields?keys as referencedField>
                   <fieldset id="${referencedField}FieldSet">
                     <#list compositeRelationFields[referencedField] as field>
                       <#if field?index == 0>
-                        <legend data-th-text="${r"#{"}${field.legendLabel}}">${field.entityName} data </legend>
+                        <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${field.legendLabel}})}">${field.entityName} data </legend>
                       </#if>
                       <#if field.userManaged>
                         ${field.codeManaged}
