@@ -38,7 +38,7 @@ DISID CORPORATION S.L.
 :toclevels: 2
 :toc-placement: left
 :toc-title: Table of Contents
-:version: 2.0.0.M3
+:version: 2.0.0.BUILD-SNAPSHOT
 ifdef::backend-pdf[]
 :pdf-style: asciidoctor
 :pagenums:
@@ -204,7 +204,7 @@ Because the release cycle of STS and Roo differ a version of Spring Roo may be i
 |Version
 |STS update site
 
-a|*2.0.0.M3*
+a|*2.0.0.BUILD-SNAPSHOT*
 a|_Spring Roo 2.0 (Nightly)_
 
 a|*2.0.0.RC1*
