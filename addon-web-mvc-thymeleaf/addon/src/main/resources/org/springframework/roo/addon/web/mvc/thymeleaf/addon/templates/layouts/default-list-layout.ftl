@@ -70,7 +70,7 @@
   <body id="body">
 
      <header role="banner">
-        <nav class="navbar navbar-default navbar-static-top" data-th-replace="fragments/menu :: menu">
+        <nav class="navbar navbar-default navbar-static-top" data-th-replace="~{fragments/menu :: menu}">
           <!-- Content replaced by the menu template fragment menu.html -->
           <span>Application menu</span>
         </nav>
@@ -90,7 +90,7 @@
       <!-- /CONTENT -->
     </div>
 
-    <footer class="container" data-th-replace="fragments/footer :: footer">
+    <footer class="container" data-th-replace="~{fragments/footer :: footer}">
       <!-- Content replaced by the footer template fragment footer.html -->
       &copy; 2016 Spring Roo (footer for example for direct display of the template)
     </footer>
@@ -131,7 +131,7 @@
       </script>
 
     <!-- Datatables fragment -->
-    <div data-th-replace="fragments/js/datatables :: datatables-js">
+    <div data-th-replace="~{fragments/js/datatables :: datatables-js}">
     </div>
 
     <div data-layout-fragment="javascript">

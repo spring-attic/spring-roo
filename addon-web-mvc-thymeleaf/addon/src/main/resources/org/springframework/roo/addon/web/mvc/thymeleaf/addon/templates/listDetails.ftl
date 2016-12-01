@@ -78,8 +78,8 @@
                     </table>
                   </#if>
                     <!-- content replaced by modal-confirm fragment of modal-confirm.html -->
-                    <div data-th-replace="fragments/modal-confirm-delete :: modalConfirmDelete(tableId='${detail.entityItemId}-table',
-                        title=${r"#{"}label_delete_entity(${r"#"}{${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_item_confirm})">
+                    <div data-th-replace="~{fragments/modal-confirm-delete :: modalConfirmDelete(tableId='${detail.entityItemId}-table',
+                        title=${r"#{"}label_delete_entity(${r"#"}{${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_item_confirm})}">
                     </div>
                 </div> <!--/table-responsive">
                 <!--END TABLE-->

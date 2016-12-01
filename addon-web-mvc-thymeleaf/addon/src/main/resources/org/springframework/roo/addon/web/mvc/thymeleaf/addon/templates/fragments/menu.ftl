@@ -65,7 +65,7 @@
               </ul>
 
               <!-- Language select -->
-              <ul class="nav navbar-nav navbar-right upper-nav languages" data-th-replace="fragments/languages :: languages">
+              <ul class="nav navbar-nav navbar-right upper-nav languages" data-th-replace="~{fragments/languages :: languages}">
                 <!-- Content replaced by the session template fragment language.html
                 -->
                 <span>Language data</span>
@@ -73,7 +73,7 @@
 
 			  <#if isSecurityEnabled>
               <!-- User menu -->
-              <ul class="nav navbar-nav navbar-right upper-nav session" data-th-replace="fragments/session-links :: session">
+              <ul class="nav navbar-nav navbar-right upper-nav session" data-th-replace="~{fragments/session-links :: session}">
                 <!-- Content replaced by the session template fragment session-links.html
                 -->
                 <span>User session data</span>
@@ -82,7 +82,7 @@
 
 
               <!-- User menu links -->
-              <ul class="nav navbar-nav navbar-right upper-nav links" data-th-replace="fragments/session-links :: links">
+              <ul class="nav navbar-nav navbar-right upper-nav links" data-th-replace="~{fragments/session-links :: links}">
                 <!-- Content replaced by the links template fragment session-links.html
                 -->
                 <span>User session data</span>
@@ -116,7 +116,7 @@
             <div id="mainnav" class="navbar-collapse collapse">
 
               <!-- Language select -->
-              <ul class="nav navbar-nav navbar-right upper-nav languages" data-th-replace="fragments/languages :: languages">
+              <ul class="nav navbar-nav navbar-right upper-nav languages" data-th-replace="~{fragments/languages :: languages}">
                 <!-- Content replaced by the session template fragment language.html
                 -->
                 <span>Language data</span>

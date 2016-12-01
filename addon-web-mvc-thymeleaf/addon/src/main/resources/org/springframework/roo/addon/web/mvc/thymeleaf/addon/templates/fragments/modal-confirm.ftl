@@ -14,7 +14,7 @@
     -->
   <div
     data-th-fragment="modalConfirm(id, title, message, onclickCallback)"
-    data-th-replace="${r"fragments/modal :: modal(id = ${id}, title = ${title}, message = ${message}, body = ~{::modalBody})"}">
+    data-th-replace="~{${r"fragments/modal :: modal(id = ${id}, title = ${title}, message = ${message}, body = ~{::modalBody})"}}">
     <div data-th-fragment="modalBody">
         <div data-th-id="${r"${id}"} + 'ModalBody'">
 

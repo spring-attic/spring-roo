@@ -14,7 +14,7 @@
 	<div data-th-fragment="datatables-js">
 
 		<!-- Modal to show loading errors -->
-      <div data-th-replace="fragments/modal :: modal(id='datatablesError', title=#{info_error}, body = ~{::errorBody}, footer = ~{})">
+      <div data-th-replace="~{fragments/modal :: modal(id='datatablesError', title=#{info_error}, body = ~{::errorBody}, footer = ~{})}">
       <p data-th-text="#{error_datatables_loading}" data-th-fragment="errorBody">Error</p>
 		</div>
 

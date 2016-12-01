@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-layout-decorate="layouts/default-layout">
+<html lang="en" data-layout-decorate="~{layouts/default-layout}">
   <head>
     <meta charset="UTF-8" data-th-remove="all"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all"/>
@@ -296,7 +296,7 @@
 
   <div data-layout-fragment="javascript">
        <!-- Datatables fragment -->
-     <div data-th-replace="fragments/js/select2 :: select2-js">
+     <div data-th-replace="~{fragments/js/select2 :: select2-js}">
       // TODO add js CDN
      </div>
     <script type="text/javascript" data-th-inline="javascript">

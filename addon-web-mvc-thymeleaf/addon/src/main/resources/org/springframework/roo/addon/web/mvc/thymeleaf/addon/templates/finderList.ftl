@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-layout-decorate="layouts/default-list-layout">
+<html lang="en" data-layout-decorate="~{layouts/default-list-layout}">
 
 <head>
   <meta charset="UTF-8" data-th-remove="all"/>
@@ -331,8 +331,8 @@
                 </tbody>
               </table>
               <!-- content replaced by modal-confirm fragment of modal-confirm.html -->
-              <div data-th-replace="fragments/modal-confirm-delete :: modalConfirmDelete(tableId='${entity.entityItemId}-table',
-                  title=${r"#{"}label_delete_entity(${r"#{"}${entityLabelPlural}})}, message=${r"#{"}info_delete_item_confirm}, baseUrl = @{${controllerPath}/})">
+              <div data-th-replace="~{fragments/modal-confirm-delete :: modalConfirmDelete(tableId='${entity.entityItemId}-table',
+                  title=${r"#{"}label_delete_entity(${r"#{"}${entityLabelPlural}})}, message=${r"#{"}info_delete_item_confirm}, baseUrl = @{${controllerPath}/})}">
               </div>
             </#if>
           </div>

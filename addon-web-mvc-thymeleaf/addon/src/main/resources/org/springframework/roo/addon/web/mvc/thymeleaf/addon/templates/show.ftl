@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-layout-decorate="layouts/default-list-layout">
+<html lang="en" data-layout-decorate="~{layouts/default-list-layout}">
   <head>
     <meta charset="UTF-8" data-th-remove="all"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all"/>
@@ -221,7 +221,7 @@
                   </#if>
                 </#list>
               </fieldset>
-              
+
               <#if compositeRelationFields?has_content>
                 <#list compositeRelationFields?keys as referencedField>
                   <fieldset id="${referencedField}FieldSet">
@@ -240,7 +240,7 @@
                     </#list>
                   </fieldset>
                 </#list>
-              </#if>    
+              </#if>
 
               <#if details?size != 0>
                   <hr>

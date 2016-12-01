@@ -3,7 +3,7 @@
   "fields/input-date.ftl" as date> <#import "fields/reference.ftl" as
   reference> <#import "fields/checkbox.ftl" as checkbox> <#import
   "fields/enum.ftl" as enum> <!DOCTYPE html>
-<html lang="en" data-layout-decorate="layouts/default-layout">
+<html lang="en" data-layout-decorate="~{layouts/default-layout}">
 <head>
 <meta charset="UTF-8" data-th-remove="all" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all" />
@@ -237,7 +237,7 @@
                   </#if>
               </#list>
             </fieldset>
-              
+
               <#if compositeRelationFields?has_content>
                 <#list compositeRelationFields?keys as referencedField>
                   <fieldset id="${referencedField}FieldSet">
@@ -357,13 +357,13 @@
   <!-- MomentJS -->
   <script
      src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.js">
-			
+
 		</script>
   <script src="../../static/public/js/moment-locale-es.js">
-			
+
 		</script>
   <script src="../../static/public/js/moment-defaults.js">
-			
+
 		</script>
 
   <div data-layout-fragment="javascript">
@@ -405,22 +405,22 @@
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/jquery.validate.min.js"
       data-th-src="@{/webjars/jquery-validation/dist/jquery.validate.min.js}">
-					
+
 				</script>
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/additional-methods.min.js"
       data-th-src="@{/webjars/jquery-validation/dist/additional-methods.min.js}">
-					
+
 				</script>
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/localization/messages_es.js"
       data-th-src="@{/webjars/jquery-validation/src/localization/messages_}+${r"${#"}locale.language${r"}"}+'.js'"
       data-th-if="${r"${#"}locale.language${r"}"} != 'en'">
-					
+
 				</script>
     <script src="../../static/public/js/validation-defaults.js"
       data-th-src="@{/public/js/validation-defaults.js}">
-					
+
 				</script>
     <script type="text/javascript" data-th-inline="javascript">
 					(function(jQuery) {
@@ -439,7 +439,7 @@
 				</script>
 
     <!-- Select2 -->
-    <div data-th-replace="fragments/js/select2 :: select2-js">
+    <div data-th-replace="~{fragments/js/select2 :: select2-js}">
       // TODO add js CDN
      </div>
 
