@@ -221,7 +221,7 @@
             <#if entity.userManaged>
                ${entity.codeManaged}
             <#else>
-              <table id="${entity.entityItemId}-table" style="width: 99.9%"
+              <table id="${entity.entityItemId}-table" style="width: 99.7%"
                    class="table table-striped table-hover table-bordered"
                    data-datatables="true"
                    data-row-id="${entity.configuration.identifierField}"

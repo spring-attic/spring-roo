@@ -248,6 +248,9 @@ table a.btn-action:focus,
 table a.btn-action:active {
   color: #79a736;
 }
+table.dataTable.no-footer {
+    border-bottom: 1px solid #dfd7ca;
+}
 
 /*--SHOW-------------*/
 
@@ -400,16 +403,18 @@ dd, dt {
 
 @media (max-width: 768px) {
   .jumbotron .project-name{font-size: 3em;}
-
   /* navbar fixes */
   .navbar-nav#entitiesMenuEntries {
-      max-width: 410px;
+    max-width: 410px;
+  }
+  /*responsive datatables fixes*/
+  .table-responsive {
+    overflow-x: hidden;
   }
 }
 
 @media (max-width: 992px){
   .navbar-nav.upper-nav > li > a {padding: 15px 5px}
-
 }
 
 @media (min-width: 1024px){
