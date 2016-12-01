@@ -580,6 +580,7 @@ public class PushInOperationsImpl implements PushInOperations {
    * @return
    */
   private boolean methodMatch(MethodMetadata method, String regEx) {
+
     // Create regular expression using provided text
     Pattern pattern = Pattern.compile(regEx);
     Matcher matcher = pattern.matcher(method.getMethodName().getSymbolName());
@@ -598,7 +599,7 @@ public class PushInOperationsImpl implements PushInOperations {
         boolean sameParameterTypes = false;
         if (methodParams.size() == parameterTypes.length) {
           sameParameterTypes = true;
-          for (int i = 0; methodParams.size() < i; i++) {
+          for (int i = 0; i < methodParams.size(); i++) {
             if (!methodParams.get(i).getJavaType().getSimpleTypeName().equals(parameterTypes[i])) {
               sameParameterTypes = false;
               break;
