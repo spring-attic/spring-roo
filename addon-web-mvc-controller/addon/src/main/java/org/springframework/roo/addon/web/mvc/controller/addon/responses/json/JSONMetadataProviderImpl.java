@@ -84,7 +84,6 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     super.activate(cContext);
     context = cContext.getBundleContext();
     serviceInstaceManager.activate(this.context);
-    super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
         new MetadataDependencyRegistryTracker(context, this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
