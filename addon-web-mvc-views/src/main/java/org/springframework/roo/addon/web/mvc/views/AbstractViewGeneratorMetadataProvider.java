@@ -134,6 +134,9 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
     final String controllerMetadataKey = ControllerMetadata.createIdentifier(controllerDetail);
     final ControllerMetadata controllerMetadata =
         (ControllerMetadata) getMetadataService().get(controllerMetadataKey);
+    if (controllerMetadata == null) {
+      return null;
+    }
 
     // Getting entity and check if is a readOnly entity or not
     final JavaType entity = controllerMetadata.getEntity();

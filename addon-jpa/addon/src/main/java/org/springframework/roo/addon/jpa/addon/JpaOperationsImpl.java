@@ -830,12 +830,9 @@ public class JpaOperationsImpl implements JpaOperations {
           "Can't get information about Entity %s which is declared as parent in %s.%s field",
           parentType, domainType, fieldEntry.getKey());
       info = parent.getRelationInfosByMappedBy(domainType, fieldEntry.getKey());
-      Validate
-          .notNull(
-              info,
-              "Can't get information about relation on Entity %s which is declared as parent in %s.%s field",
-              parentType, domainType, fieldEntry.getKey());
-      childRelations.add(Pair.of(fieldEntry.getValue(), info));
+      if (info != null) {
+        childRelations.add(Pair.of(fieldEntry.getValue(), info));
+      }
     }
     return childRelations;
   }

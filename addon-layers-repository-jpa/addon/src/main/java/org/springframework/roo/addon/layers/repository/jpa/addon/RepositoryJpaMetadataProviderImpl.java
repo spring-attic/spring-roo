@@ -207,11 +207,11 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
     // Getting java bean metadata
     final String javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails);
 
-    // Create dependency between repository and java bean annotation
-    registerDependency(javaBeanMetadataKey, metadataIdentificationString);
-
     // Register dependency between repositoryMetadata and jpaEntityMetadata
     registerDependency(entityMetadataId, metadataIdentificationString);
+
+    // Create dependency between repository and java bean annotation
+    registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
     // Check if related entity is setted as readOnly
     JavaType readOnlyRepository = null;
