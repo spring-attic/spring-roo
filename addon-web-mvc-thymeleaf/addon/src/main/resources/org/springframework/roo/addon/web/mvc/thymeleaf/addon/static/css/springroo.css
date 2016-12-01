@@ -405,11 +405,7 @@ dd, dt {
   .jumbotron .project-name{font-size: 3em;}
   /* navbar fixes */
   .navbar-nav#entitiesMenuEntries {
-    max-width: 410px;
-  }
-  /*responsive datatables fixes*/
-  .table-responsive {
-    overflow-x: hidden;
+      max-width: 410px;
   }
 }
 
