@@ -71,7 +71,6 @@ public class SeiImplMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
   protected void activate(final ComponentContext cContext) {
     context = cContext.getBundleContext();
     serviceInstaceManager.activate(this.context);
-    super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
         new MetadataDependencyRegistryTracker(context, this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());

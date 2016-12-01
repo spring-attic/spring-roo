@@ -58,7 +58,6 @@ public class WebMvcConfigurationMetadataProviderImpl extends
   @Override
   protected void activate(final ComponentContext cContext) {
     context = cContext.getBundleContext();
-    super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
         new MetadataDependencyRegistryTracker(context, this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());

@@ -86,7 +86,6 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
   protected void activate(final ComponentContext cContext) {
     super.activate(cContext);
     BundleContext localContext = cContext.getBundleContext();
-    super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
         new MetadataDependencyRegistryTracker(localContext, this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());

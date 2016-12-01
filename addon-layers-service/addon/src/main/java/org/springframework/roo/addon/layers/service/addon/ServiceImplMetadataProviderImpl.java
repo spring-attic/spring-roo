@@ -80,7 +80,6 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
   @SuppressWarnings("unchecked")
   protected void activate(final ComponentContext cContext) {
     context = cContext.getBundleContext();
-    super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
         new MetadataDependencyRegistryTracker(context, this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());

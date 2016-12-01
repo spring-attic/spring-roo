@@ -64,7 +64,6 @@ public class ExceptionsMetadataProviderImpl extends AbstractMemberDiscoveringItd
   protected void activate(final ComponentContext cContext) {
     context = cContext.getBundleContext();
     serviceInstaceManager.activate(this.context);
-    super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
         new MetadataDependencyRegistryTracker(context, this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());

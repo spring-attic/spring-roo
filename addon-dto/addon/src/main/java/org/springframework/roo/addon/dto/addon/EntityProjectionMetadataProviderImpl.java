@@ -48,7 +48,6 @@ public class EntityProjectionMetadataProviderImpl extends
   @Override
   protected void activate(final ComponentContext cContext) {
     context = cContext.getBundleContext();
-    super.setDependsOnGovernorBeingAClass(true);
     this.registryTracker =
         new MetadataDependencyRegistryTracker(context, this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());

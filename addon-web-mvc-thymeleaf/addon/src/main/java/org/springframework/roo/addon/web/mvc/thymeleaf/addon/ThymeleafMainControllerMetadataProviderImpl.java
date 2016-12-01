@@ -60,7 +60,6 @@ public class ThymeleafMainControllerMetadataProviderImpl extends
   protected void activate(final ComponentContext cContext) {
     super.activate(cContext);
     context = cContext.getBundleContext();
-    super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
         new MetadataDependencyRegistryTracker(context, this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());

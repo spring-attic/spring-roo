@@ -49,7 +49,6 @@ public class PluralMetadataProviderImpl extends AbstractItdMetadataProvider impl
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
     setIgnoreTriggerAnnotations(true);
-    setDependsOnGovernorBeingAClass(false);
   }
 
   /**
