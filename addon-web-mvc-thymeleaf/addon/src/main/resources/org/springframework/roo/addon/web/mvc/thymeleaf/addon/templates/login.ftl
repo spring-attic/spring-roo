@@ -79,15 +79,15 @@
                     aria-haspopup="true" aria-expanded="false">
                     <span class="glyphicon glyphicon-globe" aria-hidden="true">
                     </span>&nbsp;<span class="hidden-sm"
-                    data-th-text="${r"#{"}language_label${r"}"}">Language</span><span class="caret"></span>
+                    data-th-text="${r"#{"}language_label}">Language</span><span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu" id="languageFlags">
                    <li id="enFlag"><a href="?lang=en"><img class="flag"
                     data-th-src="@{/public/img/en.png}" src="../static/public/img/en.png"
-                    alt="English">&nbsp;<span data-th-text="${r"#{"}language_label_en${r"}"}">English</span></a> </li>
+                    alt="English">&nbsp;<span data-th-text="${r"#{"}language_label_en}">English</span></a> </li>
                    <li id="esFlag"><a href="?lang=es"><img class="flag"
                     data-th-src="@{/public/img/es.png}" src="../static/public/img/es.png"
-                    alt="Spanish">&nbsp;<span data-th-text="${r"#{"}language_label_es${r"}"}">Spanish</span></a> </li>
+                    alt="Spanish">&nbsp;<span data-th-text="${r"#{"}language_label_es}">Spanish</span></a> </li>
                   </ul>
                 </li>
               </ul>
@@ -101,7 +101,7 @@
           <div class="jumbotron bg-banner">
               <div class="container">
                 <h1 class="project-name">${projectName}</h1>
-                <p class="project-tagline" data-th-text="${r"#{"}info_homepage_project${r"}"}">Hello, this is your home page.</p>
+                <p class="project-tagline" data-th-text="${r"#{"}info_homepage_project}">Hello, this is your home page.</p>
               </div>
           </div>
         </div>
@@ -206,7 +206,7 @@
             Spring Roo &copy; 2016</a> •
             We <span class="glyphicon glyphicon-heart"></span>
             <a href="https://github.com/spring-projects/spring-roo/" target="_blank">Open source</a> •
-            <a data-th-href="@{/accessibility}" href="/accessibility"><span data-th-text="${r"#{"}label_accessibility${r"}"}">Accessibility</span></a>
+            <a data-th-href="@{/accessibility}" href="/accessibility"><span data-th-text="${r"#{"}label_accessibility}">Accessibility</span></a>
           </small>
         </div>
       </div>

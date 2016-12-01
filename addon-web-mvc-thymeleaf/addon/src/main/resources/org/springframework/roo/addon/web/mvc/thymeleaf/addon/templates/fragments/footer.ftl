@@ -21,7 +21,7 @@
              Spring Roo &copy; 2016</a> •
              We <span class="glyphicon glyphicon-heart"></span>
              <a href="https://github.com/spring-projects/spring-roo/" target="_blank">Open source</a> •
-             <a data-th-href="@{/accessibility}" href="/accessibility"><span data-th-text="${r"#{"}label_accessibility${r"}"}">Accessibility</span></a>
+             <a data-th-href="@{/accessibility}" href="/accessibility"><span data-th-text="${r"#{"}label_accessibility}">Accessibility</span></a>
             </small>
          </div>
        </div>

@@ -141,15 +141,15 @@
                     aria-haspopup="true" aria-expanded="false">
                     <span class="glyphicon glyphicon-globe" aria-hidden="true">
                     </span>&nbsp;<span class="hidden-sm"
-                    data-th-text="${r"#{"}language_label${r"}"}">Language</span><span class="caret"></span>
+                    data-th-text="${r"#{"}language_label}">Language</span><span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu" id="languageFlags">
                    <li id="enFlag"><a href="?lang=en"><img class="flag"
                     data-th-src="@{/public/img/en.png}" src="../static/public/img/en.png"
-                    alt="English">&nbsp;<span data-th-text="${r"#{"}language_label_en${r"}"}">English</span></a> </li>
+                    alt="English">&nbsp;<span data-th-text="${r"#{"}language_label_en}">English</span></a> </li>
                    <li id="esFlag"><a href="?lang=es"><img class="flag"
                     data-th-src="@{/public/img/es.png}" src="../static/public/img/es.png"
-                    alt="Spanish">&nbsp;<span data-th-text="${r"#{"}language_label_es${r"}"}">Spanish</span></a> </li>
+                    alt="Spanish">&nbsp;<span data-th-text="${r"#{"}language_label_es}">Spanish</span></a> </li>
                   </ul>
                 </li>
               </ul>
@@ -164,14 +164,14 @@
                   </a>
                   <ul class="dropdown-menu">
                    <li><a href="#"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
-                   &nbsp;<span data-th-text="${r"#{"}label_profile${r"}"}">Admin Profile</span></a></li>
+                   &nbsp;<span data-th-text="${r"#{"}label_profile}">Admin Profile</span></a></li>
                    <li><a href="#"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
-                   &nbsp;<span data-th-text="${r"#{"}label_change_password${r"}"}">Change password</span></a></li>
+                   &nbsp;<span data-th-text="${r"#{"}label_change_password}">Change password</span></a></li>
                    <li>
                      <form data-th-action="@{/logout}" action="/logout" method="post">
                        <button type="submit" class="btn btn-link">
                         <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
-                        <span data-th-text="${r"#{"}label_logout ${r"}"}">Log out</span>
+                        <span data-th-text="${r"#{"}label_logout}">Log out</span>
                        </button>
                      </form>
                    </li>
@@ -181,9 +181,9 @@
               <!-- User menu links -->
               <ul class="nav navbar-nav navbar-right upper-nav links">
                 <li><a href="#"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-                &nbsp;<span class="hidden-sm" data-th-text="${r"#{"}label_contact${r"}"}">Contact</span></a></li>
+                &nbsp;<span class="hidden-sm" data-th-text="${r"#{"}label_contact}">Contact</span></a></li>
                 <li><a href="#"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
-                &nbsp;<span class="hidden-sm" data-th-text="${r"#{"}label_help${r"}"}">Help</span></a></li>
+                &nbsp;<span class="hidden-sm" data-th-text="${r"#{"}label_help}">Help</span></a></li>
               </ul>
            </div>
           </div>
@@ -194,7 +194,7 @@
           <div class="jumbotron bg-banner">
               <div class="container">
                 <h1 class="project-name">${projectName}</h1>
-                <p class="project-tagline" data-th-text="${r"#{"}info_homepage_project${r"}"}">Hello, this is your home page.</p>
+                <p class="project-tagline" data-th-text="${r"#{"}info_homepage_project}">Hello, this is your home page.</p>
               </div>
           </div>
         </div>
@@ -362,7 +362,7 @@
             Spring Roo &copy; 2016</a> •
             We <span class="glyphicon glyphicon-heart"></span>
             <a href="https://github.com/spring-projects/spring-roo/" target="_blank">Open source</a> •
-            <a data-th-href="@{/accessibility}" href="../accessibility.html"><span data-th-text="${r"#{"}label_accessibility${r"}"}">Accessibility</span></a>
+            <a data-th-href="@{/accessibility}" href="../accessibility.html"><span data-th-text="${r"#{"}label_accessibility}">Accessibility</span></a>
         </small>
         </div>
       </div>
