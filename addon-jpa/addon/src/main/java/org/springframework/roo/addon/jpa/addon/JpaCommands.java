@@ -78,27 +78,38 @@ public class JpaCommands implements CommandMarker {
   // Annotations
   private static final AnnotationMetadataBuilder ROO_EQUALS_BUILDER =
       new AnnotationMetadataBuilder(ROO_EQUALS);
+
   private static final AnnotationMetadataBuilder ROO_SERIALIZABLE_BUILDER =
       new AnnotationMetadataBuilder(ROO_SERIALIZABLE);
+
   private static final AnnotationMetadataBuilder ROO_TO_STRING_BUILDER =
       new AnnotationMetadataBuilder(ROO_TO_STRING);
+
   private static final String IDENTIFIER_DEFAULT_TYPE = "java.lang.Long";
+
   private static final String VERSION_DEFAULT_TYPE = "java.lang.Integer";
 
   @Reference
   private JpaOperations jpaOperations;
+
   @Reference
   private ProjectOperations projectOperations;
+
   @Reference
   private PropFileOperations propFileOperations;
+
   @Reference
   private StaticFieldConverter staticFieldConverter;
+
   @Reference
   private TypeLocationService typeLocationService;
+
   @Reference
   private ProjectSettingsService projectSettings;
+
   @Reference
   private PathResolver pathResolver;
+
   @Reference
   private FileManager fileManager;
 
@@ -151,53 +162,61 @@ public class JpaCommands implements CommandMarker {
   }
 
   @CliOptionVisibilityIndicator(command = "jpa setup", params = {"jndiDataSource"},
-      help = "jndiDataSource parameter is not available if any of databaseName, "
-          + "hostName, password or userName are selected or you are using an HYPERSONIC database.")
+      help = "`--jndiDataSource` parameter is not available if any of `--database`, "
+          + "`--databaseName`, `--hostName`, `--password` or `--userName` are "
+          + "present or if you are using an HYPERSONIC database.")
   public boolean isJndiVisible(ShellContext shellContext) {
 
     Map<String, String> params = shellContext.getParameters();
 
-    // If mandatory parameter database is not defined, all parameters are not visible
-    String database = params.get("database");
-    if (database == null) {
-      return false;
-    }
-
-    // If uses some HYPERSONIC database, jndiDataSource should not be visible.
-    if (database.startsWith("HYPERSONIC") || database.equals("H2_IN_MEMORY")) {
-      return false;
-    }
-
-    // If user define databaseName, hostName, password or username parameters, jndiDataSource
+    // If user define databaseName, hostName, password or username parameters,
+    // jndiDataSource
     // should not be visible.
-    if (params.containsKey("databaseName") || params.containsKey("hostName")
-        || params.containsKey("password") || params.containsKey("userName")) {
+    if (params.containsKey("database") || params.containsKey("databaseName")
+        || params.containsKey("hostName") || params.containsKey("password")
+        || params.containsKey("userName")) {
       return false;
     }
 
     return true;
   }
 
-  @CliOptionVisibilityIndicator(
-      command = "jpa setup",
-      params = {"databaseName", "hostName", "password", "userName"},
-      help = "Connection parameters are not available if jndiDatasource is specified or you are using an HYPERSONIC database.")
+  @CliOptionVisibilityIndicator(command = "jpa setup", params = {"databaseName", "hostName",
+      "password", "userName"},
+      help = "Connection parameters are not available if jndiDatasource is "
+          + "specified or if you are using an HYPERSONIC database.")
   public boolean areConnectionParamsVisible(ShellContext shellContext) {
 
     Map<String, String> params = shellContext.getParameters();
 
-    // If mandatory parameter database is not defined, all parameters are not visible
+    // If parameter database is not defined, all parameters are not visible
     String database = params.get("database");
     if (database == null) {
       return false;
     }
 
-    // If uses some memory databases or file databases, jndiDataSource parameter should not be visible.
+    // If uses some memory databases or file databases, jndiDataSource parameter
+    // should not be visible.
     if (database.startsWith("HYPERSONIC") || database.equals("H2_IN_MEMORY")) {
       return false;
     }
 
-    // If user define jndiDatasource parameter, connection parameters should not be visible
+    // If user define jndiDatasource parameter, connection parameters should not
+    // be visible
+    if (params.containsKey("jndiDataSource")) {
+      return false;
+    }
+
+    return true;
+  }
+
+  @CliOptionVisibilityIndicator(command = "jpa setup", params = "database",
+      help = "'--database' option is not available if '--jndiDatasource' " + "is specified.")
+  public boolean areProviderAndDatabaseVisible(ShellContext shellContext) {
+
+    Map<String, String> params = shellContext.getParameters();
+
+    // If user define jndiDatasource parameter, database should not be visible
     if (params.containsKey("jndiDataSource")) {
       return false;
     }
@@ -230,14 +249,18 @@ public class JpaCommands implements CommandMarker {
           + "command for diferent profiles with different persistence configurations.")
   public void installJpa(
       @CliOption(key = "provider", mandatory = true,
-          help = "The persistence ORM provider to support."
-              + "Possible values are: ECLIPSELINK and HIBERNATE.") final OrmProvider ormProvider,
+          help = "The persistence ORM provider to support. "
+              + "Possible values are: ECLIPSELINK and HIBERNATE. "
+              + "This option is available only if `--jndiDataSource` has not been specified."
+              + "This option is mandatory if `--jndiDataSource` has not been specified.") final OrmProvider ormProvider,
       @CliOption(
           key = "database",
-          mandatory = true,
+          mandatory = false,
           help = "The database type to support."
               + "Possible values are: DB2_400, DB2_EXPRESS_C, DERBY_CLIENT, DERBY_EMBEDDED, FIREBIRD, H2_IN_MEMORY,"
-              + " HYPERSONIC_IN_MEMORY, HYPERSONIC_PERSISTENT, MSSQL, MYSQL, ORACLE, POSTGRES and SYBASE.") final JdbcDatabase jdbcDatabase,
+              + " HYPERSONIC_IN_MEMORY, HYPERSONIC_PERSISTENT, MSSQL, MYSQL, ORACLE, POSTGRES and SYBASE. "
+              + "This option is available only if `--jndiDataSource` has not been specified."
+              + "This option is mandatory if `--jndiDataSource` has not been specified.") final JdbcDatabase jdbcDatabase,
       @CliOption(
           key = "module",
           mandatory = true,
@@ -250,9 +273,8 @@ public class JpaCommands implements CommandMarker {
               + " module.", unspecifiedDefaultValue = ".",
           optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
       @CliOption(key = "jndiDataSource", mandatory = false, help = "The JNDI datasource to use. "
-          + "This option is not available if any of `--databaseName`, `--hostName`, `--password` "
-          + "or `--userName` options are specified, or you are using an `HYPERSONIC` or "
-          + "`H2_IN_MEMORY` database.") final String jndi,
+          + "This option is not available if any of `--provider`, `--database`, `--databaseName`, "
+          + "`--hostName`, `--password` or `--userName` options are specified.") final String jndi,
       @CliOption(key = "hostName", mandatory = false, help = "The host name to use. "
           + "This option is available if `--database` has already been specified and its value is"
           + " not `HYPERSONIC` or `H2_IN_MEMORY` and `--jndiDatasource` has not been specified.") final String hostName,
@@ -267,7 +289,7 @@ public class JpaCommands implements CommandMarker {
           + " not `HYPERSONIC` or `H2_IN_MEMORY` and `--jndiDatasource` has not been specified.") final String password,
       ShellContext shellContext) {
 
-    if (jdbcDatabase == JdbcDatabase.FIREBIRD && !isJdk6OrHigher()) {
+    if (jdbcDatabase != null && jdbcDatabase == JdbcDatabase.FIREBIRD && !isJdk6OrHigher()) {
       LOGGER.warning("JDK must be 1.6 or higher to use Firebird");
       return;
     }
@@ -277,7 +299,8 @@ public class JpaCommands implements CommandMarker {
   }
 
   /**
-   * Indicator that checks if versionField param has been specified and makes its associate params visible
+   * Indicator that checks if versionField param has been specified and makes
+   * its associate params visible
    *
    * @param shellContext
    * @return true if versionField param has been specified.
@@ -304,14 +327,15 @@ public class JpaCommands implements CommandMarker {
    *
    * @param shellContext
    * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
-   *         and its value is "true". If not, return false.
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
+   *         settings and its value is "true". If not, return false.
    */
   @CliOptionMandatoryIndicator(params = {"sequenceName", "identifierStrategy", "identifierColumn",
       "table", "versionField", "versionColumn", "versionType"}, command = "entity jpa")
   public boolean areSchemaObjectNamesRequired(ShellContext shellContext) {
 
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on
     // project settings
     String requiredSchemaObjectName =
         projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
@@ -324,10 +348,8 @@ public class JpaCommands implements CommandMarker {
   }
 
   /**
-   * Indicator that provides all possible values for --class parameter
-   *
-   * The provided results will not be validate. It will not include space
-   * on finish.
+   * Indicator that provides all possible values for --class parameter The
+   * provided results will not be validate. It will not include space on finish.
    *
    * @param shellContext
    * @return List with all possible values for --class parameter
@@ -546,7 +568,8 @@ public class JpaCommands implements CommandMarker {
       }
     } else if (!permitReservedWords && StringUtils.isNotBlank(table)) {
       // If table name has been specified but doesn't permit reserved words,
-      // check SQL reserved words on table name and JAVA reserved words on entity name
+      // check SQL reserved words on table name and JAVA reserved words on
+      // entity name
       // Use try to catch exception and show custom message for this situation
       try {
         ReservedWords.verifyReservedSqlKeywordsNotPresent(table);
@@ -614,25 +637,26 @@ public class JpaCommands implements CommandMarker {
         identifierType, identifierColumn, sequenceName, identifierStrategy, versionField,
         versionType, versionColumn, inheritanceType, annotationBuilder);
 
-    // Update entity identifier class if required (identifierClass should be only an embeddable class)
+    // Update entity identifier class if required (identifierClass should be
+    // only an embeddable class)
     if (!(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java."))) {
       jpaOperations.updateEmbeddableToIdentifier(identifierType, identifierField, identifierColumn);
     }
   }
 
   /**
-     * Returns a builder for the entity-related annotation to be added to a
-     * newly created JPA entity
-     *
-     * @param table
-     * @param schema
-     * @param catalog
-     * @param inheritanceType
-     * @param mappedSuperclass
-     * @param entityName
-     * @param readOnly
-     * @return a non-<code>null</code> builder
-     */
+   * Returns a builder for the entity-related annotation to be added to a newly
+   * created JPA entity
+   *
+   * @param table
+   * @param schema
+   * @param catalog
+   * @param inheritanceType
+   * @param mappedSuperclass
+   * @param entityName
+   * @param readOnly
+   * @return a non-<code>null</code> builder
+   */
   private AnnotationMetadataBuilder getEntityAnnotationBuilder(final String table,
       final String schema, final String catalog, final InheritanceType inheritanceType,
       final boolean mappedSuperclass, final String entityName, final boolean readOnly) {
@@ -675,7 +699,8 @@ public class JpaCommands implements CommandMarker {
   /**
    * Check if superclass of the extended entity which it's going to be created
    * will override any specified param and shows a message if so. If user uses
-   * the --force global param it will be possible to execute the command for creating the entity.
+   * the --force global param it will be possible to execute the command for
+   * creating the entity.
    *
    * @param identifierColumn
    * @param identifierField
@@ -701,7 +726,8 @@ public class JpaCommands implements CommandMarker {
   }
 
   /**
-   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
+   * TopLevelPackage
    *
    * @param cid ClassOrInterfaceTypeDetails of a JavaType
    * @param currentText String current text for option value

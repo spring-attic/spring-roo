@@ -127,20 +127,21 @@ public class JpaOperationsImpl implements JpaOperations {
 
     Validate.notNull(module, "Module required");
     Validate.notNull(ormProvider, "ORM provider required");
-    Validate.notNull(jdbcDatabase, "JDBC database required");
 
     // Parse the configuration.xml file
     final Element configuration = XmlUtils.getConfiguration(getClass());
 
     // Get the first part of the XPath expressions for unwanted databases
     // and ORM providers
-    final String databaseXPath = getDbXPath(getUnwantedDatabases(jdbcDatabase));
-    final String providersXPath = getProviderXPath(getUnwantedOrmProviders(ormProvider));
-    final String stratersXPath = getStarterXPath(getUnwantedOrmProviders(ormProvider));
+    if (jdbcDatabase != null) {
+      final String databaseXPath = getDbXPath(getUnwantedDatabases(jdbcDatabase));
+      final String providersXPath = getProviderXPath(getUnwantedOrmProviders(ormProvider));
+      final String startersXPath = getStarterXPath(getUnwantedOrmProviders(ormProvider));
 
-    // Updating pom.xml including necessary properties, dependencies and Spring Boot starters
-    updateDependencies(module, configuration, ormProvider, jdbcDatabase, stratersXPath,
-        providersXPath, databaseXPath, profile);
+      // Updating pom.xml including necessary properties, dependencies and Spring Boot starters
+      updateDependencies(module, configuration, ormProvider, jdbcDatabase, startersXPath,
+          providersXPath, databaseXPath, profile);
+    }
 
     // Update Spring Config File with spring.datasource.* domain properties
     updateApplicationProperties(module.getModuleName(), ormProvider, jdbcDatabase, hostName,
