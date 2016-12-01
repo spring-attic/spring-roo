@@ -681,8 +681,6 @@ public class CreatorOperationsImpl implements CreatorOperations {
     XmlUtils.findRequiredElement("/project/properties/pkgVendor", root).setTextContent(vendorName);
     XmlUtils.findRequiredElement("/project/properties/pkgLicense", root)
         .setTextContent(lincenseUrl);
-    XmlUtils.findRequiredElement("/project/properties/repo.folder", root).setTextContent(
-        topLevelPackage.getFullyQualifiedPackageName().replace(".", "/"));
     if (docUrl != null && docUrl.length() > 0) {
       XmlUtils.findRequiredElement("/project/properties/pkgDocUrl", root).setTextContent(docUrl);
     }
