@@ -244,7 +244,7 @@
                         </#if>
                             <!-- TABLE -->
                             <div class="table-responsive">
-                              <table id="${field.fieldNameCapitalized}Table"
+                              <table id="${field.fieldNameCapitalized}Table" style="width: 99.9%"
                                      class="table table-striped table-hover table-bordered"
                                      data-row-id="${field.configuration.identifierField}"
                                      data-select="single"

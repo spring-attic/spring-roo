@@ -38,7 +38,7 @@
                   <#if detail.userManaged>
                     ${detail.codeManaged}
                   <#else>
-                    <table id="${detail.entityItemId}-table"
+                    <table id="${detail.entityItemId}-table" style="width: 99.9%"
                       class="table table-striped table-hover table-bordered"
                       data-z="${detail.z}"
                       data-row-id="${dconfig.identifierField}"
