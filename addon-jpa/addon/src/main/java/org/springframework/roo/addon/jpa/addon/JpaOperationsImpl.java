@@ -15,21 +15,6 @@ import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -41,7 +26,6 @@ import org.springframework.roo.addon.jpa.addon.entity.IdentifierStrategy;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
-import org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity;
 import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -75,6 +59,21 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link JpaOperations}.
@@ -127,6 +126,9 @@ public class JpaOperationsImpl implements JpaOperations {
 
     Validate.notNull(module, "Module required");
     Validate.notNull(ormProvider, "ORM provider required");
+    if (StringUtils.isBlank(jndi)) {
+      Validate.notNull(jdbcDatabase, "JDBC database or JNDI data source required");
+    }
 
     // Parse the configuration.xml file
     final Element configuration = XmlUtils.getConfiguration(getClass());
