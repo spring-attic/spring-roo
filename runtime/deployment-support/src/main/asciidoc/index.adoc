@@ -2919,10 +2919,7 @@ roo> web mvc setup --module
 
 --module::
   The application module where to install the persistence. This option is available if there is more than 
-  one application module (mandatory if the focus is not set in application module); default if option not present: '.' 
---appServer::
-  The server where deploy the application; default if option not
-  present: 'EMBEDDED'
+  one application module (mandatory if the focus is not set in application module); default if option not present: '.'
 
 === web mvc templates setup
 
