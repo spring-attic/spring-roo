@@ -419,15 +419,6 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         continue;
       }
 
-      String fieldName = field.getFieldName().getSymbolName();
-      // Exclude Reference field
-      if (entityMetadata.getRelationInfos().containsKey(fieldName)) {
-        continue;
-      }
-      if (entityMetadata.getRelationsAsChild().containsKey(fieldName)) {
-        continue;
-      }
-
       // TODO Exclude audit fields
       /*isAudit = false;
       for (FieldMetadata auditField : auditFields) {
