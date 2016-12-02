@@ -833,9 +833,9 @@ footer .container-fluid {
 
 .item--dropdown .item--body .item--body--version .docs-link.reference-link
     {
-    border-right: 1px solid #4a4540;
+/*     border-right: 1px solid #4a4540;
     padding-right: 10px;
-    margin-right: 5px;
+    margin-right: 5px; */
 }
 
 .item--dropdown.no-item--header .item--body-title {
