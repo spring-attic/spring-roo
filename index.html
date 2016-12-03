@@ -56,57 +56,58 @@ Spring Roo differs from other productivity tools by focusing on:
 
 ## Exciting Features - Spring Boot, Spring Data, ...
 
-Create Spring MVC applications with JPA are easier than ever with Roo, but it also eases your journey into the next generation of technology.
+Create Spring web applications are easier than ever with Roo, but it also eases your journey into the next generation of technology.
 
 Spring Roo generates applications focused on newer Spring technologies like Spring IO platform, Spring Data, etc. Indeed, Spring Roo creates Spring Boot applications.
 
-Roo already supports cool features like Solr for search server integration and cloud deployment like Google App Engine. Plus we have incremental database introspection, Flex, Spring Integration and much more actively in development.
+Roo already supports cool features like REST API scaffolding and SOAP clients and SOAP services generation for easier integration with external systems. Plus we have incremental database introspection, Thymeleaf views, Spring Web Flow, Spring Security and much more actively in development.
 
 ## Zero Risks - Productivity Without Compromise
 
 With Roo you still program everything in Java. Its innovative approach operates entirely at compile-time and is completely compatible with your IDE. Plus because there's no runtime portion, adoption is also simplified and low risk. All your Java developers will feel comfortable and be productive from day one. Roo really represents productivity without compromise.
 
+The [reference guide](http://docs.spring.io/spring-roo/docs/2.0.x/reference/html/) includes detailed descriptions of all the features, plus an extensive user guide for main use cases.
 
 ## Quick Start
 
 ### Pre-requisites
 
-To start with Spring Roo you need:
-
-* [JDK 1.6 or JDK 1.7]( http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-* [Maven 3.2 or above]( http://maven.apache.org/download.html )
-* Internet access so that Maven can download required dependencies
-
+To get started, please ensure you have the [required system dependencies](http://docs.spring.io/spring-roo/docs/2.0.x/reference/html/#getting-started-requirements).
 
 ### Working with Spring Tool Suite (STS)
 
-Depending on the version of Spring Roo you are using you must install the
-appropriate STS:
+To install Spring Roo 2.0 on your STS 3.8.2+ read the reference documentation [installation guide](http://docs.spring.io/spring-roo/docs/2.0.x/reference/html/#getting-started-install-roo).
 
-* Install STS 3.7.0 to work with Spring Roo 2.x. Go to [Spring Roo 2 Reference Documentation]( http://docs.spring.io/spring-roo/docs/2.0.0.M1/reference/html/#install-roo-support ) and follow the instructions.
-* Install STS 3.6.2 to work with Spring Roo 1.x. Go to [Spring Roo 1 Reference Documentation]( http://docs.spring.io/spring-roo/docs/1.3.1.RELEASE/reference/html/usage.html#install-roo-support ) and follow the instructions.
+### Running Roo
+
+Finally, open your STS IDE and [create your Spring Roo project](http://docs.spring.io/spring-roo/docs/2.0.x/reference/html/#running-roo).
 
 ### Running from shell
 
 {% include download_widget.md %}
+
+Most of the times you will use Roo in STS IDE but sometimes it is missed the possibility to run Roo from the terminal.
+
+Roo is a standard Java application that is fully self-contained within the Roo distribution ZIPs. So if you prefer, you can download Roo from one of the download sites, and run it from the terminal.
 
 After downloading, unpacking, and installing Roo, try out the following steps to create an application:
 
 ```sh
 mkdir hello
 cd hello
-roo
-roo> hint
+roo.sh
 roo> project setup --topLevelPackage com.foo
 roo> jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 roo> entity jpa --class ~.domain.Timer
 roo> field string --fieldName message --notNull
-roo> repository jpa --all --package ~.repository
-roo> service --all --apiPackage ~.service.api --implPackage ~.service.impl
+roo> repository jpa --all
+roo> service --all
 roo> web mvc setup
 roo> web mvc view setup --type THYMELEAF
-roo> web mvc controller --all --package ~.web --responseType THYMELEAF
+roo> web mvc controller --all --responseType THYMELEAF
+roo> web mvc controller --all --pathPrefix /api
 roo> quit
+mvn spring-boot:run
 ```
 
 {% endcapture %}
