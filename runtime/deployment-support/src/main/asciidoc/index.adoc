@@ -133,7 +133,7 @@ The most notable improvements are:
 
 === Domain model
 
-* Improved entity relationship definition.
+* Improved entity relationship management: now Roo generates the needed logic to maintain the coherence of the relations taking in account the type of the relation, _Aggretation_ or _Composition_.
 * Added support and commands to generate DTO classes.
 
 === View layer
@@ -161,8 +161,8 @@ To get started, please ensure you have the following system dependencies:
 * A Linux, Apple or Windows-based operating system (other operating
 systems may work but are not guaranteed).
 * A http://www.oracle.com/technetwork/java/javase/downloads/[Java JDK 6]
-or newer installed. Java JDK 7 is recommended.
-* https://maven.apache.org/download.cgi[Apache Maven 3.0] or above installed and in the path.
+or newer installed. Java *JDK 7* is recommended.
+* https://maven.apache.org/download.cgi[Apache Maven 3.3] or above installed and in the path.
 
 We always recommend you use the latest version of Java and Maven that are available for your platform.
 
@@ -240,6 +240,10 @@ image::sts-add-installation-02.png["Confirm Roo installation", width="60%"]
 +
 [align="center"]
 image::sts-add-installation-03.png["Roo support installed", width="60%"]
+. Press btn:[Roo Shell] button to open the Spring Roo Shell.
++
+[align="center"]
+image::sts-open-roo-shell.png["Roo Shell"]
 
 [[using-spring-roo]]
 = Using Spring Roo
@@ -296,23 +300,17 @@ If you are in a hurry to have an Spring Boot application up and running right aw
 *roo>* script --file northwind-multimodule.roo
 ----
 
-TODO source location at GitHub
-
 [source,subs="quotes"]
 .Shop application with REST services
 ----
 *roo>* script --file restfulshop.roo
 ----
 
-TODO source location at GitHub
-
 [source,subs="quotes"]
 .The classic Pet Clinic application (one Maven module project)
 ----
 *roo>* script --file clinic.roo
 ----
-
-TODO source location at GitHub
 
 [[using-spring-roo-create-boot-app]]
 == Create your Spring Boot application
