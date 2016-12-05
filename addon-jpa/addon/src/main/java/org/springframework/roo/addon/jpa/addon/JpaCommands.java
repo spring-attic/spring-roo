@@ -12,6 +12,8 @@ import static org.springframework.roo.shell.OptionContexts.SUPERCLASS;
 import static org.springframework.roo.shell.OptionContexts.UPDATELAST_PROJECT;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -393,7 +395,7 @@ public class JpaCommands implements CommandMarker {
       command = "entity jpa",
       param = "identifierType",
       help = "--identifierType option should be a wrapper of a primitive type or an embeddable class.")
-  public List<String> getFieldEmbeddedPossibleValues(ShellContext shellContext) {
+  public List<String> getIdentifierTypePossibleValues(ShellContext shellContext) {
     String currentText = shellContext.getParameters().get("identifierType");
     List<String> allPossibleValues = new ArrayList<String>();
 
@@ -405,6 +407,8 @@ public class JpaCommands implements CommandMarker {
     allPossibleValues.add(Long.class.getName());
     allPossibleValues.add(Float.class.getName());
     allPossibleValues.add(Double.class.getName());
+    allPossibleValues.add(BigDecimal.class.getName());
+    allPossibleValues.add(BigInteger.class.getName());
 
     // Getting all existing embeddable classes
     Set<ClassOrInterfaceTypeDetails> embeddableClassesInProject =
@@ -415,6 +419,26 @@ public class JpaCommands implements CommandMarker {
         allPossibleValues.add(name);
       }
     }
+
+    return allPossibleValues;
+  }
+
+  @CliOptionAutocompleteIndicator(command = "entity jpa", param = "versionType",
+      help = "--versionType option should be a wrapper of a primitive type.")
+  public List<String> getVersionTypePossibleValues(ShellContext shellContext) {
+    String currentText = shellContext.getParameters().get("identifierType");
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    // Add java-lang and java-number classes
+    allPossibleValues.add(Number.class.getName());
+    allPossibleValues.add(Short.class.getName());
+    allPossibleValues.add(Byte.class.getName());
+    allPossibleValues.add(Integer.class.getName());
+    allPossibleValues.add(Long.class.getName());
+    allPossibleValues.add(Float.class.getName());
+    allPossibleValues.add(Double.class.getName());
+    allPossibleValues.add(BigDecimal.class.getName());
+    allPossibleValues.add(BigInteger.class.getName());
 
     return allPossibleValues;
   }
@@ -488,7 +512,7 @@ public class JpaCommands implements CommandMarker {
           help = "The JPA table catalog name to use for this entity") final String catalog,
       @CliOption(key = "identifierField", mandatory = false,
           help = "The JPA identifier field name to use for this entity") final String identifierField,
-      @CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang",
+      @CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang,project",
           unspecifiedDefaultValue = IDENTIFIER_DEFAULT_TYPE,
           specifiedDefaultValue = "java.lang.Long",
           help = "The data type that will be used for the JPA identifier field."
