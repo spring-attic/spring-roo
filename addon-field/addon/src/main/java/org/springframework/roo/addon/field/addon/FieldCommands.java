@@ -57,6 +57,7 @@ import java.util.logging.Logger;
  *
  * @author Ben Alex
  * @author Alan Stewart
+ * @author Sergio Clares
  * @since 1.0
  */
 @Component
@@ -65,7 +66,7 @@ public class FieldCommands implements CommandMarker {
 
   protected final static Logger LOGGER = HandlerUtils.getLogger(FieldCommands.class);
 
-  //------------ OSGi component attributes ----------------
+  //------------ OSGi component attributes ----------------//
   private BundleContext context;
 
   @Reference
@@ -84,6 +85,7 @@ public class FieldCommands implements CommandMarker {
   private ProjectSettingsService projectSettings;
   @Reference
   private LastUsed lastUsed;
+
   private Converter<JavaType> javaTypeConverter;
 
   // FieldCreatorProvider implementations
@@ -166,6 +168,28 @@ public class FieldCommands implements CommandMarker {
     return false;
   }
 
+  @CliOptionVisibilityIndicator(command = "field boolean", params = {"assertFalse"},
+      help = "Option `--assertFalse` is not available if option `--assertTrue` "
+          + "has already been specified.")
+  public boolean isAssertFalseVisibleForFieldBoolean(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isAssertFalseVisibleForFieldBoolean(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field boolean", params = {"assertTrue"},
+      help = "Option `--assertTrue` is not available if option `--assertFalse` "
+          + "has already been specified.")
+  public boolean isAssertTrueVisibleForFieldBoolean(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isAssertTrueVisibleForFieldBoolean(shellContext);
+    }
+    return false;
+  }
+
   @CliCommand(value = "field boolean",
       help = "Adds a private boolean field to an existing Java source file")
   public void addFieldBoolean(
@@ -205,26 +229,18 @@ public class FieldCommands implements CommandMarker {
           specifiedDefaultValue = "true",
           help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field."
               + "Default if option present: `true`; default if option not present: `false`.") final boolean notNull,
-      @CliOption(
-          key = "nullRequired",
-          mandatory = false,
-          unspecifiedDefaultValue = "false",
+      @CliOption(key = "assertFalse", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field."
-              + "Default if option present: `true`; default if option not present: `false`.") final boolean nullRequired,
-      @CliOption(
-          key = "assertFalse",
-          mandatory = false,
-          unspecifiedDefaultValue = "false",
-          specifiedDefaultValue = "true",
-          help = "Whether the value of this field must be false. Adds `javax.validation.constraints.AssertFalse` annotation to the field."
+          help = "Whether the value of this field must be false. Adds "
+              + "`javax.validation.constraints.AssertFalse` annotation to the field. "
+              + "This option is not available if `--asssertTrue` has already " + "been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean assertFalse,
-      @CliOption(
-          key = "assertTrue",
-          mandatory = false,
-          unspecifiedDefaultValue = "false",
+      @CliOption(key = "assertTrue", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether the value of this field must be true. Adds `javax.validation.constraints.AssertTrue` annotation to the field."
+          help = "Whether the value of this field must be true. Adds "
+              + "`javax.validation.constraints.AssertTrue` annotation to the field. "
+              + "This option is not available if `--asssertFalse` has already "
+              + "been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean assertTrue,
       @CliOption(
           key = "value",
@@ -247,8 +263,8 @@ public class FieldCommands implements CommandMarker {
     checkFieldExists(fieldName, shellContext, javaTypeDetails);
 
     getFieldCreatorProvider(typeName).createBooleanField(javaTypeDetails, primitive, fieldName,
-        notNull, nullRequired, assertFalse, assertTrue, column, comment, value,
-        permitReservedWords, transientModifier);
+        notNull, assertFalse, assertTrue, column, comment, value, permitReservedWords,
+        transientModifier);
   }
 
   @CliOptionMandatoryIndicator(command = "field date", params = {"column"})
@@ -308,6 +324,72 @@ public class FieldCommands implements CommandMarker {
     return false;
   }
 
+  @CliOptionVisibilityIndicator(command = "field date", params = {"future"},
+      help = "Option '--future' is not available when option '--past' has already "
+          + "been specified.")
+  public boolean isFutureVisibleForFieldDate(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isFutureVisibleForFieldDate(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field date", params = {"past"},
+      help = "Option '--past' is not available when option '--future' has already "
+          + "been specified.")
+  public boolean isPastVisibleForFieldDate(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isPastVisibleForFieldDate(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field date", params = {"dateFormat", "timeFormat"},
+      help = "Options `--dateFormat` and `--timeFormat` are not available when option "
+          + "`--dateTimeFormatPattern` has already been specified.")
+  public boolean areDateAndTimeFormatVisibleForFieldDate(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).areDateAndTimeFormatVisibleForFieldDate(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field date", params = {"dateTimeFormatPattern"},
+      help = "Option `--dateTimeFormatPattern` is not available when options "
+          + "`--dateFormat` or `--timeFormat` have already been specified.")
+  public boolean isDateTimeFormatPatternVisibleForFieldDate(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isDateTimeFormatPatternVisibleForFieldDate(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field date", params = {"notNull"},
+      help = "Option `--notNull` is not available when option `--nullRequired` "
+          + "has already been specified.")
+  public boolean isNotNullVisibleForFieldDate(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNotNullVisibleForFieldDate(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field date", params = {"nullRequired"},
+      help = "Option `--nullRequired` is not available when option `--notNull` "
+          + "has already been specified.")
+  public boolean isNullRequiredVisibleForFieldDate(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNullRequiredVisibleForFieldDate(shellContext);
+    }
+    return false;
+  }
+
   @CliCommand(value = "field date",
       help = "Adds a private date field to an existing Java source file")
   public void addFieldDateJpa(
@@ -334,81 +416,95 @@ public class FieldCommands implements CommandMarker {
       @CliOption(
           key = "persistenceType",
           mandatory = false,
-          help = "The type of persistent storage to be used. It adds a `javax.persistence.TemporalType` to a `javax.persistence.Temporal` annotation into the field"
-              + "This option is only available for JPA entities and embeddable classes."
+          help = "The type of persistent storage to be used. It adds a `javax.persistence.TemporalType` "
+              + "to a `javax.persistence.Temporal` annotation into the field. "
+              + "This option is only available for JPA entities and embeddable classes. "
               + "Default if option not present: `TemporalType.TIMESTAMP`") final DateFieldPersistenceType persistenceType,
       @CliOption(
           key = "column",
           mandatory = true,
           help = "The JPA @Column name. "
-              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
+              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. "
               + "This option is only visible for JPA entities and embeddable classes.") final String column,
       @CliOption(
           key = "transient",
           mandatory = false,
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` annotation. This marks the field as not persistent."
-              + "This option is only available for JPA entities and embeddable classes."
+          help = "Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` "
+              + "annotation. This marks the field as not persistent. "
+              + "This option is only available for JPA entities and embeddable classes. "
               + "Default if option present:`true`. Default if option not present: `false`.") final boolean transientModifier,
       @CliOption(
           key = "notNull",
           mandatory = false,
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field."
+          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field. "
+              + "This option is not available if `--nullRequired` has already been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean notNull,
       @CliOption(
           key = "nullRequired",
           mandatory = false,
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field."
+          help = "Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field. "
+              + "This option is not available if `--notNull` has already been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean nullRequired,
       @CliOption(
           key = "future",
           mandatory = false,
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value must be in the future. Adds `field.javax.validation.constraints.Future` annotation to the field."
-              + "Default if option present: `true`; default if option not present: `false`") final boolean future,
+          help = "Whether this value must be in the future. Adds `field.javax.validation.constraints.Future` "
+              + "annotation to the field. "
+              + "This option is not available if `--past` option has already been specified. "
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean future,
       @CliOption(
           key = "past",
           mandatory = false,
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value must be in the past. Adds `field.javax.validation.constraints.Past` annotation to the field."
-              + "Default if option present: `true`; default if option not present: `false`") final boolean past,
+          help = "Whether this value must be in the past. Adds `field.javax.validation.constraints.Past` "
+              + "annotation to the field. "
+              + "This option is not available if `--future` option has already been specified. "
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean past,
       @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
       @CliOption(
           key = "value",
           mandatory = false,
-          help = "Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection. ") final String value,
+          help = "Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` "
+              + "annotation with the given content, typically used for expression-driven dependency injection. ") final String value,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords,
-      @CliOption(
-          key = "dateFormat",
-          mandatory = false,
-          unspecifiedDefaultValue = "MEDIUM",
+      @CliOption(key = "dateFormat", mandatory = false, unspecifiedDefaultValue = "MEDIUM",
           specifiedDefaultValue = "MEDIUM",
-          help = "Indicates the style of the time format (ignored if dateTimeFormatPattern is specified), adding `style` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field. "
-              + "Possible values are: MEDIUM (style='MS'), NONE (style='-S') and SHORT (style='SS')."
-              + "Default: `MEDIUM`.") final DateTime dateFormat,
-      @CliOption(
-          key = "timeFormat",
-          mandatory = false,
-          unspecifiedDefaultValue = "NONE",
+          help = "Indicates the style of the date format, adding `style` attribute to "
+              + "`org.springframework.format.annotation.DateTimeFormat` annotation "
+              + "into the field, with date style (first character of the code). "
+              + "Possible values are: MEDIUM (style='M-'), NONE (style='--') and "
+              + "SHORT (style='S-'). "
+              + "This option is not available if `--dateTimeFormatPattern` has already "
+              + "been specified." + "Default: `MEDIUM`.") final DateTime dateFormat,
+      @CliOption(key = "timeFormat", mandatory = false, unspecifiedDefaultValue = "NONE",
           specifiedDefaultValue = "NONE",
-          help = "Indicates the style of the time format (ignored if dateTimeFormatPattern is specified), adding `style` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field. "
-              + "Possible values are: MEDIUM (style='MS'), NONE (style='-S') and SHORT (style='SS')."
-              + "Default: `NONE`.") final DateTime timeFormat,
+          help = "Indicates the style of the time format, adding `style` attribute to "
+              + "`org.springframework.format.annotation.DateTimeFormat` annotation "
+              + "into the field, with time style (second character of the code). "
+              + "Possible values are: MEDIUM (style='-M'), NONE (style='--') and "
+              + "SHORT (style='-S'). "
+              + "This option is not available if `--dateTimeFormatPattern` has already "
+              + "been specified." + "Default: `NONE`.") final DateTime timeFormat,
       @CliOption(
           key = "dateTimeFormatPattern",
           mandatory = false,
-          help = "Indicates a 'custom' DateTime format pattern such as yyyy-MM-dd hh:mm:ss, adding `pattern` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field, with the provided value.") final String pattern,
-      ShellContext shellContext) {
+          help = "Indicates a 'custom' DateTime format pattern such as yyyy-MM-dd hh:mm:ss, adding "
+              + "`pattern` attribute to `org.springframework.format.annotation.DateTimeFormat` "
+              + "annotation into the field, with the provided value. "
+              + "This option is not available if `--timeFormat` or `--dateFormat` have already "
+              + "been specified.") final String pattern, ShellContext shellContext) {
 
     final ClassOrInterfaceTypeDetails javaTypeDetails =
         typeLocationService.getTypeDetails(typeName);
@@ -457,7 +553,8 @@ public class FieldCommands implements CommandMarker {
   public void addFieldEmbeddedJpa(
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add.") final JavaSymbolName fieldName,
       @CliOption(key = "type", mandatory = true, optionContext = PROJECT,
-          help = "The Java type of an embeddable class, annotated with `@Embeddable`.") final JavaType fieldType,
+          help = "The Java type of an embeddable class, annotated with `@Embeddable`. "
+              + "Possible values are: any class in the project annotated with `@Embeddable`.") final JavaType fieldType,
       @CliOption(
           key = "class",
           mandatory = true,
@@ -549,13 +646,36 @@ public class FieldCommands implements CommandMarker {
     return false;
   }
 
+  @CliOptionVisibilityIndicator(command = "field enum", params = {"notNull"},
+      help = "Option `--notNull` is not available when option `--nullRequired` "
+          + "has already been specified.")
+  public boolean isNotNullVisibleForFieldEnum(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNotNullVisibleForFieldEnum(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field enum", params = {"nullRequired"},
+      help = "Option `--nullRequired` is not available when option `--notNull` "
+          + "has already been specified.")
+  public boolean isNullRequiredVisibleForFieldEnum(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNullRequiredVisibleForFieldEnum(shellContext);
+    }
+    return false;
+  }
+
   @CliCommand(
       value = "field enum",
       help = "Adds a private enum field to an existing Java source file. The field type must be a Java enum type.")
   public void addFieldEnum(
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add.") final JavaSymbolName fieldName,
       @CliOption(key = "type", mandatory = true, optionContext = ENUMERATION,
-          help = "The Java type of the field. It must be a Java enum type.") final JavaType fieldType,
+          help = "The Java type of the field. It must be a Java enum type. "
+              + "Possible values are: any enumerated class in the user's project.") final JavaType fieldType,
       @CliOption(
           key = "class",
           mandatory = true,
@@ -574,15 +694,16 @@ public class FieldCommands implements CommandMarker {
           key = "column",
           mandatory = true,
           help = "The JPA @Column name."
-              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
+              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`. "
               + "This option is only available for JPA entities and embeddable classes.") final String column,
       @CliOption(
           key = "transient",
           mandatory = false,
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` annotation. This marks the field as not persistent."
-              + "This option is only available for JPA entities and embeddable classes."
+          help = "Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` "
+              + "annotation. This marks the field as not persistent. "
+              + "This option is only available for JPA entities and embeddable classes. "
               + "Default if option present:`true`. Default if option not present: `false`.") final boolean transientModifier,
       @CliOption(
           key = "enumType",
@@ -591,22 +712,24 @@ public class FieldCommands implements CommandMarker {
               + "`javax.persistence.Enumerated` annotation to the field, with `javax.persistence.EnumType`"
               + " attribute. "
               + "Possible values are: `ORDINAL` (persists as an integer) and `STRING` "
-              + "(persists as a String). If this option is not specified, the `Enumerated` annotation "
-              + "will be added without the `EnumType` attribute, using its default value (`ORDINAL`)."
-              + "This option is only available for JPA entities and embeddable classes.") final EnumType enumType,
+              + "(persists as a String). "
+              + "This option is only available for JPA entities and embeddable classes. "
+              + "Default if option not present: `ORDINAL` (no `@Enumerated` - default by JPA).") final EnumType enumType,
       @CliOption(
           key = "notNull",
           mandatory = false,
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field."
+          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field. "
+              + "This option is not available if `--nullRequired` has already been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean notNull,
       @CliOption(
           key = "nullRequired",
           mandatory = false,
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field."
+          help = "Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field. "
+              + "This option is not available if `--notNull` has already been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean nullRequired,
       @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
@@ -681,6 +804,28 @@ public class FieldCommands implements CommandMarker {
     return false;
   }
 
+  @CliOptionVisibilityIndicator(command = "field number", params = {"notNull"},
+      help = "Option `--notNull` is not available when option `--nullRequired` "
+          + "has already been specified.")
+  public boolean isNotNullVisibleForFieldNumber(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNotNullVisibleForFieldNumber(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field number", params = {"nullRequired"},
+      help = "Option `--nullRequired` is not available if numeric type is primitive "
+          + "or `--notNull` option has been specified.")
+  public boolean isNullRequiredVisibleForFieldNumber(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNullRequiredVisibleForFieldNumber(shellContext);
+    }
+    return false;
+  }
+
   @CliCommand(
       value = "field number",
       help = "Adds a private numeric field to an existing Java source file. User can choose the field type between a wide range of numeric types.")
@@ -732,14 +877,17 @@ public class FieldCommands implements CommandMarker {
           mandatory = false,
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field."
+          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field. "
+              + "This option is not available if `--nullRequired` has already been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean notNull,
       @CliOption(
           key = "nullRequired",
           mandatory = false,
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field."
+          help = "Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field. "
+              + "This option is not available if `--notNull` or `--primitive` option have already been specified "
+              + "with value `true` or without value. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean nullRequired,
       @CliOption(
           key = "decimalMin",
@@ -885,6 +1033,28 @@ public class FieldCommands implements CommandMarker {
     return false;
   }
 
+  @CliOptionVisibilityIndicator(command = "field reference", params = {"notNull"},
+      help = "Option `--notNull` is not available when option `--nullRequired` "
+          + "has already been specified.")
+  public boolean isNotNullVisibleForFieldReference(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNotNullVisibleForFieldReference(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field reference", params = {"nullRequired"},
+      help = "Option `--nullRequired` is not available if numeric type is primitive "
+          + "or `--notNull` option has been specified.")
+  public boolean isNullRequiredVisibleForFieldReference(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNullRequiredVisibleForFieldReference(shellContext);
+    }
+    return false;
+  }
+
   @CliCommand(
       value = "field reference",
       help = "Adds a private reference field, representing (always) a bidirectional 'one-to-one' "
@@ -912,17 +1082,17 @@ public class FieldCommands implements CommandMarker {
           mandatory = true,
           help = "The JPA `@JoinColumn` `name` attribute."
               + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
-              + "This option is only available for JPA entities and embeddable classes.") final String joinColumnName,
+              + "This option is only available for JPA entities.") final String joinColumnName,
       @CliOption(key = "referencedColumnName", mandatory = false,
           help = "The JPA `@JoinColumn` `referencedColumnName` attribute."
-              + "This option is only available for JPA entities and embeddable classes.") final String referencedColumnName,
+              + "This option is only available for JPA entities.") final String referencedColumnName,
       @CliOption(
           key = "fetch",
           mandatory = false,
           help = "The fetch semantics at a JPA level. It adds the provided value to `fetch` attribute "
               + "of JPA `@OneToOne`. If this option is not provided, default fetch type will be `LAZY`."
               + "Possible values are `LAZY`and `EAGER`."
-              + "This option is only available for JPA entities and embeddable classes.") final Fetch fetch,
+              + "This option is only available for JPA entities.") final Fetch fetch,
       @CliOption(
           key = "mappedBy",
           mandatory = false,
@@ -948,11 +1118,22 @@ public class FieldCommands implements CommandMarker {
               + "entities. If this relation represents a 'composition' relation and this option "
               + "is not present, `--orphanRemoval` value will be `true`."
               + "Default if option present: `true`.") Boolean orphanRemoval,
-      @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
+      @CliOption(
+          key = "notNull",
+          mandatory = false,
+          unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` "
-              + "annotation to the field."
+          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field. "
+              + "This option is not available if `--nullRequired` has already been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean notNull,
+      @CliOption(
+          key = "nullRequired",
+          mandatory = false,
+          unspecifiedDefaultValue = "false",
+          specifiedDefaultValue = "true",
+          help = "Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field. "
+              + "This option is not available if `--notNull` has already been specified. "
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean nullRequired,
       @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs.") final String comment,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
@@ -1109,6 +1290,28 @@ public class FieldCommands implements CommandMarker {
     return false;
   }
 
+  @CliOptionVisibilityIndicator(command = "field set", params = {"notNull"},
+      help = "Option `--notNull` is not available when option `--nullRequired` "
+          + "has already been specified.")
+  public boolean isNotNullVisibleForFieldSet(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNotNullVisibleForFieldSet(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field set", params = {"nullRequired"},
+      help = "Option `--nullRequired` is not available if numeric type is primitive "
+          + "or `--notNull` option has been specified.")
+  public boolean isNullRequiredVisibleForFieldSet(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNullRequiredVisibleForFieldSet(shellContext);
+    }
+    return false;
+  }
+
   @CliCommand(
       value = "field set",
       help = "Adds a private `Set` field to an existing Java source file, representing (always) a "
@@ -1203,8 +1406,9 @@ public class FieldCommands implements CommandMarker {
           key = "fetch",
           mandatory = false,
           help = "The fetch semantics at a JPA level. It adds the provided value to `fetch` attribute of "
-              + "JPA `@OneToMany`, `@ManyToMany` and `@ManyToOne`. If this option is not provided, default"
-              + " fetch type will be `LAZY`." + "Possible values are `LAZY`and `EAGER`.") final Fetch fetch,
+              + "JPA `@OneToMany`, `@ManyToMany` and `@ManyToOne`. "
+              + "Possible values are: `LAZY`and `EAGER`."
+              + "Default if option not present: `LAZY`.") final Fetch fetch,
       @CliOption(
           key = "aggregation",
           mandatory = false,
@@ -1235,18 +1439,21 @@ public class FieldCommands implements CommandMarker {
           mandatory = false,
           help = "The maximum number of elements in the collection. This option adds or updates "
               + "`javax.validation.constraints.Size` with the provided value as `max` attribute value.") final Integer sizeMax,
-      @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
+      @CliOption(
+          key = "notNull",
+          mandatory = false,
+          unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` "
-              + "annotation to the field."
+          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field. "
+              + "This option is not available if `--nullRequired` has already been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean notNull,
       @CliOption(
           key = "nullRequired",
           mandatory = false,
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation "
-              + "to the field."
+          help = "Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field. "
+              + "This option is not available if `--notNull` has already been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean nullRequired,
       @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
@@ -1409,6 +1616,28 @@ public class FieldCommands implements CommandMarker {
     return false;
   }
 
+  @CliOptionVisibilityIndicator(command = "field list", params = {"notNull"},
+      help = "Option `--notNull` is not available when option `--nullRequired` "
+          + "has already been specified.")
+  public boolean isNotNullVisibleForFieldList(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNotNullVisibleForFieldList(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field list", params = {"nullRequired"},
+      help = "Option `--nullRequired` is not available if numeric type is primitive "
+          + "or `--notNull` option has been specified.")
+  public boolean isNullRequiredVisibleForFieldList(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNullRequiredVisibleForFieldList(shellContext);
+    }
+    return false;
+  }
+
   @CliCommand(
       value = "field list",
       help = "Adds a private `List` field to an existing Java source file, representing (always) a "
@@ -1501,8 +1730,9 @@ public class FieldCommands implements CommandMarker {
           key = "fetch",
           mandatory = false,
           help = "The fetch semantics at a JPA level. It adds the provided value to `fetch` attribute of "
-              + "JPA `@OneToMany`, `@ManyToMany` and `@ManyToOne`. If this option is not provided, default"
-              + " fetch type will be `LAZY`." + "Possible values are `LAZY`and `EAGER`.") final Fetch fetch,
+              + "JPA `@OneToMany`, `@ManyToMany` and `@ManyToOne`. "
+              + "Possible values are: `LAZY`and `EAGER`. "
+              + "Default if option not present: `LAZY`.") final Fetch fetch,
       @CliOption(
           key = "aggregation",
           mandatory = false,
@@ -1533,11 +1763,22 @@ public class FieldCommands implements CommandMarker {
           mandatory = false,
           help = "The maximum number of elements in the collection. This option adds or updates "
               + "`javax.validation.constraints.Size` with the provided value as `max` attribute value.") final Integer sizeMax,
-      @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
+      @CliOption(
+          key = "notNull",
+          mandatory = false,
+          unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` "
-              + "annotation to the field."
+          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field. "
+              + "This option is not available if `--nullRequired` has already been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean notNull,
+      @CliOption(
+          key = "nullRequired",
+          mandatory = false,
+          unspecifiedDefaultValue = "false",
+          specifiedDefaultValue = "true",
+          help = "Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field. "
+              + "This option is not available if `--notNull` has already been specified. "
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean nullRequired,
       @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
@@ -1626,6 +1867,28 @@ public class FieldCommands implements CommandMarker {
     return false;
   }
 
+  @CliOptionVisibilityIndicator(command = "field string", params = {"notNull"},
+      help = "Option `--notNull` is not available when option `--nullRequired` "
+          + "has already been specified.")
+  public boolean isNotNullVisibleForFieldString(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNotNullVisibleForFieldString(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field string", params = {"nullRequired"},
+      help = "Option `--nullRequired` is not available if numeric type is primitive "
+          + "or `--notNull` option has been specified.")
+  public boolean isNullRequiredVisibleForFieldString(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNullRequiredVisibleForFieldString(shellContext);
+    }
+    return false;
+  }
+
   @CliCommand(value = "field string",
       help = "Adds a private String field to an existing Java source file.")
   public void addFieldString(
@@ -1689,15 +1952,21 @@ public class FieldCommands implements CommandMarker {
           mandatory = false,
           help = "The maximum string length. This option adds or updates "
               + "`javax.validation.constraints.Size` with the provided value as `max` attribute value.") final Integer sizeMax,
-      @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
+      @CliOption(
+          key = "notNull",
+          mandatory = false,
+          unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` "
-              + "annotation to the field."
+          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field. "
+              + "This option is not available if `--nullRequired` has already been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean notNull,
-      @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false",
+      @CliOption(
+          key = "nullRequired",
+          mandatory = false,
+          unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value must be null. Adds `javax.validation.constraints.Null` "
-              + "annotation to the field."
+          help = "Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field. "
+              + "This option is not available if `--notNull` has already been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean nullRequired,
       @CliOption(
           key = "value",
@@ -1862,6 +2131,28 @@ public class FieldCommands implements CommandMarker {
     return false;
   }
 
+  @CliOptionVisibilityIndicator(command = "field other", params = {"notNull"},
+      help = "Option `--notNull` is not available when option `--nullRequired` "
+          + "has already been specified.")
+  public boolean isNotNullVisibleForFieldOther(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNotNullVisibleForFieldOther(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field other", params = {"nullRequired"},
+      help = "Option `--nullRequired` is not available if numeric type is primitive "
+          + "or `--notNull` option has been specified.")
+  public boolean isNullRequiredVisibleForFieldOther(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isNullRequiredVisibleForFieldOther(shellContext);
+    }
+    return false;
+  }
+
   @CliCommand(
       value = "field other",
       help = "Inserts a private field into the specified file. User can choose a custom type for the field by specifying its fully qualified name.")
@@ -1895,15 +2186,21 @@ public class FieldCommands implements CommandMarker {
               + "annotation. This marks the field as not persistent."
               + "This option is only available for JPA entities and embeddable classes."
               + "Default if option present:`true`. Default if option not present: `false`") final boolean transientModifier,
-      @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
+      @CliOption(
+          key = "notNull",
+          mandatory = false,
+          unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` "
-              + "annotation to the field."
+          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field. "
+              + "This option is not available if `--nullRequired` has already been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean notNull,
-      @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false",
+      @CliOption(
+          key = "nullRequired",
+          mandatory = false,
+          unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value must be null. Adds `javax.validation.constraints.Null` "
-              + "annotation to the field."
+          help = "Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field. "
+              + "This option is not available if `--notNull` has already been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean nullRequired,
       @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs.") final String comment,
       @CliOption(key = "value", mandatory = false,
@@ -1924,6 +2221,8 @@ public class FieldCommands implements CommandMarker {
     getFieldCreatorProvider(typeName).createOtherField(cid, fieldType, fieldName, notNull,
         nullRequired, comment, column, permitReservedWords, transientModifier);
   }
+
+  // Availability indicators //
 
   @CliAvailabilityIndicator({"field other", "field number", "field string", "field date",
       "field boolean", "field enum", "field file"})
