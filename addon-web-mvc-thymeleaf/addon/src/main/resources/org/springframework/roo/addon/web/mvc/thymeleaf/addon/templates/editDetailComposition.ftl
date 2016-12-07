@@ -379,8 +379,8 @@
     </script>
     <script
       src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/localization/messages_es.js"
-      data-th-src="@{/webjars/jquery-validation/src/localization/messages_}+${r"${#"}locale.language${r"}"}+'.js'"
-      data-th-if="${r"${#"}locale.language${r"}"} != 'en'">
+      data-th-src="@{/webjars/jquery-validation/src/localization/messages_}+${r"${#"}locale.language}+'.js'"
+      data-th-if="${r"${#"}locale.language} != 'en'">
     </script>
     <script src="../../static/public/js/validation-defaults.js"
       data-th-src="@{/public/js/validation-defaults.js}">

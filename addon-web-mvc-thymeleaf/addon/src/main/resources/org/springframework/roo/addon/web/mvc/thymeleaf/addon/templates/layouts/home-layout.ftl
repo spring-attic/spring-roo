@@ -107,12 +107,12 @@
        data-th-src="@{/webjars/momentjs/moment.min.js}">
       </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/locale/es.js"
-      data-th-src="@{/webjars/momentjs//locale/}+ ${r"${#"}locale.language${r"}"}+'.js'"
-      data-th-if="${r"${#"}locale.language${r"}"} != 'en' and ${r"${#"}locale.language${r"}"} != 'es'">
+      data-th-src="@{/webjars/momentjs//locale/}+ ${r"${#"}locale.language}+'.js'"
+      data-th-if="${r"${#"}locale.language} != 'en' and ${r"${#"}locale.language} != 'es'">
       </script>
     <script src="../../static/public/js/moment-locale-es.js"
       data-th-src="@{/public/js/moment-locale-es.js}"
-      data-th-if="${r"${#"}locale.language${r"}"} == 'es'">
+      data-th-if="${r"${#"}locale.language} == 'es'">
       </script>
     <script src="../../static/public/js/moment-defaults.js"
       data-th-src="@{/public/js/moment-defaults.js}">
