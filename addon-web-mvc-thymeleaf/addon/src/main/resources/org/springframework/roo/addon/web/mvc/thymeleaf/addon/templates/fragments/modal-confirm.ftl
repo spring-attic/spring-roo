@@ -18,7 +18,7 @@
     <div data-th-fragment="modalBody">
         <div data-th-id="${r"${id}"} + 'ModalBody'">
 
-          <p data-th-text="${r"${message}"}">Going to remove the selected
+          <p data-th-text="${r"${"}message}">Going to remove the selected
             element</p>
 
           <div class="progress hide">
@@ -32,9 +32,9 @@
         <div class="modal-footer">
           <button type="reset" class="btn btn-default pull-left"
               data-dismiss="modal" aria-label="Close"
-              data-th-text="${r"#{label_reset}"}">Cancel</button>
+              data-th-text="${r"#{"}label_reset}">Cancel</button>
           <button type="button" class="btn btn-primary pull-right"
-              data-th-text="${r"#{label_submit}"}" data-th-onclick="${r"${onclickCallback}"}"
+              data-th-text="${r"#{"}label_submit}" data-th-onclick="${r"${"}onclickCallback}"
               >Accept</button>
         </div>
     </div>

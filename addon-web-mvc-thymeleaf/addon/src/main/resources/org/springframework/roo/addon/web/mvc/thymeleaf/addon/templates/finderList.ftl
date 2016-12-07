@@ -13,8 +13,8 @@
     content="Spring Roo development team"
     data-th-remove="all"/>
   <#if isSecurityEnabled == true>
-  <meta data-th-if="${r"${_csrf != null}"}" name="_csrf" data-th-content="${r"${_csrf.token}"}" />
-  <meta data-th-if="${r"${_csrf != null}"}" name="_csrf_header" data-th-content="${r"${_csrf.headerName}"}" />
+  <meta data-th-if="${r"${"}csrf != null}" name="_csrf" data-th-content="${r"${"}_csrf.token}" />
+  <meta data-th-if="${r"${"}csrf != null}" name="_csrf_header" data-th-content="${r"${"}_csrf.headerName}" />
   </#if>
 
  <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
@@ -232,14 +232,14 @@
             <#assign allFieldsList="${allFieldsList?substring(0, allFieldsList?length - 1)}">
           </#if>
 
-          <div class="panel panel-default" data-th-object="${r"${formBean}"}">
+          <div class="panel panel-default" data-th-object="${r"${"}formBean}">
             <div class="panel-heading"  data-th-if="${r"${"}${conditionalEmpty}}">
               <a class="btn btn-default btn-xs"
                  data-th-with="${r"url=${(#mvc.url('"}${mvcUrl_search_form}${r"')).build()}"}"
                  data-th-href="@{${r"${url}("}${allFieldsList})}">
                 <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
               </a>
-              <span class="panel-title" data-th-text="${r"#{label_not_filtered}"}">Not filtered</span>
+              <span class="panel-title" data-th-text="${r"#{"}label_not_filtered}">Not filtered</span>
             </div>
             <div class="panel-heading" data-th-unless="${r"${"}${conditionalEmpty}}">
               <span class="btn-group" role="group">
@@ -253,13 +253,13 @@
                 </a>
               </span>
               <span class="panel-title">
-                <span data-th-text="${r"#{label_filtered_by}"}">Filtered by</span>:
+                <span data-th-text="${r"#{"}label_filtered_by}">Filtered by</span>:
               </span>
               <#list formbeanfields as field>
               <span class="label label-default" data-th-unless="*{${field.fieldName} == null}">${field.fieldName}</span>
               </#list>
             </div>
-            <div class="panel-body collapse in" id="filterBody" data-th-unless="${r"${"}${conditionalEmpty}${r"}"}">
+            <div class="panel-body collapse in" id="filterBody" data-th-unless="${r"${"}${conditionalEmpty}}">
               <#list formbeanfields as field>
 
                 <#assign allFieldsListWithoutCurrent="">
@@ -296,7 +296,7 @@
                    data-z="${entity.z}"
                    data-order="[[ 0, &quot;asc&quot; ]]"
                    <#list formbeanfields as field>
-                   data-data-load-url-param-${field.fieldWithoutCamelCase}="${r"${formBean."}${field.fieldName}${r"}"}"
+                   data-data-load-url-param-${field.fieldWithoutCamelCase}="${r"${"}formBean.${field.fieldName}"
                    </#list>
                    data-data-load-url="${r"${"}(#mvc.url('${mvcUrl_search_datatables}')).build()}"
                    data-data-show-url="${r"${"}(#mvc.url('${mvcUrl_show}')).buildAndExpand('_ID_')}"

@@ -124,7 +124,7 @@
               <div class="panel-body">
                 <form class="form-horizontal" data-th-action="@{/login}" method="post">
                  <fieldset>
-                  <legend class="sr-only" data-th-text="${r"#{help_login}"}">Enter your login and password</legend>
+                  <legend class="sr-only" data-th-text="${r"#{"}help_login}">Enter your login and password</legend>
                   <!-- Alerts messages -->
                   <div class="alert alert-info" role="alert"
                     data-th-if="${r"$"}{@environment.getProperty('springlets.security.auth.in-memory.enabled')}"
@@ -134,7 +134,7 @@
                     adminpasw=${r"$"}{@environment.getProperty('springlets.security.auth.in-memory.admin.password')}"
                     >
                     <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                    <span data-th-text="${r"#"}{info_security_login}">You tried to access a
+                    <span data-th-text="${r"#{"}info_security_login}">You tried to access a
                       restricted area of our application. By default, you can log in with:</span>
                     <blockquote>
                       <span data-th-if="${r"$"}{username}" data-th-text="|${r"$"}{username} / ${r"$"}{userpasw}|">"user/password"</span>
@@ -142,50 +142,50 @@
                     </blockquote>
                   </div>
 
-                  <div data-th-if="${r"${param.error}"}" class="alert alert-danger" role="alert">
+                  <div data-th-if="${r"${"}param.error}" class="alert alert-danger" role="alert">
                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                   <span class="sr-only" data-th-text="|${r"#{label_error}"}:|">Error:</span>
-                   <span data-th-text="${r"#{error_login}"}">Invalid user and password</span>
+                   <span class="sr-only" data-th-text="|${r"#{"}label_error}:|">Error:</span>
+                   <span data-th-text="${r"#{"}error_login}">Invalid user and password</span>
                   </div>
-                  <div data-th-if="${r"${param.logout}"}" class="alert alert-success" role="alert">
+                  <div data-th-if="${r"${"}param.logout}" class="alert alert-success" role="alert">
                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                   <span data-th-text="${r"#{info_closed_session}"}">Log out correctly</span>
+                   <span data-th-text="${r"#{"}info_closed_session}">Log out correctly</span>
                   </div>
-                  <div data-th-if="${r"${param.expired}"}" class="alert alert-danger" role="alert">
+                  <div data-th-if="${r"${"}param.expired}" class="alert alert-danger" role="alert">
                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                   <span class="sr-only" data-th-text="|${r"#{label_error}"}:|">Error:</span>
-                   <span data-th-text="${r"#{error_expired_session}"}">Your session has been expired</span>
+                   <span class="sr-only" data-th-text="|${r"#{"}label_error}:|">Error:</span>
+                   <span data-th-text="${r"#{"}error_expired_session}">Your session has been expired</span>
                   </div>
                   <div class="form-group has-error has-feedback" data-z="z" id="username"
                       data-th-classappend="${r"${param.error}"}? 'has-error has-feedback'"
                       data-th-class="form-group">
-                   <label for="username" class="col-md-3 control-label" data-th-text="${r"#{label_login_username}"}">Username</label>
+                   <label for="username" class="col-md-3 control-label" data-th-text="${r"#{"}label_login_username}">Username</label>
                    <div class="col-md-6">
                     <input id="username" name="username" type="text"
                         class="form-control" placeholder="Username"
-                        data-th-placeholder="${r"#{label_login_username}"}" data-toggle="tooltip"
+                        data-th-placeholder="${r"#{"}label_login_username}" data-toggle="tooltip"
                         aria-describedby="usernameStatus" />
                     <span data-th-classappend="${r"${param.error}"}? 'glyphicon glyphicon-remove form-control-feedback'"
                         class="glyphicon glyphicon-remove form-control-feedback"
-                        data-th-if="${r"${param.error}"}" aria-hidden="true"></span>
+                        data-th-if="${r"${"}param.error}" aria-hidden="true"></span>
                    </div>
                   </div>
                   <div class="form-group has-error has-feedback" data-z="z" id="password"
                       data-th-classappend="${r"${param.error}"}? 'has-error has-feedback'" data-th-class="form-group">
-                   <label for="password" class="col-md-3 control-label" data-th-text="${r"#{label_login_password}"}">Password</label>
+                   <label for="password" class="col-md-3 control-label" data-th-text="${r"#{"}label_login_password}">Password</label>
                    <div class="col-md-6">
                     <input id="password" name="password" type="password"
-                        class="form-control" placeholder="Password" data-th-placeholder="${r"#{label_login_password}"}"
+                        class="form-control" placeholder="Password" data-th-placeholder="${r"#{"}label_login_password}"
                         data-toggle="tooltip" aria-describedby="passwordStatus" />
                     <span data-th-classappend="${r"${param.error}"}? 'glyphicon glyphicon-remove form-control-feedback'"
-                        class="glyphicon glyphicon-remove form-control-feedback" data-th-if="${r"${param.error}"}"
+                        class="glyphicon glyphicon-remove form-control-feedback" data-th-if="${r"${"}param.error}"
                         aria-hidden="true"></span>
                    </div>
                   </div>
                   <div class="form-group">
                    <div class="col-md-9 col-md-offset-3">
-                    <button type="reset" class="btn btn-default" data-th-text="${r"#{label_reset}"}">Cancel</button>
-                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{label_submit}"}">Accept</button>
+                    <button type="reset" class="btn btn-default" data-th-text="${r"#{"}label_reset}">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit}">Accept</button>
                    </div>
                   </div>
                  </fieldset>
@@ -214,25 +214,25 @@
       <div class="row">
         <div class="col-sm-6 col-sm-offset-6 text-right">
           <a title="Explanation of WCAG 2.0 Level Double-A Conformance"
-            data-th-title="${r"#{label_accessibility_title}"}"
+            data-th-title="${r"#{"}label_accessibility_title}"
             target="_blank"
             href="http://www.w3.org/WAI/WCAG2AA-Conformance">
             <img height="32" width="88"
                  src="http://www.w3.org/WAI/wcag2AA"
-                 data-th-alt="${r"#{label_accessibility_alt}"}"
+                 data-th-alt="${r"#{"}label_accessibility_alt}"
                  alt="Level Double-A conformance, W3C WAI Web Content
                  Accessibility Guidelines 2.0">
           </a>
           &nbsp;
           <a title="Application developed and tested with OWASP -
              Open Web Application Security Project"
-             data-th-title="${r"#{label_owasp_title}"}"
+             data-th-title="${r"#{"}label_owasp_title}"
             target="_blank"
             href="https://www.owasp.org">
            <img height="32" width="90"
                data-th-src="@{/public/img/owasp_logo.png}"
                src="../static/public/img/owasp_logo.png"
-               data-th-alt="${r"#{label_owasp_alt}"}"
+               data-th-alt="${r"#{"}label_owasp_alt}"
                alt="Application developed and tested with OWASP">
           </a>
         </div>

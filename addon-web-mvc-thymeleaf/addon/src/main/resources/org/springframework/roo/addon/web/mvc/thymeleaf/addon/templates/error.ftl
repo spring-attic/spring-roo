@@ -61,13 +61,13 @@
     the template, in "content" fragment
   -->
   <header>
-    <h1 data-th-text="${r"#{"}label_errorpage${r"}"}">Error Page</h1>
+    <h1 data-th-text="${r"#{"}label_errorpage}">Error Page</h1>
   </header>
 
   <section data-layout-fragment="content">
 
     <div class="alert alert-danger fade in" role="alert">
-      <h4 data-th-text="${r"#{"}label_errorpage_header${r"}"}">¡Error!</h4>
+      <h4 data-th-text="${r"#{"}label_errorpage_header}">¡Error!</h4>
       <p>
         <span data-th-text="${r"#"}{info_error}">An unexpected error has occurred</span>
         (type=<span data-th-text="${r"$"}{error}">Bad</span>, status=<span data-th-text="${r"${status}"}">500</span>).
