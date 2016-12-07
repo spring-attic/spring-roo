@@ -207,9 +207,9 @@
             <!-- CONTENT -->
             <h1 data-th-text="${r"#{"}label_show_entity(${r"#{"}${entityLabel}})}">Show ${entityName}</h1>
 
-            <ul class="list-unstyled" id="containerFields">
-              <fieldset id="mainEntityFieldSet">
-                <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data </legend>
+              <div id="mainEntityFieldSet">
+                <h2 data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data</h2>
+                <ul class="list-unstyled" id="containerFields">
                 <#list fields as field>
                   <#if field.userManaged>
                     ${field.codeManaged}
@@ -220,15 +220,17 @@
            	        </li>
                   </#if>
                 </#list>
-              </fieldset>
+                </ul>
+              </div>
 
               <#if compositeRelationFields?has_content>
                 <#list compositeRelationFields?keys as referencedField>
-                  <fieldset id="${referencedField}FieldSet">
+                  <div id="${referencedField}FieldSet">
                     <#list compositeRelationFields[referencedField] as field>
-                      <#if field?index == 0>
-                        <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${field.legendLabel}})}">${field.entityName} data </legend>
-                      </#if>
+                    <#if field?index == 0>
+                    <h2 data-th-text="${r"#{"}label_data_entity(${r"#{"}${field.legendLabel}})}">${field.entityName} data</h2>
+                    <ul class="list-unstyled" id="containerFields">
+                    </#if>
                       <#if field.userManaged>
                         ${field.codeManaged}
                       <#else>
@@ -237,67 +239,68 @@
                           <span data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</span>
                         </li>
                       </#if>
-                    </#list>
-                  </fieldset>
+                   </#list>
+                   </ul>
+                  </div>
                 </#list>
               </#if>
 
-              <#if details?size != 0>
-                  <hr>
-                  <ul class="nav nav-tabs">
-                  <#assign firstDetail=true>
-                  <#list details as field>
-                    <#if firstDetail == true>
-                      <li class="active"><a id="${field.fieldNameCapitalized}Tab" data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
-                      <#assign firstDetail=false>
-                    <#else>
-                        <li><a id="${field.fieldNameCapitalized}Tab" data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
-                    </#if>
-                  </#list>
-                  </ul>
-
-                  <div class="tab-content">
-                    <#assign firstDetail=true>
-                    <#list details as field>
-                        <#if firstDetail == true>
-                            <div id="detail-${field.fieldNameCapitalized}" class="tab-pane active">
-                            <#assign firstDetail=false>
-                        <#else>
-                            <div id="detail-${field.fieldNameCapitalized}" class="tab-pane">
-                        </#if>
-                            <!-- TABLE -->
-                            <div class="table-responsive">
-                              <table id="${field.fieldNameCapitalized}Table" style="width: 99.7%"
-                                     class="table table-striped table-hover table-bordered"
-                                     data-row-id="${field.configuration.identifierField}"
-                                     data-select="single"
-                                     data-z="${field.z}"
-                                     data-order="[[ 0, &quot;asc&quot; ]]">
-                                <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabel}${r"}"})${r"}"}">${field.fieldNameCapitalized} List</caption>
-                                <thead>
-                                  <tr>
-                                    <#list field.configuration.referenceFieldFields as referencedFieldField>
-                                    <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
-                                    </#list>
-                                    <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
-                                  </tr>
-                                </thead>
-                                <tbody data-th-remove="all">
-                                  <tr>
-                                    <#list field.configuration.referenceFieldFields as referencedFieldField>
-                                    <td>${referencedFieldField.fieldName}</td>
-                                    </#list>
-                                    <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
-                                  </tr>
-                                </tbody>
-                              </table>
-                            </div>
-                            <!-- /TABLE -->
-                        </div>
-                      </#list>
-                  </div>
+            <!-- details -->
+            <#if details?size != 0>
+              <hr>
+              <ul class="nav nav-tabs">
+              <#assign firstDetail=true>
+              <#list details as field>
+                <#if firstDetail == true>
+                  <li class="active"><a id="${field.fieldNameCapitalized}Tab" data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
+                  <#assign firstDetail=false>
+                <#else>
+                    <li><a id="${field.fieldNameCapitalized}Tab" data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
                 </#if>
-            </ul>
+              </#list>
+              </ul>
+
+              <div class="tab-content">
+                <#assign firstDetail=true>
+                <#list details as field>
+                    <#if firstDetail == true>
+                        <div id="detail-${field.fieldNameCapitalized}" class="tab-pane active">
+                        <#assign firstDetail=false>
+                    <#else>
+                        <div id="detail-${field.fieldNameCapitalized}" class="tab-pane">
+                    </#if>
+                        <!-- TABLE -->
+                        <div class="table-responsive">
+                          <table id="${field.fieldNameCapitalized}Table" style="width: 99.7%"
+                                 class="table table-striped table-hover table-bordered"
+                                 data-row-id="${field.configuration.identifierField}"
+                                 data-select="single"
+                                 data-z="${field.z}"
+                                 data-order="[[ 0, &quot;asc&quot; ]]">
+                            <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabel}${r"}"})${r"}"}">${field.fieldNameCapitalized} List</caption>
+                            <thead>
+                              <tr>
+                                <#list field.configuration.referenceFieldFields as referencedFieldField>
+                                <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
+                                </#list>
+                                <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
+                              </tr>
+                            </thead>
+                            <tbody data-th-remove="all">
+                              <tr>
+                                <#list field.configuration.referenceFieldFields as referencedFieldField>
+                                <td>${referencedFieldField.fieldName}</td>
+                                </#list>
+                                <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <!-- /TABLE -->
+                    </div>
+                  </#list>
+              </div>
+            </#if>
 
             <div class="clearfix">
               <div class="pull-left">
