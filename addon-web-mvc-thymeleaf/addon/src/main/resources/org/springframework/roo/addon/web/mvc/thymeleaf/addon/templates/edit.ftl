@@ -396,12 +396,12 @@
 	  function() {
 	    Inputmask.extendAliases({
 	      'numeric' : {
-	         'groupSeparator' : /*[[${r"#{"}label_inputmask_groupSeparator${r"}"}]]*/'.',
-	         'radixPoint' : /*[[${r"#{"}label_inputmask_radixPoint${r"}"}]]*/','
+	         'groupSeparator' : /*[[${r"#{"}label_inputmask_groupSeparator}]]*/'.',
+	         'radixPoint' : /*[[${r"#{"}label_inputmask_radixPoint}]]*/','
 	       },
 	       'currency' : {
-	          'prefix' : /*[[${r"#{"}label_inputmask_prefix${r"}"}]]*/'',
-	          'suffix' : /*[[${r"#{"}label_inputmask_suffix${r"}"}]]*/' €'
+	          'prefix' : /*[[${r"#{"}label_inputmask_prefix}]]*/'',
+	          'suffix' : /*[[${r"#{"}label_inputmask_suffix}]]*/' €'
 	        }
 	    });
 	 });

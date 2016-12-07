@@ -307,13 +307,13 @@
                 <a id="${entityName}_list" href="list.html" class="btn btn-default"
     	       data-th-href="@{${"${"}(#mvc.url('${mvcUrl_list}')).build()}}"> <span
     	       class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span><span
-    	       data-th-text="${r"#{"}label_back${r"}"}">Back</span>
+    	       data-th-text="${r"#{"}label_back}">Back</span>
     	    </a>
               </div>
               <div class="pull-right">
     	     <a id="${entityName}_edit" href="edit.html" class="btn btn-primary"
     	        data-th-href="@{${"${"}(#mvc.url('${mvcUrl_editForm}')).buildAndExpand(${entity.modelAttribute}.${entity.configuration.identifierField})}}"
-    	        data-th-text="${r"#{label_edit}"}">Edit</a>
+    	        data-th-text="${r"#{"}label_edit}">Edit</a>
               </div>
             </div>
 
@@ -323,7 +323,7 @@
           <!-- MODAL -->
           <#if details?size != 0>
           <div
-            data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=${r"#{"}label_delete${r"}"})">
+            data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=${r"#{"}label_delete}")">
 
             <script type="text/javascript">
                 function openDeleteModal(){
@@ -337,13 +337,13 @@
                 <div class="modal-content">
                   <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"
-                      aria-label="${r"#{"}label_close${r"}"}">
+                      aria-label="${r"#{"}label_close}">
                       <span aria-hidden="true">&times;</span>
                     </button>
-                    <h2 class="modal-title" id="staticModalLabel" data-th-text="${r"#{"}label_delete${r"}"}">Delete</h2>
+                    <h2 class="modal-title" id="staticModalLabel" data-th-text="${r"#{"}label_delete}">Delete</h2>
                   </div>
                   <div class="modal-body" id="staticModalBody">
-                    <p data-th-text="${r"#{"}label_message${r"}"}">Message</p>
+                    <p data-th-text="${r"#{"}label_message}">Message</p>
                   </div>
                 </div>
               </div>

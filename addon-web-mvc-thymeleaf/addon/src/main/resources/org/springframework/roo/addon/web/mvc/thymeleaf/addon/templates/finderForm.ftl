@@ -201,14 +201,14 @@
   	  within the template, in the section "content"
   	-->
 
-          <h1 data-th-text="${r"#{"}label_search_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Search ${entityName}</h1>
+          <h1 data-th-text="${r"#{"}label_search_entity(${r"#{"}${entityLabel}})}">Search ${entityName}</h1>
 
           <!-- FORM -->
-          <form class="form-horizontal validate" method="GET" data-th-object="${r"${formBean}"}"
+          <form class="form-horizontal validate" method="GET" data-th-object="${r"${"}formBean}"
             data-th-action="${r"${"}(#mvc.url('${mvcUrl_search}')).build()}">
 
             <fieldset id="containerFields">
-              <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} data </legend>
+              <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data </legend>
 
               <#list fields as field>
                   <#if field.userManaged>
@@ -253,7 +253,7 @@
                       onclick="location.href='list.html'"
                       data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
                       data-th-text="${r"#{"}label_reset}">Cancel</button>
-                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_search${r"}"}">Search</button>
+                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_search}">Search</button>
                 </div>
               </div>
 
@@ -347,12 +347,12 @@
 	  function() {
 	    Inputmask.extendAliases({
 	      'numeric' : {
-	         'groupSeparator' : /*[[${r"#{"}label_inputmask_groupSeparator${r"}"}]]*/'.',
-	         'radixPoint' : /*[[${r"#{"}label_inputmask_radixPoint${r"}"}]]*/','
+	         'groupSeparator' : /*[[${r"#{"}label_inputmask_groupSeparator}]]*/'.',
+	         'radixPoint' : /*[[${r"#{"}label_inputmask_radixPoint}]]*/','
 	       },
 	       'currency' : {
-	          'prefix' : /*[[${r"#{"}label_inputmask_prefix${r"}"}]]*/'',
-	          'suffix' : /*[[${r"#{"}label_inputmask_suffix${r"}"}]]*/' €'
+	          'prefix' : /*[[${r"#{"}label_inputmask_prefix}]]*/'',
+	          'suffix' : /*[[${r"#{"}label_inputmask_suffix}]]*/' €'
 	        }
 	    });
 	 });
@@ -382,8 +382,8 @@
       (function(jQuery) {
          jQuery(document).ready(function() {
 	   jQuery.extend( jQuery.validator.messages, {
-	     'dateformat' : /*[[${r"#{"}error_invalid_date${r"}"}]]*/ 'Please enter a correct date/time',
-	     'inputmask': /*[[${r"#{"}error_invalid_maskValue${r"}"}]]*/ 'Please enter a valid value',
+	     'dateformat' : /*[[${r"#{"}error_invalid_date}]]*/ 'Please enter a correct date/time',
+	     'inputmask': /*[[${r"#{"}error_invalid_maskValue}]]*/ 'Please enter a valid value',
 	   });
 	 });
       })(jQuery);

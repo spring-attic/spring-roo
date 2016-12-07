@@ -24,11 +24,11 @@
         <div data-th-fragment="modalConfirmFooter">
             <button type="reset" class="btn btn-default pull-left"
               data-dismiss="modal" aria-label="Close"
-              data-th-text="${r"#{label_reset}"}">Cancel</button>
+              data-th-text="${r"#{"}label_reset}">Cancel</button>
             <button type="button" class="btn btn-primary pull-right"
               data-th-id="${r"${tableId}"} + DeleteButton"
               data-dismiss="modal" aria-label="Confirm"
-              data-th-text="${r"#{label_submit}"}">Accept</button>
+              data-th-text="${r"#{"}label_submit}">Accept</button>
         </div>
     </div>
 
