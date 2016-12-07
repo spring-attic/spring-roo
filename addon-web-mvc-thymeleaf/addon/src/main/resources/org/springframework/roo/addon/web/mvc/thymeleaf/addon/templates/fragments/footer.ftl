@@ -30,25 +30,25 @@
         <div class="col-sm-6 col-sm-offset-6 text-right">
 
          <a title="Explanation of WCAG 2.0 Level Double-A Conformance"
-            data-th-title="${r"#{label_accessibility_title}"}"
+            data-th-title="${r"#{"}label_accessibility_title}"
             target="_blank"
             href="http://www.w3.org/WAI/WCAG2AA-Conformance">
             <img height="32" width="88"
                  src="http://www.w3.org/WAI/wcag2AA"
-                 data-th-alt="${r"#{label_accessibility_alt}"}"
+                 data-th-alt="${r"#{"}label_accessibility_alt}"
                  alt="Level Double-A conformance, W3C WAI Web Content
                  Accessibility Guidelines 2.0"/>
          </a>
          &nbsp;
          <a title="Application developed and tested with OWASP -
              Open Web Application Security Project"
-             data-th-title="${r"#{label_owasp_title}"}"
+             data-th-title="${r"#{"}label_owasp_title}"
             target="_blank"
             href="https://www.owasp.org">
           <img height="32" width="90"
                data-th-src="@{/public/img/owasp_logo.png}"
                src="../static/public/img/owasp_logo.png"
-               data-th-alt="${r"#{label_owasp_alt}"}"
+               data-th-alt="${r"#{"}label_owasp_alt}"
                alt="Application developed and tested with OWASP"/>
          </a>
         </div>

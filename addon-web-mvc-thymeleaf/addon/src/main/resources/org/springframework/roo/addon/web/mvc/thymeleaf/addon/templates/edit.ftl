@@ -217,7 +217,7 @@
                   <#if field.userManaged>
                     ${field.codeManaged}
                   <#elseif field.type == "TEXT">
-                      <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required maxLength=field.configuration.maxLength />
+                      <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=6 required=field.configuration.required maxLength=field.configuration.maxLength />
                   <#elseif field.type == "NUMBER">
                       <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
                   <#elseif field.type == "DATE">
@@ -258,7 +258,7 @@
                       <#if field.userManaged>
                         ${field.codeManaged}
                       <#elseif field.type == "TEXT">
-                        <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required maxLength=field.configuration.maxLength />
+                        <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=6 required=field.configuration.required maxLength=field.configuration.maxLength />
                       <#elseif field.type == "NUMBER">
                         <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
                       <#elseif field.type == "DATE">
@@ -396,12 +396,12 @@
 	  function() {
 	    Inputmask.extendAliases({
 	      'numeric' : {
-	         'groupSeparator' : /*[[${r"#{"}label_inputmask_groupSeparator${r"}"}]]*/'.',
-	         'radixPoint' : /*[[${r"#{"}label_inputmask_radixPoint${r"}"}]]*/','
+	         'groupSeparator' : /*[[${r"#{"}label_inputmask_groupSeparator}]]*/'.',
+	         'radixPoint' : /*[[${r"#{"}label_inputmask_radixPoint}]]*/','
 	       },
 	       'currency' : {
-	          'prefix' : /*[[${r"#{"}label_inputmask_prefix${r"}"}]]*/'',
-	          'suffix' : /*[[${r"#{"}label_inputmask_suffix${r"}"}]]*/' €'
+	          'prefix' : /*[[${r"#{"}label_inputmask_prefix}]]*/'',
+	          'suffix' : /*[[${r"#{"}label_inputmask_suffix}]]*/' €'
 	        }
 	    });
 	 });

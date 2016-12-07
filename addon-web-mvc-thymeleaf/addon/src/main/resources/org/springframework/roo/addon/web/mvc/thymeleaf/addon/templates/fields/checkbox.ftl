@@ -3,7 +3,7 @@
   data-th-classappend="${r"${#fields.hasErrors"}('${fieldName}')}? 'has-error has-feedback'" data-th-class="form-group">
   <label class="col-md-3 control-label" for="${fieldName}"
     data-th-text="${r"#{"}${label}}">${fieldName}</label>
-  <div class="col-md-3">
+  <div class="col-md-6">
     <input type="checkbox" data-th-field="*{${fieldName}}"
       data-th-title="${r"#{"}label_requiredfield}"
       data-toggle="tooltip"/>

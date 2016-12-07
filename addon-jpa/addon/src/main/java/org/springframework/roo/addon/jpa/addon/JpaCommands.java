@@ -12,14 +12,6 @@ import static org.springframework.roo.shell.OptionContexts.SUPERCLASS;
 import static org.springframework.roo.shell.OptionContexts.UPDATELAST_PROJECT;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -34,10 +26,11 @@ import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.operations.InheritanceType;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.ReservedWords;
-import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
@@ -55,6 +48,16 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Commands for the JPA add-on to be used by the ROO shell.
@@ -358,33 +361,73 @@ public class JpaCommands implements CommandMarker {
       help = "Provided --class option should be a class annotated with @RooJpaEntity.",
       validate = false, includeSpaceOnFinish = false)
   public List<String> getClassPossibleValues(ShellContext shellContext) {
-
-    // Get current value of class
-    String currentText = shellContext.getParameters().get("class");
-
     List<String> allPossibleValues = new ArrayList<String>();
 
     // Add all modules to completions list
-    Collection<String> modules = projectOperations.getModuleNames();
-    for (String module : modules) {
-      if (StringUtils.isNotBlank(module)
-          && !module.equals(projectOperations.getFocusedModule().getModuleName())) {
-        allPossibleValues.add(module.concat(LogicalPath.MODULE_PATH_SEPARATOR).concat("~."));
+    if (projectOperations.isMultimoduleProject()) {
+      Collection<String> modules = projectOperations.getModuleNames();
+      for (String module : modules) {
+
+        // Ignore root module
+        if (StringUtils.isBlank(module)) {
+          continue;
+        }
+
+        // Ignore module name if it is the focused module
+        if (module.equals(projectOperations.getFocusedModule().getModuleName())) {
+          List<JavaPackage> modulePackages = typeLocationService.getPackagesForModule(module);
+
+          // Always add module top level package and project top level package
+          modulePackages.add(projectOperations.getTopLevelPackage(module));
+          for (JavaPackage javaPackage : modulePackages) {
+
+            // Check if package name contains top level package to shorten it
+            String currentPackageName =
+                getPackageStringValue(module, javaPackage.getFullyQualifiedPackageName());
+
+            // Add package to possible values
+            if (!allPossibleValues.contains(currentPackageName.concat("."))) {
+              allPossibleValues.add(currentPackageName.concat("."));
+            }
+          }
+        } else {
+
+          // It is not the focused module
+          List<JavaPackage> modulePackages = typeLocationService.getPackagesForModule(module);
+
+          // Always add module top level package and project top level package
+          modulePackages.add(projectOperations.getTopLevelPackage(module));
+          for (JavaPackage javaPackage : modulePackages) {
+
+            // Check if package name contains top level package to shorten it
+            String currentPackageName =
+                getPackageStringValue(module, javaPackage.getFullyQualifiedPackageName());
+
+            // Add package to possible values
+            String valueToAdd =
+                String.format("%s%s%s.", module, LogicalPath.MODULE_PATH_SEPARATOR,
+                    currentPackageName);
+            if (!allPossibleValues.contains(valueToAdd)) {
+              allPossibleValues.add(valueToAdd);
+            }
+          }
+        }
+      }
+    } else {
+
+      // Check all JavaPackages in single module project
+      for (JavaPackage javaPackage : typeLocationService.getPackagesForModule("")) {
+
+        // Check if package name contains top level package to shorten it
+        String currentPackageName =
+            getPackageStringValue("", javaPackage.getFullyQualifiedPackageName());
+
+        // Add package to possible values
+        if (!allPossibleValues.contains(currentPackageName.concat("."))) {
+          allPossibleValues.add(currentPackageName.concat("."));
+        }
       }
     }
-
-    // Getting all existing entities
-    Set<ClassOrInterfaceTypeDetails> entitiesInProject =
-        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY);
-    for (ClassOrInterfaceTypeDetails entity : entitiesInProject) {
-      String name = replaceTopLevelPackageString(entity, currentText);
-      if (!allPossibleValues.contains(name)) {
-        allPossibleValues.add(name);
-      }
-    }
-
-    // Always add base package
-    allPossibleValues.add("~.");
 
     return allPossibleValues;
   }
@@ -393,7 +436,7 @@ public class JpaCommands implements CommandMarker {
       command = "entity jpa",
       param = "identifierType",
       help = "--identifierType option should be a wrapper of a primitive type or an embeddable class.")
-  public List<String> getFieldEmbeddedPossibleValues(ShellContext shellContext) {
+  public List<String> getIdentifierTypePossibleValues(ShellContext shellContext) {
     String currentText = shellContext.getParameters().get("identifierType");
     List<String> allPossibleValues = new ArrayList<String>();
 
@@ -405,6 +448,8 @@ public class JpaCommands implements CommandMarker {
     allPossibleValues.add(Long.class.getName());
     allPossibleValues.add(Float.class.getName());
     allPossibleValues.add(Double.class.getName());
+    allPossibleValues.add(BigDecimal.class.getName());
+    allPossibleValues.add(BigInteger.class.getName());
 
     // Getting all existing embeddable classes
     Set<ClassOrInterfaceTypeDetails> embeddableClassesInProject =
@@ -415,6 +460,25 @@ public class JpaCommands implements CommandMarker {
         allPossibleValues.add(name);
       }
     }
+
+    return allPossibleValues;
+  }
+
+  @CliOptionAutocompleteIndicator(command = "entity jpa", param = "versionType",
+      help = "--versionType option should be a wrapper of a primitive type.")
+  public List<String> getVersionTypePossibleValues(ShellContext shellContext) {
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    // Add java-lang and java-number classes
+    allPossibleValues.add(Number.class.getName());
+    allPossibleValues.add(Short.class.getName());
+    allPossibleValues.add(Byte.class.getName());
+    allPossibleValues.add(Integer.class.getName());
+    allPossibleValues.add(Long.class.getName());
+    allPossibleValues.add(Float.class.getName());
+    allPossibleValues.add(Double.class.getName());
+    allPossibleValues.add(BigDecimal.class.getName());
+    allPossibleValues.add(BigInteger.class.getName());
 
     return allPossibleValues;
   }
@@ -488,7 +552,7 @@ public class JpaCommands implements CommandMarker {
           help = "The JPA table catalog name to use for this entity") final String catalog,
       @CliOption(key = "identifierField", mandatory = false,
           help = "The JPA identifier field name to use for this entity") final String identifierField,
-      @CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang",
+      @CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang,project",
           unspecifiedDefaultValue = IDENTIFIER_DEFAULT_TYPE,
           specifiedDefaultValue = "java.lang.Long",
           help = "The data type that will be used for the JPA identifier field."
@@ -694,6 +758,32 @@ public class JpaCommands implements CommandMarker {
   private boolean isJdk6OrHigher() {
     final String ver = System.getProperty("java.version");
     return ver.indexOf("1.6.") > -1 || ver.indexOf("1.7.") > -1;
+  }
+
+  /**
+   * Returns a String with the JavaPackage name to show. It will return a full 
+   * name if provided package doesn't contain the module top level JavaPackage. 
+   * Otherwise, the package name will be shortened using `~`.
+   * 
+   * @param module the String with the module name.
+   * @param javaPackage the JavaPackage to extract the String to return.
+   * @return a String with the value to show for the java package.
+   */
+  private String getPackageStringValue(String module, String javaPackageName) {
+
+    // Get project top level package from application class
+    Set<JavaType> applicationTypes =
+        typeLocationService.findTypesWithAnnotation(SpringJavaType.SPRING_BOOT_APPLICATION);
+    Validate.isTrue(!applicationTypes.isEmpty(), "Couldn't find a main class "
+        + "annotated with `@SpringBootApplication` in the project.");
+    String topLevelPackage =
+        projectOperations.getTopLevelPackage(module).getFullyQualifiedPackageName();
+
+    // If package name contains top level package name, shorten it
+    if (javaPackageName.contains(topLevelPackage)) {
+      javaPackageName = javaPackageName.replace(topLevelPackage, "~");
+    }
+    return javaPackageName;
   }
 
   /**

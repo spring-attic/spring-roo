@@ -7,14 +7,6 @@ import static org.springframework.roo.model.SpringJavaType.PUT_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.RESPONSE_ENTITY;
 import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
@@ -48,6 +40,14 @@ import org.springframework.roo.model.SpringEnumDetails;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 /**
  * Metadata for {@link RooJSON}.
@@ -1127,10 +1127,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // if (customer.getId() != null || customer.getVersion() != null
     bodyBuilder.newLine();
     bodyBuilder.appendIndent();
-    bodyBuilder.append("if (%s.get%s() != null || %s.get%s() != null", entityItemName,
-        entityMetadata.getCurrentIndentifierField().getFieldName()
-            .getSymbolNameCapitalisedFirstLetter(), entityItemName, entityMetadata
-            .getCurrentVersionField().getFieldName().getSymbolNameCapitalisedFirstLetter());
+    bodyBuilder.append("if (%s || %s",
+        createNullExpression(entityMetadata.getCurrentIndentifierField()),
+        createNullExpression(entityMetadata.getCurrentVersionField()));
     if (compositionRelationOneToOne.isEmpty()) {
       bodyBuilder.append(") {");
       bodyBuilder.newLine();
@@ -1788,6 +1787,28 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     return methodBuilder.build();
   }
 
+  /**
+   * Checks field type and creates a proper expression to check against null. 
+   * Mainly differences will be between primitive and non primitive values.
+   * 
+   * @return a String with the expression to check.
+   */
+  private String createNullExpression(FieldMetadata field) {
+    String expression = "";
+    JavaType versionType = field.getFieldType();
+
+    if (versionType.isPrimitive()) {
+      expression =
+          String.format("%s.get%s() != 0", entityItemName, field.getFieldName()
+              .getSymbolNameCapitalisedFirstLetter());
+    } else {
+      expression =
+          String.format("%s.get%s() != null", entityItemName, field.getFieldName()
+              .getSymbolNameCapitalisedFirstLetter());
+    }
+
+    return expression;
+  }
 
   /**
    * Method that returns list JSON method

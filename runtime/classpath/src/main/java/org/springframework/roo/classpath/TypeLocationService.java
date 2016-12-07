@@ -18,6 +18,7 @@ import org.springframework.roo.project.maven.Pom;
  * @author Alan Stewart
  * @author James Tyrrell
  * @author Paula Navarro
+ * @author Sergio Clares
  * @since 1.1
  */
 public interface TypeLocationService {
@@ -109,6 +110,14 @@ public interface TypeLocationService {
    * @return a List<JavaPackage> with all the module packages.
    */
   List<JavaPackage> getPackagesForModule(Pom module);
+
+  /**
+   * Returns a list with all JavaPackages for a given module.
+   * 
+   * @param module the String with the module name to search for.
+   * @return a List<JavaPackage> with all the module packages.
+   */
+  List<JavaPackage> getPackagesForModule(String moduleName);
 
   /**
    * Returns the canonical path that the given {@link JavaType} would have

@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <meta name="description" data-data-content="${r"#{info_description}"}"/>
-    <meta name="author" data-data-content="${r"#{info_author}"}"/>
+    <meta name="description" data-data-content="${r"#{"}info_description}"/>
+    <meta name="author" data-data-content="${r"#{"}info_author}"/>
 
     <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
       data-th-href="@{/public/img/favicon.ico}"/>

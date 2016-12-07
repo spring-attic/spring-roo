@@ -55,6 +55,7 @@ import java.util.logging.Logger;
  * @author Stefan Schmidt
  * @author James Tyrrell
  * @author Paula Navarro
+ * @author Sergio Clares
  * @since 1.1
  */
 @Component
@@ -263,6 +264,10 @@ public class TypeLocationServiceImpl implements TypeLocationService {
       }
     }
     return packages;
+  }
+
+  public List<JavaPackage> getPackagesForModule(String moduleName) {
+    return this.getPackagesForModule(getProjectOperations().getPomFromModuleName(moduleName));
   }
 
   private String getParentPath(final JavaType javaType) {
