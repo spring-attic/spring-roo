@@ -208,7 +208,7 @@
                   <#if field.userManaged>
                       ${field.codeManaged}
                   <#elseif field.type == "TEXT">
-                      <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required maxLength=field.configuration.maxLength />
+                      <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=6 required=field.configuration.required maxLength=field.configuration.maxLength />
                   <#elseif field.type == "NUMBER">
                       <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
                   <#elseif field.type == "DATE">
@@ -249,7 +249,7 @@
                       <#if field.userManaged>
                         ${field.codeManaged}
                       <#elseif field.type == "TEXT">
-                        <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required maxLength=field.configuration.maxLength />
+                        <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=6 required=field.configuration.required maxLength=field.configuration.maxLength />
                       <#elseif field.type == "NUMBER">
                         <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
                       <#elseif field.type == "DATE">
