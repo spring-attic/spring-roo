@@ -16,6 +16,7 @@ import org.springframework.roo.classpath.operations.jsr303.DateFieldPersistenceT
 import org.springframework.roo.classpath.operations.jsr303.UploadedFileContentType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.ShellContext;
 
 /**
@@ -93,6 +94,22 @@ public interface FieldCreatorProvider {
   boolean isTransientVisibleForFieldBoolean(ShellContext shellContext);
 
   /**
+   * Whether `--assertFalse` option should be available.
+   * 
+   * @param shellContext
+   * @return `true` if `--assertFalse` is available, `false` otherwise.
+   */
+  boolean isAssertFalseVisibleForFieldBoolean(ShellContext shellContext);
+
+  /**
+   * Whether `--assertTrue` option should be available.
+   * 
+   * @param shellContext
+   * @return `true` if `--assertTrue` is available, `false` otherwise.
+   */
+  boolean isAssertTrueVisibleForFieldBoolean(ShellContext shellContext);
+
+  /**
    * TODO
    *
    * @param shellContext
@@ -125,44 +142,61 @@ public interface FieldCreatorProvider {
   boolean isTransientVisibleForFieldDate(ShellContext shellContext);
 
   /**
+   * Whether `--future` option should be available.
+   * 
+   * @param shellContext
+   * @return `true` if `--future` is available, `false` otherwise.
+   */
+  boolean isFutureVisibleForFieldDate(ShellContext shellContext);
+
+  /**
+   * Whether `--past` option should be available.
+   * 
+   * @param shellContext
+   * @return `true` if `--past` is available, `false` otherwise.
+   */
+  boolean isPastVisibleForFieldDate(ShellContext shellContext);
+
+  /**
+   * Whether `--dateFormat` and `--timeFormat` options should be available.
+   * 
+   * @param shellContext
+   * @return `true` if `--dateFormat` and `--timeFormat` are available, `false` 
+   *            otherwise.
+   */
+  boolean areDateAndTimeFormatVisibleForFieldDate(ShellContext shellContext);
+
+  /**
+   * Whether `--dateTimeFormatPattern` option should be available.
+   * 
+   * @param shellContext
+   * @return `true` if `--dateTimeFormatPattern` is available, `false` otherwise.
+   */
+  boolean isDateTimeFormatPatternVisibleForFieldDate(ShellContext shellContext);
+
+  /**
+   * Whether `--notNull` option should be available for `field date`.
+   * 
+   * @param shellContext
+   * @return `true` if `--notNull` is available, `false` otherwise.
+   */
+  boolean isNotNullVisibleForFieldDate(ShellContext shellContext);
+
+  /**
+   * Whether `--nullRequired` option should be available for `field date`.
+   * 
+   * @param shellContext
+   * @return `true` if `--nullRequired` is available, `false` otherwise.
+   */
+  boolean isNullRequiredVisibleForFieldDate(ShellContext shellContext);
+
+  /**
    * TODO
    *
    * @param shellContext
    * @return
    */
   boolean isColumnMandatoryForFieldEnum(ShellContext shellContext);
-
-  /**
-   * TODO
-   *
-   * @param shellContext
-   * @return
-   */
-  boolean areOptionalParametersVisibleForFieldList(ShellContext shellContext);
-
-  /**
-   * Whether join column related parameter is mandatory for field list command.
-   *
-   * @param shellContext
-   * @return true when parameter is mandatory
-   */
-  boolean isJoinColumnNameMandatoryForFieldList(ShellContext shellContext);
-
-  /**
-   * Whether join column related parameter is visible for field list command.
-   *
-   * @param shellContext
-   * @return true when parameter is mandatory
-   */
-  boolean isJoinColumnNameVisibleForFieldList(ShellContext shellContext);
-
-  /**
-   * Whether 'referencedColumn' parameter is visible for field list command.
-   *
-   * @param shellContext
-   * @return true when parameter is mandatory
-   */
-  boolean isReferencedColumnNameVisibleForFieldList(ShellContext shellContext);
 
   /**
    * TODO
@@ -187,6 +221,22 @@ public interface FieldCreatorProvider {
    * @return
    */
   boolean isTransientVisibleForFieldEnum(ShellContext shellContext);
+
+  /**
+   * Whether `--notNull` option should be available for `field enum`.
+   * 
+   * @param shellContext
+   * @return `true` if `--notNull` is available, `false` otherwise.
+   */
+  boolean isNotNullVisibleForFieldEnum(ShellContext shellContext);
+
+  /**
+   * Whether `--nullRequired` option should be available for `field enum`.
+   * 
+   * @param shellContext
+   * @return `true` if `--nullRequired` is available, `false` otherwise.
+   */
+  boolean isNullRequiredVisibleForFieldEnum(ShellContext shellContext);
 
   /**
    * TODO
@@ -221,44 +271,20 @@ public interface FieldCreatorProvider {
   boolean isTransientVisibleForFieldNumber(ShellContext shellContext);
 
   /**
-   * TODO
-   *
+   * Whether `--notNull` option should be available for `field enum`.
+   * 
    * @param shellContext
-   * @return
+   * @return `true` if `--notNull` is available, `false` otherwise.
    */
-  boolean isColumnMandatoryForFieldReference(ShellContext shellContext);
+  boolean isNotNullVisibleForFieldNumber(ShellContext shellContext);
 
   /**
-   * TODO
+   * Whether `--nullRequired` parameter is visible for `field number` command.
    *
    * @param shellContext
-   * @return
+   * @return `true` if `--nullRequired` is visible, `false` otherwise. 
    */
-  boolean areOptionalParametersVisibleForFieldSet(ShellContext shellContext);
-
-  /**
-  * Whether join column related parameter is mandatory for field set command.
-  *
-  * @param shellContext
-  * @return parameter is mandatory
-  */
-  boolean isJoinColumnNameMandatoryForFieldSet(ShellContext shellContext);
-
-  /**
-   * Whether join column related parameter is visible for field set command.
-   *
-   * @param shellContext
-   * @return parameter is mandatory
-   */
-  boolean isJoinColumnNameVisibleForFieldSet(ShellContext shellContext);
-
-  /**
-   * Whether 'referencedColumn' parameter is visible for field list command.
-   *
-   * @param shellContext
-   * @return true when parameter is mandatory
-   */
-  boolean isReferencedColumnNameVisibleForFieldSet(ShellContext shellContext);
+  boolean isNullRequiredVisibleForFieldNumber(ShellContext shellContext);
 
   /**
    * TODO
@@ -291,6 +317,62 @@ public interface FieldCreatorProvider {
    * @return
    */
   boolean isCascadeTypeVisibleForFieldReference(ShellContext shellContext);
+
+  /**
+   * TODO
+   *
+   * @param shellContext
+   * @return
+   */
+  boolean isColumnMandatoryForFieldReference(ShellContext shellContext);
+
+  /**
+   * Whether `--notNull` option should be available for `field reference`.
+   * 
+   * @param shellContext
+   * @return `true` if `--notNull` is available, `false` otherwise.
+   */
+  boolean isNotNullVisibleForFieldReference(ShellContext shellContext);
+
+  /**
+   * Whether `--nullRequired` parameter is visible for `field reference` command.
+   *
+   * @param shellContext
+   * @return `true` if `--nullRequired` is visible, `false` otherwise. 
+   */
+  boolean isNullRequiredVisibleForFieldReference(ShellContext shellContext);
+
+  /**
+   * TODO
+   *
+   * @param shellContext
+   * @return
+   */
+  boolean areOptionalParametersVisibleForFieldSet(ShellContext shellContext);
+
+  /**
+  * Whether join column related parameter is mandatory for field set command.
+  *
+  * @param shellContext
+  * @return parameter is mandatory
+  */
+  boolean isJoinColumnNameMandatoryForFieldSet(ShellContext shellContext);
+
+  /**
+   * Whether join column related parameter is visible for field set command.
+   *
+   * @param shellContext
+   * @return parameter is mandatory
+   */
+  boolean isJoinColumnNameVisibleForFieldSet(ShellContext shellContext);
+
+  /**
+   * Whether 'referencedColumn' parameter is visible for field list command.
+   *
+   * @param shellContext
+   * @return true when parameter is mandatory
+   */
+  boolean isReferencedColumnNameVisibleForFieldSet(ShellContext shellContext);
 
   /**
    * TODO
@@ -347,6 +429,22 @@ public interface FieldCreatorProvider {
    * @return
    */
   boolean isJoinTableVisibleForFieldSet(ShellContext shellContext);
+
+  /**
+   * Whether `--notNull` option should be available for `field set`.
+   * 
+   * @param shellContext
+   * @return `true` if `--notNull` is available, `false` otherwise.
+   */
+  boolean isNotNullVisibleForFieldSet(ShellContext shellContext);
+
+  /**
+   * Whether `--nullRequired` parameter is visible for `field set` command.
+   *
+   * @param shellContext
+   * @return `true` if `--nullRequired` is visible, `false` otherwise. 
+   */
+  boolean isNullRequiredVisibleForFieldSet(ShellContext shellContext);
 
   /**
    * TODO
@@ -410,6 +508,54 @@ public interface FieldCreatorProvider {
    * @param shellContext
    * @return
    */
+  boolean areOptionalParametersVisibleForFieldList(ShellContext shellContext);
+
+  /**
+   * Whether join column related parameter is mandatory for field list command.
+   *
+   * @param shellContext
+   * @return true when parameter is mandatory
+   */
+  boolean isJoinColumnNameMandatoryForFieldList(ShellContext shellContext);
+
+  /**
+   * Whether join column related parameter is visible for field list command.
+   *
+   * @param shellContext
+   * @return true when parameter is mandatory
+   */
+  boolean isJoinColumnNameVisibleForFieldList(ShellContext shellContext);
+
+  /**
+   * Whether 'referencedColumn' parameter is visible for field list command.
+   *
+   * @param shellContext
+   * @return true when parameter is mandatory
+   */
+  boolean isReferencedColumnNameVisibleForFieldList(ShellContext shellContext);
+
+  /**
+   * Whether `--notNull` option should be available for `field list`.
+   * 
+   * @param shellContext
+   * @return `true` if `--notNull` is available, `false` otherwise.
+   */
+  boolean isNotNullVisibleForFieldList(ShellContext shellContext);
+
+  /**
+   * Whether `--nullRequired` parameter is visible for `field list` command.
+   *
+   * @param shellContext
+   * @return `true` if `--nullRequired` is visible, `false` otherwise. 
+   */
+  boolean isNullRequiredVisibleForFieldList(ShellContext shellContext);
+
+  /**
+   * TODO
+   *
+   * @param shellContext
+   * @return
+   */
   boolean isColumnMandatoryForFieldString(ShellContext shellContext);
 
   /**
@@ -443,6 +589,22 @@ public interface FieldCreatorProvider {
    * @return
    */
   boolean isLobVisibleForFieldString(ShellContext shellContext);
+
+  /**
+   * Whether `--notNull` option should be available for `field string`.
+   * 
+   * @param shellContext
+   * @return `true` if `--notNull` is available, `false` otherwise.
+   */
+  boolean isNotNullVisibleForFieldString(ShellContext shellContext);
+
+  /**
+   * Whether `--nullRequired` parameter is visible for `field string` command.
+   *
+   * @param shellContext
+   * @return `true` if `--nullRequired` is visible, `false` otherwise. 
+   */
+  boolean isNullRequiredVisibleForFieldString(ShellContext shellContext);
 
   /**
    * TODO
@@ -485,13 +647,28 @@ public interface FieldCreatorProvider {
   boolean isTransientVisibleForFieldOther(ShellContext shellContext);
 
   /**
+   * Whether `--notNull` option should be available for `field other`.
+   * 
+   * @param shellContext
+   * @return `true` if `--notNull` is available, `false` otherwise.
+   */
+  boolean isNotNullVisibleForFieldOther(ShellContext shellContext);
+
+  /**
+   * Whether `--nullRequired` parameter is visible for `field other` command.
+   *
+   * @param shellContext
+   * @return `true` if `--nullRequired` is visible, `false` otherwise. 
+   */
+  boolean isNullRequiredVisibleForFieldOther(ShellContext shellContext);
+
+  /**
    * TODO
    *
    * @param javaTypeDetails
    * @param primitive
    * @param fieldName
    * @param notNull
-   * @param nullRequired
    * @param assertFalse
    * @param assertTrue
    * @param column
@@ -501,8 +678,8 @@ public interface FieldCreatorProvider {
    * @param transientModifier
    */
   void createBooleanField(ClassOrInterfaceTypeDetails javaTypeDetails, boolean primitive,
-      JavaSymbolName fieldName, boolean notNull, boolean nullRequired, boolean assertFalse,
-      boolean assertTrue, String column, String comment, String value, boolean permitReservedWords,
+      JavaSymbolName fieldName, boolean notNull, boolean assertFalse, boolean assertTrue,
+      String column, String comment, String value, boolean permitReservedWords,
       boolean transientModifier);
 
   /**
@@ -512,7 +689,6 @@ public interface FieldCreatorProvider {
    * @param primitive
    * @param fieldName
    * @param notNull
-   * @param nullRequired
    * @param assertFalse
    * @param assertTrue
    * @param column
@@ -523,8 +699,8 @@ public interface FieldCreatorProvider {
    * @param extraAnnotations
    */
   void createBooleanField(ClassOrInterfaceTypeDetails javaTypeDetails, boolean primitive,
-      JavaSymbolName fieldName, boolean notNull, boolean nullRequired, boolean assertFalse,
-      boolean assertTrue, String column, String comment, String value, boolean permitReservedWords,
+      JavaSymbolName fieldName, boolean notNull, boolean assertFalse, boolean assertTrue,
+      String column, String comment, String value, boolean permitReservedWords,
       boolean transientModifier, List<AnnotationMetadataBuilder> extraAnnotations);
 
   /**

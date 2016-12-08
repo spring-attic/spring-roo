@@ -18,7 +18,7 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
       data-th-remove="all"/>
 
-    <title data-th-text="|${r"#{"}label_show_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}|">Show ${entityName} - Spring Roo application</title>
+    <title data-th-text="${r"#{"}label_show_entity(${r"#{"}${entityLabel}})}">Show ${entityName} - Spring Roo application</title>
 
     <!--/* Bootstrap */-->
     <link rel="stylesheet" type="text/css"
@@ -250,13 +250,13 @@
                                      data-select="single"
                                      data-z="${field.z}"
                                      data-order="[[ 0, &quot;asc&quot; ]]">
-                                <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabel}${r"}"})${r"}"}">${field.fieldNameCapitalized} List</caption>
+                                <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabel}})}">${field.fieldNameCapitalized} List</caption>
                                 <thead>
                                   <tr>
                                     <#list field.configuration.referenceFieldFields as referencedFieldField>
-                                    <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
+                                    <th data-th-text="${r"#{"}${referencedFieldField.label}}">${referencedFieldField.fieldName}</th>
                                     </#list>
-                                    <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
+                                    <th data-th-text="${r"#{"}label_tools}">Tools</th>
                                   </tr>
                                 </thead>
                                 <tbody data-th-remove="all">
@@ -264,7 +264,7 @@
                                     <#list field.configuration.referenceFieldFields as referencedFieldField>
                                     <td>${referencedFieldField.fieldName}</td>
                                     </#list>
-                                    <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
+                                    <td data-th-text="${r"#{"}label_tools}">Tools</td>
                                   </tr>
                                 </tbody>
                               </table>
@@ -281,13 +281,13 @@
                 <a id="${entityName}_list" href="list.html" class="btn btn-default"
     	       data-th-href="@{${r"${"}(#mvc.url('${mvcUrl_list}')).build()}}"> <span
     	       class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span><span
-    	       data-th-text="${r"#{"}label_back${r"}"}">Back</span>
+    	       data-th-text="${r"#{"}label_back}">Back</span>
     	    </a>
               </div>
               <div class="pull-right">
     	     <a id="${entityName}_edit" href="edit.html" class="btn btn-primary"
     	        data-th-href="@{${"${"}(#mvc.url('${detail.configuration.mvcUrl_editForm}')).buildAndExpand(${entity.modelAttribute}.${entity.configuration.identifierField},${detail.modelAttribute}.${detail.configuration.identifierField})}}"
-    	        data-th-text="${r"#{label_edit}"}">Edit</a>
+    	        data-th-text="${r"#{"}label_edit}">Edit</a>
               </div>
             </div>
 
@@ -297,7 +297,7 @@
           <!-- MODAL -->
           <#if details?size != 0>
           <div
-            data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=${r"#{"}label_delete${r"}"})">
+            data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=${r"#{"}label_delete})">
 
             <script type="text/javascript">
                 function openDeleteModal(){
@@ -311,13 +311,13 @@
                 <div class="modal-content">
                   <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"
-                      aria-label="${r"#{"}label_close${r"}"}">
+                      aria-label="${r"#{"}label_close}">
                       <span aria-hidden="true">&times;</span>
                     </button>
-                    <h2 class="modal-title" id="staticModalLabel" data-th-text="${r"#{"}label_delete${r"}"}">Delete</h2>
+                    <h2 class="modal-title" id="staticModalLabel" data-th-text="${r"#{"}label_delete}">Delete</h2>
                   </div>
                   <div class="modal-body" id="staticModalBody">
-                    <p data-th-text="${r"#{"}label_message${r"}"}">Message</p>
+                    <p data-th-text="${r"#{"}label_message}">Message</p>
                   </div>
                 </div>
               </div>

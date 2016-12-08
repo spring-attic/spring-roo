@@ -14,8 +14,8 @@
     content="Spring Roo development team"
     data-th-remove="all"/>
   <#if isSecurityEnabled == true>
-  <meta data-th-if="${r"${_csrf != null}"}" name="_csrf" data-th-content="${r"${_csrf.token}"}" />
-  <meta data-th-if="${r"${_csrf != null}"}" name="_csrf_header" data-th-content="${r"${_csrf.headerName}"}" />
+  <meta data-th-if="${r"${"}csrf != null}" name="_csrf" data-th-content="${r"${"}_csrf.token}" />
+  <meta data-th-if="${r"${"}csrf != null}" name="_csrf_header" data-th-content="${r"${"}_csrf.headerName}" />
   </#if>
 
  <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
@@ -241,11 +241,11 @@
                   <tr>
                     <#list fields as field>
                     <#if field.type != "LIST">
-                    <th data-data="${field.fieldName}" data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</th>
+                    <th data-data="${field.fieldName}" data-th-text="${r"#{"}${field.label}}">${field.fieldName}</th>
                     </#if>
                     </#list>
                     <th data-data="${entity.configuration.identifierField}" data-orderable="false" data-searchable="false"
-                         class="dttools" data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
+                         class="dttools" data-th-text="${r"#{"}label_tools}">Tools</th>
                   </tr>
                 </thead>
                 <tbody data-th-remove="all">
