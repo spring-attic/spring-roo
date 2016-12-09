@@ -1,0 +1,203 @@
+// Prerequisites:
+//
+//   ruby 2.0.0+
+//   prawn 2.0.0+
+//
+//   asciidoctor
+//   asciidoctor-pdf 1.5.0.alpha.10
+//
+//   (prawn and ruby < 2.0 will not work)
+//
+// Build & review the document before commit it to GitHub:
+//
+//   $ asciidoctor -b html5 README.adoc
+//
+//   # Embed images in XHTML
+//   $ asciidoctor -b html5 -a data-uri README.adoc
+//
+
+= Contributing to Spring Roo
+:experimental:
+:page-layout: base
+:toc-placement: manual
+:author: DISID Corporation S.L.
+:email: <springroo@disid.com>
+
+Thanks for contributing Spring Roo.
+
+These instructions are aimed at experienced developers looking to *develop Spring Roo itself*. If you are new to Spring Roo or would simply like to try a release that has already been built, tested and distributed by the core development team, we recommend that you visit the http://projects.spring.io/spring-roo/[Spring Roo Home Page] and download an official release.
+
+== Code of Conduct
+
+This project adheres to the Contributor Covenant link:CODE_OF_CONDUCT.adoc[code of conduct]. By participating, you  are expected to uphold this code. Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
+
+== Before Contributing
+
+=== Search StackOverflow first; discuss if necessary
+
+For general usage questions please ask on http://stackoverflow.com/[stackoverflow], tagged with http://stackoverflow.com/questions/tagged/spring-roo[spring-roo].
+
+=== Search JIRA; create an issue if necessary
+
+Is there already an issue that addresses your concern? Do a bit of searching in the https://jira.spring.io/browse/ROO[Spring ROO] issue tracker to see if you can find something similar. If you do not find something similar, please create a new JIRA issue before submitting a pull request unless the change is truly trivial.
+
+=== Sign the Contributor License Agreement (CLA)
+
+If you have not previously done so, please sign the https://cla.pivotal.io/sign/spring[Contributor License Agreement].
+
+[[gpg-pgp-setup]]
+== GPG (PGP) Setup
+
+Roo uses GPG to automatically sign build outputs. If you haven't installed GPG, download and install it:
+
+* Main site: http://www.gnupg.org/download/
+* Apple Mac option: http://macgpg.sourceforge.net/
+
+Ensure you have a valid signature. Use _"gpg --list-secret-keys"_. 
+
+You should see some output like this:
+
+[source,bash]
+----
+$ gpg --list-secret-keys
+/home/balex/.gnupg/secring.gpg
+sec   1024D/00B5050F 2009-03-28
+uid                  Ben Alex <ben.alex@acegi.com.au>
+uid                  Ben Alex <ben.alex@springsource.com>
+uid                  Ben Alex <balex@vmware.com>
+ssb   4096g/2DB6833B 2009-03-28
+----
+
+If you don't see the output, it means you first need to create a key. 
+
+It's very easy to do this, just use _"gpg --gen-key"_.
+
+Then verify your newly-created key was indeed created: _"gpg --list-secret-keys"_.
+
+Next you need to publish your key to a *public keyserver*. Take a note of the "sec" key ID shown from the _--list-secret-keys_. In my case it's key ID _"00B5050F"_. 
+
+Push your public key to a keyserver via the command _"gpg --keyserver hkp://pgp.mit.edu --send-keys 00B5050F"_ (_of course changing the key ID at the end_). Most public key servers share keys, so you don't need to send your public key to multiple key servers.
+
+Finally, every time you build you will be prompted for the password of your
+key.
+
+You have *several options*:
+
+* Type the password in every time
+* Include a _-Dgpg.passphrase=thephrase_ argument when calling "mvn"
++
+[source,bash]
+----
+$ ./mvnw clean install -Dgpg.passphrase=thephrase
+----
+* Edit _~/.bashrc_ and add _-Dgpg.passphrase=thephrase_ to _MAVEN_OPTS_
+* Edit your active Maven profile to include a _"gpg.passphrase"_ property with readle value:
++
+[source,xml]
+----
+<profiles>
+  <profile>
+    <properties>
+      <gpg.passphrase>roorules</gpg.passphrase>
+----
+* Use an encrypted  _"gpg.passphrase"_:
+.. Create a master password
++
+[source,bash]
+----
+$ ./mvnw --encrypt-master-password <password>
+----
+.. Store this password in the _~/.m2/settings-security.xml_. It should look like:
++
+[source,xml]
+----
+<settingsSecurity>
+  <master>{jSMOWnoPFgsHVpMvz5VrIt5kRbzGpI8u+9EF1iFQyJQ=}</master>
+</settingsSecurity>
+----
+.. Encrypt gpg passphrase:
++
+[source,bash]
+----
+$ ./mvnw --encrypt-password <passphrase>
+----
+.. Store it into your _settings.xml_ file in the server section. This will look like:
++
+[source,xml]
+----
+<settings>
+...
+  <servers>
+  ...
+    <server>
+      <id>gpg.passphrase</id>
+      <passphrase>{COQLCE6DU6GtcS5P=}</passphrase>
+    </server>
+  ...
+  </servers>
+...
+</settings>
+----
+
+Of course the most secure options are to type the password every time and to encrypt the password. However, the most comfortable is to encrypt the password especially *if you're doing a lot of builds*.
+
+NOTE: _If you're new to GPG: don't lose your private key! Backup the secring.gpg file, as you'll need it to ever revoke your key or sign a replacement key (the public key servers offer no way to revoke a key unless you can sign the revocation request)._
+
+== Create a Fork
+
+For contributors that want to write code, we encourage contributions through pull requests from http://help.github.com/forking/[forks of this repository].
+
+The commit messages must follow http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html[these conventions], if you are fixing an existing issue add *"ROO-XXXX:"* (without the quotation marks) at the begining of the commit message (where XXXX is the issue number).
+
+== Code Conventions
+
+* Use the Spring Roo project https://github.com/google/styleguide[code format conventions].
+
+** The developers and contributors that uses STS or Eclipse should import the formatter settings via menu:Window[Properties > Java > Code Style > Formatter > Import], using the link:devel-resources/eclipse-java-code-style-formatter.xml[eclipse-java-code-style-formatter.xml] file from the _devel-resources_ folder.
+
+** For the developers that build the project with the `./mvnw` command, the http://mvnrepository.com/artifact/com.googlecode.maven-java-formatter-plugin/maven-java-formatter-plugin[Maven Java Formatter plugin] has been included in the link:pom.xml[pom.xml] file to format the Java source files automatically using the link:devel-resources/eclipse-java-code-style-formatter.xml[eclipse-java-code-style-formatter.xml] file from the _devel-resources_ folder.
+
+* Make sure all new _.java_ files to have the Javadoc class comment with the `@author` tag identifying you as well as a paragraph on what the class is for.
+
+* Add the ASF license header comment to all new _.java_ files (copy from existing files in the project).
+
+* Add the Javadoc comments to all new class methods as well as class attributes.
+
+== Working with the Code
+
+Spring Roo itself is a standard http://maven.apache.org/[Maven] project and therefore any _standard IDE_ can be used for development. *No extra plugins are needed*.
+
+The team use https://www.eclipse.org/[Eclipse] or https://spring.io/tools[STS] to develop Roo, just import the project branch as standard Maven project via menu:File[Import > Maven > Existing Maven Projects] into the Workspace.
+
+In theory you could use the https://www.eclipse.org/m2e/[m2eclipse plugin]. The Roo team just tends to use the shell command `./mvnw` instead.
+
+=== Building from Source
+
+The project can be built from the root directory using the standard maven command:
+
+[source,bash]
+----
+$ ./mvnw clean install
+----
+
+NOTE: You may need to increase the amount of memory available to Maven by setting a `MAVEN_OPTS` environment variable with the value `-Xmx1024m -XX:MaxPermSize=512m`
+
+If you are rebuilding often, you might also want to skip the housekeeping until you are ready to submit a pull request:
+
+[source,bash]
+----
+$ ./mvnw clean install -DskipTests -Dmaven.gpg.skip=true -Dgpg.skip=true -Dmaven.javadoc.skip=true -Dformatter.skip=true -Dmaven.source.skip=true -Dmaven.formatter.skip=true -DskipRelease
+----
+
+==== Test the build
+
+Roo ships with a command line tool called *roo-dev*. It copies all relevant JARs from a success build into _$ROO_HOME/runtime/bootstrap/target/osgi/_. This directory represents a Roo build snapshot instance.
+
+To test your contribution just try Roo, go to the application project directory and run _roo-dev_:
+
+[source,bash]
+----
+$ cd $PROJECT_HOME
+$ $ROO_HOME/runtime/bootstrap/roo-dev
+----
+
