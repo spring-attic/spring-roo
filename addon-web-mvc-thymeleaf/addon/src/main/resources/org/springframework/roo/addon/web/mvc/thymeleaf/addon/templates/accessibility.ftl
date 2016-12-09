@@ -181,7 +181,7 @@
           <h2 data-th-text="${r"#{"}label_accessibility}">Accessibility</h2>
 
           <p class="lead" data-th-text="${r"#{"}label_accessibility_lead}">Accessibility policy application</p>
-          <p data-th-text="${r"#{"}label_accessibility_text}">
+          <p data-th-utext="${r"#{"}label_accessibility_text}">
            Spring Roo Application is committed to ensuring the accessibility of
            its web content to people with disabilities. All of the content on
            our website will meet <a href="https://www.w3.org/TR/WCAG/" target="_blank"
