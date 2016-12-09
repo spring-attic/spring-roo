@@ -214,7 +214,7 @@ legend{
 
 .form-horizontal .form-group input[type="radio"],
 .form-horizontal .form-group input[type="checkbox"] {
-    margin: 14px 0 0;
+    margin: 18px 0 0;
 }
 
 /*--TABLES-------------*/
@@ -260,6 +260,34 @@ table a.btn-action:active {
 table.dataTable.no-footer {
     border-bottom: 1px solid #dfd7ca;
 }
+
+div.dataTables_wrapper div.dataTables_processing {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    margin-left: -100px;
+    margin-top: 16px;
+    padding: 0.5em 0;
+    height: 30px;
+    overflow: hidden;
+    border-radius: 4px;
+    -moz-animation: progress-bar-stripes 2s linear infinite;
+    -ms-animation: progress-bar-stripes 2s linear infinite;
+    -o-animation: progress-bar-stripes 2s linear infinite;
+    animation: progress-bar-stripes 2s linear infinite;
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+    background-size: 40px 40px;
+    font-size: 12px;
+    color: #ffffff;
+    text-align: center;
+    background-color: #428bca;
+    -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+    -webkit-transition: width 0.6s ease;
+    transition: width 0.6s ease;
+}
+
 
 /*--SHOW-------------*/
 
@@ -422,10 +450,10 @@ dd, dt {
   .navbar-nav.upper-nav > li > a {padding: 15px 5px}
 }
 
-@media (min-width: 1024px){
+@media (min-width: 1020px){
   /* navbar fixes */
   .navbar-nav#entitiesMenuEntries {
-      max-width: 80%;
+      max-width: 370px;
   }
 }
 
