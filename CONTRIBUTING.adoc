@@ -147,6 +147,8 @@ NOTE: _If you're new to GPG: don't lose your private key! Backup the secring.gpg
 
 For contributors that want to write code, we encourage contributions through pull requests from http://help.github.com/forking/[forks of this repository].
 
+NOTE: Developers with appropriate permissions may work through branches.
+
 The commit messages must follow http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html[these conventions], if you are fixing an existing issue add *"ROO-XXXX:"* (without the quotation marks) at the begining of the commit message (where XXXX is the issue number).
 
 == Code Conventions

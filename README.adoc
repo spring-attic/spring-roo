@@ -81,7 +81,7 @@ Spring Roo can be easily built with the https://github.com/takari/maven-wrapper[
 $ ./mvnw clean install
 ----
 
-See the link:DEVELOPING.adoc[developer guidelines] for details.
+See the link:CONTRIBUTING.adoc[contributor guidelines] for details.
 
 [[stay-in-touch]]
 == Staying in Touch
