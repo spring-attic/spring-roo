@@ -25,7 +25,8 @@
   			   <#if languages??>
       			<#list languages as language>
       			<li id="${language.localePrefix}Flag">
-      			 <a href="?lang=${language.localePrefix}">
+      			 <a href="?lang=${language.localePrefix}"
+      			    data-th-title="${r"#{"}label_gotoLanguage}+' ${language.language}'">
       			   <img class="flag"
       			   data-th-src="@{/public/img/${language.localePrefix}.png}"
       			   src="/public/img/${language.localePrefix}.png"

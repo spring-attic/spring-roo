@@ -17,14 +17,22 @@
        <div class="row">
       	 <div class="col-sm-6 col-sm-offset-3">
            <small class="clearfix">
-             Made with <a href="http://projects.spring.io/spring-roo/" target="_blank" data-th-text="| Spring Roo © ${r"${#calendars.format(#dates.createNow(),'yyyy')}"}|">
-             Spring Roo &copy; 2016</a> •
-             We <span class="glyphicon glyphicon-heart"></span>
-             <a href="https://github.com/spring-projects/spring-roo/" target="_blank">Open source</a>
+             Made with
+             <a href="http://projects.spring.io/spring-roo/"
+                data-th-title="${r"#{"}label_gotowebsite}" target="_blank">
+                Spring Roo</a>
+             <span data-th-text="|© ${r"${#calendars.format(#dates.createNow(),'yyyy')}"}|">
+                &copy; 2016</span> • We <span class="glyphicon glyphicon-heart"></span>
+             <a href="https://github.com/spring-projects/spring-roo/"
+                data-th-title="${r"#{"}label_gotoGithub}"
+                target="_blank">
+                Open source</a>
              <span sec:authorize="isAuthenticated()"> • </span>
-             <a sec:authorize="isAuthenticated()" data-th-href="@{/accessibility}" href="/accessibility">
-              <!--This content is only shown to authenticated users.-->
-              <span data-th-text="${r"#{"}label_accessibility}">Accessibility</span>
+             <a sec:authorize="isAuthenticated()"
+              data-th-href="@{/accessibility}" href="/accessibility"
+              data-th-title="${r"#{"}label_accessibility_lead}">
+                <!-- This content is only shown to authenticated users. -->
+                <span data-th-text="${r"#{"}label_accessibility}">Accessibility</span>
             </a>
             </small>
          </div>

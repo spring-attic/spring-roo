@@ -31,7 +31,9 @@
                 </a>
               </div>
               <!-- Name application -->
-              <div class="application-name navbar-brand hidden-xs"><a href="/" data-th-href="@{/}">${projectName}</a></div>
+              <div class="application-name navbar-brand hidden-xs">
+                <a data-th-title="${r"#{"}label_goHome}" href="/" data-th-href="@{/}">${projectName}</a>
+              </div>
 
             </div><!-- /navbar-header -->
 
@@ -109,7 +111,9 @@
                 </a>
               </div>
               <!-- Name application -->
-              <div class="application-name navbar-brand hidden-xs"><a href="/" data-th-href="@{/}">${projectName}</a></div>
+              <div class="application-name navbar-brand hidden-xs">
+                <a data-th-title="${r"#{"}label_goHome}" href="/" data-th-href="@{/}">${projectName}</a>
+              </div>
 
             </div><!-- /navbar-header -->
 
