@@ -30,6 +30,14 @@
       href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
       data-th-href="@{/webjars/font-awesome/css/font-awesome.min.css}"/>
 
+    <!-- Select2 -->
+    <link rel="stylesheet" type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css"
+      data-th-href="@{/webjars/select2/dist/css/select2.css}" />
+    <link rel="stylesheet" type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.7/select2-bootstrap.css"
+      data-th-href="@{/webjars/select2-bootstrap-theme/dist/select2-bootstrap.css}" />
+
     <!-- Bootswatch CSS custom -->
     <link rel="stylesheet" type="text/css"
       href="../../static/public/css/theme.css"
@@ -113,6 +121,10 @@
     <script src="../../static/public/js/moment-defaults.js"
       data-th-src="@{/public/js/moment-defaults.js}">
       </script>
+
+    <!-- Select2 -->
+    <div data-th-replace="~{fragments/js/select2 :: select2-js}">
+     </div>
 
     <div data-layout-fragment="javascript">
       <!-- This includes javascript own code of each page -->

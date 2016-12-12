@@ -41,14 +41,6 @@
       href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
       data-th-remove="all"/>
 
-    <!-- Select2 -->
-    <link rel="stylesheet" type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css"
-      data-th-href="@{/webjars/select2/dist/css/select2.css}"/>
-    <link rel="stylesheet" type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.7/select2-bootstrap.css"
-      data-th-href="@{/webjars/select2-bootstrap-theme/dist/select2-bootstrap.css}"/>
-
     <!-- DateTimePicker -->
     <link rel="stylesheet" type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.min.css"
@@ -388,12 +380,6 @@
 	 });
       })(jQuery);
     </script>
-
-    <!-- Select2 -->
-    <div data-th-replace="~{fragments/js/select2 :: select2-js}">
-      // TODO add js CDN
-     </div>
-
 
     <script type="text/javascript" data-th-inline="javascript">
       // IIFE - Immediately Invoked Function Expression

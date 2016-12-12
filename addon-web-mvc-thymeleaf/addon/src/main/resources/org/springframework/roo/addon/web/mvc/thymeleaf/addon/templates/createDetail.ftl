@@ -35,14 +35,6 @@
       href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
       data-th-remove="all"/>
 
-    <!-- Select2 -->
-    <link rel="stylesheet" type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css"
-      data-th-href="@{/webjars/select2/dist/css/select2.css}"/>
-    <link rel="stylesheet" type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.7/select2-bootstrap.css"
-      data-th-href="@{/webjars/select2-bootstrap-theme/dist/select2-bootstrap.css}"/>
-
     <!-- DateTimePicker -->
     <link rel="stylesheet" type="text/css"
       href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.min.css"
@@ -211,7 +203,6 @@
                 <div class="form-group has-error has-feedback" data-z="${detail.z}" id="${detail.entityItemId}"
                     data-th-class="form-group">
                     <div class="col-md-6">
-                      <!-- Select2 -->
                       <select id="${detail.fieldName}" name="${detail.fieldName}Ids"
                         class="form-control dropdown-select-ajax"
                         data-allow-clear="true"
@@ -291,14 +282,8 @@
   <!-- JavaScript
   ================================================== -->
   <!-- Placed at the end of the document so that the pages load faster -->
-  <!-- JQuery -->
-
-
   <div data-layout-fragment="javascript">
-       <!-- Datatables fragment -->
-     <div data-th-replace="~{fragments/js/select2 :: select2-js}">
-      // TODO add js CDN
-     </div>
+
     <script type="text/javascript" data-th-inline="javascript">
       // IIFE - Immediately Invoked Function Expression
       (function(list) {
