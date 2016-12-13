@@ -32,6 +32,9 @@ public class SpringletsJavaType {
   public static final JavaType SPRINGLETS_DATATABLES = new JavaType(
       "io.springlets.data.web.datatables.Datatables");
 
+  public static final JavaType SPRINGLETS_METHOD_LINK_FACTORY_SUPPORT = new JavaType(
+      "io.springlets.web.mvc.support.MethodLinkFactorySupport");
+
   public static final JavaType SPRINGLETS_SELECT2_DATA = new JavaType(
       "io.springlets.data.web.select2.Select2Data");
 
