@@ -8,6 +8,7 @@ import org.springframework.roo.addon.web.mvc.controller.addon.responses.Controll
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
 import org.springframework.roo.addon.web.mvc.i18n.languages.EnglishLanguage;
 import org.springframework.roo.addon.web.mvc.views.ViewContext;
+import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -27,7 +28,6 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 import java.lang.reflect.Modifier;
@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * Implementation of ControllerMVCResponseService that provides
@@ -52,9 +51,11 @@ import java.util.logging.Logger;
 public class ThymeleafMVCViewResponseService extends AbstractOperations implements
     ControllerMVCResponseService {
 
-  private static Logger LOGGER = HandlerUtils.getLogger(ThymeleafMVCViewResponseService.class);
   private static final String RESPONSE_TYPE = "THYMELEAF";
   private static final String CONTROLLER_NAME_MODIFIER = "Thymeleaf";
+
+  private static final String SPRING_THYMELEAF_MODE = "spring.thymeleaf.mode";
+  private static final String SPRING_THYMELEAF_MODE_VALUE = "html";
 
   private static final Dependency STARTER_THYMELEAF_DEPENDENCY = new Dependency(
       "org.springframework.boot", "spring-boot-starter-thymeleaf", null);
@@ -171,15 +172,22 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
 
   @Override
   public void install(Pom module) {
+
     // Is necessary to install thymeleaf dependencies
     addThymeleafDependencies(module);
+
     // Is necessary to generate the main controller
     addMainController(module);
+
     // Thymeleaf needs Datatables component to list
     // data, so is necessary to install Datatables resources
     addThymeleafDatatablesResources(module);
+
     // Is necessary to copy static resources
     copyStaticResources(module);
+
+    // Specify HTML template mode 
+    addTemplateModeProperty(module);
 
     // Add all available WebJar containing required static resources
     addWebJars(module);
@@ -247,32 +255,6 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
   }
 
   /**
-   * This method adds necessary thymeleaf dependencies to
-   * generated project
-   *
-   * @param module
-   */
-  private void addThymeleafDependencies(Pom module) {
-
-    // Add Thymeleaf starter
-    getProjectOperations().addDependency(module.getModuleName(), STARTER_THYMELEAF_DEPENDENCY);
-
-    // Add Thymeleaf layout dialect
-    getProjectOperations().addDependency(module.getModuleName(), LAYOUT_THYMELEAF_DEPENDENCY);
-
-    // Add Thymeleaf data dialect
-    getProjectOperations().addDependency(module.getModuleName(), DATA_THYMELEAF_DEPENDENCY);
-
-    // ROO-3813: Use Thymeleaf 3.0 instead of the provided version by Spring IO
-    // More info about Thymelead 3.0 using Spring Boot here
-    // http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-use-thymeleaf-3
-    getProjectOperations().addProperty("", new Property("thymeleaf.version", "3.0.0.RELEASE"));
-    getProjectOperations().addProperty("",
-        new Property("thymeleaf-layout-dialect.version", "2.0.0"));
-    getProjectOperations().addProperty("", new Property("thymeleaf-data-dialect.version", "2.0.1"));
-  }
-
-  /**
    * This method add new MainController.java class annotated
    * with @RooThymeleafMainController
    *
@@ -329,50 +311,44 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
   }
 
   /**
-   * This method copy and generate all necessary resources to be able
-   * to use THYMELEAF.
+   * This method adds a spring property which specifies HTML as the template 
+   * mode to use by Thymeleaf for all existing profiles.
+   * 
+   * @param module
+   */
+  private void addTemplateModeProperty(Pom module) {
+    List<String> applicationProfiles =
+        getApplicationConfigService().getApplicationProfiles(module.getModuleName());
+    for (String profile : applicationProfiles) {
+      getApplicationConfigService().addProperty(module.getModuleName(), SPRING_THYMELEAF_MODE,
+          SPRING_THYMELEAF_MODE_VALUE, profile, false);
+    }
+  }
+
+  /**
+   * This method adds necessary thymeleaf dependencies to
+   * generated project
    *
    * @param module
    */
-  private void copyStaticResources(Pom module) {
-    LogicalPath resourcesPath =
-        LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, module.getModuleName());
+  private void addThymeleafDependencies(Pom module) {
 
-    // copy all necessary styles inside SRC_MAIN_RESOURCES/static/public/css
-    copyDirectoryContents("static/css/*.css",
-        getPathResolver().getIdentifier(resourcesPath, "/static/public/css"), true);
+    // Add Thymeleaf starter
+    getProjectOperations().addDependency(module.getModuleName(), STARTER_THYMELEAF_DEPENDENCY);
 
-    // copy all necessary fonts inside SRC_MAIN_RESOURCES/static/public/fonts
-    copyDirectoryContents("static/fonts/*.eot",
-        getPathResolver().getIdentifier(resourcesPath, "/static/public/fonts"), true);
-    copyDirectoryContents("static/fonts/*.svg",
-        getPathResolver().getIdentifier(resourcesPath, "/static/public/fonts"), true);
-    copyDirectoryContents("static/fonts/*.ttf",
-        getPathResolver().getIdentifier(resourcesPath, "/static/public/fonts"), true);
-    copyDirectoryContents("static/fonts/*.woff",
-        getPathResolver().getIdentifier(resourcesPath, "/static/public/fonts"), true);
-    copyDirectoryContents("static/fonts/*.woff2",
-        getPathResolver().getIdentifier(resourcesPath, "/static/public/fonts"), true);
+    // Add Thymeleaf layout dialect
+    getProjectOperations().addDependency(module.getModuleName(), LAYOUT_THYMELEAF_DEPENDENCY);
 
-    // copy all necessary images inside SRC_MAIN_RESOURCES/static/public/img
-    copyDirectoryContents("static/img/*.ico",
-        getPathResolver().getIdentifier(resourcesPath, "/static/public/img"), false);
-    copyDirectoryContents("static/img/*.jpg",
-        getPathResolver().getIdentifier(resourcesPath, "/static/public/img"), false);
-    copyDirectoryContents("static/img/*.png",
-        getPathResolver().getIdentifier(resourcesPath, "/static/public/img"), false);
-    copyDirectoryContents("static/img/*.gif",
-        getPathResolver().getIdentifier(resourcesPath, "/static/public/img"), false);
+    // Add Thymeleaf data dialect
+    getProjectOperations().addDependency(module.getModuleName(), DATA_THYMELEAF_DEPENDENCY);
 
-    // copy all necessary scripts inside SRC_MAIN_RESOURCES/static/public/js
-    copyDirectoryContents("static/js/*.js",
-        getPathResolver().getIdentifier(resourcesPath, "/static/public/js"), true);
-
-    // copy all necessary scripts inside SRC_MAIN_RESOURCES/templates/fragments/js
-    copyDirectoryContents("templates/fragments/js/*.html",
-        getPathResolver().getIdentifier(resourcesPath, "/templates/fragments/js"), true);
-    copyDirectoryContents("templates/fragments/js/*.js",
-        getPathResolver().getIdentifier(resourcesPath, "/templates/fragments/js"), true);
+    // ROO-3813: Use Thymeleaf 3.0 instead of the provided version by Spring IO
+    // More info about Thymelead 3.0 using Spring Boot here
+    // http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-use-thymeleaf-3
+    getProjectOperations().addProperty("", new Property("thymeleaf.version", "3.0.0.RELEASE"));
+    getProjectOperations().addProperty("",
+        new Property("thymeleaf-layout-dialect.version", "2.0.0"));
+    getProjectOperations().addProperty("", new Property("thymeleaf-data-dialect.version", "2.0.1"));
   }
 
   /**
@@ -387,41 +363,6 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
   private void addThymeleafDatatablesResources(Pom module) {
     // Add WebMVCThymeleafUIConfiguration config class
     addWebMVCThymeleafUIConfiguration(module);
-  }
-
-  /**
-   * This method adds new WebMVCThymeleafUIConfiguration.java class inside .config
-   * package of generated project
-   *
-   * @param module
-   */
-  private void addWebMVCThymeleafUIConfiguration(Pom module) {
-
-    // Obtain the class annotated with @RooWebMvcConfiguration
-    Set<ClassOrInterfaceTypeDetails> webMvcConfigurationSet =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_WEB_MVC_CONFIGURATION);
-    if (webMvcConfigurationSet == null || webMvcConfigurationSet.isEmpty()) {
-      throw new RuntimeException(String.format(
-          "ERROR: Can't found configuration class annotated with @%s.",
-          RooJavaType.ROO_WEB_MVC_CONFIGURATION));
-    }
-
-    ClassOrInterfaceTypeDetails webMvcConfiguration = webMvcConfigurationSet.iterator().next();
-
-    // Prevent to include the @RooWebMvcThymeleafUIConfiguration more than once
-    if (webMvcConfiguration.getAnnotation(RooJavaType.ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION) == null) {
-      AnnotationMetadataBuilder thymeleaftConfigurationAnnotation =
-          new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION);
-
-      ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-          new ClassOrInterfaceTypeDetailsBuilder(webMvcConfiguration);;
-
-      cidBuilder.addAnnotation(thymeleaftConfigurationAnnotation);
-
-      getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
-    }
-
   }
 
   /**
@@ -527,6 +468,88 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
   }
 
   /**
+   * This method adds new WebMVCThymeleafUIConfiguration.java class inside .config
+   * package of generated project
+   *
+   * @param module
+   */
+  private void addWebMVCThymeleafUIConfiguration(Pom module) {
+
+    // Obtain the class annotated with @RooWebMvcConfiguration
+    Set<ClassOrInterfaceTypeDetails> webMvcConfigurationSet =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_WEB_MVC_CONFIGURATION);
+    if (webMvcConfigurationSet == null || webMvcConfigurationSet.isEmpty()) {
+      throw new RuntimeException(String.format(
+          "ERROR: Can't found configuration class annotated with @%s.",
+          RooJavaType.ROO_WEB_MVC_CONFIGURATION));
+    }
+
+    ClassOrInterfaceTypeDetails webMvcConfiguration = webMvcConfigurationSet.iterator().next();
+
+    // Prevent to include the @RooWebMvcThymeleafUIConfiguration more than once
+    if (webMvcConfiguration.getAnnotation(RooJavaType.ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION) == null) {
+      AnnotationMetadataBuilder thymeleaftConfigurationAnnotation =
+          new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION);
+
+      ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+          new ClassOrInterfaceTypeDetailsBuilder(webMvcConfiguration);;
+
+      cidBuilder.addAnnotation(thymeleaftConfigurationAnnotation);
+
+      getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
+
+  }
+
+  /**
+   * This method copy and generate all necessary resources to be able
+   * to use THYMELEAF.
+   *
+   * @param module
+   */
+  private void copyStaticResources(Pom module) {
+    LogicalPath resourcesPath =
+        LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, module.getModuleName());
+
+    // copy all necessary styles inside SRC_MAIN_RESOURCES/static/public/css
+    copyDirectoryContents("static/css/*.css",
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/css"), true);
+
+    // copy all necessary fonts inside SRC_MAIN_RESOURCES/static/public/fonts
+    copyDirectoryContents("static/fonts/*.eot",
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/fonts"), true);
+    copyDirectoryContents("static/fonts/*.svg",
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/fonts"), true);
+    copyDirectoryContents("static/fonts/*.ttf",
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/fonts"), true);
+    copyDirectoryContents("static/fonts/*.woff",
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/fonts"), true);
+    copyDirectoryContents("static/fonts/*.woff2",
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/fonts"), true);
+
+    // copy all necessary images inside SRC_MAIN_RESOURCES/static/public/img
+    copyDirectoryContents("static/img/*.ico",
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/img"), false);
+    copyDirectoryContents("static/img/*.jpg",
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/img"), false);
+    copyDirectoryContents("static/img/*.png",
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/img"), false);
+    copyDirectoryContents("static/img/*.gif",
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/img"), false);
+
+    // copy all necessary scripts inside SRC_MAIN_RESOURCES/static/public/js
+    copyDirectoryContents("static/js/*.js",
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/js"), true);
+
+    // copy all necessary scripts inside SRC_MAIN_RESOURCES/templates/fragments/js
+    copyDirectoryContents("templates/fragments/js/*.html",
+        getPathResolver().getIdentifier(resourcesPath, "/templates/fragments/js"), true);
+    copyDirectoryContents("templates/fragments/js/*.js",
+        getPathResolver().getIdentifier(resourcesPath, "/templates/fragments/js"), true);
+  }
+
+  /**
    * This method checks if THYMELEAF dependencies has been installed before
    *
    * @param module
@@ -544,6 +567,10 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
   }
 
   // Getting OSGi services
+
+  private ApplicationConfigService getApplicationConfigService() {
+    return serviceInstaceManager.getServiceInstance(this, ApplicationConfigService.class);
+  }
 
   private ProjectOperations getProjectOperations() {
     return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
