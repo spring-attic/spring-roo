@@ -4,7 +4,6 @@ import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -73,13 +72,13 @@ public class LinkFactoryMetadataProviderImpl extends AbstractMemberDiscoveringIt
 
   @Override
   protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-    return RepositoryJpaMetadata.createIdentifier(javaType, path);
+    return LinkFactoryMetadata.createIdentifier(javaType, path);
   }
 
   @Override
   protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-    final JavaType javaType = RepositoryJpaMetadata.getJavaType(metadataIdentificationString);
-    final LogicalPath path = RepositoryJpaMetadata.getPath(metadataIdentificationString);
+    final JavaType javaType = LinkFactoryMetadata.getJavaType(metadataIdentificationString);
+    final LogicalPath path = LinkFactoryMetadata.getPath(metadataIdentificationString);
     return PhysicalTypeIdentifier.createIdentifier(javaType, path);
   }
 
@@ -114,7 +113,7 @@ public class LinkFactoryMetadataProviderImpl extends AbstractMemberDiscoveringIt
     final ControllerMetadata controllerMetadata = getMetadataService().get(controllerMetadataKey);
 
     return new LinkFactoryMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, controllerMetadata);
+        governorPhysicalTypeMetadata, controller, controllerMetadata);
   }
 
   public String getProvidesType() {
