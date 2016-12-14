@@ -121,8 +121,12 @@ public class JavaType implements Comparable<JavaType> {
   public static final JavaSymbolName WILDCARD_NEITHER_ARG = new JavaSymbolName(
       "_ROO_WILDCARD_NEITHER_"); // List<?>
 
+  public static final JavaSymbolName GENERIC_TYPE_ARG = new JavaSymbolName("T"); // List<?>
+
   public static final JavaType WILDCARD_NEITHER = new JavaType(OBJECT.getFullyQualifiedTypeName(),
       0, DataType.TYPE, JavaType.WILDCARD_NEITHER_ARG, null);
+
+  public static final JavaType GENERIC_TYPE = new JavaType("T");
 
   public static final JavaSymbolName WILDCARD_SUPER_ARG =
       new JavaSymbolName("_ROO_WILDCARD_SUPER_"); // List<? super XXXX>
@@ -274,6 +278,18 @@ public class JavaType implements Comparable<JavaType> {
    */
   public static JavaType wrapperWilcard(final JavaType wrapperType) {
     return wrapperOf(wrapperType, WILDCARD_NEITHER);
+  }
+
+  /**
+   * Returns a {@link JavaType} for a _wrapperType_ with generic:
+   * JavaType.wrapperWilcard(JavaType.LIST) return List<T>
+   *
+   * @param elementType the type of element in the list (required)
+   * @return a non `null` type
+   * @since 2.0.0
+   */
+  public static JavaType wrapperGenericType(final JavaType wrapperType) {
+    return wrapperOf(wrapperType, GENERIC_TYPE);
   }
 
   /** Return {@link JavaType} which is a Widcard of generics with "extends"

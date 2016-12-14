@@ -454,6 +454,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
       cidBuilder.setAnnotations(annotations);
 
       getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+
+      // Create LinkFactory class
+      if (responseType.getName().equals("THYMELEAF")) {
+        includeLinkFactory(cidBuilder.getName());
+      }
     } else {
       LOGGER.log(
           Level.INFO,
@@ -497,6 +502,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
       cidBuilder.setAnnotations(annotations);
 
       getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+
+      // Create LinkFactory class
+      if (responseType.getName().equals("THYMELEAF")) {
+        includeLinkFactory(cidBuilder.getName());
+      }
     } else {
       LOGGER.log(
           Level.INFO,
@@ -1053,6 +1063,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
+    // Create LinkFactory class
+    if (type == ControllerType.DETAIL && responseType.getName().equals("THYMELEAF")) {
+      includeLinkFactory(cidBuilder.getName());
+    }
+
     if (getProjectOperations().isMultimoduleProject()) {
       // TODO
       //        // Getting related service
@@ -1164,6 +1179,49 @@ public class ControllerOperationsImpl implements ControllerOperations {
       }
     }
     return false;
+  }
+
+  /**
+   * Creates a new class which supports its associated controller building URL's 
+   * for its methods
+   * 
+   * @param controller the JavaType of the associated controller
+   */
+  private void includeLinkFactory(JavaType controller) {
+
+//    // Create name
+//    String name = controller.getSimpleTypeName().concat("LinkFactory");
+//    if (name.contains("Controller")) {
+//      name = name.replace("Controller", "");
+//    }
+//
+//    // Create type
+//    final JavaType linkFactoryJavaType =
+//        new JavaType(controller.getPackage().getFullyQualifiedPackageName().concat(".")
+//            .concat(name), controller.getModule());
+//
+//    // Create identifier
+//    final String linkFactoryPathIdentifier =
+//        getPathResolver().getCanonicalPath(linkFactoryJavaType.getModule(), Path.SRC_MAIN_JAVA,
+//            linkFactoryJavaType);
+//    final String mid =
+//        PhysicalTypeIdentifier.createIdentifier(linkFactoryJavaType,
+//            getPathResolver().getPath(linkFactoryPathIdentifier));
+//
+//    // Create builder
+//    final ClassOrInterfaceTypeDetailsBuilder typeBuilder =
+//        new ClassOrInterfaceTypeDetailsBuilder(mid, PUBLIC, linkFactoryJavaType,
+//            PhysicalTypeCategory.CLASS);
+//
+//    // Add @RooLinkFactory annotation
+//    AnnotationMetadataBuilder annotationBuilder =
+//        new AnnotationMetadataBuilder(RooJavaType.ROO_LINK_FACTORY);
+//    annotationBuilder.addAttribute(new ClassAttributeValue(new JavaSymbolName("controller"),
+//        controller));
+//    typeBuilder.addAnnotation(annotationBuilder);
+//
+//    // Write changes to disk
+//    getTypeManagementService().createOrUpdateTypeOnDisk(typeBuilder.build());
   }
 
   /**

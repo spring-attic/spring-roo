@@ -12,6 +12,9 @@ package org.springframework.roo.model;
  */
 public class SpringletsJavaType {
 
+  public static final JavaType SPRINGLETS_CONTROLLER_METHOD_LINK_BUILDER_FACTORY = new JavaType(
+      "io.springlets.web.mvc.util.ControllerMethodLinkBuilderFactory");
+
   public static final JavaType SPRINGLETS_GLOBAL_SEARCH = new JavaType(
       "io.springlets.data.domain.GlobalSearch");
   public static final JavaType SPRINGLETS_GLOBAL_SEARCH_ARGUMENT_RESOLVER = new JavaType(
@@ -32,8 +35,12 @@ public class SpringletsJavaType {
   public static final JavaType SPRINGLETS_DATATABLES = new JavaType(
       "io.springlets.data.web.datatables.Datatables");
 
+  public static final JavaType SPRINGLETS_METHOD_LINK_FACTORY = new JavaType(
+      "io.springlets.web.mvc.util.MethodLinkFactory");
   public static final JavaType SPRINGLETS_METHOD_LINK_FACTORY_SUPPORT = new JavaType(
       "io.springlets.web.mvc.support.MethodLinkFactorySupport");
+  public static final JavaType SPRINGLETS_METHOD_LINK_BUILDER_FACTORY = new JavaType(
+      "io.springlets.web.mvc.util.MethodLinkBuilderFactory");
 
   public static final JavaType SPRINGLETS_SELECT2_DATA = new JavaType(
       "io.springlets.data.web.select2.Select2Data");

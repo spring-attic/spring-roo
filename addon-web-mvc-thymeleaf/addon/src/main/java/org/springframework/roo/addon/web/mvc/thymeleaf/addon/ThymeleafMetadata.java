@@ -114,6 +114,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       .create(PROVIDES_TYPE_STRING);
 
   private static final JavaSymbolName DRAW_PARAM_NAME = new JavaSymbolName("draw");
+  private static final String LINK_BUILDER_ARGUMENT_NAME = "linkBuilder";
 
   private final boolean readOnly;
   private final ControllerMetadata controllerMetadata;
@@ -141,7 +142,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private final MethodMetadata createFormMethod;
   private final MethodMetadata createMethod;
   private final MethodMetadata listMethod;
-  private final MethodMetadata listURIMethod;
   private final MethodMetadata listDatatablesMethod;
   private final MethodMetadata select2Method;
 
@@ -151,7 +151,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private final MethodMetadata updateMethod;
   private final MethodMetadata deleteMethod;
   private final MethodMetadata showMethod;
-  private final MethodMetadata showURIMethod;
   private final MethodMetadata populateFormMethod;
   private final MethodMetadata populateFormatsMethod;
 
@@ -174,6 +173,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
   private final List<MethodMetadata> allMethods;
   private final FieldMetadata messageSourceField;
+  private final FieldMetadata methodLinkBuilderFactoryField;
   private final String viewsPath;
   private final JavaType collectionController;
   private final List<FieldMetadata> dateTimeFields;
@@ -184,7 +184,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private final MethodMetadata updateDetailMethod;
   private final MethodMetadata deleteDetailMethod;
   private final MethodMetadata showDetailMethod;
-
+  private final String ITEM_LINK = "itemLink";
+  private final String COLLECTION_LINK = "collectionLink";
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -230,7 +231,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
    * @param formBeansDateTimeFields
    * @param detailsCollectionController
    * @param relatedCollectionController
-
+  
    */
   public ThymeleafMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
@@ -283,15 +284,25 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     this.messageSourceField = getMessageSourceField();
     ensureGovernorHasField(new FieldMetadataBuilder(this.messageSourceField));
 
-    this.constructor = getConstructor();
-    ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
-
     List<MethodMetadata> allMethods = new ArrayList<MethodMetadata>();
 
     switch (this.type) {
       case COLLECTION: {
+
+        // Add MethodLinkBuilderFactory field  
+        this.methodLinkBuilderFactoryField =
+            getMethodLinkBuilderFactoryField(ITEM_LINK, this.itemController);
+        ensureGovernorHasField(new FieldMetadataBuilder(this.methodLinkBuilderFactoryField));
+
+        // Build constructor
+        String linkBuilderLine =
+            String.format("this.%s = linkBuilder.of(%s.class);", ITEM_LINK,
+                getNameOfJavaType(this.itemController));
+        this.constructor = getConstructor(linkBuilderLine);
+        ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
+
+        // Build methods
         this.listMethod = addAndGet(getListMethod(), allMethods);
-        this.listURIMethod = addAndGet(getListURIMethod(), allMethods);
         this.listDatatablesMethod = addAndGet(getListDatatablesMethod(), allMethods);
 
         boolean generateSelect2 = true;
@@ -329,7 +340,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateMethod = null;
         this.deleteMethod = null;
         this.showMethod = null;
-        this.showURIMethod = null;
         this.modelAttributeDetailsMethod = null;
         this.listDatatablesDetailsMethod = null;
         this.finderListMethods = null;
@@ -347,9 +357,22 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         break;
       }
       case ITEM: {
+
+        // Add MethodLinkBuilderFactory field  
+        this.methodLinkBuilderFactoryField =
+            getMethodLinkBuilderFactoryField(ITEM_LINK, this.governorTypeDetails.getType());
+        ensureGovernorHasField(new FieldMetadataBuilder(this.methodLinkBuilderFactoryField));
+
+        // Build constructor
+        String linkBuilderLine =
+            String.format("this.%s = linkBuilder.of(%s.class);", ITEM_LINK,
+                getNameOfJavaType(this.governorTypeDetails.getType()));
+        this.constructor = getConstructor(linkBuilderLine);
+        ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
+
+        // Build methods
         this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
         this.showMethod = addAndGet(getShowMethod(), allMethods);
-        this.showURIMethod = addAndGet(getShowURIMethod(), allMethods);
         if (readOnly) {
           this.editFormMethod = null;
           this.updateMethod = null;
@@ -368,7 +391,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
 
         this.listMethod = null;
-        this.listURIMethod = null;
         this.listDatatablesMethod = null;
         this.createMethod = null;
         this.createFormMethod = null;
@@ -389,6 +411,15 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         break;
       }
       case SEARCH: {
+
+        this.methodLinkBuilderFactoryField = null;
+
+        // Build constructor
+        String linkBuilderLine = "";
+        this.constructor = getConstructor(linkBuilderLine);
+        ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
+
+        // Build methods
         Map<String, MethodMetadata> tmpFindersDtt = new TreeMap<String, MethodMetadata>();
         Map<String, MethodMetadata> tmpFinderLists = new TreeMap<String, MethodMetadata>();
         Map<String, MethodMetadata> tmpFinderForms = new TreeMap<String, MethodMetadata>();
@@ -413,7 +444,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         // FIXME We need more method to handle it... To Be Defined!!!
 
         this.listMethod = null;
-        this.listURIMethod = null;
         this.listDatatablesMethod = null;
         this.createMethod = null;
         this.createFormMethod = null;
@@ -424,7 +454,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateMethod = null;
         this.deleteMethod = null;
         this.showMethod = null;
-        this.showURIMethod = null;
         this.populateFormMethod = null;
         this.populateFormatsMethod = null;
         this.modelAttributeDetailsMethod = null;
@@ -442,6 +471,19 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       }
       case DETAIL: {
 
+        // Add MethodLinkBuilderFactory field  
+        this.methodLinkBuilderFactoryField =
+            getMethodLinkBuilderFactoryField(COLLECTION_LINK, this.collectionController);
+        ensureGovernorHasField(new FieldMetadataBuilder(this.methodLinkBuilderFactoryField));
+
+        // Build constructor
+        String linkBuilderLine =
+            String.format("this.%s = linkBuilder.of(%s.class);", COLLECTION_LINK,
+                getNameOfJavaType(this.collectionController));
+        this.constructor = getConstructor(linkBuilderLine);
+        ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
+
+        // Build methods
         this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
         Map<RelationInfo, MethodMetadata> modelAtributeDetailsMethod =
             new TreeMap<RelationInfo, MethodMetadata>();
@@ -473,7 +515,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         }
 
         this.listMethod = null;
-        this.listURIMethod = null;
         this.listDatatablesMethod = null;
         this.createMethod = null;
         this.createFormMethod = null;
@@ -482,7 +523,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateMethod = null;
         this.deleteMethod = null;
         this.showMethod = null;
-        this.showURIMethod = null;
         this.finderListMethods = null;
         this.finderDatatableMethods = null;
         this.finderFormMethods = null;
@@ -496,6 +536,19 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       }
       case DETAIL_ITEM: {
 
+        // Add MethodLinkBuilderFactory field  
+        this.methodLinkBuilderFactoryField =
+            getMethodLinkBuilderFactoryField(COLLECTION_LINK, this.collectionController);
+        ensureGovernorHasField(new FieldMetadataBuilder(this.methodLinkBuilderFactoryField));
+
+        // Build constructor
+        String linkBuilderLine =
+            String.format("this.%s = linkBuilder.of(%s.class);", COLLECTION_LINK,
+                getNameOfJavaType(this.collectionController));
+        this.constructor = getConstructor(linkBuilderLine);
+        ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
+
+        // Build methods
         this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
         Map<RelationInfo, MethodMetadata> modelAtributeDetailsMethod =
             new TreeMap<RelationInfo, MethodMetadata>();
@@ -520,7 +573,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.deleteDetailMethod = addAndGet(getDeleteDetailMethod(), allMethods);
         this.showDetailMethod = addAndGet(getShowDetailMethod(), allMethods);
         this.listMethod = null;
-        this.listURIMethod = null;
         this.listDatatablesMethod = null;
         this.createMethod = null;
         this.createFormMethod = null;
@@ -529,7 +581,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateMethod = null;
         this.deleteMethod = null;
         this.showMethod = null;
-        this.showURIMethod = null;
         this.finderDatatableMethods = null;
         this.finderListMethods = null;
         this.finderFormMethods = null;
@@ -551,7 +602,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // Build the ITD
     itdTypeDetails = builder.build();
   }
-
 
   private FieldMetadata getMessageSourceField() {
     return new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
@@ -582,7 +632,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   }
 
 
-  private ConstructorMetadata getConstructor() {
+  private ConstructorMetadata getConstructor(String linkBuilderLine) {
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // Generating constructor
@@ -618,6 +668,12 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     constructor.addParameter(messageSourceName, messageSourceField.getFieldType());
     bodyBuilder.appendFormalLine("this.%1$s = %1$s;", messageSourceName);
 
+    // Add ControllerMethodLinkBuilderFactory argument
+    if (StringUtils.isNotBlank(linkBuilderLine)) {
+      constructor.addParameter(LINK_BUILDER_ARGUMENT_NAME,
+          SpringletsJavaType.SPRINGLETS_CONTROLLER_METHOD_LINK_BUILDER_FACTORY);
+      bodyBuilder.appendFormalLine(linkBuilderLine);
+    }
 
     // Adding body
     constructor.setBodyBuilder(bodyBuilder);
@@ -937,46 +993,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   }
 
   /**
-   * Creates listURI method
-   *
-   * @return
-   */
-  private MethodMetadata getListURIMethod() {
-    // Define method parameter types and parameter names
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-
-    MethodMetadata existingMethod =
-        getGovernorMethod(LIST_URI_METHOD_NAME,
-            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-    if (existingMethod != null) {
-      return existingMethod;
-    }
-
-    // return MvcUriComponentsBuilder.fromMethodCall(
-    //     MvcUriComponentsBuilder.on(CustomersCollectionThymeleafController.class).list(null))
-    //     .build().encode();
-    InvocableMemberBodyBuilder body = new InvocableMemberBodyBuilder();
-
-    body.appendFormalLine("return %s.fromMethodCall(",
-        getNameOfJavaType(SpringJavaType.MVC_URI_COMPONENTS_BUILDER));
-    body.indent();
-    body.indent();
-    body.appendFormalLine("%s.on(%s.class).%s(null))",
-        getNameOfJavaType(SpringJavaType.MVC_URI_COMPONENTS_BUILDER),
-        getNameOfJavaType(getDestination()), this.listMethod.getMethodName());
-    body.appendFormalLine(".build().encode();");
-    body.reset();
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.STATIC, LIST_URI_METHOD_NAME,
-            SpringJavaType.URI_COMPONENTS, parameterTypes, parameterNames, body);
-
-    return methodBuilder.build();
-  }
-
-  /**
    * Creates getInitBinderMethod method
    *
    * @return
@@ -1026,6 +1042,20 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
+  }
+
+  /**
+   * Build a MethodLinkBuilderFactory field of provided type
+   * 
+   * @param fieldName
+   * @return FieldMetadata
+   */
+  private FieldMetadata getMethodLinkBuilderFactoryField(String fieldName, JavaType controller) {
+    FieldMetadataBuilder field =
+        new FieldMetadataBuilder(getId(), Modifier.PRIVATE, new JavaSymbolName(fieldName),
+            JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_METHOD_LINK_BUILDER_FACTORY,
+                controller), null);
+    return field.build();
   }
 
   /**
@@ -1103,51 +1133,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
             parameterNames, bodyBuilder);
 
     methodBuilder.addAnnotation(ANN_METADATA_MODEL_ATTRIBUTE);
-
-    return methodBuilder.build();
-  }
-
-  /**
-   * Creates showURI method
-   *
-   * @return
-   */
-  private MethodMetadata getShowURIMethod() {
-    // Define method parameter types and parameter names
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(entity));
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName(entityItemName));
-
-    MethodMetadata existingMethod =
-        getGovernorMethod(SHOW_URI_METHOD_NAME,
-            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-    if (existingMethod != null) {
-      return existingMethod;
-    }
-
-    // return MvcUriComponentsBuilder
-    //    .fromMethodCall(
-    //     MvcUriComponentsBuilder.on(CustomersItemJsonController.class).show(customer, null))
-    //     .buildAndExpand(customer.getId()).encode();
-    InvocableMemberBodyBuilder body = new InvocableMemberBodyBuilder();
-
-    body.appendFormalLine("return %s", getNameOfJavaType(SpringJavaType.MVC_URI_COMPONENTS_BUILDER));
-    body.indent();
-    body.appendFormalLine(".fromMethodCall(");
-    body.indent();
-    body.appendFormalLine("%s.on(%s.class).%s(%s, null))",
-        getNameOfJavaType(SpringJavaType.MVC_URI_COMPONENTS_BUILDER),
-        getNameOfJavaType(getDestination()), this.showMethod.getMethodName(), entityItemName);
-    body.indentRemove();
-    body.appendFormalLine(".buildAndExpand(%s.get%s()).encode();", entityItemName,
-        StringUtils.capitalize(entityIdentifier));
-    body.indentRemove();
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.STATIC, SHOW_URI_METHOD_NAME,
-            SpringJavaType.URI_COMPONENTS, parameterTypes, parameterNames, body);
 
     return methodBuilder.build();
   }
@@ -1323,10 +1308,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         controllerMetadata.getServiceField().getFieldName(), serviceMetadata.getCurrentSaveMethod()
             .getMethodName(), entityItemName);
 
-    // UriComponents showURI = CustomersItemThymeleafController.showURI(newCustomer);
-    bodyBuilder.appendFormalLine("%s showURI = %s.%s(%s);",
-        getNameOfJavaType(SpringJavaType.URI_COMPONENTS), getNameOfJavaType(itemController),
-        SHOW_URI_METHOD_NAME, newValueVar);
+    // UriComponents showURI = itemLink.to("show").with("category", newCategory.getId()).toUri();
+    bodyBuilder.appendFormalLine("%s showURI = %s.to(\"show\").with(\"%s\", %s.getId()).toUri();",
+        getNameOfJavaType(SpringJavaType.URI_COMPONENTS), ITEM_LINK, this.entityItemName,
+        newValueVar);
 
     // return new ModelAndView("redirect:" + showURI.toUriString());
     bodyBuilder.appendFormalLine("return new %s(\"redirect:\" + showURI.toUriString());",
@@ -1403,10 +1388,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         controllerMetadata.getServiceField().getFieldName(), serviceMetadata.getCurrentSaveMethod()
             .getMethodName(), entityItemName);
 
-    // UriComponents showURI = CustomersItemThymeleafController.showURI(savedCustomer);
-    bodyBuilder.appendFormalLine("%s showURI = %s.%s(%s);",
-        getNameOfJavaType(SpringJavaType.URI_COMPONENTS), getDestination().getSimpleTypeName(),
-        showURIMethod.getMethodName(), savedVarName);
+    // UriComponents showURI = itemLink.to("show").with("category", savedCategory.getId()).toUri();
+    bodyBuilder.appendFormalLine("%s showURI = %s.to(\"show\").with(\"%s\", %s.getId()).toUri();",
+        getNameOfJavaType(SpringJavaType.URI_COMPONENTS), ITEM_LINK, this.entityItemName,
+        savedVarName);
 
     // return new ModelAndView("redirect:" + showURI.toUriString());
     bodyBuilder.appendFormalLine("return new %s(\"redirect:\" + showURI.toUriString());",
@@ -1491,14 +1476,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     bodyBuilder.appendFormalLine("%s.%s(%s);", controllerMetadata.getLastDetailServiceField()
         .getFieldName(), serviceMetadata.getCurrentSaveMethod().getMethodName(), entityItemName);
 
-    // UriComponents listURI = CustomerOrdersCollectionThymeleafController.listURI();
-    bodyBuilder.appendFormalLine("%s listURI = %s.%s();",
-        getNameOfJavaType(SpringJavaType.URI_COMPONENTS), collectionController.getSimpleTypeName(),
-        LIST_URI_METHOD_NAME);
-
-    // return new ModelAndView("redirect:" + showURI.toUriString());
-    bodyBuilder.appendFormalLine("return new %s(\"redirect:\" + listURI.toUriString());",
-        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW));
+    // return new ModelAndView("redirect:" + collectionLink.to("list").toUriString());
+    bodyBuilder.appendFormalLine("return new %s(\"redirect:\" + %s.to(\"list\").toUriString());",
+        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), COLLECTION_LINK);
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
@@ -1572,17 +1552,17 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     return null;
     /*
     final List<AnnotatedJavaType> originalParameterTypes = finderMethod.getParameterTypes();
-
+    
     // Get finder parameter names
     final List<JavaSymbolName> originalParameterNames = finderMethod.getParameterNames();
     List<String> stringParameterNames = new ArrayList<String>();
     for (JavaSymbolName parameterName : originalParameterNames) {
       stringParameterNames.add(parameterName.getSymbolName());
     }
-
+    
     // Define methodName
     final JavaSymbolName methodName = finderMethod.getMethodName();
-
+    
     // Define path
     String path = "";
     if (StringUtils.startsWith(methodName.getSymbolName(), "count")) {
@@ -1597,7 +1577,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       path = methodName.getSymbolName();
     }
     path = StringUtils.uncapitalize(path);
-
+    
     // Check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod = getControllerMVCService().getMVCMethodByRequestMapping(
         controller.getType(), SpringEnumDetails.REQUEST_METHOD_GET, "/" + path,
@@ -1606,13 +1586,13 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
-
+    
     // Get parameters
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     StringBuffer finderParamsString = new StringBuffer();
     for (int i = 0; i < originalParameterTypes.size(); i++) {
-
+    
       // Add @ModelAttribute for search param
       if (i == 0) {
         AnnotationMetadataBuilder requestParamAnnotation =
@@ -1628,41 +1608,41 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         parameterTypes.add(originalParameterTypes.get(i));
         addTypeToImport(originalParameterTypes.get(i).getJavaType());
         parameterNames.add(originalParameterNames.get(i));
-
+    
         // Build finder parameters String
         finderParamsString.append(", ".concat(originalParameterNames.get(i).getSymbolName()));
       }
     }
-
+    
     // Add DatatablesPageable param
     parameterTypes
         .add(AnnotatedJavaType.convertFromJavaType(addTypeToImport(this.datatablesPageable)));
     parameterNames.add(new JavaSymbolName("pageable"));
     finderParamsString.append(", pageable");
-
+    
     // Add additional 'draw' param
     AnnotationMetadataBuilder requestParamAnnotation =
         new AnnotationMetadataBuilder(addTypeToImport(SpringJavaType.REQUEST_PARAM));
     requestParamAnnotation.addStringAttribute("value", "draw");
     parameterTypes.add(new AnnotatedJavaType(JavaType.INT_OBJECT, requestParamAnnotation.build()));
     parameterNames.add(new JavaSymbolName("draw"));
-
+    
     // Adding annotations
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-
+    
     // Adding @RequestMapping annotation
     annotations.add(
         getControllerMVCService().getRequestMappingAnnotation(SpringEnumDetails.REQUEST_METHOD_GET,
             "/" + path, stringParameterNames, null, "application/vnd.datatables+json", ""));
-
+    
     // Adding @ResponseBody annotation
     AnnotationMetadataBuilder responseBodyAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
     annotations.add(responseBodyAnnotation);
-
+    
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
+    
     // Generating returnType
     JavaType returnType = finderMethod.getReturnType();
     List<JavaType> returnParameterTypes = returnType.getParameters();
@@ -1673,12 +1653,12 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         returnTypeParamsString.append(",");
       }
       returnTypeParamsString.append(returnParameterTypes.get(i).getSimpleTypeName());
-
+    
       // Add module dependency
       getTypeLocationService().addModuleDependency(this.controller.getType().getModule(),
           returnParameterTypes.get(i));
     }
-
+    
     // ReturnType<ReturnTypeParams> entity =
     // ENTITY_SERVICE_FIELD.FINDER_NAME(SEARCH_PARAMS);
     String returnParameterName =
@@ -1693,7 +1673,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
           addTypeToImport(returnType).getSimpleTypeName(), returnTypeParamsString,
           returnParameterName, getServiceField().getFieldName(), methodName, finderParamsString));
     }
-
+    
     // long allAvailableEntity/Projection =
     // ENTITY_SERVICE_FIELD.COUNT_METHOD(formBean);
     bodyBuilder.newLine();
@@ -1702,21 +1682,21 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         getServiceField().getFieldName(), "count".concat(StringUtils.capitalize(path)),
         parameterNames.get(0)));
     bodyBuilder.newLine();
-
+    
     // return new DatatablesData<Entity/Projection>(entity/projection,
     // allAvailableEntity/Projection, draw);
     bodyBuilder.appendFormalLine(String.format("return new %s<%s>(%s, allAvailable%s, draw);",
         addTypeToImport(this.datatablesDataType).getSimpleTypeName(), returnTypeParamsString,
         returnParameterName,
         StringUtils.capitalize(Noun.pluralOf(returnParameterName, Locale.ENGLISH))));
-
+    
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
             addTypeToImport(new JavaType(this.datatablesDataType.getFullyQualifiedTypeName(), 0,
                 DataType.TYPE, null, returnParameterTypes)),
             parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
-
+    
     return methodBuilder.build();
     */
   }
@@ -1732,18 +1712,18 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // TODO
     return null;
     /*
-
+    
     // Get finder parameter names
     final List<JavaSymbolName> originalParameterNames = finderMethod.getParameterNames();
     List<String> stringParameterNames = new ArrayList<String>();
     for (JavaSymbolName parameterName : originalParameterNames) {
       stringParameterNames.add(parameterName.getSymbolName());
     }
-
+    
     // Define methodName
     final JavaSymbolName methodName =
         new JavaSymbolName(finderMethod.getMethodName().getSymbolName().concat("Redirect"));
-
+    
     // Define path
     String path = "";
     if (StringUtils.startsWith(methodName.getSymbolName(), "count")) {
@@ -1758,7 +1738,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       path = methodName.getSymbolName();
     }
     path = StringUtils.uncapitalize(StringUtils.removeEnd(path, "Redirect"));
-
+    
     // Check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod = getControllerMVCService().getMVCMethodByRequestMapping(
         controller.getType(), SpringEnumDetails.REQUEST_METHOD_POST, "/" + path,
@@ -1767,58 +1747,58 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
-
+    
     // Get parameters
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-
+    
     // Check if finder parameter is a DTO
     JavaType formBean = finderMethod.getParameterTypes().get(0).getJavaType();
     if (getTypeLocationService().getTypeDetails(formBean) != null && getTypeLocationService()
         .getTypeDetails(formBean).getAnnotation(RooJavaType.ROO_DTO) == null) {
-
+    
       // Finder parameter are entity fields
       formBean = this.entity;
     }
-
+    
     // Add form bean parameter
     AnnotationMetadataBuilder modelAttributeAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
     modelAttributeAnnotation.addStringAttribute("value", "formBean");
     parameterTypes.add(new AnnotatedJavaType(formBean, modelAttributeAnnotation.build()));
     parameterNames.add(new JavaSymbolName("formBean"));
-
+    
     // Add redirect parameter
     parameterTypes.add(
         AnnotatedJavaType.convertFromJavaType(addTypeToImport(SpringJavaType.REDIRECT_ATTRIBUTES)));
     parameterNames.add(new JavaSymbolName("redirect"));
-
+    
     // Adding annotations
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-
+    
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
         SpringEnumDetails.REQUEST_METHOD_POST, "/" + path, stringParameterNames, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
-
+    
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
     bodyBuilder.newLine();
-
+    
     // redirect.addFlashAttribute(entity/dtoSearch);
     bodyBuilder.appendFormalLine(
         String.format("redirect.addFlashAttribute(\"formBean\", %s);", parameterNames.get(0)));
     bodyBuilder.newLine();
-
+    
     // return "redirect:PATH_PREFIX/ENTITY_PLURAL/FINDER_NAME";
     bodyBuilder.appendFormalLine(String.format("return \"redirect:%s/%s/search/%s\";",
         this.pathPrefix, this.entityPlural, path));
-
+    
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
             JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
-
+    
     return methodBuilder.build();
     */
   }
@@ -1833,15 +1813,15 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // TODO
     return null;
     /*
-
+    
     // Get finder parameter names
     List<String> stringParameterNames = new ArrayList<String>();
     stringParameterNames.add("model");
-
+    
     // Define methodName
     final JavaSymbolName methodName =
         new JavaSymbolName(finderMethod.getMethodName().getSymbolName().concat("Form"));
-
+    
     // Define path
     String path = "";
     if (StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "count")) {
@@ -1856,7 +1836,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       path = methodName.getSymbolName();
     }
     path = StringUtils.uncapitalize(path).concat("/search-form");
-
+    
     // Check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod = getControllerMVCService().getMVCMethodByRequestMapping(
         controller.getType(), SpringEnumDetails.REQUEST_METHOD_GET, "/" + path,
@@ -1865,50 +1845,50 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
-
+    
     // Get parameters
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-
+    
     // Add model parameter
     parameterTypes
         .add(AnnotatedJavaType.convertFromJavaType(addTypeToImport(SpringJavaType.MODEL)));
     parameterNames.add(new JavaSymbolName("model"));
-
+    
     // Adding annotations
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-
+    
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
         SpringEnumDetails.REQUEST_METHOD_GET, "/" + path, stringParameterNames, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
-
+    
     // Check if finder parameter is a DTO
     JavaType formBean = finderMethod.getParameterTypes().get(0).getJavaType();
     if (getTypeLocationService().getTypeDetails(formBean) != null && getTypeLocationService()
         .getTypeDetails(formBean).getAnnotation(RooJavaType.ROO_DTO) == null) {
-
+    
       // Finder parameter are entity fields
       formBean = this.entity;
     }
-
+    
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
     bodyBuilder.newLine();
-
+    
     // Entity/DTO search = new Entity/DTO();
     bodyBuilder.appendFormalLine(String.format("%1$s %2$s = new %1$s();",
         addTypeToImport(formBean).getSimpleTypeName(), "formBean"));
     bodyBuilder.newLine();
-
+    
     // model.addAttribute("search", search);
     bodyBuilder.appendFormalLine(String.format("model.addAttribute(\"%1$s\", %1$s);", "formBean"));
     bodyBuilder.newLine();
-
+    
     // populateForm(model);
     bodyBuilder.appendFormalLine("populateForm(model);");
     bodyBuilder.newLine();
-
+    
     // return "PATH_PREFIX/ENTITY_PLURAL/FINDER_NAMEForm";
     String pathPrefix = "";
     if (StringUtils.isBlank(this.pathPrefix)) {
@@ -1918,12 +1898,12 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     }
     bodyBuilder.appendFormalLine(String.format("return \"%s%s/%s\";",
         StringUtils.removeStart(pathPrefix, "/"), this.entityPlural, methodName.getSymbolName()));
-
+    
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
             JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
-
+    
     return methodBuilder.build();
     */
   }
@@ -2672,15 +2652,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         addToRelationMethod.getMethodName(), parentItemName,
         getNameOfJavaType(JavaType.COLLECTIONS), entityItemName);
 
-
-    // UriComponents listURI = CategoriesCollectionThymeleafController.listURI();
-    bodyBuilder.appendFormalLine("%s listURI = %s.%s();",
-        getNameOfJavaType(SpringJavaType.URI_COMPONENTS), getNameOfJavaType(collectionController),
-        LIST_URI_METHOD_NAME);
-
-    // return new ModelAndView("redirect:" + listURI.toUriString());
-    bodyBuilder.appendFormalLine("return new %s(\"redirect:\" + listURI.toUriString());",
-        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW));
+    // return new ModelAndView("redirect:" + collectionLink.to("list").toUriString());
+    bodyBuilder.appendFormalLine("return new %s(\"redirect:\" + %s.to(\"list\").toUriString());",
+        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), COLLECTION_LINK);
 
 
     MethodMetadataBuilder methodBuilder =
@@ -2772,15 +2746,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     bodyBuilder.appendFormalLine("%s.%s(%s,%s);", detailsServiceField.getFieldName(),
         setMethod.getMethodName(), setMethod.getParameterNames().get(0), itemsName);
 
-
-    // UriComponents listURI = CategoriesCollectionThymeleafController.listURI();
-    bodyBuilder.appendFormalLine("%s listURI = %s.%s();",
-        getNameOfJavaType(SpringJavaType.URI_COMPONENTS), getNameOfJavaType(collectionController),
-        LIST_URI_METHOD_NAME);
-
-    // return new ModelAndView("redirect:" + listURI.toUriString());
-    bodyBuilder.appendFormalLine("return new %s(\"redirect:\" + listURI.toUriString());",
-        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW));
+    // return new ModelAndView("redirect:" + collectionLink.to("list").toUriString());
+    bodyBuilder.appendFormalLine("return new %s(\"redirect:\" + %s.to(\"list\").toUriString());",
+        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), COLLECTION_LINK);
 
 
     MethodMetadataBuilder methodBuilder =
