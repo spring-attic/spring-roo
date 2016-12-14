@@ -132,7 +132,7 @@ public final class RooJavaType {
   public static final JavaType ROO_EXCEPTION_HANDLER = new JavaType(
       "org.springframework.roo.addon.web.mvc.exceptions.annotations.RooExceptionHandler");
   public static final JavaType ROO_LINK_FACTORY = new JavaType(
-      "org.springframework.roo.addon.web.mvc.exceptions.annotations.RooLinkFactory");
+      "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooLinkFactory");
   public static final JavaType ROO_THYMELEAF = new JavaType(
       "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleaf");
   public static final JavaType ROO_THYMELEAF_MAIN_CONTROLLER = new JavaType(
