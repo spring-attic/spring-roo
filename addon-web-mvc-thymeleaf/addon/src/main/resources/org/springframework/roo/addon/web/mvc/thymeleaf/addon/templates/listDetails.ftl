@@ -33,8 +33,8 @@
                 <#else>
                   <#assign parentEntity=detail.rootEntity>
                 </#if>
-                <div class="table-responsive">
-                  <#assign dconfig=detail.configuration>
+                <#assign dconfig=detail.configuration>
+                <div class="table-responsive" data-th-with="detailCollectionLink=${r"${@"}linkBuilder.of('${dconfig.mvcDetailCollectionControllerName}')},detailItemLink=${r"${@"}linkBuilder.of('${dconfig.mvcDetailItemControllerName}')">
                   <#if detail.userManaged>
                     ${detail.codeManaged}
                   <#else>
@@ -45,12 +45,12 @@
                       data-datatables="true"
                       data-parent-table="${parentEntity.entityItemId}-table"
                       data-order="[[ 0, &quot;asc&quot; ]]"
-                      data-data-load-url="${r"${"}(#mvc.url('${dconfig.mvcUrl_datatablesDetails}')).buildAndExpand('_PARENTID_')}"
+                      data-data-load-url="${r"${"}detailCollectionLink.to('datatables').with('${modelAttributeName}', '_PARENT_ID_')}"
                       data-data-show-url="${r"${"}(#mvc.url('${dconfig.mvcUrl_show}')).buildAndExpand(${dconfig.mvcUrl_itemExpandBuilderExp})}"
                       <#if entity.readOnly == false>
                       data-data-edit-url="${r"${"}(#mvc.url('${dconfig.mvcUrl_editForm}')).buildAndExpand(${dconfig.mvcUrl_itemExpandBuilderExp})}"
                       data-data-delete-url="${r"${"}(#mvc.url('${dconfig.mvcUrl_delete}')).${dconfig.mvcUrl_delete_dt_ext}}"
-                      data-data-create-url="${r"${"}(#mvc.url('${dconfig.mvcUrl_createForm}')).buildAndExpand('_PARENTID_')}"
+                      data-data-create-url="${r"${"}detailCollectionLink.to('createForm').with('${modelAttributeName}', '_PARENT_ID_')}"
                       </#if>
                       >
                       <caption data-th-text="${r"#{"}label_list_of_entity(${r"#"}{${dconfig.referencedFieldLabel}})}">${detail.fieldNameCapitalized} List</caption>

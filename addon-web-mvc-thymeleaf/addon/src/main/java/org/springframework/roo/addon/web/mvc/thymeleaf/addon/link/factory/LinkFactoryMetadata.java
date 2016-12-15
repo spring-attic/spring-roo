@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.thymeleaf.addon.link.factory;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleaf;
@@ -129,6 +130,9 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     this.entityName = this.controllerMetadata.getEntity().getSimpleTypeName();
     this.importResolver = builder.getImportRegistrationResolver();
 
+    // Add @Component
+    builder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.COMPONENT));
+
     // Set extends type
     List<JavaType> implementsTypes = new ArrayList<JavaType>();
     implementsTypes.add(JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_METHOD_LINK_FACTORY,
@@ -226,16 +230,13 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    bodyBuilder.appendFormalLine("return %s;",
+    bodyBuilder.appendFormalLine("return %s.class;",
         this.controller.getNameIncludingTypeParameters(false, this.importResolver));
 
     // return CONTROLLER_CLASS;
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PRIVATE, methodName,
-            JavaType.wrapperGenericType(JavaType.CLASS), null);
-
-    // Set @Override
-    // methodBuilder.addAnnotation(new AnnotationMetadataBuilder(JavaType.OVERRIDE));
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.wrapperOf(
+            JavaType.CLASS, this.controller), null);
 
     // Set method body
     methodBuilder.setBodyBuilder(bodyBuilder);
@@ -279,8 +280,8 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // Generate body
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // if (METHOD_NAME_ARGUMENT_NAME == LIST) {
-    bodyBuilder.appendFormalLine("if (%s == LIST) {", METHOD_NAME_ARGUMENT_NAME);
+    // if (METHOD_NAME_ARGUMENT_NAME.equals(LIST)) {
+    bodyBuilder.appendFormalLine("if (%s.equals(LIST)) {", METHOD_NAME_ARGUMENT_NAME);
 
     // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).list(null)).build();
     bodyBuilder.indent();
@@ -293,8 +294,8 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // }
     bodyBuilder.appendFormalLine("}");
 
-    // if (METHOD_NAME_ARGUMENT_NAME == DATATABLES) {
-    bodyBuilder.appendFormalLine("if (%s == DATATABLES) {", METHOD_NAME_ARGUMENT_NAME);
+    // if (METHOD_NAME_ARGUMENT_NAME.equals(DATATABLES)) {
+    bodyBuilder.appendFormalLine("if (%s.equals(DATATABLES)) {", METHOD_NAME_ARGUMENT_NAME);
 
     // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).datatables(null, null, null)).replaceQuery(null).build();
     bodyBuilder.indent();
@@ -307,8 +308,8 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // }
     bodyBuilder.appendFormalLine("}");
 
-    // if (METHOD_NAME_ARGUMENT_NAME == CREATE) {
-    bodyBuilder.appendFormalLine("if (%s == CREATE) {", METHOD_NAME_ARGUMENT_NAME);
+    // if (METHOD_NAME_ARGUMENT_NAME.equals(CREATE)) {
+    bodyBuilder.appendFormalLine("if (%s.equals(CREATE)) {", METHOD_NAME_ARGUMENT_NAME);
 
     // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).create(null, null, null)).build();
     bodyBuilder.indent();
@@ -322,8 +323,8 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // }
     bodyBuilder.appendFormalLine("}");
 
-    // if (METHOD_NAME_ARGUMENT_NAME == CREATE_FORM) {
-    bodyBuilder.appendFormalLine("if (%s == CREATE_FORM) {", METHOD_NAME_ARGUMENT_NAME);
+    // if (METHOD_NAME_ARGUMENT_NAME.equals(CREATE_FORM)) {
+    bodyBuilder.appendFormalLine("if (%s.equals(CREATE_FORM)) {", METHOD_NAME_ARGUMENT_NAME);
 
     // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).createForm(null)).build();
     bodyBuilder.indent();
@@ -346,9 +347,6 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
             SpringJavaType.URI_COMPONENTS, parameterTypes, parameterNames, bodyBuilder);
-
-    // Add annotation to method builder
-    // methodBuilder.addAnnotation(new AnnotationMetadataBuilder(JavaType.OVERRIDE));
 
     return methodBuilder.build();
   }
@@ -408,8 +406,8 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     bodyBuilder.newLine();
     bodyBuilder.indentRemove();
 
-    // if (METHOD_NAME_ARGUMENT_NAME == CREATE_FORM) {
-    bodyBuilder.appendFormalLine("if (%s == CREATE_FORM) {", METHOD_NAME_ARGUMENT_NAME);
+    // if (METHOD_NAME_ARGUMENT_NAME.equals(CREATE_FORM)) {
+    bodyBuilder.appendFormalLine("if (%s.equals(CREATE_FORM)) {", METHOD_NAME_ARGUMENT_NAME);
 
     // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).createForm(null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
     bodyBuilder.indent();
@@ -424,24 +422,35 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // }
     bodyBuilder.appendFormalLine("}");
 
-    // if (METHOD_NAME_ARGUMENT_NAME == CREATE) {
-    bodyBuilder.appendFormalLine("if (%s == CREATE) {", METHOD_NAME_ARGUMENT_NAME);
+    // if (METHOD_NAME_ARGUMENT_NAME.equals(CREATE)) {
+    bodyBuilder.appendFormalLine("if (%s.equals(CREATE)) {", METHOD_NAME_ARGUMENT_NAME);
 
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).create(null, null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
+    // Different implementation for detail composition and aggregation
     bodyBuilder.indent();
-    bodyBuilder
-        .appendFormalLine(String
-            .format(
-                "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).create(null, null, null)).buildAndExpand(%2$s);",
-                SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-                    this.importResolver), PATH_VARIABLES_ARGUMENT_NAME));
+    if (controllerMetadata.getLastDetailsInfo().type == JpaRelationType.AGGREGATION) {
+      // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).create(null, null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
+      bodyBuilder
+          .appendFormalLine(String
+              .format(
+                  "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).create(null, null, null)).buildAndExpand(%2$s);",
+                  SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
+                      this.importResolver), PATH_VARIABLES_ARGUMENT_NAME));
+    } else {
+      // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).create(null, null, null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
+      bodyBuilder
+          .appendFormalLine(String
+              .format(
+                  "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).create(null, null, null, null)).buildAndExpand(%2$s);",
+                  SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
+                      this.importResolver), PATH_VARIABLES_ARGUMENT_NAME));
+    }
     bodyBuilder.indentRemove();
 
     // }
     bodyBuilder.appendFormalLine("}");
 
-    // if (METHOD_NAME_ARGUMENT_NAME == DATATABLES) {
-    bodyBuilder.appendFormalLine("if (%s == DATATABLES) {", METHOD_NAME_ARGUMENT_NAME);
+    // if (METHOD_NAME_ARGUMENT_NAME.equals(DATATABLES)) {
+    bodyBuilder.appendFormalLine("if (%s.equals(DATATABLES)) {", METHOD_NAME_ARGUMENT_NAME);
 
     // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).datatables(null, null, null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
     bodyBuilder.indent();
@@ -468,9 +477,6 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
             SpringJavaType.URI_COMPONENTS, parameterTypes, parameterNames, bodyBuilder);
-
-    // Add annotation to method builder
-    // methodBuilder.addAnnotation(new AnnotationMetadataBuilder(JavaType.OVERRIDE));
 
     return methodBuilder.build();
   }
@@ -530,8 +536,8 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     bodyBuilder.newLine();
     bodyBuilder.indentRemove();
 
-    // if (METHOD_NAME_ARGUMENT_NAME == SHOW) {
-    bodyBuilder.appendFormalLine("if (%s == SHOW) {", METHOD_NAME_ARGUMENT_NAME);
+    // if (METHOD_NAME_ARGUMENT_NAME.equals(SHOW)) {
+    bodyBuilder.appendFormalLine("if (%s.equals(SHOW)) {", METHOD_NAME_ARGUMENT_NAME);
 
     // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).show(null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
     bodyBuilder.indent();
@@ -546,8 +552,8 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // }
     bodyBuilder.appendFormalLine("}");
 
-    // if (METHOD_NAME_ARGUMENT_NAME == UPDATE) {
-    bodyBuilder.appendFormalLine("if (%s == UPDATE) {", METHOD_NAME_ARGUMENT_NAME);
+    // if (METHOD_NAME_ARGUMENT_NAME.equals(UPDATE)) {
+    bodyBuilder.appendFormalLine("if (%s.equals(UPDATE)) {", METHOD_NAME_ARGUMENT_NAME);
 
     // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).update(null, null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
     bodyBuilder.indent();
@@ -562,8 +568,24 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // }
     bodyBuilder.appendFormalLine("}");
 
-    // if (METHOD_NAME_ARGUMENT_NAME == DELETE) {
-    bodyBuilder.appendFormalLine("if (%s == DELETE) {", METHOD_NAME_ARGUMENT_NAME);
+    // if (METHOD_NAME_ARGUMENT_NAME.equals(EDIT_FORM)) {
+    bodyBuilder.appendFormalLine("if (%s.equals(EDIT_FORM)) {", METHOD_NAME_ARGUMENT_NAME);
+
+    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).editForm(null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
+    bodyBuilder.indent();
+    bodyBuilder
+        .appendFormalLine(String
+            .format(
+                "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).editForm(null, null)).buildAndExpand(%2$s);",
+                SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
+                    this.importResolver), PATH_VARIABLES_ARGUMENT_NAME));
+    bodyBuilder.indentRemove();
+
+    // }
+    bodyBuilder.appendFormalLine("}");
+
+    // if (METHOD_NAME_ARGUMENT_NAME.equals(DELETE)) {
+    bodyBuilder.appendFormalLine("if (%s.equals(DELETE)) {", METHOD_NAME_ARGUMENT_NAME);
 
     // MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).delete(null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
     bodyBuilder.indent();
@@ -590,9 +612,6 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
             SpringJavaType.URI_COMPONENTS, parameterTypes, parameterNames, bodyBuilder);
-
-    // Add annotation to method builder
-    // methodBuilder.addAnnotation(new AnnotationMetadataBuilder(JavaType.OVERRIDE));
 
     return methodBuilder.build();
   }

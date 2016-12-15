@@ -181,7 +181,7 @@
 
       <!-- CONTENT -->
       <section data-layout-fragment="content">
-        <div class="container-fluid content">
+        <div class="container-fluid content" data-th-with="collectionLink=${r"${@"}linkBuilder.of('${mvcCollectionControllerName}')}">
   	<!--
   	  Only the inner content of the following tag "section" is included
   	  within the template, in the section "content"
@@ -191,7 +191,7 @@
 
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="@{${r"${"}(#mvc.url('${mvcUrl_create}')).build()}}">
+            data-th-action="@{${r"${"}collectionLink.to('create').with('${modelAttributeName}', ${modelAttributeName}.${identifierField})}}">
 
             <fieldset id="containerFields">
               <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data </legend>
@@ -278,7 +278,7 @@
                 <div class="col-md-9 col-md-offset-3">
                     <button type="reset" class="btn btn-default"
                       onclick="location.href='list.html'"
-                      data-th-onclick="'location.href=\'' + @{${"${"}(#mvc.url('${mvcUrl_list}')).build()}} + '\''"
+                      data-th-onclick="'location.href=\'' + @{${"${"}collectionLink.to('list')}} + '\''"
                       data-th-text="${r"#{"}label_reset}">Cancel</button>
                     <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit}">Save</button>
                 </div>

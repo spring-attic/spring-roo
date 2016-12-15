@@ -1,12 +1,12 @@
 package org.springframework.roo.addon.web.mvc.views.components;
 
-import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
 import org.springframework.roo.support.util.XmlUtils;
+
+import java.util.List;
 
 /**
  * This class contains all necessary information about a detail entity to show it
@@ -145,4 +145,5 @@ public class DetailEntityItem extends EntityItem {
   public RelationInfo getFieldInfo() {
     return fieldInfo;
   }
+
 }

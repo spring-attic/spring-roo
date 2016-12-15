@@ -188,7 +188,7 @@
 
       <!-- CONTENT -->
       <section data-layout-fragment="content">
-        <div class="container-fluid content">
+        <div class="container-fluid content" data-th-with="collectionLink=${r"${@"}linkBuilder.of('${mvcCollectionControllerName}')},itemLink=${r"${@"}linkBuilder.of('${mvcItemControllerName}')}">
       	<!--
       	  Only the inner content of the following tag "section" is included
       	  within the template, in the section "content"
@@ -198,7 +198,7 @@
 
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="@{${"${"}(#mvc.url('${mvcUrl_update}')).buildAndExpand(${entity.modelAttribute}.${entity.configuration.identifierField})}}">
+            data-th-action="@{${r"${"}itemLink.to('update').with('${modelAttributeName}', ${modelAttributeName}.${identifierField})}}">
             <input type="hidden" name="_method" value="PUT" />
 
              <fieldset id="containerFields">
@@ -288,7 +288,7 @@
                   <div class="pull-left">
                     <button type="reset" class="btn btn-default"
                       onclick="location.href='list.html'"
-                      data-th-onclick="'location.href=\'' + @{${"${"}(#mvc.url('${mvcUrl_list}')).build()}} + '\''"
+                      data-th-onclick="'location.href=\'' + @{${"${"}collectionLink.to('list')}} + '\''"
                       data-th-text="${r"#{"}label_reset}">Cancel</button>
                   </div>
                   <div class="pull-right">

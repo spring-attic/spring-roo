@@ -300,9 +300,11 @@ public class ThymeleafViewGeneratorServiceImpl extends
     DetailEntityItem item =
         super.createDetailEntityItem(detailController, entityMembers, entityMetadata, entityName,
             ctx, detailSuffix, rootEntity);
-    item.addConfigurationElement("mvnDetailControllerName", detailController.getMvcControllerName());
-    item.addConfigurationElement("mvcUrl_datatablesDetails", ThymeleafMetadata.getMvcUrlNameFor(
-        detailController.getDestination(), ThymeleafMetadata.LIST_DATATABLES_DETAILS_METHOD_NAME));
+    item.addConfigurationElement("mvcDetailControllerName", detailController.getMvcControllerName());
+    item.addConfigurationElement("mvcDetailItemControllerName",
+        detailItemController.getSimpleTypeName());
+    item.addConfigurationElement("mvcDetailCollectionControllerName",
+        detailCollectionController.getSimpleTypeName());
     item.addConfigurationElement("mvcUrl_createForm", ThymeleafMetadata.getMvcUrlNameFor(
         detailCollectionController, ThymeleafMetadata.CREATE_FORM_METHOD_NAME));
     item.addConfigurationElement("mvcUrl_create", ThymeleafMetadata.getMvcUrlNameFor(

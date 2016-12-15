@@ -217,7 +217,7 @@
           <h1 data-th-text="${r"#{"}${entityLabelPlural}}">${entityName}s</h1>
 
           <!--TABLE-->
-          <div class="table-responsive" id="containerFields">
+          <div class="table-responsive" id="containerFields" data-th-with="collectionLink=${r"${@"}linkBuilder.of('${mvcCollectionControllerName}')},itemLink=${r"${@"}linkBuilder.of('${mvcItemControllerName}')}">
             <#if entity.userManaged>
                ${entity.codeManaged}
             <#else>
@@ -228,12 +228,12 @@
                    data-select="single"
                    data-z="${entity.z}"
                    data-order="[[ 0, &quot;asc&quot; ]]"
-                   data-data-load-url="${r"${"}(#mvc.url('${mvcUrl_datatables}')).build()}"
-                   data-data-show-url="${r"${"}(#mvc.url('${mvcUrl_show}')).buildAndExpand('_ID_')}"
+                   data-data-load-url="${r"${"}collectionLink.to('datatables')}"
+                   data-data-show-url="${r"${"}itemLink.to('show').with('${modelAttributeName}', '_ID_')}"
                    <#if entity.readOnly == false>
-                   data-data-create-url="${r"${"}(#mvc.url('${mvcUrl_createForm}')).build()}"
-                   data-data-edit-url="${r"${"}(#mvc.url('${mvcUrl_editForm}')).buildAndExpand('_ID_')}"
-                   data-data-delete-url="${r"${"}(#mvc.url('${mvcUrl_remove}')).buildAndExpand('_ID_')}"
+                   data-data-create-url="${r"${"}collectionLink.to('createForm')}"
+                   data-data-edit-url="${r"${"}itemLink.to('editForm').with('${modelAttributeName}', '_ID_')}"
+                   data-data-delete-url="${r"${"}itemLink.to('delete').with('${modelAttributeName}', '_ID_')}"
                    </#if>
                    >
                 <caption class="sr-only" data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}})}">${entityName} List</caption>

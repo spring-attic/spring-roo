@@ -306,7 +306,7 @@
               <div class="pull-left">
                 <a id="${entityName}_list" href="list.html" class="btn btn-default"
                    data-th-title="${r"#{"}label_goBack}"
-    	             data-th-href="@{${"${"}(#mvc.url('${mvcUrl_list}')).build()}}">
+    	             data-th-href="${"${"}@linkBuilder.of('${mvcCollectionControllerName}').to('list')}">
     	             <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
     	             <span data-th-text="${r"#{"}label_back}">Back</span>
     	          </a>
@@ -314,7 +314,7 @@
               <div class="pull-right">
         	       <a id="${entityName}_edit" href="edit.html" class="btn btn-primary"
         	           data-th-title="${r"#{"}label_goEdit}"
-        	           data-th-href="@{${"${"}(#mvc.url('${mvcUrl_editForm}')).buildAndExpand(${entity.modelAttribute}.${entity.configuration.identifierField})}}"
+        	           data-th-href="${"${"}@linkBuilder.of('${mvcItemControllerName}').to('editForm').with('${modelAttributeName}', ${modelAttributeName}.${identifierField})}"
         	           data-th-text="${r"#{"}label_edit}">Edit</a>
               </div>
             </div>
