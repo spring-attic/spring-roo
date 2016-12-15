@@ -131,13 +131,11 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     this.importResolver = builder.getImportRegistrationResolver();
 
     // Add @Component
-    builder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.COMPONENT));
+    ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(SpringJavaType.COMPONENT));
 
-    // Set extends type
-    List<JavaType> implementsTypes = new ArrayList<JavaType>();
-    implementsTypes.add(JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_METHOD_LINK_FACTORY,
+    // Set implements type
+    ensureGovernorImplements(JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_METHOD_LINK_FACTORY,
         this.controller));
-    builder.setImplementsTypes(implementsTypes);
 
     // Build specific members depending on controller type
     switch (this.controllerType) {
@@ -458,7 +456,7 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
         "return %1$s.fromMethodCall(%1$s.on(getControllerClass())"
             + ".datatables(null, null, null, null)).buildAndExpand(%2$s);",
         SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-            this.importResolver), PARAMETERS_ARGUMENT_NAME));
+            this.importResolver), PATH_VARIABLES_ARGUMENT_NAME));
     bodyBuilder.indentRemove();
 
     // }
@@ -594,7 +592,7 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
             .format(
                 "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).delete(null)).buildAndExpand(%2$s);",
                 SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-                    this.importResolver), PARAMETERS_ARGUMENT_NAME));
+                    this.importResolver), PATH_VARIABLES_ARGUMENT_NAME));
     bodyBuilder.indentRemove();
 
     // }

@@ -298,8 +298,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         String linkBuilderLine =
             String.format("this.%s = linkBuilder.of(%s.class);", ITEM_LINK,
                 getNameOfJavaType(this.itemController));
-        this.constructor = getConstructor(linkBuilderLine);
-        ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
+        this.constructor = addAndGetConstructor(getConstructor(linkBuilderLine));
 
         // Build methods
         this.listMethod = addAndGet(getListMethod(), allMethods);
@@ -367,8 +366,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         String linkBuilderLine =
             String.format("this.%s = linkBuilder.of(%s.class);", ITEM_LINK,
                 getNameOfJavaType(this.governorTypeDetails.getType()));
-        this.constructor = getConstructor(linkBuilderLine);
-        ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
+        this.constructor = addAndGetConstructor(getConstructor(linkBuilderLine));
 
         // Build methods
         this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
@@ -416,8 +414,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
         // Build constructor
         String linkBuilderLine = "";
-        this.constructor = getConstructor(linkBuilderLine);
-        ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
+        this.constructor = addAndGetConstructor(getConstructor(linkBuilderLine));
 
         // Build methods
         Map<String, MethodMetadata> tmpFindersDtt = new TreeMap<String, MethodMetadata>();
@@ -480,8 +477,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         String linkBuilderLine =
             String.format("this.%s = linkBuilder.of(%s.class);", COLLECTION_LINK,
                 getNameOfJavaType(this.collectionController));
-        this.constructor = getConstructor(linkBuilderLine);
-        ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
+        this.constructor = addAndGetConstructor(getConstructor(linkBuilderLine));
 
         // Build methods
         this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
@@ -545,8 +541,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         String linkBuilderLine =
             String.format("this.%s = linkBuilder.of(%s.class);", COLLECTION_LINK,
                 getNameOfJavaType(this.collectionController));
-        this.constructor = getConstructor(linkBuilderLine);
-        ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
+        this.constructor = addAndGetConstructor(getConstructor(linkBuilderLine));
 
         // Build methods
         this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
@@ -615,6 +610,11 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     return method;
   }
 
+  private ConstructorMetadata addAndGetConstructor(ConstructorMetadata constructor) {
+    ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
+    return constructor;
+  }
+
   private AnnotationMetadataBuilder getRequestMappingAnnotation() {
     AnnotationMetadataBuilder annotationBuilder =
         new AnnotationMetadataBuilder(SpringJavaType.REQUEST_MAPPING);
@@ -673,6 +673,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       constructor.addParameter(LINK_BUILDER_ARGUMENT_NAME,
           SpringletsJavaType.SPRINGLETS_CONTROLLER_METHOD_LINK_BUILDER_FACTORY);
       bodyBuilder.appendFormalLine(linkBuilderLine);
+      this.builder.getImportRegistrationResolver().addImport(
+          SpringletsJavaType.SPRINGLETS_CONTROLLER_METHOD_LINK_BUILDER_FACTORY);
     }
 
     // Adding body
