@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -29,12 +31,19 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
+import org.springframework.roo.support.util.FileUtils;
+import org.springframework.roo.support.util.XmlUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 /**
  * Implementation of ControllerMVCResponseService that provides
@@ -57,6 +66,15 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
   private static final String SPRING_THYMELEAF_MODE = "spring.thymeleaf.mode";
   private static final String SPRING_THYMELEAF_MODE_VALUE = "html";
 
+  private static final Property DYNAMIC_JASPER_VERSION_PROPERTY = new Property(
+      "dynamicjasper.version", "5.0.11");
+  private static final Property DYNAMIC_JASPER_FONTS_VERSION_PROPERTY = new Property(
+      "dynamicjasper-fonts.version", "1.0");
+
+  private static final String DYNAMIC_JASPER_VERSION_PROPERTY_NAME = "${dynamicjasper.version}";
+  private static final String DYNAMIC_JASPER_FONTS_VERSION_PROPERTY_NAME =
+      "${dynamicjasper-fonts.version}";
+
   private static final Dependency STARTER_THYMELEAF_DEPENDENCY = new Dependency(
       "org.springframework.boot", "spring-boot-starter-thymeleaf", null);
   private static final Dependency LAYOUT_THYMELEAF_DEPENDENCY = new Dependency(
@@ -65,10 +83,19 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
       "com.github.mxab.thymeleaf.extras", "thymeleaf-extras-data-attribute",
       "${thymeleaf-data-dialect.version}");
 
+  private static final Dependency DYNAMIC_JASPER_DEPENDENCY = new Dependency("ar.com.fdvs",
+      "DynamicJasper", DYNAMIC_JASPER_VERSION_PROPERTY_NAME);
+  private static final Dependency DYNAMIC_JASPER_CORE_FONTS_DEPENDENCY = new Dependency(
+      "ar.com.fdvs", "DynamicJasper-core-fonts", DYNAMIC_JASPER_FONTS_VERSION_PROPERTY_NAME);
+  private static final Dependency POI_DEPENDENCY = new Dependency("org.apache.poi", "poi", null);
+  private static final Dependency SPRING_CONTEXT_SUPPORT = new Dependency("org.springframework",
+      "spring-context-support", null);
+
   private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
 
   @Override
   protected void activate(final ComponentContext cContext) {
+    super.activate(cContext);
     context = cContext.getBundleContext();
     serviceInstaceManager.activate(context);
   }
@@ -176,6 +203,12 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     // Is necessary to install thymeleaf dependencies
     addThymeleafDependencies(module);
 
+    // Add JasperReport dependencies
+    addJasperReportsDependencies(module);
+
+    // Add JasperReport export classes
+    addJasperReportExportClasses(module);
+
     // Is necessary to generate the main controller
     addMainController(module);
 
@@ -252,6 +285,49 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
       }
     }
     return null;
+  }
+
+  /**
+   * This method adds JasperReports dependencies to generated project
+   *
+   * @param module
+   */
+  private void addJasperReportsDependencies(Pom module) {
+    String moduleName = module.getModuleName();
+
+    // Add Dynamic Jasper dependencies
+    getProjectOperations().addDependency(moduleName, DYNAMIC_JASPER_DEPENDENCY);
+    getProjectOperations().addDependency(moduleName, DYNAMIC_JASPER_CORE_FONTS_DEPENDENCY);
+
+    // Add Apache POI dependency
+    getProjectOperations().addDependency(moduleName, POI_DEPENDENCY);
+
+    // Add Spring Context Support dependency
+    getProjectOperations().addDependency(moduleName, SPRING_CONTEXT_SUPPORT);
+
+    // Add version properties
+    getProjectOperations().addProperty("", DYNAMIC_JASPER_VERSION_PROPERTY);
+    getProjectOperations().addProperty("", DYNAMIC_JASPER_FONTS_VERSION_PROPERTY);
+  }
+
+  /**
+   * Create the support classes to allow export data to different file 
+   * types using JasperReports.
+   * 
+   * @param module the Pom from module where classes should be created.
+   */
+  private void addJasperReportExportClasses(Pom module) {
+
+    // Create the interface
+    createClassFromTemplate(module, "JasperReportsExporter-template._java", "JasperReportsExporter");
+
+    // Create one implementation for each type of data
+    createClassFromTemplate(module, "JasperReportsCsvExporter-template._java",
+        "JasperReportsCsvExporter");
+    createClassFromTemplate(module, "JasperReportsPdfExporter-template._java",
+        "JasperReportsPdfExporter");
+    createClassFromTemplate(module, "JasperReportsXlsExporter-template._java",
+        "JasperReportsXlsExporter");
   }
 
   /**
@@ -547,6 +623,51 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
         getPathResolver().getIdentifier(resourcesPath, "/templates/fragments/js"), true);
     copyDirectoryContents("templates/fragments/js/*.js",
         getPathResolver().getIdentifier(resourcesPath, "/templates/fragments/js"), true);
+  }
+
+  /**
+   * Creates a class from a template, replacing its package.
+   *
+   * @param module
+   *            the Pom related to module where the class should be created
+   * @param templateName
+   *            the String with the template name
+   * @param className
+   *            the String with the class name to create
+   */
+  public void createClassFromTemplate(Pom module, String templateName, String className) {
+
+    // Set package
+    String packageName = module.getGroupId().concat(".web.reports");
+
+    // Include implementation of Validator from template
+    final JavaType type =
+        new JavaType(String.format("%s.%s", packageName, className), module.getModuleName());
+    Validate.notNull(type.getModule(),
+        "ERROR: Module name is required to generate a valid JavaType");
+    final String identifier =
+        getPathResolver().getCanonicalPath(type.getModule(), Path.SRC_MAIN_JAVA, type);
+    InputStream inputStream = null;
+
+    // Check first if file exists
+    if (!this.fileManager.exists(identifier)) {
+      try {
+
+        // Use defined template
+        inputStream = FileUtils.getInputStream(getClass(), templateName);
+        String input = IOUtils.toString(inputStream);
+
+        // Replacing package
+        input = input.replace("__PACKAGE__", packageName);
+
+        // Creating CollectionValidator
+        this.fileManager.createOrUpdateTextFileIfRequired(identifier, input, true);
+      } catch (final IOException e) {
+        throw new IllegalStateException(String.format("Unable to create '%s'", identifier), e);
+      } finally {
+        IOUtils.closeQuietly(inputStream);
+      }
+    }
   }
 
   /**

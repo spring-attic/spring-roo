@@ -82,7 +82,12 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   protected static final JavaSymbolName CREATE_FORM_METHOD_NAME = new JavaSymbolName("createForm");
   protected static final JavaSymbolName EDIT_FORM_METHOD_NAME = new JavaSymbolName("editForm");
   protected static final JavaSymbolName UPDATE_METHOD_NAME = new JavaSymbolName("update");
-
+  protected static final JavaSymbolName EXPORT_METHOD_NAME = new JavaSymbolName("export");
+  protected static final JavaSymbolName EXPORT_CSV_METHOD_NAME = new JavaSymbolName("exportCsv");
+  protected static final JavaSymbolName EXPORT_PDF_METHOD_NAME = new JavaSymbolName("exportPdf");
+  protected static final JavaSymbolName EXPORT_XLS_METHOD_NAME = new JavaSymbolName("exportXls");
+  protected static final JavaSymbolName ADD_COLUMN_TO_REPORT_BUILDER_METHOD_NAME =
+      new JavaSymbolName("addColumnToReportBuilder");
 
   private static final AnnotatedJavaType PAGEABLE_PARAM = new AnnotatedJavaType(
       SpringJavaType.PAGEABLE);
@@ -105,9 +110,38 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private static final JavaSymbolName MESSAGE_SOURCE = new JavaSymbolName("messageSource");
   private static final AnnotationMetadata ANN_METADATA_MODEL_ATTRIBUTE = AnnotationMetadataBuilder
       .getInstance(SpringJavaType.MODEL_ATTRIBUTE);
+  private static final AnnotatedJavaType DATATABLES_COLUMNS_PARAM = new AnnotatedJavaType(
+      JavaType.STRING_ARRAY);
+  private static final JavaSymbolName DATATABLES_COLUMNS_PARAM_NAME = new JavaSymbolName(
+      "datatablesColumns");
+  private static final JavaSymbolName RESPONSE_PARAM_NAME = new JavaSymbolName("response");
+  private static final AnnotatedJavaType STRING_PARAM = new AnnotatedJavaType(JavaType.STRING);
+  private static final JavaSymbolName FILE_NAME_PARAM_NAME = new JavaSymbolName("fileName");
+  private static final JavaSymbolName EXPORTER_PARAM_NAME = new JavaSymbolName("exporter");
 
   private static final AnnotationMetadata ANN_METADATA_VALID = AnnotationMetadataBuilder
       .getInstance(Jsr303JavaType.VALID);
+
+  // Static Types
+  private static final JavaType JR_EXCEPTION = new JavaType(
+      "net.sf.jasperreports.engine.JRException");
+  private static final JavaType COLUMN_BUILDER_EXCEPTION = new JavaType(
+      "ar.com.fdvs.dj.domain.builders.ColumnBuilderException");
+  private static final JavaType IO_EXCEPTION = new JavaType("java.io.IOException");
+  private static final JavaType CLASS_NOT_FOUND_EXCEPTION = new JavaType(
+      "java.lang.ClassNotFoundException");
+  private static final JavaType FAST_REPORT_BUILDER = new JavaType(
+      "ar.com.fdvs.dj.domain.builders.FastReportBuilder");
+  private static final JavaType JR_DATA_SOURCE = new JavaType(
+      "net.sf.jasperreports.engine.JRDataSource");
+  private static final JavaType JR_BEAN_COLLECTION_DATA_SOURCE = new JavaType(
+      "net.sf.jasperreports.engine.data.JRBeanCollectionDataSource");
+  private static final JavaType JASPER_PRINT = new JavaType(
+      "net.sf.jasperreports.engine.JasperPrint");
+  private static final JavaType DYNAMIC_JASPER_HELPER = new JavaType(
+      "ar.com.fdvs.dj.core.DynamicJasperHelper");
+  private static final JavaType CLASSIC_LAYOUT_MANAGER = new JavaType(
+      "ar.com.fdvs.dj.core.layout.ClassicLayoutManager");
 
   private static final String PROVIDES_TYPE_STRING = ThymeleafMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
@@ -161,11 +195,18 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private final MethodMetadata createDetailsMethod;
   private final MethodMetadata removeFromDetailsMethod;
 
-
   // Finder Methods
   private final Map<String, MethodMetadata> finderFormMethods;
   private final Map<String, MethodMetadata> finderListMethods;
   private final Map<String, MethodMetadata> finderDatatableMethods;
+
+  // Export Methods
+  private final MethodMetadata exportMethod;
+  private final MethodMetadata exportCsvMethod;
+  private final MethodMetadata exportPdfMethod;
+  private final MethodMetadata exportXlsMethod;
+  private final MethodMetadata addColumnToReportBuilderMethod;
+  private final List<MethodMetadata> exportMethods;
 
   // TODO
   // private final Map<String, MethodMetadata> finderListMethods;
@@ -186,6 +227,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private final MethodMetadata showDetailMethod;
   private final String ITEM_LINK = "itemLink";
   private final String COLLECTION_LINK = "collectionLink";
+  private final String entityPluralUncapitalized;
+  private final List<FieldMetadata> entityValidFields;
+  private final Map<String, JavaType> jasperReportsMap;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -244,10 +288,12 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       final Map<JavaType, List<FieldMetadata>> formBeansDateTimeFields,
       final Map<JavaType, List<FieldMetadata>> formBeansEnumFields,
       final JavaType detailItemController, JavaType detailsCollectionController,
-      final JavaType relatedCollectionController, final JavaType relatedItemController) {
+      final JavaType relatedCollectionController, final JavaType relatedItemController,
+      final List<FieldMetadata> validFields, final Map<String, JavaType> jasperReportsMap) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
-
+    this.jasperReportsMap = jasperReportsMap;
+    this.entityValidFields = validFields;
     this.readOnly = entityMetadata.isReadOnly();
     this.controllerMetadata = controllerMetadata;
     this.type = this.controllerMetadata.getType();
@@ -259,6 +305,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     this.entityIdentifierPlural = entityIdentifierPlural;
     this.entityItemName = StringUtils.uncapitalize(entity.getSimpleTypeName());
     this.entityPlural = entityPlural;
+    this.entityPluralUncapitalized = StringUtils.uncapitalize(entityPlural);
     this.compositionRelationOneToOne = compositionRelationOneToOne;
     this.itemController = itemController;
     this.detailItemController = detailItemController;
@@ -353,6 +400,36 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.deleteDetailMethod = null;
         this.showDetailMethod = null;
 
+        // Jasper export methods
+        List<MethodMetadata> exportMethods = new ArrayList<MethodMetadata>();
+        if (getExportMethod() != null) {
+          this.exportMethod = addAndGet(getExportMethod(), exportMethods);
+        } else {
+          this.exportMethod = null;
+        }
+        if (getCsvExportMethod() != null) {
+          this.exportCsvMethod = addAndGet(getCsvExportMethod(), exportMethods);
+        } else {
+          this.exportCsvMethod = null;
+        }
+        if (getPdfExportMethod() != null) {
+          this.exportPdfMethod = addAndGet(getPdfExportMethod(), exportMethods);
+        } else {
+          this.exportPdfMethod = null;
+        }
+        if (getXlsMethod() != null) {
+          this.exportXlsMethod = addAndGet(getXlsMethod(), exportMethods);
+        } else {
+          this.exportXlsMethod = null;
+        }
+        if (getAddColumnToReportBuilderMethod() != null) {
+          this.addColumnToReportBuilderMethod =
+              addAndGet(getAddColumnToReportBuilderMethod(), exportMethods);
+        } else {
+          this.addColumnToReportBuilderMethod = null;
+        }
+        this.exportMethods = exportMethods;
+
         break;
       }
       case ITEM: {
@@ -406,6 +483,15 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateDetailMethod = null;
         this.deleteDetailMethod = null;
         this.showDetailMethod = null;
+
+        // Jasper export methods
+        this.exportMethod = null;
+        this.exportCsvMethod = null;
+        this.exportPdfMethod = null;
+        this.exportXlsMethod = null;
+        this.addColumnToReportBuilderMethod = null;
+        this.exportMethods = null;
+
         break;
       }
       case SEARCH: {
@@ -464,6 +550,15 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateDetailMethod = null;
         this.deleteDetailMethod = null;
         this.showDetailMethod = null;
+
+        // Jasper export methods
+        this.exportMethod = null;
+        this.exportCsvMethod = null;
+        this.exportPdfMethod = null;
+        this.exportXlsMethod = null;
+        this.addColumnToReportBuilderMethod = null;
+        this.exportMethods = null;
+
         break;
       }
       case DETAIL: {
@@ -528,6 +623,15 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateDetailMethod = null;
         this.deleteDetailMethod = null;
         this.showDetailMethod = null;
+
+        // Jasper export methods
+        this.exportMethod = null;
+        this.exportCsvMethod = null;
+        this.exportPdfMethod = null;
+        this.exportXlsMethod = null;
+        this.addColumnToReportBuilderMethod = null;
+        this.exportMethods = null;
+
         break;
       }
       case DETAIL_ITEM: {
@@ -585,6 +689,14 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.createDetailsMethod = null;
         this.createFormDetailsMethod = null;
 
+        // Jasper export methods
+        this.exportMethod = null;
+        this.exportCsvMethod = null;
+        this.exportPdfMethod = null;
+        this.exportXlsMethod = null;
+        this.addColumnToReportBuilderMethod = null;
+        this.exportMethods = null;
+
         break;
 
       }
@@ -604,8 +716,14 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         .build();
   }
 
+  private MethodMetadata addAndGet(MethodMetadata method) {
+    return addAndGet(method, null);
+  }
+
   private MethodMetadata addAndGet(MethodMetadata method, List<MethodMetadata> allMethods) {
-    allMethods.add(method);
+    if (allMethods != null) {
+      allMethods.add(method);
+    }
     ensureGovernorHasMethod(new MethodMetadataBuilder(method));
     return method;
   }
@@ -684,6 +802,375 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
   }
 
+  /* Jasper Export Methods */
+
+  /**
+   * Generates a method to add columns to DynamicJasper report builder.
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getAddColumnToReportBuilderMethod() {
+    JavaSymbolName methodName = ADD_COLUMN_TO_REPORT_BUILDER_METHOD_NAME;
+
+    // Including parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(STRING_PARAM);
+    parameterTypes.add(new AnnotatedJavaType(FAST_REPORT_BUILDER));
+
+    // Check method existence
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Including parameter names
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    final JavaSymbolName columnName = new JavaSymbolName("columnName");
+    parameterNames.add(DATATABLES_COLUMNS_PARAM_NAME);
+    final JavaSymbolName reportBuilder = new JavaSymbolName("builder");
+    parameterNames.add(reportBuilder);
+
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+    for (int i = 0; i < this.entityValidFields.size(); i++) {
+      String fieldName = this.entityValidFields.get(i).getFieldName().getSymbolName();
+      if (i == 0) {
+
+        // if (columnName.equals("FIELD")) {
+        bodyBuilder.appendFormalLine("if (columnName.equals(\"%s\")) {", fieldName);
+      } else {
+
+        // else if (columnName.equals("FIELD")) {
+        bodyBuilder.appendFormalLine("else if (columnName.equals(\"%s\")) {", fieldName);
+      }
+
+      bodyBuilder.indent();
+
+      if (this.entityValidFields.get(i).getFieldName()
+          .equals(this.entityMetadata.getCurrentIndentifierField().getFieldName())) {
+
+        // builder.addColumn("FIELD-TITLE", "FIELD-NAME", FIELD-CLASS, 50);
+        bodyBuilder.appendFormalLine("builder.addColumn(\"%s\", \"%s\", %s.class.getName(), 50);",
+            StringUtils.capitalize(fieldName), fieldName, getNameOfJavaType(this.entityValidFields
+                .get(i).getFieldType()));
+      } else {
+
+        // builder.addColumn("FIELD-TITLE", "FIELD-NAME", FIELD-CLASS, 100);
+        bodyBuilder.appendFormalLine("builder.addColumn(\"%s\", \"%s\", %s.class.getName(), 100);",
+            StringUtils.capitalize(fieldName), fieldName, getNameOfJavaType(this.entityValidFields
+                .get(i).getFieldType()));
+      }
+
+      bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine("}");
+    }
+
+    // Build method
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
+            parameterTypes, parameterNames, bodyBuilder);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * Generates a method to export data using DynamicJasper and arguments 
+   * received as different export methods will delegate in this one.
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getExportMethod() {
+
+    JavaSymbolName methodName = EXPORT_METHOD_NAME;
+
+    // Including parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(GLOBAL_SEARCH_PARAM);
+    AnnotationMetadataBuilder pageableDefaultAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.PAGEABLE_DEFAULT);
+    pageableDefaultAnnotation.addIntegerAttribute("size", Integer.MAX_VALUE);
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE, pageableDefaultAnnotation
+        .build()));
+    parameterTypes.add(DATATABLES_COLUMNS_PARAM);
+    parameterTypes
+        .add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse")));
+    parameterTypes.add(new AnnotatedJavaType(this.jasperReportsMap.get("JasperReportsExporter")));
+    parameterTypes.add(STRING_PARAM);
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(GLOBAL_SEARCH_PARAM_NAME);
+    parameterNames.add(PAGEABLE_PARAM_NAME);
+    parameterNames.add(DATATABLES_COLUMNS_PARAM_NAME);
+    parameterNames.add(RESPONSE_PARAM_NAME);
+    parameterNames.add(EXPORTER_PARAM_NAME);
+    parameterNames.add(FILE_NAME_PARAM_NAME);
+
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+
+    // Obtain the filtered and ordered elements
+    // Page<Owner> owners = ownerService.findAll(search, pageable);
+    bodyBuilder.appendFormalLine("// Obtain the filtered and ordered elements");
+    bodyBuilder.appendFormalLine("%s<%s> %s = %s.%s(%s, %s);",
+        getNameOfJavaType(SpringJavaType.PAGE), getNameOfJavaType(this.entity),
+        this.entityPluralUncapitalized, this.controllerMetadata.getServiceField().getFieldName()
+            .getSymbolName(), this.serviceMetadata.getCurrentFindAllWithGlobalSearchMethod()
+            .getMethodName().getSymbolName(), GLOBAL_SEARCH_PARAM_NAME, PAGEABLE_PARAM_NAME);
+    bodyBuilder.newLine();
+
+    // // Prevent generation of reports with empty data
+    bodyBuilder.appendFormalLine("// Prevent generation of reports with empty data");
+    // if (owners == null || owners.getContent().isEmpty()) {
+    bodyBuilder.appendFormalLine("if (%1$s == null || %s.getContent().isEmpty()) {",
+        this.entityPluralUncapitalized);
+    // throw new RuntimeException("ERROR: Not available data to generate a report.");
+    bodyBuilder.indent();
+    bodyBuilder
+        .appendFormalLine("throw new RuntimeException(\"ERROR: Not available data to generate a report.\");");
+    // }
+    bodyBuilder.indentRemove();
+    bodyBuilder.appendFormalLine("}");
+    bodyBuilder.newLine();
+
+    // // Creates a new ReportBuilder using DynamicJasper library
+    bodyBuilder.appendFormalLine("// Creates a new ReportBuilder using DynamicJasper library");
+    // FastReportBuilder builder = new FastReportBuilder();
+    bodyBuilder.appendFormalLine("%1$s builder = new %1$s();",
+        getNameOfJavaType(FAST_REPORT_BUILDER));
+    bodyBuilder.newLine();
+
+    // // IMPORTANT: By default, this application uses "export_default.jrxml"
+    bodyBuilder
+        .appendFormalLine("// IMPORTANT: By default, this application uses \"export_default.jrxml\"");
+    // // to generate all reports. If you want to customize this specific report,
+    bodyBuilder
+        .appendFormalLine("// to generate all reports. If you want to customize this specific report,");
+    // create a new ".jrxml" template and customize it. Take in account the 
+    bodyBuilder
+        .appendFormalLine("// create a new \".jrxml\" template and customize it. (Take in account the ");
+    // DynamicJasper restrictions: 
+    bodyBuilder.appendFormalLine("// DynamicJasper restrictions: ");
+    // http://dynamicjasper.com/2010/10/06/how-to-use-custom-jrxml-templates/)
+    bodyBuilder
+        .appendFormalLine("// http://dynamicjasper.com/2010/10/06/how-to-use-custom-jrxml-templates/)");
+    // builder.setTemplateFile("templates/reports/export_default.jrxml");
+    bodyBuilder
+        .appendFormalLine("builder.setTemplateFile(\"templates/reports/export_default.jrxml\");");
+    bodyBuilder.newLine();
+
+    // // The generated report will display the same columns as the Datatables component.
+    bodyBuilder
+        .appendFormalLine("// The generated report will display the same columns as the Datatables component.");
+    // // However, this is not mandatory. You could edit this code if you want to ignore
+    bodyBuilder
+        .appendFormalLine("// However, this is not mandatory. You could edit this code if you want to ignore");
+    // // the provided datatablesColumns
+    bodyBuilder.appendFormalLine("// the provided datatablesColumns");
+    // if (datatablesColumns != null) {
+    bodyBuilder.appendFormalLine("if (%s != null) {", DATATABLES_COLUMNS_PARAM_NAME);
+    bodyBuilder.indent();
+    // for (String column : datatablesColumns) {
+    bodyBuilder.appendFormalLine("for (String column : %s) {", DATATABLES_COLUMNS_PARAM_NAME);
+    bodyBuilder.indent();
+    // // Delegates in addColumnToReportBuilder to include each datatables column
+    bodyBuilder.appendFormalLine("// Delegates in %s to include each datatables column",
+        ADD_COLUMN_TO_REPORT_BUILDER_METHOD_NAME);
+    // // to the report builder
+    bodyBuilder.appendFormalLine("// to the report builder");
+    // addColumnToReportBuilder(column, builder);
+    bodyBuilder.appendFormalLine("addColumnToReportBuilder(column, builder);");
+    bodyBuilder.indentRemove();
+    // }
+    bodyBuilder.appendFormalLine("}");
+    bodyBuilder.indentRemove();
+    // }
+    bodyBuilder.appendFormalLine("}");
+    bodyBuilder.newLine();
+
+    // // This property resizes the columns to use full width page.
+    bodyBuilder.appendFormalLine("// This property resizes the columns to use full width page.");
+    // // Set false value if you want to use the specific width of each column.
+    bodyBuilder
+        .appendFormalLine("// Set false value if you want to use the specific width of each column.");
+    //builder.setUseFullPageWidth(true);
+    bodyBuilder.appendFormalLine("builder.setUseFullPageWidth(true);");
+    bodyBuilder.newLine();
+
+    // // Creates a new Jasper Reports Datasource using the obtained elements
+    bodyBuilder
+        .appendFormalLine("// Creates a new Jasper Reports Datasource using the obtained elements");
+    // JRDataSource ds = new JRBeanCollectionDataSource(owners.getContent());
+    bodyBuilder.appendFormalLine("%s ds = new %s(%s.getContent());",
+        getNameOfJavaType(JR_DATA_SOURCE), getNameOfJavaType(JR_BEAN_COLLECTION_DATA_SOURCE),
+        this.entityPluralUncapitalized);
+    bodyBuilder.newLine();
+
+    // // Generates the JasperReport
+    bodyBuilder.appendFormalLine("// Generates the JasperReport");
+    //JasperPrint jp = DynamicJasperHelper.generateJasperPrint(builder.build(), new ClassicLayoutManager(), ds);
+    bodyBuilder.appendFormalLine("%s jp = %s.generateJasperPrint(builder.build(), new %s(), ds);",
+        getNameOfJavaType(JASPER_PRINT), getNameOfJavaType(DYNAMIC_JASPER_HELPER),
+        getNameOfJavaType(CLASSIC_LAYOUT_MANAGER));
+    bodyBuilder.newLine();
+
+    // // Converts the JaspertReport element to a ByteArrayOutputStream and
+    bodyBuilder
+        .appendFormalLine("// Converts the JaspertReport element to a ByteArrayOutputStream and");
+    // // write it into the response stream using the provided JasperReportExporter
+    bodyBuilder
+        .appendFormalLine("// write it into the response stream using the provided JasperReportExporter");
+    //exporter.export(jp, fileName, response);
+    bodyBuilder.appendFormalLine("%s.export(jp, %s, %s);", EXPORTER_PARAM_NAME,
+        FILE_NAME_PARAM_NAME, RESPONSE_PARAM_NAME);
+
+    bodyBuilder.reset();
+
+    // Build method
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
+            parameterTypes, parameterNames, bodyBuilder);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * Generates a method to export data to CSV using DynamicJasper.
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getCsvExportMethod() {
+    if (jasperReportsMap.get("JasperReportsCsvExporter") != null) {
+      final String exporterMethodInvocation =
+          String.format("new %s()",
+              getNameOfJavaType(jasperReportsMap.get("JasperReportsCsvExporter")));
+      final String fileName =
+          String.format("%s_report.csv", StringUtils.uncapitalize(this.entityPlural));
+      final JavaSymbolName methodName = EXPORT_CSV_METHOD_NAME;
+
+      return buildExportTypeMethod(exporterMethodInvocation, fileName, methodName, "exportCsv",
+          "/export/csv");
+    }
+    return null;
+  }
+
+  /**
+   * Generates a method to export data to PDF using DynamicJasper.
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getPdfExportMethod() {
+    if (jasperReportsMap.get("JasperReportsPdfExporter") != null) {
+      final String exporterMethodInvocation =
+          String.format("new %s()",
+              getNameOfJavaType(jasperReportsMap.get("JasperReportsPdfExporter")));
+      final String fileName =
+          String.format("%s_report.pdf", StringUtils.uncapitalize(this.entityPlural));
+      final JavaSymbolName methodName = EXPORT_PDF_METHOD_NAME;
+
+      return buildExportTypeMethod(exporterMethodInvocation, fileName, methodName, "exportPdf",
+          "/export/pdf");
+    }
+    return null;
+  }
+
+  /**
+   * Generates a method to export data to XLS using DynamicJasper.
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getXlsMethod() {
+    if (jasperReportsMap.get("JasperReportsXlsExporter") != null) {
+      final String exporterMethodInvocation =
+          String.format("new %s()",
+              getNameOfJavaType(jasperReportsMap.get("JasperReportsXlsExporter")));
+      final String fileName =
+          String.format("%s_report.xls", StringUtils.uncapitalize(this.entityPlural));
+      final JavaSymbolName methodName = EXPORT_XLS_METHOD_NAME;
+
+      return buildExportTypeMethod(exporterMethodInvocation, fileName, methodName, "exportXls",
+          "/export/xls");
+    }
+    return null;
+  }
+
+  /**
+   * Builds export (TYPE) method, which is similar in all export target types.
+   * 
+   * @param exporterClassInstantiation the String with the instantiation of 
+   *            the JasperReports support class.
+   * @param fileName the String with the output file name.
+   * @param methodName the JavaSymbolName with the method name.
+   * @return MethodMetadata
+   */
+  private MethodMetadata buildExportTypeMethod(final String exporterClassInstantiation,
+      final String fileName, final JavaSymbolName methodName, final String getMappingAnnotatinName,
+      final String getMappingAnnotationValue) {
+
+    // Including parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(GLOBAL_SEARCH_PARAM);
+    AnnotationMetadataBuilder pageableDefaultAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.PAGEABLE_DEFAULT);
+    pageableDefaultAnnotation.addIntegerAttribute("size", Integer.MAX_VALUE);
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE, pageableDefaultAnnotation
+        .build()));
+    parameterTypes.add(DATATABLES_COLUMNS_PARAM);
+    parameterTypes
+        .add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse")));
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Including parameter names
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(GLOBAL_SEARCH_PARAM_NAME);
+    parameterNames.add(PAGEABLE_PARAM_NAME);
+    parameterNames.add(DATATABLES_COLUMNS_PARAM_NAME);
+    parameterNames.add(RESPONSE_PARAM_NAME);
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+    AnnotationMetadataBuilder getMappingBuilder = new AnnotationMetadataBuilder(GET_MAPPING);
+    getMappingBuilder.addStringAttribute("name", getMappingAnnotatinName);
+    getMappingBuilder.addStringAttribute("value", getMappingAnnotationValue);
+    annotations.add(getMappingBuilder);
+    annotations.add(RESPONSE_BODY_ANNOTATION);
+
+    // Add throws types
+    final List<JavaType> throwTypes = new ArrayList<JavaType>();
+    throwTypes.add(JR_EXCEPTION);
+    throwTypes.add(IO_EXCEPTION);
+    throwTypes.add(COLUMN_BUILDER_EXCEPTION);
+    throwTypes.add(CLASS_NOT_FOUND_EXCEPTION);
+
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // export(search, pageable, datatablesColumns, response, new JasperReportsCsvExporter(), "ENTITY-ITEM_report.csv");
+    bodyBuilder.appendFormalLine("export(%s, %s, %s, %s, %s, \"%s\");", GLOBAL_SEARCH_PARAM_NAME,
+        PAGEABLE_PARAM_NAME, DATATABLES_COLUMNS_PARAM_NAME, RESPONSE_PARAM_NAME,
+        exporterClassInstantiation, fileName);
+
+    // Build method
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
+            parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+    methodBuilder.setThrowsTypes(throwTypes);
+
+    return methodBuilder.build();
+  }
 
   /**
    * Generates a finder method which delegates on entity service to get result
@@ -3130,7 +3617,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     return editFormDetailMethod;
   }
 
-
   @Override
   public String toString() {
     final ToStringBuilder builder = new ToStringBuilder(this);
@@ -3162,4 +3648,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   public Map<String, MethodMetadata> getFinderListMethods() {
     return finderListMethods;
   }
+
+  public List<MethodMetadata> getExportMethods() {
+    return exportMethods;
+  }
+
 }

@@ -2,12 +2,6 @@ package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_THYMELEAF;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -33,12 +27,24 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link ThymeleafMetadataProvider}.
@@ -59,6 +65,8 @@ public class ThymeleafMetadataProviderImpl extends
 
   protected MetadataDependencyRegistryTracker registryTracker = null;
   protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
+
+  private Map<String, JavaType> jasperReportsExporterMap;
 
   /**
    * This service is being activated so setup it:
@@ -203,19 +211,110 @@ public class ThymeleafMetadataProviderImpl extends
               info.childType, prefix, controllerMetadata.getDestination());
     }
 
+    Validate.notNull(getJasperReportsMap(),
+        "Couldn't find class `JasperReportsExporter` in project.");
+
+    // Get valid entity fields (those suitable for reports)
+    List<FieldMetadata> entityFields =
+        getEntityValidFields(getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
+            getTypeLocationService().getTypeDetails(controllerMetadata.getEntity())).getFields());
+
     final ThymeleafMetadata metadata =
         new ThymeleafMetadata(metadataIdentificationString, aspectName,
             governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
             entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
             collectionController, dateTimeFields, enumFields, findersToAdd,
             formBeansDateTimeFields, formBeansEnumFields, detailsItemController,
-            detailsCollectionController, relatedCollectionController, relatedItemController);
+            detailsCollectionController, relatedCollectionController, relatedItemController,
+            entityFields, getJasperReportsMap());
 
     return metadata;
   }
 
   public String getProvidesType() {
     return ThymeleafMetadata.getMetadataIdentiferType();
+  }
+
+  /**
+   * Finds `JasperReportsExporter` for providing Metadata with its package.
+   * This method is temporal as `JasperReportsExporter` should be moved to 
+   * other support project.
+   * 
+   */
+  public Map<String, JavaType> getJasperReportsMap() {
+    if (this.jasperReportsExporterMap == null) {
+      Map<String, JavaType> jasperReportsExporterMap = new HashMap<String, JavaType>();
+      Collection<Pom> modules = getProjectOperations().getPoms();
+      for (Pom module : modules) {
+        Collection<JavaType> typesForModule = getTypeLocationService().getTypesForModule(module);
+        for (JavaType type : typesForModule) {
+          if (type.getSimpleTypeName().equals("JasperReportsExporter")) {
+            jasperReportsExporterMap.put("JasperReportsExporter", type);
+          } else if (type.getSimpleTypeName().equals("JasperReportsCsvExporter")) {
+            jasperReportsExporterMap.put("JasperReportsCsvExporter", type);
+          } else if (type.getSimpleTypeName().equals("JasperReportsPdfExporter")) {
+            jasperReportsExporterMap.put("JasperReportsPdfExporter", type);
+          } else if (type.getSimpleTypeName().equals("JasperReportsXlsExporter")) {
+            jasperReportsExporterMap.put("JasperReportsXlsExporter", type);
+          }
+        }
+      }
+
+      this.jasperReportsExporterMap.putAll(jasperReportsExporterMap);
+    }
+
+    return this.jasperReportsExporterMap;
+  }
+
+  /**
+   * Return the entity list of valid fields. Static and referenced fields 
+   * are excluded.
+   * 
+   * @return a List<FieldMetadata>
+   * 
+   */
+  private List<FieldMetadata> getEntityValidFields(List<FieldMetadata> fields) {
+
+    // Iterate over entity fields
+    List<FieldMetadata> validFields = new ArrayList<FieldMetadata>();
+    for (FieldMetadata field : fields) {
+
+      // Exclude non-simple fields. This also exclude relation fields which 
+      // return a collection @OneToMany and @ManyToMany
+      if (field.getFieldType().isMultiValued()) {
+        continue;
+      }
+
+      // Exclude static fields
+      int staticFinal = Modifier.STATIC + Modifier.FINAL;
+      int publicStatic = Modifier.PUBLIC + Modifier.STATIC;
+      int publicStaticFinal = Modifier.PUBLIC + Modifier.STATIC + Modifier.FINAL;
+      int privateStatic = Modifier.PRIVATE + Modifier.STATIC;
+      int privateStaticFinal = Modifier.PRIVATE + Modifier.STATIC + Modifier.FINAL;
+
+      if (field.getModifier() == Modifier.STATIC || field.getModifier() == staticFinal
+          || field.getModifier() == publicStatic || field.getModifier() == publicStaticFinal
+          || field.getModifier() == privateStatic || field.getModifier() == privateStaticFinal) {
+        continue;
+      }
+
+      // Exclude relation fields
+      if (field.getAnnotation(JpaJavaType.ONE_TO_ONE) != null) {
+        continue;
+      }
+      if (field.getAnnotation(JpaJavaType.MANY_TO_ONE) != null) {
+        continue;
+      }
+
+      // Exclude embedded fields
+      if (field.getAnnotation(JpaJavaType.EMBEDDED) != null
+          || field.getAnnotation(JpaJavaType.EMBEDDED_ID) != null) {
+        continue;
+      }
+
+      validFields.add(field);
+    }
+    return validFields;
   }
 
 }
