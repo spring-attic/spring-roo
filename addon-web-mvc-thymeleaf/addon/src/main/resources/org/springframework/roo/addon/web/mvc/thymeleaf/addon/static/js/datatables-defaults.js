@@ -27,6 +27,21 @@
     $.extend($.fn.dataTable.ext.buttons, {
       'add': createButton
     });
+    
+    // Add a csv export button
+    $.extend($.fn.dataTable.ext.buttons, {
+      'csv': exportCsvButton
+    });
+
+    // Add an excel (XLS) export button
+    $.extend($.fn.dataTable.ext.buttons, {
+      'excel': exportExcelButton
+    });
+
+    // Add a pdf export button
+    $.extend($.fn.dataTable.ext.buttons, {
+      'pdf': exportPdfButton
+    });
 
     $.extend(  $.fn.dataTable, {
       'renderTools': renderTools
@@ -51,7 +66,10 @@
             'extend': 'pageLength',
             'className': 'btn-action',
           },
-        ]
+          'csv',
+          'excel',
+          'pdf'
+        ],
       },
       'columnDefs': [
         {
@@ -134,6 +152,84 @@
         //}
       }
     };
+    
+    /**
+     * Creates a new button in the buttons plugin toolbar to export data in 
+     * CSV format using the value of the table tag attribute 
+     * 'data-export-csv-url' as a function which returns the value 
+     * to be used as the URL.
+     */
+    function exportCsvButton(datatables, conf) {
+      var dataExportCsvUrl = getDataValue(datatables, 'export-csv-url');
+      if (dataExportCsvUrl) {
+    	  return getExportButton(datatables, dataExportCsvUrl, "CSV");
+      }
+    }
+    
+    /**
+     * Creates a new button in the buttons plugin toolbar to export data in 
+     * XLS format using the value of the table tag attribute 
+     * 'data-export-xls-url' as a function which returns the value 
+     * to be used as the URL.
+     */
+    function exportExcelButton(datatables, conf) {
+      var dataExportXlsUrl = getDataValue(datatables, 'export-xls-url');
+      if (dataExportXlsUrl) {
+    	  return getExportButton(datatables, dataExportXlsUrl, "XLS");
+      }
+    }
+
+
+    /**
+     * Creates a new button in the buttons plugin toolbar to export data in 
+     * PDF format using the value of the table tag attribute 
+     * 'data-export-pdf-url' as a function which returns the value 
+     * to be used as the URL.
+     */
+    function exportPdfButton(datatables, conf) {
+      var dataExportPdfUrl = getDataValue(datatables, 'export-pdf-url');
+      if (dataExportPdfUrl) {
+    	  return getExportButton(datatables, dataExportPdfUrl, "PDF");
+      }
+    }
+    
+    /**
+     * Generates a Datatables export button object using the provided URL
+     * and the provided type.
+     * 
+     * @param datatables DataTable on which the calling should act upon
+     * @param url The url where export button will load
+     * @param type The type of the export button. Will be used to set
+     * 			the button name
+     * @return a new export button with the provided configuration
+     */
+    function getExportButton(datatables, url, type) {
+    	return {
+            'action': function(e, datatables, node, config) {
+            	// Check if current datatable has some records. If not, 
+            	// show an error modal and prevent to continue
+            	if(datatables.context[0]._iRecordsDisplay == 0){
+            		var tableId = getTableId(datatables);
+            		var $exportError = $('#' + tableId + 'ExportEmptyError');
+            		$exportError.modal();
+            		return;
+            	}
+            	
+            	// Process the URL to obtain an URL that includes the Datatables
+            	// parameters.
+            	var processedUrl = getUrlWithDatatablesParams(datatables, url);
+
+            	// Open the processed URL in a new window
+            	window.open(
+            	  processedUrl,
+            	  '_blank'
+            	);
+            },
+            'className': 'btn-action export-' + type.toLowerCase(),
+            'name': type,
+            'text': datatables.i18n('buttons.export.' + type.toLowerCase(), type)
+          };
+    }
 
     /**
      * Generates and executes an ajax request whose goal is to load data for a
@@ -320,6 +416,94 @@
       }
 
       return processedUrl;
+    }
+    
+    /**
+     * Process the given Url and the Datatables configuration to build
+     * an URL that contains the Datatables parameters.
+     * This function is useful when is necessary to make a petition 
+     * to the server side without using AJAX.
+     * 
+     * @param datatables DataTable on which the calling should act upon
+     * @param url to process
+     * @returns the processed url
+     */
+    function getUrlWithDatatablesParams(datatables, url) {
+    	
+    	// Remove existing parameters
+    	url = url.split("?")[0];
+    	
+    	// Getting data from Datatables
+    	var dtContext = datatables.context[0];
+    	var data = dtContext.oAjaxData;
+    	
+    	// Getting search value
+    	var searchValue = data.search.value;
+    	
+    	// Getting order
+    	var order = data.order;
+    	
+    	// Getting columns
+    	var columns = data.columns;
+    	
+    	var sortParams = "";
+    	for(i = 0; i < order.length; i++){
+    		if(order[i] != null && order[i] != undefined
+    				&& order[i].column != null && order[i].column != undefined){
+				var columnName = columns[order[i].column].data;
+				var dir = order[i].dir;
+				
+				sortParams += "sort=" + columnName + "," + dir + "&";
+    				
+    		}
+    	}
+    	if(sortParams.length > 0){
+    		sortParams = sortParams.substr(0, sortParams.length - 1);
+    	}
+    	
+    	var datatablesColumns = "";
+    	for(i = 0; i < columns.length; i++){
+    		if(columns[i] != null && columns[i] != undefined
+    				&& columns[i].data != null && columns[i].data != undefined){
+    			datatablesColumns += columns[i].data + ",";
+    			
+    		}
+    	}
+    	if(datatablesColumns.length > 0){
+    		datatablesColumns = datatablesColumns.substr(0, datatablesColumns.length -1);
+    		datatablesColumns = "datatablesColumns="+datatablesColumns;
+    	}
+    	
+    	
+    	// Build URL parameters
+    	var hasParameters = false;
+    	var params = "";
+    	if(searchValue != null && searchValue != "" && searchValue != undefined){
+    		if(hasParameters){
+    			params += "&";
+    		}
+    		params += "search[value]="+searchValue;
+    		hasParameters = true;
+    	}
+    	
+    	if(sortParams != null && sortParams != "" && sortParams != undefined){
+    		if(hasParameters){
+    			params += "&";
+    		}
+    		params += sortParams;
+    		hasParameters = true;
+    	}
+    	
+    	if(datatablesColumns != null && datatablesColumns != "" && datatablesColumns != undefined){
+    		if(hasParameters){
+    			params += "&";
+    		}
+    		params += datatablesColumns;
+    		hasParameters = true;
+    	}
+    	
+    	return url + "?" + params;
+    	
     }
 
     /**

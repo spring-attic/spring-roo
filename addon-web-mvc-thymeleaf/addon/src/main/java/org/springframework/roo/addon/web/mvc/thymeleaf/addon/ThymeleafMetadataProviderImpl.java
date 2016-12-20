@@ -259,7 +259,7 @@ public class ThymeleafMetadataProviderImpl extends
           }
         }
       }
-
+      this.jasperReportsExporterMap = new HashMap<String, JavaType>();
       this.jasperReportsExporterMap.putAll(jasperReportsExporterMap);
     }
 

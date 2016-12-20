@@ -42,6 +42,9 @@
                    data-order="[[ 0, &quot;asc&quot; ]]"
                    data-data-load-url="${r"${"}collectionLink.to('datatables')}"
                    data-data-show-url="${r"${"}itemLink.to('show').with('${modelAttributeName}', '_ID_')}"
+                   data-data-export-csv-url="${r"${"}collectionLink.to('exportCsv')}" 
+                   data-data-export-xls-url="${r"${"}collectionLink.to('exportXls')}" 
+                   data-data-export-pdf-url="${r"${"}collectionLink.to('exportPdf')}"
                    <#if entity.readOnly == false>
                    data-data-create-url="${r"${"}collectionLink.to('createForm')}"
                    data-data-edit-url="${r"${"}itemLink.to('editForm').with('${modelAttributeName}', '_ID_')}"
@@ -74,6 +77,9 @@
               <!-- content replaced by modal-confirm fragment of modal-confirm.html -->
               <div data-th-replace="~{fragments/modal-confirm-delete :: modalConfirmDelete(tableId='${entity.entityItemId}-table',
                   title=${r"#{"}label_delete_entity(${r"#{"}${entityLabelPlural}})}, message=${r"#{"}info_delete_item_confirm}, baseUrl = @{${controllerPath}/})}">
+              </div>
+              <div data-th-replace="~{fragments/modal-export-empty-error :: modalExportEmptyError(tableId='${entity.entityItemId}-table',
+                  title=${r"#{"}label_export_empty_error(${r"#{"}${entityLabelPlural}})}, message=${r"#{"}info_export_empty_error})}">
               </div>
             </#if>
           </div>

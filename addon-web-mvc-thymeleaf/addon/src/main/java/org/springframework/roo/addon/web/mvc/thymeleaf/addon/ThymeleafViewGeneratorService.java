@@ -16,4 +16,6 @@ public interface ThymeleafViewGeneratorService extends MVCViewGenerationService<
 
   void addDefaultListLayout(String moduleName, ViewContext<ThymeleafMetadata> ctx);
 
+  void addModalExportEmptyError(String moduleName, ViewContext<ThymeleafMetadata> ctx);
+
 }

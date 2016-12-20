@@ -43,6 +43,18 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
   protected static final JavaSymbolName TO_URI_METHOD_NAME = new JavaSymbolName("toUri");
   protected static final JavaSymbolName GET_CONTROLLER_CLASS_METHOD_NAME = new JavaSymbolName(
       "getControllerClass");
+  protected static final String DATATABLES_FIELD_NAME = "DATATABLES";
+  protected static final String DATATABLES_FIELD_VALUE = "datatables";
+  protected static final String CREATE_FIELD_NAME = "CREATE";
+  protected static final String CREATE_FIELD_VALUE = "create";
+  protected static final String CREATE_FORM_FIELD_NAME = "CREATE_FORM";
+  protected static final String CREATE_FORM_FIELD_VALUE = "createForm";
+
+  private static final JavaType JR_EXCEPTION = new JavaType(
+      "net.sf.jasperreports.engine.JRException");
+  private static final JavaType IO_EXCEPTION = new JavaType("java.io.IOException");
+  private static final JavaType CLASS_NOT_FOUND_EXCEPTION = new JavaType(
+      "java.lang.ClassNotFoundException");
 
   private final ControllerMetadata controllerMetadata;
   private final ControllerType controllerType;
@@ -143,9 +155,14 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
         // Create fields
         ensureGovernorHasField(returnStaticStringFieldBuilder("LIST", "list"));
-        ensureGovernorHasField(returnStaticStringFieldBuilder("DATATABLES", "datatables"));
-        ensureGovernorHasField(returnStaticStringFieldBuilder("CREATE", "create"));
-        ensureGovernorHasField(returnStaticStringFieldBuilder("CREATE_FORM", "createForm"));
+        ensureGovernorHasField(returnStaticStringFieldBuilder(DATATABLES_FIELD_NAME,
+            DATATABLES_FIELD_VALUE));
+        ensureGovernorHasField(returnStaticStringFieldBuilder(CREATE_FIELD_NAME, CREATE_FIELD_VALUE));
+        ensureGovernorHasField(returnStaticStringFieldBuilder(CREATE_FORM_FIELD_NAME,
+            CREATE_FORM_FIELD_VALUE));
+        ensureGovernorHasField(returnStaticStringFieldBuilder("EXPORT_CSV", "exportCsv"));
+        ensureGovernorHasField(returnStaticStringFieldBuilder("EXPORT_PDF", "exportPdf"));
+        ensureGovernorHasField(returnStaticStringFieldBuilder("EXPORT_XLS", "exportXls"));
 
         // Create methods
         this.toUriForCollectionControllerMethod =
@@ -185,9 +202,11 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
       case DETAIL: {
 
         // Create fields
-        ensureGovernorHasField(returnStaticStringFieldBuilder("CREATE_FORM", "createForm"));
-        ensureGovernorHasField(returnStaticStringFieldBuilder("CREATE", "create"));
-        ensureGovernorHasField(returnStaticStringFieldBuilder("DATATABLES", "datatables"));
+        ensureGovernorHasField(returnStaticStringFieldBuilder(CREATE_FORM_FIELD_NAME,
+            CREATE_FORM_FIELD_VALUE));
+        ensureGovernorHasField(returnStaticStringFieldBuilder(CREATE_FIELD_NAME, CREATE_FIELD_VALUE));
+        ensureGovernorHasField(returnStaticStringFieldBuilder(DATATABLES_FIELD_NAME,
+            DATATABLES_FIELD_VALUE));
 
         // Create methods
         this.toUriForCollectionControllerMethod = null;
@@ -293,7 +312,8 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     bodyBuilder.appendFormalLine("}");
 
     // if (METHOD_NAME_ARGUMENT_NAME.equals(DATATABLES)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(DATATABLES)) {", METHOD_NAME_ARGUMENT_NAME);
+    bodyBuilder.appendFormalLine("if (%s.equals(%s)) {", METHOD_NAME_ARGUMENT_NAME,
+        DATATABLES_FIELD_NAME);
 
     // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).datatables(null, null, null)).replaceQuery(null).build();
     bodyBuilder.indent();
@@ -307,7 +327,8 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     bodyBuilder.appendFormalLine("}");
 
     // if (METHOD_NAME_ARGUMENT_NAME.equals(CREATE)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(CREATE)) {", METHOD_NAME_ARGUMENT_NAME);
+    bodyBuilder.appendFormalLine("if (%s.equals(%s)) {", METHOD_NAME_ARGUMENT_NAME,
+        CREATE_FIELD_NAME);
 
     // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).create(null, null, null)).build();
     bodyBuilder.indent();
@@ -322,7 +343,8 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     bodyBuilder.appendFormalLine("}");
 
     // if (METHOD_NAME_ARGUMENT_NAME.equals(CREATE_FORM)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(CREATE_FORM)) {", METHOD_NAME_ARGUMENT_NAME);
+    bodyBuilder.appendFormalLine("if (%s.equals(%s)) {", METHOD_NAME_ARGUMENT_NAME,
+        CREATE_FORM_FIELD_NAME);
 
     // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).createForm(null)).build();
     bodyBuilder.indent();
@@ -330,6 +352,51 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
         "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).createForm(null)).build();",
         SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
             this.importResolver));
+    bodyBuilder.indentRemove();
+
+    // }
+    bodyBuilder.appendFormalLine("}");
+
+    // if (METHOD_NAME_ARGUMENT_NAME.equals(EXPORT_CSV)) {
+    bodyBuilder.appendFormalLine("if (%s.equals(EXPORT_CSV)) {", METHOD_NAME_ARGUMENT_NAME);
+
+    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).exportCsv(null, null, null, null)).build();
+    bodyBuilder.indent();
+    bodyBuilder
+        .appendFormalLine(
+            "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).exportCsv(null, null, null, null)).build();",
+            SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
+                this.importResolver));
+    bodyBuilder.indentRemove();
+
+    // }
+    bodyBuilder.appendFormalLine("}");
+
+    // if (METHOD_NAME_ARGUMENT_NAME.equals(EXPORT_PDF)) {
+    bodyBuilder.appendFormalLine("if (%s.equals(EXPORT_PDF)) {", METHOD_NAME_ARGUMENT_NAME);
+
+    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).exportPdf(null, null, null)).build();
+    bodyBuilder.indent();
+    bodyBuilder
+        .appendFormalLine(
+            "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).exportPdf(null, null, null, null)).build();",
+            SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
+                this.importResolver));
+    bodyBuilder.indentRemove();
+
+    // }
+    bodyBuilder.appendFormalLine("}");
+
+    // if (METHOD_NAME_ARGUMENT_NAME.equals(EXPORT_XLS)) {
+    bodyBuilder.appendFormalLine("if (%s.equals(EXPORT_XLS)) {", METHOD_NAME_ARGUMENT_NAME);
+
+    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).exportXls(null, null, null)).build();
+    bodyBuilder.indent();
+    bodyBuilder
+        .appendFormalLine(
+            "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).exportXls(null, null, null, null)).build();",
+            SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
+                this.importResolver));
     bodyBuilder.indentRemove();
 
     // }
@@ -345,6 +412,13 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
             SpringJavaType.URI_COMPONENTS, parameterTypes, parameterNames, bodyBuilder);
+
+    // Add throws types
+    final List<JavaType> throwTypes = new ArrayList<JavaType>();
+    throwTypes.add(JR_EXCEPTION);
+    throwTypes.add(IO_EXCEPTION);
+    throwTypes.add(CLASS_NOT_FOUND_EXCEPTION);
+    methodBuilder.setThrowsTypes(throwTypes);
 
     return methodBuilder.build();
   }

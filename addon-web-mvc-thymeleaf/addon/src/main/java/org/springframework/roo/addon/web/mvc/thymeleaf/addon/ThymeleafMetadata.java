@@ -828,7 +828,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // Including parameter names
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     final JavaSymbolName columnName = new JavaSymbolName("columnName");
-    parameterNames.add(DATATABLES_COLUMNS_PARAM_NAME);
+    parameterNames.add(columnName);
     final JavaSymbolName reportBuilder = new JavaSymbolName("builder");
     parameterNames.add(reportBuilder);
 
@@ -851,15 +851,37 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
           .equals(this.entityMetadata.getCurrentIndentifierField().getFieldName())) {
 
         // builder.addColumn("FIELD-TITLE", "FIELD-NAME", FIELD-CLASS, 50);
-        bodyBuilder.appendFormalLine("builder.addColumn(\"%s\", \"%s\", %s.class.getName(), 50);",
-            StringUtils.capitalize(fieldName), fieldName, getNameOfJavaType(this.entityValidFields
-                .get(i).getFieldType()));
+        if (this.entityValidFields.get(i).getFieldType().isPrimitive()) {
+
+          // Print SimpleTypeName of JavaType when it is a primitive
+          bodyBuilder.appendFormalLine(
+              "builder.addColumn(\"%s\", \"%s\", %s.class.getName(), 50);",
+              StringUtils.capitalize(fieldName), fieldName, this.entityValidFields.get(i)
+                  .getFieldType().getSimpleTypeName());
+          getNameOfJavaType(this.entityValidFields.get(i).getFieldType());
+        } else {
+          bodyBuilder.appendFormalLine(
+              "builder.addColumn(\"%s\", \"%s\", %s.class.getName(), 50);",
+              StringUtils.capitalize(fieldName), fieldName,
+              getNameOfJavaType(this.entityValidFields.get(i).getFieldType()));
+        }
       } else {
 
         // builder.addColumn("FIELD-TITLE", "FIELD-NAME", FIELD-CLASS, 100);
-        bodyBuilder.appendFormalLine("builder.addColumn(\"%s\", \"%s\", %s.class.getName(), 100);",
-            StringUtils.capitalize(fieldName), fieldName, getNameOfJavaType(this.entityValidFields
-                .get(i).getFieldType()));
+        if (this.entityValidFields.get(i).getFieldType().isPrimitive()) {
+
+          // Print SimpleTypeName of JavaType when it is a primitive
+          bodyBuilder.appendFormalLine(
+              "builder.addColumn(\"%s\", \"%s\", %s.class.getName(), 100);",
+              StringUtils.capitalize(fieldName), fieldName, this.entityValidFields.get(i)
+                  .getFieldType().getSimpleTypeName());
+          getNameOfJavaType(this.entityValidFields.get(i).getFieldType());
+        } else {
+          bodyBuilder.appendFormalLine(
+              "builder.addColumn(\"%s\", \"%s\", %s.class.getName(), 100);",
+              StringUtils.capitalize(fieldName), fieldName,
+              getNameOfJavaType(this.entityValidFields.get(i).getFieldType()));
+        }
       }
 
       bodyBuilder.indentRemove();
@@ -870,6 +892,12 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
             parameterTypes, parameterNames, bodyBuilder);
+
+    // Add throws types
+    final List<JavaType> throwTypes = new ArrayList<JavaType>();
+    throwTypes.add(COLUMN_BUILDER_EXCEPTION);
+    throwTypes.add(CLASS_NOT_FOUND_EXCEPTION);
+    methodBuilder.setThrowsTypes(throwTypes);
 
     return methodBuilder.build();
   }
@@ -1038,6 +1066,14 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
             parameterTypes, parameterNames, bodyBuilder);
 
+    // Add throws types
+    final List<JavaType> throwTypes = new ArrayList<JavaType>();
+    throwTypes.add(JR_EXCEPTION);
+    throwTypes.add(IO_EXCEPTION);
+    throwTypes.add(COLUMN_BUILDER_EXCEPTION);
+    throwTypes.add(CLASS_NOT_FOUND_EXCEPTION);
+    methodBuilder.setThrowsTypes(throwTypes);
+
     return methodBuilder.build();
   }
 
@@ -1122,7 +1158,12 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     pageableDefaultAnnotation.addIntegerAttribute("size", Integer.MAX_VALUE);
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE, pageableDefaultAnnotation
         .build()));
-    parameterTypes.add(DATATABLES_COLUMNS_PARAM);
+    AnnotationMetadataBuilder requestParamAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.REQUEST_PARAM);
+    requestParamAnnotation.addStringAttribute("value",
+        DATATABLES_COLUMNS_PARAM_NAME.getSymbolName());
+    parameterTypes
+        .add(new AnnotatedJavaType(JavaType.STRING_ARRAY, requestParamAnnotation.build()));
     parameterTypes
         .add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse")));
 
@@ -1162,10 +1203,13 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         PAGEABLE_PARAM_NAME, DATATABLES_COLUMNS_PARAM_NAME, RESPONSE_PARAM_NAME,
         exporterClassInstantiation, fileName);
 
+    // return ResponseEntity.ok().build();
+    bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
+
     // Build method
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
-            parameterTypes, parameterNames, bodyBuilder);
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
     methodBuilder.setThrowsTypes(throwTypes);
 

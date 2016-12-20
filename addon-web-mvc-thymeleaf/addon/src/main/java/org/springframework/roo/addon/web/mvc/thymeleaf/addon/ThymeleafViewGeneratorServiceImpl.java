@@ -277,6 +277,27 @@ public class ThymeleafViewGeneratorServiceImpl extends
   }
 
   @Override
+  public void addModalExportEmptyError(String moduleName, ViewContext<ThymeleafMetadata> ctx) {
+    // Process elements to generate
+    Document newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getFragmentsFolder(moduleName).concat("/modal-export-empty-error").concat(
+            getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge("fragments/modal-export-empty-error", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("fragments/modal-export-empty-error", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+  }
+
+  @Override
   protected DetailEntityItem createDetailEntityItem(ThymeleafMetadata detailController,
       MemberDetails entityMembers, JpaEntityMetadata entityMetadata, String entityName,
       ViewContext<ThymeleafMetadata> ctx, String detailSuffix, EntityItem rootEntity) {
@@ -771,7 +792,6 @@ public class ThymeleafViewGeneratorServiceImpl extends
   @Override
   protected boolean getReferenceField(FieldItem fieldItem, ClassOrInterfaceTypeDetails typeDetails,
       ViewContext<ThymeleafMetadata> ctx) {
-    // TODO Auto-generated method stub
     boolean found = super.getReferenceField(fieldItem, typeDetails, ctx);
     if (!found) {
       return false;

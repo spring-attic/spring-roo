@@ -243,6 +243,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     getViewGenerationService().addModal(module.getModuleName(), ctx);
     getViewGenerationService().addModalConfirm(module.getModuleName(), ctx);
     getViewGenerationService().addModalConfirmDelete(module.getModuleName(), ctx);
+    getViewGenerationService().addModalExportEmptyError(module.getModuleName(), ctx);
     getViewGenerationService().addSessionLinks(module.getModuleName(), ctx);
     getViewGenerationService().addLanguages(module.getModuleName(), ctx);
     getViewGenerationService().addAccessibilityView(module.getModuleName(), ctx);
@@ -623,6 +624,10 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
         getPathResolver().getIdentifier(resourcesPath, "/templates/fragments/js"), true);
     copyDirectoryContents("templates/fragments/js/*.js",
         getPathResolver().getIdentifier(resourcesPath, "/templates/fragments/js"), true);
+
+    // copy default JasperReports template
+    copyDirectoryContents("templates/reports/*.jrxml",
+        getPathResolver().getIdentifier(resourcesPath, "/templates/reports"), true);
   }
 
   /**
