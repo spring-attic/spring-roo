@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.comments.AbstractComment;
 import org.springframework.roo.classpath.details.comments.CommentStructure;
 import org.springframework.roo.classpath.details.comments.CommentStructure.CommentLocation;
 import org.springframework.roo.classpath.details.comments.JavadocComment;
@@ -279,9 +281,78 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
     }*/
 
     // ROO-3834: Append Javadoc
-    if (method.getCommentStructure() != null) {
+    CommentStructure commentStructure = method.getCommentStructure();
+    if (commentStructure != null && commentStructure.getBeginComments() != null) {
+      List<AbstractComment> methodComments = commentStructure.getBeginComments();
+      String comment = "";
 
-      // if the method has annotations, add JavaDoc comments to the first
+      // ROO-3834: Append default Javadoc if not exists a comment structure
+      String paramString = "";
+      String returnString = "";
+      String throwsString = "";
+      for (AbstractComment methodComment : methodComments) {
+        if (methodComment.getComment().contains("@param")) {
+          paramString = paramString.concat(methodComment.getComment() + "\n");
+        } else if (methodComment.getComment().contains("@return")) {
+          returnString = returnString.concat(methodComment.getComment() + "\n");
+        } else if (methodComment.getComment().contains("@throws")) {
+          throwsString = throwsString.concat(methodComment.getComment() + "\n");
+        } else {
+          comment = comment.concat(methodComment.getComment() + "\n");
+        }
+      }
+
+      // Check and add params
+      if (StringUtils.isBlank(paramString)) {
+        comment = comment.concat(" \n");
+        List<JavaSymbolName> parameterNames = method.getParameterNames();
+        for (int i = 0; i < parameterNames.size(); i++) {
+          comment =
+              comment.concat("@param ").concat(parameterNames.get(i).getSymbolName()).concat("\n");
+        }
+      } else {
+        comment = comment.concat(paramString);
+      }
+
+      // Check and add return
+      if (StringUtils.isBlank(returnString) && method.getReturnType() != JavaType.VOID_PRIMITIVE) {
+        if (StringUtils.isBlank(paramString)) {
+          comment = comment.concat(" \n");
+        }
+        comment =
+            comment.concat("@return ").concat(method.getReturnType().getSimpleTypeName())
+                .concat("\n");
+      } else {
+        comment = comment.concat(returnString);
+      }
+
+      // Check method throws
+      if (StringUtils.isBlank(throwsString) && !method.getThrowsTypes().isEmpty()) {
+        if (StringUtils.isBlank(paramString) && StringUtils.isBlank(returnString)) {
+          comment = comment.concat(" \n");
+        }
+        for (JavaType throwsType : method.getThrowsTypes()) {
+          comment = comment.concat("@throws ").concat(throwsType.getSimpleTypeName()).concat("\n");
+        }
+      } else {
+        comment = comment.concat(throwsString);
+      }
+
+      // Write definitive comments
+      List<AbstractComment> newComments = new LinkedList<AbstractComment>();
+      String[] commentLines = comment.split("\n");
+      newComments.add(new JavadocComment("/**"));
+      for (String commentLine : commentLines) {
+        newComments.add(new JavadocComment(" * ".concat(commentLine)));
+      }
+      newComments.add(new JavadocComment(" */"));
+
+      // Set definitive comment structure on method
+      CommentStructure newCommentStructure = new CommentStructure();
+      newCommentStructure.setBeginComments(newComments);
+      method.setCommentStructure(newCommentStructure);
+
+      // If the method has annotations, add JavaDoc comments to the first
       // annotation
       if (annotations != null && annotations.size() > 0) {
         AnnotationExpr firstAnnotation = annotations.get(0);
