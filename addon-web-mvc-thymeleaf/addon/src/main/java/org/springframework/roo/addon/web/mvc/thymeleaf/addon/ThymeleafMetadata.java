@@ -39,11 +39,8 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.comments.AbstractComment;
-import org.springframework.roo.classpath.details.comments.BlockComment;
 import org.springframework.roo.classpath.details.comments.CommentStructure;
-import org.springframework.roo.classpath.details.comments.CommentStructure.CommentLocation;
 import org.springframework.roo.classpath.details.comments.JavadocComment;
-import org.springframework.roo.classpath.details.comments.LineComment;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
@@ -62,6 +59,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SplittableRandom;
 import java.util.TreeMap;
 
 /**
@@ -109,6 +107,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private static final JavaSymbolName MODEL_PARAM_NAME = new JavaSymbolName("model");
   private static final JavaSymbolName FORM_BEAN_PARAM_NAME = new JavaSymbolName("formBean");
   private static final AnnotatedJavaType LOCALE_PARAM = new AnnotatedJavaType(JdkJavaType.LOCALE);
+  private static final JavaSymbolName LOCALE_PARAM_NAME = new JavaSymbolName("locale");
   private static final AnnotationMetadataBuilder RESPONSE_BODY_ANNOTATION =
       new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
   private static final JavaType JODA_DATETIME_FORMAT_JAVA_TYPE = new JavaType(
@@ -148,6 +147,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       "ar.com.fdvs.dj.core.DynamicJasperHelper");
   private static final JavaType CLASSIC_LAYOUT_MANAGER = new JavaType(
       "ar.com.fdvs.dj.core.layout.ClassicLayoutManager");
+  private static final JavaType STRING_UTILS_APACHE = new JavaType(
+      "org.apache.commons.lang3.StringUtils");
 
   private static final String PROVIDES_TYPE_STRING = ThymeleafMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
@@ -163,6 +164,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private final ServiceMetadata serviceMetadata;
   private final JavaType entity;
   private final String entityPlural;
+  private final String entityLabel;
   private final List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne;
   private final String entityItemName;
   private final JpaEntityMetadata entityMetadata;
@@ -310,6 +312,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         entityMetadata.getCurrentIndentifierField().getFieldName().getSymbolName();
     this.entityIdentifierPlural = entityIdentifierPlural;
     this.entityItemName = StringUtils.uncapitalize(entity.getSimpleTypeName());
+    this.entityLabel = "label_".concat(this.entityItemName.toLowerCase());
     this.entityPlural = entityPlural;
     this.entityPluralUncapitalized = StringUtils.uncapitalize(entityPlural);
     this.compositionRelationOneToOne = compositionRelationOneToOne;
@@ -822,6 +825,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(STRING_PARAM);
     parameterTypes.add(new AnnotatedJavaType(FAST_REPORT_BUILDER));
+    parameterTypes.add(LOCALE_PARAM);
+    parameterTypes.add(STRING_PARAM);
 
     // Check method existence
     MethodMetadata existingMethod =
@@ -837,8 +842,14 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     parameterNames.add(columnName);
     final JavaSymbolName reportBuilder = new JavaSymbolName("builder");
     parameterNames.add(reportBuilder);
+    parameterNames.add(LOCALE_PARAM_NAME);
+    parameterNames.add(FILE_NAME_PARAM_NAME);
 
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // try {
+    bodyBuilder.appendFormalLine("try {");
+
     for (int i = 0; i < this.entityValidFields.size(); i++) {
       String fieldName = this.entityValidFields.get(i).getFieldName().getSymbolName();
       if (i == 0) {
@@ -860,33 +871,40 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         if (this.entityValidFields.get(i).getFieldType().isPrimitive()) {
 
           // Print SimpleTypeName of JavaType when it is a primitive
-          bodyBuilder.appendFormalLine(
-              "builder.addColumn(\"%s\", \"%s\", %s.class.getName(), 50);",
-              StringUtils.capitalize(fieldName), fieldName, this.entityValidFields.get(i)
-                  .getFieldType().getSimpleTypeName());
+          bodyBuilder
+              .appendFormalLine(
+                  "builder.addColumn(this.%s.getMessage(\"%s_%s\", null, \"%s\", locale), \"%s\", %s.class.getName(), 50);",
+                  this.messageSourceField.getFieldName().getSymbolName(), this.entityLabel,
+                  fieldName.toLowerCase(), getFieldDefaultLabelValue(fieldName), fieldName,
+                  this.entityValidFields.get(i).getFieldType().getSimpleTypeName());
           getNameOfJavaType(this.entityValidFields.get(i).getFieldType());
         } else {
-          bodyBuilder.appendFormalLine(
-              "builder.addColumn(\"%s\", \"%s\", %s.class.getName(), 50);",
-              StringUtils.capitalize(fieldName), fieldName,
-              getNameOfJavaType(this.entityValidFields.get(i).getFieldType()));
+          bodyBuilder
+              .appendFormalLine(
+                  "builder.addColumn(this.%s.getMessage(\"%s_%s\", null, \"%s\", locale), \"%s\", %s.class.getName(), 50);",
+                  this.messageSourceField.getFieldName().getSymbolName(), this.entityLabel,
+                  fieldName.toLowerCase(), getFieldDefaultLabelValue(fieldName), fieldName,
+                  getNameOfJavaType(this.entityValidFields.get(i).getFieldType()));
         }
       } else {
 
         // builder.addColumn("FIELD-TITLE", "FIELD-NAME", FIELD-CLASS, 100);
         if (this.entityValidFields.get(i).getFieldType().isPrimitive()) {
 
-          // Print SimpleTypeName of JavaType when it is a primitive
-          bodyBuilder.appendFormalLine(
-              "builder.addColumn(\"%s\", \"%s\", %s.class.getName(), 100);",
-              StringUtils.capitalize(fieldName), fieldName, this.entityValidFields.get(i)
-                  .getFieldType().getSimpleTypeName());
+          bodyBuilder
+              .appendFormalLine(
+                  "builder.addColumn(this.%s.getMessage(\"%s_%s\", null, \"%s\", locale), \"%s\", %s.class.getName(), 100);",
+                  this.messageSourceField.getFieldName().getSymbolName(), this.entityLabel,
+                  fieldName.toLowerCase(), getFieldDefaultLabelValue(fieldName), fieldName,
+                  this.entityValidFields.get(i).getFieldType().getSimpleTypeName());
           getNameOfJavaType(this.entityValidFields.get(i).getFieldType());
         } else {
-          bodyBuilder.appendFormalLine(
-              "builder.addColumn(\"%s\", \"%s\", %s.class.getName(), 100);",
-              StringUtils.capitalize(fieldName), fieldName,
-              getNameOfJavaType(this.entityValidFields.get(i).getFieldType()));
+          bodyBuilder
+              .appendFormalLine(
+                  "builder.addColumn(this.%s.getMessage(\"%s_%s\", null, \"%s\", locale), \"%s\", %s.class.getName(), 100);",
+                  this.messageSourceField.getFieldName().getSymbolName(), this.entityLabel,
+                  fieldName.toLowerCase(), getFieldDefaultLabelValue(fieldName), fieldName,
+                  getNameOfJavaType(this.entityValidFields.get(i).getFieldType()));
         }
       }
 
@@ -894,16 +912,17 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       bodyBuilder.appendFormalLine("}");
     }
 
+    // }
+    bodyBuilder.appendFormalLine("}");
+
+    // Build catch blocks
+    buildExportCatchBlock(bodyBuilder, COLUMN_BUILDER_EXCEPTION);
+    buildExportCatchBlock(bodyBuilder, CLASS_NOT_FOUND_EXCEPTION);
+
     // Build method
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
             parameterTypes, parameterNames, bodyBuilder);
-
-    // Add throws types
-    final List<JavaType> throwTypes = new ArrayList<JavaType>();
-    throwTypes.add(COLUMN_BUILDER_EXCEPTION);
-    throwTypes.add(CLASS_NOT_FOUND_EXCEPTION);
-    methodBuilder.setThrowsTypes(throwTypes);
 
     // Add Javadoc to method
     CommentStructure commentStructure = new CommentStructure();
@@ -947,6 +966,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         .add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse")));
     parameterTypes.add(new AnnotatedJavaType(this.jasperReportsMap.get("JasperReportsExporter")));
     parameterTypes.add(STRING_PARAM);
+    parameterTypes.add(LOCALE_PARAM);
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -962,6 +982,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     parameterNames.add(RESPONSE_PARAM_NAME);
     parameterNames.add(EXPORTER_PARAM_NAME);
     parameterNames.add(FILE_NAME_PARAM_NAME);
+    parameterNames.add(LOCALE_PARAM_NAME);
 
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
@@ -981,10 +1002,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // if (owners == null || owners.getContent().isEmpty()) {
     bodyBuilder.appendFormalLine("if (%1$s == null || %s.getContent().isEmpty()) {",
         this.entityPluralUncapitalized);
-    // throw new RuntimeException("ERROR: Not available data to generate a report.");
+    // return;
     bodyBuilder.indent();
-    bodyBuilder
-        .appendFormalLine("throw new RuntimeException(\"ERROR: Not available data to generate a report.\");");
+    bodyBuilder.appendFormalLine("return;");
     // }
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
@@ -1035,8 +1055,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         ADD_COLUMN_TO_REPORT_BUILDER_METHOD_NAME);
     // // to the report builder
     bodyBuilder.appendFormalLine("// to the report builder");
-    // addColumnToReportBuilder(column, builder);
-    bodyBuilder.appendFormalLine("addColumnToReportBuilder(column, builder);");
+    // addColumnToReportBuilder(column, builder, locale);
+    bodyBuilder.appendFormalLine("addColumnToReportBuilder(column, builder, %s, %s);",
+        LOCALE_PARAM_NAME, FILE_NAME_PARAM_NAME);
     bodyBuilder.indentRemove();
     // }
     bodyBuilder.appendFormalLine("}");
@@ -1065,10 +1086,20 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // // Generates the JasperReport
     bodyBuilder.appendFormalLine("// Generates the JasperReport");
-    //JasperPrint jp = DynamicJasperHelper.generateJasperPrint(builder.build(), new ClassicLayoutManager(), ds);
-    bodyBuilder.appendFormalLine("%s jp = %s.generateJasperPrint(builder.build(), new %s(), ds);",
-        getNameOfJavaType(JASPER_PRINT), getNameOfJavaType(DYNAMIC_JASPER_HELPER),
-        getNameOfJavaType(CLASSIC_LAYOUT_MANAGER));
+    //JasperPrint jp;
+    bodyBuilder.appendFormalLine("%s jp;", getNameOfJavaType(JASPER_PRINT));
+    // try {
+    bodyBuilder.appendFormalLine("try {");
+    bodyBuilder.indent();
+    //jp = DynamicJasperHelper.generateJasperPrint(builder.build(), new ClassicLayoutManager(), ds);
+    bodyBuilder.appendFormalLine("jp = %s.generateJasperPrint(builder.build(), new %s(), ds);",
+        getNameOfJavaType(DYNAMIC_JASPER_HELPER), getNameOfJavaType(CLASSIC_LAYOUT_MANAGER));
+    bodyBuilder.indentRemove();
+    // "}"
+    bodyBuilder.appendFormalLine("}");
+
+    // Build catch block
+    buildExportCatchBlock(bodyBuilder, JR_EXCEPTION);
     bodyBuilder.newLine();
 
     // // Converts the JaspertReport element to a ByteArrayOutputStream and
@@ -1077,24 +1108,22 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // // write it into the response stream using the provided JasperReportExporter
     bodyBuilder
         .appendFormalLine("// write it into the response stream using the provided JasperReportExporter");
+    bodyBuilder.appendFormalLine("try {");
+    bodyBuilder.indent();
     //exporter.export(jp, fileName, response);
     bodyBuilder.appendFormalLine("%s.export(jp, %s, %s);", EXPORTER_PARAM_NAME,
         FILE_NAME_PARAM_NAME, RESPONSE_PARAM_NAME);
-
+    bodyBuilder.indentRemove();
+    // "}"
+    bodyBuilder.appendFormalLine("}");
+    buildExportCatchBlock(bodyBuilder, JR_EXCEPTION);
+    buildExportCatchBlock(bodyBuilder, IO_EXCEPTION);
     bodyBuilder.reset();
 
     // Build method
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
             parameterTypes, parameterNames, bodyBuilder);
-
-    // Add throws types
-    final List<JavaType> throwTypes = new ArrayList<JavaType>();
-    throwTypes.add(JR_EXCEPTION);
-    throwTypes.add(IO_EXCEPTION);
-    throwTypes.add(COLUMN_BUILDER_EXCEPTION);
-    throwTypes.add(CLASS_NOT_FOUND_EXCEPTION);
-    methodBuilder.setThrowsTypes(throwTypes);
 
     // Add Javadoc to method
     CommentStructure commentStructure = new CommentStructure();
@@ -1203,6 +1232,43 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   }
 
   /**
+   * Builds a `catch` block which throws an exception with a localized message 
+   * for export method.
+   * 
+   * @param bodyBuilder the InvocableMemberBodyBuilder which will be appended 
+   *            to export method
+   */
+  private void buildExportCatchBlock(InvocableMemberBodyBuilder bodyBuilder, JavaType exceptionType) {
+    // } catch (JRException e) {
+    bodyBuilder.appendFormalLine("catch (%s e) {", getNameOfJavaType(exceptionType));
+    bodyBuilder.indent();
+    // String errorMessage = this.messageSource.getMessage("error_exportingErrorException", 
+    bodyBuilder.appendFormalLine(
+        "String errorMessage = this.%s.getMessage(\"error_exportingErrorException\", ",
+        this.messageSourceField.getFieldName().getSymbolName());
+    //    new Object[] {StringUtils.substringAfterLast(fileName, ".").toUpperCase()}, 
+    bodyBuilder.indent();
+    bodyBuilder.appendFormalLine(
+        "new Object[] {%s.substringAfterLast(fileName, \".\").toUpperCase()}, ",
+        getNameOfJavaType(STRING_UTILS_APACHE));
+    //    String.format("Error while exporting data to %s file", StringUtils
+    bodyBuilder.appendFormalLine(
+        "String.format(\"Error while exporting data to %s file\", StringUtils.",
+        getNameOfJavaType(STRING_UTILS_APACHE));
+    bodyBuilder.indent();
+    //        substringAfterLast(fileName, ".").toUpperCase()), locale);
+    bodyBuilder.appendFormalLine("substringAfterLast(fileName, \".\").toUpperCase()), locale);");
+    bodyBuilder.indentRemove();
+    bodyBuilder.indentRemove();
+    // throw new ExportingErrorException(errorMessage);
+    bodyBuilder.appendFormalLine("throw new %s(errorMessage);",
+        getNameOfJavaType(this.jasperReportsMap.get("ExportingErrorException")));
+    bodyBuilder.indentRemove();
+    // }
+    bodyBuilder.appendFormalLine("}");
+  }
+
+  /**
    * Builds export (TYPE) method, which is similar in all export target types.
    * 
    * @param exporterClassInstantiation the String with the instantiation of 
@@ -1231,6 +1297,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         .add(new AnnotatedJavaType(JavaType.STRING_ARRAY, requestParamAnnotation.build()));
     parameterTypes
         .add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse")));
+    parameterTypes.add(LOCALE_PARAM);
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -1245,6 +1312,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     parameterNames.add(PAGEABLE_PARAM_NAME);
     parameterNames.add(DATATABLES_COLUMNS_PARAM_NAME);
     parameterNames.add(RESPONSE_PARAM_NAME);
+    parameterNames.add(LOCALE_PARAM_NAME);
 
     // Adding annotations
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -1264,9 +1332,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // export(search, pageable, datatablesColumns, response, new JasperReportsCsvExporter(), "ENTITY-ITEM_report.csv");
-    bodyBuilder.appendFormalLine("export(%s, %s, %s, %s, %s, \"%s\");", GLOBAL_SEARCH_PARAM_NAME,
-        PAGEABLE_PARAM_NAME, DATATABLES_COLUMNS_PARAM_NAME, RESPONSE_PARAM_NAME,
-        exporterClassInstantiation, fileName);
+    bodyBuilder.appendFormalLine("export(%s, %s, %s, %s, %s, \"%s\", %s);",
+        GLOBAL_SEARCH_PARAM_NAME, PAGEABLE_PARAM_NAME, DATATABLES_COLUMNS_PARAM_NAME,
+        RESPONSE_PARAM_NAME, exporterClassInstantiation, fileName,
+        LOCALE_PARAM_NAME.getSymbolName());
 
     // return ResponseEntity.ok().build();
     bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
@@ -1276,7 +1345,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
             JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
-    methodBuilder.setThrowsTypes(throwTypes);
 
     // Add JavaDoc
     CommentStructure commentStructure = new CommentStructure();
@@ -1297,6 +1365,26 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     methodBuilder.setCommentStructure(commentStructure);
 
     return methodBuilder.build();
+  }
+
+  /**
+   * Returns a String with default label to show when cannot find the right
+   * label code.
+   * 
+   * @return a String with default field label
+   */
+  private String getFieldDefaultLabelValue(String fieldName) {
+    String[] splittedFieldName = fieldName.split("[A-Z]");
+    String label = "";
+
+    for (int i = 0; i < splittedFieldName.length; i++) {
+      if (i != 0) {
+        label = label.concat(" ");
+      }
+      label = label.concat(StringUtils.capitalize(splittedFieldName[i]));
+    }
+
+    return label;
   }
 
   /**
@@ -1557,9 +1645,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         totalItemNamesCount, itemNames));
 
     // if (search != null && StringUtils.hasText(search.getText())) {
-    bodyBuilder.appendFormalLine(String.format("if (%s != null && %s.hasText(%s.getText())) {",
-        GLOBAL_SEARCH_PARAM_NAME, getNameOfJavaType(SpringJavaType.STRING_UTILS),
-        GLOBAL_SEARCH_PARAM_NAME));
+    bodyBuilder
+        .appendFormalLine(String.format("if (%s != null && %s.isNotBlank(%s.getText())) {",
+            GLOBAL_SEARCH_PARAM_NAME, getNameOfJavaType(STRING_UTILS_APACHE),
+            GLOBAL_SEARCH_PARAM_NAME));
 
     // Getting count method
     MethodMetadata countMethod = null;
@@ -2683,8 +2772,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     //  if (search != null && StringUtils.hasText(search.getText())) {
     //      totalCustomersCount = customerService.count();
     //  }
-    bodyBuilder.appendFormalLine("if (search != null && %s.hasText(search.getText())) {",
-        getNameOfJavaType(SpringJavaType.STRING_UTILS));
+    bodyBuilder.appendFormalLine("if (search != null && %s.isNotBlank(search.getText())) {",
+        getNameOfJavaType(STRING_UTILS_APACHE));
     bodyBuilder.indent();
     bodyBuilder.appendFormalLine("%s = %s.%s();", totalVarName, controllerMetadata
         .getServiceField().getFieldName(), serviceMetadata.getCurrentCountMethod().getMethodName());

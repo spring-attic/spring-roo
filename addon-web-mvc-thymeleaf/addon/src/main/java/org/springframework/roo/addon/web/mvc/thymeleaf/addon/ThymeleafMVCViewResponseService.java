@@ -329,6 +329,10 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
         "JasperReportsPdfExporter");
     createClassFromTemplate(module, "JasperReportsXlsExporter-template._java",
         "JasperReportsXlsExporter");
+
+    // Add ExportingErrorException
+    createClassFromTemplate(module, "ExportingErrorException-template._java",
+        "ExportingErrorException");
   }
 
   /**

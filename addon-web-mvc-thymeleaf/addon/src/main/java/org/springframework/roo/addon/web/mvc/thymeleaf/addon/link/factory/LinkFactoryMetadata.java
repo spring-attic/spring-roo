@@ -360,11 +360,11 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // if (METHOD_NAME_ARGUMENT_NAME.equals(EXPORT_CSV)) {
     bodyBuilder.appendFormalLine("if (%s.equals(EXPORT_CSV)) {", METHOD_NAME_ARGUMENT_NAME);
 
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).exportCsv(null, null, null, null)).build();
+    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).exportCsv(null, null, null, null, null)).build();
     bodyBuilder.indent();
     bodyBuilder
         .appendFormalLine(
-            "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).exportCsv(null, null, null, null)).build();",
+            "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).exportCsv(null, null, null, null, null)).build();",
             SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
                 this.importResolver));
     bodyBuilder.indentRemove();
@@ -375,11 +375,11 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // if (METHOD_NAME_ARGUMENT_NAME.equals(EXPORT_PDF)) {
     bodyBuilder.appendFormalLine("if (%s.equals(EXPORT_PDF)) {", METHOD_NAME_ARGUMENT_NAME);
 
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).exportPdf(null, null, null)).build();
+    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).exportPdf(null, null, null, null, null)).build();
     bodyBuilder.indent();
     bodyBuilder
         .appendFormalLine(
-            "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).exportPdf(null, null, null, null)).build();",
+            "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).exportPdf(null, null, null, null, null)).build();",
             SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
                 this.importResolver));
     bodyBuilder.indentRemove();
@@ -390,11 +390,11 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // if (METHOD_NAME_ARGUMENT_NAME.equals(EXPORT_XLS)) {
     bodyBuilder.appendFormalLine("if (%s.equals(EXPORT_XLS)) {", METHOD_NAME_ARGUMENT_NAME);
 
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).exportXls(null, null, null)).build();
+    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).exportXls(null, null, null, null)).build();
     bodyBuilder.indent();
     bodyBuilder
         .appendFormalLine(
-            "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).exportXls(null, null, null, null)).build();",
+            "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).exportXls(null, null, null, null, null)).build();",
             SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
                 this.importResolver));
     bodyBuilder.indentRemove();
@@ -412,13 +412,6 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
             SpringJavaType.URI_COMPONENTS, parameterTypes, parameterNames, bodyBuilder);
-
-    // Add throws types
-    final List<JavaType> throwTypes = new ArrayList<JavaType>();
-    throwTypes.add(JR_EXCEPTION);
-    throwTypes.add(IO_EXCEPTION);
-    throwTypes.add(CLASS_NOT_FOUND_EXCEPTION);
-    methodBuilder.setThrowsTypes(throwTypes);
 
     return methodBuilder.build();
   }

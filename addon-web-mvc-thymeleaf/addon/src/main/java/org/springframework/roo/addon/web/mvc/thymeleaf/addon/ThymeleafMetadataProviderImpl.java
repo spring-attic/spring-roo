@@ -256,6 +256,9 @@ public class ThymeleafMetadataProviderImpl extends
             jasperReportsExporterMap.put("JasperReportsPdfExporter", type);
           } else if (type.getSimpleTypeName().equals("JasperReportsXlsExporter")) {
             jasperReportsExporterMap.put("JasperReportsXlsExporter", type);
+          } else if (type.getSimpleTypeName().equals("ExportingErrorException")) {
+            // Get ExportingErrorException
+            jasperReportsExporterMap.put("ExportingErrorException", type);
           }
         }
       }

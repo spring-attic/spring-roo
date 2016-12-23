@@ -162,7 +162,7 @@
     function exportCsvButton(datatables, conf) {
       var dataExportCsvUrl = getDataValue(datatables, 'export-csv-url');
       if (dataExportCsvUrl) {
-    	  return getExportButton(datatables, dataExportCsvUrl, "CSV");
+    	  return getExportButton(datatables, dataExportCsvUrl, "CSV", false);
       }
     }
     
@@ -175,7 +175,7 @@
     function exportExcelButton(datatables, conf) {
       var dataExportXlsUrl = getDataValue(datatables, 'export-xls-url');
       if (dataExportXlsUrl) {
-    	  return getExportButton(datatables, dataExportXlsUrl, "XLS");
+    	  return getExportButton(datatables, dataExportXlsUrl, "XLS", false);
       }
     }
 
@@ -189,7 +189,7 @@
     function exportPdfButton(datatables, conf) {
       var dataExportPdfUrl = getDataValue(datatables, 'export-pdf-url');
       if (dataExportPdfUrl) {
-    	  return getExportButton(datatables, dataExportPdfUrl, "PDF");
+    	  return getExportButton(datatables, dataExportPdfUrl, "PDF", true);
       }
     }
     
@@ -203,7 +203,7 @@
      * 			the button name
      * @return a new export button with the provided configuration
      */
-    function getExportButton(datatables, url, type) {
+    function getExportButton(datatables, url, type, openInNewTab) {
     	return {
             'action': function(e, datatables, node, config) {
             	// Check if current datatable has some records. If not, 
@@ -219,11 +219,18 @@
             	// parameters.
             	var processedUrl = getUrlWithDatatablesParams(datatables, url);
 
-            	// Open the processed URL in a new window
-            	window.open(
-            	  processedUrl,
-            	  '_blank'
-            	);
+            	// Open the processed URL
+            	if (openInNewTab) {
+            		window.open(
+            				processedUrl,
+            				'_blank'
+                    		);
+            	} else {
+            		window.open(
+                        	  processedUrl,
+                        	  '_self'
+                        	);
+            	}
             },
             'className': 'btn-action export-' + type.toLowerCase(),
             'name': type,

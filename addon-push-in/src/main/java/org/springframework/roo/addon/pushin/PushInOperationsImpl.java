@@ -5,6 +5,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
@@ -253,6 +254,13 @@ public class PushInOperationsImpl implements PushInOperations {
     // Getting member details
     MemberDetails memberDetails =
         getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
+    List<MemberHoldingTypeDetails> memberHoldingTypes = memberDetails.getDetails();
+
+    // Return if the class has not associated ITD's
+    if (memberHoldingTypes.size() == 1
+        && memberHoldingTypes.get(0).getPhysicalTypeCategory() != PhysicalTypeCategory.ITD) {
+      return pushedElements;
+    }
 
     // Check if the provided class is a test to be able to select valid
     // class path
