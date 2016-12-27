@@ -1799,6 +1799,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     pathVariableAnnotation.addStringAttribute("value", StringUtils.uncapitalize(pathVariable));
 
     parameterTypes.add(new AnnotatedJavaType(idType, pathVariableAnnotation.build()));
+    parameterTypes.add(LOCALE_PARAM);
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -1809,6 +1810,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(idName);
+    parameterNames.add(LOCALE_PARAM_NAME);
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -1823,9 +1825,15 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // }
     bodyBuilder.appendFormalLine("if (%s == null) {", pathVariable);
     bodyBuilder.indent();
-    bodyBuilder.appendFormalLine(
-        "throw new %s(String.format(\"%s with identifier '%%s' not found\",%s));",
-        getNameOfJavaType(SPRINGLETS_NOT_FOUND_EXCEPTION), entityType.getSimpleTypeName(), idName);
+    // String message = messageSource.getMessage("error_NotFound", entity, null, locale);
+    bodyBuilder
+        .appendFormalLine(
+            "String message = %s.getMessage(\"error_NotFound\", new Object[] {\"%s\", %s}, \"The record couldn't be found\", %s);",
+            MESSAGE_SOURCE, this.entity.getSimpleTypeName(), idName,
+            LOCALE_PARAM_NAME.getSymbolName());
+    // throw new NotFoundException(message);
+    bodyBuilder.appendFormalLine("throw new %s(message);",
+        getNameOfJavaType(SPRINGLETS_NOT_FOUND_EXCEPTION));
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
 
