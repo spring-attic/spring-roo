@@ -1877,8 +1877,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     annotations.add(getMappingAnnotation);
     this.mvcMethodNames.put(methodName.getSymbolName(), methodName.getSymbolName());
 
-    annotations.add(RESPONSE_BODY_ANNOTATION);
-
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
