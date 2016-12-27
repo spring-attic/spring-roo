@@ -36,6 +36,7 @@ import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.Jsr303JavaType;
 import org.springframework.roo.model.RooJavaType;
@@ -50,6 +51,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -81,6 +83,13 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
   // Max fields that will be included on generated view
   private static final int MAX_FIELDS_TO_ADD = 5;
+
+  private final List<JavaType> STANDAR_TYPES = Arrays.asList(JavaType.BOOLEAN_OBJECT,
+      JavaType.STRING, JavaType.LONG_OBJECT, JavaType.INT_OBJECT, JavaType.FLOAT_OBJECT,
+      JavaType.DOUBLE_OBJECT);
+
+  private final List<JavaType> DATE_TIME_TYPES = Arrays.asList(JdkJavaType.DATE,
+      JdkJavaType.CALENDAR);
 
   private static Logger LOGGER = HandlerUtils.getLogger(AbstractViewGenerationService.class);
 
@@ -1170,6 +1179,23 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       final String fieldResourceId = buildLabel(entityName, field.getFieldName().getSymbolName());
 
       properties.put(fieldResourceId, field.getFieldName().getReadableSymbolName());
+
+      // ROO-3865: Add suport for enum internationalization
+      // If field is enum, add each enum value as label with proper format
+      JavaType fieldType = field.getFieldType();
+      final ClassOrInterfaceTypeDetails javaTypeDetails =
+          getTypeLocationService().getTypeDetails(fieldType);
+      if (javaTypeDetails != null
+          && javaTypeDetails.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
+        List<JavaSymbolName> enumConstants = javaTypeDetails.getEnumConstants();
+        for (JavaSymbolName constant : enumConstants) {
+          String enumLabelCode =
+              XmlUtils.convertId("enum.".concat(fieldType.getSimpleTypeName()).concat(".")
+                  .concat(constant.getSymbolName()));
+          String enumLabelValue = StringUtils.capitalize(constant.getSymbolName().toLowerCase());
+          properties.put(enumLabelCode, enumLabelValue);
+        }
+      }
 
       // Add related entity fields
       if (field.getFieldType().getFullyQualifiedTypeName().equals(Set.class.getName())
