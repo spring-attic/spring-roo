@@ -1351,6 +1351,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     comments.add(new JavadocComment(
         "It delegates in the `export` method providing the necessary information"));
     comments.add(new JavadocComment(String.format("to generate a %s report.", fileType)));
+    comments.add(new JavadocComment(" "));
     comments
         .add(new JavadocComment(
             "@param search The GlobalSearch that contains the filter provided by the Datatables component"));
