@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -32,18 +31,14 @@ import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.XmlUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 /**
  * Implementation of ControllerMVCResponseService that provides
@@ -244,6 +239,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     getViewGenerationService().addModalConfirm(module.getModuleName(), ctx);
     getViewGenerationService().addModalConfirmDelete(module.getModuleName(), ctx);
     getViewGenerationService().addModalExportEmptyError(module.getModuleName(), ctx);
+    getViewGenerationService().addModalConfirmDeleteBatch(module.getModuleName(), ctx);
     getViewGenerationService().addSessionLinks(module.getModuleName(), ctx);
     getViewGenerationService().addLanguages(module.getModuleName(), ctx);
     getViewGenerationService().addAccessibilityView(module.getModuleName(), ctx);
@@ -465,7 +461,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
 
     // Add Datatables and Datatables related WebJars
     getProjectOperations().addProperty(rootModuleName,
-        new Property("datatables.version", "1.10.11"));
+        new Property("datatables.version", "1.10.12"));
     dependencies.add(new Dependency("org.webjars.bower", "datatables", "${datatables.version}"));
 
     getProjectOperations().addProperty(rootModuleName,
@@ -594,6 +590,8 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
         LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, module.getModuleName());
 
     // copy all necessary styles inside SRC_MAIN_RESOURCES/static/public/css
+    copyDirectoryContents("static/css/checkboxes-1.0.4/*.css",
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/css/checkboxes-1.0.4"), true);
     copyDirectoryContents("static/css/*.css",
         getPathResolver().getIdentifier(resourcesPath, "/static/public/css"), true);
 
@@ -622,6 +620,8 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     // copy all necessary scripts inside SRC_MAIN_RESOURCES/static/public/js
     copyDirectoryContents("static/js/*.js",
         getPathResolver().getIdentifier(resourcesPath, "/static/public/js"), true);
+    copyDirectoryContents("static/js/checkboxes-1.0.4/*.js",
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/js/checkboxes-1.0.4"), true);
 
     // copy all necessary scripts inside SRC_MAIN_RESOURCES/templates/fragments/js
     copyDirectoryContents("templates/fragments/js/*.html",

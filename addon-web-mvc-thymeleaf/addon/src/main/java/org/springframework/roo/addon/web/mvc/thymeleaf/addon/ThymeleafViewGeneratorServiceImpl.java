@@ -277,6 +277,27 @@ public class ThymeleafViewGeneratorServiceImpl extends
   }
 
   @Override
+  public void addModalConfirmDeleteBatch(String moduleName, ViewContext<ThymeleafMetadata> ctx) {
+    // Process elements to generate
+    Document newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getFragmentsFolder(moduleName).concat("/modal-confirm-delete-batch").concat(
+            getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge("fragments/modal-confirm-delete-batch", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("fragments/modal-confirm-delete-batch", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+  }
+
+  @Override
   public void addModalExportEmptyError(String moduleName, ViewContext<ThymeleafMetadata> ctx) {
     // Process elements to generate
     Document newDoc = null;

@@ -43,7 +43,6 @@ public class LinkFactoryMetadataProviderImpl extends AbstractMemberDiscoveringIt
    *
    */
   @Override
-  @SuppressWarnings("unchecked")
   protected void activate(final ComponentContext cContext) {
     super.activate(cContext);
     this.registryTracker =
@@ -108,7 +107,7 @@ public class LinkFactoryMetadataProviderImpl extends AbstractMemberDiscoveringIt
         "Error creating controller %s methods to generate URL's.",
         controller.getFullyQualifiedTypeName());
 
-    // Get ControllerType
+    // Get ControllerMetadata to get info from it
     String controllerMetadataKey = ControllerMetadata.createIdentifier(controllerDetails);
     final ControllerMetadata controllerMetadata = getMetadataService().get(controllerMetadataKey);
 

@@ -74,6 +74,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   protected static final JavaSymbolName CREATE_METHOD_NAME = new JavaSymbolName("create");
   protected static final JavaSymbolName LIST_METHOD_NAME = new JavaSymbolName("list");
   protected static final JavaSymbolName DELETE_METHOD_NAME = new JavaSymbolName("delete");
+  protected static final JavaSymbolName DELETE_BATCH_METHOD_NAME =
+      new JavaSymbolName("deleteBatch");
   protected static final JavaSymbolName LIST_URI_METHOD_NAME = new JavaSymbolName("listURI");
   protected static final JavaSymbolName LIST_DATATABLES_METHOD_NAME = new JavaSymbolName(
       "datatables");
@@ -185,6 +187,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private final MethodMetadata listMethod;
   private final MethodMetadata listDatatablesMethod;
   private final MethodMetadata select2Method;
+  private final MethodMetadata deleteBatchMethod;
 
   // Item Methods
   private final MethodMetadata modelAttributeMethod;
@@ -328,7 +331,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     this.viewsPath =
         controllerMetadata.getPath().startsWith("/") ? controllerMetadata.getPath().substring(1)
             : controllerMetadata.getPath();
-
     this.mvcMethodNames = new HashMap<String, String>();
 
     //Add @Controller
@@ -374,20 +376,21 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
           this.select2Method = null;
         }
 
-        if (readOnly) {
+        if (this.readOnly) {
           this.initBinderMethod = null;
           this.populateFormMethod = null;
           this.populateFormatsMethod = null;
           this.createMethod = null;
           this.createFormMethod = null;
+          this.deleteBatchMethod = null;
         } else {
           this.initBinderMethod = addAndGet(getInitBinderMethod(entity), allMethods);
           this.populateFormatsMethod = addAndGet(getPopulateFormatsMethod(), allMethods);
           this.populateFormMethod = addAndGet(getPopulateFormMethod(), allMethods);
           this.createMethod = addAndGet(getCreateMethod(), allMethods);
           this.createFormMethod = addAndGet(getCreateFormMethod(), allMethods);
+          this.deleteBatchMethod = addAndGet(getDeleteBatchMethod(), allMethods);
         }
-
 
         this.modelAttributeMethod = null;
         this.editFormMethod = null;
@@ -472,7 +475,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
           this.deleteMethod = addAndGet(getDeleteMethod(), allMethods);
         }
 
-
+        this.deleteBatchMethod = null;
         this.listMethod = null;
         this.listDatatablesMethod = null;
         this.createMethod = null;
@@ -534,6 +537,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.finderFormMethods = Collections.unmodifiableMap(tmpFinderForms);
         // FIXME We need more method to handle it... To Be Defined!!!
 
+        this.deleteBatchMethod = null;
         this.listMethod = null;
         this.listDatatablesMethod = null;
         this.createMethod = null;
@@ -618,6 +622,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.createMethod = null;
         this.createFormMethod = null;
 
+        this.deleteBatchMethod = null;
         this.editFormMethod = null;
         this.updateMethod = null;
         this.deleteMethod = null;
@@ -684,6 +689,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.createMethod = null;
         this.createFormMethod = null;
 
+        this.deleteBatchMethod = null;
         this.editFormMethod = null;
         this.updateMethod = null;
         this.deleteMethod = null;
@@ -2241,6 +2247,73 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         serviceMetadata.getCurrentDeleteMethod().getMethodName(), entityItemName);
 
     // return ResponseEntity.ok().build();
+    bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "deleteBatch" method using Thymeleaf view 
+   * response type. This method will be only created if it not exists in 
+   * collection JSON controller.
+   *
+   * @return MethodMetadata
+   */
+  private MethodMetadata getDeleteBatchMethod() {
+
+    // Define methodName
+    final JavaSymbolName methodName = DELETE_BATCH_METHOD_NAME;
+
+    // Adding parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+
+    AnnotationMetadataBuilder pathVariable =
+        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
+    pathVariable.addStringAttribute("value", entityIdentifierPlural);
+    parameterTypes.add(new AnnotatedJavaType(JavaType.collectionOf(entityMetadata
+        .getCurrentIndentifierField().getFieldType()), pathVariable.build()));
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Adding parameter names
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName(entityIdentifierPlural));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @DeleteMapping annotation
+    AnnotationMetadataBuilder deleteMappingAnnotation =
+        new AnnotationMetadataBuilder(DELETE_MAPPING);
+    deleteMappingAnnotation.addStringAttribute("value", "/batch/{" + entityIdentifierPlural + "}");
+    deleteMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    annotations.add(deleteMappingAnnotation);
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // serviceField.SERVICE_DELETE_METHOD(ids);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine("%s.%s(%s);", controllerMetadata.getServiceField().getFieldName(),
+        serviceMetadata.getCurrentDeleteBatchMethod().getMethodName(), entityIdentifierPlural);
+
+    // return ResponseEntity.ok().build();
+    bodyBuilder.newLine();
     bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
 
     MethodMetadataBuilder methodBuilder =

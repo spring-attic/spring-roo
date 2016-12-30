@@ -22,6 +22,7 @@
       'language': {
         'buttons': {
           'add': /*[[#{label_datatables_add}]]*/ 'Add',
+          'delete': /*[[#{label_datatables_delete}]]*/ 'Delete',
           'colvis': /*[[#{label_datatables_columns}]]*/ 'Columns',
           'pageLength': /*[[#{label_datatables_showRows}]]*/ 'Show %d rows'
         },

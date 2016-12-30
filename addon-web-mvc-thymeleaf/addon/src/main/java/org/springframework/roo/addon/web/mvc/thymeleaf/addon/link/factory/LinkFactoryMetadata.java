@@ -49,6 +49,14 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
   protected static final String CREATE_FIELD_VALUE = "create";
   protected static final String CREATE_FORM_FIELD_NAME = "CREATE_FORM";
   protected static final String CREATE_FORM_FIELD_VALUE = "createForm";
+  protected static final String DELETE_BATCH_FIELD_NAME = "DELETE_BATCH";
+  protected static final String DELETE_BATCH_FIELD_VALUE = "deleteBatch";
+  protected static final String EXPORT_CSV_FIELD_NAME = "EXPORT_CSV";
+  protected static final String EXPORT_CSV_FIELD_VALUE = "exportCsv";
+  protected static final String EXPORT_PDF_FIELD_NAME = "EXPORT_PDF";
+  protected static final String EXPORT_PDF_FIELD_VALUE = "exportPdf";
+  protected static final String EXPORT_XLS_FIELD_NAME = "EXPORT_XLS";
+  protected static final String EXPORT_XLS_FIELD_VALUE = "exportXls";
 
   private static final JavaType JR_EXCEPTION = new JavaType(
       "net.sf.jasperreports.engine.JRException");
@@ -123,12 +131,8 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
    * @param governorPhysicalTypeMetadata
    *            the governor, which is expected to contain a
    *            {@link ClassOrInterfaceTypeDetails} (required)
-   * @param collectionController
-   * @param formBeansEnumFields
-   * @param formBeansDateTimeFields
-   * @param detailsCollectionController
-   * @param relatedCollectionController
-  
+   * @param controller
+   * @param controllerMetadata
    */
   public LinkFactoryMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType controller,
@@ -160,9 +164,14 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
         ensureGovernorHasField(returnStaticStringFieldBuilder(CREATE_FIELD_NAME, CREATE_FIELD_VALUE));
         ensureGovernorHasField(returnStaticStringFieldBuilder(CREATE_FORM_FIELD_NAME,
             CREATE_FORM_FIELD_VALUE));
-        ensureGovernorHasField(returnStaticStringFieldBuilder("EXPORT_CSV", "exportCsv"));
-        ensureGovernorHasField(returnStaticStringFieldBuilder("EXPORT_PDF", "exportPdf"));
-        ensureGovernorHasField(returnStaticStringFieldBuilder("EXPORT_XLS", "exportXls"));
+        ensureGovernorHasField(returnStaticStringFieldBuilder(DELETE_BATCH_FIELD_NAME,
+            DELETE_BATCH_FIELD_VALUE));
+        ensureGovernorHasField(returnStaticStringFieldBuilder(EXPORT_CSV_FIELD_NAME,
+            EXPORT_CSV_FIELD_VALUE));
+        ensureGovernorHasField(returnStaticStringFieldBuilder(EXPORT_PDF_FIELD_NAME,
+            EXPORT_PDF_FIELD_VALUE));
+        ensureGovernorHasField(returnStaticStringFieldBuilder(EXPORT_XLS_FIELD_NAME,
+            EXPORT_XLS_FIELD_VALUE));
 
         // Create methods
         this.toUriForCollectionControllerMethod =
@@ -350,6 +359,21 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     bodyBuilder.indent();
     bodyBuilder.appendFormalLine(
         "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).createForm(null)).build();",
+        SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
+            this.importResolver));
+    bodyBuilder.indentRemove();
+
+    // }
+    bodyBuilder.appendFormalLine("}");
+
+    // if (METHOD_NAME_ARGUMENT_NAME.equals(DELETE_BATCH)) {
+    bodyBuilder.appendFormalLine("if (%s.equals(%s)) {", METHOD_NAME_ARGUMENT_NAME,
+        DELETE_BATCH_FIELD_NAME);
+
+    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).deleteBatch(null)).build();
+    bodyBuilder.indent();
+    bodyBuilder.appendFormalLine(
+        "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).deleteBatch(null)).build();",
         SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
             this.importResolver));
     bodyBuilder.indentRemove();
@@ -679,11 +703,6 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
             SpringJavaType.URI_COMPONENTS, parameterTypes, parameterNames, bodyBuilder);
 
     return methodBuilder.build();
-  }
-
-  private MethodMetadata getToUriForSearchControllerMethod() {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   /**

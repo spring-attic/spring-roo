@@ -18,4 +18,6 @@ public interface ThymeleafViewGeneratorService extends MVCViewGenerationService<
 
   void addModalExportEmptyError(String moduleName, ViewContext<ThymeleafMetadata> ctx);
 
+  void addModalConfirmDeleteBatch(String moduleName, ViewContext<ThymeleafMetadata> ctx);
+
 }

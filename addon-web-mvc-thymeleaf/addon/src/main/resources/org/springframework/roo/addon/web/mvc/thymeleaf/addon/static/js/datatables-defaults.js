@@ -27,6 +27,11 @@
     $.extend($.fn.dataTable.ext.buttons, {
       'add': createButton
     });
+
+    // Add a delete rows button
+    $.extend($.fn.dataTable.ext.buttons, {
+      'delete': deleteBatchButton
+    });
     
     // Add a csv export button
     $.extend($.fn.dataTable.ext.buttons, {
@@ -58,6 +63,7 @@
         },
         'buttons': [
           'add',
+          'delete',
           {
             'extend': 'colvis',
             'className': 'btn-action',
@@ -152,7 +158,84 @@
         //}
       }
     };
-    
+
+    /**
+     * Creates a new button in the buttons plugin toolbar to delete rows selected
+     * with the checkbox extension,
+     * using the value of the table tag attribute 'data-delete-url-function' as
+     * a function which returns the URL or, if it is not defined, the value of
+     * the table tag attribute 'data-create-url' to be used as the URL.
+     */
+    function deleteBatchButton(datatables, conf) {
+      var deleteUrl = getDataDeleteBatchUrl(datatables);
+
+      if (deleteUrl) {
+        return {
+          'action': function(e, datatables, node, config) {
+            var tableId = getTableId(datatables);
+            var $deleteConfirm = $('#' + tableId + 'DeleteBatchConfirm');
+
+            // When the delete element modal is opened, copy the current
+            // element id to be deleted to the 'TABLE_ID + DeleteRowId'
+            // element
+            $deleteConfirm.on('show.bs.modal', function(e) {
+              // Get data-row-id attribute of the clicked element
+              var rows_selected = datatables.columns().checkboxes.selected();
+              
+              // Populate the row-id data attribute in the modal
+              $('#' + tableId + 'DeleteBatchRowId').data('row-id', rows_selected.join(","))
+            });
+
+            $('#' + tableId + 'DeleteBatchButton').on('click', function() {
+               deleteBatchElement(datatables);
+            });
+            
+            $deleteConfirm.modal();
+          },
+          'className': 'btn-action delete',
+          'name': 'delete',
+          'text': datatables.i18n('buttons.delete', 'Delete')
+        };
+      }
+    };
+
+    /**
+     * Deletes the element whose id is the one in the datatables
+     * row whose _delete_ button has been selected, and the
+     * the opened modal confirmacion has been accepted
+     * (see modal-confirm-delete.html)
+     * @param datatables DataTable on which the calling should act upon
+     */
+    function deleteBatchElement(datatables) {
+      var $token = $("meta[name='_csrf']");
+      var $header = $("meta[name='_csrf_header']");
+      
+      var tableId = getTableId(datatables);
+      var rowIds = $('#' + tableId + 'DeleteBatchRowId').data('row-id');
+      
+      var url = getDeleteBatchUrl(datatables, rowIds);
+      
+      $.ajax({
+         url: url,
+         type: 'DELETE',
+         beforeSend: function (request) {
+           if($token != null && $token.length > 0 && $header != null && $header.length > 0) {
+             request.setRequestHeader($header.attr("content"), $token.attr("content"));
+           }
+         }
+      })
+      .done(function(result) {
+        var $deleteSuccess = $('#' + tableId + 'DeleteBatchSuccess');
+        $deleteSuccess.modal();
+        datatables.columns().checkboxes.deselect();
+        datatables.ajax.reload(); // Refresh Datatables
+      })
+      .fail(function(jqXHR, status) {
+        var $deleteError = $('#' + tableId + 'DeleteBatchError');
+        $deleteError.modal();
+      });
+    }    
+
     /**
      * Creates a new button in the buttons plugin toolbar to export data in 
      * CSV format using the value of the table tag attribute 
@@ -162,7 +245,7 @@
     function exportCsvButton(datatables, conf) {
       var dataExportCsvUrl = getDataValue(datatables, 'export-csv-url');
       if (dataExportCsvUrl) {
-    	  return getExportButton(datatables, dataExportCsvUrl, "CSV", false);
+    	  return getExportButton(datatables, dataExportCsvUrl, "CSV");
       }
     }
     
@@ -175,7 +258,7 @@
     function exportExcelButton(datatables, conf) {
       var dataExportXlsUrl = getDataValue(datatables, 'export-xls-url');
       if (dataExportXlsUrl) {
-    	  return getExportButton(datatables, dataExportXlsUrl, "XLS", false);
+    	  return getExportButton(datatables, dataExportXlsUrl, "XLS");
       }
     }
 
@@ -189,7 +272,7 @@
     function exportPdfButton(datatables, conf) {
       var dataExportPdfUrl = getDataValue(datatables, 'export-pdf-url');
       if (dataExportPdfUrl) {
-    	  return getExportButton(datatables, dataExportPdfUrl, "PDF", true);
+    	  return getExportButton(datatables, dataExportPdfUrl, "PDF");
       }
     }
     
@@ -203,7 +286,7 @@
      * 			the button name
      * @return a new export button with the provided configuration
      */
-    function getExportButton(datatables, url, type, openInNewTab) {
+    function getExportButton(datatables, url, type) {
     	return {
             'action': function(e, datatables, node, config) {
             	// Check if current datatable has some records. If not, 
@@ -219,18 +302,11 @@
             	// parameters.
             	var processedUrl = getUrlWithDatatablesParams(datatables, url);
 
-            	// Open the processed URL
-            	if (openInNewTab) {
-            		window.open(
-            				processedUrl,
-            				'_blank'
-                    		);
-            	} else {
-            		window.open(
-                        	  processedUrl,
-                        	  '_self'
-                        	);
-            	}
+            	// Open the processed URL in a new window
+            	window.open(
+            	  processedUrl,
+            	  '_blank'
+            	);
             },
             'className': 'btn-action export-' + type.toLowerCase(),
             'name': type,
@@ -624,11 +700,58 @@
      * the selected element Id has to be inserted.
      *
      * @param datatables DataTable on which the calling should act upon
+     */
+    function getDataDeleteUrl(datatables) {
+      var url = getDataValue(datatables, 'delete-url');
+      return url;
+    }
+    
+    /**
+     * Returns the URL to remove an element of the Datatables.
+     * The value is defined in the Datatables table tag with a
+     * 'data-delete-url' as the URL to use.
+     *
+     * The URL contains the text *_ID_* in the place where
+     * the selected element Id has to be inserted, AND it is
+     * replaced with the provided id.
+     *
+     * @param datatables DataTable on which the calling should act upon
      * @param id identifier of the element to remove
      */
     function getDeleteUrl(datatables, id) {
-      var url = getDataValue(datatables, 'delete-url');
+      var url = getDataDeleteUrl(datatables);
       return processUrl(datatables, url, id);
+    }
+
+    /**
+     * Returns the URL to remove a list of elements from the Datatables.
+     * The value is defined in the Datatables table tag with a
+     * 'data-delete-batch-url' as the URL to use.
+     * The URL contains the text *_ID_* in the place where
+     * the selected elements Ids have to be inserted.
+     *
+     * @param datatables DataTable on which the calling should act upon
+     */
+    function getDataDeleteBatchUrl(datatables) {
+      var url = getDataValue(datatables, 'delete-batch-url');
+      return url;
+    }
+
+    /**
+     * Returns the URL to remove a list of elements from the Datatables.
+     * The value is defined in the Datatables table tag with a
+     * 'data-delete-batch-url' as the URL to use.
+     * The URL contains the text *_ID_* in the place where
+     * the selected elements Ids have to be inserted, and it is
+     * replaced with the provided idlist.
+     *
+     * @param datatables DataTable on which the calling should act upon
+     * @param idlist list of identifiers of the elements to remove
+     */
+    function getDeleteBatchUrl(datatables, idlist) {
+      var url = getDataDeleteBatchUrl(datatables);
+      //return processUrl(datatables, url, idlist);
+      return url.concat(idlist);
     }
 
     /**

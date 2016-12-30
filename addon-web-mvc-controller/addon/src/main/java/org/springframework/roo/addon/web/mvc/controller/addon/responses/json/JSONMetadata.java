@@ -88,19 +88,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
   private final boolean readOnly;
   private final ControllerMetadata controllerMetadata;
-  private final MethodMetadata listMethod;
-  private final MethodMetadata showMethod;
-  private final MethodMetadata createMethod;
-  private final MethodMetadata updateMethod;
-  private final MethodMetadata deleteMethod;
-  private final MethodMetadata createBatchMethod;
-  private final MethodMetadata updateBatchMethod;
-  private final MethodMetadata deleteBatchMethod;
   private final Map<String, MethodMetadata> finderMethods;
-  private final MethodMetadata modelAttributeMethod;
   private final ControllerType type;
   private final ConstructorMetadata constructor;
-  private final MethodMetadata listURIMethod;
   private final List<MethodMetadata> allMethods;
   private final ServiceMetadata serviceMetadata;
   private final JavaType entity;
@@ -110,9 +100,18 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private final JpaEntityMetadata entityMetadata;
   private final JavaType itemController;
   private final String entityIdentifierPlural;
-  private final MethodMetadata showURIMethod;
   private final String entityIdentifier;
   private final Map<RelationInfo, MethodMetadata> modelAttributeDetailsMethod;
+
+  private final MethodMetadata listMethod;
+  private final MethodMetadata showMethod;
+  private final MethodMetadata createMethod;
+  private final MethodMetadata updateMethod;
+  private final MethodMetadata deleteMethod;
+  private final MethodMetadata createBatchMethod;
+  private final MethodMetadata updateBatchMethod;
+  private final MethodMetadata deleteBatchMethod;
+  private final MethodMetadata modelAttributeMethod;
   private final MethodMetadata listDetailsMethod;
   private final MethodMetadata addToDetailsMethod;
   private final MethodMetadata removeFromDetailsMethod;
@@ -121,6 +120,8 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private final MethodMetadata showDetailMethod;
   private final MethodMetadata updateDetailMethod;
   private final MethodMetadata deleteDetailMethod;
+  private final MethodMetadata showURIMethod;
+  private final MethodMetadata listURIMethod;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);

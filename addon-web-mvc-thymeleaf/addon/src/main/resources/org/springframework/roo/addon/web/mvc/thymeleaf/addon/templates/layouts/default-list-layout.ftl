@@ -46,6 +46,9 @@
 		<link data-th-href="@{/webjars/datatables.net-select-bs/css/select.bootstrap.css}" rel="stylesheet" type="text/css"
 		  href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css" />
 
+        <link data-th-href="@{/public/css/checkboxes-1.0.4/dataTables.checkboxes.css}" rel="stylesheet" type="text/css" 
+          href="https://gyrocode.github.io/jquery-datatables-checkboxes/1.0.4/css/dataTables.checkboxes.css" />
+
     <!-- Bootswatch CSS custom -->
     <link rel="stylesheet" type="text/css"
       href="../../static/public/css/theme.css"
