@@ -991,15 +991,19 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
+    // Get findAll method
+    MethodMetadata findAllMethod = this.serviceMetadata.getCurrentFindAllWithGlobalSearchMethod();
+
+    // Getting the default return type
+    JavaType defaultReturnType = findAllMethod.getReturnType();
 
     // Obtain the filtered and ordered elements
     // Page<Owner> owners = ownerService.findAll(search, pageable);
     bodyBuilder.appendFormalLine("// Obtain the filtered and ordered elements");
-    bodyBuilder.appendFormalLine("%s<%s> %s = %s.%s(%s, %s);",
-        getNameOfJavaType(SpringJavaType.PAGE), getNameOfJavaType(this.entity),
+    bodyBuilder.appendFormalLine("%s %s = %s.%s(%s, %s);", getNameOfJavaType(defaultReturnType),
         this.entityPluralUncapitalized, this.controllerMetadata.getServiceField().getFieldName()
-            .getSymbolName(), this.serviceMetadata.getCurrentFindAllWithGlobalSearchMethod()
-            .getMethodName().getSymbolName(), GLOBAL_SEARCH_PARAM_NAME, PAGEABLE_PARAM_NAME);
+            .getSymbolName(), findAllMethod.getMethodName().getSymbolName(),
+        GLOBAL_SEARCH_PARAM_NAME, PAGEABLE_PARAM_NAME);
     bodyBuilder.newLine();
 
     // // Prevent generation of reports with empty data
@@ -1949,7 +1953,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // model.addAttribute(new Entity());
     bodyBuilder.appendFormalLine(String.format("model.addAttribute(new %s());",
-        this.entity.getSimpleTypeName()));
+        getNameOfJavaType(this.entity)));
 
     // return "path/create";
     bodyBuilder.appendFormalLine("return new %s(\"%s/create\");",
@@ -2835,14 +2839,18 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // Generate body
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-
     final String itemNames = StringUtils.uncapitalize(this.entityPlural);
+
+    // Getting the findAllMethod
+    MethodMetadata findAllMethod = this.serviceMetadata.getCurrentFindAllWithGlobalSearchMethod();
+
+    // Getting the findAll return type
+    JavaType defaultReturnType = findAllMethod.getReturnType().getParameters().get(0);
 
     // Page<Customer> customers = customerService.findAll(search, pageable);
     bodyBuilder.appendFormalLine("%s<%s> %s = %s.%s(search, pageable);",
-        getNameOfJavaType(SpringJavaType.PAGE), getNameOfJavaType(entity), itemNames,
-        controllerMetadata.getServiceField().getFieldName(), serviceMetadata
-            .getCurrentFindAllMethod().getMethodName());
+        getNameOfJavaType(SpringJavaType.PAGE), getNameOfJavaType(defaultReturnType), itemNames,
+        controllerMetadata.getServiceField().getFieldName(), findAllMethod.getMethodName());
 
     final String totalVarName = "total" + StringUtils.capitalize(this.entityPlural) + "Count";
     // long totalCustomersCount = customers.getTotalElements();
@@ -2864,17 +2872,18 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // DatatablesData<Entity> datatablesData = new DatatablesData<Entity>(entityNamePlural,
     // allAvailableentityNamePlural, draw);
     bodyBuilder.appendFormalLine("%s<%s> datatablesData = new %s<%s>(%s, %s, draw);",
-        getNameOfJavaType(SPRINGLETS_DATATABLES_DATA), getNameOfJavaType(entity),
-        getNameOfJavaType(SPRINGLETS_DATATABLES_DATA), getNameOfJavaType(entity), itemNames,
-        totalVarName);
+        getNameOfJavaType(SPRINGLETS_DATATABLES_DATA), getNameOfJavaType(defaultReturnType),
+        getNameOfJavaType(SPRINGLETS_DATATABLES_DATA), getNameOfJavaType(defaultReturnType),
+        itemNames, totalVarName);
 
     // return ResponseEntity.ok(datatablesData);
-    bodyBuilder.appendFormalLine("return  %s.ok(datatablesData);",
+    bodyBuilder.appendFormalLine("return %s.ok(datatablesData);",
         getNameOfJavaType(RESPONSE_ENTITY));
 
     // Generating returnType
     JavaType returnType =
-        JavaType.wrapperOf(RESPONSE_ENTITY, JavaType.wrapperOf(SPRINGLETS_DATATABLES_DATA, entity));
+        JavaType.wrapperOf(RESPONSE_ENTITY,
+            JavaType.wrapperOf(SPRINGLETS_DATATABLES_DATA, defaultReturnType));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, parameterTypes,
@@ -2930,11 +2939,18 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // Generate body
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
+    final String itemsName = StringUtils.uncapitalize(this.entityPlural);
+
+    // Getting the findAllMethod
+    MethodMetadata findAllMethod = this.serviceMetadata.getCurrentFindAllWithGlobalSearchMethod();
+
+    // Getting the findAll return type
+    JavaType defaultReturnType = findAllMethod.getReturnType().getParameters().get(0);
+
     // Page<Customer> customers = customerService.findAll(search, pageable);
     bodyBuilder.appendFormalLine("%s<%s> %s = %s.%s(search, pageable);",
-        getNameOfJavaType(SpringJavaType.PAGE), getNameOfJavaType(entity), this.entityPlural,
-        controllerMetadata.getServiceField().getFieldName(), serviceMetadata
-            .getCurrentFindAllMethod().getMethodName());
+        getNameOfJavaType(SpringJavaType.PAGE), getNameOfJavaType(defaultReturnType), itemsName,
+        controllerMetadata.getServiceField().getFieldName(), findAllMethod.getMethodName());
 
     // String idExpression = "#{id}";
     bodyBuilder.appendFormalLine("String idExpression = \"#{%s}\";", this.entityIdentifier);
@@ -2949,17 +2965,18 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // idExpression, textExpression);
     bodyBuilder.appendFormalLine(
         "%s<%s> select2Data = new %s<%s>(%s, idExpression, textExpression);",
-        getNameOfJavaType(SpringletsJavaType.SPRINGLETS_SELECT2_DATA), getNameOfJavaType(entity),
-        getNameOfJavaType(SpringletsJavaType.SPRINGLETS_SELECT2_DATA), getNameOfJavaType(entity),
-        this.entityPlural);
+        getNameOfJavaType(SpringletsJavaType.SPRINGLETS_SELECT2_DATA),
+        getNameOfJavaType(defaultReturnType),
+        getNameOfJavaType(SpringletsJavaType.SPRINGLETS_SELECT2_DATA),
+        getNameOfJavaType(defaultReturnType), itemsName);
 
     // return ResponseEntity.ok(select2Data);
-    bodyBuilder.appendFormalLine("return  %s.ok(select2Data);", getNameOfJavaType(RESPONSE_ENTITY));
+    bodyBuilder.appendFormalLine("return %s.ok(select2Data);", getNameOfJavaType(RESPONSE_ENTITY));
 
     // Generating returnType
     JavaType returnType =
         JavaType.wrapperOf(RESPONSE_ENTITY,
-            JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_SELECT2_DATA, entity));
+            JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_SELECT2_DATA, defaultReturnType));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, parameterTypes,
@@ -3590,11 +3607,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // populateForm(model);
     bodyBuilder.appendFormalLine("%s(model);", populateFormMethod.getMethodName());
-    bodyBuilder.newLine();
-
     // model.addAttribute(new Entity());
     bodyBuilder.appendFormalLine(String.format("model.addAttribute(new %s());",
-        entity.getSimpleTypeName()));
+        getNameOfJavaType(entity)));
 
 
     // return new ModelAndView("path/create");

@@ -2,12 +2,15 @@ package org.springframework.roo.addon.web.mvc.views;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
 import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerLocator;
@@ -125,10 +128,47 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
   public void addListView(String moduleName, JpaEntityMetadata entityMetadata,
       MemberDetails entity, List<T> detailsControllers, ViewContext<T> ctx) {
 
+    // Get the repository related with the entity to check the default return type
+    RepositoryJpaMetadata repository =
+        getRepositoryJpaLocator().getFirstRepositoryMetadata(entityMetadata.getAnnotatedEntity());
+
+    // All views should have a repository
+    Validate.notNull(repository,
+        "ERROR: The provided entity should have an associated repository to be able "
+            + "to generate the list view.");
+
+    // Obtain the defaultReturnType
+    JavaType defaultReturnType = repository.getDefaultReturnType();
+
+    // The defaultReturnType must not be null. If it's not an entity projection,
+    // it must be an entity
+    Validate
+        .notNull(defaultReturnType,
+            "ERROR: The repository associated to the provided entity should define a defaultReturnType");
+
+    // Obtain details of the provided defaultReturnType. If not exists as type, show an error
+    ClassOrInterfaceTypeDetails defaultReturnTypeCid =
+        getTypeLocationService().getTypeDetails(defaultReturnType);
+    Validate.notNull(defaultReturnTypeCid,
+        "ERROR: The provided defaultReturnType is not a valid type");
+    MemberDetails defaultReturnTypeDetails =
+        getMemberDetailsScanner().getMemberDetails(getClass().toString(), defaultReturnTypeCid);
+    Validate.notNull(defaultReturnTypeDetails,
+        "ERROR: Is not possible to obtain any detail from the " + "provided defaultReturnType.");
+
+    List<FieldMetadata> defaultReturnTypeFields = defaultReturnTypeDetails.getFields();
+
+    // To prevent errors during generation, is defaultReturnTypeFields is empty,
+    // all the entity fields will be used
+    if (defaultReturnTypeFields.isEmpty()) {
+      defaultReturnTypeFields = entity.getFields();
+    }
+
     // Getting entity fields that should be included on view
-    List<FieldMetadata> entityFields = getPersistentFields(entity.getFields());
+    List<FieldMetadata> entityFields = getPersistentFields(defaultReturnTypeFields);
     List<FieldItem> fields =
-        getFieldViewItems(entityFields, ctx.getEntityName(), true, ctx, TABLE_SUFFIX);
+        getFieldViewItems(entityMetadata, entityFields, ctx.getEntityName(), true, ctx,
+            TABLE_SUFFIX);
 
     // Process elements to generate
     DOC newDoc = null;
@@ -259,7 +299,8 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       }
     }
     List<FieldItem> fields =
-        getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
+        getFieldViewItems(entityMetadata, entityFields, ctx.getEntityName(), false, ctx,
+            FIELD_SUFFIX);
 
     // TODO: TO BE FIXED when implements details
     List<FieldItem> details = new ArrayList<FieldItem>();
@@ -320,7 +361,8 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     }
 
     List<FieldItem> fields =
-        getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
+        getFieldViewItems(entityMetadata, entityFields, ctx.getEntityName(), false, ctx,
+            FIELD_SUFFIX);
 
     ctx.addExtraParameter("fields", fields);
     ctx.addExtraParameter("entity", entityItem);
@@ -367,7 +409,8 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     }
 
     List<FieldItem> fields =
-        getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, FIELD_SUFFIX);
+        getFieldViewItems(entityMetadata, entityFields, ctx.getEntityName(), false, ctx,
+            FIELD_SUFFIX);
 
     EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
 
@@ -870,6 +913,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
    * returns a List of FieldItem. If provided entity has more than 5 fields,
    * only the first 5 ones will be included on generated view.
    *
+   * @param entityMetadata
    * @param fields
    * @param entityName
    * @param checkMaxFields
@@ -877,14 +921,16 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
    * @param suffixId
    * @return List that contains FieldMetadata that will be added to the view.
    */
-  protected List<FieldItem> getFieldViewItems(List<FieldMetadata> entityFields, String entityName,
-      boolean checkMaxFields, ViewContext<T> ctx, String suffixId) {
+  protected List<FieldItem> getFieldViewItems(JpaEntityMetadata entityMetadata,
+      List<FieldMetadata> entityFields, String entityName, boolean checkMaxFields,
+      ViewContext<T> ctx, String suffixId) {
 
     // Get the MAX_FIELDS_TO_ADD
     List<FieldItem> fieldViewItems = new ArrayList<FieldItem>();
     for (FieldMetadata entityField : entityFields) {
 
-      FieldItem fieldItem = createFieldItem(entityField, entityName, suffixId, ctx, null);
+      FieldItem fieldItem =
+          createFieldItem(entityMetadata, entityField, entityName, suffixId, ctx, null);
 
       if (fieldItem != null) {
         fieldViewItems.add(fieldItem);
@@ -898,12 +944,18 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     return fieldViewItems;
   }
 
-  protected FieldItem createFieldItem(FieldMetadata entityField, String entityName,
-      String suffixId, ViewContext<T> ctx, String referencedFieldName) {
+  protected FieldItem createFieldItem(JpaEntityMetadata entityMetadata, FieldMetadata entityField,
+      String entityName, String suffixId, ViewContext<T> ctx, String referencedFieldName) {
+
+    // Getting current identifier field
+    FieldMetadata identifierField = entityMetadata.getCurrentIndentifierField();
+    FieldMetadata versionField = entityMetadata.getCurrentVersionField();
 
     // Exclude id and version fields
     if (entityField.getAnnotation(JpaJavaType.ID) != null
-        || entityField.getAnnotation(JpaJavaType.VERSION) != null) {
+        || entityField.getAnnotation(JpaJavaType.VERSION) != null
+        || identifierField.getFieldName().equals(entityField.getFieldName())
+        || versionField.getFieldName().equals(entityField.getFieldName())) {
       return null;
     }
 
@@ -1067,17 +1119,53 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
         FieldItem.buildLabel(entityName, last.fieldName));
 
     // Getting all referenced fields
-    List<FieldMetadata> referencedFields =
-        getEditableFields(getMemberDetailsScanner().getMemberDetails(getClass().toString(),
-            childEntityDetails).getFields());
+    List<FieldMetadata> referencedFields = null;
+    // Get the repository related with the child entity to check the default return type
+    RepositoryJpaMetadata repository =
+        getRepositoryJpaLocator().getFirstRepositoryMetadata(
+            childEntityMetadata.getAnnotatedEntity());
+
+    // All views should have a repository
+    Validate.notNull(repository,
+        "ERROR: The provided child entity should have an associated repository to be able "
+            + "to generate the list view.");
+
+    // Obtain the defaultReturnType
+    JavaType defaultReturnType = repository.getDefaultReturnType();
+
+    // The defaultReturnType must not be null. If it's not an entity projection,
+    // it must be an entity
+    Validate
+        .notNull(defaultReturnType,
+            "ERROR: The repository associated to the provided entity should define a defaultReturnType");
+
+    // Obtain details of the provided defaultReturnType. If not exists as type, show an error
+    ClassOrInterfaceTypeDetails defaultReturnTypeCid =
+        getTypeLocationService().getTypeDetails(defaultReturnType);
+    Validate.notNull(defaultReturnTypeCid,
+        "ERROR: The provided defaultReturnType is not a valid type");
+    MemberDetails defaultReturnTypeDetails =
+        getMemberDetailsScanner().getMemberDetails(getClass().toString(), defaultReturnTypeCid);
+    Validate.notNull(defaultReturnTypeDetails,
+        "ERROR: Is not possible to obtain any detail from the " + "provided defaultReturnType.");
+
+    List<FieldMetadata> defaultReturnTypeFields = defaultReturnTypeDetails.getFields();
+    if (defaultReturnTypeFields.isEmpty()) {
+      referencedFields =
+          getEditableFields(getMemberDetailsScanner().getMemberDetails(getClass().toString(),
+              childEntityDetails).getFields());
+    } else {
+      referencedFields = getEditableFields(defaultReturnTypeFields);
+    }
+
     detailItem.addConfigurationElement(
         "referenceFieldFields",
-        getFieldViewItems(referencedFields, entityName + "." + last.fieldName, true, ctx,
-            StringUtils.EMPTY));
+        getFieldViewItems(childEntityMetadata, referencedFields, entityName + "." + last.fieldName,
+            true, ctx, StringUtils.EMPTY));
     detailItem.addConfigurationElement(
         "fields",
-        getFieldViewItems(referencedFields, detailItem.getEntityName(), true, ctx,
-            StringUtils.EMPTY));
+        getFieldViewItems(childEntityMetadata, referencedFields, detailItem.getEntityName(), true,
+            ctx, StringUtils.EMPTY));
     return detailItem;
   }
 
@@ -1242,7 +1330,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
    */
   private Map<String, List<FieldItem>> getRelationFieldItems(List<FieldMetadata> fieldList,
       boolean checkMaxFields, ViewContext<T> ctx, String suffixId,
-      List<String> compositeReferencedFields, JavaType parentEntity) {
+      List<String> compositeReferencedFields, JpaEntityMetadata parentEntity) {
 
     // Create the Map to return
     Map<String, List<FieldItem>> relationFieldsMap = new HashMap<String, List<FieldItem>>();
@@ -1267,14 +1355,13 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
         for (FieldMetadata referencedEntityField : referencedEntityEditableFields) {
 
           // If references the parent entity, don't add it
-          if (referencedEntityField.getFieldType().equals(parentEntity)) {
+          if (referencedEntityField.getFieldType().equals(parentEntity.getAnnotatedEntity())) {
             continue;
           }
 
           FieldItem fieldItem =
-              createFieldItem(referencedEntityField,
-                  entityField.getFieldType().getSimpleTypeName(), suffixId, ctx, entityField
-                      .getFieldName().getSymbolName());
+              createFieldItem(parentEntity, referencedEntityField, entityField.getFieldType()
+                  .getSimpleTypeName(), suffixId, ctx, entityField.getFieldName().getSymbolName());
 
           if (fieldItem != null) {
             referencedEntityFieldItems.add(fieldItem);
@@ -1319,7 +1406,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     }
     Map<String, List<FieldItem>> compositeRelationFields =
         getRelationFieldItems(getEditableFields(entityDetails.getFields()), false, ctx,
-            FIELD_SUFFIX, compositeReferencedFields, entityMetadata.getAnnotatedEntity());
+            FIELD_SUFFIX, compositeReferencedFields, entityMetadata);
     return compositeRelationFields;
   }
 
@@ -1416,6 +1503,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
   protected ControllerLocator getControllerLocator() {
     return serviceInstaceManager.getServiceInstance(this, ControllerLocator.class);
+  }
+
+  protected RepositoryJpaLocator getRepositoryJpaLocator() {
+    return serviceInstaceManager.getServiceInstance(this, RepositoryJpaLocator.class);
   }
 
   protected ControllerOperations getControllerOperations() {

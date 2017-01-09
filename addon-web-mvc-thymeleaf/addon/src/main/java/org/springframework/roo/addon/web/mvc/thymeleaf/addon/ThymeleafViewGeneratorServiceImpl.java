@@ -466,7 +466,8 @@ public class ThymeleafViewGeneratorServiceImpl extends
     // Getting entity fields that should be included on view
     List<FieldMetadata> formBeanFields = getPersistentFields(formBeanDetails.getFields());
     List<FieldItem> fields =
-        getFieldViewItems(formBeanFields, ctx.getEntityName(), true, ctx, TABLE_SUFFIX);
+        getFieldViewItems(entityMetadata, formBeanFields, ctx.getEntityName(), true, ctx,
+            TABLE_SUFFIX);
 
     // Process elements to generate
     Document newDoc = null;
@@ -515,7 +516,8 @@ public class ThymeleafViewGeneratorServiceImpl extends
     // Getting entity fields that should be included on view
     List<FieldMetadata> returnFields = getPersistentFields(returnTypeDetails.getFields());
     List<FieldItem> fields =
-        getFieldViewItems(returnFields, ctx.getEntityName(), true, ctx, TABLE_SUFFIX);
+        getFieldViewItems(entityMetadata, returnFields, ctx.getEntityName(), true, ctx,
+            TABLE_SUFFIX);
 
 
     // Getting formBean details
@@ -526,7 +528,8 @@ public class ThymeleafViewGeneratorServiceImpl extends
     // Getting entity fields that should be included on view
     List<FieldMetadata> formBeanFieldsMetadata = getPersistentFields(formBeanDetails.getFields());
     List<FieldItem> formBeanFields =
-        getFieldViewItems(formBeanFieldsMetadata, ctx.getEntityName(), true, ctx, TABLE_SUFFIX);
+        getFieldViewItems(entityMetadata, formBeanFieldsMetadata, ctx.getEntityName(), true, ctx,
+            TABLE_SUFFIX);
 
 
     // Process elements to generate
