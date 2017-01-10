@@ -2,22 +2,31 @@ package org.springframework.roo.addon.layers.repository.jpa.addon.finder;
 
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderAutocomplete;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.PartTree;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.converters.JavaTypeConverter;
 import org.springframework.roo.converters.LastUsed;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -34,13 +43,7 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 /**
  * Commands for the 'finder' add-on to be used by the ROO shell.
@@ -63,16 +66,12 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
 
+  private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
+
   @Reference
   private FinderOperations finderOperations;
   @Reference
   private LastUsed lastUsed;
-
-  private TypeLocationService typeLocationService;
-  private TypeManagementService typeManagementService;
-  private MemberDetailsScanner memberDetailsScanner;
-  private ProjectOperations projectOperations;
-  private Converter<JavaType> javaTypeConverter;
 
   // Map where entity details will be cached
   private Map<JavaType, MemberDetails> entitiesDetails;
@@ -81,6 +80,7 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
     this.entitiesDetails = new HashMap<JavaType, MemberDetails>();
+    serviceInstaceManager.activate(this.context);
   }
 
   @CliAvailabilityIndicator({"finder add"})
@@ -132,8 +132,8 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
     }
 
     Set<ClassOrInterfaceTypeDetails> projectionsInProject =
-        typeLocationService
-            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_ENTITY_PROJECTION);
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_ENTITY_PROJECTION);
     for (ClassOrInterfaceTypeDetails projection : projectionsInProject) {
 
       // Add only projections associated to the entity specified in the command
@@ -207,9 +207,12 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
     return allPossibleValues;
   }
 
-  @CliOptionAutocompleteIndicator(command = "finder add", includeSpaceOnFinish = false,
+  @CliOptionAutocompleteIndicator(
+      command = "finder add",
+      includeSpaceOnFinish = false,
       param = "returnType",
-      help = "--returnType option should be a Projection class related with the specified entity.")
+      help = "--returnType option could be a Projection class related with the specified entity or the same entity. "
+          + "By default, uses the value of the 'defaultReturnType' parameter specified during the Jpa Repository creation.")
   public List<String> getReturnTypePossibleResults(ShellContext shellContext) {
 
     // Get current value of returnType
@@ -232,6 +235,14 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
           allPossibleValues.add(name);
         }
       }
+    }
+
+    // Always include the entity name, because if the defaultReturnType of the repository
+    // is a projection, the developer should be able to specify an entity as return type.
+    String entityName =
+        replaceTopLevelPackageString(getTypeLocationService().getTypeDetails(entity), currentText);
+    if (!allPossibleValues.contains(entityName)) {
+      allPossibleValues.add(entityName);
     }
 
     return allPossibleValues;
@@ -289,7 +300,29 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
     // Get current value of returnType
     String returnType = shellContext.getParameters().get("returnType");
 
-    return StringUtils.isNotBlank(returnType);
+    // This parameter is not mandatory if returnType has not been specified
+    if (StringUtils.isBlank(returnType)) {
+      return false;
+    }
+
+    // If returnType has been specified, but it's an entity, this parameter is not
+    // mandatory
+    JavaTypeConverter converter = (JavaTypeConverter) getJavaTypeConverter().get(0);
+    JavaType type = converter.convertFromText(returnType, JavaType.class, PROJECT);
+    if (type == null) {
+      return false;
+    }
+    ClassOrInterfaceTypeDetails details = getTypeLocationService().getTypeDetails(type);
+    if (details == null) {
+      return false;
+    }
+    AnnotationMetadata entityAnnotation = details.getAnnotation(RooJavaType.ROO_JPA_ENTITY);
+    if (entityAnnotation != null) {
+      return false;
+    }
+
+    return true;
+
   }
 
   @CliCommand(
@@ -323,7 +356,7 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
               + "(name and type) as those included in the finder `--name`, which can be target entity"
               + " fields or related entity fields."
               + "Possible values are: any of the DTO's in the project."
-              + "This option is mandatory if `--returnType` is specified."
+              + "This option is mandatory if `--returnType` is specified and its a projection."
               + "This option is not available if `--entity` parameter has not been specified before or "
               + "if it does not exist any DTO in generated project. "
               + "Default if option not present: the entity specified in `--entity` option.") final JavaType formBean,
@@ -333,10 +366,11 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
           optionContext = PROJECT,
           help = "The finder's results return type."
               + "Possible values are: link:#entity-projection-command[Projection] classes annotated with "
-              + "`@RooEntityProjection` and related to the entity specified in `--entity` option."
+              + "`@RooEntityProjection` and related to the entity specified in `--entity` option or the same entity."
               + "This option is not available if `--entity` parameter has not been specified before or "
               + "if it does not exist any Projection class associated to the targeted entity."
-              + "Default if not present: the entity specified in `--entity`.") JavaType returnType) {
+              + "Default if not present: the value of the `--defaultReturnType` parameter specified during JPA repository"
+              + " creation.") JavaType returnType) {
 
     // Check if specified finderName follows Spring Data nomenclature
     PartTree partTree = new PartTree(finderName.getSymbolName(), getEntityDetails(entity), this);
@@ -347,14 +381,28 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
             partTree.isValid(),
             "--name parameter must follow Spring Data nomenclature. Please, write a valid value using autocomplete feature (TAB or CTRL + Space)");
 
-    // formBean and return type must be defined together
-    if (formBean != null || returnType != null) {
-      Validate.notNull(formBean, "--formBean is requied when --returnType parameter is defined");
-      if (returnType == null) {
-        // Use entity as default return type
-        returnType = entity;
-      }
-      // No matters about Spring Data nomenclature
+    // If returnType has not been specified, use the specified "defaultReturnType" from the
+    // related repository
+    if (returnType == null) {
+      // Obtain the related repository metadata
+      RepositoryJpaMetadata repositoryMetadata =
+          getRepositoryJpaLocator().getFirstRepositoryMetadata(entity);
+      Validate
+          .notNull(repositoryMetadata,
+              "ERROR: You must create a repository related with this entity before to generate a finder");
+
+      // Use the repository metadata to obtain the default return type
+      returnType = repositoryMetadata.getDefaultReturnType();
+    }
+
+    Validate.notNull(returnType, "ERROR: The new finder must define a returnType");
+
+    // Check if the returnType is an entity. If is is not an entity validate 
+    // that the formBean is not null
+    ClassOrInterfaceTypeDetails type = getTypeLocationService().getTypeDetails(returnType);
+    if (type.getAnnotation(RooJavaType.ROO_JPA_ENTITY) == null) {
+      Validate.notNull(formBean,
+          "--formBean is requied when --returnType parameter is a projection.");
     }
 
     finderOperations.installFinder(entity, finderName, formBean, returnType);
@@ -430,7 +478,8 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
     String typeString = shellContext.getParameters().get("entity");
     JavaType type = null;
     if (typeString != null) {
-      type = getJavaTypeConverter().convertFromText(typeString, JavaType.class, PROJECT);
+      JavaTypeConverter converter = (JavaTypeConverter) getJavaTypeConverter().get(0);
+      type = converter.convertFromText(typeString, JavaType.class, PROJECT);
     } else {
       type = lastUsed.getJavaType();
     }
@@ -493,124 +542,38 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
   }
 
   public ProjectOperations getProjectOperations() {
-    if (projectOperations == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          projectOperations = (ProjectOperations) this.context.getService(ref);
-          return projectOperations;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("ERROR: Cannot load ProjectOperations on FinderOperationsImpl.");
-        return null;
-      }
-    } else {
-      return projectOperations;
-    }
+    return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
   }
 
   public TypeLocationService getTypeLocationService() {
-    if (typeLocationService == null) {
-      // Get all Services implement TypeLocationService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeLocationService = (TypeLocationService) this.context.getService(ref);
-          return typeLocationService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on FinderOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeLocationService;
-    }
+    return serviceInstaceManager.getServiceInstance(this, TypeLocationService.class);
   }
 
   public TypeManagementService getTypeManagementService() {
-    if (typeManagementService == null) {
-      // Get all Services implement TypeManagementService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeManagementService = (TypeManagementService) this.context.getService(ref);
-          return typeManagementService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeManagementService on FinderOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeManagementService;
-    }
+    return serviceInstaceManager.getServiceInstance(this, TypeManagementService.class);
   }
 
 
   public MemberDetailsScanner getMemberDetailsScanner() {
-    if (memberDetailsScanner == null) {
-      // Get all Services implement MemberDetailsScanner interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
+    return serviceInstaceManager.getServiceInstance(this, MemberDetailsScanner.class);
+  }
 
-        for (ServiceReference<?> ref : references) {
-          memberDetailsScanner = (MemberDetailsScanner) this.context.getService(ref);
-          return memberDetailsScanner;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load MemberDetailsScanner on FinderOperationsImpl.");
-        return null;
-      }
-    } else {
-      return memberDetailsScanner;
-    }
+  public RepositoryJpaLocator getRepositoryJpaLocator() {
+    return serviceInstaceManager.getServiceInstance(this, RepositoryJpaLocator.class);
   }
 
   @SuppressWarnings("unchecked")
-  public Converter<JavaType> getJavaTypeConverter() {
-    if (javaTypeConverter == null) {
-
-      // Get all Services implement JavaTypeConverter interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(Converter.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          Converter<?> converter = (Converter<?>) this.context.getService(ref);
-          if (converter.supports(JavaType.class, PROJECT)) {
-            javaTypeConverter = (Converter<JavaType>) converter;
-            return javaTypeConverter;
+  public List<Converter> getJavaTypeConverter() {
+    return serviceInstaceManager.getServiceInstance(this, Converter.class,
+        new ServiceInstaceManager.Matcher<Converter>() {
+          @Override
+          public boolean match(Converter service) {
+            if (service instanceof JavaTypeConverter) {
+              return true;
+            }
+            return false;
           }
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("ERROR: Cannot load JavaTypeConverter on FieldCommands.");
-        return null;
-      }
-    } else {
-      return javaTypeConverter;
-    }
+        });
   }
 
 }

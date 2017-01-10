@@ -375,7 +375,7 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
                 governorPhysicalTypeMetadata.getType().getModule(), parameter);
           }
 
-          if (formBean == null && returnType == null) {
+          if (formBean == null && (returnType == null || entity.equals(returnType))) {
 
             // Add to finder methods list
             findersToAdd.add(finderMethod);
