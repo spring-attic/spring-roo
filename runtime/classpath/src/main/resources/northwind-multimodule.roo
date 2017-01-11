@@ -47,15 +47,18 @@ entity jpa --class ~.Region --table NW_REGIONS --sequenceName NW_REGIONS_REGION_
 
 /// Read-write entities
 
-entity jpa --class ~.Category --table NW_CATEGORIES --sequenceName NW_CATEGORIES_CATEGORY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CATEGORY_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
+entity jpa --class ~.Category --table NW_CATEGORIES --sequenceName NW_CATEGORIES_CATEGORY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CATEGORY_ID --versionField version --versionType java.lang.Long --versionColumn VERSION --entityFormatExpression #{name}
 
-entity jpa --class ~.CustomerOrder --table NW_CUSTOMER_ORDERS --sequenceName NW_CUSTOMER_ORDERS_CUSTOMER_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CUSTOMER_ORDER_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
+// Entity format with localization message, which will be shown as entity info on view fields. 
+// The message should be edited by developer with a localized SpEL expression like "Ship name: #{shipName}"
+entity jpa --class ~.CustomerOrder --table NW_CUSTOMER_ORDERS --sequenceName NW_CUSTOMER_ORDERS_CUSTOMER_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CUSTOMER_ORDER_ID --versionField version --versionType java.lang.Long --versionColumn VERSION --entityFormatMessage customerorder_format
 
 entity jpa --class ~.OrderDetail --table NW_ORDER_DETAILS --sequenceName NW_ORDER_DETAILS_ORDER_DETAIL_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn ORDER_DETAIL_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
 
 entity jpa --class ~.Party --table NW_PARTIES --sequenceName NW_PARTIES_PARTY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PARTY_ID --versionField version --versionType java.lang.Long --versionColumn VERSION --inheritanceType JOINED
 
-entity jpa --class ~.Product --table NW_PRODUCTS --sequenceName NW_PRODUCTS_PRODUCT_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PRODUCT_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
+// Entity format example. This SpEL expression result will be shown as entity info on view fields
+entity jpa --class ~.Product --table NW_PRODUCTS --sequenceName NW_PRODUCTS_PRODUCT_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PRODUCT_ID --versionField version --versionType java.lang.Long --versionColumn VERSION --entityFormatExpression "#{name} #{code}"
 
 entity jpa --class ~.PurchaseOrder --table NW_PURCHASE_ORDERS --sequenceName NW_PURCHASE_ORDERS_PURCHASE_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PURCHASE_ORDER_ID --versionField version --versionType java.lang.Long --versionColumn VERSION
 
@@ -214,7 +217,14 @@ field number --fieldName freight --type java.math.BigDecimal
 // The data access layer
 /////////////////////////
 
-// Spring Data repositories
+// Entity projection with expression for view layer visualization. Only fields specified in 
+// the expression will be shown in selectors
+entity projection --class model:~.CustomerInfo --entity model:~.Customer --fields id,companyName,email,fax --entityFormatExpression #{companyName}
+// When projection is used as default return type in repositories, the default lists will 
+// show only the projection fields, not entity fields
+repository jpa --entity model:~.Customer --interface repository:~.CustomerRepository --defaultReturnType model:~.CustomerInfo
+
+// Create remaining Spring Data repositories for all entities
 repository jpa --all
 
 // Default queries

@@ -1,115 +1,106 @@
-// Project setup
-/////////////////
+// Create project
+project setup --topLevelPackage com.disid.restful --projectName restfulshop
 
-// Create the Spring Boot application
-project setup --topLevelPackage org.springframework.roo.petclinic
-
-// Setup the data access layer
+// Setup JPA
 jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 
-// The domain model
+// Create entities without relations
 
-/// Enumerations
-enum type --class ~.reference.PetType
-enum constant --name DOG
-enum constant --name CAT
-enum constant --name BIRD
-
-enum type --class ~.reference.Specialty
-enum constant --name CARDIOLOGY
-enum constant --name DENTISTRY
-enum constant --name NUTRITION
-
-/// The JPA entities 
-entity jpa --class ~.domain.Pet --sequenceName PET_SEQ
-entity jpa --class ~.domain.Visit --sequenceName VISIT_SEQ
-entity jpa --class ~.domain.AbstractPerson --abstract
-entity jpa --class ~.domain.Vet --extends ~.domain.AbstractPerson
-entity jpa --class ~.domain.Owner --extends ~.domain.AbstractPerson
-
-focus --class ~.domain.AbstractPerson
-field string --fieldName firstName --sizeMin 3 --sizeMax 30
-field string --fieldName lastName --notNull --sizeMin 3 --sizeMax 30
-field string --fieldName address --notNull --sizeMax 50 --sizeMin 1
-field string --fieldName city --notNull --sizeMax 30
-field string --fieldName telephone --notNull
-field string --fieldName homePage --sizeMax 30
-field string --fieldName email --sizeMax 30 --sizeMin 6
-field date --fieldName birthDay --type java.util.Date --notNull
-
-focus --class ~.domain.Visit
-field string --fieldName description --sizeMax 255
-field date --fieldName visitDate --type java.util.Date --notNull --past
-// This relation are children part, by ROO-3793 will be declared on parent entity
-// field reference --fieldName pet --type ~.domain.Pet --notNull
-// field reference --fieldName vet --type ~.domain.Vet
-
-focus --class ~.domain.Pet
-field boolean --fieldName sendReminders --notNull --primitive
-field string --fieldName name --notNull --sizeMin 1
-field number --fieldName weight --type java.lang.Float --notNull --min 0
-field enum --fieldName type --type ~.reference.PetType --notNull
-// This relation is child part, by ROO-3793 will be declared on parent entity
-// field reference --fieldName owner --type ~.domain.Owner
-field set --fieldName visits --type ~.domain.Visit
-
-focus --class ~.domain.Vet
-field date --fieldName employedSince --type java.util.Calendar --notNull --past
-field enum --fieldName specialty --type ~.reference.Specialty --notNull false
-field set --fieldName visits --type ~.domain.Visit
-
-focus --class ~.domain.Owner
-field set --fieldName pets --type ~.domain.Pet --mappedBy owner --notNull false --cardinality ONE_TO_MANY
-
-repository jpa --all --package ~.repository
-service --all --apiPackage ~.service.api --implPackage ~.service.impl
-
-dto --class ~.domain.PetNameAndWeightFormBean
-field string --fieldName name
-field number --fieldName weight --type java.lang.Float
-finder add --entity ~.domain.Pet --name findByNameAndWeight --formBean ~.domain.PetNameAndWeightFormBean
-
-dto --class ~.domain.OwnerFirstNameFormBean
-field string --fieldName firstName
-finder add --entity ~.domain.Owner --name findByFirstNameLike --formBean ~.domain.OwnerFirstNameFormBean
-
-dto --class ~.domain.OwnerCityFormBean
+// Address
+entity jpa --class ~.model.Address
+field string --fieldName street
 field string --fieldName city
-// Using entity projection as return type
-entity projection --class ~.domain.OwnerInfo --entity ~.domain.Owner --fields id,firstName,lastName,city
-finder add --entity ~.domain.Owner --name findByCityLike --formBean ~.domain.OwnerCityFormBean --returnType ~.domain.OwnerInfo 
+field number --fieldName streetNumber --type Integer --min 1
 
-finder add --entity ~.domain.Pet --name findByOwner
-finder add --entity ~.domain.Pet --name findBySendRemindersAndWeightLessThan
-finder add --entity ~.domain.Pet --name findByTypeAndNameLike
+// Category
+entity jpa --class ~.model.Category --entityFormatMessage category_format
+field string --fieldName name --sizeMin 3 --sizeMax 30
+field string --fieldName description
 
-finder add --entity ~.domain.Visit --name findByDescriptionAndVisitDate
-finder add --entity ~.domain.Visit --name findByVisitDateBetween
-finder add --entity ~.domain.Visit --name findByDescriptionLike
+// Customer
+entity jpa --class ~.model.Customer
+field string --fieldName  firstName
+field string --fieldName lastName
 
+// Product
+entity jpa --class ~.model.Product --entityFormatExpression #{name}
+field string --fieldName name
+field string --fieldName description
+
+// CustomerOrder
+entity jpa --class ~.model.CustomerOrder
+field date --fieldName orderDate --type java.util.Date --dateTimeFormatPattern "dd/MM/yyyy"
+field date --fieldName shippedDate --type java.util.Date --dateTimeFormatPattern "dd/MM/yyyy"
+field string --fieldName shipAddress
+
+// OrderDetailPK
+//embeddable --class ~.model.OrderDetailPK --serializable
+//field number --fieldName id --type Integer
+//field number --fieldName customerOrderId --type Long --column customerOrderId
+
+// OrderDetail
+//entity jpa --class ~.model.OrderDetail --identifierType ~.model.OrderDetailPK
+entity jpa --class ~.model.OrderDetail
+field number --fieldName quantity --type Integer
+
+// Customer relations
+focus --class ~.model.Customer
+field reference --fieldName address --type ~.model.Address --aggregation false --joinColumnName my_customer
+field set --fieldName orders --type ~.model.CustomerOrder --joinTable my_customer_orders --joinColumns my_order --referencedColumns id --inverseJoinColumns my_customer --inverseReferencedColumns id
+
+// Category relations
+focus --class ~.model.Category
+field set --fieldName products --type ~.model.Product --cardinality MANY_TO_MANY --aggregation --joinTable my_products_categories --joinColumns my_product --referencedColumns id --inverseJoinColumns my_category --inverseReferencedColumns id
+
+// CostumerOrder relations
+focus --class ~.model.CustomerOrder
+field set --fieldName details --type ~.model.OrderDetail --cardinality ONE_TO_MANY --aggregation false
+
+// Product relations
+focus --class ~.model.Product
+field set --fieldName orderDetails --type ~.model.OrderDetail
+
+// Create projection and use it as repository default return type
+entity projection --class ~.model.CustomerInfo --entity ~.model.Customer --fields id,lastName,address --entityFormatExpression "#{firstName} #{lastName}"
+repository jpa --entity ~.model.Customer --interface ~.repository.CustomerRepository --defaultReturnType ~.model.CustomerInfo
+
+// Generate repositories
+repository jpa --all
+
+// Generate service layer
+service --all
+
+// Generate finders
+dto --class ~.model.CustomerFindByFirstNameAndLastName
+field string --fieldName firstName
+field string --fieldName lastName
+finder add --entity ~.model.Customer --name findByFirstNameAndLastName --formBean ~.model.CustomerFindByFirstNameAndLastName
+
+// Generate web layer
 web mvc setup
+web mvc controller --all
 web mvc view setup --type THYMELEAF
-web mvc controller --all --responseType JSON
 web mvc controller --all --responseType THYMELEAF
-web mvc detail --all --responseType THYMELEAF
-web mvc finder --all --responseType THYMELEAF
+
 
 web mvc language --code es
 
-security setup --provider DEFAULT
+// detail OneToMany aggregation
+web mvc detail --entity ~.model.Customer --field orders
+web mvc detail --entity ~.model.Customer --field orders --responseType THYMELEAF
 
-security authorize --class ~.service.impl.OwnerServiceImpl --method delete.* --roles ADMIN
+// detail ManyToMany aggregation
+web mvc detail --entity ~.model.Category --field products
+web mvc detail --entity ~.model.Category --field products --responseType THYMELEAF
 
-// FIXME!! Re-enable audit when Springlets contains audit starter
-// jpa audit setup
-// jpa audit add --entity ~.domain.Owner
+// detail OneToMany composition
+web mvc detail --entity ~.model.CustomerOrder --field details
+web mvc detail --entity ~.model.CustomerOrder --field details --responseType THYMELEAF
 
-// Generate new SOAP Services that will be available under "/services" URL
-ws endpoint --service ~.service.api.OwnerService --sei ~.ws.api.OwnerWebService --class ~.ws.endpoint.OwnerWebServiceEndpoint --config ~.config.WsEndpointsConfiguration
-ws endpoint --service ~.service.api.PetService --sei ~.ws.api.PetWebService --class ~.ws.endpoint.PetWebServiceEndpoint --config ~.config.WsEndpointsConfiguration
+// two level details
+// web mvc detail --entity ~.model.Customer --field orders.details
+// web mvc detail --entity ~.model.Customer --field orders.details --responseType THYMELEAF
 
-// Generate integration test
-test integration --class ~.repository.VetRepository
-test integration --class ~.repository.OwnerRepository
-test integration --class ~.repository.VisitRepository
-test integration --class ~.repository.PetRepository
+
+web mvc finder --entity ~.model.Customer
+web mvc finder --entity ~.model.Customer --responseType THYMELEAF

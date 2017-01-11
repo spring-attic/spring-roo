@@ -23,7 +23,7 @@ field string --fieldName  firstName
 field string --fieldName lastName
 
 // Product
-entity jpa --class ~.model.Product
+entity jpa --class ~.model.Product --entityFormatExpression #{name}
 field string --fieldName name
 field string --fieldName description
 
