@@ -1055,34 +1055,6 @@ public class FieldCommands implements CommandMarker {
     return false;
   }
 
-  @CliOptionVisibilityIndicator(
-      command = "field reference",
-      params = "entityFormatExpression",
-      help = "Option `--entityFormatExpression` is not available if `--entityFormatMessage` has been "
-          + "specified.")
-  public boolean isEntityFormatExpressionVisibleForFieldReference(ShellContext shellContext) {
-    JavaType type = getTypeFromCommand(shellContext);
-    if (type != null) {
-      return getFieldCreatorProvider(type).isEntityFormatExpressionVisibleForFieldReference(
-          shellContext);
-    }
-    return false;
-  }
-
-  @CliOptionVisibilityIndicator(
-      command = "field reference",
-      params = "entityFormatMessage",
-      help = "Option `--entityFormatMessage` is not available if `--entityFormatExpression` has been "
-          + "specified.")
-  public boolean isEntityFormatMessageVisibleForFieldReference(ShellContext shellContext) {
-    JavaType type = getTypeFromCommand(shellContext);
-    if (type != null) {
-      return getFieldCreatorProvider(type).isEntityFormatMessageVisibleForFieldReference(
-          shellContext);
-    }
-    return false;
-  }
-
   @CliCommand(
       value = "field reference",
       help = "Adds a private reference field, representing (always) a bidirectional 'one-to-one' "
@@ -1352,32 +1324,6 @@ public class FieldCommands implements CommandMarker {
     JavaType type = getTypeFromCommand(shellContext);
     if (type != null) {
       return getFieldCreatorProvider(type).isNullRequiredVisibleForFieldSet(shellContext);
-    }
-    return false;
-  }
-
-  @CliOptionVisibilityIndicator(
-      command = "field set",
-      params = "entityFormatExpression",
-      help = "Option `--entityFormatExpression` is not available if `--entityFormatMessage` has been "
-          + "specified.")
-  public boolean isEntityFormatExpressionVisibleForFieldSet(ShellContext shellContext) {
-    JavaType type = getTypeFromCommand(shellContext);
-    if (type != null) {
-      return getFieldCreatorProvider(type).isEntityFormatExpressionVisibleForFieldSet(shellContext);
-    }
-    return false;
-  }
-
-  @CliOptionVisibilityIndicator(
-      command = "field set",
-      params = "entityFormatMessage",
-      help = "Option `--entityFormatMessage` is not available if `--entityFormatExpression` has been "
-          + "specified.")
-  public boolean isEntityFormatMessageVisibleForFieldSet(ShellContext shellContext) {
-    JavaType type = getTypeFromCommand(shellContext);
-    if (type != null) {
-      return getFieldCreatorProvider(type).isEntityFormatMessageVisibleForFieldSet(shellContext);
     }
     return false;
   }
@@ -1721,33 +1667,6 @@ public class FieldCommands implements CommandMarker {
     JavaType type = getTypeFromCommand(shellContext);
     if (type != null) {
       return getFieldCreatorProvider(type).isNullRequiredVisibleForFieldList(shellContext);
-    }
-    return false;
-  }
-
-  @CliOptionVisibilityIndicator(
-      command = "field list",
-      params = "entityFormatExpression",
-      help = "Option `--entityFormatExpression` is not available if `--entityFormatMessage` has been "
-          + "specified.")
-  public boolean isEntityFormatExpressionVisibleForFieldList(ShellContext shellContext) {
-    JavaType type = getTypeFromCommand(shellContext);
-    if (type != null) {
-      return getFieldCreatorProvider(type)
-          .isEntityFormatExpressionVisibleForFieldList(shellContext);
-    }
-    return false;
-  }
-
-  @CliOptionVisibilityIndicator(
-      command = "field list",
-      params = "entityFormatMessage",
-      help = "Option `--entityFormatMessage` is not available if `--entityFormatExpression` has been "
-          + "specified.")
-  public boolean isEntityFormatMessageVisibleForFieldList(ShellContext shellContext) {
-    JavaType type = getTypeFromCommand(shellContext);
-    if (type != null) {
-      return getFieldCreatorProvider(type).isEntityFormatMessageVisibleForFieldList(shellContext);
     }
     return false;
   }

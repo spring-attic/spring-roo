@@ -114,6 +114,8 @@ public class JpaOperationsImpl implements JpaOperations {
       "springlets-data-jpa", "${springlets.version}");
   private static final Dependency SPRINGLETS_DATA_COMMONS_STARTER = new Dependency("io.springlets",
       "springlets-data-commons", "${springlets.version}");
+  private static final Dependency SPRINGLETS_CONTEXT_DEPENDENCY = new Dependency("io.springlets",
+      "springlets-context", "${springlets.version}");
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
@@ -200,6 +202,10 @@ public class JpaOperationsImpl implements JpaOperations {
         "Entity name '%s' must not be part of java.lang", name.getSimpleTypeName());
 
     getProjectOperations().setModule(getProjectOperations().getPomFromModuleName(name.getModule()));
+
+    // Add springlets-context dependency
+    getProjectOperations().addDependency(name.getModule(), SPRINGLETS_CONTEXT_DEPENDENCY);
+    getProjectOperations().addProperty("", SPRINGLETS_VERSION_PROPERTY);
 
     int modifier = Modifier.PUBLIC;
     if (createAbstract) {

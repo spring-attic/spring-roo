@@ -513,24 +513,6 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
-  public boolean isEntityFormatExpressionVisibleForFieldReference(ShellContext shellContext) {
-    String param = shellContext.getParameters().get("entityFormatMessage");
-    if (param != null) {
-      return false;
-    }
-    return true;
-  }
-
-  @Override
-  public boolean isEntityFormatMessageVisibleForFieldReference(ShellContext shellContext) {
-    String param = shellContext.getParameters().get("entityFormatExpression");
-    if (param != null) {
-      return false;
-    }
-    return true;
-  }
-
-  @Override
   public boolean areOptionalParametersVisibleForFieldSet(ShellContext shellContext) {
     String cardinality = shellContext.getParameters().get(CARDINALITY);
     String joinColumnNameParam = shellContext.getParameters().get(JOIN_COLUMN_NAME);
@@ -733,24 +715,6 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
-  public boolean isEntityFormatExpressionVisibleForFieldSet(ShellContext shellContext) {
-    if (shellContext.getParameters().get("entityFormatMessage") == null
-        && shellContext.getParameters().get(CARDINALITY).equals(ONE_TO_MANY)) {
-      return true;
-    }
-    return false;
-  }
-
-  @Override
-  public boolean isEntityFormatMessageVisibleForFieldSet(ShellContext shellContext) {
-    if (shellContext.getParameters().get("entityFormatExpression") == null
-        && shellContext.getParameters().get(CARDINALITY).equals(ONE_TO_MANY)) {
-      return true;
-    }
-    return false;
-  }
-
-  @Override
   public boolean areOptionalParametersVisibleForFieldList(ShellContext shellContext) {
     String cardinality = shellContext.getParameters().get(CARDINALITY);
     String joinColumnNameParam = shellContext.getParameters().get(JOIN_COLUMN_NAME);
@@ -940,24 +904,6 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       return false;
     }
     return true;
-  }
-
-  @Override
-  public boolean isEntityFormatExpressionVisibleForFieldList(ShellContext shellContext) {
-    if (shellContext.getParameters().get("entityFormatMessage") == null
-        && shellContext.getParameters().get(CARDINALITY).equals(ONE_TO_MANY)) {
-      return true;
-    }
-    return false;
-  }
-
-  @Override
-  public boolean isEntityFormatMessageVisibleForFieldList(ShellContext shellContext) {
-    if (shellContext.getParameters().get("entityFormatExpression") == null
-        && shellContext.getParameters().get(CARDINALITY).equals(ONE_TO_MANY)) {
-      return true;
-    }
-    return false;
   }
 
   /**
@@ -2338,15 +2284,6 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
   private AnnotationMetadataBuilder buildEntityFormatAnnotation(
       final String entityFormatExpression, final String entityFormatMessage, final String fieldName) {
-
-    // Don't allow the two attributes to be present at same annotation
-    if (StringUtils.isNotBlank(entityFormatExpression)
-        && StringUtils.isNotBlank(entityFormatMessage)) {
-      throw new IllegalStateException(String.format(
-          "'@EntityFormat' from '%s' only accepts one attribute at a time. Please, check it.",
-          fieldName));
-    }
-
     final AnnotationMetadataBuilder entityFormatBuilder =
         new AnnotationMetadataBuilder(SpringletsJavaType.SPRINGLETS_ENTITY_FORMAT);
 

@@ -347,22 +347,6 @@ public interface FieldCreatorProvider {
    * @param shellContext
    * @return
    */
-  boolean isEntityFormatExpressionVisibleForFieldReference(ShellContext shellContext);
-
-  /**
-   * TODO
-   *
-   * @param shellContext
-   * @return
-   */
-  boolean isEntityFormatMessageVisibleForFieldReference(ShellContext shellContext);
-
-  /**
-   * TODO
-   *
-   * @param shellContext
-   * @return
-   */
   boolean areOptionalParametersVisibleForFieldSet(ShellContext shellContext);
 
   /**
@@ -467,22 +451,6 @@ public interface FieldCreatorProvider {
    * @param shellContext
    * @return
    */
-  boolean isEntityFormatExpressionVisibleForFieldSet(ShellContext shellContext);
-
-  /**
-   * TODO
-   *
-   * @param shellContext
-   * @return
-   */
-  boolean isEntityFormatMessageVisibleForFieldSet(ShellContext shellContext);
-
-  /**
-   * TODO
-   *
-   * @param shellContext
-   * @return
-   */
   boolean areJoinTableParamsVisibleForFieldList(ShellContext shellContext);
 
   /**
@@ -580,22 +548,6 @@ public interface FieldCreatorProvider {
    * @return `true` if `--nullRequired` is visible, `false` otherwise. 
    */
   boolean isNullRequiredVisibleForFieldList(ShellContext shellContext);
-
-  /**
-   * TODO
-   *
-   * @param shellContext
-   * @return
-   */
-  boolean isEntityFormatExpressionVisibleForFieldList(ShellContext shellContext);
-
-  /**
-   * TODO
-   *
-   * @param shellContext
-   * @return
-   */
-  boolean isEntityFormatMessageVisibleForFieldList(ShellContext shellContext);
 
   /**
    * TODO

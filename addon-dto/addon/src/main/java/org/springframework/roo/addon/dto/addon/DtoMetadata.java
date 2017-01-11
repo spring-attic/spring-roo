@@ -132,21 +132,13 @@ public class DtoMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     final AnnotationMetadataBuilder entityFormatBuilder =
         new AnnotationMetadataBuilder(SpringletsJavaType.SPRINGLETS_ENTITY_FORMAT);
 
-    // Don't allow the two attributes to be present at same annotation
-    if (StringUtils.isNotBlank(expressionAttribute) && StringUtils.isNotBlank(messageAttribute)) {
-      throw new IllegalStateException(String.format(
-          "'@EntityFormat' from '%s' only accepts one attribute at a time. Please, check it.",
-          this.type.getSimpleTypeName()));
-    } else {
+    // Check for each attribute individually
+    if (StringUtils.isNotBlank(expressionAttribute)) {
+      entityFormatBuilder.addStringAttribute("value", expressionAttribute);
 
-      // Check for each attribute individually
-      if (StringUtils.isNotBlank(expressionAttribute)) {
-        entityFormatBuilder.addStringAttribute("value", expressionAttribute);
-
-      }
-      if (StringUtils.isNotBlank(messageAttribute)) {
-        entityFormatBuilder.addStringAttribute("message", messageAttribute);
-      }
+    }
+    if (StringUtils.isNotBlank(messageAttribute)) {
+      entityFormatBuilder.addStringAttribute("message", messageAttribute);
     }
 
     return entityFormatBuilder.build();

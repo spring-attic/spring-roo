@@ -35,6 +35,7 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.Property;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -60,6 +61,11 @@ import java.util.logging.Logger;
 public class DtoOperationsImpl implements DtoOperations {
 
   protected final static Logger LOGGER = HandlerUtils.getLogger(DtoOperationsImpl.class);
+
+  private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
+      "1.1.0.BUILD-SNAPSHOT");
+  private static final Dependency SPRINGLETS_CONTEXT_DEPENDENCY = new Dependency("io.springlets",
+      "springlets-context", "${springlets.version}");
 
   @Reference
   private ProjectOperations projectOperations;
@@ -94,6 +100,10 @@ public class DtoOperationsImpl implements DtoOperations {
     // Set focus on dto module
     projectOperations.setModule(projectOperations.getPomFromModuleName(name.getModule()));
 
+    // Add springlets-context dependency
+    projectOperations.addDependency(name.getModule(), SPRINGLETS_CONTEXT_DEPENDENCY);
+    projectOperations.addProperty("", SPRINGLETS_VERSION_PROPERTY);
+
     // Create file
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(name,
@@ -112,22 +122,14 @@ public class DtoOperationsImpl implements DtoOperations {
     }
 
     // ROO-3868: New entity visualization support using a DTO
-    // Don't allow the two attributes to be present at same time
-    if (StringUtils.isNotBlank(formatExpression) && StringUtils.isNotBlank(formatMessage)) {
-      throw new IllegalStateException(String.format(
-          "'@EntityFormat' from '%s' only accepts one attribute at a time. Please, check it.",
-          name.getSimpleTypeName()));
-    } else {
+    // Check for each attribute individually
+    if (StringUtils.isNotBlank(formatExpression)) {
+      rooDtoAnnotation.addStringAttribute("formatExpression", formatExpression);
 
-      // Check for each attribute individually
-      if (StringUtils.isNotBlank(formatExpression)) {
-        rooDtoAnnotation.addStringAttribute("formatExpression", formatExpression);
+    }
 
-      }
-
-      if (StringUtils.isNotBlank(formatMessage)) {
-        rooDtoAnnotation.addStringAttribute("formatMessage", formatMessage);
-      }
+    if (StringUtils.isNotBlank(formatMessage)) {
+      rooDtoAnnotation.addStringAttribute("formatMessage", formatMessage);
     }
 
     cidBuilder.addAnnotation(rooDtoAnnotation);
@@ -163,6 +165,10 @@ public class DtoOperationsImpl implements DtoOperations {
 
     // Set focus on projection module
     projectOperations.setModule(projectOperations.getPomFromModuleName(name.getModule()));
+
+    // Add springlets-context dependency
+    projectOperations.addDependency(name.getModule(), SPRINGLETS_CONTEXT_DEPENDENCY);
+    projectOperations.addProperty("", SPRINGLETS_VERSION_PROPERTY);
 
     Map<String, FieldMetadata> fieldsToAdd = new HashMap<String, FieldMetadata>();
     boolean onlyMainEntityFields = true;
@@ -232,22 +238,14 @@ public class DtoOperationsImpl implements DtoOperations {
         new JavaSymbolName("fields"), fieldNames));
 
     // ROO-3868: New entity visualization support using a Projection
-    // Don't allow the two attributes to be present at same time
-    if (StringUtils.isNotBlank(formatExpression) && StringUtils.isNotBlank(formatMessage)) {
-      throw new IllegalStateException(String.format(
-          "'@EntityFormat' from '%s' only accepts one attribute at a time. Please, check it.",
-          name.getSimpleTypeName()));
-    } else {
+    // Check for each attribute individually
+    if (StringUtils.isNotBlank(formatExpression)) {
+      projectionAnnotation.addStringAttribute("formatExpression", formatExpression);
 
-      // Check for each attribute individually
-      if (StringUtils.isNotBlank(formatExpression)) {
-        projectionAnnotation.addStringAttribute("formatExpression", formatExpression);
+    }
 
-      }
-
-      if (StringUtils.isNotBlank(formatMessage)) {
-        projectionAnnotation.addStringAttribute("formatMessage", formatMessage);
-      }
+    if (StringUtils.isNotBlank(formatMessage)) {
+      projectionAnnotation.addStringAttribute("formatMessage", formatMessage);
     }
 
     projectionBuilder.addAnnotation(projectionAnnotation);

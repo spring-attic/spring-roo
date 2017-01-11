@@ -487,16 +487,6 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
-  public boolean isEntityFormatExpressionVisibleForFieldReference(ShellContext shellContext) {
-    return false;
-  }
-
-  @Override
-  public boolean isEntityFormatMessageVisibleForFieldReference(ShellContext shellContext) {
-    return false;
-  }
-
-  @Override
   public boolean areOptionalParametersVisibleForFieldSet(ShellContext shellContext) {
     return false;
   }
@@ -627,16 +617,6 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
-  public boolean isEntityFormatExpressionVisibleForFieldSet(ShellContext shellContext) {
-    return false;
-  }
-
-  @Override
-  public boolean isEntityFormatMessageVisibleForFieldSet(ShellContext shellContext) {
-    return false;
-  }
-
-  @Override
   public boolean isJoinColumnNameMandatoryForFieldList(ShellContext shellContext) {
     return false;
   }
@@ -749,16 +729,6 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
       return false;
     }
     return true;
-  }
-
-  @Override
-  public boolean isEntityFormatExpressionVisibleForFieldList(ShellContext shellContext) {
-    return false;
-  }
-
-  @Override
-  public boolean isEntityFormatMessageVisibleForFieldList(ShellContext shellContext) {
-    return false;
   }
 
   /**

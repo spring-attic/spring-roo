@@ -345,28 +345,20 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     String expressionAttribute = this.annotationValues.getEntityFormatExpression();
     String messageAttribute = this.annotationValues.getEntityFormatMessage();
 
-    // Don't allow the two attributes to be present at same annotation
-    if (StringUtils.isNotBlank(expressionAttribute) && StringUtils.isNotBlank(messageAttribute)) {
-      throw new IllegalStateException(String.format(
-          "'@EntityFormat' from '%s' only accepts one attribute at a time. Please, check it.",
-          this.annotatedEntity.getSimpleTypeName()));
-    } else {
+    final AnnotationMetadataBuilder entityFormatBuilder =
+        new AnnotationMetadataBuilder(entityFormatAnnotation);
 
-      final AnnotationMetadataBuilder entityFormatBuilder =
-          new AnnotationMetadataBuilder(entityFormatAnnotation);
+    // Check for each attribute individually
+    if (StringUtils.isNotBlank(expressionAttribute)) {
+      entityFormatBuilder.addStringAttribute("value", expressionAttribute);
 
-      // Check for each attribute individually
-      if (StringUtils.isNotBlank(expressionAttribute)) {
-        entityFormatBuilder.addStringAttribute("value", expressionAttribute);
-
-      }
-
-      if (StringUtils.isNotBlank(messageAttribute)) {
-        entityFormatBuilder.addStringAttribute("message", messageAttribute);
-      }
-
-      entityFormatAnnotation = entityFormatBuilder.build();
     }
+
+    if (StringUtils.isNotBlank(messageAttribute)) {
+      entityFormatBuilder.addStringAttribute("message", messageAttribute);
+    }
+
+    entityFormatAnnotation = entityFormatBuilder.build();
 
     return entityFormatAnnotation;
   }

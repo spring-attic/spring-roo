@@ -325,52 +325,6 @@ public class JpaCommands implements CommandMarker {
   }
 
   /**
-   * Indicator that checks if `--entityFormatExpression` is visible for `entity jpa` command.
-   * This option won't be visible is `--entityFormatMessage` has been specified.
-   *
-   * @param shellContext
-   * @return `false` if `--entityFormatMessage` option has been specified, `true` otherwise.
-   */
-  @CliOptionVisibilityIndicator(
-      command = "entity jpa",
-      params = "entityFormatExpression",
-      help = "Option `--entityFormatExpression` is not available if `--entityFormatMessage` has been "
-          + "specified.")
-  public boolean isEntityFormatExpressionVisibleForEntityJpa(ShellContext shellContext) {
-
-    String param = shellContext.getParameters().get("entityFormatMessage");
-
-    if (param != null) {
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Indicator that checks if `--entityFormatMessage` is visible for `entity jpa` command.
-   * This option won't be visible is `--entityFormatExpression` has been specified.
-   *
-   * @param shellContext
-   * @return `false` if `--entityFormatExpression` option has been specified, `true` otherwise.
-   */
-  @CliOptionVisibilityIndicator(
-      command = "entity jpa",
-      params = "entityFormatMessage",
-      help = "Option `--entityFormatMessage` is not available if `--entityFormatExpression` has been "
-          + "specified.")
-  public boolean isEntityFormatMessageVisibleForEntityJpa(ShellContext shellContext) {
-
-    String param = shellContext.getParameters().get("entityFormatExpression");
-
-    if (param != null) {
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
    * ROO-3709: Indicator that checks if exists some project setting that makes
    * each of the following parameters mandatory: sequenceName, identifierColumn,
    * identifierStrategy, versionField, versionColumn, versionType and table.
@@ -644,7 +598,8 @@ public class JpaCommands implements CommandMarker {
           help = "The message key used to obtain a localized SpEL expression to format the entity when "
               + "showing it in presentation layer. It adds the `message` attribute to "
               + "`io.springlets.format.EntityFormat` annotation and creates a message in all message bundles "
-              + "with the provided key. Message value should be  modified by developer."
+              + "with the provided key. Message value should be  modified by developer. This kind of format "
+              + "has more priority that 'expression' format added with `--entityFormatExpression`"
               + "This option is available only if `--entityFormatExpression` has not been specified.") String formatMessage,
       ShellContext shellContext) {
 

@@ -365,16 +365,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
-  public boolean isEntityFormatExpressionVisibleForFieldReference(ShellContext shellContext) {
-    return false;
-  }
-
-  @Override
-  public boolean isEntityFormatMessageVisibleForFieldReference(ShellContext shellContext) {
-    return false;
-  }
-
-  @Override
   public boolean isJoinTableMandatoryForFieldSet(ShellContext shellContext) {
     return false;
   }
@@ -448,16 +438,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
-  public boolean isEntityFormatExpressionVisibleForFieldSet(ShellContext shellContext) {
-    return false;
-  }
-
-  @Override
-  public boolean isEntityFormatMessageVisibleForFieldSet(ShellContext shellContext) {
-    return false;
-  }
-
-  @Override
   public boolean isJoinColumnNameMandatoryForFieldList(ShellContext shellContext) {
     return false;
   }
@@ -528,16 +508,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
       return false;
     }
     return true;
-  }
-
-  @Override
-  public boolean isEntityFormatExpressionVisibleForFieldList(ShellContext shellContext) {
-    return false;
-  }
-
-  @Override
-  public boolean isEntityFormatMessageVisibleForFieldList(ShellContext shellContext) {
-    return false;
   }
 
   @Override
