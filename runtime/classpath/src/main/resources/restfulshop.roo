@@ -13,12 +13,12 @@ field string --fieldName city
 field number --fieldName streetNumber --type Integer --min 1
 
 // Category
-entity jpa --class ~.model.Category
+entity jpa --class ~.model.Category --entityFormatMessage category_format
 field string --fieldName name --sizeMin 3 --sizeMax 30
 field string --fieldName description
 
 // Customer
-entity jpa --class ~.model.Customer
+entity jpa --class ~.model.Customer entityFormatExpression "#{firstName} #{lastName}"
 field string --fieldName  firstName
 field string --fieldName lastName
 
@@ -28,7 +28,7 @@ field string --fieldName name
 field string --fieldName description
 
 // CustomerOrder
-entity jpa --class ~.model.CustomerOrder
+entity jpa --class ~.model.CustomerOrder --entityFormatExpression #{shipAddress}
 field date --fieldName orderDate --type java.util.Date --dateTimeFormatPattern "dd/MM/yyyy"
 field date --fieldName shippedDate --type java.util.Date --dateTimeFormatPattern "dd/MM/yyyy"
 field string --fieldName shipAddress
@@ -61,7 +61,7 @@ focus --class ~.model.Product
 field set --fieldName orderDetails --type ~.model.OrderDetail
 
 // Generate repositories
-repository jpa --all --package ~.repository
+repository jpa --all
 
 // Generate service layer
 service --all
