@@ -108,7 +108,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
       "org.springframework.boot.jackson.JsonObjectDeserializer");
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.0.0.RELEASE");
+      "1.1.0.BUILD-SNAPSHOT");
   private static final Dependency SPRINGLETS_WEB_STARTER = new Dependency("io.springlets",
       "springlets-boot-starter-web", "${springlets.version}");
   private static final Property TRACEE_PROPERTY = new Property("tracee.version", "1.1.2");

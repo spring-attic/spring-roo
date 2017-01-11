@@ -101,6 +101,52 @@ public class DtoCommands implements CommandMarker {
     return dtoOperations.isEntityProjectionPossible();
   }
 
+  /**
+   * Indicator that checks if `--entityFormatExpression` is visible for `dto` command.
+   * This option won't be visible is `--entityFormatMessage` has been specified.
+   *
+   * @param shellContext
+   * @return `false` if `--entityFormatMessage` option has been specified, `true` otherwise.
+   */
+  @CliOptionVisibilityIndicator(
+      command = "dto",
+      params = "entityFormatExpression",
+      help = "Option `--entityFormatExpression` is not available if `--entityFormatMessage` has been "
+          + "specified.")
+  public boolean isEntityFormatExpressionVisibleForDto(ShellContext shellContext) {
+
+    String param = shellContext.getParameters().get("entityFormatMessage");
+
+    if (param != null) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Indicator that checks if `--entityFormatMessage` is visible for `dto` command.
+   * This option won't be visible is `--entityFormatExpression` has been specified.
+   *
+   * @param shellContext
+   * @return `false` if `--entityFormatExpression` option has been specified, `true` otherwise.
+   */
+  @CliOptionVisibilityIndicator(
+      command = "dto",
+      params = "entityFormatMessage",
+      help = "Option `--entityFormatMessage` is not available if `--entityFormatExpression` has been "
+          + "specified.")
+  public boolean isEntityFormatMessageVisibleForDto(ShellContext shellContext) {
+
+    String param = shellContext.getParameters().get("entityFormatExpression");
+
+    if (param != null) {
+      return false;
+    }
+
+    return true;
+  }
+
   @CliCommand(
       value = "dto",
       help = "Creates a new DTO (Data Transfer Object) class in the directory _src/main/java_ of the selected project module (if any) with @RooDTO annotation.")
@@ -128,6 +174,21 @@ public class DtoCommands implements CommandMarker {
           unspecifiedDefaultValue = "false",
           help = "Whether the DTO should implement `java.io.Serializable`. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean serializable,
+      @CliOption(
+          key = "entityFormatExpression",
+          mandatory = false,
+          help = "The SpEL expression used to format the entity when showing it in presentation layer e.g. "
+              + "{#fieldA} {#fieldB}. It adds the `value` attribute to `io.springlets.format.EntityFormat` "
+              + "annotation."
+              + "This option is available only if `--entityFormatMessage` has not been specified.") String formatExpression,
+      @CliOption(
+          key = "entityFormatMessage",
+          mandatory = false,
+          help = "The message key used to obtain a localized SpEL expression to format the entity when "
+              + "showing it in presentation layer. It adds the `message` attribute to "
+              + "`io.springlets.format.EntityFormat` annotation and creates a message in all message bundles "
+              + "with the provided key. Message value should be  modified by developer."
+              + "This option is available only if `--entityFormatExpression` has not been specified.") String formatMessage,
       ShellContext shellContext) {
 
     // Check if DTO already exists
@@ -144,7 +205,8 @@ public class DtoCommands implements CommandMarker {
                   name));
     }
 
-    dtoOperations.createDto(name, immutable, utilityMethods, serializable);
+    dtoOperations.createDto(name, immutable, utilityMethods, serializable, formatExpression,
+        formatMessage);
 
   }
 
@@ -273,6 +335,48 @@ public class DtoCommands implements CommandMarker {
     // Check already specified params
     Map<String, String> params = shellContext.getParameters();
     if (params.containsKey("entity")) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Indicator that checks if `--entityFormatExpression` is visible for `entity projection` command.
+   * This option won't be visible is `--entityFormatMessage` has been specified.
+   *
+   * @param shellContext
+   * @return `false` if `--entityFormatMessage` option has been specified, `true` otherwise.
+   */
+  @CliOptionVisibilityIndicator(
+      command = "entity projection",
+      params = "entityFormatExpression",
+      help = "Option `--entityFormatExpression` is available only if `--entityFormatMessage` hasn't been "
+          + "specified and `--entity` has already been specified.")
+  public boolean isEntityFormatExpressionVisibleForEntityProjection(ShellContext shellContext) {
+    if (shellContext.getParameters().get("entityFormatMessage") == null
+        && shellContext.getParameters().get("entity") != null) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Indicator that checks if `--entityFormatMessage` is visible for `entity projection` command.
+   * This option won't be visible is `--entityFormatExpression` has been specified.
+   *
+   * @param shellContext
+   * @return `false` if `--entityFormatExpression` option has been specified, `true` otherwise.
+   */
+  @CliOptionVisibilityIndicator(
+      command = "entity projection",
+      params = "entityFormatMessage",
+      help = "Option `--entityFormatExpression` is available only if `--entityFormatExpression` hasn't been "
+          + "specified and `--entity` has already been specified.")
+  public boolean isEntityFormatMessageVisibleForEntityProjection(ShellContext shellContext) {
+    if (shellContext.getParameters().get("entityFormatExpression") == null
+        && shellContext.getParameters().get("entity") != null) {
       return true;
     }
 
@@ -541,6 +645,21 @@ public class DtoCommands implements CommandMarker {
           help = "Suffix added to each Projection class name, built from each associated entity name. "
               + "This option is only available if `--all` has been already specified."
               + "Default if option not present: 'Projection'.") final String suffix,
+      @CliOption(
+          key = "entityFormatExpression",
+          mandatory = false,
+          help = "The SpEL expression used to format the entity when showing it in presentation layer e.g. "
+              + "{#fieldA} {#fieldB}. It adds the `value` attribute to `io.springlets.format.EntityFormat` "
+              + "annotation."
+              + "This option is available only if `--entityFormatMessage` has not been specified.") String formatExpression,
+      @CliOption(
+          key = "entityFormatMessage",
+          mandatory = false,
+          help = "The message key used to obtain a localized SpEL expression to format the entity when "
+              + "showing it in presentation layer. It adds the `message` attribute to "
+              + "`io.springlets.format.EntityFormat` annotation and creates a message in all message bundles "
+              + "with the provided key. Message value should be  modified by developer."
+              + "This option is available only if `--entityFormatExpression` has not been specified.") String formatMessage,
       ShellContext shellContext) {
 
     // Check if Projection already exists
@@ -569,7 +688,7 @@ public class DtoCommands implements CommandMarker {
     }
 
     if (entity != null) {
-      dtoOperations.createProjection(entity, name, fields, null);
+      dtoOperations.createProjection(entity, name, fields, null, formatExpression, formatMessage);
     } else if (all == true) {
       dtoOperations.createAllProjections(suffix, shellContext);
     }

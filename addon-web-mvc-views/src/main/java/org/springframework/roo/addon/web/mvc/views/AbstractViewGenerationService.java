@@ -6,6 +6,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.dto.addon.EntityProjectionLocator;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
@@ -44,6 +45,7 @@ import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.Jsr303JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -78,6 +80,7 @@ import java.util.logging.Logger;
  * @param <DOC>
  * @param <T>
  * @author Juan Carlos García
+ * @author Sergio Clares
  * @since 2.0
  */
 @Component(componentAbstract = true)
@@ -1310,7 +1313,62 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
         }
       }
     }
+
+    // ROO-3868: Add label for localized SpEL to show entity in presentation view
+    // Check for @EntityFormat at entity type-level
+    addI18nLabelsFromEntityFormatExpressions(properties,
+        getTypeLocationService().getTypeDetails(entity));
+
+    // Check for @EntityFormat at all existing projections for this entity
+    Collection<ClassOrInterfaceTypeDetails> entityProjectionsForEntity =
+        getEntityProjectionLocator().getEntityProjectionsForEntity(entity);
+    for (ClassOrInterfaceTypeDetails details : entityProjectionsForEntity) {
+
+      addI18nLabelsFromEntityFormatExpressions(properties, details);
+    }
+
     return properties;
+  }
+
+  /**
+   * Locates `@EntityFormat` annotations at type-level and relation fields and
+   * adds a new message to provided map if the annotation has the `message` 
+   * attribute.
+   * 
+   * @param properties the Map<String, String> to be added to message bundles.
+   * @param details the ClassOrInterfaceTypeDetails to check.
+   */
+  private void addI18nLabelsFromEntityFormatExpressions(final Map<String, String> properties,
+      ClassOrInterfaceTypeDetails details) {
+    // Get all projection member details
+    if (details != null) {
+      MemberDetails memberDetails =
+          getMemberDetailsScanner().getMemberDetails(this.getClass().getName(), details);
+
+      // Search for @EntityFormat at type-level
+      AnnotationMetadata entityFormatTypeLevelAnnotation =
+          memberDetails.getAnnotation(SpringletsJavaType.SPRINGLETS_ENTITY_FORMAT);
+      if (entityFormatTypeLevelAnnotation != null) {
+        AnnotationAttributeValue<Object> messageAttribute =
+            entityFormatTypeLevelAnnotation.getAttribute("message");
+        if (messageAttribute != null) {
+          properties.put((String) messageAttribute.getValue(), "TO BE MODIFIED BY DEVELOPER");
+        }
+      }
+
+      // Search for @EntityFormat at relation fields
+      for (FieldMetadata field : memberDetails.getFields()) {
+        AnnotationMetadata entityFormatAnnotation =
+            field.getAnnotation(SpringletsJavaType.SPRINGLETS_ENTITY_FORMAT);
+        if (entityFormatAnnotation != null) {
+          AnnotationAttributeValue<Object> messageAttribute =
+              entityFormatAnnotation.getAttribute("message");
+          if (messageAttribute != null) {
+            properties.put((String) messageAttribute.getValue(), "TO BE MODIFIED BY DEVELOPER");
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -1515,5 +1573,9 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
   protected ProjectOperations getProjectOperations() {
     return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
+  }
+
+  protected EntityProjectionLocator getEntityProjectionLocator() {
+    return serviceInstaceManager.getServiceInstance(this, EntityProjectionLocator.class);
   }
 }

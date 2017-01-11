@@ -1055,6 +1055,34 @@ public class FieldCommands implements CommandMarker {
     return false;
   }
 
+  @CliOptionVisibilityIndicator(
+      command = "field reference",
+      params = "entityFormatExpression",
+      help = "Option `--entityFormatExpression` is not available if `--entityFormatMessage` has been "
+          + "specified.")
+  public boolean isEntityFormatExpressionVisibleForFieldReference(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isEntityFormatExpressionVisibleForFieldReference(
+          shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(
+      command = "field reference",
+      params = "entityFormatMessage",
+      help = "Option `--entityFormatMessage` is not available if `--entityFormatExpression` has been "
+          + "specified.")
+  public boolean isEntityFormatMessageVisibleForFieldReference(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isEntityFormatMessageVisibleForFieldReference(
+          shellContext);
+    }
+    return false;
+  }
+
   @CliCommand(
       value = "field reference",
       help = "Adds a private reference field, representing (always) a bidirectional 'one-to-one' "
@@ -1139,6 +1167,21 @@ public class FieldCommands implements CommandMarker {
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo."
               + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords,
+      @CliOption(
+          key = "entityFormatExpression",
+          mandatory = false,
+          help = "The SpEL expression used to format the related entity when showing it in presentation layer e.g. "
+              + "{#fieldA} {#fieldB}. It adds the `value` attribute to `io.springlets.format.EntityFormat` "
+              + "annotation."
+              + "This option is available only if `--entityFormatMessage` has not been specified.") String formatExpression,
+      @CliOption(
+          key = "entityFormatMessage",
+          mandatory = false,
+          help = "The message key used to obtain a localized SpEL expression to format the related entity when "
+              + "showing it in presentation layer. It adds the `message` attribute to "
+              + "`io.springlets.format.EntityFormat` annotation and creates a message in all message bundles "
+              + "with the provided key. Message value should be modified by developer."
+              + "This option is available only if `--entityFormatExpression` has not been specified.") String formatMessage,
       //      @CliOption(
       //          key = "cascadeType",
       //          mandatory = false,
@@ -1146,9 +1189,10 @@ public class FieldCommands implements CommandMarker {
       ShellContext shellContext) {
 
     // TODO support multiple cascade type
-    getFieldCreatorProvider(typeName).createReferenceField(typeName, fieldType, fieldName,
-        aggregation, mappedBy, null, notNull, joinColumnName, referencedColumnName, fetch, comment,
-        permitReservedWords, orphanRemoval, shellContext.isForce());
+    getFieldCreatorProvider(typeName)
+        .createReferenceField(typeName, fieldType, fieldName, aggregation, mappedBy, null, notNull,
+            joinColumnName, referencedColumnName, fetch, comment, permitReservedWords,
+            orphanRemoval, shellContext.isForce(), formatExpression, formatMessage);
   }
 
   @CliOptionMandatoryIndicator(command = "field set", params = {"joinColumnName"})
@@ -1312,6 +1356,32 @@ public class FieldCommands implements CommandMarker {
     return false;
   }
 
+  @CliOptionVisibilityIndicator(
+      command = "field set",
+      params = "entityFormatExpression",
+      help = "Option `--entityFormatExpression` is not available if `--entityFormatMessage` has been "
+          + "specified.")
+  public boolean isEntityFormatExpressionVisibleForFieldSet(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isEntityFormatExpressionVisibleForFieldSet(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(
+      command = "field set",
+      params = "entityFormatMessage",
+      help = "Option `--entityFormatMessage` is not available if `--entityFormatExpression` has been "
+          + "specified.")
+  public boolean isEntityFormatMessageVisibleForFieldSet(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isEntityFormatMessageVisibleForFieldSet(shellContext);
+    }
+    return false;
+  }
+
   @CliCommand(
       value = "field set",
       help = "Adds a private `Set` field to an existing Java source file, representing (always) a "
@@ -1460,6 +1530,23 @@ public class FieldCommands implements CommandMarker {
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo."
               + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords,
+      @CliOption(
+          key = "entityFormatExpression",
+          mandatory = false,
+          help = "The SpEL expression used to format the related entity when showing it in presentation layer e.g. "
+              + "{#fieldA} {#fieldB}. It adds the `value` attribute to `io.springlets.format.EntityFormat` "
+              + "annotation."
+              + "This option is available only if `--entityFormatMessage` has not been specified and "
+              + "`--cardinality` is `MANY_TO_ONE`.") String formatExpression,
+      @CliOption(
+          key = "entityFormatMessage",
+          mandatory = false,
+          help = "The message key used to obtain a localized SpEL expression to format the related entity when "
+              + "showing it in presentation layer. It adds the `message` attribute to "
+              + "`io.springlets.format.EntityFormat` annotation and creates a message in all message bundles "
+              + "with the provided key. Message value should be modified by developer."
+              + "This option is available only if `--entityFormatExpression` has not been specified and "
+              + "`--cardinality` is `MANY_TO_ONE`.") String formatMessage,
       //      @CliOption(key = "cascadeType", mandatory = false, unspecifiedDefaultValue = "ALL",
       //          specifiedDefaultValue = "ALL",
       //          help = "CascadeType. Possible values are ALL, DETACH, MERGE, PERSIST, REFRESH "
@@ -1472,7 +1559,7 @@ public class FieldCommands implements CommandMarker {
         cardinality.getCardinality(), null, notNull, sizeMin, sizeMax, mappedBy, fetch, comment,
         joinColumnName, referencedColumnName, joinTable, joinColumns, referencedColumns,
         inverseJoinColumns, inverseReferencedColumns, permitReservedWords, aggregation,
-        orphanRemoval, shellContext.isForce());
+        orphanRemoval, shellContext.isForce(), formatExpression, formatMessage);
 
   }
 
@@ -1638,6 +1725,33 @@ public class FieldCommands implements CommandMarker {
     return false;
   }
 
+  @CliOptionVisibilityIndicator(
+      command = "field list",
+      params = "entityFormatExpression",
+      help = "Option `--entityFormatExpression` is not available if `--entityFormatMessage` has been "
+          + "specified.")
+  public boolean isEntityFormatExpressionVisibleForFieldList(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type)
+          .isEntityFormatExpressionVisibleForFieldList(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(
+      command = "field list",
+      params = "entityFormatMessage",
+      help = "Option `--entityFormatMessage` is not available if `--entityFormatExpression` has been "
+          + "specified.")
+  public boolean isEntityFormatMessageVisibleForFieldList(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isEntityFormatMessageVisibleForFieldList(shellContext);
+    }
+    return false;
+  }
+
   @CliCommand(
       value = "field list",
       help = "Adds a private `List` field to an existing Java source file, representing (always) a "
@@ -1784,6 +1898,23 @@ public class FieldCommands implements CommandMarker {
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo."
               + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords,
+      @CliOption(
+          key = "entityFormatExpression",
+          mandatory = false,
+          help = "The SpEL expression used to format the related entity when showing it in presentation layer e.g. "
+              + "{#fieldA} {#fieldB}. It adds the `value` attribute to `io.springlets.format.EntityFormat` "
+              + "annotation."
+              + "This option is available only if `--entityFormatMessage` has not been specified and "
+              + "`--cardinality` is `MANY_TO_ONE`.") String formatExpression,
+      @CliOption(
+          key = "entityFormatMessage",
+          mandatory = false,
+          help = "The message key used to obtain a localized SpEL expression to format the related entity when "
+              + "showing it in presentation layer. It adds the `message` attribute to "
+              + "`io.springlets.format.EntityFormat` annotation and creates a message in all message bundles "
+              + "with the provided key. Message value should be modified by developer."
+              + "This option is available only if `--entityFormatExpression` has not been specified and "
+              + "`--cardinality` is `MANY_TO_ONE`.") String formatMessage,
       //      @CliOption(key = "cascadeType", mandatory = false, unspecifiedDefaultValue = "ALL",
       //          specifiedDefaultValue = "ALL",
       //          help = "CascadeType. Possible values are ALL, DETACH, MERGE, PERSIST, REFRESH "
@@ -1796,7 +1927,7 @@ public class FieldCommands implements CommandMarker {
         cardinality.getCardinality(), null, notNull, sizeMin, sizeMax, mappedBy, fetch, comment,
         joinColumnName, referencedColumnName, joinTable, joinColumns, referencedColumns,
         inverseJoinColumns, inverseReferencedColumns, permitReservedWords, aggregation,
-        orphanRemoval, shellContext.isForce());
+        orphanRemoval, shellContext.isForce(), formatExpression, formatMessage);
 
   }
 

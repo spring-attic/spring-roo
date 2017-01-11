@@ -44,6 +44,7 @@ import java.util.TreeMap;
  *
  * @author Juan Carlos García
  * @author Jose Manuel Vivó
+ * @author Sergio Clares
  * @since 2.0
  */
 public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
@@ -51,6 +52,9 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
   private static final String PROVIDES_TYPE_STRING = ServiceImplMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
+  private static final JavaSymbolName GET_ENTITY_TYPE_METHOD_NAME = new JavaSymbolName(
+      "getEntityType");
+  private static final JavaSymbolName GET_ID_TYPE_METHOD_NAME = new JavaSymbolName("getIdType");
 
   private static final AnnotationMetadata LAZY_ANNOTATION = new AnnotationMetadataBuilder(
       SpringJavaType.LAZY).build();
@@ -67,6 +71,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
   private final ServiceMetadata serviceMetadata;
   private final JpaEntityMetadata entityMetadata;
   private final List<Pair<FieldMetadata, RelationInfo>> childRelationsInfo;
+  private final JavaType entityIdentifierType;
 
   // Temporal arrays don't share
   private ArrayList<MethodMetadata> pendingTransactionalMethodToAdd;
@@ -132,6 +137,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     this.serviceMetadata = serviceMetadata;
     this.entityMetadata = entityMetadata;
     this.childRelationsInfo = childRelationsInfo;
+    this.entityIdentifierType = serviceMetadata.getIdType();
 
     // Get service that needs to be implemented
     ensureGovernorImplements(serviceInterface);
@@ -208,6 +214,10 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
       ensureGovernorHasMethod(new MethodMetadataBuilder(getMethod(method)));
     }
 
+    // ROO-3868: New entity visualization support
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getEntityTypeGetterMethod()));
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getIdentifierTypeGetterMethod()));
+
     // Build the ITD
     itdTypeDetails = builder.build();
   }
@@ -253,6 +263,69 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // return {repoField}.{saveMethod}({param0});
     bodyBuilder.appendFormalLine("return %s.%s(%s);", repoField, saveMethod, param0);
     return getMethod(methodToBeImplemented, true, bodyBuilder);
+  }
+
+  /**
+   * Builds a method which returns the class of entity JavaType.
+   * 
+   * @return MethodMetadataBuilder
+   */
+  private MethodMetadata getEntityTypeGetterMethod() {
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(GET_ENTITY_TYPE_METHOD_NAME,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // return ENTITY_TYPE.class;
+    bodyBuilder.appendFormalLine("return %s.class;",
+        this.entity.getNameIncludingTypeParameters(false, importResolver));
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, GET_ENTITY_TYPE_METHOD_NAME,
+            JavaType.wrapperOf(JavaType.CLASS, this.entity), parameterTypes, parameterNames,
+            bodyBuilder);
+
+    // Build and return a MethodMetadata instance
+    return methodBuilder.build();
+  }
+
+  /**
+   * Builds a method which returns the class of the entity identifier JavaType.
+   * 
+   * @return MethodMetadataBuilder
+   */
+  private MethodMetadata getIdentifierTypeGetterMethod() {
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(GET_ID_TYPE_METHOD_NAME,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // return IDENTIFIER_TYPE.class;
+    bodyBuilder.appendFormalLine("return %s.class;", getNameOfJavaType(this.entityIdentifierType));
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, GET_ID_TYPE_METHOD_NAME,
+            JavaType.wrapperOf(JavaType.CLASS, this.serviceMetadata.getIdType()), parameterTypes,
+            parameterNames, bodyBuilder);
+
+    // Build and return a MethodMetadata instance
+    return methodBuilder.build();
   }
 
   private MethodMetadata getSetRelation(MethodMetadata methodToBeImplemented,

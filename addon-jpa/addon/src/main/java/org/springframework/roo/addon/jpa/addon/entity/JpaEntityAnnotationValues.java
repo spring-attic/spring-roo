@@ -12,6 +12,7 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Andrew Swan
  * @author Juan Carlos García
+ * @author Sergio Clares
  * @since 1.2.0
  */
 public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
@@ -30,6 +31,10 @@ public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
   private String table = "";
   @AutoPopulate
   private boolean readOnly;
+  @AutoPopulate
+  private String entityFormatMessage = "";
+  @AutoPopulate
+  private String entityFormatExpression = "";
 
   /**
    * Constructor for reading the values of the given annotation
@@ -73,4 +78,13 @@ public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
   public boolean isReadOnly() {
     return readOnly;
   }
+
+  public String getEntityFormatExpression() {
+    return entityFormatExpression;
+  }
+
+  public String getEntityFormatMessage() {
+    return entityFormatMessage;
+  }
+
 }

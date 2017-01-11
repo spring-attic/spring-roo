@@ -487,6 +487,16 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
+  public boolean isEntityFormatExpressionVisibleForFieldReference(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean isEntityFormatMessageVisibleForFieldReference(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
   public boolean areOptionalParametersVisibleForFieldSet(ShellContext shellContext) {
     return false;
   }
@@ -617,6 +627,16 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
+  public boolean isEntityFormatExpressionVisibleForFieldSet(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean isEntityFormatMessageVisibleForFieldSet(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
   public boolean isJoinColumnNameMandatoryForFieldList(ShellContext shellContext) {
     return false;
   }
@@ -729,6 +749,16 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
       return false;
     }
     return true;
+  }
+
+  @Override
+  public boolean isEntityFormatExpressionVisibleForFieldList(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean isEntityFormatMessageVisibleForFieldList(ShellContext shellContext) {
+    return false;
   }
 
   /**
@@ -1130,7 +1160,8 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   public void createReferenceField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       boolean aggregation, JavaSymbolName mappedBy, Cascade cascadeType[], boolean notNull,
       String joinColumnName, String referencedColumnName, Fetch fetch, String comment,
-      boolean permitReservedWords, Boolean orphanRemoval, boolean isForce) {
+      boolean permitReservedWords, Boolean orphanRemoval, boolean isForce, String formatExpression,
+      String formatMessage) {
     // This method shouldn't be executed as
     // EmbeddableFieldCreatorProvider.isFieldReferenceAvailable() *ALWAYS* returns false
     throw new IllegalArgumentException("'reference field' is not supported for Embedables objects");
@@ -1142,7 +1173,8 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
       Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumnName,
       String referencedColumnName, String joinTable, String joinColumns, String referencedColumns,
       String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
-      Boolean aggregation, Boolean orphanRemoval, boolean isForce) {
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce, String formatExpression,
+      String formatMessage) {
     // This method shouldn't be executed as
     // EmbeddableFieldCreatorProvider.isFieldCollectionAvailable() *ALWAYS* returns false
     throw new IllegalArgumentException("'set field' is not supported for Embedables objects");
@@ -1154,7 +1186,8 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
       Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumnName,
       String referencedColumnName, String joinTable, String joinColumns, String referencedColumns,
       String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
-      Boolean aggregation, Boolean orphanRemoval, boolean isForce) {
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce, String formatExpression,
+      String formatMessage) {
     // This method shouldn't be executed as
     // EmbeddableFieldCreatorProvider.isFieldCollectionAvailable() *ALWAYS* returns false
     throw new IllegalArgumentException("'list field' is not supported for Embedables objects");

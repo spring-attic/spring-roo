@@ -33,8 +33,11 @@ public interface DtoOperations {
    * @param immutable whether the DTO should be immutable
    * @param utilityMethods whether the DTO should have utility methods
    * @param serializable whether the DTO should implement Serializable
+   * @param formatMessage the localization message key to use to format the dto
+   * @param formatExpression the SpEL expression to use to format the dto
    */
-  void createDto(JavaType name, boolean immutable, boolean utilityMethods, boolean serializable);
+  void createDto(JavaType name, boolean immutable, boolean utilityMethods, boolean serializable,
+      String formatExpression, String formatMessage);
 
   /**
    * Creates a Projection class from an entity.
@@ -43,8 +46,11 @@ public interface DtoOperations {
    * @param name the name of the Projection.
    * @param fields the related entity fields to include into the Projection.
    * @param suffix the suffix to add to Projection name. 
+   * @param formatMessage the localization message key to use to format the projection
+   * @param formatExpression the SpEL expression to use to format the projection
    */
-  void createProjection(JavaType entity, JavaType name, String fields, String suffix);
+  void createProjection(JavaType entity, JavaType name, String fields, String suffix,
+      String formatExpression, String formatMessage);
 
   /**
    * Creates one entity Projection for each entity in the project.

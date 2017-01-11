@@ -11,6 +11,7 @@ import java.lang.annotation.Target;
  * 
  * @author Andrew Swan
  * @author Juan Carlos García
+ * @author Sergio Clares
  * @since 1.2.0
  */
 @Retention(RetentionPolicy.SOURCE)
@@ -69,4 +70,21 @@ public @interface RooJpaEntity {
    *         if this entity should be used for CRUD operations.
    */
   boolean readOnly() default false;
+
+  /**
+   * Specifies the localization message used to obtain a localized Spring 
+   * Expression Language expression to format the entity when showing 
+   * it in presentation layer.
+   * 
+   * @return the key of the message with the SpEL (defaults to "").
+   */
+  String entityFormatMessage() default "";
+
+  /**
+   * Specifies the Spring Expression Language expression to use for formatting 
+   * the entity in presentation layer.
+   * 
+   * @return the SpEL (defaults to "").
+   */
+  String entityFormatExpression() default "";
 }

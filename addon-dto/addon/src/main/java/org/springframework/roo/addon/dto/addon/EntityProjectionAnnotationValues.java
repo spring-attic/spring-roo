@@ -21,6 +21,12 @@ public class EntityProjectionAnnotationValues extends AbstractAnnotationValues {
   @AutoPopulate
   private String[] fields;
 
+  @AutoPopulate
+  private String formatMessage = "";
+
+  @AutoPopulate
+  private String formatExpression = "";
+
   /**
    * Constructor
    * 
@@ -37,6 +43,14 @@ public class EntityProjectionAnnotationValues extends AbstractAnnotationValues {
 
   public String[] getFields() {
     return fields;
+  }
+
+  public String getFormatExpression() {
+    return formatExpression;
+  }
+
+  public String getFormatMessage() {
+    return formatMessage;
   }
 
 }

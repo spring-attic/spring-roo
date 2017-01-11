@@ -14,6 +14,10 @@ public class DtoAnnotationValues extends AbstractAnnotationValues {
 
   @AutoPopulate
   private boolean immutable;
+  @AutoPopulate
+  private String formatMessage = "";
+  @AutoPopulate
+  private String formatExpression = "";
 
   /**
    * Constructor
@@ -32,6 +36,24 @@ public class DtoAnnotationValues extends AbstractAnnotationValues {
    */
   public boolean getImmutable() {
     return immutable;
+  }
+
+  /**
+   * Returns the value of _formatExpression_ property
+   * 
+   * @return String formatExpression
+   */
+  public String getFormatExpression() {
+    return formatExpression;
+  }
+
+  /**
+   * Returns the value of _formatMessage_ property
+   * 
+   * @return String formatMessage
+   */
+  public String getFormatMessage() {
+    return formatMessage;
   }
 
 }

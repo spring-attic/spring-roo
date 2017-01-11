@@ -8,12 +8,18 @@ package org.springframework.roo.model;
  *
  * @author Jose Manuel Vivó
  * @author Juan Carlos García
+ * @author Sergio Clares
  * @since 2.0.0
  */
 public class SpringletsJavaType {
 
   public static final JavaType SPRINGLETS_CONTROLLER_METHOD_LINK_BUILDER_FACTORY = new JavaType(
       "io.springlets.web.mvc.util.ControllerMethodLinkBuilderFactory");
+
+  public static final JavaType SPRINGLETS_ENTITY_FORMAT = new JavaType(
+      "io.springlets.format.EntityFormat");
+  public static final JavaType SPRINGLETS_ENTITY_RESOLVER = new JavaType(
+      "io.springlets.format.EntityResolver");
 
   public static final JavaType SPRINGLETS_GLOBAL_SEARCH = new JavaType(
       "io.springlets.data.domain.GlobalSearch");
@@ -28,12 +34,17 @@ public class SpringletsJavaType {
       "io.springlets.security.web.SpringletsUserDetailsService");
   public static final JavaType SPRINGLETS_NOT_FOUND_EXCEPTION = new JavaType(
       "io.springlets.web.NotFoundException");
+  public static final JavaType SPRINGLETS_DATATABLES = new JavaType(
+      "io.springlets.data.web.datatables.Datatables");
+  public static final JavaType SPRINGLETS_DATATABLES_COLUMNS = new JavaType(
+      "io.springlets.data.web.datatables.DatatablesColumns");
   public static final JavaType SPRINGLETS_DATATABLES_PAGEABLE = new JavaType(
       "io.springlets.data.web.datatables.DatatablesPageable");
   public static final JavaType SPRINGLETS_DATATABLES_DATA = new JavaType(
       "io.springlets.data.web.datatables.DatatablesData");
-  public static final JavaType SPRINGLETS_DATATABLES = new JavaType(
-      "io.springlets.data.web.datatables.Datatables");
+  public static final JavaType SPRINGLETS_CONVERTED_DATATABLES_DATA = new JavaType(
+      "io.springlets.data.web.datatables.ConvertedDatatablesData");
+
 
   public static final JavaType SPRINGLETS_METHOD_LINK_FACTORY = new JavaType(
       "io.springlets.web.mvc.util.MethodLinkFactory");
@@ -44,6 +55,10 @@ public class SpringletsJavaType {
 
   public static final JavaType SPRINGLETS_SELECT2_DATA = new JavaType(
       "io.springlets.data.web.select2.Select2Data");
+  public static final JavaType SPRINGLETS_SELECT2_DATA_SUPPORT = new JavaType(
+      "io.springlets.data.web.select2.Select2DataSupport");
+  public static final JavaType SPRINGLETS_SELECT2_DATA_WITH_CONVERSION = new JavaType(
+      "io.springlets.data.web.select2.Select2DataWithConversion");
 
   public static final JavaType SPRINGLETS_MAIL_RECEIVER_SERVICE = new JavaType(
       "io.springlets.mail.MailReceiverService");

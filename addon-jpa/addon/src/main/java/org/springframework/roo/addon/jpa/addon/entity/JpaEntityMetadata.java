@@ -17,7 +17,6 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
-import org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -46,6 +45,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
@@ -54,6 +54,7 @@ import org.springframework.roo.project.LogicalPath;
  * @author Andrew Swan
  * @author Juan Carlos García
  * @author Jose Manuel Vivó
+ * @author Sergio Clares
  * @since 1.2.0
  */
 public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
@@ -175,6 +176,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     // Add @DiscriminatorColumn if required
     builder.addAnnotation(getDiscriminatorColumnAnnotation());
+
+    // Add @EntityFormat annotation
+    builder.addAnnotation(getEntityFormatAnnotation());
 
     // Ensure there's a no-arg constructor (explicit or default)
     builder.addConstructor(getNoArgConstructor());
@@ -324,6 +328,47 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     }
 
     return entityAnnotation;
+  }
+
+  /**
+   * Generates the Springlets `@EntityFormat` annotation to be applied to the entity
+  *
+  * @return AnnotationMetadata
+  */
+  private AnnotationMetadata getEntityFormatAnnotation() {
+    AnnotationMetadata entityFormatAnnotation =
+        getTypeAnnotation(SpringletsJavaType.SPRINGLETS_ENTITY_FORMAT);
+    if (entityFormatAnnotation == null) {
+      return null;
+    }
+
+    String expressionAttribute = this.annotationValues.getEntityFormatExpression();
+    String messageAttribute = this.annotationValues.getEntityFormatMessage();
+
+    // Don't allow the two attributes to be present at same annotation
+    if (StringUtils.isNotBlank(expressionAttribute) && StringUtils.isNotBlank(messageAttribute)) {
+      throw new IllegalStateException(String.format(
+          "'@EntityFormat' from '%s' only accepts one attribute at a time. Please, check it.",
+          this.annotatedEntity.getSimpleTypeName()));
+    } else {
+
+      final AnnotationMetadataBuilder entityFormatBuilder =
+          new AnnotationMetadataBuilder(entityFormatAnnotation);
+
+      // Check for each attribute individually
+      if (StringUtils.isNotBlank(expressionAttribute)) {
+        entityFormatBuilder.addStringAttribute("value", expressionAttribute);
+
+      }
+
+      if (StringUtils.isNotBlank(messageAttribute)) {
+        entityFormatBuilder.addStringAttribute("message", messageAttribute);
+      }
+
+      entityFormatAnnotation = entityFormatBuilder.build();
+    }
+
+    return entityFormatAnnotation;
   }
 
 
@@ -995,6 +1040,13 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   }
 
   /**
+   * @return `@RooJpaEntity` `entityFormatMessage` value
+   */
+  public String getEntityFormatMessage() {
+    return (String) this.annotationValues.getEntityFormatMessage();
+  }
+
+  /**
    * = _RelationInfo_
    *
    * *Immutable* information about a managed relation
@@ -1115,8 +1167,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       }
       return true;
     }
-
-
 
     @Override
     public int compareTo(RelationInfo o) {

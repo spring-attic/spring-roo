@@ -62,6 +62,7 @@ import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.model.RooEnumDetails;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.settings.project.ProjectSettingsService;
@@ -512,6 +513,24 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
+  public boolean isEntityFormatExpressionVisibleForFieldReference(ShellContext shellContext) {
+    String param = shellContext.getParameters().get("entityFormatMessage");
+    if (param != null) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public boolean isEntityFormatMessageVisibleForFieldReference(ShellContext shellContext) {
+    String param = shellContext.getParameters().get("entityFormatExpression");
+    if (param != null) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
   public boolean areOptionalParametersVisibleForFieldSet(ShellContext shellContext) {
     String cardinality = shellContext.getParameters().get(CARDINALITY);
     String joinColumnNameParam = shellContext.getParameters().get(JOIN_COLUMN_NAME);
@@ -714,6 +733,24 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
+  public boolean isEntityFormatExpressionVisibleForFieldSet(ShellContext shellContext) {
+    if (shellContext.getParameters().get("entityFormatMessage") == null
+        && shellContext.getParameters().get(CARDINALITY).equals(ONE_TO_MANY)) {
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public boolean isEntityFormatMessageVisibleForFieldSet(ShellContext shellContext) {
+    if (shellContext.getParameters().get("entityFormatExpression") == null
+        && shellContext.getParameters().get(CARDINALITY).equals(ONE_TO_MANY)) {
+      return true;
+    }
+    return false;
+  }
+
+  @Override
   public boolean areOptionalParametersVisibleForFieldList(ShellContext shellContext) {
     String cardinality = shellContext.getParameters().get(CARDINALITY);
     String joinColumnNameParam = shellContext.getParameters().get(JOIN_COLUMN_NAME);
@@ -903,6 +940,24 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       return false;
     }
     return true;
+  }
+
+  @Override
+  public boolean isEntityFormatExpressionVisibleForFieldList(ShellContext shellContext) {
+    if (shellContext.getParameters().get("entityFormatMessage") == null
+        && shellContext.getParameters().get(CARDINALITY).equals(ONE_TO_MANY)) {
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public boolean isEntityFormatMessageVisibleForFieldList(ShellContext shellContext) {
+    if (shellContext.getParameters().get("entityFormatExpression") == null
+        && shellContext.getParameters().get(CARDINALITY).equals(ONE_TO_MANY)) {
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -1306,7 +1361,8 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
   public void createReferenceField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       boolean aggregation, JavaSymbolName mappedBy, Cascade[] cascadeType, boolean notNull,
       String joinColumnName, String referencedColumnName, Fetch fetch, String comment,
-      boolean permitReservedWords, Boolean orphanRemoval, boolean isForce) {
+      boolean permitReservedWords, Boolean orphanRemoval, boolean isForce, String formatExpression,
+      String formatMessage) {
 
     final ClassOrInterfaceTypeDetails childCid = typeLocationService.getTypeDetails(fieldType);
     final ClassOrInterfaceTypeDetails parentCid = typeLocationService.getTypeDetails(typeName);
@@ -1317,7 +1373,6 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
             childCid,
             "The specified target '--type' does not exist or can not be found. Please create this type first.",
             fieldType);
-
     // Check if parent field exist
     checkFieldExists(fieldName, isForce, parentCid, "fieldName");
 
@@ -1388,6 +1443,10 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
     parentFieldDetails.setMappedBy(mappedBy);
 
+    // ROO-3868: New entity visualization support using a new format annotation
+    parentFieldDetails.addAdditionaAnnotation(buildEntityFormatAnnotation(formatExpression,
+        formatMessage, fieldName.getSymbolName()));
+
     // Prepare child files
     final ReferenceField childFieldDetails =
         new ReferenceField(childCid.getDeclaredByMetadataId(), typeName, mappedBy,
@@ -1404,6 +1463,10 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     }
     childFieldDetails.setNotNull(notNull);
 
+    // ROO-3868: New entity visualization support using a new format annotation
+    childFieldDetails.addAdditionaAnnotation(buildEntityFormatAnnotation(formatExpression,
+        formatMessage, fieldName.getSymbolName()));
+
     // insert child field
     insertField(childFieldDetails, permitReservedWords, false, true);
 
@@ -1417,12 +1480,14 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumnName,
       String referencedColumnName, String joinTable, String joinColumns, String referencedColumns,
       String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
-      Boolean aggregation, Boolean orphanRemoval, boolean isForce) {
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce, String formatExpression,
+      String formatMessage) {
 
     createCollectionField(typeName, fieldType, fieldName, cardinality, cascadeType, notNull,
         sizeMin, sizeMax, mappedBy, fetch, comment, joinColumnName, referencedColumnName,
         joinTable, joinColumns, referencedColumns, inverseJoinColumns, inverseReferencedColumns,
-        permitReservedWords, aggregation, orphanRemoval, isForce, false);
+        permitReservedWords, aggregation, orphanRemoval, isForce, false, formatExpression,
+        formatMessage);
   }
 
   /**
@@ -1453,6 +1518,8 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
    * @param orphanRemoval
    * @param isForce
    * @param isList true generates List, false generates Set
+   * @param formatExpression
+   * @param formatMessage
    */
   public void createCollectionField(JavaType typeName, JavaType fieldType,
       JavaSymbolName fieldName, Cardinality cardinality, Cascade[] cascadeType, boolean notNull,
@@ -1460,7 +1527,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       String joinColumnName, String referencedColumnName, String joinTable, String joinColumns,
       String referencedColumns, String inverseJoinColumns, String inverseReferencedColumns,
       boolean permitReservedWords, Boolean aggregation, Boolean orphanRemoval, boolean isForce,
-      boolean isList) {
+      boolean isList, String formatExpression, String formatMessage) {
 
     // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
     // on
@@ -1544,7 +1611,8 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
           createChildFieldOfOneToManyRelation(childCid, typeName, permitReservedWords, mappedBy,
               fetch, joinColumnName, referencedColumnName, joinTable, joinColumns,
-              referencedColumns, inverseJoinColumns, inverseReferencedColumns);
+              referencedColumns, inverseJoinColumns, inverseReferencedColumns, formatExpression,
+              formatMessage);
           break;
         case MANY_TO_MANY:
           createParentFieldOfToManyRelation(parentCid, childCid, fieldName, fieldType,
@@ -1584,7 +1652,8 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
   private void createChildFieldOfOneToManyRelation(ClassOrInterfaceTypeDetails childCid,
       JavaType parentType, boolean permitReservedWords, JavaSymbolName mappedBy, Fetch fetch,
       String joinColumnName, String referencedColumnName, String joinTable, String joinColumns,
-      String referencedColumns, String inverseJoinColumns, String inverseReferencedColumns) {
+      String referencedColumns, String inverseJoinColumns, String inverseReferencedColumns,
+      String formatExpression, String formatMessage) {
     final ReferenceField childFieldDetails =
         new ReferenceField(childCid.getDeclaredByMetadataId(), parentType, mappedBy,
             Cardinality.MANY_TO_ONE, null);
@@ -1635,6 +1704,9 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
         childFieldDetails.setJoinColumn(joinColumnName);
       }
     }
+
+    childFieldDetails.addAdditionaAnnotation(buildEntityFormatAnnotation(formatExpression,
+        formatMessage, mappedBy.getSymbolName()));
 
     insertField(childFieldDetails, permitReservedWords, false, true);
   }
@@ -1849,12 +1921,14 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumnName,
       String referencedColumnName, String joinTable, String joinColumns, String referencedColumns,
       String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
-      Boolean aggregation, Boolean orphanRemoval, boolean isForce) {
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce, String formatExpression,
+      String formatMessage) {
 
     createCollectionField(typeName, fieldType, fieldName, cardinality, cascadeType, notNull,
         sizeMin, sizeMax, mappedBy, fetch, comment, joinColumnName, referencedColumnName,
         joinTable, joinColumns, referencedColumns, inverseJoinColumns, inverseReferencedColumns,
-        permitReservedWords, aggregation, orphanRemoval, isForce, true);
+        permitReservedWords, aggregation, orphanRemoval, isForce, true, formatExpression,
+        formatMessage);
   };
 
 
@@ -2260,6 +2334,33 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
                     fieldName, parameterName));
       }
     }
+  }
+
+  private AnnotationMetadataBuilder buildEntityFormatAnnotation(
+      final String entityFormatExpression, final String entityFormatMessage, final String fieldName) {
+
+    // Don't allow the two attributes to be present at same annotation
+    if (StringUtils.isNotBlank(entityFormatExpression)
+        && StringUtils.isNotBlank(entityFormatMessage)) {
+      throw new IllegalStateException(String.format(
+          "'@EntityFormat' from '%s' only accepts one attribute at a time. Please, check it.",
+          fieldName));
+    }
+
+    final AnnotationMetadataBuilder entityFormatBuilder =
+        new AnnotationMetadataBuilder(SpringletsJavaType.SPRINGLETS_ENTITY_FORMAT);
+
+    // Check for each attribute individually
+    if (StringUtils.isNotBlank(entityFormatExpression)) {
+      entityFormatBuilder.addStringAttribute("value", entityFormatExpression);
+
+    }
+
+    if (StringUtils.isNotBlank(entityFormatMessage)) {
+      entityFormatBuilder.addStringAttribute("message", entityFormatMessage);
+    }
+
+    return entityFormatBuilder;
   }
 
   @SuppressWarnings("unchecked")

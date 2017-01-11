@@ -1,9 +1,6 @@
 package org.springframework.roo.addon.field.addon;
 
 
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -16,8 +13,10 @@ import org.springframework.roo.classpath.operations.jsr303.DateFieldPersistenceT
 import org.springframework.roo.classpath.operations.jsr303.UploadedFileContentType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.ShellContext;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * Provides a field creation API which can be implemented by each add-on that
@@ -348,6 +347,22 @@ public interface FieldCreatorProvider {
    * @param shellContext
    * @return
    */
+  boolean isEntityFormatExpressionVisibleForFieldReference(ShellContext shellContext);
+
+  /**
+   * TODO
+   *
+   * @param shellContext
+   * @return
+   */
+  boolean isEntityFormatMessageVisibleForFieldReference(ShellContext shellContext);
+
+  /**
+   * TODO
+   *
+   * @param shellContext
+   * @return
+   */
   boolean areOptionalParametersVisibleForFieldSet(ShellContext shellContext);
 
   /**
@@ -452,6 +467,22 @@ public interface FieldCreatorProvider {
    * @param shellContext
    * @return
    */
+  boolean isEntityFormatExpressionVisibleForFieldSet(ShellContext shellContext);
+
+  /**
+   * TODO
+   *
+   * @param shellContext
+   * @return
+   */
+  boolean isEntityFormatMessageVisibleForFieldSet(ShellContext shellContext);
+
+  /**
+   * TODO
+   *
+   * @param shellContext
+   * @return
+   */
   boolean areJoinTableParamsVisibleForFieldList(ShellContext shellContext);
 
   /**
@@ -549,6 +580,22 @@ public interface FieldCreatorProvider {
    * @return `true` if `--nullRequired` is visible, `false` otherwise. 
    */
   boolean isNullRequiredVisibleForFieldList(ShellContext shellContext);
+
+  /**
+   * TODO
+   *
+   * @param shellContext
+   * @return
+   */
+  boolean isEntityFormatExpressionVisibleForFieldList(ShellContext shellContext);
+
+  /**
+   * TODO
+   *
+   * @param shellContext
+   * @return
+   */
+  boolean isEntityFormatMessageVisibleForFieldList(ShellContext shellContext);
 
   /**
    * TODO
@@ -896,11 +943,14 @@ public interface FieldCreatorProvider {
    * @param permitReservedWords
    * @param orphanRemoval
    * @param isForce
+   * @param formatMessage 
+   * @param formatExpression 
    */
   void createReferenceField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       boolean aggregation, JavaSymbolName mappedBy, Cascade cascadeType[], boolean notNull,
       String joinColumnName, String referencedColumnName, Fetch fetch, String comment,
-      boolean permitReservedWords, Boolean orphanRemoval, boolean isForce);
+      boolean permitReservedWords, Boolean orphanRemoval, boolean isForce, String formatExpression,
+      String formatMessage);
 
   /**
    * TODO
@@ -927,13 +977,16 @@ public interface FieldCreatorProvider {
    * @param aggregation
    * @param orphanRemoval
    * @param isForce
+   * @param formatMessage 
+   * @param formatExpression 
    */
   void createSetField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       Cardinality cardinality, Cascade cascadeType[], boolean notNull, Integer sizeMin,
       Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumnName,
       String referencedColumnName, String joinTable, String joinColumns, String referencedColumns,
       String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
-      Boolean aggregation, Boolean orphanRemoval, boolean isForce);
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce, String formatExpression,
+      String formatMessage);
 
 
   /**
@@ -961,13 +1014,16 @@ public interface FieldCreatorProvider {
    * @param aggregation
    * @param orphanRemoval
    * @param isForce
+   * @param formatMessage 
+   * @param formatExpression 
    */
   void createListField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       Cardinality cardinality, Cascade cascadeType[], boolean notNull, Integer sizeMin,
       Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumnName,
       String referencedColumnName, String joinTable, String joinColumns, String referencedColumns,
       String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
-      Boolean aggregation, Boolean orphanRemoval, boolean isForce);
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce, String formatExpression,
+      String formatMessage);
 
 
   /**
@@ -1129,4 +1185,5 @@ public interface FieldCreatorProvider {
    * @return
    */
   List<String> getFieldEmbeddedAllPossibleValues(ShellContext shellContext);
+
 }

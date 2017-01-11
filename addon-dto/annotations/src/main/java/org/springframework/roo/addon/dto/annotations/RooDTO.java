@@ -22,4 +22,22 @@ public @interface RooDTO {
    * @return true if DTO should be immutable, false otherwise.
    */
   boolean immutable() default false;
+
+  /**
+   * Specifies the localization message used to obtain a localized Spring 
+   * Expression Language expression to format the dto when showing 
+   * it in presentation layer.
+   * 
+   * @return the key of the message with the SpEL (defaults to "").
+   */
+  String formatMessage() default "";
+
+  /**
+   * Specifies the Spring Expression Language expression to use for formatting 
+   * the dto in presentation layer.
+   * 
+   * @return the SpEL (defaults to "").
+   */
+  String formatExpression() default "";
+
 }

@@ -7,7 +7,6 @@ import static org.springframework.roo.model.SpringJavaType.POST_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.REQUEST_PARAM;
 import static org.springframework.roo.model.SpringJavaType.RESPONSE_ENTITY;
 import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_DATATABLES;
-import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_DATATABLES_DATA;
 import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH;
 import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_NOT_FOUND_EXCEPTION;
 
@@ -27,6 +26,7 @@ import org.springframework.roo.addon.web.mvc.views.AbstractViewMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
@@ -66,6 +66,7 @@ import java.util.TreeMap;
  *
  * @author Juan Carlos García
  * @author Jose Manuel Vivó
+ * @author Sergio Clares
  * @since 2.0
  */
 public class ThymeleafMetadata extends AbstractViewMetadata {
@@ -114,10 +115,14 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private static final JavaType JODA_DATETIME_FORMAT_JAVA_TYPE = new JavaType(
       "org.joda.time.format.DateTimeFormat");
   private static final JavaSymbolName MESSAGE_SOURCE = new JavaSymbolName("messageSource");
+  private static final JavaSymbolName CONVERSION_SERVICE_FIELD_NAME = new JavaSymbolName(
+      "conversionService");
   private static final AnnotationMetadata ANN_METADATA_MODEL_ATTRIBUTE = AnnotationMetadataBuilder
       .getInstance(SpringJavaType.MODEL_ATTRIBUTE);
-  private static final AnnotatedJavaType DATATABLES_COLUMNS_PARAM = new AnnotatedJavaType(
+  private static final AnnotatedJavaType STRING_ARRAY_PARAM = new AnnotatedJavaType(
       JavaType.STRING_ARRAY);
+  private static final AnnotatedJavaType DATATABLES_COLUMNS_PARAM = new AnnotatedJavaType(
+      SpringletsJavaType.SPRINGLETS_DATATABLES_COLUMNS);
   private static final JavaSymbolName DATATABLES_COLUMNS_PARAM_NAME = new JavaSymbolName(
       "datatablesColumns");
   private static final JavaSymbolName RESPONSE_PARAM_NAME = new JavaSymbolName("response");
@@ -225,6 +230,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private final List<MethodMetadata> allMethods;
   private final FieldMetadata messageSourceField;
   private final FieldMetadata methodLinkBuilderFactoryField;
+  private final FieldMetadata conversionServiceField;
   private final String viewsPath;
   private final JavaType collectionController;
   private final List<FieldMetadata> dateTimeFields;
@@ -340,6 +346,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     this.messageSourceField = getMessageSourceField();
     ensureGovernorHasField(new FieldMetadataBuilder(this.messageSourceField));
+    ensureGovernorHasMethod(new MethodMetadataBuilder(addGetterForField(this.messageSourceField)));
 
     List<MethodMetadata> allMethods = new ArrayList<MethodMetadata>();
 
@@ -350,6 +357,14 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.methodLinkBuilderFactoryField =
             getMethodLinkBuilderFactoryField(ITEM_LINK, this.itemController);
         ensureGovernorHasField(new FieldMetadataBuilder(this.methodLinkBuilderFactoryField));
+        ensureGovernorHasMethod(new MethodMetadataBuilder(
+            addGetterForField(this.methodLinkBuilderFactoryField)));
+
+        // ROO-3868: New entity visualization support needs a ConversionService field
+        this.conversionServiceField = getConversionServiceField();
+        ensureGovernorHasField(new FieldMetadataBuilder(this.conversionServiceField));
+        ensureGovernorHasMethod(new MethodMetadataBuilder(
+            addGetterForField(this.conversionServiceField)));
 
         // Build constructor
         String linkBuilderLine =
@@ -413,32 +428,12 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
         // Jasper export methods
         List<MethodMetadata> exportMethods = new ArrayList<MethodMetadata>();
-        if (getExportMethod() != null) {
-          this.exportMethod = addAndGet(getExportMethod(), exportMethods);
-        } else {
-          this.exportMethod = null;
-        }
-        if (getCsvExportMethod() != null) {
-          this.exportCsvMethod = addAndGet(getCsvExportMethod(), exportMethods);
-        } else {
-          this.exportCsvMethod = null;
-        }
-        if (getPdfExportMethod() != null) {
-          this.exportPdfMethod = addAndGet(getPdfExportMethod(), exportMethods);
-        } else {
-          this.exportPdfMethod = null;
-        }
-        if (getXlsMethod() != null) {
-          this.exportXlsMethod = addAndGet(getXlsMethod(), exportMethods);
-        } else {
-          this.exportXlsMethod = null;
-        }
-        if (getAddColumnToReportBuilderMethod() != null) {
-          this.addColumnToReportBuilderMethod =
-              addAndGet(getAddColumnToReportBuilderMethod(), exportMethods);
-        } else {
-          this.addColumnToReportBuilderMethod = null;
-        }
+        this.exportMethod = addAndGet(getExportMethod(), exportMethods);
+        this.exportCsvMethod = addAndGet(getCsvExportMethod(), exportMethods);
+        this.exportPdfMethod = addAndGet(getPdfExportMethod(), exportMethods);
+        this.exportXlsMethod = addAndGet(getXlsMethod(), exportMethods);
+        this.addColumnToReportBuilderMethod =
+            addAndGet(getAddColumnToReportBuilderMethod(), exportMethods);
         this.exportMethods = exportMethods;
 
         break;
@@ -449,6 +444,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.methodLinkBuilderFactoryField =
             getMethodLinkBuilderFactoryField(ITEM_LINK, this.governorTypeDetails.getType());
         ensureGovernorHasField(new FieldMetadataBuilder(this.methodLinkBuilderFactoryField));
+        ensureGovernorHasMethod(new MethodMetadataBuilder(
+            addGetterForField(this.methodLinkBuilderFactoryField)));
+
+        this.conversionServiceField = null;
 
         // Build constructor
         String linkBuilderLine =
@@ -508,6 +507,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       case SEARCH: {
 
         this.methodLinkBuilderFactoryField = null;
+        this.conversionServiceField = null;
 
         // Build constructor
         String linkBuilderLine = "";
@@ -579,6 +579,14 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.methodLinkBuilderFactoryField =
             getMethodLinkBuilderFactoryField(COLLECTION_LINK, this.collectionController);
         ensureGovernorHasField(new FieldMetadataBuilder(this.methodLinkBuilderFactoryField));
+        ensureGovernorHasMethod(new MethodMetadataBuilder(
+            addGetterForField(this.methodLinkBuilderFactoryField)));
+
+        // ROO-3868: New entity visualization support needs a ConversionService field
+        this.conversionServiceField = getConversionServiceField();
+        ensureGovernorHasField(new FieldMetadataBuilder(this.conversionServiceField));
+        ensureGovernorHasMethod(new MethodMetadataBuilder(
+            addGetterForField(this.conversionServiceField)));
 
         // Build constructor
         String linkBuilderLine =
@@ -653,6 +661,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.methodLinkBuilderFactoryField =
             getMethodLinkBuilderFactoryField(COLLECTION_LINK, this.collectionController);
         ensureGovernorHasField(new FieldMetadataBuilder(this.methodLinkBuilderFactoryField));
+        ensureGovernorHasMethod(new MethodMetadataBuilder(
+            addGetterForField(this.methodLinkBuilderFactoryField)));
+
+        this.conversionServiceField = null;
 
         // Build constructor
         String linkBuilderLine =
@@ -724,14 +736,16 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     itdTypeDetails = builder.build();
   }
 
-  private FieldMetadata getMessageSourceField() {
-    return new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
-        new ArrayList<AnnotationMetadataBuilder>(), MESSAGE_SOURCE, SpringJavaType.MESSAGE_SOURCE)
-        .build();
+  private FieldMetadata getConversionServiceField() {
+    return new FieldMetadataBuilder(getId(), Modifier.PRIVATE,
+        new ArrayList<AnnotationMetadataBuilder>(), CONVERSION_SERVICE_FIELD_NAME,
+        SpringJavaType.CONVERSION_SERVICE).build();
   }
 
-  private MethodMetadata addAndGet(MethodMetadata method) {
-    return addAndGet(method, null);
+  private FieldMetadata getMessageSourceField() {
+    return new FieldMetadataBuilder(getId(), Modifier.PRIVATE,
+        new ArrayList<AnnotationMetadataBuilder>(), MESSAGE_SOURCE, SpringJavaType.MESSAGE_SOURCE)
+        .build();
   }
 
   private MethodMetadata addAndGet(MethodMetadata method, List<MethodMetadata> allMethods) {
@@ -745,6 +759,36 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private ConstructorMetadata addAndGetConstructor(ConstructorMetadata constructor) {
     ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
     return constructor;
+  }
+
+  private MethodMetadata addGetterForField(FieldMetadata field) {
+    JavaSymbolName methodName = BeanInfoUtils.getAccessorMethodName(field);
+
+    // Including parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+
+    // Check method existence
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Including parameter names
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // return this.FIELD
+    bodyBuilder.appendFormalLine("return this.%s;", field.getFieldName().getSymbolName());
+
+    // Build method
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, field.getFieldType(),
+            parameterTypes, parameterNames, bodyBuilder);
+
+    return methodBuilder.build();
   }
 
   private AnnotationMetadataBuilder getRequestMappingAnnotation() {
@@ -795,8 +839,16 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       }
     }
 
+    // ROO-3868: New entity visualization support needs a ConversionService field
+    if (this.type == ControllerType.COLLECTION || this.type == ControllerType.DETAIL) {
+      String conversionServiceFieldName =
+          this.conversionServiceField.getFieldName().getSymbolName();
+      constructor.addParameter(conversionServiceFieldName,
+          this.conversionServiceField.getFieldType());
+      bodyBuilder.appendFormalLine("this.%1$s = %1$s;", conversionServiceFieldName);
+    }
 
-    String messageSourceName = messageSourceField.getFieldName().getSymbolName();
+    String messageSourceName = this.messageSourceField.getFieldName().getSymbolName();
     constructor.addParameter(messageSourceName, messageSourceField.getFieldType());
     bodyBuilder.appendFormalLine("this.%1$s = %1$s;", messageSourceName);
 
@@ -929,21 +981,22 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
             parameterTypes, parameterNames, bodyBuilder);
 
+    // Deactivated until repaired comments push-in
     // Add Javadoc to method
-    CommentStructure commentStructure = new CommentStructure();
-    List<AbstractComment> comments = new ArrayList<AbstractComment>();
-    comments.add(new JavadocComment(
-        "This method contains all the entity fields that are able to be displayed in a "));
-    comments.add(new JavadocComment(
-        "report. The developer could add a new column to the report builder providing the "));
-    comments.add(new JavadocComment(
-        "field name and the builder where the new field will be added as column."));
-    comments.add(new JavadocComment(" "));
-    comments.add(new JavadocComment("@param columnName The field name to show as column"));
-    comments.add(new JavadocComment(
-        "@param builder The builder where the new field will be added as column."));
-    commentStructure.setBeginComments(comments);
-    methodBuilder.setCommentStructure(commentStructure);
+    //    CommentStructure commentStructure = new CommentStructure();
+    //    List<AbstractComment> comments = new ArrayList<AbstractComment>();
+    //    comments.add(new JavadocComment(
+    //        "This method contains all the entity fields that are able to be displayed in a "));
+    //    comments.add(new JavadocComment(
+    //        "report. The developer could add a new column to the report builder providing the "));
+    //    comments.add(new JavadocComment(
+    //        "field name and the builder where the new field will be added as column."));
+    //    comments.add(new JavadocComment(" "));
+    //    comments.add(new JavadocComment("@param columnName The field name to show as column"));
+    //    comments.add(new JavadocComment(
+    //        "@param builder The builder where the new field will be added as column."));
+    //    commentStructure.setBeginComments(comments);
+    //    methodBuilder.setCommentStructure(commentStructure);
 
     return methodBuilder.build();
   }
@@ -966,7 +1019,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     pageableDefaultAnnotation.addIntegerAttribute("size", Integer.MAX_VALUE);
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE, pageableDefaultAnnotation
         .build()));
-    parameterTypes.add(DATATABLES_COLUMNS_PARAM);
+    parameterTypes.add(STRING_ARRAY_PARAM);
     parameterTypes
         .add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse")));
     parameterTypes.add(new AnnotatedJavaType(this.jasperReportsMap.get("JasperReportsExporter")));
@@ -1134,48 +1187,49 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
             parameterTypes, parameterNames, bodyBuilder);
 
+    // Deactivated until repaired comments push-in
     // Add Javadoc to method
-    CommentStructure commentStructure = new CommentStructure();
-    List<AbstractComment> comments = new ArrayList<AbstractComment>();
-    comments
-        .add(new JavadocComment(
-            "Method that obtains the filtered and ordered records using the Datatables information and "));
-    comments.add(new JavadocComment(
-        "export them to a new report file. (It ignores the current pagination)."));
-    comments.add(new JavadocComment(" "));
-    comments.add(new JavadocComment(
-        "To generate the report file it uses the `DynamicJasper` library"));
-    comments
-        .add(new JavadocComment(
-            "(http://dynamicjasper.com). This library allows developers to generate reports dynamically"));
-    comments.add(new JavadocComment("without use an specific template to each entity."));
-    comments.add(new JavadocComment(" "));
-    comments.add(new JavadocComment(
-        "To customize the appearance of ALL generated reports, you could customize the "));
-    comments
-        .add(new JavadocComment(
-            "\"export_default.jrxml\" template located in \"src/main/resources/templates/reports/\". However,"));
-    comments.add(new JavadocComment(
-        "if you want to customize the appearance of this specific report, you could create a new"));
-    comments
-        .add(new JavadocComment(
-            "\".jrxml\" file and provide it to the library replacing the `builder.setTemplateFile();`"));
-    comments.add(new JavadocComment("operation used in this implementation."));
-    comments.add(new JavadocComment(" "));
-    comments
-        .add(new JavadocComment(
-            "@param search GlobalSearch that contains the filter provided by the Datatables component"));
-    comments
-        .add(new JavadocComment(
-            "@param pageable Pageable that contains the Sort info provided by the Datatabes component"));
-    comments.add(new JavadocComment(
-        "@param datatablesColumns Columns displayed in the Datatables component"));
-    comments.add(new JavadocComment("@param response The HttpServletResponse"));
-    comments.add(new JavadocComment(
-        "@param exporter An specific JasperReportsExporter to be used during export process."));
-    comments.add(new JavadocComment("@param fileName The final filename to use"));
-    commentStructure.setBeginComments(comments);
-    methodBuilder.setCommentStructure(commentStructure);
+    //    CommentStructure commentStructure = new CommentStructure();
+    //    List<AbstractComment> comments = new ArrayList<AbstractComment>();
+    //    comments
+    //        .add(new JavadocComment(
+    //            "Method that obtains the filtered and ordered records using the Datatables information and "));
+    //    comments.add(new JavadocComment(
+    //        "export them to a new report file. (It ignores the current pagination)."));
+    //    comments.add(new JavadocComment(" "));
+    //    comments.add(new JavadocComment(
+    //        "To generate the report file it uses the `DynamicJasper` library"));
+    //    comments
+    //        .add(new JavadocComment(
+    //            "(http://dynamicjasper.com). This library allows developers to generate reports dynamically"));
+    //    comments.add(new JavadocComment("without use an specific template to each entity."));
+    //    comments.add(new JavadocComment(" "));
+    //    comments.add(new JavadocComment(
+    //        "To customize the appearance of ALL generated reports, you could customize the "));
+    //    comments
+    //        .add(new JavadocComment(
+    //            "\"export_default.jrxml\" template located in \"src/main/resources/templates/reports/\". However,"));
+    //    comments.add(new JavadocComment(
+    //        "if you want to customize the appearance of this specific report, you could create a new"));
+    //    comments
+    //        .add(new JavadocComment(
+    //            "\".jrxml\" file and provide it to the library replacing the `builder.setTemplateFile();`"));
+    //    comments.add(new JavadocComment("operation used in this implementation."));
+    //    comments.add(new JavadocComment(" "));
+    //    comments
+    //        .add(new JavadocComment(
+    //            "@param search GlobalSearch that contains the filter provided by the Datatables component"));
+    //    comments
+    //        .add(new JavadocComment(
+    //            "@param pageable Pageable that contains the Sort info provided by the Datatabes component"));
+    //    comments.add(new JavadocComment(
+    //        "@param datatablesColumns Columns displayed in the Datatables component"));
+    //    comments.add(new JavadocComment("@param response The HttpServletResponse"));
+    //    comments.add(new JavadocComment(
+    //        "@param exporter An specific JasperReportsExporter to be used during export process."));
+    //    comments.add(new JavadocComment("@param fileName The final filename to use"));
+    //    commentStructure.setBeginComments(comments);
+    //    methodBuilder.setCommentStructure(commentStructure);
 
     return methodBuilder.build();
   }
@@ -1355,24 +1409,25 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
             JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
+    // Deactivated until repaired comments push-in
     // Add JavaDoc
-    CommentStructure commentStructure = new CommentStructure();
-    List<AbstractComment> comments = new ArrayList<AbstractComment>();
-    comments.add(new JavadocComment(
-        "It delegates in the `export` method providing the necessary information"));
-    comments.add(new JavadocComment(String.format("to generate a %s report.", fileType)));
-    comments.add(new JavadocComment(" "));
-    comments
-        .add(new JavadocComment(
-            "@param search The GlobalSearch that contains the filter provided by the Datatables component"));
-    comments
-        .add(new JavadocComment(
-            "@param pageable The Pageable that contains the Sort info provided by the Datatabes component"));
-    comments.add(new JavadocComment(
-        "@param datatablesColumns The Columns displayed in the Datatables component"));
-    comments.add(new JavadocComment("@param response The HttpServletResponse"));
-    commentStructure.setBeginComments(comments);
-    methodBuilder.setCommentStructure(commentStructure);
+    //    CommentStructure commentStructure = new CommentStructure();
+    //    List<AbstractComment> comments = new ArrayList<AbstractComment>();
+    //    comments.add(new JavadocComment(
+    //        "It delegates in the `export` method providing the necessary information"));
+    //    comments.add(new JavadocComment(String.format("to generate a %s report.", fileType)));
+    //    comments.add(new JavadocComment(" "));
+    //    comments
+    //        .add(new JavadocComment(
+    //            "@param search The GlobalSearch that contains the filter provided by the Datatables component"));
+    //    comments
+    //        .add(new JavadocComment(
+    //            "@param pageable The Pageable that contains the Sort info provided by the Datatabes component"));
+    //    comments.add(new JavadocComment(
+    //        "@param datatablesColumns The Columns displayed in the Datatables component"));
+    //    comments.add(new JavadocComment("@param response The HttpServletResponse"));
+    //    commentStructure.setBeginComments(comments);
+    //    methodBuilder.setCommentStructure(commentStructure);
 
     return methodBuilder.build();
   }
@@ -2803,6 +2858,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     final JavaSymbolName methodName = LIST_DATATABLES_METHOD_NAME;
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(DATATABLES_COLUMNS_PARAM);
     parameterTypes.add(GLOBAL_SEARCH_PARAM);
     parameterTypes.add(DATATABLES_PAGEABLE_PARAM);
     AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM);
@@ -2817,6 +2873,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     }
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(DATATABLES_COLUMNS_PARAM_NAME);
     parameterNames.add(new JavaSymbolName("search"));
     parameterNames.add(new JavaSymbolName("pageable"));
     parameterNames.add(new JavaSymbolName("draw"));
@@ -2867,14 +2924,13 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
 
-
-
-    // DatatablesData<Entity> datatablesData = new DatatablesData<Entity>(entityNamePlural,
-    // allAvailableentityNamePlural, draw);
-    bodyBuilder.appendFormalLine("%s<%s> datatablesData = new %s<%s>(%s, %s, draw);",
-        getNameOfJavaType(SPRINGLETS_DATATABLES_DATA), getNameOfJavaType(defaultReturnType),
-        getNameOfJavaType(SPRINGLETS_DATATABLES_DATA), getNameOfJavaType(defaultReturnType),
-        itemNames, totalVarName);
+    // ConvertedDatatablesData<Owner> datatablesData = new ConvertedDatatablesData<Owner>(owners, 
+    // totalOwnersCount, draw, conversionService, columns);
+    bodyBuilder.appendFormalLine(
+        "%1$s<%2$s> datatablesData = new %1$s<%2$s>(%3$s, %4$s, draw, %5$s, %6$s);",
+        getNameOfJavaType(SpringletsJavaType.SPRINGLETS_CONVERTED_DATATABLES_DATA),
+        getNameOfJavaType(defaultReturnType), itemNames, totalVarName,
+        CONVERSION_SERVICE_FIELD_NAME, DATATABLES_COLUMNS_PARAM_NAME);
 
     // return ResponseEntity.ok(datatablesData);
     bodyBuilder.appendFormalLine("return %s.ok(datatablesData);",
@@ -2882,8 +2938,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // Generating returnType
     JavaType returnType =
-        JavaType.wrapperOf(RESPONSE_ENTITY,
-            JavaType.wrapperOf(SPRINGLETS_DATATABLES_DATA, defaultReturnType));
+        JavaType.wrapperOf(RESPONSE_ENTITY, JavaType.wrapperOf(
+            SpringletsJavaType.SPRINGLETS_CONVERTED_DATATABLES_DATA, defaultReturnType));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, parameterTypes,
@@ -2955,28 +3011,20 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // String idExpression = "#{id}";
     bodyBuilder.appendFormalLine("String idExpression = \"#{%s}\";", this.entityIdentifier);
 
-    // String textExpression = messageSource.getMessage("expression_product", null, "#{toString()}", locale);
-    bodyBuilder
-        .appendFormalLine(
-            "String textExpression = messageSource.getMessage(\"expression_%s\", null, \"#{toString()}\", locale);",
-            this.entityItemName);
-
-    // Select2Data<Entity> datatablesData = new Select2Data<Entity>(entityNamePlural,
-    // idExpression, textExpression);
-    bodyBuilder.appendFormalLine(
-        "%s<%s> select2Data = new %s<%s>(%s, idExpression, textExpression);",
-        getNameOfJavaType(SpringletsJavaType.SPRINGLETS_SELECT2_DATA),
+    // Select2DataSupport<Customer> select2Data = new Select2DataWithConversion<Customer>(customers, idExpression, conversionService);
+    bodyBuilder.appendFormalLine("%s<%s> select2Data = new %s<%s>(%s, idExpression, %s);",
+        getNameOfJavaType(SpringletsJavaType.SPRINGLETS_SELECT2_DATA_SUPPORT),
         getNameOfJavaType(defaultReturnType),
-        getNameOfJavaType(SpringletsJavaType.SPRINGLETS_SELECT2_DATA),
-        getNameOfJavaType(defaultReturnType), itemsName);
+        getNameOfJavaType(SpringletsJavaType.SPRINGLETS_SELECT2_DATA_WITH_CONVERSION),
+        getNameOfJavaType(defaultReturnType), itemsName, CONVERSION_SERVICE_FIELD_NAME);
 
     // return ResponseEntity.ok(select2Data);
     bodyBuilder.appendFormalLine("return %s.ok(select2Data);", getNameOfJavaType(RESPONSE_ENTITY));
 
     // Generating returnType
     JavaType returnType =
-        JavaType.wrapperOf(RESPONSE_ENTITY,
-            JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_SELECT2_DATA, defaultReturnType));
+        JavaType.wrapperOf(RESPONSE_ENTITY, JavaType.wrapperOf(
+            SpringletsJavaType.SPRINGLETS_SELECT2_DATA_SUPPORT, defaultReturnType));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, parameterTypes,
@@ -3292,6 +3340,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(new AnnotatedJavaType(
         findAllMethod.getParameterTypes().get(0).getJavaType(), ANN_METADATA_MODEL_ATTRIBUTE));
+    parameterTypes.add(DATATABLES_COLUMNS_PARAM);
     parameterTypes.add(GLOBAL_SEARCH_PARAM);
     parameterTypes.add(DATATABLES_PAGEABLE_PARAM);
     AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM);
@@ -3308,6 +3357,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     final JavaSymbolName parentParamName = findAllMethod.getParameterNames().get(0);
     parameterNames.add(parentParamName);
+    parameterNames.add(DATATABLES_COLUMNS_PARAM_NAME);
     parameterNames.add(new JavaSymbolName("search"));
     parameterNames.add(new JavaSymbolName("pageable"));
     parameterNames.add(new JavaSymbolName("draw"));
@@ -3329,7 +3379,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // Generating returnType
     final JavaType serviceReturnType = findAllMethod.getReturnType();
     final JavaType dataReturnType =
-        JavaType.wrapperOf(SPRINGLETS_DATATABLES_DATA, serviceReturnType.getParameters().get(0));
+        JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_CONVERTED_DATATABLES_DATA,
+            serviceReturnType.getParameters().get(0));
     final JavaType returnType = JavaType.wrapperOf(RESPONSE_ENTITY, dataReturnType);
 
     // TODO
@@ -3350,19 +3401,18 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     final String totalVarName = "total" + StringUtils.capitalize(itemsName) + "Count";
 
-
-    //  totalOrdersCount = customerOrderService.countByCustomer(customer);
+    // long totalOrdersCount = customerOrderService.countByCustomer(customer);
     bodyBuilder.appendFormalLine("%s %s = %s.%s(%s);",
         getNameOfJavaType(countByDetailMethod.getReturnType()), totalVarName,
         detailsServiceField.getFieldName(), countByDetailMethod.getMethodName(), parentParamName);
 
+    // ConvertedDatatablesData<CustomerOrder> data = new ConvertedDatatablesData<CustomerOrder>(orders,
+    //        totalOrdersCount, draw, conversionService, columns);
+    bodyBuilder.appendFormalLine("%1$s data =  new %1$s(%2$s, %3$s, draw, %4$s, %5$s);",
+        getNameOfJavaType(dataReturnType), itemsName, totalVarName, CONVERSION_SERVICE_FIELD_NAME,
+        DATATABLES_COLUMNS_PARAM_NAME);
 
-    // DatatablesData<CustomerOrder> data =  new DatatablesData<CustomerOrder>(orders, totalOrderCount, draw);
-    bodyBuilder.appendFormalLine("%s data =  new %s(%s, %s, draw);",
-        getNameOfJavaType(dataReturnType), getNameOfJavaType(dataReturnType), itemsName,
-        totalVarName);
-
-    // return ResponseEntity.ok(datatablesData);
+    // return ResponseEntity.ok(data);
     bodyBuilder.appendFormalLine("return %s.ok(data);",
         getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY));
 
@@ -3376,8 +3426,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
   /**
    * This method provides the "create" method for details association relationship
-   * using Thymeleaf view response
-   * type
+   * using Thymeleaf view response type
    *
    * @return MethodMetadata
    */

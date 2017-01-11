@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 public class SpringletsJpaSecurityProvider implements SecurityProvider {
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.0.0.RELEASE");
+      "1.1.0.BUILD-SNAPSHOT");
 
   private static final Dependency SPRINGLETS_SECURITY_AUTHENTICATION_STARTER = new Dependency(
       "io.springlets", "springlets-boot-starter-authentication", "${springlets.version}");

@@ -83,6 +83,7 @@ import java.util.logging.Logger;
  * @author Juan Carlos García
  * @author Paula Navarro
  * @author Jose Manuel Vivó
+ * @author Sergio Clares
  * @since 1.0
  */
 @Component
@@ -108,7 +109,7 @@ public class JpaOperationsImpl implements JpaOperations {
   private ServiceInstaceManager serviceManager = new ServiceInstaceManager();
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.0.0.RELEASE");
+      "1.1.0.BUILD-SNAPSHOT");
   private static final Dependency SPRINGLETS_DATA_JPA_STARTER = new Dependency("io.springlets",
       "springlets-data-jpa", "${springlets.version}");
   private static final Dependency SPRINGLETS_DATA_COMMONS_STARTER = new Dependency("io.springlets",
@@ -240,6 +241,7 @@ public class JpaOperationsImpl implements JpaOperations {
       getProjectOperations().addModuleDependency(implementsType.getModule());
     }
 
+    // Set annotations to new entity
     cidBuilder.setAnnotations(annotations);
 
     // Write entity on disk
@@ -269,9 +271,6 @@ public class JpaOperationsImpl implements JpaOperations {
       getProjectOperations().addDependencies(getProjectOperations().getFocusedModuleName(),
           dependencies);
     }
-
-
-
   }
 
   @Override
@@ -995,7 +994,6 @@ public class JpaOperationsImpl implements JpaOperations {
   private MetadataService getMetadataService() {
     return serviceManager.getServiceInstance(this, MetadataService.class);
   }
-
 
   private FileManager getFileManager() {
     return serviceManager.getServiceInstance(this, FileManager.class);

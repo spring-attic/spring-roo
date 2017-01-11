@@ -365,6 +365,16 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
+  public boolean isEntityFormatExpressionVisibleForFieldReference(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean isEntityFormatMessageVisibleForFieldReference(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
   public boolean isJoinTableMandatoryForFieldSet(ShellContext shellContext) {
     return false;
   }
@@ -438,6 +448,16 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
+  public boolean isEntityFormatExpressionVisibleForFieldSet(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean isEntityFormatMessageVisibleForFieldSet(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
   public boolean isJoinColumnNameMandatoryForFieldList(ShellContext shellContext) {
     return false;
   }
@@ -508,6 +528,16 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
       return false;
     }
     return true;
+  }
+
+  @Override
+  public boolean isEntityFormatExpressionVisibleForFieldList(ShellContext shellContext) {
+    return false;
+  }
+
+  @Override
+  public boolean isEntityFormatMessageVisibleForFieldList(ShellContext shellContext) {
+    return false;
   }
 
   @Override
@@ -813,7 +843,8 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
   public void createReferenceField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       boolean aggregation, JavaSymbolName mappedBy, Cascade[] cascadeType, boolean notNull,
       String joinColumnName, String referencedColumnName, Fetch fetch, String comment,
-      boolean permitReservedWords, Boolean orphanRemoval, boolean isForce) {
+      boolean permitReservedWords, Boolean orphanRemoval, boolean isForce, String formatExpression,
+      String formatMessage) {
     throw new IllegalArgumentException(
         "'field reference' command is not available for DTO classes.");
   }
@@ -824,7 +855,8 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
       Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumn,
       String referencedColumn, String joinTable, String joinColumns, String referencedColumns,
       String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
-      Boolean aggregation, Boolean orphanRemoval, boolean isForce) {
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce, String formatExpression,
+      String formatMessage) {
     throw new IllegalArgumentException("'field set' command is not available for DTO classes.");
   }
 
@@ -834,7 +866,8 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
       Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinColumn,
       String referencedColumn, String joinTable, String joinColumns, String referencedColumns,
       String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
-      Boolean aggregation, Boolean orphanRemoval, boolean isForce) {
+      Boolean aggregation, Boolean orphanRemoval, boolean isForce, String formatExpression,
+      String formatMessage) {
     throw new IllegalArgumentException("'field list' command is not available for DTO classes.");
   }
 

@@ -118,31 +118,11 @@ public class ItdSourceFileComposer {
 
       // ROO-3447: Append comments if exists
       CommentStructure commentStructure = constructor.getCommentStructure();
-      if (commentStructure != null && commentStructure.getBeginComments() != null) {
+      if (commentStructure != null) {
         List<AbstractComment> constructorComments = commentStructure.getBeginComments();
         String comment = "";
-        boolean hasParams = false;
         for (AbstractComment constructorComment : constructorComments) {
-
-          // ROO-3834: Append default Javadoc if not exists a comment structure
-          if (constructorComment.getComment().contains("@param")) {
-            hasParams = true;
-          } else {
-            comment = comment.concat(constructorComment.getComment() + "\n");
-          }
-        }
-
-        // Add params to JavaDoc if needed
-        if (!hasParams) {
-          List<JavaSymbolName> parameterNames = constructor.getParameterNames();
-          for (int i = 0; i < parameterNames.size(); i++) {
-            if (i == 0) {
-              comment = comment.concat(" \n");
-            }
-            comment =
-                comment.concat("@param ").concat(parameterNames.get(i).getSymbolName())
-                    .concat("\n");
-          }
+          comment = comment.concat(constructorComment.getComment() + "\n");
         }
 
         String[] commentLines = comment.split("\n");
@@ -152,7 +132,6 @@ public class ItdSourceFileComposer {
         }
         appendFormalLine(" */");
       } else {
-
         // ROO-3834: Append default Javadoc if not exists a comment structure
         appendFormalLine("/**");
         appendFormalLine(" * TODO Auto-generated constructor documentation");
@@ -310,7 +289,7 @@ public class ItdSourceFileComposer {
 
       // ROO-3447: Append comments if exists
       CommentStructure commentStructure = field.getCommentStructure();
-      if (commentStructure != null && commentStructure.getBeginComments() != null) {
+      if (commentStructure != null) {
         List<AbstractComment> fieldComments = commentStructure.getBeginComments();
         String comment = "";
         for (AbstractComment fieldComment : fieldComments) {
@@ -716,62 +695,11 @@ public class ItdSourceFileComposer {
 
       // ROO-3447: Append comments if exists
       CommentStructure commentStructure = method.getCommentStructure();
-      if (commentStructure != null && commentStructure.getBeginComments() != null) {
+      if (commentStructure != null) {
         List<AbstractComment> methodComments = commentStructure.getBeginComments();
         String comment = "";
-
-        // ROO-3834: Append default Javadoc if not exists a comment structure
-        String paramString = "";
-        String returnString = "";
-        String throwsString = "";
         for (AbstractComment methodComment : methodComments) {
-          if (methodComment.getComment().contains("@param")) {
-            paramString = paramString.concat(methodComment.getComment() + "\n");
-          } else if (methodComment.getComment().contains("@return")) {
-            returnString = returnString.concat(methodComment.getComment() + "\n");
-          } else if (methodComment.getComment().contains("@throws")) {
-            throwsString = throwsString.concat(methodComment.getComment() + "\n");
-          } else {
-            comment = comment.concat(methodComment.getComment() + "\n");
-          }
-        }
-
-        // Check and add params
-        if (StringUtils.isBlank(paramString)) {
-          comment = comment.concat(" \n");
-          List<JavaSymbolName> parameterNames = method.getParameterNames();
-          for (int i = 0; i < parameterNames.size(); i++) {
-            comment =
-                comment.concat("@param ").concat(parameterNames.get(i).getSymbolName())
-                    .concat("\n");
-          }
-        } else {
-          comment = comment.concat(paramString);
-        }
-
-        // Check and add return
-        if (StringUtils.isBlank(returnString) && method.getReturnType() != JavaType.VOID_PRIMITIVE) {
-          if (StringUtils.isBlank(paramString)) {
-            comment = comment.concat(" \n");
-          }
-          comment =
-              comment.concat("@return ").concat(method.getReturnType().getSimpleTypeName())
-                  .concat("\n");
-        } else {
-          comment = comment.concat(returnString);
-        }
-
-        // Check method throws
-        if (StringUtils.isBlank(throwsString) && !method.getThrowsTypes().isEmpty()) {
-          if (StringUtils.isBlank(paramString) && StringUtils.isBlank(returnString)) {
-            comment = comment.concat(" \n");
-          }
-          for (JavaType throwsType : method.getThrowsTypes()) {
-            comment =
-                comment.concat("@throws ").concat(throwsType.getSimpleTypeName()).concat("\n");
-          }
-        } else {
-          comment = comment.concat(throwsString);
+          comment = comment.concat(methodComment.getComment() + "\n");
         }
 
         String[] commentLines = comment.split("\n");

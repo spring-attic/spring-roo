@@ -21,6 +21,7 @@ import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
@@ -40,6 +41,7 @@ import java.util.TreeSet;
  *
  * @author Juan Carlos García
  * @author Jose Manuel Vivó
+ * @author Sergio Clares
  * @since 2.0
  */
 public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
@@ -165,6 +167,11 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     notTransactionalDefinedMethod.add(findOneMethod);
     ensureGovernorHasMethod(new MethodMetadataBuilder(findOneMethod));
 
+    // ROO-3868: Extend from Springlets EntityResolver to use new entity view system
+    JavaType extendsType =
+        JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_ENTITY_RESOLVER, this.entity,
+            this.identifierType);
+    ensureGovernorExtends(extendsType);
 
     // Generating persistent methods for modifiable entities
     // (not reandOnly an no composition child)
@@ -1087,6 +1094,13 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    */
   public JavaType getEntity() {
     return entity;
+  }
+
+  /**
+   * @return related entity identifier type
+   */
+  public JavaType getIdType() {
+    return identifierType;
   }
 
   @Override

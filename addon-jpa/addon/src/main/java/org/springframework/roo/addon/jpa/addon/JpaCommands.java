@@ -66,6 +66,7 @@ import java.util.logging.Logger;
  * @author Ben Alex
  * @author Alan Stewart
  * @author Juan Carlos García
+ * @author Sergio Clares
  * @since 1.0
  */
 @Component
@@ -312,7 +313,7 @@ public class JpaCommands implements CommandMarker {
       command = "entity jpa",
       params = {"versionType", "versionColumn"},
       help = "Options --versionType and --versionColumn must be used with the --versionField option.")
-  public boolean areJoinTableParamsVisibleForFieldList(ShellContext shellContext) {
+  public boolean areVersionParamsVisibleForEntityJpa(ShellContext shellContext) {
 
     String versionFieldParam = shellContext.getParameters().get("versionField");
 
@@ -321,6 +322,52 @@ public class JpaCommands implements CommandMarker {
     }
 
     return false;
+  }
+
+  /**
+   * Indicator that checks if `--entityFormatExpression` is visible for `entity jpa` command.
+   * This option won't be visible is `--entityFormatMessage` has been specified.
+   *
+   * @param shellContext
+   * @return `false` if `--entityFormatMessage` option has been specified, `true` otherwise.
+   */
+  @CliOptionVisibilityIndicator(
+      command = "entity jpa",
+      params = "entityFormatExpression",
+      help = "Option `--entityFormatExpression` is not available if `--entityFormatMessage` has been "
+          + "specified.")
+  public boolean isEntityFormatExpressionVisibleForEntityJpa(ShellContext shellContext) {
+
+    String param = shellContext.getParameters().get("entityFormatMessage");
+
+    if (param != null) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Indicator that checks if `--entityFormatMessage` is visible for `entity jpa` command.
+   * This option won't be visible is `--entityFormatExpression` has been specified.
+   *
+   * @param shellContext
+   * @return `false` if `--entityFormatExpression` option has been specified, `true` otherwise.
+   */
+  @CliOptionVisibilityIndicator(
+      command = "entity jpa",
+      params = "entityFormatMessage",
+      help = "Option `--entityFormatMessage` is not available if `--entityFormatExpression` has been "
+          + "specified.")
+  public boolean isEntityFormatMessageVisibleForEntityJpa(ShellContext shellContext) {
+
+    String param = shellContext.getParameters().get("entityFormatExpression");
+
+    if (param != null) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -584,6 +631,21 @@ public class JpaCommands implements CommandMarker {
           key = "plural",
           mandatory = false,
           help = "Specify the plural of this new entity. If not provided, a calculated plural will be used by default") String plural,
+      @CliOption(
+          key = "entityFormatExpression",
+          mandatory = false,
+          help = "The SpEL expression used to format the entity when showing it in presentation layer e.g. "
+              + "{#fieldA} {#fieldB}. It adds the `value` attribute to `io.springlets.format.EntityFormat` "
+              + "annotation."
+              + "This option is available only if `--entityFormatMessage` has not been specified.") String formatExpression,
+      @CliOption(
+          key = "entityFormatMessage",
+          mandatory = false,
+          help = "The message key used to obtain a localized SpEL expression to format the entity when "
+              + "showing it in presentation layer. It adds the `message` attribute to "
+              + "`io.springlets.format.EntityFormat` annotation and creates a message in all message bundles "
+              + "with the provided key. Message value should be  modified by developer."
+              + "This option is available only if `--entityFormatExpression` has not been specified.") String formatMessage,
       ShellContext shellContext) {
 
     Validate.isTrue(!identifierType.isPrimitive(), "Identifier type cannot be a primitive");
@@ -682,7 +744,7 @@ public class JpaCommands implements CommandMarker {
     annotationBuilder.add(javaBeanAnnotationBuilder);
     annotationBuilder.add(ROO_TO_STRING_BUILDER);
     annotationBuilder.add(getEntityAnnotationBuilder(table, schema, catalog, inheritanceType,
-        mappedSuperclass, entityName, readOnly));
+        mappedSuperclass, entityName, readOnly, formatExpression, formatMessage));
     if (equals) {
       annotationBuilder.add(ROO_EQUALS_BUILDER);
     }
@@ -723,7 +785,8 @@ public class JpaCommands implements CommandMarker {
    */
   private AnnotationMetadataBuilder getEntityAnnotationBuilder(final String table,
       final String schema, final String catalog, final InheritanceType inheritanceType,
-      final boolean mappedSuperclass, final String entityName, final boolean readOnly) {
+      final boolean mappedSuperclass, final String entityName, final boolean readOnly,
+      final String formatExpression, final String formatMessage) {
     final AnnotationMetadataBuilder entityAnnotationBuilder =
         new AnnotationMetadataBuilder(ROO_JPA_ENTITY);
 
@@ -745,6 +808,14 @@ public class JpaCommands implements CommandMarker {
     }
     if (table != null) {
       entityAnnotationBuilder.addStringAttribute("table", table);
+    }
+
+    // ROO-3868: New entity visualization support using a new format annotation
+    if (StringUtils.isNotBlank(formatExpression)) {
+      entityAnnotationBuilder.addStringAttribute("entityFormatExpression", formatExpression);
+    }
+    if (StringUtils.isNotBlank(formatMessage)) {
+      entityAnnotationBuilder.addStringAttribute("entityFormatMessage", formatMessage);
     }
 
     // ROO-3708: Generate readOnly entities

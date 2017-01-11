@@ -86,7 +86,7 @@ public class DtoOperationsImpl implements DtoOperations {
 
   @Override
   public void createDto(JavaType name, boolean immutable, boolean utilityMethods,
-      boolean serializable) {
+      boolean serializable, String formatExpression, String formatMessage) {
 
     Validate.isTrue(!JdkJavaType.isPartOfJavaLang(name.getSimpleTypeName()),
         "Class name '%s' is part of java.lang", name.getSimpleTypeName());
@@ -110,6 +110,26 @@ public class DtoOperationsImpl implements DtoOperations {
       rooDtoAnnotation.addBooleanAttribute("immutable", immutable);
       rooJavaBeanAnnotation.addBooleanAttribute("settersByDefault", false);
     }
+
+    // ROO-3868: New entity visualization support using a DTO
+    // Don't allow the two attributes to be present at same time
+    if (StringUtils.isNotBlank(formatExpression) && StringUtils.isNotBlank(formatMessage)) {
+      throw new IllegalStateException(String.format(
+          "'@EntityFormat' from '%s' only accepts one attribute at a time. Please, check it.",
+          name.getSimpleTypeName()));
+    } else {
+
+      // Check for each attribute individually
+      if (StringUtils.isNotBlank(formatExpression)) {
+        rooDtoAnnotation.addStringAttribute("formatExpression", formatExpression);
+
+      }
+
+      if (StringUtils.isNotBlank(formatMessage)) {
+        rooDtoAnnotation.addStringAttribute("formatMessage", formatMessage);
+      }
+    }
+
     cidBuilder.addAnnotation(rooDtoAnnotation);
     cidBuilder.addAnnotation(rooJavaBeanAnnotation);
 
@@ -134,7 +154,8 @@ public class DtoOperationsImpl implements DtoOperations {
   }
 
   @Override
-  public void createProjection(JavaType entity, JavaType name, String fields, String suffix) {
+  public void createProjection(JavaType entity, JavaType name, String fields, String suffix,
+      String formatExpression, String formatMessage) {
     Validate.notNull(name, "Use --class to select the name of the Projection.");
 
     // TODO: Validate fields for excluding entity collection, transient and 
@@ -209,6 +230,26 @@ public class DtoOperationsImpl implements DtoOperations {
     }
     projectionAnnotation.addAttribute(new ArrayAttributeValue<StringAttributeValue>(
         new JavaSymbolName("fields"), fieldNames));
+
+    // ROO-3868: New entity visualization support using a Projection
+    // Don't allow the two attributes to be present at same time
+    if (StringUtils.isNotBlank(formatExpression) && StringUtils.isNotBlank(formatMessage)) {
+      throw new IllegalStateException(String.format(
+          "'@EntityFormat' from '%s' only accepts one attribute at a time. Please, check it.",
+          name.getSimpleTypeName()));
+    } else {
+
+      // Check for each attribute individually
+      if (StringUtils.isNotBlank(formatExpression)) {
+        projectionAnnotation.addStringAttribute("formatExpression", formatExpression);
+
+      }
+
+      if (StringUtils.isNotBlank(formatMessage)) {
+        projectionAnnotation.addStringAttribute("formatMessage", formatMessage);
+      }
+    }
+
     projectionBuilder.addAnnotation(projectionAnnotation);
 
     // Build and save changes to disk
@@ -249,7 +290,7 @@ public class DtoOperationsImpl implements DtoOperations {
           pathResolver.getCanonicalPath(projectionType.getModule(), Path.SRC_MAIN_JAVA,
               projectionType);
       if (!fileManager.exists(entityFilePathIdentifier)) {
-        createProjection(entity.getType(), projectionType, null, suffix);
+        createProjection(entity.getType(), projectionType, null, suffix, null, null);
       }
     }
   }

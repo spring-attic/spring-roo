@@ -58,12 +58,6 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
   protected static final String EXPORT_XLS_FIELD_NAME = "EXPORT_XLS";
   protected static final String EXPORT_XLS_FIELD_VALUE = "exportXls";
 
-  private static final JavaType JR_EXCEPTION = new JavaType(
-      "net.sf.jasperreports.engine.JRException");
-  private static final JavaType IO_EXCEPTION = new JavaType("java.io.IOException");
-  private static final JavaType CLASS_NOT_FOUND_EXCEPTION = new JavaType(
-      "java.lang.ClassNotFoundException");
-
   private final ControllerMetadata controllerMetadata;
   private final ControllerType controllerType;
   private final String controllerName;
@@ -324,10 +318,10 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     bodyBuilder.appendFormalLine("if (%s.equals(%s)) {", METHOD_NAME_ARGUMENT_NAME,
         DATATABLES_FIELD_NAME);
 
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).datatables(null, null, null)).replaceQuery(null).build();
+    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).datatables(null, null, null, null)).replaceQuery(null).build();
     bodyBuilder.indent();
     bodyBuilder.appendFormalLine("return %1$s.fromMethodCall(%1$s.on(getControllerClass())"
-        + ".datatables(null, null, null)).replaceQuery(null).build();",
+        + ".datatables(null, null, null, null)).replaceQuery(null).build();",
         SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
             this.importResolver));
     bodyBuilder.indentRemove();
@@ -541,11 +535,11 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // if (METHOD_NAME_ARGUMENT_NAME.equals(DATATABLES)) {
     bodyBuilder.appendFormalLine("if (%s.equals(DATATABLES)) {", METHOD_NAME_ARGUMENT_NAME);
 
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).datatables(null, null, null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
+    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).datatables(null, null, null, null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
     bodyBuilder.indent();
     bodyBuilder.appendFormalLine(String.format(
         "return %1$s.fromMethodCall(%1$s.on(getControllerClass())"
-            + ".datatables(null, null, null, null)).buildAndExpand(%2$s);",
+            + ".datatables(null, null, null, null, null)).buildAndExpand(%2$s);",
         SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
             this.importResolver), PATH_VARIABLES_ARGUMENT_NAME));
     bodyBuilder.indentRemove();
