@@ -47,7 +47,7 @@ public abstract class XmlTestCase {
     // Trim trailing whitespace as XmlUtils.nodeToString appends an extra
     // newline.
     final String actualXml = StringUtils.stripEnd(XmlUtils.nodeToString(actualNode), null);
-    assertEquals(StringUtils.replace(normalisedXml, "\n", ""),
-        StringUtils.replace(actualXml, "\n", ""));
+    assertEquals(StringUtils.replace(normalisedXml, IOUtils.LINE_SEPARATOR, ""),
+        StringUtils.replace(actualXml, IOUtils.LINE_SEPARATOR, ""));
   }
 }
