@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.finder;
 
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
@@ -11,6 +12,7 @@ import org.springframework.roo.model.RooJavaType;
  * Annotation values for @RooSearch
  *
  * @author Sergio Clares
+ * @author Juan Carlos García
  * @since 2.0
  */
 public class SearchAnnotationValues extends AbstractAnnotationValues {
@@ -20,6 +22,11 @@ public class SearchAnnotationValues extends AbstractAnnotationValues {
 
   public SearchAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
     super(governorPhysicalTypeMetadata, RooJavaType.ROO_SEARCH);
+    AutoPopulationUtils.populate(this, annotationMetadata);
+  }
+
+  public SearchAnnotationValues(final ClassOrInterfaceTypeDetails cid) {
+    super(cid, RooJavaType.ROO_SEARCH);
     AutoPopulationUtils.populate(this, annotationMetadata);
   }
 

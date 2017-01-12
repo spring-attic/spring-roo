@@ -1,5 +1,13 @@
 package org.springframework.roo.addon.web.mvc.views;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -40,14 +48,6 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.propfiles.manager.PropFilesManagerService;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * This abstract class will be extended by MetadataProviders focused on view
@@ -175,29 +175,6 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
       Validate.notNull(collectionController,
           "ERROR: Can't find Collection-type controller related to controller '%s'",
           controllerDetail.getType().getFullyQualifiedTypeName());
-    }
-
-    List<T> detailsControllers = null;
-    if (controllerMetadata.getType() == ControllerType.COLLECTION) {
-      // Locate Details controllers
-      Collection<ClassOrInterfaceTypeDetails> detailsControllersToCheck =
-          getControllerLocator().getControllers(entity, ControllerType.DETAIL, viewType);
-      List<T> found = new ArrayList<T>();
-      for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
-        if (controllerPackage.equals(controller.getType().getPackage())) {
-          // Get view metadata
-          T detailViewMetadata = getMetadataService().get(createLocalIdentifier(controller));
-          if (detailViewMetadata == null) {
-            // Can't generate metadata YET!!
-            return null;
-          }
-
-          found.add(detailViewMetadata);
-        }
-      }
-      if (!found.isEmpty()) {
-        detailsControllers = Collections.unmodifiableList(found);
-      }
     }
 
     JavaType detailItemController = null;
@@ -451,9 +428,16 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
 
     switch (controllerMetadata.getType()) {
       case COLLECTION:
+
+        // Obtain the details controllers to use only them that includes "list" value in the
+        // views parameter of @RooDetail annotation. If @RooDetail doesn't include views 
+        // parameter, include it.
+        List<T> detailsControllersForListView =
+            getDetailsControllers(controllerMetadata, controllerPackage, entity, viewType, "list");
+
         // Add list view
         viewGenerationService.addListView(module, entityMetadata, entityMemberDetails,
-            detailsControllers, ctx);
+            detailsControllersForListView, ctx);
         if (!entityMetadata.isReadOnly()) {
           // If not readOnly, add create view
           viewGenerationService.addCreateView(module, entityMetadata, entityMemberDetails, ctx);
@@ -461,8 +445,15 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
 
         break;
       case ITEM:
+
+        // Obtain the details controllers to use only them that includes "show" value in the
+        // views parameter of @RooDetail annotation.
+        List<T> detailsControllersForShowView =
+            getDetailsControllers(controllerMetadata, controllerPackage, entity, viewType, "show");
+
         // Add show view
-        viewGenerationService.addShowView(module, entityMetadata, entityMemberDetails, ctx);
+        viewGenerationService.addShowView(module, entityMetadata, entityMemberDetails,
+            detailsControllersForShowView, ctx);
 
         if (!entityMetadata.isReadOnly()) {
           // If not readOnly, add update view
@@ -510,8 +501,16 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
             if (!returnType.getParameters().isEmpty()) {
               returnType = returnType.getParameters().get(0);
             }
-            viewGenerationService.addFinderListView(module, entityMetadata, viewMetadata, formBean,
-                returnType, finderName, ctx);
+
+            // Obtain the details controllers to use only them that includes this finder value in the
+            // views parameter of @RooDetail annotation.
+            List<T> detailsControllersForFinderListView =
+                getDetailsControllers(controllerMetadata, controllerPackage, entity, viewType,
+                    finderName);
+
+            viewGenerationService.addFinderListView(module, entityMetadata, entityMemberDetails,
+                viewMetadata, formBean, returnType, finderName,
+                detailsControllersForFinderListView, ctx);
           }
         }
         break;
@@ -552,6 +551,58 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
     registerDependency(jpaEntityMetadataKey, metadataIdentificationString);
 
     return viewMetadata;
+  }
+
+  /**
+   * This method obtains the details controller that are available for an specific
+   * view type.
+   * 
+   * @param controllerMetadata
+   * @param controllerPackage
+   * @param entity
+   * @param responseType
+   * @param viewType
+   * @return
+   */
+  private List<T> getDetailsControllers(ControllerMetadata controllerMetadata,
+      JavaPackage controllerPackage, JavaType entity, JavaType responseType, String viewType) {
+    // Locate detail controllers related with this entity
+    List<T> detailsControllers = new ArrayList<T>();
+    Collection<ClassOrInterfaceTypeDetails> detailsControllersToCheck =
+        getControllerLocator().getControllers(entity, ControllerType.DETAIL, responseType);
+    List<T> found = new ArrayList<T>();
+    for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
+      if (controllerPackage.equals(controller.getType().getPackage())) {
+        // Get view metadata
+        T detailViewMetadata = getMetadataService().get(createLocalIdentifier(controller));
+        if (detailViewMetadata == null) {
+          // Can't generate metadata YET!!
+          return null;
+        }
+
+        // Check if the obtained detail controller should be included in this type view
+        DetailAnnotationValues detailAnnotationValues = new DetailAnnotationValues(controller);
+        String[] annotationViews = detailAnnotationValues.getViews();
+        // Remember that if views parameter is not present, the detail will be included only
+        // in list view
+        if (annotationViews == null && viewType.equals("list")) {
+          found.add(detailViewMetadata);
+        } else if (annotationViews != null) {
+          List<String> views = Arrays.asList(annotationViews);
+          // If the @RooDetail annotation contains this type as view parameter, it should be
+          // included
+          if (views.contains(viewType)) {
+            found.add(detailViewMetadata);
+          }
+        }
+
+      }
+    }
+    if (!found.isEmpty()) {
+      detailsControllers = Collections.unmodifiableList(found);
+    }
+
+    return detailsControllers;
   }
 
   private JavaType filterControllerByPackageAndPrefix(

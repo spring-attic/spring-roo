@@ -1,3 +1,4 @@
+<#import "listDetails.ftl" as details>
 <!DOCTYPE html>
 <html lang="en" data-layout-decorate="~{layouts/default-list-layout}">
 
@@ -159,6 +160,13 @@
             </#if>
           </div>
           <!-- /TABLE -->
+          
+          <#if detailsLevels?size != 0>
+          <!-- details -->
+            <#list detailsLevels as detailsLevel>
+            <@details.section detailsLevel=detailsLevel/>
+            </#list>
+          </#if>
 
           <div class="clearfix">
             <div class="pull-left">

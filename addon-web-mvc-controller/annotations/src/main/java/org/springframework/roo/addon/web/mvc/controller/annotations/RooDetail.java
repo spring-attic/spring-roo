@@ -14,6 +14,7 @@ import java.lang.annotation.Target;
  * emitted to an ITD.
  *
  * @author Manuel Iborra
+ * @author Juan Carlos García
  * @since 2.0
  */
 @Retention(RetentionPolicy.SOURCE)
@@ -26,5 +27,14 @@ public @interface RooDetail {
    * @return The relation field name
    */
   String relationField();
+
+  /**
+   * This parameter defines the views where the 
+   * detail will be included
+   * 
+   * @return List with the name of the views where the 
+   * detail will be included
+   */
+  String[] views() default "";
 
 }

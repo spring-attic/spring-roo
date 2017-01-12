@@ -94,8 +94,13 @@ web mvc setup
 web mvc view setup --type THYMELEAF
 web mvc controller --all --responseType JSON
 web mvc controller --all --responseType THYMELEAF
-web mvc detail --all --responseType THYMELEAF
+
+// Publishing finders
 web mvc finder --all --responseType THYMELEAF
+
+// Adding details
+web mvc detail --entity ~.domain.Owner --field pets --views list,show,findByCityLike --responseType THYMELEAF
+web mvc detail --all --views list,show --responseType THYMELEAF
 
 web mvc language --code es
 

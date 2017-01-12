@@ -96,6 +96,7 @@
           <!-- /TABLE -->
 
           <#if detailsLevels?size != 0>
+          <!-- details -->
             <#list detailsLevels as detailsLevel>
             <@details.section detailsLevel=detailsLevel/>
             </#list>

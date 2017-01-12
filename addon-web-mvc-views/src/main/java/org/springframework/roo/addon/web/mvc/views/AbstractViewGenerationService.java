@@ -1,5 +1,26 @@
 package org.springframework.roo.addon.web.mvc.views;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.logging.Logger;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -51,27 +72,6 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.XmlUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.logging.Logger;
 
 /**
  * This abstract class implements MVCViewGenerationService interface that
@@ -184,7 +184,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
 
     List<List<DetailEntityItem>> detailsLevels = new ArrayList<List<DetailEntityItem>>();
-    if (detailsControllers != null) {
+    if (detailsControllers != null && !detailsControllers.isEmpty()) {
       List<DetailEntityItem> details = new ArrayList<DetailEntityItem>();
       for (T detailController : detailsControllers) {
         DetailEntityItem detailItem =
@@ -283,7 +283,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
   @Override
   public void addShowView(String moduleName, JpaEntityMetadata entityMetadata,
-      MemberDetails entityDetails, ViewContext<T> ctx) {
+      MemberDetails entityDetails, List<T> detailsControllers, ViewContext<T> ctx) {
 
     // Getting entity fields that should be included on view
     List<FieldMetadata> entityFields = new ArrayList<FieldMetadata>();
@@ -305,11 +305,6 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
         getFieldViewItems(entityMetadata, entityFields, ctx.getEntityName(), false, ctx,
             FIELD_SUFFIX);
 
-    // TODO: TO BE FIXED when implements details
-    List<FieldItem> details = new ArrayList<FieldItem>();
-    // getDetailsFieldViewItems(entityDetails, ctx.getEntityName(), ctx);
-
-    ctx.addExtraParameter("details", details);
     ctx.addExtraParameter("fields", fields);
     ctx.addExtraParameter("entity", entityItem);
     ctx.addExtraParameter("compositeRelationFields", compositeRelationFields);
@@ -321,6 +316,52 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     String viewName =
         getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat("/show")
             .concat(getViewsExtension());
+
+    // Including details if needed
+    List<List<DetailEntityItem>> detailsLevels = new ArrayList<List<DetailEntityItem>>();
+    if (detailsControllers != null && !detailsControllers.isEmpty()) {
+      List<DetailEntityItem> details = new ArrayList<DetailEntityItem>();
+      for (T detailController : detailsControllers) {
+        DetailEntityItem detailItem =
+            createDetailEntityItem(detailController, entityDetails, entityMetadata,
+                ctx.getEntityName(), ctx, DETAIL_SUFFIX, entityItem);
+        details.add(detailItem);
+      }
+
+      // Sort details by path
+      Collections.sort(details, new Comparator<DetailEntityItem>() {
+
+        @Override
+        public int compare(DetailEntityItem o1, DetailEntityItem o2) {
+          return o1.getPathString().compareTo(o2.getPathString());
+        }
+      });
+
+      // Locates parent details for children, grandsons, etc and make groups by
+      // levels
+      for (DetailEntityItem detail : details) {
+        // Create group until item level
+        while (detailsLevels.size() < detail.getLevel()) {
+          detailsLevels.add(new ArrayList<DetailEntityItem>());
+        }
+        // Include detail in its group
+        detailsLevels.get(detail.getLevel() - 1).add(detail);
+        if (detail.getLevel() < 1) {
+          // Nothing more to do with detail
+          continue;
+        }
+        // look for parent
+        for (DetailEntityItem parent : details) {
+          if (detail.isTheParentEntity(parent)) {
+            // set parent
+            detail.setParentEntity(parent);
+            break;
+          }
+        }
+      }
+    }
+
+    ctx.addExtraParameter("detailsLevels", detailsLevels);
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
@@ -441,7 +482,8 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
   @Override
   public void addFinderListView(String moduleName, JpaEntityMetadata entityMetadata,
-      T viewMetadata, JavaType formBean, JavaType returnType, String finderName, ViewContext<T> ctx) {
+      MemberDetails entity, T viewMetadata, JavaType formBean, JavaType returnType,
+      String finderName, List<T> detailsControllers, ViewContext<T> ctx) {
     // To be implemented by View Provider
   }
 

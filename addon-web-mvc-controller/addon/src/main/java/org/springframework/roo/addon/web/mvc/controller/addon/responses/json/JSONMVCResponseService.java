@@ -194,4 +194,10 @@ public class JSONMVCResponseService implements ControllerMVCResponseService {
   public boolean requiresJsonMixin() {
     return true;
   }
+
+  @Override
+  public boolean providesViews() {
+    // JSON doesn't provide views
+    return false;
+  }
 }

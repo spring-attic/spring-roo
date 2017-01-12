@@ -1,8 +1,10 @@
 package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE;
+import static org.springframework.roo.shell.OptionContexts.PROJECT;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +21,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.web.mvc.controller.addon.finder.SearchAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
+import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -28,6 +32,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.converters.JavaTypeConverter;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
@@ -43,6 +48,7 @@ import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
 import org.springframework.roo.shell.CliOptionMandatoryIndicator;
 import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
@@ -577,13 +583,119 @@ public class ControllerCommands implements CommandMarker {
   @CliOptionVisibilityIndicator(
       params = {"package", "responseType"},
       command = "web mvc detail",
-      help = "--package, --pathPrefix and --responseType parameters are not visible if --all parameter or --entity parameter has been specified before.")
+      help = "--package, --pathPrefix and --responseType parameters are not visible until --all parameter or --entity parameter has been specified.")
   public boolean areDetailParametersVisibles(ShellContext context) {
     if (context.getParameters().containsKey("all") || context.getParameters().containsKey("entity")) {
       return true;
     }
     return false;
   }
+
+  @CliOptionVisibilityIndicator(params = {"views"}, command = "web mvc detail",
+      help = "--views parameter is not visible until a valid --responseType has specified.")
+  public boolean isViewParameterAvailable(ShellContext context) {
+    if (context.getParameters().containsKey("responseType")) {
+
+      // Get the specified one
+      String currentResponseType = context.getParameters().get("responseType");
+
+      // Check the responseType
+      Map<String, ControllerMVCResponseService> responseTypeServices =
+          getInstalledControllerMVCResponseTypes();
+      for (Entry<String, ControllerMVCResponseService> responseTypeService : responseTypeServices
+          .entrySet()) {
+        if (responseTypeService.getKey().equals(currentResponseType)
+            && responseTypeService.getValue().providesViews()) {
+          return true;
+        }
+      }
+
+    }
+    return false;
+  }
+
+  @CliOptionAutocompleteIndicator(
+      command = "web mvc detail",
+      param = "views",
+      includeSpaceOnFinish = false,
+      help = "--views parameter could be autocomplete with a separated comma list including 'list' and 'show'. If --entity parameter "
+          + "has been specified, is possible to autocomplete with existing finder views too.")
+  public List<String> getAllAvailableViews(ShellContext shellContext) {
+    List<String> viewsValuesToReturn = new ArrayList<String>();
+
+    // Get current views in --views value
+    String currentViewsValue = shellContext.getParameters().get("views");
+    String[] views = StringUtils.split(currentViewsValue, ",");
+
+    // Check for bad written separators and return no options
+    if (currentViewsValue.contains(",.") || currentViewsValue.contains(".,")) {
+      return viewsValuesToReturn;
+    }
+
+    // Check if --entity parameter has been specified
+    JavaType currentEntity = getTypeFromEntityParam(shellContext);
+    List<String> finderViews = new ArrayList<String>();
+    if (currentEntity != null) {
+      // Obtain search controllers for the current entity
+      Collection<ClassOrInterfaceTypeDetails> searchControllers =
+          getControllerLocator().getControllers(currentEntity, ControllerType.SEARCH,
+              RooJavaType.ROO_THYMELEAF);
+      for (ClassOrInterfaceTypeDetails searchController : searchControllers) {
+        SearchAnnotationValues searchAnnotationValues =
+            new SearchAnnotationValues(searchController);
+        if (searchAnnotationValues.getFinders() != null
+            && searchAnnotationValues.getFinders().length > 0) {
+          finderViews.addAll(Arrays.asList(searchAnnotationValues.getFinders()));
+        }
+      }
+    }
+
+    // Check if it is first view
+    if (currentViewsValue.equals("")) {
+      viewsValuesToReturn.add("list");
+      viewsValuesToReturn.add("show");
+      viewsValuesToReturn.addAll(finderViews);
+    } else if (currentViewsValue.endsWith(",")) {
+      String finishedViews = "";
+      for (int i = 0; i < views.length; i++) {
+        finishedViews += views[i] + ",";
+      }
+      if (!finishedViews.contains("list,")) {
+        viewsValuesToReturn.add(finishedViews + "list");
+      }
+      if (!finishedViews.contains("show,")) {
+        viewsValuesToReturn.add(finishedViews + "show");
+      }
+      for (String finderView : finderViews) {
+        if (!finishedViews.contains(finderView + ",")) {
+          viewsValuesToReturn.add(finishedViews + finderView);
+        }
+      }
+    } else if (views.length == 1) {
+      viewsValuesToReturn.add("list");
+      viewsValuesToReturn.add("show");
+      viewsValuesToReturn.addAll(finderViews);
+    } else {
+      String finishedViews = "";
+      for (int i = 0; i < views.length - 1; i++) {
+        finishedViews += views[i] + ",";
+      }
+      if (!finishedViews.contains("list,")) {
+        viewsValuesToReturn.add(finishedViews + "list");
+      }
+      if (!finishedViews.contains("show,")) {
+        viewsValuesToReturn.add(finishedViews + "show");
+      }
+      for (String finderView : finderViews) {
+        if (!finishedViews.contains(finderView + ",")) {
+          viewsValuesToReturn.add(finishedViews + finderView);
+        }
+      }
+    }
+
+    return viewsValuesToReturn;
+  }
+
 
   /**
    * This method provides the Command definition to be able to generate new
@@ -599,7 +711,7 @@ public class ControllerCommands implements CommandMarker {
       value = "web mvc detail",
       help = "Generates new `@RooController` for relation fields which detail wants to be managed. "
           + "It must be a `@OneToMany` field. Generated controllers will have `@RooDetail` with info "
-          + "about the parent entity")
+          + "about the parent entity and the parent views where the detail will be displayed.")
   public void addDetailController(
       @CliOption(
           key = "all",
@@ -654,7 +766,17 @@ public class ControllerCommands implements CommandMarker {
               + "Possible values are: `JSON` plus any response type installed with `web mvc view setup` "
               + "command. "
               + "This option is available once `--all` or `--entity` parameters have been specified."
-              + "Default: `JSON`.") String responseType) {
+              + "Default: `JSON`.") String responseType,
+      @CliOption(
+          key = "views",
+          mandatory = false,
+          specifiedDefaultValue = "list",
+          help = "Separated comma list where developer could specify the different parent views where "
+              + "this new detail will be displayed. By default, detail will be displayed only in the"
+              + "parent list view. This option could be autocompleted with 'list', 'show' or the different"
+              + "parent finder views (if exists). "
+              + "This parameter is not visible if the provided `--responseType` doesn't use views to display "
+              + "the data.") String viewsList) {
 
     // Getting --responseType service
     Map<String, ControllerMVCResponseService> responseTypeServices =
@@ -672,10 +794,10 @@ public class ControllerCommands implements CommandMarker {
     // Check --all parameter
     if (all) {
       getControllerOperations().createOrUpdateDetailControllersForAllEntities(
-          responseTypeServices.get(responseType), controllersPackage);
+          responseTypeServices.get(responseType), controllersPackage, viewsList);
     } else {
       getControllerOperations().createOrUpdateDetailControllerForEntity(entity, field,
-          responseTypeServices.get(responseType), controllersPackage);
+          responseTypeServices.get(responseType), controllersPackage, viewsList);
     }
   }
 
@@ -940,6 +1062,26 @@ public class ControllerCommands implements CommandMarker {
     getControllerOperations().exportOperation(controller, operations);
   }*/
 
+  /**
+   * Tries to obtain JavaType indicated in command or which has the focus in the
+   * Shell
+   *
+   * @param shellContext the Roo Shell context
+   * @return JavaType or null if no class has the focus or no class is specified
+   *         in the command
+   */
+  private JavaType getTypeFromEntityParam(ShellContext shellContext) {
+    // Try to get 'class' from ShellContext
+    String typeString = shellContext.getParameters().get("entity");
+    JavaType type = null;
+    if (typeString != null) {
+      JavaTypeConverter converter = (JavaTypeConverter) getJavaTypeConverter().get(0);
+      type = converter.convertFromText(typeString, JavaType.class, PROJECT);
+    }
+
+    return type;
+  }
+
   // Gets OSGi Services
 
   public ControllerOperations getControllerOperations() {
@@ -968,6 +1110,24 @@ public class ControllerCommands implements CommandMarker {
 
   public MemberDetailsScanner getMemberDetailsScanner() {
     return serviceInstaceManager.getServiceInstance(this, MemberDetailsScanner.class);
+  }
+
+  public ControllerLocator getControllerLocator() {
+    return serviceInstaceManager.getServiceInstance(this, ControllerLocator.class);
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<Converter> getJavaTypeConverter() {
+    return serviceInstaceManager.getServiceInstance(this, Converter.class,
+        new ServiceInstaceManager.Matcher<Converter>() {
+          @Override
+          public boolean match(Converter service) {
+            if (service instanceof JavaTypeConverter) {
+              return true;
+            }
+            return false;
+          }
+        });
   }
 
 }

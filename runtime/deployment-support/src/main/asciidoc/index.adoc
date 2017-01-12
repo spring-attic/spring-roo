@@ -689,11 +689,11 @@ You can generate master-detail views to manage the entity relations as follows:
 [source,subs="quotes"]
 .Relationship controllers and views
 ----
-*roo>* web mvc detail --entity model:~.Category --field products --responseType THYMELEAF
-     web mvc detail --entity model:~.Category --responseType THYMELEAF --field products.purchaseOrders
-     web mvc detail --entity model:~.Product --field purchaseOrders --responseType THYMELEAF
-     web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions
-     web mvc detail --entity model:~.Region --responseType THYMELEAF --field cities
+*roo>* web mvc detail --entity model:~.Category --field products --responseType THYMELEAF --views list,show
+     web mvc detail --entity model:~.Category --responseType THYMELEAF --field products.purchaseOrders --views list,show
+     web mvc detail --entity model:~.Product --field purchaseOrders --responseType THYMELEAF --views list,show
+     web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions --views list,show
+     web mvc detail --entity model:~.Region --responseType THYMELEAF --field cities --views list,show
 ----
 
 ==== Search support
@@ -2864,7 +2864,10 @@ roo> web mvc detail
   Indicates which package has the controllers on which the detail controllers are generated. This param will be visible if 'all' or 'entity' parameters have been specified
 --responseType::                    
   Indicates the responseType to be used by generated controller. Depending of the selected responseType, generated methods and views will vary. This param will be visible if 'all' or 'entity' parameters have been specified; default: 'JSON'
+--views::
+  Separated comma list where developer could specify the different parent views where the new detail will be displayed. By default, detail will be displayed only in the parent list view. This option could be autocompleted with 'list', 'show' or the different parent finder views (if exists). This parameter is not visible if the provided `--responseType` doesn't use views to display the data.
 
+[[web-mvc-finder-command]]
 === web mvc finder
 
 Adds @RooWebFinder annotation to MVC controller type

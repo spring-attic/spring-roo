@@ -1,5 +1,12 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -29,12 +36,6 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.settings.project.ProjectSettingsService;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -506,7 +507,8 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
   @Override
   public void addFinderListView(String moduleName, JpaEntityMetadata entityMetadata,
-      ThymeleafMetadata viewMetadata, JavaType formBean, JavaType returnType, String finderName,
+      MemberDetails entity, ThymeleafMetadata viewMetadata, JavaType formBean, JavaType returnType,
+      String finderName, List<ThymeleafMetadata> detailsControllers,
       ViewContext<ThymeleafMetadata> ctx) {
     // Getting returnType details
     MemberDetails returnTypeDetails =
@@ -542,6 +544,51 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
 
+    List<List<DetailEntityItem>> detailsLevels = new ArrayList<List<DetailEntityItem>>();
+    if (detailsControllers != null && !detailsControllers.isEmpty()) {
+      List<DetailEntityItem> details = new ArrayList<DetailEntityItem>();
+      for (ThymeleafMetadata detailController : detailsControllers) {
+        DetailEntityItem detailItem =
+            createDetailEntityItem(detailController, entity, entityMetadata, ctx.getEntityName(),
+                ctx, DETAIL_SUFFIX, entityItem);
+        details.add(detailItem);
+      }
+
+      // Sort details by path
+      Collections.sort(details, new Comparator<DetailEntityItem>() {
+
+        @Override
+        public int compare(DetailEntityItem o1, DetailEntityItem o2) {
+          return o1.getPathString().compareTo(o2.getPathString());
+        }
+      });
+
+      // Locates parent details for children, grandsons, etc and make groups by
+      // levels
+      for (DetailEntityItem detail : details) {
+        // Create group until item level
+        while (detailsLevels.size() < detail.getLevel()) {
+          detailsLevels.add(new ArrayList<DetailEntityItem>());
+        }
+        // Include detail in its group
+        detailsLevels.get(detail.getLevel() - 1).add(detail);
+        if (detail.getLevel() < 1) {
+          // Nothing more to do with detail
+          continue;
+        }
+        // look for parent
+        for (DetailEntityItem parent : details) {
+          if (detail.isTheParentEntity(parent)) {
+            // set parent
+            detail.setParentEntity(parent);
+            break;
+          }
+        }
+      }
+    }
+
+    ctx.addExtraParameter("detailsLevels", detailsLevels);
+
     final JavaType searchController = viewMetadata.getDestination();
 
     Map<String, MethodMetadata> finderDatatablesMethods = viewMetadata.getFinderDatatableMethods();
@@ -568,7 +615,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
     if (existsFile(viewName)) {
       newDoc =
           mergeListView("finderList", loadExistingDoc(viewName), ctx, entityItem, fields,
-              new ArrayList<List<DetailEntityItem>>());
+              detailsLevels);
     } else {
       newDoc = process("finderList", ctx);
     }

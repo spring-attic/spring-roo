@@ -1,5 +1,13 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -31,14 +39,6 @@ import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.FileUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Implementation of ControllerMVCResponseService that provides
@@ -738,6 +738,12 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
 
   @Override
   public boolean requiresJsonMixin() {
+    return true;
+  }
+
+  @Override
+  public boolean providesViews() {
+    // Thymeleaf provider uses HTML to represent the information
     return true;
   }
 }

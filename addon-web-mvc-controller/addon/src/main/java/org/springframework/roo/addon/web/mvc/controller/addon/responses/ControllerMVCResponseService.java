@@ -101,4 +101,11 @@ public interface ControllerMVCResponseService extends Feature {
    */
   boolean requiresJsonMixin();
 
+  /**
+   * Informs if this response type will provide views
+   * 
+   * @return true if provides views
+   */
+  boolean providesViews();
+
 }

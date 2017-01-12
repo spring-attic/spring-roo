@@ -2,6 +2,20 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import static java.lang.reflect.Modifier.PUBLIC;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -65,20 +79,6 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.FileUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Implementation of {@link ControllerOperations}.
@@ -711,12 +711,31 @@ public class ControllerOperationsImpl implements ControllerOperations {
    *
    * @param relationField
    *            Field that set the relationship
+   * @param viewsList Separated comma list that 
+   * 			defines the parent views where the new detail will be
+   * 			displayed.
    * @return
    */
-  private AnnotationMetadataBuilder getRooDetailAnnotation(final String relationField) {
+  private AnnotationMetadataBuilder getRooDetailAnnotation(final String relationField,
+      final String viewsList) {
     AnnotationMetadataBuilder annotationDetail =
         new AnnotationMetadataBuilder(RooJavaType.ROO_DETAIL);
     annotationDetail.addStringAttribute("relationField", relationField);
+
+    // Including views attribute if needed
+    if (StringUtils.isNotEmpty(viewsList)) {
+      String[] views = viewsList.split(",");
+      List<StringAttributeValue> viewsValues = new ArrayList<StringAttributeValue>();
+
+      for (String view : views) {
+        viewsValues.add(new StringAttributeValue(new JavaSymbolName("value"), view));
+      }
+
+      ArrayAttributeValue<StringAttributeValue> viewsAttr =
+          new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("views"), viewsValues);
+      annotationDetail.addAttribute(viewsAttr);
+    }
+
     return annotationDetail;
   }
 
@@ -818,7 +837,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
   @Override
   public void createOrUpdateDetailControllersForAllEntities(
-      ControllerMVCResponseService responseType, JavaPackage controllerPackage) {
+      ControllerMVCResponseService responseType, JavaPackage controllerPackage, String viewsList) {
 
     // Getting all entities annotated with @RooJpaEntity
     Set<ClassOrInterfaceTypeDetails> entities =
@@ -827,7 +846,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
     for (ClassOrInterfaceTypeDetails entity : entities) {
       if (!entity.isAbstract()) {
         createOrUpdateDetailControllerForEntity(entity.getType(), "", responseType,
-            controllerPackage);
+            controllerPackage, viewsList);
       }
     }
 
@@ -835,7 +854,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
   @Override
   public void createOrUpdateDetailControllerForEntity(JavaType entity, String relationField,
-      ControllerMVCResponseService responseType, JavaPackage controllerPackage) {
+      ControllerMVCResponseService responseType, JavaPackage controllerPackage, String viewsList) {
 
     // Getting entity details to obtain information about it
     ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
@@ -964,19 +983,19 @@ public class ControllerOperationsImpl implements ControllerOperations {
     for (Pair<String, List<RelationInfoExtended>> relation : relationsToAdd) {
       boolean generated =
           createDetailClass(relation.getLeft(), entity, responseType, controllerPackage,
-              pathPrefixController);
+              pathPrefixController, viewsList);
 
       RelationInfo lastRelation = relation.getRight().get(relation.getRight().size() - 1);
       if (generated && lastRelation.type == JpaRelationType.COMPOSITION) {
         createDetailsItemClass(relation.getLeft(), entity, responseType, controllerPackage,
-            pathPrefixController);
+            pathPrefixController, viewsList);
       }
     }
   }
 
   private boolean createDetailsItemClass(String field, JavaType entity,
       ControllerMVCResponseService responseType, JavaPackage controllerPackage,
-      String pathPrefixController) {
+      String pathPrefixController, String viewsList) {
     final StringBuffer detailControllerName =
         new StringBuffer(getPluralService().getPlural(entity));
     detailControllerName.append("Item");
@@ -988,7 +1007,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
     detailControllerName.append("Controller");
 
     return createDetailClass(field, detailControllerName.toString(), ControllerType.DETAIL_ITEM,
-        entity, responseType, controllerPackage, pathPrefixController);
+        entity, responseType, controllerPackage, pathPrefixController, viewsList);
 
   }
 
@@ -1004,7 +1023,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
    */
   private boolean createDetailClass(String field, JavaType entity,
       ControllerMVCResponseService responseType, JavaPackage controllerPackage,
-      String pathPrefixController) {
+      String pathPrefixController, String viewsList) {
     final StringBuffer detailControllerName =
         new StringBuffer(getPluralService().getPlural(entity));
     detailControllerName.append("Item");
@@ -1015,14 +1034,14 @@ public class ControllerOperationsImpl implements ControllerOperations {
     detailControllerName.append("Controller");
 
     return createDetailClass(field, detailControllerName.toString(), ControllerType.DETAIL, entity,
-        responseType, controllerPackage, pathPrefixController);
+        responseType, controllerPackage, pathPrefixController, viewsList);
   }
 
 
 
   private boolean createDetailClass(String field, String controllerName, ControllerType type,
       JavaType entity, ControllerMVCResponseService responseType, JavaPackage controllerPackage,
-      String pathPrefixController) {
+      String pathPrefixController, String viewsList) {
     JavaType detailController =
         new JavaType(String.format("%s.%s", controllerPackage.getFullyQualifiedPackageName(),
             controllerName), controllerPackage.getModule());
@@ -1038,7 +1057,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
     annotations.add(getRooControllerAnnotation(entity, pathPrefixController, type));
-    annotations.add(getRooDetailAnnotation(field));
+    annotations.add(getRooDetailAnnotation(field, viewsList));
 
     // Add responseType annotation. Don't use responseTypeService
     // annotate to

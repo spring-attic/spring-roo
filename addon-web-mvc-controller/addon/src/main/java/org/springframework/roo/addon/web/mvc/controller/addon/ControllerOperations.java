@@ -104,9 +104,11 @@ public interface ControllerOperations extends Feature {
    *            View provider to use
    * @param controllerPackage
    *            Package where is situated the controller
+   * @param viewsList Separated comma list of all parent views where the new detail 
+   * 			will be displayed
    */
   void createOrUpdateDetailControllersForAllEntities(ControllerMVCResponseService responseType,
-      JavaPackage controllerPackage);
+      JavaPackage controllerPackage, String viewsList);
 
   /**
    * This operation will generate or update a level detail controller for a
@@ -120,9 +122,11 @@ public interface ControllerOperations extends Feature {
    *            View provider to use
    * @param controllerPackage
    *            Package where is situated the controller
+   * @param viewsList Separated comma list of all parent views where the new detail 
+   * 			will be displayed
    */
   void createOrUpdateDetailControllerForEntity(JavaType entity, String relationField,
-      ControllerMVCResponseService responseType, JavaPackage controllerPackage);
+      ControllerMVCResponseService responseType, JavaPackage controllerPackage, String viewsList);
 
   /**
    * Get all the methods that can be published from the service or the controller established by parameter
