@@ -13,6 +13,7 @@ import org.springframework.roo.model.JavaType;
  * Builder for {@link FieldMetadata}.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.1
  */
 public class FieldMetadataBuilder extends

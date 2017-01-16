@@ -295,6 +295,8 @@ public class ServiceOperationsImpl implements ServiceOperations {
             PhysicalTypeCategory.CLASS);
     // Adding @RooService annotation to current interface
     implTypeBuilder.addAnnotation(implAnnotationMetadata.build());
+    // Adding implements
+    implTypeBuilder.addImplementsType(interfaceType);
 
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(implTypeBuilder.build().getType(),

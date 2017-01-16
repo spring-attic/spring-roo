@@ -3,9 +3,12 @@ package org.springframework.roo.classpath.itd;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.PUBLIC;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -27,6 +30,7 @@ import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
+import org.springframework.roo.model.SpringJavaType;
 
 /**
  * Abstract implementation of {@link ItdTypeDetailsProvidingMetadataItem}, which
@@ -47,6 +51,9 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
   protected PhysicalTypeMetadata governorPhysicalTypeMetadata;
   protected ClassOrInterfaceTypeDetails governorTypeDetails;
   protected ItdTypeDetails itdTypeDetails;
+
+  protected Map<FieldMetadata, MethodMetadataBuilder> accessorMethods;
+  protected Map<FieldMetadata, MethodMetadataBuilder> mutatorMethods;
 
   /**
    * Validates input and constructs a superclass that implements
@@ -73,6 +80,9 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 
     this.aspectName = aspectName;
     this.governorPhysicalTypeMetadata = governorPhysicalTypeMetadata;
+
+    accessorMethods = new HashMap<FieldMetadata, MethodMetadataBuilder>();
+    mutatorMethods = new HashMap<FieldMetadata, MethodMetadataBuilder>();
 
     final Object physicalTypeDetails = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
     if (physicalTypeDetails instanceof ClassOrInterfaceTypeDetails) {
@@ -149,16 +159,59 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
   }
 
   /**
-   * Ensures that the governor has provided field
+   * Ensures that the governor has provided field. If the provided field is private, 
+   * this method always includes the accessor method. The mutator method will not be 
+   * generated if the provided field is annotated with @Autowired annotation 
    *
    * @param FieldMetadataBuilder the field to include(required)
    * @since 2.0
    */
   protected final void ensureGovernorHasField(final FieldMetadataBuilder fieldMetadata) {
+    boolean includeAccessor = false;
+    boolean includeMutator = false;
+    int modifier = fieldMetadata.getModifier();
+    if (modifier >= Modifier.PRIVATE
+        && modifier <= Modifier.PRIVATE + Modifier.STATIC + Modifier.FINAL && modifier % 2 == 0) {
+      includeAccessor = true;
+      if (fieldMetadata.getDeclaredTypeAnnotation(SpringJavaType.AUTOWIRED) == null
+          && modifier < Modifier.FINAL) {
+        includeMutator = true;
+      }
+    }
+    ensureGovernorHasField(fieldMetadata, includeAccessor, includeMutator);
+  }
+
+  /**
+   * Ensures that the governor has provided field. You could indicates if
+   * is necessary to generate the accessor and the mutator methods for this new field manually.
+   *
+   * @param FieldMetadataBuilder the field to include(required)
+   * @since 2.0
+   */
+  protected final void ensureGovernorHasField(final FieldMetadataBuilder fieldMetadata,
+      boolean includeAccessor, boolean includeMutator) {
     if (governorTypeDetails.getField(fieldMetadata.getFieldName()) == null) {
       builder.addField(fieldMetadata);
     }
+
+    if (includeAccessor) {
+      MethodMetadataBuilder accessorMethod = getAccessorMethod(fieldMetadata.build());
+      if (accessorMethod != null
+          && governorTypeDetails.getMethod(accessorMethod.getMethodName()) == null) {
+        builder.addMethod(accessorMethod);
+      }
+    }
+
+    if (includeMutator) {
+      MethodMetadata mutatorMethod = getMutatorMethod(fieldMetadata.build());
+      if (mutatorMethod != null
+          && governorTypeDetails.getMethod(mutatorMethod.getMethodName()) == null) {
+        builder.addMethod(mutatorMethod);
+      }
+    }
+
   }
+
 
   /**
    * Ensures that the governor has provided method
@@ -191,10 +244,18 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
   }
 
   protected MethodMetadataBuilder getAccessorMethod(final FieldMetadata field) {
-    return getAccessorMethod(
-        field,
-        InvocableMemberBodyBuilder.getInstance().appendFormalLine(
-            "return " + field.getFieldName().getSymbolName() + ";"));
+    // Check if this method has been cached
+    MethodMetadataBuilder accessor = accessorMethods.get(field);
+    if (accessor == null) {
+      accessor =
+          getAccessorMethod(
+              field,
+              InvocableMemberBodyBuilder.getInstance().appendFormalLine(
+                  "return " + field.getFieldName().getSymbolName() + ";"));
+      accessorMethods.put(field, accessor);
+    }
+
+    return accessor;
   }
 
   protected MethodMetadataBuilder getAccessorMethod(final FieldMetadata field,
@@ -296,6 +357,22 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
     addToImports(parameterTypes);
     return new MethodMetadataBuilder(getId(), modifier, methodName, returnType,
         AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+  }
+
+  protected MethodMetadata getMutatorMethod(final FieldMetadata field) {
+    // Check if the mutator has been cached
+    MethodMetadataBuilder mutator = mutatorMethods.get(field);
+    if (mutator == null) {
+      mutator = getMutatorMethod(field.getFieldName(), field.getFieldType());
+      mutatorMethods.put(field, mutator);
+    }
+
+    // Prevent null exception
+    if (mutator == null) {
+      return null;
+    }
+
+    return mutator.build();
   }
 
   protected MethodMetadataBuilder getMutatorMethod(final JavaSymbolName fieldName,

@@ -91,7 +91,6 @@ quick_zip_gpg_tests() {
     popd &>/dev/null
 }
 
-
 load_roo() {
     log "Beginning test script: $@"
     rm -rf /tmp/rootest
@@ -112,7 +111,6 @@ load_roo() {
     fi
     popd &>/dev/null
 }
-
 
 load_roo_build_and_test() {
     type -P mvn &>/dev/null || { l_error "mvn not found. Aborting." >&2; exit 1; }
@@ -139,6 +137,7 @@ load_roo_build_and_test() {
     fi
     popd &>/dev/null
 }
+
 
 load_roo_build_and_test_multimodule() {
     type -P mvn &>/dev/null || { l_error "mvn not found. Aborting." >&2; exit 1; }
@@ -556,7 +555,10 @@ if [[ "$COMMAND" = "assembly" ]]; then
     cp $ROO_HOME/runtime/bootstrap/src/main/conf/* $WORK_DIR/conf
     cp $ROO_HOME/runtime/bootstrap/readme.txt $WORK_DIR/
     cp `find $ROO_HOME -iname legal-\*.txt` $WORK_DIR/legal
-    cp `find $ROO_HOME -iname \*.roo | grep -v "/target/"` $WORK_DIR/samples
+    # Only basic scripts will be included on /samples directory
+    cp `find $ROO_HOME -iname \northwind-multimodule.roo | grep -v "/target/"` $WORK_DIR/samples
+    cp `find $ROO_HOME -iname \clinic.roo | grep -v "/target/"` $WORK_DIR/samples
+    cp `find $ROO_HOME -iname \restfulshop.roo | grep -v "/target/"` $WORK_DIR/samples
     cp -r $ROO_HOME/runtime/deployment-support/target/generated-docs/index.pdf $WORK_DIR/docs/pdf
     cp -r $ROO_HOME/runtime/deployment-support/target/generated-docs/index.pdfmarks $WORK_DIR/docs/pdf
     cp -r $ROO_HOME/runtime/deployment-support/target/generated-docs/images $WORK_DIR/docs/html
@@ -620,88 +622,21 @@ if [[ "$COMMAND" = "assembly" ]]; then
         # Executing tests #
         ###################
 
-        # GENERIC SHELL FEATURES
-
-            # Project Settings tests
-            #load_roo script project-settings-1.roo
-            #load_roo script project-settings-2.roo
-            #load_roo script project-settings-3.roo
-
-            # Global parameter tests
-            #load_roo script global-parameters.roo
-
-            # Application Configuration Service tests
-            #load_roo script application-config-service.roo
-
-            # CliOptions dependency visibility
-            #load_roo script cli-dependency-visibility.roo
-
-            # CliOptions dynamic mandatory
-            #load_roo script cli-dynamic-mandatory.roo
-
-            # Push-In Operations
-            #load_roo_build_and_test script push-in.roo
-
-        # PROJECT GENERATION FEATURES
-
-            # Entity commands with project settings
-            #load_roo script entities-with-project-settings.roo 
-
-            # Entity and entity-field commands
-            #load_roo script entities-and-entity-fields.roo 
-
-            # Repository test
-            #load_roo_build_and_test script repository-generation-test.roo
-
-            # Finder tests
-            #load_roo_build_and_test script finder-autocomplete-test.roo
-            #load_roo_build_and_test script finder-generation-test.roo
-
-            # Service test
-            #load_roo_build_and_test script service-generation-test.roo
-
-            # Multimodule tests
-            #load_roo_build_and_test script multimodule-standard-test.roo
-            #load_roo_build_and_test script multimodule-basic-test.roo
-            #load_roo_build_and_test script multimodule-jpa-layer-test.roo
-            #load_roo_build_and_test script multimodule-service-layer-test.roo
-
-            # Security and audit tests
-            #load_roo_build_and_test script security.roo
-            #load_roo_build_and_test script security-multimodule.roo
-            #load_roo_build_and_test script audit.roo            
-            #load_roo_build_and_test script audit-multimodule.roo
-
-            # Addon-test tests
-            #load_roo_build_and_test script tests.roo
-            #load_roo_build_and_test script tests-multimodule.roo
-
-	        # Web mvc tests
-            #load_roo_build_and_test script web-mvc-test.roo
-            #load_roo_build_and_test script multimodule-web-mvc-embedded-test.roo
-            #load_roo_build_and_test script multimodule-web-mvc-weblogic-test.roo
-
-
-		    #load_roo_build_and_test script web-finder-test.roo
-		    #load_roo_build_and_test script multimodule-web-finder-test.roo
-
-            # DTO's tests
-            #load_roo_build_and_test script dto.roo
-            #load_roo_build_and_test script dto-multimodule.roo
-
-        # COMPLETE APPLICATIONS TESTS
-
-            # Northwind complete application
-            #load_roo_build_and_test script northwind.roo
-
-            # Northwind complete multimodule application
-	        load_roo_build_and_test script northwind-multimodule.roo
-
-            # Petclinic complete application
+            # Petclinic application
             load_roo_build_and_test script clinic.roo
 
-            # Petclinic multimodule application
-            #load_roo_build_and_test script clinic-multimodule.roo    
+            # Restful application
+            load_roo_build_and_test script restfulshop.roo
+
+            # Northwind multimodule application
+	        load_roo_build_and_test script northwind-multimodule.roo
+	    
+	    	# Push-In Applications
+			load_roo_build_and_test script clinic-push-in.roo
+			load_roo_build_and_test script restfulshop-push-in.roo
+			load_roo_build_and_test script northwind-multimodule-push-in.roo
+	        
+
 
         log "Removing Roo distribution from test area"
         rm -rf /tmp/$RELEASE_IDENTIFIER

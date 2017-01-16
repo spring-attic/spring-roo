@@ -436,10 +436,10 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // customerService.addToOrders(customer, order.getId());
-    bodyBuilder.appendFormalLine("%s.%s(%s,%s.singleton(%s.%s()));", detailsServiceField
-        .getFieldName(), removeFromMethod.getMethodName(), removeFromMethod.getParameterNames()
-        .get(0), getNameOfJavaType(JavaType.COLLECTIONS), itemsName,
-        detailsInfo.childEntityMetadata.getCurrentIdentifierAccessor().getMethodName());
+    bodyBuilder.appendFormalLine("%s().%s(%s,%s.singleton(%s.%s()));",
+        getAccessorMethod(detailsServiceField).getMethodName(), removeFromMethod.getMethodName(),
+        removeFromMethod.getParameterNames().get(0), getNameOfJavaType(JavaType.COLLECTIONS),
+        itemsName, detailsInfo.childEntityMetadata.getCurrentIdentifierAccessor().getMethodName());
 
     // return ResponseEntity.ok().build();
     bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
@@ -518,8 +518,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         .getFieldName().getSymbolNameCapitalisedFirstLetter());
 
     // customerService.save(customer);
-    bodyBuilder.appendFormalLine("%s.%s(%s);", controllerMetadata.getLastDetailServiceField()
-        .getFieldName(), serviceMetadata.getCurrentSaveMethod().getMethodName(), entityItemName);
+    bodyBuilder.appendFormalLine("%s().%s(%s);",
+        getAccessorMethod(controllerMetadata.getLastDetailServiceField()).getMethodName(),
+        serviceMetadata.getCurrentSaveMethod().getMethodName(), entityItemName);
 
     // return ResponseEntity.ok().build();
     bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
@@ -607,8 +608,8 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Page<Customer> customers = customerService.findAll(formBean, globalSearch, pageable);
     bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine("%s %s = %s.%s(%s);", getNameOfJavaType(serviceReturnType),
-        itemNames, controllerMetadata.getServiceField().getFieldName(),
+    bodyBuilder.appendFormalLine("%s %s = %s().%s(%s);", getNameOfJavaType(serviceReturnType),
+        itemNames, getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(),
         serviceFinderMethod.getMethodName(), StringUtils.join(parameterStrings, ","));
 
     // return ResponseEntity.status(HttpStatus.FOUND).body(owners);
@@ -666,10 +667,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // customerService.removeFromOrders(customer, orders);
-    bodyBuilder.appendFormalLine("%s.%s(%s,%s);", detailsServiceField.getFieldName(),
-        removeFromDetailsMethod.getMethodName(),
-        removeFromDetailsMethod.getParameterNames().get(0), removeFromDetailsMethod
-            .getParameterNames().get(1));
+    bodyBuilder.appendFormalLine("%s().%s(%s,%s);", getAccessorMethod(detailsServiceField)
+        .getMethodName(), removeFromDetailsMethod.getMethodName(), removeFromDetailsMethod
+        .getParameterNames().get(0), removeFromDetailsMethod.getParameterNames().get(1));
 
     // return ResponseEntity.ok().build();
     bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
@@ -723,9 +723,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // customerService.addToOrders(customer, order);
-    bodyBuilder.appendFormalLine("%s.%s(%s,%s);", detailsServiceField.getFieldName(), addToMethod
-        .getMethodName(), addToMethod.getParameterNames().get(0), addToMethod.getParameterNames()
-        .get(1));
+    bodyBuilder.appendFormalLine("%s().%s(%s,%s);", getAccessorMethod(detailsServiceField)
+        .getMethodName(), addToMethod.getMethodName(), addToMethod.getParameterNames().get(0),
+        addToMethod.getParameterNames().get(1));
 
     // return ResponseEntity.ok().build();
     bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
@@ -785,9 +785,10 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // customerService.addToOrders(customer, Collections.singleton(order));
-    bodyBuilder.appendFormalLine("%s.%s(%s,%s.singleton(%s));", detailsServiceField.getFieldName(),
-        removeFromMethod.getMethodName(), removeFromMethod.getParameterNames().get(0),
-        getNameOfJavaType(JavaType.COLLECTIONS), itemsName);
+    bodyBuilder.appendFormalLine("%s().%s(%s,%s.singleton(%s));",
+        getAccessorMethod(detailsServiceField).getMethodName(), removeFromMethod.getMethodName(),
+        removeFromMethod.getParameterNames().get(0), getNameOfJavaType(JavaType.COLLECTIONS),
+        itemsName);
 
     // return ResponseEntity.ok().build();
     bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
@@ -844,9 +845,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // customerService.addToOrders(customer, Collections.singleton(order));
-    bodyBuilder.appendFormalLine("%s.%s(%s,%s.singleton(%s));", detailsServiceField.getFieldName(),
-        addToMethod.getMethodName(), addToMethod.getParameterNames().get(0),
-        getNameOfJavaType(JavaType.COLLECTIONS), itemsName);
+    bodyBuilder.appendFormalLine("%s().%s(%s,%s.singleton(%s));",
+        getAccessorMethod(detailsServiceField).getMethodName(), addToMethod.getMethodName(),
+        addToMethod.getParameterNames().get(0), getNameOfJavaType(JavaType.COLLECTIONS), itemsName);
 
     // return ResponseEntity.ok().build();
     bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
@@ -917,9 +918,10 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Page<Customer> customers = customerService.findAll(globalSearch, pageable);
     bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine("%s %s = %s.%s(%s, %s, %s);",
-        getNameOfJavaType(serviceReturnType), itemNames, detailsServiceField.getFieldName(),
-        findAllMethod.getMethodName(), parentParamName, GLOBAL_SEARCH_NAME, PAGEABLE_PARAM_NAME);
+    bodyBuilder.appendFormalLine("%s %s = %s().%s(%s, %s, %s);",
+        getNameOfJavaType(serviceReturnType), itemNames, getAccessorMethod(detailsServiceField)
+            .getMethodName(), findAllMethod.getMethodName(), parentParamName, GLOBAL_SEARCH_NAME,
+        PAGEABLE_PARAM_NAME);
 
     // return ResponseEntity.status(HttpStatus.FOUND).body(customers);
     bodyBuilder.appendFormalLine(String.format("return %s.status(%s.FOUND).body(%s);",
@@ -1181,9 +1183,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Entity newEntity = entityService.saveMethodName(entity);
     bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine("%s new%s = %s.%s(%s);", getNameOfJavaType(entity), StringUtils
-        .capitalize(entityItemName), controllerMetadata.getServiceField().getFieldName(),
-        serviceMetadata.getCurrentSaveMethod().getMethodName(), entityItemName);
+    bodyBuilder.appendFormalLine("%s new%s = %s().%s(%s);", getNameOfJavaType(entity), StringUtils
+        .capitalize(entityItemName), getAccessorMethod(controllerMetadata.getServiceField())
+        .getMethodName(), serviceMetadata.getCurrentSaveMethod().getMethodName(), entityItemName);
 
     // UriComponents showURI = CustomersItemJsonController.showURI(newCustomer);
     bodyBuilder.appendFormalLine("%s showURI = %s.%s(new%s);",
@@ -1271,8 +1273,8 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
           relatedEntityIdentifier.getSymbolNameCapitalisedFirstLetter(), storedName);
     }
     // customerService.save(customer);
-    bodyBuilder.appendFormalLine("%s.save(%s);", controllerMetadata.getServiceField()
-        .getFieldName(), entityItemName);
+    bodyBuilder.appendFormalLine("%s().save(%s);",
+        getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), entityItemName);
 
     // return ResponseEntity.ok().build();
     bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
@@ -1321,8 +1323,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // customerService.delete(customer);
-    bodyBuilder.appendFormalLine("%s.%s(%s);", controllerMetadata.getServiceField().getFieldName(),
-        serviceMetadata.getCurrentDeleteMethod().getMethodName(), entityItemName);
+    bodyBuilder.appendFormalLine("%s().%s(%s);",
+        getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
+            .getCurrentDeleteMethod().getMethodName(), entityItemName);
 
     // return ResponseEntity.ok().build();
     bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
@@ -1388,8 +1391,8 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // Page<Customer> customers = customerService.findAll(globalSearch, pageable);
     bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine("%s %s = %s.%s(%s, %s);", getNameOfJavaType(serviceReturnType),
-        itemNames, controllerMetadata.getServiceField().getFieldName(),
+    bodyBuilder.appendFormalLine("%s %s = %s().%s(%s, %s);", getNameOfJavaType(serviceReturnType),
+        itemNames, getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(),
         findAllMethod.getMethodName(), GLOBAL_SEARCH_NAME, PAGEABLE_PARAM_NAME);
 
     // return ResponseEntity.status(HttpStatus.FOUND).body(customers);
@@ -1564,9 +1567,10 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // customerService.save(customers);
     bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine("%s.%s(%s);", controllerMetadata.getServiceField().getFieldName(),
-        serviceMetadata.getCurrentSaveBatchMethod().getMethodName(),
-        StringUtils.uncapitalize(this.entityPlural));
+    bodyBuilder.appendFormalLine("%s().%s(%s);",
+        getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
+            .getCurrentSaveBatchMethod().getMethodName(), StringUtils
+            .uncapitalize(this.entityPlural));
 
     // return ResponseEntity.created(listURI().toUri()).build();
     bodyBuilder.newLine();
@@ -1633,9 +1637,10 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // customerService.save(customers);
     bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine("%s.%s(%s);", controllerMetadata.getServiceField().getFieldName(),
-        serviceMetadata.getCurrentSaveBatchMethod().getMethodName(),
-        StringUtils.uncapitalize(this.entityPlural));
+    bodyBuilder.appendFormalLine("%s().%s(%s);",
+        getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
+            .getCurrentSaveBatchMethod().getMethodName(), StringUtils
+            .uncapitalize(this.entityPlural));
 
     // return ResponseEntity.ok().build();
     bodyBuilder.newLine();
@@ -1693,8 +1698,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
     // serviceField.SERVICE_DELETE_METHOD(ids);
     bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine("%s.%s(%s);", controllerMetadata.getServiceField().getFieldName(),
-        serviceMetadata.getCurrentDeleteBatchMethod().getMethodName(), entityIdentifierPlural);
+    bodyBuilder.appendFormalLine("%s().%s(%s);",
+        getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
+            .getCurrentDeleteBatchMethod().getMethodName(), entityIdentifierPlural);
 
     // return ResponseEntity.ok().build();
     bodyBuilder.newLine();

@@ -1,0 +1,5 @@
+// Generating complete application
+script restfulshop.roo
+
+// Make push-in of every generated elements
+push-in --method (?!get|set)[a-z,A-Z]*

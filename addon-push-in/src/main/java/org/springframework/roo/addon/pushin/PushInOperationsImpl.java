@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.pushin;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -34,6 +35,7 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -532,14 +534,33 @@ public class PushInOperationsImpl implements PushInOperations {
   }
 
   /**
-   * This method generates new method instance using an existing
-   * methodMetadata
+   * Method that obtains all declared fields and returns a list with 
+   * the private ones.
    * 
-   * @param declaredByMetadataId
-   * @param method
-   * 
-   * @return
+   * @param memberDetails
+   * @return list with the private fields
    */
+  private List<? extends FieldMetadata> getPrivateFields(MemberDetails memberDetails) {
+    List<FieldMetadata> privateFields = new ArrayList<FieldMetadata>();
+    // Checking all registered fields in ITDs and .java files
+    for (FieldMetadata field : memberDetails.getFields()) {
+      if (field.getModifier() == Modifier.PRIVATE
+          || field.getModifier() == Modifier.PRIVATE + Modifier.FINAL) {
+        privateFields.add(field);
+      }
+    }
+    return privateFields;
+  }
+
+  /**
+     * This method generates new method instance using an existing
+     * methodMetadata
+     * 
+     * @param declaredByMetadataId
+     * @param method
+     * 
+     * @return
+     */
   private MethodMetadata getNewMethod(String declaredByMetadataId, MethodMetadata method) {
 
     // Create bodyBuilder
@@ -601,6 +622,11 @@ public class PushInOperationsImpl implements PushInOperations {
       // Getting method name and parameter types
       String name = regEx.split("\\(")[0];
       String[] parameterTypes = regEx.split("\\(")[1].replaceAll("\\)", "").split(",");
+
+      // Prevent errors with empty regular expressions
+      if (StringUtils.isEmpty(name)) {
+        return false;
+      }
 
       if (method.getMethodName().equals(new JavaSymbolName(name))) {
         List<AnnotatedJavaType> methodParams = method.getParameterTypes();

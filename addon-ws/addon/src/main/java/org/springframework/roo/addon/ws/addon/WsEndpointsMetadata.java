@@ -185,25 +185,26 @@ public class WsEndpointsMetadata extends AbstractItdTypeDetailsProvidingMetadata
         getNameOfJavaType(JavaType.LIST), getNameOfJavaType(JavaType.ARRAY_LIST));
 
     // urlPatterns.add(this.cxfServletPath + "/*");
-    bodyBuilder.appendFormalLine("urlPatterns.add(this.%s + \"/*\");", getServletField()
-        .getFieldName());
+    bodyBuilder.appendFormalLine("urlPatterns.add(%s() + \"/*\");",
+        getAccessorMethod(getServletField()).getMethodName());
 
     // filterRegBean.setUrlPatterns(urlPatterns);
     bodyBuilder.appendFormalLine("filterRegBean.setUrlPatterns(urlPatterns);");
 
     // if (LOG.isDebugEnabled()) {
-    bodyBuilder.appendFormalLine("if (%s.isDebugEnabled()) {", getLoggerField().getFieldName());
+    bodyBuilder.appendFormalLine("if (%s().isDebugEnabled()) {",
+        getAccessorMethod(getLoggerField()).getMethodName());
 
     // LOG.debug("Registering the 'OpenEntityManagerInViewFilter' filter for the '"
     bodyBuilder.indent();
     bodyBuilder.appendFormalLine(
-        "%s.debug(\"Registering the 'OpenEntityManagerInViewFilter' filter for the '\"",
-        getLoggerField().getFieldName());
+        "%s().debug(\"Registering the 'OpenEntityManagerInViewFilter' filter for the '\"",
+        getAccessorMethod(getLoggerField()).getMethodName());
 
     // .concat(this.cxfServletPath + "/*").concat("' URL."));
     bodyBuilder.indent();
-    bodyBuilder.appendFormalLine(".concat(this.%s + \"/*\").concat(\"' URL.\"));",
-        getServletField().getFieldName());
+    bodyBuilder.appendFormalLine(".concat(%s() + \"/*\").concat(\"' URL.\"));",
+        getAccessorMethod(getServletField()).getMethodName());
     bodyBuilder.indentRemove();
     bodyBuilder.indentRemove();
 
@@ -241,10 +242,10 @@ public class WsEndpointsMetadata extends AbstractItdTypeDetailsProvidingMetadata
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // EndpointImpl endpoint = new EndpointImpl(this.bus, new ENDPOINT(this.SERVICENAME));
-    bodyBuilder.appendFormalLine("%s endpoint = new EndpointImpl(this.%s, new %s(this.%s));",
-        getNameOfJavaType(new JavaType("org.apache.cxf.jaxws.EndpointImpl")), getBusField()
-            .getFieldName(), getNameOfJavaType(endpoint),
-        getServiceField(getServiceFromEndpoint(endpoint)).getFieldName());
+    bodyBuilder.appendFormalLine("%s endpoint = new EndpointImpl(%s(), new %s(%s()));",
+        getNameOfJavaType(new JavaType("org.apache.cxf.jaxws.EndpointImpl")),
+        getAccessorMethod(getBusField()).getMethodName(), getNameOfJavaType(endpoint),
+        getAccessorMethod(getServiceField(getServiceFromEndpoint(endpoint))).getMethodName());
 
     // endpoint.setFeatures(Arrays.asList(new TraceeCxfFeature(), new LoggingFeature()));
     bodyBuilder.appendFormalLine("endpoint.setFeatures(%s.asList(new %s(), new %s()));",

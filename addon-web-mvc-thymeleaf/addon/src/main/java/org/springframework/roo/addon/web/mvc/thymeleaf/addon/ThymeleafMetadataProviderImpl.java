@@ -2,6 +2,16 @@ package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_THYMELEAF;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -16,6 +26,7 @@ import org.springframework.roo.addon.web.mvc.controller.addon.ControllerAnnotati
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.RelationInfoExtended;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
+import org.springframework.roo.addon.web.mvc.thymeleaf.addon.link.factory.LinkFactoryAnnotationValues;
 import org.springframework.roo.addon.web.mvc.views.AbstractViewGeneratorMetadataProvider;
 import org.springframework.roo.addon.web.mvc.views.MVCViewGenerationService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -35,15 +46,6 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Implementation of {@link ThymeleafMetadataProvider}.
@@ -218,6 +220,35 @@ public class ThymeleafMetadataProviderImpl extends
         getEntityValidFields(getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
             getTypeLocationService().getTypeDetails(controllerMetadata.getEntity())).getFields());
 
+    // Getting the related linkFactory for this controller
+    Set<ClassOrInterfaceTypeDetails> linkFactories =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_LINK_FACTORY);
+
+    JavaType relatedCollectionLinkFactory = null;
+    JavaType relatedItemLinkFactory = null;
+    JavaType collectionControllerToCheck = collectionController;
+    if (collectionControllerToCheck == null) {
+      collectionControllerToCheck = governorPhysicalTypeMetadata.getType();
+    }
+
+    JavaType itemControllerToCheck = itemController;
+    if (itemControllerToCheck == null) {
+      itemControllerToCheck = governorPhysicalTypeMetadata.getType();
+    }
+
+    for (ClassOrInterfaceTypeDetails linkFactory : linkFactories) {
+      LinkFactoryAnnotationValues annotationValues = new LinkFactoryAnnotationValues(linkFactory);
+      // Getting link factory of the collection controller
+      if (annotationValues.getController().equals(collectionControllerToCheck)) {
+        relatedCollectionLinkFactory = linkFactory.getType();
+      } else if (annotationValues.getController().equals(itemControllerToCheck)) {
+        relatedItemLinkFactory = linkFactory.getType();
+      }
+
+
+    }
+
     final ThymeleafMetadata metadata =
         new ThymeleafMetadata(metadataIdentificationString, aspectName,
             governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
@@ -225,7 +256,8 @@ public class ThymeleafMetadataProviderImpl extends
             collectionController, dateTimeFields, enumFields, findersToAdd,
             formBeansDateTimeFields, formBeansEnumFields, detailsItemController,
             detailsCollectionController, relatedCollectionController, relatedItemController,
-            entityFields, getJasperReportsMap());
+            entityFields, getJasperReportsMap(), relatedCollectionLinkFactory,
+            relatedItemLinkFactory);
 
     return metadata;
   }

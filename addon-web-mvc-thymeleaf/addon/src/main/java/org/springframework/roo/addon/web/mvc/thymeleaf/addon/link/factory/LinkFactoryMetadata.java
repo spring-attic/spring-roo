@@ -718,7 +718,7 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
    * @return FieldMetadataBuilder
    */
   private FieldMetadataBuilder returnStaticStringFieldBuilder(String fieldName, String initializer) {
-    return new FieldMetadataBuilder(getId(), Modifier.PRIVATE + Modifier.STATIC + Modifier.FINAL,
+    return new FieldMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.STATIC + Modifier.FINAL,
         new JavaSymbolName(fieldName), JavaType.STRING, "\"" + initializer + "\"");
   }
 

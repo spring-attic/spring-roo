@@ -139,9 +139,6 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     this.childRelationsInfo = childRelationsInfo;
     this.entityIdentifierType = serviceMetadata.getIdType();
 
-    // Get service that needs to be implemented
-    ensureGovernorImplements(serviceInterface);
-
     // All services should include @Service annotation
     AnnotationMetadataBuilder serviceAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.SERVICE);
@@ -241,7 +238,6 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     final JavaSymbolName param1 = methodToBeImplemented.getParameterNames().get(1);
     final JavaType param1TypeWrapped =
         methodToBeImplemented.getParameterTypes().get(1).getJavaType().getParameters().get(0);
-    final String repoField = repositoryFieldMetadata.getFieldName().getSymbolName();
     final String saveMethod =
         serviceMetadata.getCurrentSaveMethod().getMethodName().getSymbolName();
 
@@ -252,16 +248,17 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     } else {
       // List<{childType}> {parentFieldName} =
       // {childService}.findAll({param1});
-      JavaSymbolName childService = childServideField.getFieldName();
-      bodyBuilder.appendFormalLine("%s<%s> %s = %s.findAll(%s);", getNameOfJavaType(JavaType.LIST),
-          getNameOfJavaType(childType), parentFieldName, childService, param1);
+      bodyBuilder.appendFormalLine("%s<%s> %s = %s().findAll(%s);",
+          getNameOfJavaType(JavaType.LIST), getNameOfJavaType(childType), parentFieldName,
+          getAccessorMethod(childServideField).getMethodName(), param1);
       childListVariable = parentFieldName;
     }
     // {param0}.{operation}({childListVariable});
     bodyBuilder.appendFormalLine("%s.%s(%s);", param0, operation, childListVariable);
 
     // return {repoField}.{saveMethod}({param0});
-    bodyBuilder.appendFormalLine("return %s.%s(%s);", repoField, saveMethod, param0);
+    bodyBuilder.appendFormalLine("return %s().%s(%s);", getAccessorMethod(repositoryFieldMetadata)
+        .getMethodName(), saveMethod, param0);
     return getMethod(methodToBeImplemented, true, bodyBuilder);
   }
 
@@ -339,16 +336,15 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     final FieldMetadata childServideField = requiredServiceFieldByEntity.get(childType);
     final String childTypeNameJavaType = getNameOfJavaType(childType);
     final JavaSymbolName param1 = methodToBeImplemented.getParameterNames().get(1);
-    final String repoField = repositoryFieldMetadata.getFieldName().getSymbolName();
     final String saveMethod =
         serviceMetadata.getCurrentSaveMethod().getMethodName().getSymbolName();
 
     String childListVariable = "items";
     // List<{childType}> {parentFieldName} =
     // {childService}.findAll({param1});
-    JavaSymbolName childService = childServideField.getFieldName();
-    bodyBuilder.appendFormalLine("%s<%s> %s = %s.findAll(%s);", getNameOfJavaType(JavaType.LIST),
-        childTypeNameJavaType, childListVariable, childService, param1);
+    bodyBuilder.appendFormalLine("%s<%s> %s = %s().findAll(%s);", getNameOfJavaType(JavaType.LIST),
+        childTypeNameJavaType, childListVariable, getAccessorMethod(childServideField)
+            .getMethodName(), param1);
 
     // Set<{childType}> currents = {param0}.get{rel.property}();
     bodyBuilder.appendFormalLine("%s currents = %s.get%s();",
@@ -405,7 +401,8 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
         childListVariable);
 
     // return {repoField}.{saveMethod}({param0});
-    bodyBuilder.appendFormalLine("return %s.%s(%s);", repoField, saveMethod, param0);
+    bodyBuilder.appendFormalLine("return %s().%s(%s);", getAccessorMethod(repositoryFieldMetadata)
+        .getMethodName(), saveMethod, param0);
     return getMethod(methodToBeImplemented, true, bodyBuilder);
   }
 
@@ -523,7 +520,8 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     } else {
       constructorBuilder.addParameter(fieldName, fieldType);
     }
-    bodyBuilder.appendFormalLine("this." + fieldName + " = " + fieldName + ";");
+    bodyBuilder.appendFormalLine(String.format("%s(" + fieldName + ");", getMutatorMethod(field)
+        .getMethodName()));
   }
 
   /**
@@ -624,7 +622,6 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    final JavaSymbolName repositoryFieldName = repositoryFieldMetadata.getFieldName();
     // Getting parameters String
     String parametersString = "";
     for (JavaSymbolName parameterName : methodToBeImplemented.getParameterNames()) {
@@ -634,10 +631,10 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
       parametersString = parametersString.substring(0, parametersString.length() - 2);
     }
 
-    bodyBuilder.appendFormalLine("%s %s.%s(%s);",
+    bodyBuilder.appendFormalLine("%s %s().%s(%s);",
         methodToBeImplemented.getReturnType().equals(JavaType.VOID_PRIMITIVE) ? "" : "return",
-        repositoryFieldName, methodToBeImplemented.getMethodName().getSymbolName(),
-        parametersString);
+        getAccessorMethod(repositoryFieldMetadata).getMethodName(), methodToBeImplemented
+            .getMethodName().getSymbolName(), parametersString);
     return bodyBuilder;
   }
 
@@ -657,15 +654,15 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     final JavaSymbolName param0 = methodToBeImplemented.getParameterNames().get(0);
     final String entity = getNameOfJavaType(this.entity);
 
-    final JavaSymbolName repositoryFieldName = repositoryFieldMetadata.getFieldName();
     if (isBatch) {
 
       // List<Entity> toDelete = repositoryField.FIND_ALL_METHOD(paramName);
-      bodyBuilder.appendFormalLine("%s<%s> toDelete = %s.%s(%s);",
-          getNameOfJavaType(JavaType.LIST), entity, repositoryFieldName,
-          this.findAllIterableMethod.getMethodName(), param0);
+      bodyBuilder.appendFormalLine("%s<%s> toDelete = %s().%s(%s);",
+          getNameOfJavaType(JavaType.LIST), entity, getAccessorMethod(repositoryFieldMetadata)
+              .getMethodName(), this.findAllIterableMethod.getMethodName(), param0);
 
-      bodyBuilder.appendFormalLine("%s.deleteInBatch(toDelete);", repositoryFieldName,
+      bodyBuilder.appendFormalLine("%s().deleteInBatch(toDelete);",
+          getAccessorMethod(repositoryFieldMetadata).getMethodName(),
           methodToBeImplemented.getMethodName());
 
     } else {
@@ -770,7 +767,8 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
         }
       }
 
-      bodyBuilder.appendFormalLine("%s.delete(%s);", repositoryFieldName, param0);
+      bodyBuilder.appendFormalLine("%s().delete(%s);", getAccessorMethod(repositoryFieldMetadata)
+          .getMethodName(), param0);
 
     }
     return bodyBuilder;
@@ -789,8 +787,6 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
     final JavaSymbolName param0 = methodToBeImplemented.getParameterNames().get(0);
-
-    final JavaSymbolName repositoryFieldName = repositoryFieldMetadata.getFieldName();
 
     /*
      * // Ensure the relationships are maintained
@@ -812,9 +808,10 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
       }
     }
 
-    bodyBuilder.appendFormalLine("%s %s.%s(%s);",
+    bodyBuilder.appendFormalLine("%s %s().%s(%s);",
         methodToBeImplemented.getReturnType().equals(JavaType.VOID_PRIMITIVE) ? "" : "return",
-        repositoryFieldName, methodToBeImplemented.getMethodName().getSymbolName(), param0);
+        getAccessorMethod(repositoryFieldMetadata).getMethodName(), methodToBeImplemented
+            .getMethodName().getSymbolName(), param0);
     return bodyBuilder;
   }
 

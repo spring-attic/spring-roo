@@ -174,6 +174,33 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     transactionalAnnotation.addBooleanAttribute("readOnly", true);
     ensureGovernorIsAnnotated(transactionalAnnotation);
 
+    // Creating new constant for every existing field in entity
+    List<JavaSymbolName> addedFields = new ArrayList<JavaSymbolName>();
+    for (FieldMetadata field : validFields) {
+      FieldMetadata newConstant = getConstantForField(field.getFieldName().getSymbolName());
+      if (!addedFields.contains(newConstant.getFieldName())) {
+        ensureGovernorHasField(new FieldMetadataBuilder(newConstant));
+        addedFields.add(newConstant.getFieldName());
+      }
+    }
+
+    // Creating new constant for every field of the provided projections
+    for (Entry<JavaType, Boolean> element : this.typesAreProjections.entrySet()) {
+      JavaType projection = element.getKey();
+      List<Pair<String, String>> projectionFields = this.typesFieldMaps.get(projection);
+      if (projectionFields != null && !projectionFields.isEmpty()) {
+        Iterator<Pair<String, String>> iterator = projectionFields.iterator();
+        while (iterator.hasNext()) {
+          Pair<String, String> entry = iterator.next();
+          FieldMetadata newConstant = getConstantForField(entry.getKey());
+          if (!addedFields.contains(newConstant.getFieldName())) {
+            ensureGovernorHasField(new FieldMetadataBuilder(newConstant));
+            addedFields.add(newConstant.getFieldName());
+          }
+        }
+      }
+    }
+
     // Generate findAll implementation method
     if (findAllGlobalSearchMethod != null) {
       ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllImpl(findAllGlobalSearchMethod,
@@ -287,7 +314,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
         FieldMetadata field = iterator.next();
         String fieldName = field.getFieldName().getSymbolName();
         mappingBuilderLine.append(String.format("\n\t\t\t.map(%s, %s.%s)",
-            getConstantForField(fieldName), entityVariable, fieldName));
+            getConstantForField(fieldName).getFieldName(), entityVariable, fieldName));
       }
     } else {
 
@@ -297,7 +324,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       while (iterator.hasNext()) {
         Entry<String, String> entry = iterator.next();
         mappingBuilderLine.append(String.format("\n\t\t\t.map(%s, %s)",
-            getConstantForField(entry.getKey()), entry.getValue()));
+            getConstantForField(entry.getKey()).getFieldName(), entry.getValue()));
       }
     }
     mappingBuilderLine.append(";");
@@ -334,14 +361,14 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param fieldName
    * @return
    */
-  private JavaSymbolName getConstantForField(String fieldName) {
+  private FieldMetadata getConstantForField(String fieldName) {
     Validate.notEmpty(fieldName, "ERROR: You must provide a valid fieldName to be able to generate"
         + " the finder content");
 
     // If already created, return the existing constant associated 
     // to this field
     if (constantsForFields.get(fieldName) != null) {
-      return constantsForFields.get(fieldName).getFieldName();
+      return constantsForFields.get(fieldName);
     }
 
     // If not exists, generate it and then, return its name
@@ -358,16 +385,16 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
         new JavaSymbolName(constantName.substring(0,
             constantName.length() - CONSTANT_SEPARATOR.length()).toUpperCase());
 
-    // Creating field and adding it to the builder
+    // Creating field and adding it to the builder. Contants will be always publics to be used
+    // in different locations.
     FieldMetadataBuilder constantField =
-        new FieldMetadataBuilder(getId(), Modifier.PRIVATE + Modifier.STATIC + Modifier.FINAL,
+        new FieldMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.STATIC + Modifier.FINAL,
             constantSymbolName, JavaType.STRING, "\"".concat(fieldName).concat("\""));
-    ensureGovernorHasField(constantField);
 
     // Cache it to prevent generate the same constant again
     constantsForFields.put(fieldName, constantField.build());
 
-    return constantSymbolName;
+    return constantField.build();
   }
 
   /**
@@ -490,7 +517,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
         FieldMetadata field = iterator.next();
         String entityFieldName = field.getFieldName().getSymbolName();
         mappingBuilderLine.append(String.format("\n\t\t\t.map(%s, %s.%s)",
-            getConstantForField(entityFieldName), entityVariable, entityFieldName));
+            getConstantForField(entityFieldName).getFieldName(), entityVariable, entityFieldName));
       }
     } else {
 
@@ -500,7 +527,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       while (iterator.hasNext()) {
         Pair<String, String> entry = iterator.next();
         mappingBuilderLine.append(String.format("\n\t\t\t.map(%s, %s)",
-            getConstantForField(entry.getKey()), entry.getValue()));
+            getConstantForField(entry.getKey()).getFieldName(), entry.getValue()));
       }
     }
     mappingBuilderLine.append(";");
@@ -594,7 +621,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
         FieldMetadata field = iterator.next();
         String fieldName = field.getFieldName().getSymbolName();
         mappingBuilderLine.append(String.format("\n\t\t\t.map(%s, %s.%s)",
-            getConstantForField(fieldName), entityVariable, fieldName));
+            getConstantForField(fieldName).getFieldName(), entityVariable, fieldName));
       }
     } else {
 
@@ -604,7 +631,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       while (iterator.hasNext()) {
         Entry<String, String> entry = iterator.next();
         mappingBuilderLine.append(String.format("\n\t\t\t.map(%s, %s)",
-            getConstantForField(entry.getKey()), entry.getValue()));
+            getConstantForField(entry.getKey()).getFieldName(), entry.getValue()));
       }
     }
     mappingBuilderLine.append(";");

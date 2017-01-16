@@ -573,6 +573,8 @@ public class WsOperationsImpl implements WsOperations {
     endpointAnnotation.addClassAttribute("sei", sei);
     // Include new @RooSeiImpl annotation
     cidBuilderEndpoint.addAnnotation(endpointAnnotation);
+    // Include implements
+    cidBuilderEndpoint.addImplementsType(sei);
 
     // Write endpoint class on disk
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilderEndpoint.build());

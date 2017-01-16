@@ -133,9 +133,6 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
             projectTopLevelPackage.getFullyQualifiedPackageName(), '.')));
     ensureGovernorIsAnnotated(webServiceAnnotation);
 
-    // Include implements
-    ensureGovernorImplements(sei);
-
     // Include service field
     ensureGovernorHasField(new FieldMetadataBuilder(getServiceField()));
 
@@ -169,9 +166,8 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         .getSymbolNameUnCapitalisedFirstLetter(), getServiceField().getFieldType());
     // Generating constructor body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder.appendFormalLine("this.%s = %s;", getServiceField().getFieldName()
-        .getSymbolNameUnCapitalisedFirstLetter(), getServiceField().getFieldName()
-        .getSymbolNameUnCapitalisedFirstLetter());
+    bodyBuilder.appendFormalLine("%s(%s);", getMutatorMethod(getServiceField()).getMethodName(),
+        getServiceField().getFieldName().getSymbolNameUnCapitalisedFirstLetter());
     constructorMethod.setBodyBuilder(bodyBuilder);
 
     constructor = constructorMethod.build();
@@ -241,9 +237,10 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       parametersList = parametersList.substring(0, parametersList.length() - 2);
     }
 
-    bodyBuilder.appendFormalLine("%s%s.%s(%s);",
-        seiMethod.getReturnType() != JavaType.VOID_PRIMITIVE ? "return " : "", getServiceField()
-            .getFieldName(), serviceMethod.getMethodName().getSymbolName(), parametersList);
+    bodyBuilder.appendFormalLine("%s%s().%s(%s);",
+        seiMethod.getReturnType() != JavaType.VOID_PRIMITIVE ? "return " : "",
+        getAccessorMethod(getServiceField()).getMethodName(), serviceMethod.getMethodName()
+            .getSymbolName(), parametersList);
 
     endpointMethod.setBodyBuilder(bodyBuilder);
 

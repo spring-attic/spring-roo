@@ -1,7 +1,11 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafMainController;
 import org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooWebMvcThymeleafUIConfiguration;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -19,11 +23,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Metadata for {@link RooWebMvcThymeleafUIConfiguration}.
@@ -103,20 +102,19 @@ public class ThymeleafUIConfigurationMetadata extends AbstractItdTypeDetailsProv
     this.templateEngineField = getTemplateEngineField();
     this.applicationContextAwareField = getApplicationContextField();
 
+    // Adding fields
     ensureGovernorHasField(new FieldMetadataBuilder(this.thymeleafPropertiesField));
     ensureGovernorHasField(new FieldMetadataBuilder(this.templateEngineField));
     ensureGovernorHasField(new FieldMetadataBuilder(this.applicationContextAwareField));
 
-    this.setApplicationContextMethod = getSetApplicationContextMethod();
-
+    this.setApplicationContextMethod = getMutatorMethod(this.applicationContextAwareField);
     this.javascriptThymeleafViewResolverMethod = getJavascriptThymeleafViewResolverMethod();
-
     this.javascriptTemplateResolverMethod = getJavascriptTemplateResolverMethod();
 
     // Add index method
     ensureGovernorHasMethod(new MethodMetadataBuilder(javascriptThymeleafViewResolverMethod));
     ensureGovernorHasMethod(new MethodMetadataBuilder(javascriptTemplateResolverMethod));
-    ensureGovernorHasMethod(new MethodMetadataBuilder(setApplicationContextMethod));
+
 
     // Build the ITD
     itdTypeDetails = builder.build();
@@ -128,54 +126,13 @@ public class ThymeleafUIConfigurationMetadata extends AbstractItdTypeDetailsProv
 
 
   private FieldMetadata getTemplateEngineField() {
-    return new FieldMetadataBuilder(getId(), Modifier.PUBLIC, AUTOWIRED_LIST, new JavaSymbolName(
+    return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, AUTOWIRED_LIST, new JavaSymbolName(
         "templateEngine"), TEMPLATE_ENGINE).build();
   }
 
   private FieldMetadata getThymeleafPropertiesField() {
-    return new FieldMetadataBuilder(getId(), Modifier.PUBLIC, AUTOWIRED_LIST, new JavaSymbolName(
+    return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, AUTOWIRED_LIST, new JavaSymbolName(
         "thymeleafProperties"), THYMELEAF_PROPERTIES).build();
-  }
-
-  /**
-   * Return setApplicationContext method
-   *
-   * @return
-   */
-  private MethodMetadata getSetApplicationContextMethod() {
-    // Define methodName
-    final JavaSymbolName methodName = new JavaSymbolName("setApplicationContext");
-
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(APPLICATION_CONTEXT));
-
-    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("applicationContext"));
-
-    MethodMetadata existingMethod =
-        getGovernorMethod(methodName,
-            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-    if (existingMethod != null) {
-      return existingMethod;
-    }
-    // Adding annotations
-    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    /*
-        this.applicationContext = applicationContext;
-     */
-    bodyBuilder.appendFormalLine("this.%s = applicationContext;",
-        applicationContextAwareField.getFieldName());
-
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
-            parameterTypes, parameterNames, bodyBuilder);
-    methodBuilder.setAnnotations(annotations);
-
-    return methodBuilder.build();
   }
 
   /**
@@ -184,7 +141,7 @@ public class ThymeleafUIConfigurationMetadata extends AbstractItdTypeDetailsProv
    * @return
    */
   private FieldMetadata getApplicationContextField() {
-    return new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
+    return new FieldMetadataBuilder(getId(), Modifier.PRIVATE,
         new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName("applicationContext"),
         APPLICATION_CONTEXT).build();
   }
@@ -227,13 +184,13 @@ public class ThymeleafUIConfigurationMetadata extends AbstractItdTypeDetailsProv
      */
     bodyBuilder.appendFormalLine("%1$s resolver = new %1$s();",
         getNameOfJavaType(THYMELEAF_VIEW_RESOLVER));
-    bodyBuilder.appendFormalLine("resolver.setTemplateEngine(this.%s);",
-        this.templateEngineField.getFieldName());
+    bodyBuilder.appendFormalLine("resolver.setTemplateEngine(%s());",
+        getAccessorMethod(this.templateEngineField).getMethodName());
     bodyBuilder.appendFormalLine("resolver.setCharacterEncoding(\"UTF-8\");");
     bodyBuilder.appendFormalLine("resolver.setContentType(\"application/javascript\");");
     bodyBuilder.appendFormalLine("resolver.setViewNames(new String[] {\"*.js\"});");
-    bodyBuilder.appendFormalLine("resolver.setCache(this.%s.isCache());",
-        this.thymeleafPropertiesField.getFieldName());
+    bodyBuilder.appendFormalLine("resolver.setCache(%s().isCache());",
+        getAccessorMethod(this.thymeleafPropertiesField).getMethodName());
     bodyBuilder.appendFormalLine("return resolver;");
 
 
@@ -274,7 +231,7 @@ public class ThymeleafUIConfigurationMetadata extends AbstractItdTypeDetailsProv
 
     /*
         SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
-        resolver.setApplicationContext(this.applicationContext);
+        resolver.setApplicationContext(getApplicationContext());
         resolver.setPrefix("classpath:/templates/fragments/js/");
         resolver.setTemplateMode(TemplateMode.JAVASCRIPT);
         resolver.setCharacterEncoding(UTF8);
@@ -284,15 +241,15 @@ public class ThymeleafUIConfigurationMetadata extends AbstractItdTypeDetailsProv
      */
     bodyBuilder.appendFormalLine("%1$s resolver = new %1$s();",
         getNameOfJavaType(SPRING_RESOURCE_TEMPLATE_RESOLVER));
-    bodyBuilder.appendFormalLine("resolver.setApplicationContext(this.%s);",
-        this.applicationContextAwareField.getFieldName());
+    bodyBuilder.appendFormalLine("resolver.setApplicationContext(%s());",
+        getAccessorMethod(this.applicationContextAwareField).getMethodName());
     bodyBuilder.appendFormalLine("resolver.setPrefix(\"classpath:/templates/fragments/js/\");");
     bodyBuilder.appendFormalLine("resolver.setTemplateMode(%s.JAVASCRIPT);",
         getNameOfJavaType(TEMPLATE_MODE));
     bodyBuilder.appendFormalLine("resolver.setCharacterEncoding(\"UTF-8\");");
     bodyBuilder.appendFormalLine("resolver.setCheckExistence(true);");
-    bodyBuilder.appendFormalLine("resolver.setCacheable(this.%s.isCache());",
-        this.thymeleafPropertiesField.getFieldName());
+    bodyBuilder.appendFormalLine("resolver.setCacheable(%s().isCache());",
+        getAccessorMethod(this.thymeleafPropertiesField).getMethodName());
     bodyBuilder.appendFormalLine("return resolver;");
 
 

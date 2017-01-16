@@ -18,7 +18,7 @@ field string --fieldName name --sizeMin 3 --sizeMax 30
 field string --fieldName description
 
 // Customer
-entity jpa --class ~.model.Customer entityFormatExpression "#{firstName} #{lastName}"
+entity jpa --class ~.model.Customer --entityFormatExpression "#{firstName} #{lastName}"
 field string --fieldName  firstName
 field string --fieldName lastName
 

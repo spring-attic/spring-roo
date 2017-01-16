@@ -249,7 +249,7 @@ public class EntityDeserializerMetadata extends AbstractItdTypeDetailsProvidingM
     String fieldName =
         new JavaSymbolName(service.getSimpleTypeName()).getSymbolNameUnCapitalisedFirstLetter();
 
-    return new FieldMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC,
+    return new FieldMetadataBuilder(declaredByMetadataId, Modifier.PRIVATE,
         new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), service).build();
   }
 

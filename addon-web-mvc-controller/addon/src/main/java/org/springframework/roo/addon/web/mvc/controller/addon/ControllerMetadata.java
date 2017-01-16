@@ -10,7 +10,6 @@ import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
@@ -28,7 +27,6 @@ import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMeta
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -207,7 +205,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     String fieldName =
         new JavaSymbolName(service.getSimpleTypeName()).getSymbolNameUnCapitalisedFirstLetter();
 
-    return new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
+    return new FieldMetadataBuilder(getId(), Modifier.PRIVATE,
         new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), service).build();
   }
 

@@ -657,6 +657,12 @@ if [[ "$COMMAND" = "assembly" ]]; then
 
             # Northwind multimodule application
 	        load_roo_build_and_test script northwind-multimodule.roo
+	    
+	    	# Push-In Applications
+			load_roo_build_and_test script clinic-push-in.roo
+			load_roo_build_and_test script restfulshop-push-in.roo
+			load_roo_build_and_test script northwind-multimodule-push-in.roo
+	        
 
 
         log "Removing Roo distribution from test area"

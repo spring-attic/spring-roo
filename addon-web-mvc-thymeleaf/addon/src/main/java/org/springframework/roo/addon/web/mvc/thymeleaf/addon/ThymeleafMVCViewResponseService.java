@@ -27,6 +27,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuil
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.operations.AbstractOperations;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Dependency;
@@ -316,18 +317,19 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
   private void addJasperReportExportClasses(Pom module) {
 
     // Create the interface
-    createClassFromTemplate(module, "JasperReportsExporter-template._java", "JasperReportsExporter");
+    createJasperReportsClassFromTemplate(module, "JasperReportsExporter-template._java",
+        "JasperReportsExporter");
 
     // Create one implementation for each type of data
-    createClassFromTemplate(module, "JasperReportsCsvExporter-template._java",
+    createJasperReportsClassFromTemplate(module, "JasperReportsCsvExporter-template._java",
         "JasperReportsCsvExporter");
-    createClassFromTemplate(module, "JasperReportsPdfExporter-template._java",
+    createJasperReportsClassFromTemplate(module, "JasperReportsPdfExporter-template._java",
         "JasperReportsPdfExporter");
-    createClassFromTemplate(module, "JasperReportsXlsExporter-template._java",
+    createJasperReportsClassFromTemplate(module, "JasperReportsXlsExporter-template._java",
         "JasperReportsXlsExporter");
 
     // Add ExportingErrorException
-    createClassFromTemplate(module, "ExportingErrorException-template._java",
+    createJasperReportsClassFromTemplate(module, "ExportingErrorException-template._java",
         "ExportingErrorException");
   }
 
@@ -644,10 +646,12 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
    * @param className
    *            the String with the class name to create
    */
-  public void createClassFromTemplate(Pom module, String templateName, String className) {
+  public void createJasperReportsClassFromTemplate(Pom module, String templateName, String className) {
 
     // Set package
-    String packageName = module.getGroupId().concat(".web.reports");
+    String packageName =
+        getProjectOperations().getTopLevelPackage(module.getModuleName())
+            .getFullyQualifiedPackageName().concat(".web.reports");
 
     // Include implementation of Validator from template
     final JavaType type =

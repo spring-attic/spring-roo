@@ -2,4 +2,4 @@
 script northwind-multimodule.roo
 
 // Make push-in of every generated elements
-push-in --all --force
+push-in --method (?!get|set)[a-z,A-Z]*

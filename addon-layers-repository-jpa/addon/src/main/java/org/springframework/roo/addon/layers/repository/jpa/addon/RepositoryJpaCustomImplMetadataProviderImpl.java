@@ -228,6 +228,10 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
     final RepositoryJpaCustomMetadata repositoryCustomMetadata =
         getMetadataService().get(repositoryCustomMetadataKey);
+    // Prevent empty metadata
+    if (repositoryCustomMetadata == null) {
+      return null;
+    }
 
     // Getting java bean metadata
     final String javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails);
