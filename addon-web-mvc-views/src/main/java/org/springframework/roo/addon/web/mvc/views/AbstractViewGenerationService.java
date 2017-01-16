@@ -1,26 +1,5 @@
 package org.springframework.roo.addon.web.mvc.views;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.logging.Logger;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -72,6 +51,27 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.XmlUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.logging.Logger;
 
 /**
  * This abstract class implements MVCViewGenerationService interface that
@@ -1093,6 +1093,28 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       } else {
         fieldItem.addConfigurationElement("max", "NULL");
       }
+
+      // ROO-3872: Support numeric input validation from client and server side
+      // Add fractions constraints
+      AnnotationMetadata digitsAnnotation = entityField.getAnnotation(Jsr303JavaType.DIGITS);
+      if (digitsAnnotation != null) {
+        AnnotationAttributeValue<Object> digitsFraction = digitsAnnotation.getAttribute("fraction");
+        if (digitsFraction != null) {
+          if (type.equals(JavaType.INT_OBJECT) || type.equals(JavaType.INT_PRIMITIVE)) {
+            fieldItem.addConfigurationElement("digitsFraction", "0");
+          } else {
+            fieldItem.addConfigurationElement("digitsFraction", digitsFraction.getValue()
+                .toString());
+          }
+        } else {
+          fieldItem.addConfigurationElement("digitsFraction", "2");
+        }
+      } else if (type.equals(JavaType.INT_OBJECT) || type.equals(JavaType.INT_PRIMITIVE)) {
+        fieldItem.addConfigurationElement("digitsFraction", "0");
+      } else {
+        fieldItem.addConfigurationElement("digitsFraction", "2");
+      }
+
       fieldItem.setType(FieldTypes.NUMBER.toString());
     } else {
       // ROO-3810: Getting @Size annotation

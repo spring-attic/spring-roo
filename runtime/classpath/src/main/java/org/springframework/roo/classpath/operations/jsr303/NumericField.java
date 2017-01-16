@@ -15,6 +15,7 @@ import org.springframework.roo.classpath.details.annotations.LongAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
+import org.springframework.roo.model.SpringJavaType;
 
 public class NumericField extends StringOrNumericField {
 
@@ -62,6 +63,9 @@ public class NumericField extends StringOrNumericField {
       attrs.add(new IntegerAttributeValue(new JavaSymbolName("fraction"), digitsFraction));
       annotations.add(new AnnotationMetadataBuilder(DIGITS, attrs));
     }
+
+    // Always add a default @NumberFormat
+    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.NUMBER_FORMAT));
   }
 
   public Integer getDigitsFraction() {

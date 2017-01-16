@@ -1297,7 +1297,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     }
 
     Validate.isTrue(fieldDetails.isDigitsSetCorrectly(),
-        "Must specify both --digitsInteger and --digitsFractional for @Digits to be added");
+        "Must specify both --digitsInteger and --digitsFraction for @Digits to be added");
 
     insertField(fieldDetails, permitReservedWords, transientModifier);
 
