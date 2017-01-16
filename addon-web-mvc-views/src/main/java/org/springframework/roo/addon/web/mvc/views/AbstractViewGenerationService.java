@@ -1095,24 +1095,27 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       }
 
       // ROO-3872: Support numeric input validation from client and server side
-      // Add fractions constraints
+      // Add digits constraints
       AnnotationMetadata digitsAnnotation = entityField.getAnnotation(Jsr303JavaType.DIGITS);
       if (digitsAnnotation != null) {
+
+        // Fraction digits
         AnnotationAttributeValue<Object> digitsFraction = digitsAnnotation.getAttribute("fraction");
-        if (digitsFraction != null) {
-          if (type.equals(JavaType.INT_OBJECT) || type.equals(JavaType.INT_PRIMITIVE)) {
-            fieldItem.addConfigurationElement("digitsFraction", "0");
-          } else {
-            fieldItem.addConfigurationElement("digitsFraction", digitsFraction.getValue()
-                .toString());
-          }
+        fieldItem.addConfigurationElement("digitsFraction", digitsFraction.getValue().toString());
+
+        // Integer digits
+        AnnotationAttributeValue<Object> digitsInteger = digitsAnnotation.getAttribute("integer");
+        fieldItem.addConfigurationElement("digitsInteger", digitsInteger.getValue().toString());
+      } else {
+
+        // Add default values for decimals
+        if (type.equals(JavaType.INT_OBJECT) || type.equals(JavaType.INT_PRIMITIVE)
+            || type.equals(JdkJavaType.BIG_INTEGER)) {
+          fieldItem.addConfigurationElement("digitsFraction", "0");
         } else {
           fieldItem.addConfigurationElement("digitsFraction", "2");
         }
-      } else if (type.equals(JavaType.INT_OBJECT) || type.equals(JavaType.INT_PRIMITIVE)) {
-        fieldItem.addConfigurationElement("digitsFraction", "0");
-      } else {
-        fieldItem.addConfigurationElement("digitsFraction", "2");
+        fieldItem.addConfigurationElement("digitsInteger", "NULL");
       }
 
       fieldItem.setType(FieldTypes.NUMBER.toString());

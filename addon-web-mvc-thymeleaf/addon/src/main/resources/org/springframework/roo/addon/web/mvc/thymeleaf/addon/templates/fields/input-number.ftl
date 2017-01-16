@@ -1,4 +1,4 @@
-<#macro input label fieldName fieldId z width required min max digitsFraction>
+<#macro input label fieldName fieldId z width required min max digitsFraction digitsInteger>
 <div class="form-group has-error has-feedback" data-z="${z}" id="${fieldId}"
   data-th-classappend="${r"${#fields.hasErrors"}('${fieldName}')}? 'has-error has-feedback'" data-th-class="form-group">
   <label for="${fieldName}" class="col-md-3 control-label"
@@ -9,6 +9,7 @@
       data-th-placeholder="${r"#{"}${label}}"
       data-toggle="tooltip" aria-describedby="${fieldName}Status" 
       data-inputmask-alias="numeric" 
+      <#if digitsInteger != "NULL">data-inputmask-integerDigits="${digitsInteger}"</#if> 
       <#if digitsFraction != "NULL">data-inputmask-digits="${digitsFraction}"</#if>
       <#if required == true>required="required"</#if> 
       <#if min != "NULL">min="${min}"</#if> 
