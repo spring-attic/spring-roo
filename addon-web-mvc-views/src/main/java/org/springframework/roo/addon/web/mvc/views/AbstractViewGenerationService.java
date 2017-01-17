@@ -771,6 +771,11 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
             && !menuEntry.getFinderNamesAndPaths().isEmpty()) {
           menuEntryInserted.setFinderNamesAndPaths(menuEntry.getFinderNamesAndPaths());
         }
+
+        // Check the 'addDefaultEntries' attribute and add it if needed
+        if (!menuEntryInserted.isAddDefaultEntries() && menuEntry.isAddDefaultEntries()) {
+          menuEntryInserted.setAddDefaultEntries(menuEntry.isAddDefaultEntries());
+        }
       } else {
         mapMenuEntries.put(keyThatRepresentsEntry, menuEntry);
       }
