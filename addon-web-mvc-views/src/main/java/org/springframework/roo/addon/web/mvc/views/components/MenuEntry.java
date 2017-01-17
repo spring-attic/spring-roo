@@ -24,9 +24,11 @@ public class MenuEntry {
   private String id;
   private boolean simple;
   private String z;
+  private boolean addDefaultEntries;
 
   public MenuEntry(String entityName, String path, String pathPrefix, String entityLabel,
-      String entityPluralLabel, Map<String, String> finderNamesAndPaths, boolean simple) {
+      String entityPluralLabel, Map<String, String> finderNamesAndPaths, boolean simple,
+      boolean addDefaultEntries) {
     this.entityName = entityName;
     this.path = path;
     this.pathPrefix = pathPrefix;
@@ -36,6 +38,7 @@ public class MenuEntry {
     this.codeManaged = "";
     this.finderNamesAndPaths = finderNamesAndPaths;
     this.simple = simple;
+    this.addDefaultEntries = addDefaultEntries;
     buildId();
 
     // Calculate the Z parameter as the hash code of the other parameters
@@ -175,6 +178,12 @@ public class MenuEntry {
     this.simple = simple;
   }
 
+  public boolean isAddDefaultEntries() {
+    return addDefaultEntries;
+  }
 
+  public void setAddDefaultEntries(boolean addDefaultEntries) {
+    this.addDefaultEntries = addDefaultEntries;
+  }
 
 }

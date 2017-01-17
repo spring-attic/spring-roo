@@ -743,14 +743,28 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       }
 
       // Create new menuEntry element for controller
-      MenuEntry menuEntry =
-          createMenuEntry(entity.getSimpleTypeName(), path, pathPrefix,
-              FieldItem.buildLabel(entity.getSimpleTypeName(), ""),
-              FieldItem.buildLabel(entity.getSimpleTypeName(), "plural"), finderNamesAndPaths,
-              false);
       String keyThatRepresentsEntry = pathPrefix.concat(entity.getSimpleTypeName());
 
       // Add new menu entry to menuEntries list if doesn't exist
+      MenuEntry menuEntry = null;
+      if (controllerValues.getType() == ControllerType.SEARCH) {
+
+        // Only add finder entry
+        menuEntry =
+            createMenuEntry(entity.getSimpleTypeName(), path, pathPrefix,
+                FieldItem.buildLabel(entity.getSimpleTypeName(), ""),
+                FieldItem.buildLabel(entity.getSimpleTypeName(), "plural"), finderNamesAndPaths,
+                false, false);
+      } else {
+
+        // Add default menu entries
+        menuEntry =
+            createMenuEntry(entity.getSimpleTypeName(), path, pathPrefix,
+                FieldItem.buildLabel(entity.getSimpleTypeName(), ""),
+                FieldItem.buildLabel(entity.getSimpleTypeName(), "plural"), finderNamesAndPaths,
+                false, true);
+      }
+
       if (mapMenuEntries.containsKey(keyThatRepresentsEntry)) {
         MenuEntry menuEntryInserted = mapMenuEntries.get(keyThatRepresentsEntry);
         if (menuEntryInserted.getFinderNamesAndPaths().isEmpty()
@@ -772,7 +786,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       // Creating the menu entry
       MenuEntry menuEntry =
           createMenuEntry(webFlowView, webFlowView, "", FieldItem.buildLabel(webFlowView, ""),
-              FieldItem.buildLabel(webFlowView, "plural"), null, true);
+              FieldItem.buildLabel(webFlowView, "plural"), null, true, false);
 
       mapMenuEntries.put(webFlowView, menuEntry);
     }
@@ -808,9 +822,9 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
   protected MenuEntry createMenuEntry(String entityName, String path, String pathPrefix,
       String entityLabel, String entityPluralLabel, Map<String, String> finderNamesAndPaths,
-      boolean simple) {
+      boolean simple, boolean addDefaultEntries) {
     return new MenuEntry(entityName, path, pathPrefix, entityLabel, entityPluralLabel,
-        finderNamesAndPaths, simple);
+        finderNamesAndPaths, simple, addDefaultEntries);
   }
 
   /**
