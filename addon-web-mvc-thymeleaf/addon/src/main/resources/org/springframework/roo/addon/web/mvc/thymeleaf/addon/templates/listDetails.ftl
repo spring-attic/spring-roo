@@ -53,7 +53,7 @@
                       data-data-create-url="${r"${"}detailCollectionLink.to('createForm').with('${modelAttributeName}', '_PARENTID_')}"
                       </#if>
                       >
-                      <caption data-th-text="${r"#{"}label_list_of_entity(${r"#"}{${dconfig.referencedFieldLabel}})}">${detail.fieldNameCapitalized} List</caption>
+                      <caption class="sr-only" data-th-text="${r"#{"}label_list_of_entity(${r"#"}{${dconfig.referencedFieldLabel}})}">${detail.fieldNameCapitalized} List</caption>
                       <thead>
                         <tr>
                           <#list detail.configuration.referenceFieldFields as referencedFieldField>

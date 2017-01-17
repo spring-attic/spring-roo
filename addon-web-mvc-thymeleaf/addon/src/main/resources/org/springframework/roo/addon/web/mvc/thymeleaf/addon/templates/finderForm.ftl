@@ -44,7 +44,7 @@
             data-th-action="${r"${"}(#mvc.url('${mvcUrl_search}')).build()}">
 
             <fieldset id="containerFields">
-              <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data </legend>
+              <legend class="sr-only" data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data </legend>
 
               <#list fields as field>
                   <#if field.userManaged>
