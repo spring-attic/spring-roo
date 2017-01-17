@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -217,12 +218,19 @@ public class I18nOperationsImpl implements I18nOperations {
               messageBundle);
 
       if (getFileManager().exists(bundlePath)) {
-        getPropFilesManager().addProperties(resourcesPath, messageBundle, labels, true, false);
+        // Adding labels if not exists already
+        for (Entry<String, String> label : labels.entrySet()) {
+          getPropFilesManager().addPropertyIfNotExists(resourcesPath, messageBundle,
+              label.getKey(), label.getValue(), true, false);
+        }
       }
     }
 
-    // Allways update english message bundles
-    getPropFilesManager().addProperties(resourcesPath, "messages.properties", labels, true, false);
+    // Allways update english message bundles if label not exists already
+    for (Entry<String, String> label : labels.entrySet()) {
+      getPropFilesManager().addPropertyIfNotExists(resourcesPath, "messages.properties",
+          label.getKey(), label.getValue(), true, false);
+    }
   }
 
   /**

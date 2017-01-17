@@ -76,26 +76,28 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
   @Override
   public void addPropertyIfNotExists(final LogicalPath propertyFilePath,
       final String propertyFilename, final String key, final String value, boolean force) {
-    manageProperty(propertyFilePath, propertyFilename, "", asMap(key, value), !SORTED, force);
+    manageProperty(propertyFilePath, propertyFilename, "", asMap(key, value), !SORTED, force, true);
   }
 
   @Override
   public void addPropertyIfNotExists(LogicalPath propertyFilePath, String propertyFilename,
       String prefix, String key, String value, boolean force) {
-    manageProperty(propertyFilePath, propertyFilename, prefix, asMap(key, value), !SORTED, force);
+    manageProperty(propertyFilePath, propertyFilename, prefix, asMap(key, value), !SORTED, force,
+        true);
   }
 
   @Override
   public void addPropertyIfNotExists(final LogicalPath propertyFilePath,
       final String propertyFilename, final String key, final String value, final boolean sorted,
       boolean force) {
-    manageProperty(propertyFilePath, propertyFilename, "", asMap(key, value), sorted, force);
+    manageProperty(propertyFilePath, propertyFilename, "", asMap(key, value), sorted, force, true);
   }
 
   @Override
   public void addPropertyIfNotExists(LogicalPath propertyFilePath, String propertyFilename,
       String prefix, String key, String value, boolean sorted, boolean force) {
-    manageProperty(propertyFilePath, propertyFilename, prefix, asMap(key, value), sorted, force);
+    manageProperty(propertyFilePath, propertyFilename, prefix, asMap(key, value), sorted, force,
+        true);
   }
 
   @Override
@@ -359,6 +361,13 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
   private void manageProperty(final LogicalPath propertyFilePath, final String propertyFilename,
       final String prefix, final Map<String, String> properties, final boolean sorted,
       final boolean force) {
+    // By default, properties will be replaced if exists and user has specify the force parameter
+    manageProperty(propertyFilePath, propertyFilename, prefix, properties, sorted, force, false);
+  }
+
+  private void manageProperty(final LogicalPath propertyFilePath, final String propertyFilename,
+      final String prefix, final Map<String, String> properties, final boolean sorted,
+      final boolean force, boolean preventChangesIfAlreadyExists) {
     Validate.notNull(prefix, "Prefix could be blank but not null");
     Validate.notNull(propertyFilePath, "Property file path required");
     Validate.notBlank(propertyFilename, "Property filename required");
@@ -417,7 +426,10 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
 
       final String newValue = entry.getValue();
       final String existingValue = props.getProperty(key);
-      if (existingValue == null || !existingValue.equals(newValue) && force) {
+      if (existingValue != null && !newValue.equals(existingValue) && preventChangesIfAlreadyExists) {
+        // Ignore this label if already exists
+        continue;
+      } else if (existingValue == null || !existingValue.equals(newValue) && force) {
         props.setProperty(key, newValue);
         saveNeeded = true;
       } else if (!existingValue.equals(newValue) && !force) {
