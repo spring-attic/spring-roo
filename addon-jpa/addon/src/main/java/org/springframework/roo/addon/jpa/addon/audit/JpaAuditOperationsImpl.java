@@ -103,8 +103,10 @@ public class JpaAuditOperationsImpl implements JpaAuditOperations {
     cidBuilder.addField(getCreatedByField(entityDetails, createdByColumn));
     cidBuilder.addField(getModifiedByField(entityDetails, modifiedByColumn));
 
-    // Add @RooJpaAudit annotation
-    cidBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_JPA_AUDIT).build());
+    // Add @RooJpaAudit annotation if needed
+    if (entityDetails.getAnnotation(RooJavaType.ROO_JPA_AUDIT) == null) {
+      cidBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_JPA_AUDIT).build());
+    }
 
     // Write changes on disk
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());

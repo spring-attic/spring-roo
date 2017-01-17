@@ -108,9 +108,12 @@ security setup --provider DEFAULT
 
 security authorize --class ~.service.impl.OwnerServiceImpl --method delete.* --roles ADMIN
 
-// FIXME!! Re-enable audit when Springlets contains audit starter
-// jpa audit setup
-// jpa audit add --entity ~.domain.Owner
+// Setup Jpa Audit and include audit in entities
+jpa audit setup
+jpa audit add --entity ~.domain.Pet
+jpa audit add --entity ~.domain.Owner
+jpa audit add --entity ~.domain.Visit
+jpa audit add --entity ~.domain.Vet
 
 // Generate new SOAP Services that will be available under "/services" URL
 ws endpoint --service ~.service.api.OwnerService --sei ~.ws.api.OwnerWebService --class ~.ws.endpoint.OwnerWebServiceEndpoint --config ~.config.WsEndpointsConfiguration
