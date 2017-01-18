@@ -2,7 +2,6 @@ package org.springframework.roo.addon.dod.addon;
 
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.EMBEDDED_FIELD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.EMBEDDED_ID_FIELD;
-import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_FIELD;
@@ -21,6 +20,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.addon.ConfigurableMetadataProvider;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -382,9 +382,6 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
     // Get the additions to make for each required method
     final MethodParameter fromParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "from");
     final MethodParameter toParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "to");
-    final MemberTypeAdditions findEntriesMethod =
-        layerService.getMemberTypeAdditions(dodMetadataId, FIND_ENTRIES_METHOD.name(), entity,
-            identifierType, LayerType.HIGHEST.getPosition(), fromParameter, toParameter);
     final MemberTypeAdditions findMethodAdditions =
         layerService.getMemberTypeAdditions(dodMetadataId, FIND_METHOD.name(), entity,
             identifierType, LayerType.HIGHEST.getPosition(), new MethodParameter(identifierType,
@@ -399,8 +396,7 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
         layerService.getMemberTypeAdditions(dodMetadataId, PERSIST_METHOD, entity, identifierType,
             LayerType.HIGHEST.getPosition(), entityParameter);
 
-    if (findEntriesMethod == null || findMethodAdditions == null || identifierAccessor == null
-        || persistMethodAdditions == null) {
+    if (findMethodAdditions == null || identifierAccessor == null || persistMethodAdditions == null) {
       return null;
     }
 
@@ -424,10 +420,15 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
             RooJavaType.ROO_DATA_ON_DEMAND);
 
+    // Get entity metadata
+    String jpaEntityIdentifier =
+        JpaEntityMetadata.createIdentifier(getTypeLocationService().getTypeDetails(entity));
+    JpaEntityMetadata entityJpaMetadata = getMetadataService().get(jpaEntityIdentifier);
+
     return new DataOnDemandMetadata(dodMetadataId, aspectName, governorPhysicalTypeMetadata,
-        annotationValues, identifierAccessor, findMethodAdditions, findEntriesMethod,
-        persistMethodAdditions, flushMethod, locatedFields, identifierType, embeddedIdHolder,
-        embeddedHolders, repository.getType(), dataOnDemandClasses);
+        annotationValues, identifierAccessor, findMethodAdditions, persistMethodAdditions,
+        flushMethod, locatedFields, identifierType, embeddedIdHolder, embeddedHolders,
+        repository.getType(), dataOnDemandClasses, entityJpaMetadata);
   }
 
   public String getProvidesType() {

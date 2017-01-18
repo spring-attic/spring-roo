@@ -33,6 +33,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.roo.addon.dod.annotations.RooDataOnDemand;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
@@ -56,6 +57,7 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
@@ -133,6 +135,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
   private JavaSymbolName rndFieldName;
   private MethodMetadata specificPersistentEntityMethod;
   private JavaType repository;
+  private JpaEntityMetadata entityJpaMetadata;
 
   /**
    * Constructor
@@ -156,11 +159,12 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
   public DataOnDemandMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final DataOnDemandAnnotationValues annotationValues, final MethodMetadata identifierAccessor,
-      final MemberTypeAdditions findMethod, final MemberTypeAdditions findEntriesMethod,
-      final MemberTypeAdditions persistMethod, final MemberTypeAdditions flushMethod,
+      final MemberTypeAdditions findMethod, final MemberTypeAdditions persistMethod,
+      final MemberTypeAdditions flushMethod,
       final Map<FieldMetadata, DataOnDemandMetadata> locatedFields, final JavaType identifierType,
       final EmbeddedIdHolder embeddedIdHolder, final List<EmbeddedHolder> embeddedHolders,
-      final JavaType repository, Set<ClassOrInterfaceTypeDetails> dataOnDemandClasses) {
+      final JavaType repository, Set<ClassOrInterfaceTypeDetails> dataOnDemandClasses,
+      final JpaEntityMetadata entityJpaMetadata) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.isTrue(isValid(identifier),
         "Metadata identification string '%s' does not appear to be a valid", identifier);
@@ -175,7 +179,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
       return;
     }
 
-    if (findEntriesMethod == null || persistMethod == null || findMethod == null) {
+    if (persistMethod == null || findMethod == null) {
       valid = false;
       return;
     }
@@ -185,7 +189,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
     this.identifierAccessor = identifierAccessor;
     this.findMethod = findMethod;
     this.identifierType = identifierType;
-    entity = annotationValues.getEntity();
+    this.entity = annotationValues.getEntity();
+    this.entityJpaMetadata = entityJpaMetadata;
 
     // Calculate and store field initializers
     for (final Map.Entry<FieldMetadata, DataOnDemandMetadata> entry : locatedFields.entrySet()) {
@@ -232,8 +237,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
     setSpecificPersistentEntityMethod();
     setRandomPersistentEntityMethod();
     setModifyMethod();
-    builder.addMethod(getInitMethod(annotationValues.getQuantity(), findEntriesMethod,
-        persistMethod, flushMethod));
+    builder.addMethod(getInitMethod(annotationValues.getQuantity(), persistMethod, flushMethod));
 
     itdTypeDetails = builder.build();
   }
@@ -1075,8 +1079,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
   /**
    * Returns the DoD type's "void init()" method (existing or generated)
    *
-   * @param findEntriesMethod
-   *            (required)
    * @param persistMethod
    *            (required)
    * @param flushMethod
@@ -1084,8 +1086,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
    * @return never <code>null</code>
    */
   private MethodMetadataBuilder getInitMethod(final int quantity,
-      final MemberTypeAdditions findEntriesMethod, final MemberTypeAdditions persistMethod,
-      final MemberTypeAdditions flushMethod) {
+      final MemberTypeAdditions persistMethod, final MemberTypeAdditions flushMethod) {
     // Method definition to find or build
     final JavaSymbolName methodName = new JavaSymbolName("init");
     final JavaType[] parameterTypes = {};
@@ -1105,58 +1106,66 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
     builder.getImportRegistrationResolver().addImports(ARRAY_LIST, ITERATOR,
         CONSTRAINT_VIOLATION_EXCEPTION, CONSTRAINT_VIOLATION);
 
-    findEntriesMethod.copyAdditionsTo(builder, governorTypeDetails);
     persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
     final String dataField = getDataFieldName().getSymbolName();
     bodyBuilder.appendFormalLine("int from = 0;");
     bodyBuilder.appendFormalLine("int to = " + quantity + ";");
-    bodyBuilder.appendFormalLine(dataField + " = " + findEntriesMethod.getMethodCall() + ";");
-    bodyBuilder.appendFormalLine("if (" + dataField + " == null) {");
-    bodyBuilder.indent();
-    bodyBuilder
-        .appendFormalLine("throw new IllegalStateException(\"Find entries implementation for '"
-            + entity.getSimpleTypeName() + "' illegally returned null\");");
-    bodyBuilder.indentRemove();
-    bodyBuilder.appendFormalLine("}");
-    bodyBuilder.appendFormalLine("if (!" + dataField + ".isEmpty()) {");
-    bodyBuilder.indent();
-    bodyBuilder.appendFormalLine("return;");
-    bodyBuilder.indentRemove();
-    bodyBuilder.appendFormalLine("}");
-    bodyBuilder.appendFormalLine("");
-    bodyBuilder.appendFormalLine(dataField + " = new ArrayList<" + entity.getSimpleTypeName()
-        + ">();");
-    bodyBuilder.appendFormalLine("for (int i = 0; i < " + quantity + "; i++) {");
-    bodyBuilder.indent();
-    bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " " + OBJ_VAR + " = "
-        + newTransientEntityMethod.getMethodName().getSymbolName() + "(i);");
-    bodyBuilder.appendFormalLine("try {");
-    bodyBuilder.indent();
-    bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
-    bodyBuilder.indentRemove();
-    bodyBuilder.appendFormalLine("} catch (final ConstraintViolationException e) {");
-    bodyBuilder.indent();
-    bodyBuilder.appendFormalLine("final StringBuilder msg = new StringBuilder();");
-    bodyBuilder
-        .appendFormalLine("for (Iterator<ConstraintViolation<?>> iter = e.getConstraintViolations().iterator(); iter.hasNext();) {");
-    bodyBuilder.indent();
-    bodyBuilder.appendFormalLine("final ConstraintViolation<?> cv = iter.next();");
-    bodyBuilder
-        .appendFormalLine("msg.append(\"[\").append(cv.getRootBean().getClass().getName()).append(\".\").append(cv.getPropertyPath()).append(\": \").append(cv.getMessage()).append(\" (invalid value = \").append(cv.getInvalidValue()).append(\")\").append(\"]\");");
-    bodyBuilder.indentRemove();
-    bodyBuilder.appendFormalLine("}");
-    bodyBuilder.appendFormalLine("throw new IllegalStateException(msg.toString(), e);");
-    bodyBuilder.indentRemove();
-    bodyBuilder.appendFormalLine("}");
-    if (flushMethod != null) {
-      bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
-      flushMethod.copyAdditionsTo(builder, governorTypeDetails);
+    bodyBuilder.appendFormalLine(
+        "%s = %s.findAll(new %s(from / to, to)).getContent();",
+        dataField,
+        getRepositoryField().getFieldName().getSymbolName(),
+        SpringJavaType.PAGE_REQUEST.getNameIncludingTypeParameters(false,
+            this.builder.getImportRegistrationResolver()));
+
+    // Take in count read only entities
+    if (!this.entityJpaMetadata.isReadOnly()) {
+      bodyBuilder.appendFormalLine("if (" + dataField + " == null) {");
+      bodyBuilder.indent();
+      bodyBuilder
+          .appendFormalLine("throw new IllegalStateException(\"Find entries implementation for '"
+              + entity.getSimpleTypeName() + "' illegally returned null\");");
+      bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine("}");
+      bodyBuilder.appendFormalLine("if (!" + dataField + ".isEmpty()) {");
+      bodyBuilder.indent();
+      bodyBuilder.appendFormalLine("return;");
+      bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine("}");
+      bodyBuilder.appendFormalLine("");
+      bodyBuilder.appendFormalLine(dataField + " = new ArrayList<" + entity.getSimpleTypeName()
+          + ">();");
+      bodyBuilder.appendFormalLine("for (int i = 0; i < " + quantity + "; i++) {");
+      bodyBuilder.indent();
+      bodyBuilder.appendFormalLine(entity.getSimpleTypeName() + " " + OBJ_VAR + " = "
+          + newTransientEntityMethod.getMethodName().getSymbolName() + "(i);");
+      bodyBuilder.appendFormalLine("try {");
+      bodyBuilder.indent();
+      bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
+      bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine("} catch (final ConstraintViolationException e) {");
+      bodyBuilder.indent();
+      bodyBuilder.appendFormalLine("final StringBuilder msg = new StringBuilder();");
+      bodyBuilder
+          .appendFormalLine("for (Iterator<ConstraintViolation<?>> iter = e.getConstraintViolations().iterator(); iter.hasNext();) {");
+      bodyBuilder.indent();
+      bodyBuilder.appendFormalLine("final ConstraintViolation<?> cv = iter.next();");
+      bodyBuilder
+          .appendFormalLine("msg.append(\"[\").append(cv.getRootBean().getClass().getName()).append(\".\").append(cv.getPropertyPath()).append(\": \").append(cv.getMessage()).append(\" (invalid value = \").append(cv.getInvalidValue()).append(\")\").append(\"]\");");
+      bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine("}");
+      bodyBuilder.appendFormalLine("throw new IllegalStateException(msg.toString(), e);");
+      bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine("}");
+      if (flushMethod != null) {
+        bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
+        flushMethod.copyAdditionsTo(builder, governorTypeDetails);
+      }
+      bodyBuilder.appendFormalLine(dataField + ".add(" + OBJ_VAR + ");");
+      bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine("}");
     }
-    bodyBuilder.appendFormalLine(dataField + ".add(" + OBJ_VAR + ");");
-    bodyBuilder.indentRemove();
-    bodyBuilder.appendFormalLine("}");
 
     // Create the method
     return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType,

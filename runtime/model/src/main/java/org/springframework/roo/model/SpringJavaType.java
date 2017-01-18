@@ -144,6 +144,8 @@ public final class SpringJavaType {
   public static final JavaType OPEN_ENTITY_MANAGER_IN_VIEW_FILTER = new JavaType(
       "org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter");
   public static final JavaType PAGE = new JavaType("org.springframework.data.domain.Page");
+  public static final JavaType PAGE_REQUEST = new JavaType(
+      "org.springframework.data.domain.PageRequest");
   public static final JavaType PAGEABLE = new JavaType("org.springframework.data.domain.Pageable");
   public static final JavaType PAGEABLE_DEFAULT = new JavaType(
       "org.springframework.data.web.PageableDefault");
