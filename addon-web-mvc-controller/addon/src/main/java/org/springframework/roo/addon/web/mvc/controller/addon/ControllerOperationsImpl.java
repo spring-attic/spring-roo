@@ -371,7 +371,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
               Level.INFO,
               String
                   .format(
-                      "ERROR: The provided class %s is composition child part of a relationship. No controller is needed as it's managed form parent controller",
+                      "INFO: The provided class %s is composition child part of a relationship. No controller is needed as it's managed form parent controller",
                       entity.getSimpleTypeName()));
       return;
     }
@@ -903,7 +903,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
               Level.INFO,
               String
                   .format(
-                      "ERROR: Doesn't exist parent controller in the package %s with the response type %s for the entity %s. Please, use 'web mvc controller' command to create them",
+                      "INFO: Doesn't exist parent controller in the package %s with the response type %s for the entity %s. Please, use 'web mvc controller' command to create them.",
                       controllerPackage, responseType.getName(), entity.getSimpleTypeName()));
       return;
     }
