@@ -129,7 +129,9 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // Including constants for every method existing in the controller class
     for (MethodMetadata method : controllerMethods) {
       String methodName = method.getMethodName().getSymbolName();
-      ensureGovernorHasField(getConstantForMethodName(methodName));
+      if (constantForMethods.get(methodName) == null) {
+        ensureGovernorHasField(getConstantForMethodName(methodName));
+      }
     }
 
     // Create methods
