@@ -447,9 +447,9 @@ public class DtoOperationsImpl implements DtoOperations {
         // Add to fields String, which will be used to create the annotation
         fieldsString = idField.getFieldName().getSymbolName().concat(",").concat(fieldsString);
         LOGGER.info(String.format(
-            "INFO: You have not included the identifier field/s of the entity '%s' in "
+            "INFO: You haven't included the identifier field/s of the entity '%s' in "
                 + "your projection, which is necessary to be able to use this projection "
-                + "in the view layer. But don't worry, Spring Roo have included it automatically.",
+                + "in the view layer. But don't worry, Spring Roo has included it automatically.",
             entity.getSimpleTypeName()));
       }
     }
