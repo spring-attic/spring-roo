@@ -173,10 +173,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 
     // Add Repository interface
     JavaType interfaceType = null;
-    if (composition) {
-      // If composition extends Repository
-      interfaceType = SpringJavaType.SPRING_DATA_REPOSITORY;
-    } else if (entityMetadata.isReadOnly()) {
+    if (entityMetadata.isReadOnly()) {
       // If readOnly, extends ReadOnlyRepository
       interfaceType = readOnlyRepository;
     } else {
