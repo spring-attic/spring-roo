@@ -1,10 +1,14 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon.link.factory;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
-import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleaf;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -14,21 +18,17 @@ import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * = LinkFactoryMetadata
@@ -43,32 +43,15 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
   protected static final JavaSymbolName TO_URI_METHOD_NAME = new JavaSymbolName("toUri");
   protected static final JavaSymbolName GET_CONTROLLER_CLASS_METHOD_NAME = new JavaSymbolName(
       "getControllerClass");
-  protected static final String DATATABLES_FIELD_NAME = "DATATABLES";
-  protected static final String DATATABLES_FIELD_VALUE = "datatables";
-  protected static final String CREATE_FIELD_NAME = "CREATE";
-  protected static final String CREATE_FIELD_VALUE = "create";
-  protected static final String CREATE_FORM_FIELD_NAME = "CREATE_FORM";
-  protected static final String CREATE_FORM_FIELD_VALUE = "createForm";
-  protected static final String DELETE_BATCH_FIELD_NAME = "DELETE_BATCH";
-  protected static final String DELETE_BATCH_FIELD_VALUE = "deleteBatch";
-  protected static final String EXPORT_CSV_FIELD_NAME = "EXPORT_CSV";
-  protected static final String EXPORT_CSV_FIELD_VALUE = "exportCsv";
-  protected static final String EXPORT_PDF_FIELD_NAME = "EXPORT_PDF";
-  protected static final String EXPORT_PDF_FIELD_VALUE = "exportPdf";
-  protected static final String EXPORT_XLS_FIELD_NAME = "EXPORT_XLS";
-  protected static final String EXPORT_XLS_FIELD_VALUE = "exportXls";
 
-  private final ControllerMetadata controllerMetadata;
-  private final ControllerType controllerType;
-  private final String controllerName;
-  private final String entityName;
   private final JavaType controller;
+  private final List<MethodMetadata> controllerMethods;
 
-  private final MethodMetadata toUriForCollectionControllerMethod;
-  private final MethodMetadata toUriForItemControllerMethod;
-  private final MethodMetadata toUriForDetailControllerMethod;
-  private final MethodMetadata toUriForSearchControllerMethod;
+  private final MethodMetadata toUriMethod;
   private final MethodMetadata getControllerClassMethod;
+
+  private Map<String, FieldMetadataBuilder> constantForMethods;
+
 
   private final AnnotatedJavaType stringArgument = new AnnotatedJavaType(JavaType.STRING);
   private final AnnotatedJavaType objectArrayArgument =
@@ -79,8 +62,6 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
   private final JavaSymbolName METHOD_NAME_ARGUMENT_NAME = new JavaSymbolName("methodName");
   private final JavaSymbolName PARAMETERS_ARGUMENT_NAME = new JavaSymbolName("parameters");
   private final JavaSymbolName PATH_VARIABLES_ARGUMENT_NAME = new JavaSymbolName("pathVariables");
-
-  private final ImportRegistrationResolver importResolver;
 
   private static final String PROVIDES_TYPE_STRING = LinkFactoryMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
@@ -130,15 +111,13 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
    */
   public LinkFactoryMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType controller,
-      final ControllerMetadata controllerMetadata) {
+      final ControllerMetadata controllerMetadata, final List<MethodMetadata> controllerMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
-    this.controllerMetadata = controllerMetadata;
-    this.controllerType = this.controllerMetadata.getType();
     this.controller = controller;
-    this.controllerName = this.controller.getSimpleTypeName();
-    this.entityName = this.controllerMetadata.getEntity().getSimpleTypeName();
-    this.importResolver = builder.getImportRegistrationResolver();
+    this.controllerMethods = controllerMethods;
+    this.constantForMethods = new HashMap<String, FieldMetadataBuilder>();
+
 
     // Add @Component
     ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(SpringJavaType.COMPONENT));
@@ -147,89 +126,109 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     ensureGovernorImplements(JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_METHOD_LINK_FACTORY,
         this.controller));
 
-    // Build specific members depending on controller type
-    switch (this.controllerType) {
-      case COLLECTION: {
-
-        // Create fields
-        ensureGovernorHasField(returnStaticStringFieldBuilder("LIST", "list"));
-        ensureGovernorHasField(returnStaticStringFieldBuilder(DATATABLES_FIELD_NAME,
-            DATATABLES_FIELD_VALUE));
-        ensureGovernorHasField(returnStaticStringFieldBuilder(CREATE_FIELD_NAME, CREATE_FIELD_VALUE));
-        ensureGovernorHasField(returnStaticStringFieldBuilder(CREATE_FORM_FIELD_NAME,
-            CREATE_FORM_FIELD_VALUE));
-        ensureGovernorHasField(returnStaticStringFieldBuilder(DELETE_BATCH_FIELD_NAME,
-            DELETE_BATCH_FIELD_VALUE));
-        ensureGovernorHasField(returnStaticStringFieldBuilder(EXPORT_CSV_FIELD_NAME,
-            EXPORT_CSV_FIELD_VALUE));
-        ensureGovernorHasField(returnStaticStringFieldBuilder(EXPORT_PDF_FIELD_NAME,
-            EXPORT_PDF_FIELD_VALUE));
-        ensureGovernorHasField(returnStaticStringFieldBuilder(EXPORT_XLS_FIELD_NAME,
-            EXPORT_XLS_FIELD_VALUE));
-
-        // Create methods
-        this.toUriForCollectionControllerMethod =
-            addAndGet(getToUriForCollectionControllerMethod());
-        this.toUriForItemControllerMethod = null;
-        this.toUriForSearchControllerMethod = null;
-        this.toUriForDetailControllerMethod = null;
-        this.getControllerClassMethod = addAndGet(getControllerClassMethod());
-        break;
-      }
-      case ITEM: {
-
-        // Create fields
-        ensureGovernorHasField(returnStaticStringFieldBuilder("SHOW", "show"));
-        ensureGovernorHasField(returnStaticStringFieldBuilder("EDIT_FORM", "editForm"));
-        ensureGovernorHasField(returnStaticStringFieldBuilder("UPDATE", "update"));
-        ensureGovernorHasField(returnStaticStringFieldBuilder("DELETE", "delete"));
-
-        // Create methods
-        this.toUriForCollectionControllerMethod = null;
-        this.toUriForItemControllerMethod = addAndGet(getToUriForItemControllerMethod());
-        this.toUriForSearchControllerMethod = null;
-        this.toUriForDetailControllerMethod = null;
-        this.getControllerClassMethod = addAndGet(getControllerClassMethod());
-        break;
-      }
-      case SEARCH: {
-
-        // TODO: this will be implemented shortly
-        this.toUriForCollectionControllerMethod = null;
-        this.toUriForItemControllerMethod = null;
-        this.toUriForSearchControllerMethod = null;
-        this.toUriForDetailControllerMethod = null;
-        this.getControllerClassMethod = addAndGet(getControllerClassMethod());
-        return;
-      }
-      case DETAIL: {
-
-        // Create fields
-        ensureGovernorHasField(returnStaticStringFieldBuilder(CREATE_FORM_FIELD_NAME,
-            CREATE_FORM_FIELD_VALUE));
-        ensureGovernorHasField(returnStaticStringFieldBuilder(CREATE_FIELD_NAME, CREATE_FIELD_VALUE));
-        ensureGovernorHasField(returnStaticStringFieldBuilder(DATATABLES_FIELD_NAME,
-            DATATABLES_FIELD_VALUE));
-
-        // Create methods
-        this.toUriForCollectionControllerMethod = null;
-        this.toUriForItemControllerMethod = null;
-        this.toUriForSearchControllerMethod = null;
-        this.toUriForDetailControllerMethod = addAndGet(getToUriForDetailControllerMethod());
-        this.getControllerClassMethod = addAndGet(getControllerClassMethod());
-        break;
-      }
-      default:
-        this.toUriForCollectionControllerMethod = null;
-        this.toUriForItemControllerMethod = null;
-        this.toUriForSearchControllerMethod = null;
-        this.toUriForDetailControllerMethod = null;
-        this.getControllerClassMethod = null;
-        return;
+    // Including constants for every method existing in the controller class
+    for (MethodMetadata method : controllerMethods) {
+      String methodName = method.getMethodName().getSymbolName();
+      ensureGovernorHasField(getConstantForMethodName(methodName));
     }
+
+    // Create methods
+    this.getControllerClassMethod = addAndGet(getControllerClassMethod());
+    this.toUriMethod = addAndGet(getToUriMethod());
 
     // Build the ITD
     itdTypeDetails = builder.build();
+  }
+
+  /**
+     * Generates a `toUri` method which generates URI's for the *Collection* 
+     * controller methods which are called from views.
+     *
+     * @param finderName
+     * @param serviceFinderMethod
+     * @return
+     */
+  private MethodMetadata getToUriMethod() {
+
+    // Define methodName
+    final JavaSymbolName toUriMethodName = TO_URI_METHOD_NAME;
+
+    // Define method argument types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(stringArgument);
+    parameterTypes.add(objectArrayArgument);
+    parameterTypes.add(mapStringObjectArgument);
+
+    // Return method if already exists
+    MethodMetadata existingMethod =
+        getGovernorMethod(toUriMethodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Define method argument names
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(METHOD_NAME_ARGUMENT_NAME);
+    parameterNames.add(PARAMETERS_ARGUMENT_NAME);
+    parameterNames.add(PATH_VARIABLES_ARGUMENT_NAME);
+
+    // Generate body
+    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Include a conditional for every method
+    for (MethodMetadata method : this.controllerMethods) {
+      // Getting methodName
+      String methodName = method.getMethodName().getSymbolName();
+
+      // Getting methodParams
+      String methodParamsToNull = "";
+      boolean hasRequestParams = false;
+      for (AnnotatedJavaType param : method.getParameterTypes()) {
+        // Check @RequestParam annotation in current parameter
+        List<AnnotationMetadata> paramAnnotation = param.getAnnotations();
+        for (AnnotationMetadata annotation : paramAnnotation) {
+          if (annotation.getAnnotationType().equals(SpringJavaType.REQUEST_PARAM)) {
+            hasRequestParams = true;
+          }
+        }
+
+        // Include a null declaration for every parameter
+        methodParamsToNull += "null, ";
+      }
+      // Remove empty space and comma
+      if (StringUtils.isNotEmpty(methodParamsToNull)) {
+        methodParamsToNull = methodParamsToNull.substring(0, methodParamsToNull.length() - 2);
+      }
+
+      // if (METHOD_NAME_ARGUMENT_NAME.equals(methodNameConstant)) {
+      bodyBuilder.appendFormalLine("if (%s.equals(%s)) {", METHOD_NAME_ARGUMENT_NAME,
+          getConstantForMethodName(methodName).getFieldName());
+      bodyBuilder.indent();
+
+      // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).list(null)).build();
+
+      bodyBuilder.appendFormalLine(
+          "return %1$s.fromMethodCall(%1$s.on(%2$s()).%3$s(%4$s))%5$s.buildAndExpand(%6$s);",
+          getNameOfJavaType(SpringJavaType.MVC_URI_COMPONENTS_BUILDER),
+          this.getControllerClassMethod.getMethodName(), methodName, methodParamsToNull,
+          hasRequestParams ? ".replaceQuery(null)" : "", PATH_VARIABLES_ARGUMENT_NAME);
+      bodyBuilder.indentRemove();
+      // }
+      bodyBuilder.appendFormalLine("}");
+    }
+
+    // throw new IllegalArgumentException("Invalid method name: " + METHOD_NAME_ARGUMENT_NAME);
+    bodyBuilder.appendFormalLine(
+        "throw new IllegalArgumentException(\"Invalid method name: \" + %s);",
+        METHOD_NAME_ARGUMENT_NAME);
+
+    // Build method builder
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, toUriMethodName,
+            SpringJavaType.URI_COMPONENTS, parameterTypes, parameterNames, bodyBuilder);
+
+    return methodBuilder.build();
   }
 
   private MethodMetadata getControllerClassMethod() {
@@ -250,8 +249,7 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    bodyBuilder.appendFormalLine("return %s.class;",
-        this.controller.getNameIncludingTypeParameters(false, this.importResolver));
+    bodyBuilder.appendFormalLine("return %s.class;", getNameOfJavaType(this.controller));
 
     // return CONTROLLER_CLASS;
     MethodMetadataBuilder methodBuilder =
@@ -260,441 +258,6 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
     // Set method body
     methodBuilder.setBodyBuilder(bodyBuilder);
-
-    return methodBuilder.build();
-  }
-
-  /**
-   * Generates a `toUri` method which generates URI's for the *Collection* 
-   * controller methods which are called from views.
-   *
-   * @param finderName
-   * @param serviceFinderMethod
-   * @return
-   */
-  private MethodMetadata getToUriForCollectionControllerMethod() {
-
-    // Define methodName
-    final JavaSymbolName methodName = TO_URI_METHOD_NAME;
-
-    // Define method argument types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(stringArgument);
-    parameterTypes.add(objectArrayArgument);
-    parameterTypes.add(mapStringObjectArgument);
-
-    // Return method if already exists
-    MethodMetadata existingMethod =
-        getGovernorMethod(methodName,
-            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-    if (existingMethod != null) {
-      return existingMethod;
-    }
-
-    // Define method argument names
-    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(METHOD_NAME_ARGUMENT_NAME);
-    parameterNames.add(PARAMETERS_ARGUMENT_NAME);
-    parameterNames.add(PATH_VARIABLES_ARGUMENT_NAME);
-
-    // Generate body
-    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // if (METHOD_NAME_ARGUMENT_NAME.equals(LIST)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(LIST)) {", METHOD_NAME_ARGUMENT_NAME);
-
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).list(null)).build();
-    bodyBuilder.indent();
-    bodyBuilder.appendFormalLine(
-        "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).list(null)).build();",
-        SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-            this.importResolver));
-    bodyBuilder.indentRemove();
-
-    // }
-    bodyBuilder.appendFormalLine("}");
-
-    // if (METHOD_NAME_ARGUMENT_NAME.equals(DATATABLES)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(%s)) {", METHOD_NAME_ARGUMENT_NAME,
-        DATATABLES_FIELD_NAME);
-
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).datatables(null, null, null, null)).replaceQuery(null).build();
-    bodyBuilder.indent();
-    bodyBuilder.appendFormalLine("return %1$s.fromMethodCall(%1$s.on(getControllerClass())"
-        + ".datatables(null, null, null, null)).replaceQuery(null).build();",
-        SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-            this.importResolver));
-    bodyBuilder.indentRemove();
-
-    // }
-    bodyBuilder.appendFormalLine("}");
-
-    // if (METHOD_NAME_ARGUMENT_NAME.equals(CREATE)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(%s)) {", METHOD_NAME_ARGUMENT_NAME,
-        CREATE_FIELD_NAME);
-
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).create(null, null, null)).build();
-    bodyBuilder.indent();
-    bodyBuilder
-        .appendFormalLine(
-            "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).create(null, null, null)).build();",
-            SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-                this.importResolver));
-    bodyBuilder.indentRemove();
-
-    // }
-    bodyBuilder.appendFormalLine("}");
-
-    // if (METHOD_NAME_ARGUMENT_NAME.equals(CREATE_FORM)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(%s)) {", METHOD_NAME_ARGUMENT_NAME,
-        CREATE_FORM_FIELD_NAME);
-
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).createForm(null)).build();
-    bodyBuilder.indent();
-    bodyBuilder.appendFormalLine(
-        "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).createForm(null)).build();",
-        SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-            this.importResolver));
-    bodyBuilder.indentRemove();
-
-    // }
-    bodyBuilder.appendFormalLine("}");
-
-    // if (METHOD_NAME_ARGUMENT_NAME.equals(DELETE_BATCH)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(%s)) {", METHOD_NAME_ARGUMENT_NAME,
-        DELETE_BATCH_FIELD_NAME);
-
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).deleteBatch(null)).build();
-    bodyBuilder.indent();
-    bodyBuilder.appendFormalLine(
-        "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).deleteBatch(null)).build();",
-        SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-            this.importResolver));
-    bodyBuilder.indentRemove();
-
-    // }
-    bodyBuilder.appendFormalLine("}");
-
-    // if (METHOD_NAME_ARGUMENT_NAME.equals(EXPORT_CSV)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(EXPORT_CSV)) {", METHOD_NAME_ARGUMENT_NAME);
-
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).exportCsv(null, null, null, null, null)).build();
-    bodyBuilder.indent();
-    bodyBuilder
-        .appendFormalLine(
-            "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).exportCsv(null, null, null, null, null)).build();",
-            SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-                this.importResolver));
-    bodyBuilder.indentRemove();
-
-    // }
-    bodyBuilder.appendFormalLine("}");
-
-    // if (METHOD_NAME_ARGUMENT_NAME.equals(EXPORT_PDF)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(EXPORT_PDF)) {", METHOD_NAME_ARGUMENT_NAME);
-
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).exportPdf(null, null, null, null, null)).build();
-    bodyBuilder.indent();
-    bodyBuilder
-        .appendFormalLine(
-            "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).exportPdf(null, null, null, null, null)).build();",
-            SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-                this.importResolver));
-    bodyBuilder.indentRemove();
-
-    // }
-    bodyBuilder.appendFormalLine("}");
-
-    // if (METHOD_NAME_ARGUMENT_NAME.equals(EXPORT_XLS)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(EXPORT_XLS)) {", METHOD_NAME_ARGUMENT_NAME);
-
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).exportXls(null, null, null, null)).build();
-    bodyBuilder.indent();
-    bodyBuilder
-        .appendFormalLine(
-            "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).exportXls(null, null, null, null, null)).build();",
-            SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-                this.importResolver));
-    bodyBuilder.indentRemove();
-
-    // }
-    bodyBuilder.appendFormalLine("}");
-    bodyBuilder.newLine();
-
-    // throw new IllegalArgumentException("Invalid method name: " + METHOD_NAME_ARGUMENT_NAME);
-    bodyBuilder.appendFormalLine(
-        "throw new IllegalArgumentException(\"Invalid method name: \" + %s);",
-        METHOD_NAME_ARGUMENT_NAME);
-
-    // Build method builder
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            SpringJavaType.URI_COMPONENTS, parameterTypes, parameterNames, bodyBuilder);
-
-    return methodBuilder.build();
-  }
-
-  private MethodMetadata getToUriForDetailControllerMethod() {
-
-    // Define methodName
-    final JavaSymbolName methodName = TO_URI_METHOD_NAME;
-
-    // Define method argument types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(stringArgument);
-    parameterTypes.add(objectArrayArgument);
-    parameterTypes.add(mapStringObjectArgument);
-
-    // Return method if already exists
-    MethodMetadata existingMethod =
-        getGovernorMethod(methodName,
-            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-    if (existingMethod != null) {
-      return existingMethod;
-    }
-
-    // Define method argument names
-    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(METHOD_NAME_ARGUMENT_NAME);
-    parameterNames.add(PARAMETERS_ARGUMENT_NAME);
-    parameterNames.add(PATH_VARIABLES_ARGUMENT_NAME);
-
-    // Generate body
-    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // Assert.notEmpty(PATH_VARIABLES_ARGUMENT_NAME, "CONTROLLER_NAME links need at least "
-    bodyBuilder.appendFormalLine(String.format("%s.notEmpty(%s, \"%s links need at least \"",
-        SpringJavaType.ASSERT.getNameIncludingTypeParameters(false, this.importResolver),
-        PATH_VARIABLES_ARGUMENT_NAME, controllerName));
-
-    // + "the ENTITY_NAME id Path Variable with the 'ENTITY_NAME_UNCAPITALIZED' key");
-    bodyBuilder.indent();
-    bodyBuilder.appendFormalLine(String.format("+ \"the %s id Path Variable with the '%s' key\");",
-        this.entityName, StringUtils.uncapitalize(this.entityName)));
-    bodyBuilder.newLine();
-
-    // Assert.notNull(PATH_VARIABLES_ARGUMENT_NAME.get("ENTITY_NAME_UNCAPITALIZED"),
-    bodyBuilder.indentRemove();
-    bodyBuilder.appendFormalLine(String.format("%s.notNull(%s.get(\"%s\"),",
-        SpringJavaType.ASSERT.getNameIncludingTypeParameters(false, this.importResolver),
-        PATH_VARIABLES_ARGUMENT_NAME, StringUtils.uncapitalize(this.entityName)));
-
-    // "CONTROLLER_NAME links need at least "
-    bodyBuilder.indent();
-    bodyBuilder.appendFormalLine(String.format("\"%s links need at least \"", this.controllerName));
-
-    // + "the ENTITY_NAME id Path Variable with the 'ENTITY_NAME_UNCAPITALIZED' key");
-    bodyBuilder.appendFormalLine(String.format("+ \"the %s id Path Variable with the '%s' key\");",
-        this.entityName, StringUtils.uncapitalize(this.entityName)));
-    bodyBuilder.newLine();
-    bodyBuilder.indentRemove();
-
-    // if (METHOD_NAME_ARGUMENT_NAME.equals(CREATE_FORM)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(CREATE_FORM)) {", METHOD_NAME_ARGUMENT_NAME);
-
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).createForm(null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
-    bodyBuilder.indent();
-    bodyBuilder
-        .appendFormalLine(String
-            .format(
-                "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).createForm(null, null)).buildAndExpand(%2$s);",
-                SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-                    this.importResolver), PATH_VARIABLES_ARGUMENT_NAME));
-    bodyBuilder.indentRemove();
-
-    // }
-    bodyBuilder.appendFormalLine("}");
-
-    // if (METHOD_NAME_ARGUMENT_NAME.equals(CREATE)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(CREATE)) {", METHOD_NAME_ARGUMENT_NAME);
-
-    // Different implementation for detail composition and aggregation
-    bodyBuilder.indent();
-    if (controllerMetadata.getLastDetailsInfo().type == JpaRelationType.AGGREGATION) {
-      // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).create(null, null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
-      bodyBuilder
-          .appendFormalLine(String
-              .format(
-                  "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).create(null, null, null)).buildAndExpand(%2$s);",
-                  SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-                      this.importResolver), PATH_VARIABLES_ARGUMENT_NAME));
-    } else {
-      // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).create(null, null, null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
-      bodyBuilder
-          .appendFormalLine(String
-              .format(
-                  "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).create(null, null, null, null)).buildAndExpand(%2$s);",
-                  SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-                      this.importResolver), PATH_VARIABLES_ARGUMENT_NAME));
-    }
-    bodyBuilder.indentRemove();
-
-    // }
-    bodyBuilder.appendFormalLine("}");
-
-    // if (METHOD_NAME_ARGUMENT_NAME.equals(DATATABLES)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(DATATABLES)) {", METHOD_NAME_ARGUMENT_NAME);
-
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).datatables(null, null, null, null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
-    bodyBuilder.indent();
-    bodyBuilder.appendFormalLine(String.format(
-        "return %1$s.fromMethodCall(%1$s.on(getControllerClass())"
-            + ".datatables(null, null, null, null, null)).buildAndExpand(%2$s);",
-        SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-            this.importResolver), PATH_VARIABLES_ARGUMENT_NAME));
-    bodyBuilder.indentRemove();
-
-    // }
-    bodyBuilder.appendFormalLine("}");
-    bodyBuilder.newLine();
-
-    // throw new IllegalArgumentException("Invalid method name: " + METHOD_NAME_ARGUMENT_NAME);
-    bodyBuilder.appendFormalLine(String.format(
-        "throw new IllegalArgumentException(\"Invalid method name: \" + %s);",
-        METHOD_NAME_ARGUMENT_NAME));
-
-    // }
-    bodyBuilder.reset();
-
-    // Build method builder
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            SpringJavaType.URI_COMPONENTS, parameterTypes, parameterNames, bodyBuilder);
-
-    return methodBuilder.build();
-  }
-
-  private MethodMetadata getToUriForItemControllerMethod() {
-
-    // Define methodName
-    final JavaSymbolName methodName = TO_URI_METHOD_NAME;
-
-    // Define method argument types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(stringArgument);
-    parameterTypes.add(objectArrayArgument);
-    parameterTypes.add(mapStringObjectArgument);
-
-    // Return method if already exists
-    MethodMetadata existingMethod =
-        getGovernorMethod(methodName,
-            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-    if (existingMethod != null) {
-      return existingMethod;
-    }
-
-    // Define method argument names
-    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(METHOD_NAME_ARGUMENT_NAME);
-    parameterNames.add(PARAMETERS_ARGUMENT_NAME);
-    parameterNames.add(PATH_VARIABLES_ARGUMENT_NAME);
-
-    // Generate body
-    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // Assert.notEmpty(PATH_VARIABLES_ARGUMENT_NAME, "CONTROLLER_NAME links need at least "
-    bodyBuilder.appendFormalLine(String.format("%s.notEmpty(%s, \"%s links need at least \"",
-        SpringJavaType.ASSERT.getNameIncludingTypeParameters(false, this.importResolver),
-        PATH_VARIABLES_ARGUMENT_NAME, controllerName));
-
-    // + "the ENTITY_NAME id Path Variable with the 'ENTITY_NAME_UNCAPITALIZED' key");
-    bodyBuilder.indent();
-    bodyBuilder.appendFormalLine(String.format("+ \"the %s id Path Variable with the '%s' key\");",
-        this.entityName, StringUtils.uncapitalize(this.entityName)));
-    bodyBuilder.newLine();
-
-    // Assert.notNull(PATH_VARIABLES_ARGUMENT_NAME.get("ENTITY_NAME_UNCAPITALIZED"),
-    bodyBuilder.indentRemove();
-    bodyBuilder.appendFormalLine(String.format("%s.notNull(%s.get(\"%s\"),",
-        SpringJavaType.ASSERT.getNameIncludingTypeParameters(false, this.importResolver),
-        PATH_VARIABLES_ARGUMENT_NAME, StringUtils.uncapitalize(this.entityName)));
-
-    // "CONTROLLER_NAME links need at least "
-    bodyBuilder.indent();
-    bodyBuilder.appendFormalLine(String.format("\"%s links need at least \"", this.controllerName));
-
-    // + "the ENTITY_NAME id Path Variable with the 'ENTITY_NAME_UNCAPITALIZED' key");
-    bodyBuilder.appendFormalLine(String.format("+ \"the %s id Path Variable with the '%s' key\");",
-        this.entityName, StringUtils.uncapitalize(this.entityName)));
-    bodyBuilder.newLine();
-    bodyBuilder.indentRemove();
-
-    // if (METHOD_NAME_ARGUMENT_NAME.equals(SHOW)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(SHOW)) {", METHOD_NAME_ARGUMENT_NAME);
-
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).show(null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
-    bodyBuilder.indent();
-    bodyBuilder
-        .appendFormalLine(String
-            .format(
-                "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).show(null, null)).buildAndExpand(%2$s);",
-                SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-                    this.importResolver), PATH_VARIABLES_ARGUMENT_NAME));
-    bodyBuilder.indentRemove();
-
-    // }
-    bodyBuilder.appendFormalLine("}");
-
-    // if (METHOD_NAME_ARGUMENT_NAME.equals(UPDATE)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(UPDATE)) {", METHOD_NAME_ARGUMENT_NAME);
-
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).update(null, null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
-    bodyBuilder.indent();
-    bodyBuilder
-        .appendFormalLine(String
-            .format(
-                "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).update(null, null, null)).buildAndExpand(%2$s);",
-                SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-                    this.importResolver), PATH_VARIABLES_ARGUMENT_NAME));
-    bodyBuilder.indentRemove();
-
-    // }
-    bodyBuilder.appendFormalLine("}");
-
-    // if (METHOD_NAME_ARGUMENT_NAME.equals(EDIT_FORM)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(EDIT_FORM)) {", METHOD_NAME_ARGUMENT_NAME);
-
-    // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).editForm(null, null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
-    bodyBuilder.indent();
-    bodyBuilder
-        .appendFormalLine(String
-            .format(
-                "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).editForm(null, null)).buildAndExpand(%2$s);",
-                SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-                    this.importResolver), PATH_VARIABLES_ARGUMENT_NAME));
-    bodyBuilder.indentRemove();
-
-    // }
-    bodyBuilder.appendFormalLine("}");
-
-    // if (METHOD_NAME_ARGUMENT_NAME.equals(DELETE)) {
-    bodyBuilder.appendFormalLine("if (%s.equals(DELETE)) {", METHOD_NAME_ARGUMENT_NAME);
-
-    // MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).delete(null)).buildAndExpand(PATH_VARIABLES_ARGUMENT_NAME);
-    bodyBuilder.indent();
-    bodyBuilder
-        .appendFormalLine(String
-            .format(
-                "return %1$s.fromMethodCall(%1$s.on(getControllerClass()).delete(null)).buildAndExpand(%2$s);",
-                SpringJavaType.MVC_URI_COMPONENTS_BUILDER.getNameIncludingTypeParameters(false,
-                    this.importResolver), PATH_VARIABLES_ARGUMENT_NAME));
-    bodyBuilder.indentRemove();
-
-    // }
-    bodyBuilder.appendFormalLine("}");
-    bodyBuilder.newLine();
-
-    // throw new IllegalArgumentException("Invalid method name: " + METHOD_NAME_ARGUMENT_NAME);
-    bodyBuilder.appendFormalLine(String.format(
-        "throw new IllegalArgumentException(\"Invalid method name: \" + %s);",
-        METHOD_NAME_ARGUMENT_NAME));
-
-    bodyBuilder.reset();
-
-    // Build method builder
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            SpringJavaType.URI_COMPONENTS, parameterTypes, parameterNames, bodyBuilder);
 
     return methodBuilder.build();
   }
@@ -713,13 +276,24 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
   /**
    * Builds and returns a private static final field with provided field name and initializer
    * 
-   * @param fieldName
-   * @param initializer
-   * @return FieldMetadataBuilder
+   * @param methodName
+   * @return
    */
-  private FieldMetadataBuilder returnStaticStringFieldBuilder(String fieldName, String initializer) {
-    return new FieldMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.STATIC + Modifier.FINAL,
-        new JavaSymbolName(fieldName), JavaType.STRING, "\"" + initializer + "\"");
+  private FieldMetadataBuilder getConstantForMethodName(String methodName) {
+
+    // If already exists, return the existing one
+    if (constantForMethods.get(methodName) != null) {
+      return constantForMethods.get(methodName);
+    }
+
+    // Create a new one and cache it
+    FieldMetadataBuilder constant =
+        new FieldMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.STATIC + Modifier.FINAL,
+            new JavaSymbolName(methodName.toUpperCase()), JavaType.STRING, "\"" + methodName + "\"");
+
+    constantForMethods.put(methodName, constant);
+
+    return constant;
   }
 
   @Override
@@ -732,6 +306,10 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
     builder.append("governor", governorPhysicalTypeMetadata.getId());
     builder.append("itdTypeDetails", itdTypeDetails);
     return builder.toString();
+  }
+
+  public List<MethodMetadata> getControllerMethods() {
+    return controllerMethods;
   }
 
 }

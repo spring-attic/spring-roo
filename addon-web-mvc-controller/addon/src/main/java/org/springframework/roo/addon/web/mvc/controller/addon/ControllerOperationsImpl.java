@@ -1083,7 +1083,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
     // Create LinkFactory class
-    if (type == ControllerType.DETAIL && responseType.getName().equals("THYMELEAF")) {
+    if (responseType.getName().equals("THYMELEAF")) {
       includeLinkFactory(cidBuilder.getName());
     }
 
