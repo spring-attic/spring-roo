@@ -94,6 +94,31 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
   }
 
   @Override
+  public void addPropertiesIfNotExists(LogicalPath propertyFilePath, String propertyFilename,
+      String prefix, final Map<String, String> properties, boolean sorted, boolean force) {
+    manageProperty(propertyFilePath, propertyFilename, prefix, properties, sorted, force, true);
+  }
+
+  @Override
+  public void addPropertiesIfNotExists(final LogicalPath propertyFilePath,
+      final String propertyFilename, final Map<String, String> properties, boolean force) {
+    manageProperty(propertyFilePath, propertyFilename, "", properties, !SORTED, force, true);
+  }
+
+  @Override
+  public void addPropertiesIfNotExists(LogicalPath propertyFilePath, String propertyFilename,
+      String prefix, Map<String, String> properties, boolean force) {
+    manageProperty(propertyFilePath, propertyFilename, prefix, properties, !SORTED, force, true);
+  }
+
+  @Override
+  public void addPropertiesIfNotExists(final LogicalPath propertyFilePath,
+      final String propertyFilename, final Map<String, String> properties, final boolean sorted,
+      boolean force) {
+    manageProperty(propertyFilePath, propertyFilename, "", properties, sorted, force, true);
+  }
+
+  @Override
   public void addPropertyIfNotExists(LogicalPath propertyFilePath, String propertyFilename,
       String prefix, String key, String value, boolean sorted, boolean force) {
     manageProperty(propertyFilePath, propertyFilename, prefix, asMap(key, value), sorted, force,
@@ -536,4 +561,5 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
     }
 
   }
+
 }

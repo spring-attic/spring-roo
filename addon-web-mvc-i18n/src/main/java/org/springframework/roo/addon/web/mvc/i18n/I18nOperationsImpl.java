@@ -219,18 +219,14 @@ public class I18nOperationsImpl implements I18nOperations {
 
       if (getFileManager().exists(bundlePath)) {
         // Adding labels if not exists already
-        for (Entry<String, String> label : labels.entrySet()) {
-          getPropFilesManager().addPropertyIfNotExists(resourcesPath, messageBundle,
-              label.getKey(), label.getValue(), true, false);
-        }
+        getPropFilesManager().addPropertiesIfNotExists(resourcesPath, messageBundle, labels, true,
+            false);
       }
     }
 
     // Allways update english message bundles if label not exists already
-    for (Entry<String, String> label : labels.entrySet()) {
-      getPropFilesManager().addPropertyIfNotExists(resourcesPath, "messages.properties",
-          label.getKey(), label.getValue(), true, false);
-    }
+    getPropFilesManager().addPropertiesIfNotExists(resourcesPath, "messages.properties", labels,
+        true, false);
   }
 
   /**
