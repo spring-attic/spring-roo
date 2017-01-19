@@ -96,6 +96,7 @@ public final class SpringJavaType {
   public static final JavaType HIDDEN_HTTP_METHOD_FILTER = new JavaType(
       "org.springframework.web.filter.HiddenHttpMethodFilter");
   public static final JavaType HTTP_HEADERS = new JavaType("org.springframework.http.HttpHeaders");
+  public static final JavaType HTTP_METHOD = new JavaType("org.springframework.http.HttpMethod");
   public static final JavaType HTTP_STATUS = new JavaType("org.springframework.http.HttpStatus");
   public static final JavaType INIT_BINDER = new JavaType(
       "org.springframework.web.bind.annotation.InitBinder");

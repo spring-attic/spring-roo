@@ -26,6 +26,7 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
@@ -178,7 +179,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
       interfaceType = readOnlyRepository;
     } else {
       // Extends JpaRepository
-      interfaceType = SpringJavaType.SPRING_JPA_REPOSITORY;
+      interfaceType = SpringletsJavaType.SPRINGLETS_DETACHABLE_JPA_REPOSITORY;
     }
     ensureGovernorExtends(JavaType.wrapperOf(interfaceType, annotationValues.getEntity(),
         identifierType));

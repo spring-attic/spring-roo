@@ -11,6 +11,7 @@ import org.springframework.roo.support.util.XmlUtils;
  * in a page
  *
  * @author Manuel Iborra
+ * @author Sergio Clares
  * @since 2.0
  */
 public class EntityItem {
@@ -27,7 +28,7 @@ public class EntityItem {
   /**
    *
    * Constructs a EntityItem using the entityName, identifierField, controllerPath
-   * and suffixId
+   * suffixId, readOnly and versionField
    *
    * @param entityName
    *            the entity where this table is defined
@@ -37,9 +38,13 @@ public class EntityItem {
    *            path where is defined the controller that manage the table
    * @param suffixId
    *            used to generate field id
+   * @param readOnly
+   *            whether the entity is read only
+   * @param versionField
+   *            the field name used as version field
    */
   public EntityItem(String entityName, String identifierField, String controllerPath,
-      String suffixId, boolean readOnly) {
+      String suffixId, boolean readOnly, String versionField) {
     this.entityName = entityName;
     this.modelAttribute = StringUtils.uncapitalize(entityName);
     this.userManaged = false;
@@ -48,6 +53,7 @@ public class EntityItem {
     this.configuration = new HashMap<String, Object>();
     this.configuration.put("identifierField", identifierField);
     this.configuration.put("controllerPath", controllerPath);
+    this.configuration.put("versionField", versionField);
     buildId(suffixId);
 
     // Calculate the Z parameter as the hash code of the other parameters

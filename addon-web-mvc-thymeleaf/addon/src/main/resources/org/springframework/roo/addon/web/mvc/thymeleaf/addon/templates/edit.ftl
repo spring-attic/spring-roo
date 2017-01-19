@@ -44,6 +44,7 @@
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
             data-th-action="@{${r"${"}itemLink.to('update').with('${modelAttributeName}', ${modelAttributeName}.${identifierField})}}">
             <input type="hidden" name="_method" value="PUT" />
+            <input type="hidden" name="version" data-th-value="${r"*"}{${entity.configuration.versionField}}" />
 
              <fieldset id="containerFields">
               <legend class="sr-only" data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data </legend>
