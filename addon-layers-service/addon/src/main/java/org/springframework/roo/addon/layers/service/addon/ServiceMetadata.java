@@ -66,6 +66,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   private final MethodMetadata saveBatchMethod;
   private final MethodMetadata deleteBatchMethod;
   private final MethodMetadata findOneMethod;
+  private final MethodMetadata findOneForUpdateMethod;
   private final MethodMetadata findAllMethod;
   private final MethodMetadata findAllIterableMethod;
   private final MethodMetadata countMethod;
@@ -196,10 +197,16 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
     if (entityMetadata.isReadOnly()) {
       this.saveMethod = null;
+      this.findOneForUpdateMethod = null;
     } else {
       this.saveMethod = getSaveMethod();
       transactionalDefinedMethod.add(saveMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(saveMethod));
+
+      // Add findOneDetached method
+      this.findOneForUpdateMethod = getFindOneForUpdateMethod();
+      notTransactionalDefinedMethod.add(findOneForUpdateMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(findOneForUpdateMethod));
     }
 
     // Add standard finders methods (if not composition child)
@@ -299,7 +306,6 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         ensureGovernorHasMethod(new MethodMetadataBuilder(method));
       }
     }
-
 
     // Generating finders
     for (MethodMetadata finder : finders) {
@@ -616,6 +622,41 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     // Define method parameter names
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(entityMetadata.getCurrentIndentifierField().getFieldName());
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName, entity,
+            parameterTypes, parameterNames, null);
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
+  }
+
+  /**
+   * Generates the "findOneForUpdate" method to be able to control 
+   * concurrency in Entity updates.
+   * 
+   * @return MethodMetadata with public Entity findOneForUpdate(T id);
+   *         structure
+   */
+  private MethodMetadata getFindOneForUpdateMethod() {
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("findOneForUpdate");
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.identifierType));
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(this.entityMetadata.getCurrentIndentifierField().getFieldName());
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,

@@ -96,6 +96,7 @@ public final class SpringJavaType {
   public static final JavaType HIDDEN_HTTP_METHOD_FILTER = new JavaType(
       "org.springframework.web.filter.HiddenHttpMethodFilter");
   public static final JavaType HTTP_HEADERS = new JavaType("org.springframework.http.HttpHeaders");
+  public static final JavaType HTTP_METHOD = new JavaType("org.springframework.http.HttpMethod");
   public static final JavaType HTTP_STATUS = new JavaType("org.springframework.http.HttpStatus");
   public static final JavaType INIT_BINDER = new JavaType(
       "org.springframework.web.bind.annotation.InitBinder");
@@ -144,6 +145,8 @@ public final class SpringJavaType {
   public static final JavaType OPEN_ENTITY_MANAGER_IN_VIEW_FILTER = new JavaType(
       "org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter");
   public static final JavaType PAGE = new JavaType("org.springframework.data.domain.Page");
+  public static final JavaType PAGE_REQUEST = new JavaType(
+      "org.springframework.data.domain.PageRequest");
   public static final JavaType PAGEABLE = new JavaType("org.springframework.data.domain.Pageable");
   public static final JavaType PAGEABLE_DEFAULT = new JavaType(
       "org.springframework.data.web.PageableDefault");

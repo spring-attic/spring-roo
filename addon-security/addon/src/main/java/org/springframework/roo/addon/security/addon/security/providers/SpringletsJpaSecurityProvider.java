@@ -114,10 +114,13 @@ public class SpringletsJpaSecurityProvider implements SecurityProvider {
       for (ClassOrInterfaceTypeDetails springBootApplicationClass : springBootApplicationClasses) {
         ClassOrInterfaceTypeDetailsBuilder cidBuilder =
             new ClassOrInterfaceTypeDetailsBuilder(springBootApplicationClass);
-        cidBuilder.addAnnotation(new AnnotationMetadataBuilder(
-            SpringJavaType.ENABLE_JPA_REPOSITORIES));
-        cidBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.ENTITY_SCAN));
-
+        if (springBootApplicationClass.getAnnotation(SpringJavaType.ENABLE_JPA_REPOSITORIES) == null) {
+          cidBuilder.addAnnotation(new AnnotationMetadataBuilder(
+              SpringJavaType.ENABLE_JPA_REPOSITORIES));
+        }
+        if (springBootApplicationClass.getAnnotation(SpringJavaType.ENTITY_SCAN) == null) {
+          cidBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.ENTITY_SCAN));
+        }
         getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
         break;
       }

@@ -58,6 +58,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
   private static final AnnotationMetadata LAZY_ANNOTATION = new AnnotationMetadataBuilder(
       SpringJavaType.LAZY).build();
+  private static final JavaSymbolName FIND_ONE_DETACHED = new JavaSymbolName("findOneDetached");
 
   private ImportRegistrationResolver importResolver;
 
@@ -551,21 +552,22 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
       }
     }
 
-    // Check if is delete method
+    // Check what is the particular method
     boolean isDelete = methodToBeImplemented.getMethodName().getSymbolName().equals("delete");
-
     boolean isSaveMethod =
         methodToBeImplemented.equals(this.serviceMetadata.getCurrentSaveMethod());
+    boolean isFindOneForUpdate =
+        methodToBeImplemented.getMethodName().getSymbolName().equals("findOneForUpdate");
 
     InvocableMemberBodyBuilder bodyBuilder;
     if (isDelete) {
       bodyBuilder = builDeleteMethodBody(methodToBeImplemented, isBatch);
+    } else if (isSaveMethod) {
+      bodyBuilder = builSaveMethodBody(methodToBeImplemented);
+    } else if (isFindOneForUpdate) {
+      bodyBuilder = buildFindOneForUpdateBody(methodToBeImplemented);
     } else {
-      if (isSaveMethod) {
-        bodyBuilder = builSaveMethodBody(methodToBeImplemented);
-      } else {
-        bodyBuilder = builMethodBody(methodToBeImplemented);
-      }
+      bodyBuilder = builMethodBody(methodToBeImplemented);
     }
 
     return getMethod(methodToBeImplemented, isTransactional, bodyBuilder);
@@ -774,6 +776,25 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     return bodyBuilder;
   }
 
+  /**
+   * Build "findOneForUpdate" method body which delegates on repository
+   * 
+   * @param methodToBeImplemented
+   * @return
+   */
+  private InvocableMemberBodyBuilder buildFindOneForUpdateBody(MethodMetadata methodToBeImplemented) {
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+    final JavaSymbolName param0 = methodToBeImplemented.getParameterNames().get(0);
+
+    // return entityRepository.findOneDetached(id);
+    bodyBuilder.appendFormalLine("%s %s().%s(%s);",
+        methodToBeImplemented.getReturnType().equals(JavaType.VOID_PRIMITIVE) ? "" : "return",
+        getAccessorMethod(repositoryFieldMetadata).getMethodName(),
+        FIND_ONE_DETACHED.getSymbolName(), param0);
+    return bodyBuilder;
+  }
 
   /**
    * Build "save" method body which delegates on repository

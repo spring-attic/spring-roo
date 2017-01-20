@@ -27,6 +27,8 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
@@ -153,7 +155,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       // Show an error indicating that defaultReturnType should be annotated with
       // @RooEntityProjection
       Validate.notNull(defaultReturnTypeAnnotation,
-          "ERROR: Provided defaultSearchResult should be annotated with @RooDTO");
+          "ERROR: Provided defaultReturnType should be annotated with @RooEntityProjection");
     }
 
     // Check if the new interface to be created already exists
@@ -191,6 +193,9 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       }
     }
 
+    // Add Springlets base repository class
+    addBaseRepositoryClassToApplicationModules();
+
     // Check if current entity is defined as "readOnly".
     AnnotationAttributeValue<Boolean> readOnlyAttr =
         entityDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY).getAttribute("readOnly");
@@ -216,6 +221,157 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
     // Add dependencies and plugins
     generateConfiguration(interfaceType, domainType);
+
+  }
+
+  /**
+   * Checks for all the application modules in project and adds the Springlets 
+   * base repository class if none is already specified.
+   *  
+   */
+  private void addBaseRepositoryClassToApplicationModules() {
+    Set<ClassOrInterfaceTypeDetails> applicationCids =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            SpringJavaType.SPRING_BOOT_APPLICATION);
+    for (ClassOrInterfaceTypeDetails applicationCid : applicationCids) {
+      if (applicationCid.getAnnotation(SpringJavaType.ENABLE_JPA_REPOSITORIES) != null) {
+        AnnotationAttributeValue<Object> attribute =
+            applicationCid.getAnnotation(SpringJavaType.ENABLE_JPA_REPOSITORIES).getAttribute(
+                "repositoryBaseClass");
+        if (attribute != null
+            && !((JavaType) attribute.getValue())
+                .equals(SpringletsJavaType.SPRINGLETS_DETACHABLE_JPA_REPOSITORY_IMPL)) {
+          LOGGER
+              .warning(String
+                  .format(
+                      "WARNING: Your application class in module %s is using other repository base "
+                          + "class different from which uses Spring Roo (`%s`). Some functionalities like version control "
+                          + "won't work.", applicationCid.getType().getModule(),
+                      SpringletsJavaType.SPRINGLETS_DETACHABLE_JPA_REPOSITORY_IMPL
+                          .getFullyQualifiedTypeName()));
+        } else if (attribute == null) {
+
+          // Add default Spring Roo repository class from Springlets to existing annotation
+          AnnotationMetadata enableRepositoriesAnnotation =
+              applicationCid.getAnnotation(SpringJavaType.ENABLE_JPA_REPOSITORIES);
+          AnnotationMetadataBuilder enableRepositoriesAnnotationBuilder =
+              new AnnotationMetadataBuilder(enableRepositoriesAnnotation);
+          enableRepositoriesAnnotationBuilder.addClassAttribute("repositoryBaseClass",
+              SpringletsJavaType.SPRINGLETS_DETACHABLE_JPA_REPOSITORY_IMPL);
+          ClassOrInterfaceTypeDetailsBuilder applicationClassBuilder =
+              new ClassOrInterfaceTypeDetailsBuilder(applicationCid);
+          applicationClassBuilder.updateTypeAnnotation(enableRepositoriesAnnotationBuilder);
+        }
+      } else {
+
+        // Add default Spring Roo repository class from Springlets to new annotation
+        AnnotationMetadataBuilder enableRepositoriesAnnotationBuilder =
+            new AnnotationMetadataBuilder(SpringJavaType.ENABLE_JPA_REPOSITORIES);
+        enableRepositoriesAnnotationBuilder.addClassAttribute("repositoryBaseClass",
+            SpringletsJavaType.SPRINGLETS_DETACHABLE_JPA_REPOSITORY_IMPL);
+        ClassOrInterfaceTypeDetailsBuilder applicationClassBuilder =
+            new ClassOrInterfaceTypeDetailsBuilder(applicationCid);
+        applicationClassBuilder.addAnnotation(enableRepositoriesAnnotationBuilder);
+
+        // Save repository interface on disk
+        getTypeManagementService().createOrUpdateTypeOnDisk(applicationClassBuilder.build());
+      }
+    }
+  }
+
+  /**
+   * Method that generates RepositoryCustom interface and its implementation
+   * for an specific entity
+   *
+   * @param domainType
+   * @param repositoryType
+   * @param repositoryPackage
+   * @param defaultReturnType
+   *
+   * @return JavaType with new RepositoryCustom interface.
+   */
+  private JavaType addRepositoryCustom(JavaType domainType, JavaType repositoryType,
+      JavaPackage repositoryPackage) {
+
+    // Getting RepositoryCustom interface JavaTYpe
+    JavaType interfaceType =
+        new JavaType(repositoryPackage.getFullyQualifiedPackageName().concat(".")
+            .concat(repositoryType.getSimpleTypeName()).concat("Custom"),
+            repositoryType.getModule());
+
+    // Check if new interface exists yet
+    final String interfaceIdentifier =
+        getPathResolver().getCanonicalPath(interfaceType.getModule(), Path.SRC_MAIN_JAVA,
+            interfaceType);
+
+    if (getFileManager().exists(interfaceIdentifier)) {
+      // Type already exists - return
+      return interfaceType;
+    }
+
+    final String interfaceMdId =
+        PhysicalTypeIdentifier.createIdentifier(interfaceType,
+            getPathResolver().getPath(interfaceIdentifier));
+    final ClassOrInterfaceTypeDetailsBuilder interfaceBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType,
+            PhysicalTypeCategory.INTERFACE);
+
+    // Generates @RooJpaRepositoryCustom annotation with referenced entity value
+    final AnnotationMetadataBuilder repositoryCustomAnnotationMetadata =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM);
+    repositoryCustomAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName(
+        "entity"), domainType));
+
+    interfaceBuilder.addAnnotation(repositoryCustomAnnotationMetadata);
+
+    // Save RepositoryCustom interface and its implementation on disk
+    getTypeManagementService().createOrUpdateTypeOnDisk(interfaceBuilder.build());
+
+    generateRepositoryCustomImpl(interfaceType, repositoryType, domainType);
+
+    return interfaceType;
+
+  }
+
+  /**
+   * Method that generates the repository interface. This method takes in mind
+   * if entity is defined as readOnly or not.
+   *
+   * @param interfaceType
+   * @param domainType
+   * @param entityDetails
+   * @param interfaceIdentifier
+   */
+  private void addRepositoryInterface(JavaType interfaceType, JavaType domainType,
+      ClassOrInterfaceTypeDetails entityDetails, String interfaceIdentifier,
+      JavaType defaultReturnType) {
+    // Generates @RooJpaRepository annotation with referenced entity value
+    // and repository custom associated to this repository
+    final AnnotationMetadataBuilder interfaceAnnotationMetadata =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_REPOSITORY_JPA);
+    interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName("entity"),
+        domainType));
+    if (defaultReturnType != null) {
+      interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName(
+          "defaultReturnType"), defaultReturnType));
+
+      // Add dependencies between modules
+      getProjectOperations().addModuleDependency(interfaceType.getModule(),
+          defaultReturnType.getModule());
+    }
+    // Generating interface
+    final String interfaceMdId =
+        PhysicalTypeIdentifier.createIdentifier(interfaceType,
+            getPathResolver().getPath(interfaceIdentifier));
+    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType,
+            PhysicalTypeCategory.INTERFACE);
+
+    // Annotate repository interface
+    cidBuilder.addAnnotation(interfaceAnnotationMetadata.build());
+
+    // Save new repository on disk
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
   }
 
@@ -303,48 +459,6 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
             new Repository(repositoryElement));
       }
     }
-
-  }
-
-  /**
-   * Method that generates the repository interface. This method takes in mind
-   * if entity is defined as readOnly or not.
-   *
-   * @param interfaceType
-   * @param domainType
-   * @param entityDetails
-   * @param interfaceIdentifier
-   */
-  private void addRepositoryInterface(JavaType interfaceType, JavaType domainType,
-      ClassOrInterfaceTypeDetails entityDetails, String interfaceIdentifier,
-      JavaType defaultReturnType) {
-    // Generates @RooJpaRepository annotation with referenced entity value
-    // and repository custom associated to this repository
-    final AnnotationMetadataBuilder interfaceAnnotationMetadata =
-        new AnnotationMetadataBuilder(RooJavaType.ROO_REPOSITORY_JPA);
-    interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName("entity"),
-        domainType));
-    if (defaultReturnType != null) {
-      interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName(
-          "defaultReturnType"), defaultReturnType));
-
-      // Add dependencies between modules
-      getProjectOperations().addModuleDependency(interfaceType.getModule(),
-          defaultReturnType.getModule());
-    }
-    // Generating interface
-    final String interfaceMdId =
-        PhysicalTypeIdentifier.createIdentifier(interfaceType,
-            getPathResolver().getPath(interfaceIdentifier));
-    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-        new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType,
-            PhysicalTypeCategory.INTERFACE);
-
-    // Annotate repository interface
-    cidBuilder.addAnnotation(interfaceAnnotationMetadata.build());
-
-    // Save new repository on disk
-    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
   }
 
@@ -481,60 +595,6 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     }
 
     return implType;
-
-  }
-
-  /**
-   * Method that generates RepositoryCustom interface and its implementation
-   * for an specific entity
-   *
-   * @param domainType
-   * @param repositoryType
-   * @param repositoryPackage
-   * @param defaultReturnType
-   *
-   * @return JavaType with new RepositoryCustom interface.
-   */
-  private JavaType addRepositoryCustom(JavaType domainType, JavaType repositoryType,
-      JavaPackage repositoryPackage) {
-
-    // Getting RepositoryCustom interface JavaTYpe
-    JavaType interfaceType =
-        new JavaType(repositoryPackage.getFullyQualifiedPackageName().concat(".")
-            .concat(repositoryType.getSimpleTypeName()).concat("Custom"),
-            repositoryType.getModule());
-
-    // Check if new interface exists yet
-    final String interfaceIdentifier =
-        getPathResolver().getCanonicalPath(interfaceType.getModule(), Path.SRC_MAIN_JAVA,
-            interfaceType);
-
-    if (getFileManager().exists(interfaceIdentifier)) {
-      // Type already exists - return
-      return interfaceType;
-    }
-
-    final String interfaceMdId =
-        PhysicalTypeIdentifier.createIdentifier(interfaceType,
-            getPathResolver().getPath(interfaceIdentifier));
-    final ClassOrInterfaceTypeDetailsBuilder interfaceBuilder =
-        new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType,
-            PhysicalTypeCategory.INTERFACE);
-
-    // Generates @RooJpaRepositoryCustom annotation with referenced entity value
-    final AnnotationMetadataBuilder repositoryCustomAnnotationMetadata =
-        new AnnotationMetadataBuilder(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM);
-    repositoryCustomAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName(
-        "entity"), domainType));
-
-    interfaceBuilder.addAnnotation(repositoryCustomAnnotationMetadata);
-
-    // Save RepositoryCustom interface and its implementation on disk
-    getTypeManagementService().createOrUpdateTypeOnDisk(interfaceBuilder.build());
-
-    generateRepositoryCustomImpl(interfaceType, repositoryType, domainType);
-
-    return interfaceType;
 
   }
 

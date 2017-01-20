@@ -278,7 +278,8 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
   protected EntityItem createEntityItem(JpaEntityMetadata entityMetadata, ViewContext<T> ctx,
       String suffix) {
     return new EntityItem(ctx.getEntityName(), ctx.getIdentifierField(), ctx.getControllerPath(),
-        suffix, entityMetadata.isReadOnly());
+        suffix, entityMetadata.isReadOnly(), entityMetadata.getCurrentVersionField().getFieldName()
+            .getSymbolName());
   }
 
   @Override

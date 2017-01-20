@@ -103,6 +103,64 @@ public interface PropFilesManagerService {
       String key, String value, boolean sorted, boolean force);
 
   /**
+   * Adds a list of properties only if the given key (and value) does not exist already.
+   * 
+   * @param propertyFilePath the location of the property file (required)
+   * @param propertyFilename the name of the property file within the
+   *            specified path (required)
+   * @param key the property key to update (required)
+   * @param value the property value to set into the property key (required)
+   * @param force boolean that indicates if is necessary to force operation
+   */
+  void addPropertiesIfNotExists(LogicalPath propertyFilePath, String propertyFilename,
+      Map<String, String> properties, boolean force);
+
+  /**
+   * Adds a list of properties only if the given key (and value) does not exist already.
+   * 
+   * @param propertyFilePath the location of the property file (required)
+   * @param propertyFilename the name of the property file within the
+   *            specified path (required)
+   * @param prefix the property prefix to use          
+   * @param key the property key to update (required)
+   * @param value the property value to set into the property key (required)
+   * @param force boolean that indicates if is necessary to force operation
+   */
+  void addPropertiesIfNotExists(LogicalPath propertyFilePath, String propertyFilename,
+      String prefix, Map<String, String> properties, boolean force);
+
+  /**
+   * Adds a list of properties only if the given key (and value) does not exist already.
+   * 
+   * @param propertyFilePath the location of the property file (required)
+   * @param propertyFilename the name of the property file within the
+   *            specified path (required)
+   * @param key the property key to update (required)
+   * @param value the property value to set into the property key (required)
+   * @param sorted indicates if the resulting properties should be sorted
+   *            alphabetically
+   * @param force boolean that indicates if is necessary to force operation
+   */
+  void addPropertiesIfNotExists(LogicalPath propertyFilePath, String propertyFilename,
+      Map<String, String> properties, boolean sorted, boolean force);
+
+  /**
+   * Adds a list of properties only if the given key (and value) does not exist already.
+   * 
+   * @param propertyFilePath the location of the property file (required)
+   * @param propertyFilename the name of the property file within the
+   *            specified path (required)
+   * @param prefix the property prefix to use
+   * @param key the property key to update (required)
+   * @param value the property value to set into the property key (required)
+   * @param sorted indicates if the resulting properties should be sorted
+   *            alphabetically
+   * @param force boolean that indicates if is necessary to force operation
+   */
+  void addPropertiesIfNotExists(LogicalPath propertyFilePath, String propertyFilename,
+      String prefix, Map<String, String> properties, boolean sorted, boolean force);
+
+  /**
    * Changes the specified property, throwing an exception if the file does
    * not exist.
    * 

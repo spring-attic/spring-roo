@@ -58,7 +58,8 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
 
   private static final String RESPONSE_TYPE = "THYMELEAF";
   private static final String CONTROLLER_NAME_MODIFIER = "Thymeleaf";
-
+  private static final String SPRING_MESSAGES_ENCODING = "spring.messages.encoding";
+  private static final String SPRING_MESSAGES_ENCODING_VALUE = "ISO-8859-1";
   private static final String SPRING_THYMELEAF_MODE = "spring.thymeleaf.mode";
   private static final String SPRING_THYMELEAF_MODE_VALUE = "html";
 
@@ -215,8 +216,8 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     // Is necessary to copy static resources
     copyStaticResources(module);
 
-    // Specify HTML template mode 
-    addTemplateModeProperty(module);
+    // Add application properties
+    addApplicationProperties(module);
 
     // Add all available WebJar containing required static resources
     addWebJars(module);
@@ -390,18 +391,22 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
   }
 
   /**
-   * This method adds a spring property which specifies HTML as the template 
-   * mode to use by Thymeleaf for all existing profiles.
+   * This method adds two spring properties. One of them specifies HTML as the 
+   * template mode to use by Thymeleaf for all existing profiles and the other 
+   * one specifies the messages files encoding as ISO-8859-1. 
    * 
    * @param module
    */
-  private void addTemplateModeProperty(Pom module) {
+  private void addApplicationProperties(Pom module) {
     List<String> applicationProfiles =
         getApplicationConfigService().getApplicationProfiles(module.getModuleName());
     for (String profile : applicationProfiles) {
       getApplicationConfigService().addProperty(module.getModuleName(), SPRING_THYMELEAF_MODE,
           SPRING_THYMELEAF_MODE_VALUE, profile, false);
     }
+
+    getApplicationConfigService().addProperty(module.getModuleName(), SPRING_MESSAGES_ENCODING,
+        SPRING_MESSAGES_ENCODING_VALUE, "", false);
   }
 
   /**

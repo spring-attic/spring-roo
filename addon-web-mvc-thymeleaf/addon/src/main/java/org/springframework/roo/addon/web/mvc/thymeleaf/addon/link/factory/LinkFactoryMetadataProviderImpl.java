@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon.link.factory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -9,12 +12,15 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
@@ -111,8 +117,24 @@ public class LinkFactoryMetadataProviderImpl extends AbstractMemberDiscoveringIt
     String controllerMetadataKey = ControllerMetadata.createIdentifier(controllerDetails);
     final ControllerMetadata controllerMetadata = getMetadataService().get(controllerMetadataKey);
 
+    // Get the controller methods
+    List<MethodMetadata> controllerMethods = new ArrayList<MethodMetadata>();
+
+
+    MemberDetails controllerMemberDetails = getMemberDetails(controllerDetails);
+    for (MethodMetadata method : controllerMemberDetails.getMethods()) {
+      // Check if is a @RequestMapping method
+      if (method.getAnnotation(SpringJavaType.GET_MAPPING) != null
+          || method.getAnnotation(SpringJavaType.POST_MAPPING) != null
+          || method.getAnnotation(SpringJavaType.PUT_MAPPING) != null
+          || method.getAnnotation(SpringJavaType.DELETE_MAPPING) != null
+          || method.getAnnotation(SpringJavaType.REQUEST_MAPPING) != null) {
+        controllerMethods.add(method);
+      }
+    }
+
     return new LinkFactoryMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, controller, controllerMetadata);
+        governorPhysicalTypeMetadata, controller, controllerMetadata, controllerMethods);
   }
 
   public String getProvidesType() {

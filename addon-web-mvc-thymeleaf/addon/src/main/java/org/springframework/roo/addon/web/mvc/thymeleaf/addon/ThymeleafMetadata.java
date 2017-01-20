@@ -10,15 +10,6 @@ import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_DATATA
 import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH;
 import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_NOT_FOUND_EXCEPTION;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
@@ -57,6 +48,15 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
 /**
  * Metadata for {@link RooThymeleaf}.
  *
@@ -90,6 +90,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   protected static final JavaSymbolName EXPORT_XLS_METHOD_NAME = new JavaSymbolName("exportXls");
   protected static final JavaSymbolName ADD_COLUMN_TO_REPORT_BUILDER_METHOD_NAME =
       new JavaSymbolName("addColumnToReportBuilder");
+  protected static final JavaSymbolName FIN_ONE_FOR_UPDATE_METHOD_NAME = new JavaSymbolName(
+      "findOneForUpdate");
 
   private static final AnnotatedJavaType PAGEABLE_PARAM = new AnnotatedJavaType(
       SpringJavaType.PAGEABLE);
@@ -125,6 +127,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private static final AnnotatedJavaType STRING_PARAM = new AnnotatedJavaType(JavaType.STRING);
   private static final JavaSymbolName FILE_NAME_PARAM_NAME = new JavaSymbolName("fileName");
   private static final JavaSymbolName EXPORTER_PARAM_NAME = new JavaSymbolName("exporter");
+  private static final JavaSymbolName HTTP_METHOD_PARAM_NAME = new JavaSymbolName("method");
+  private static final JavaSymbolName VERSION_PARAM_NAME = new JavaSymbolName("version");
 
   private static final AnnotationMetadata ANN_METADATA_VALID = AnnotationMetadataBuilder
       .getInstance(Jsr303JavaType.VALID);
@@ -1813,6 +1817,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
    */
   private MethodMetadata getModelAttributeMethod(String pathVariable,
       ServiceMetadata serviceMetadata, FieldMetadata serviceField) {
+    String pathVariableUncapitalized = StringUtils.uncapitalize(pathVariable);
+
     // Define methodName
     final JavaSymbolName methodName =
         new JavaSymbolName("get" + StringUtils.capitalize(pathVariable));
@@ -1826,10 +1832,11 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     AnnotationMetadataBuilder pathVariableAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
-    pathVariableAnnotation.addStringAttribute("value", StringUtils.uncapitalize(pathVariable));
+    pathVariableAnnotation.addStringAttribute("value", pathVariableUncapitalized);
 
     parameterTypes.add(new AnnotatedJavaType(idType, pathVariableAnnotation.build()));
     parameterTypes.add(LOCALE_PARAM);
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.HTTP_METHOD));
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -1841,21 +1848,39 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(idName);
     parameterNames.add(LOCALE_PARAM_NAME);
+    parameterNames.add(HTTP_METHOD_PARAM_NAME);
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // Customer customer = customerService.findOne(id);
-    bodyBuilder.appendFormalLine("%s %s = %s.%s(%s);", getNameOfJavaType(entityType), pathVariable,
-        serviceField.getFieldName(), serviceMetadata.getCurrentFindOneMethod().getMethodName(),
-        idName);
+    // Entity entity = null;
+    bodyBuilder.appendFormalLine("%s %s = null;", getNameOfJavaType(entityType),
+        pathVariableUncapitalized);
 
-    // if (customer == null) {
-    //   throw new NotFoundException("Customer not found");
-    // }
-    bodyBuilder.appendFormalLine("if (%s == null) {", pathVariable);
+    // if (HttpMethod.PUT.equals(method)) {
+    bodyBuilder.appendFormalLine("if (%s.PUT.equals(%s)) {",
+        getNameOfJavaType(SpringJavaType.HTTP_METHOD), HTTP_METHOD_PARAM_NAME);
+    // pet = petService.findOneForUpdate(id);
     bodyBuilder.indent();
+    bodyBuilder.appendFormalLine("%s = %s.%s(%s);", pathVariableUncapitalized, serviceField
+        .getFieldName().getSymbolName(), FIN_ONE_FOR_UPDATE_METHOD_NAME.getSymbolName(), idName);
+    //    } else {
+    bodyBuilder.indentRemove();
+    bodyBuilder.appendFormalLine("} else {");
+    // entity = entityService.findOne(id);
+    bodyBuilder.indent();
+    bodyBuilder.appendFormalLine("%s = %s.%s(%s);", pathVariableUncapitalized, serviceField
+        .getFieldName().getSymbolName(), serviceMetadata.getCurrentFindOneMethod().getMethodName()
+        .getSymbolName(), idName);
+    //    }
+    bodyBuilder.indentRemove();
+    bodyBuilder.appendFormalLine("}");
+
+    // if (entity == null) {
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine("if (%s == null) {", pathVariableUncapitalized);
     // String message = messageSource.getMessage("error_NotFound", entity, null, locale);
+    bodyBuilder.indent();
     bodyBuilder
         .appendFormalLine(
             "String message = %s.getMessage(\"error_NotFound\", new Object[] {\"%s\", %s}, \"The record couldn't be found\", %s);",
@@ -1865,10 +1890,11 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     bodyBuilder.appendFormalLine("throw new %s(message);",
         getNameOfJavaType(SPRINGLETS_NOT_FOUND_EXCEPTION));
     bodyBuilder.indentRemove();
+    // }
     bodyBuilder.appendFormalLine("}");
 
-    // return customer;
-    bodyBuilder.appendFormalLine("return %s;", pathVariable);
+    // return entity;
+    bodyBuilder.appendFormalLine("return %s;", pathVariableUncapitalized);
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, parameterTypes,
@@ -2077,8 +2103,12 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     final JavaSymbolName methodName = UPDATE_METHOD_NAME;
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM);
+    requestParamAnnotation.addStringAttribute("value", VERSION_PARAM_NAME.getSymbolName());
     parameterTypes.add(new AnnotatedJavaType(this.entity, ANN_METADATA_VALID,
         ANN_METADATA_MODEL_ATTRIBUTE));
+    parameterTypes.add(new AnnotatedJavaType(this.entityMetadata.getCurrentVersionField()
+        .getFieldType(), requestParamAnnotation.build()));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.BINDING_RESULT));
     parameterTypes.add(MODEL_PARAM);
 
@@ -2091,6 +2121,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName(entityItemName));
+    parameterNames.add(this.entityMetadata.getCurrentVersionField().getFieldName());
     parameterNames.add(new JavaSymbolName("result"));
     parameterNames.add(MODEL_PARAM_NAME);
 
