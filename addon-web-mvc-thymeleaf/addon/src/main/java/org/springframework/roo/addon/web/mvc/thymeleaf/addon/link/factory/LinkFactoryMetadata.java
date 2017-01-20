@@ -185,16 +185,7 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
       // Getting methodParams
       String methodParamsToNull = "";
-      boolean hasRequestParams = false;
-      for (AnnotatedJavaType param : method.getParameterTypes()) {
-        // Check @RequestParam annotation in current parameter
-        List<AnnotationMetadata> paramAnnotation = param.getAnnotations();
-        for (AnnotationMetadata annotation : paramAnnotation) {
-          if (annotation.getAnnotationType().equals(SpringJavaType.REQUEST_PARAM)) {
-            hasRequestParams = true;
-          }
-        }
-
+      for (int i = 0; i < method.getParameterTypes().size(); i++) {
         // Include a null declaration for every parameter
         methodParamsToNull += "null, ";
       }
@@ -211,10 +202,10 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
       // return MvcUriComponentsBuilder.fromMethodCall(MvcUriComponentsBuilder.on(getControllerClass()).list(null)).build();
 
       bodyBuilder.appendFormalLine(
-          "return %1$s.fromMethodCall(%1$s.on(%2$s()).%3$s(%4$s))%5$s.buildAndExpand(%6$s);",
-          getNameOfJavaType(SpringJavaType.MVC_URI_COMPONENTS_BUILDER),
+          "return %1$s.fromMethodCall(%1$s.on(%2$s()).%3$s(%4$s)).buildAndExpand(%5$s);",
+          getNameOfJavaType(SpringletsJavaType.SPRINGLETS_MVC_URI_COMPONENTS_BUILDER),
           this.getControllerClassMethod.getMethodName(), methodName, methodParamsToNull,
-          hasRequestParams ? ".replaceQuery(null)" : "", PATH_VARIABLES_ARGUMENT_NAME);
+          PATH_VARIABLES_ARGUMENT_NAME);
       bodyBuilder.indentRemove();
       // }
       bodyBuilder.appendFormalLine("}");

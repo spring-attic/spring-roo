@@ -29,7 +29,7 @@
         Only the inner content of the following tag "section" is included
         within the template, in the section "content"
       -->
-      <section data-layout-fragment="content">
+      <section data-layout-fragment="content" data-th-with="searchLink=${r"${@"}linkBuilder.of('${mvcSearchControllerName}')},collectionLink=${r"${@"}linkBuilder.of('${mvcCollectionControllerName}')},itemLink=${r"${@"}linkBuilder.of('${mvcItemControllerName}')}">
         <div class="container-fluid content">
 
           <h1 data-th-text="${r"#{"}${entityLabelPlural}}">${entityName}s</h1>
@@ -55,7 +55,7 @@
 
             <div class="panel-heading"  data-th-if="${r"${"}${conditionalEmpty}}">
               <a class="btn btn-default btn-xs"
-                 data-th-with="${r"url=${(#mvc.url('"}${mvcUrl_search_form}${r"')).build()}"}"
+                 data-th-with="url=${r"${"}searchLink.to('${finderName}Form')}"
                  data-th-href="@{${r"${url}("}${allFieldsList})}">
                 <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
               </a>
@@ -65,7 +65,7 @@
             <div class="panel-heading" data-th-unless="${r"${"}${conditionalEmpty}}">
               <span class="btn-group" role="group">
                 <a class="btn btn-default btn-xs"
-                   data-th-with="${r"url=${(#mvc.url('"}${mvcUrl_search_form}${r"')).build()}"}"
+                   data-th-with="url=${r"${"}searchLink.to('${finderName}Form')}"
                    data-th-href="@{${r"${url}("}${allFieldsList})}">
                   <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
                 </a>
@@ -95,7 +95,7 @@
                 </#if>
 
                  <a class="btn btn-primary btn-xs" data-th-unless="*{${field.fieldName} == null}"
-                             data-th-with="${r"url=${(#mvc.url('"}${mvcUrl_search_list}')).build()}"
+                             data-th-with="url=${r"${"}searchLink.to('${finderName}')}"
                              data-th-href="@{${r"${url}"}${allFieldsListWithoutCurrent}}">
                             <span class="glyphicon glyphicon-remove-circle"></span>
                             <span data-th-text="|${field.fieldName}: *{${field.fieldName}}|">${field.fieldName}: a ${field.fieldName}</span>
@@ -121,12 +121,16 @@
                    <#list formbeanfields as field>
                    data-data-load-url-param-${field.fieldWithoutCamelCase}="${r"${"}formBean.${field.fieldName}}"
                    </#list>
-                   data-data-load-url="${r"${"}(#mvc.url('${mvcUrl_search_datatables}')).build()}"
-                   data-data-show-url="${r"${"}(#mvc.url('${mvcUrl_show}')).buildAndExpand('_ID_')}"
+                   data-data-load-url="${r"${"}searchLink.to('${finderName}Dt')}"
+                   data-data-show-url="${r"${"}itemLink.to('show').with('${modelAttributeName}', '_ID_')}"
+                   data-data-export-csv-url="${r"${"}collectionLink.to('exportCsv')}" 
+                   data-data-export-xls-url="${r"${"}collectionLink.to('exportXls')}" 
+                   data-data-export-pdf-url="${r"${"}collectionLink.to('exportPdf')}"
                    <#if entity.readOnly == false>
-                   data-data-create-url="${r"${"}(#mvc.url('${mvcUrl_createForm}')).build()}"
-                   data-data-edit-url="${r"${"}(#mvc.url('${mvcUrl_editForm}')).buildAndExpand('_ID_')}"
-                   data-data-delete-url="${r"${"}(#mvc.url('${mvcUrl_remove}')).buildAndExpand('_ID_')}"
+                    data-data-create-url="${r"${"}collectionLink.to('createForm')}"
+                   data-data-edit-url="${r"${"}itemLink.to('editForm').with('${modelAttributeName}', '_ID_')}"
+                   data-data-delete-url="${r"${"}itemLink.to('delete').with('${modelAttributeName}', '_ID_')}"
+                   data-data-delete-batch-url="${r"${"}collectionLink.to('deleteBatch').with('ids', '_ID_')}"
                    </#if>
                    >
                 <caption class="sr-only"

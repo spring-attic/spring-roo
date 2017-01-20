@@ -29,6 +29,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaPackage;
@@ -234,6 +235,9 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 
     // Write changes to disk
     typeManagementService.createOrUpdateTypeOnDisk(controllerBuilder.build());
+
+    // Create LinkFactory class for the search controler
+    controllerOperations.createLinkFactoryClass(controllerBuilder.getName());
   }
 
   @Override

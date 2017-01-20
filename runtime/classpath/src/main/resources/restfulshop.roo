@@ -74,16 +74,19 @@ finder add --entity ~.model.Customer --name findByFirstNameAndLastName --formBea
 
 // Generate web layer
 web mvc setup
+web mvc language --code es
 web mvc controller --all
 web mvc view setup --type THYMELEAF
 web mvc controller --all --responseType THYMELEAF
 
+// Publishing finders in web layer
+web mvc finder --entity ~.model.Customer
+web mvc finder --entity ~.model.Customer --responseType THYMELEAF
 
-web mvc language --code es
 
 // detail OneToMany aggregation
 web mvc detail --entity ~.model.Customer --field orders
-web mvc detail --entity ~.model.Customer --field orders --responseType THYMELEAF
+web mvc detail --entity ~.model.Customer --field orders --responseType THYMELEAF --views list,findByFirstNameAndLastName
 
 // detail ManyToMany aggregation
 web mvc detail --entity ~.model.Category --field products
@@ -96,7 +99,3 @@ web mvc detail --entity ~.model.CustomerOrder --field details --responseType THY
 // two level details
 // web mvc detail --entity ~.model.Customer --field orders.details
 // web mvc detail --entity ~.model.Customer --field orders.details --responseType THYMELEAF
-
-
-web mvc finder --entity ~.model.Customer
-web mvc finder --entity ~.model.Customer --responseType THYMELEAF

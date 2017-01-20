@@ -34,14 +34,14 @@
         Only the inner content of the following tag "section" is included
         within the template, in the section "content"
       -->
-      <section data-layout-fragment="content">
+      <section data-layout-fragment="content" data-th-with="searchLink=${r"${@"}linkBuilder.of('${mvcSearchControllerName}')}">
         <div class="container-fluid content">
 
           <h1 data-th-text="${r"#{"}label_search_entity(${r"#{"}${entityLabel}})}">Search ${entityName}</h1>
 
           <!-- FORM -->
           <form class="form-horizontal validate" method="GET" data-th-object="${r"${"}formBean}"
-            data-th-action="${r"${"}(#mvc.url('${mvcUrl_search}')).build()}">
+            data-th-action="${r"${"}searchLink.to('${finderName}')}">
 
             <fieldset id="containerFields">
               <legend class="sr-only" data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data </legend>

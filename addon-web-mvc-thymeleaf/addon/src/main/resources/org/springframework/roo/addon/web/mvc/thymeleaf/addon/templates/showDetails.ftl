@@ -45,14 +45,14 @@
                       data-datatables="true"
                       data-order="[[ 0, &quot;asc&quot; ]]"
                       data-data-load-url="${r"${"}detailCollectionLink.to('datatables').with('${modelAttributeName}', id)}"
-                      data-data-show-url="${r"${"}(#mvc.url('${dconfig.mvcUrl_show}')).buildAndExpand(${dconfig.mvcUrl_itemExpandBuilderExp})}"
+                      data-data-show-url="${r"${"}detailItemLink.to('show').with('${detail.modelAttribute}', '_ID_')}"
                       <#if entity.readOnly == false>
-                      data-data-edit-url="${r"${"}(#mvc.url('${dconfig.mvcUrl_editForm}')).buildAndExpand(${dconfig.mvcUrl_itemExpandBuilderExp})}"
-                      data-data-delete-url="${r"${"}(#mvc.url('${dconfig.mvcUrl_delete}')).${dconfig.mvcUrl_delete_dt_ext}}"
-                      data-data-create-url="${r"${"}detailCollectionLink.to('createForm').with('${modelAttributeName}', id)}"
+                       data-data-edit-url="${r"${"}detailItemLink.to('editForm').with('${detail.modelAttribute}', '_ID_')}"
+                       data-data-delete-url="${r"${"}detailCollectionLink.to('removeFrom${detail.fieldNameCapitalized}').with('${modelAttributeName}', id).with('${detail.fieldName}ToRemove', '_ID_')}"
+                       data-data-create-url="${r"${"}detailCollectionLink.to('createForm').with('${modelAttributeName}', id)}"
                       </#if>
                       >
-                      <caption data-th-text="${r"#{"}label_list_of_entity(${r"#"}{${dconfig.referencedFieldLabel}})}">${detail.fieldNameCapitalized} List</caption>
+                      <caption class="sr-only" data-th-text="${r"#{"}label_list_of_entity(${r"#"}{${dconfig.referencedFieldLabel}})}">${detail.fieldNameCapitalized} List</caption>
                       <thead>
                         <tr>
                           <#list detail.configuration.referenceFieldFields as referencedFieldField>

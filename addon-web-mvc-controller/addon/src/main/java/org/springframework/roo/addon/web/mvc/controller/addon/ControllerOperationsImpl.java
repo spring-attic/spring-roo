@@ -457,7 +457,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
       // Create LinkFactory class
       if (responseType.getName().equals("THYMELEAF")) {
-        includeLinkFactory(cidBuilder.getName());
+        createLinkFactoryClass(cidBuilder.getName());
       }
     } else {
       LOGGER.log(
@@ -505,7 +505,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
       // Create LinkFactory class
       if (responseType.getName().equals("THYMELEAF")) {
-        includeLinkFactory(cidBuilder.getName());
+        createLinkFactoryClass(cidBuilder.getName());
       }
     } else {
       LOGGER.log(
@@ -1084,7 +1084,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     // Create LinkFactory class
     if (responseType.getName().equals("THYMELEAF")) {
-      includeLinkFactory(cidBuilder.getName());
+      createLinkFactoryClass(cidBuilder.getName());
     }
 
     if (getProjectOperations().isMultimoduleProject()) {
@@ -1206,7 +1206,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
    * 
    * @param controller the JavaType of the associated controller
    */
-  private void includeLinkFactory(JavaType controller) {
+  @Override
+  public void createLinkFactoryClass(JavaType controller) {
 
     // Create name
     String name = controller.getSimpleTypeName().concat("LinkFactory");

@@ -348,36 +348,10 @@ public class ThymeleafViewGeneratorServiceImpl extends
         detailItemController.getSimpleTypeName());
     item.addConfigurationElement("mvcDetailCollectionControllerName",
         detailCollectionController.getSimpleTypeName());
-    item.addConfigurationElement("mvcUrl_createForm", ThymeleafMetadata.getMvcUrlNameFor(
-        detailCollectionController, ThymeleafMetadata.CREATE_FORM_METHOD_NAME));
-    item.addConfigurationElement("mvcUrl_create", ThymeleafMetadata.getMvcUrlNameFor(
-        detailCollectionController, ThymeleafMetadata.CREATE_METHOD_NAME));
-    if (detailController.getControllerMetadata().getLastDetailsInfo().type == JpaRelationType.AGGREGATION) {
-      item.addConfigurationElement(
-          "mvcUrl_delete",
-          ThymeleafMetadata.getMvcUrlNameFor(detailCollectionController,
-              detailController.getCurrentRemoveFromDetailsMethod()));
-      item.addConfigurationElement("mvcUrl_delete_dt_ext",
-          "arg(1,'_ID_').buildAndExpand('_PARENTID_')");
-      item.addConfigurationElement("mvcUrl_show", ThymeleafMetadata.getMvcUrlNameFor(
-          relatedItemController, ThymeleafMetadata.SHOW_METHOD_NAME));
-      item.addConfigurationElement("mvcUrl_editForm", ThymeleafMetadata.getMvcUrlNameFor(
-          relatedItemController, ThymeleafMetadata.EDIT_FORM_METHOD_NAME));
-      item.addConfigurationElement("mvcUrl_select2", ThymeleafMetadata.getMvcUrlNameFor(
-          relatedCollectionController, ThymeleafMetadata.SELECT2_METHOD_NAME));
-      item.addConfigurationElement("mvcUrl_itemExpandBuilderExp", "'_ID_'");
-
-    } else {
-      item.addConfigurationElement("mvcUrl_delete", ThymeleafMetadata.getMvcUrlNameFor(
-          detailItemController, ThymeleafMetadata.DELETE_METHOD_NAME));
-      item.addConfigurationElement("mvcUrl_show", ThymeleafMetadata.getMvcUrlNameFor(
-          detailItemController, ThymeleafMetadata.SHOW_METHOD_NAME));
-      item.addConfigurationElement("mvcUrl_editForm", ThymeleafMetadata.getMvcUrlNameFor(
-          detailItemController, ThymeleafMetadata.EDIT_FORM_METHOD_NAME));
-      item.addConfigurationElement("mvcUrl_update", ThymeleafMetadata.getMvcUrlNameFor(
-          detailItemController, ThymeleafMetadata.UPDATE_METHOD_NAME));
-      item.addConfigurationElement("mvcUrl_itemExpandBuilderExp", "'_PARENTID_','_ID_'");
-      item.addConfigurationElement("mvcUrl_delete_dt_ext", "buildAndExpand('_PARENTID_','_ID_')");
+    if (relatedItemController != null) {
+      item.addConfigurationElement("select2MethodName", ThymeleafMetadata.SELECT2_METHOD_NAME);
+      item.addConfigurationElement("select2ControllerName",
+          relatedCollectionController.getSimpleTypeName());
     }
 
     return item;
@@ -480,14 +454,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
 
-    final JavaType searchController = viewMetadata.getDestination();
-
-    Map<String, MethodMetadata> finderListMethods = viewMetadata.getFinderListMethods();
-    MethodMetadata finderMethod = finderListMethods.get(finderName);
-
-    ctx.addExtraParameter("mvcUrl_search",
-        ThymeleafMetadata.getMvcUrlNameFor(searchController, finderMethod));
-
+    ctx.addExtraParameter("finderName", finderName.replace("findBy", "by"));
     ctx.addExtraParameter("entity", entityItem);
     ctx.addExtraParameter("fields", fields);
 
@@ -597,13 +564,6 @@ public class ThymeleafViewGeneratorServiceImpl extends
     MethodMetadata finderListMethod = finderListMethods.get(finderName);
     Map<String, MethodMetadata> finderFormMethods = viewMetadata.getFinderFormMethods();
     MethodMetadata finderFormMethod = finderFormMethods.get(finderName);
-
-    ctx.addExtraParameter("mvcUrl_search_datatables",
-        ThymeleafMetadata.getMvcUrlNameFor(searchController, finderDtMethod));
-    ctx.addExtraParameter("mvcUrl_search_list",
-        ThymeleafMetadata.getMvcUrlNameFor(searchController, finderListMethod));
-    ctx.addExtraParameter("mvcUrl_search_form",
-        ThymeleafMetadata.getMvcUrlNameFor(searchController, finderFormMethod));
 
     ctx.addExtraParameter("entity", entityItem);
     ctx.addExtraParameter("fields", fields);
@@ -822,6 +782,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     final JavaType itemCtrl;
     final JavaType collCtrl;
+    final JavaType searchCtrl;
     ctx.addExtraParameter("mvcControllerName", metadata.getMvcControllerName());
     if (controllerMetadata.getType() == ControllerType.COLLECTION) {
       collCtrl = controllerMetadata.getDestination();
@@ -836,25 +797,19 @@ public class ThymeleafViewGeneratorServiceImpl extends
       itemCtrl = metadata.getItemController();
     }
     ctx.addExtraParameter("mvcItemControllerName", ThymeleafMetadata.getMvcControllerName(itemCtrl));
-    ctx.addExtraParameter("mvcUrl_datatables",
-        ThymeleafMetadata.getMvcUrlNameFor(collCtrl, ThymeleafMetadata.LIST_DATATABLES_METHOD_NAME));
-    ctx.addExtraParameter("mvcUrl_createForm",
-        ThymeleafMetadata.getMvcUrlNameFor(collCtrl, ThymeleafMetadata.CREATE_FORM_METHOD_NAME));
-    ctx.addExtraParameter("mvcUrl_create",
-        ThymeleafMetadata.getMvcUrlNameFor(collCtrl, ThymeleafMetadata.CREATE_METHOD_NAME));
-    ctx.addExtraParameter("mvcUrl_list",
-        ThymeleafMetadata.getMvcUrlNameFor(collCtrl, ThymeleafMetadata.LIST_METHOD_NAME));
-    ctx.addExtraParameter("mvcUrl_show",
-        ThymeleafMetadata.getMvcUrlNameFor(itemCtrl, ThymeleafMetadata.SHOW_METHOD_NAME));
-    ctx.addExtraParameter("mvcUrl_editForm",
-        ThymeleafMetadata.getMvcUrlNameFor(itemCtrl, ThymeleafMetadata.EDIT_FORM_METHOD_NAME));
-    ctx.addExtraParameter("mvcUrl_remove",
-        ThymeleafMetadata.getMvcUrlNameFor(itemCtrl, ThymeleafMetadata.DELETE_METHOD_NAME));
 
-    ctx.addExtraParameter("mvcUrl_update",
-        ThymeleafMetadata.getMvcUrlNameFor(itemCtrl, ThymeleafMetadata.UPDATE_METHOD_NAME));
+    // Adding search linkfactory if needed
+    if (controllerMetadata.getType() == ControllerType.SEARCH) {
+      searchCtrl = controllerMetadata.getDestination();
+    } else {
+      searchCtrl = null;
+    }
 
-    // TODO finder names
+
+    if (searchCtrl != null) {
+      ctx.addExtraParameter("mvcSearchControllerName",
+          ThymeleafMetadata.getMvcControllerName(searchCtrl));
+    }
 
     return ctx;
   }
@@ -867,14 +822,15 @@ public class ThymeleafViewGeneratorServiceImpl extends
     if (!found) {
       return false;
     }
+
     ClassOrInterfaceTypeDetails referenceController =
         (ClassOrInterfaceTypeDetails) fieldItem.getConfiguration().get("referencedController");
-    fieldItem.addConfigurationElement("referecedMvcUrl_select2", ThymeleafMetadata
-        .getMvcUrlNameFor(referenceController.getType(), ThymeleafMetadata.SELECT2_METHOD_NAME));
 
+    fieldItem.addConfigurationElement("select2MethodName", ThymeleafMetadata.SELECT2_METHOD_NAME);
+    fieldItem.addConfigurationElement("select2ControllerName", referenceController.getType()
+        .getSimpleTypeName());
 
     return true;
-
   }
 
   @Override

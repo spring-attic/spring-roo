@@ -23,7 +23,7 @@
 
       <!-- CONTENT -->
       <section data-layout-fragment="content">
-        <div class="container-fluid content">
+        <div class="container-fluid content" data-th-with="collectionLink=${r"${@"}linkBuilder.of('${mvcCollectionControllerName}')},detailCollectionLink=${r"${@"}linkBuilder.of('${detail.configuration.mvcDetailCollectionControllerName}')}">
   	<!--
   	  Only the inner content of the following tag "section" is included
   	  within the template, in the section "content"
@@ -34,8 +34,7 @@
           <#assign dconfig=detail.configuration>
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="${r"${"}(#mvc.url('${dconfig.mvcUrl_create}')).buildAndExpand(${modelAttributeName}.${identifierField})}">
-
+            data-th-action="${r"${"}detailCollectionLink.to('create').with('${modelAttributeName}', ${modelAttributeName}.${identifierField})}">
             <fieldset id="containerFields">
               <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${detail.configuration.entityLabel}})}">${detail.entityName} data </legend>
 
@@ -43,7 +42,7 @@
                 ${detail.codeManaged}
               <#else>
                 <div class="form-group has-error has-feedback" data-z="${detail.z}" id="${detail.entityItemId}"
-                    data-th-class="form-group">
+                    data-th-class="form-group" data-th-with="select2ControllerLink=${r"${@"}linkBuilder.of('${dconfig.select2ControllerName}')}">
                     <div class="col-md-6">
                       <select id="${detail.fieldName}" name="${detail.fieldName}Ids"
                         class="form-control dropdown-select-ajax"
@@ -52,7 +51,7 @@
                         data-ajax--data-type="json"
                         data-ajax--delay="250"
                         multiple="multiple"
-                        data-data-ajax--url="${r"${"}(#mvc.url('${dconfig.mvcUrl_select2}')).build()}"
+                        data-data-ajax--url="${r"${"}select2ControllerLink.to('${dconfig.select2MethodName}')}"
                         data-data-placeholder="${r"#{"}${select2_placeholder}}">
                           <option data-th-each="item: *{${detail.pathStringFieldNames}}"
                              selected="true"
@@ -68,7 +67,7 @@
                 <div class="col-md-9 col-md-offset-3">
                     <button type="reset" class="btn btn-default"
                       onclick="location.href='list.html'"
-                      data-th-onclick="'location.href=\'' + ${r"${"}(#mvc.url('${mvcUrl_list}')).build()} + '\''"
+                      data-th-onclick="'location.href=\'' + @{${"${"}collectionLink.to('list')}} + '\''"
                       data-th-text="${r"#{"}label_reset}">Cancel</button>
                     <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit}">Save</button>
                 </div>

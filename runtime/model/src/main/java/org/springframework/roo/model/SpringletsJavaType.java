@@ -69,6 +69,9 @@ public class SpringletsJavaType {
   public static final JavaType SPRINGLETS_MAIL_RECEIVER_SERVICE = new JavaType(
       "io.springlets.mail.MailReceiverService");
 
+  public static final JavaType SPRINGLETS_MVC_URI_COMPONENTS_BUILDER = new JavaType(
+      "io.springlets.web.mvc.util.SpringletsMvcUriComponentsBuilder");
+
   public static final JavaType SPRINGLETS_JMS_SENDING_SERVICE = new JavaType(
       "io.springlets.jms.JmsMessageSenderService");
 
@@ -81,6 +84,7 @@ public class SpringletsJavaType {
       "io.springlets.data.domain.jaxb.PageAdapter");
   public static final JavaType SPRINGLETS_PAGEABLE_ADAPTER = new JavaType(
       "io.springlets.data.domain.jaxb.PageableAdapter");
+
 
 
   /**

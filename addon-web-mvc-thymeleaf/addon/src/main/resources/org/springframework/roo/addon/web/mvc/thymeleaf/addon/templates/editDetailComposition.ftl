@@ -35,13 +35,13 @@
         within the template, in the section "content"
       -->
       <section data-layout-fragment="content">
-        <div class="container-fluid content">
+        <div class="container-fluid content" data-th-with="collectionLink=${r"${@"}linkBuilder.of('${detail.configuration.mvcDetailCollectionControllerName}')},itemLink=${r"${@"}linkBuilder.of('${detail.configuration.mvcDetailItemControllerName}')}">
 
           <h1 data-th-text="${r"#{"}label_edit_entity(${r"#{"}${entityLabel}})}">Edit ${entityName}</h1>
 
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="@{${"${"}(#mvc.url('${detail.configuration.mvcUrl_update}')).buildAndExpand(${entity.modelAttribute}.${entity.configuration.identifierField},${detail.modelAttribute}.${detail.configuration.identifierField})}}">
+            data-th-action="${r"${"}itemLink.to('update')}">
             <input type="hidden" name="_method" value="PUT" />
 
              <fieldset id="containerFields">
@@ -67,7 +67,8 @@
                           z=field.z
                           referencedEntity=field.configuration.referencedEntity
                           identifierField=field.configuration.identifierField
-                          referecedMvcUrl_select2=field.configuration.referecedMvcUrl_select2
+                          select2MethodName=field.configuration.select2MethodName
+                          select2ControllerName=field.configuration.select2ControllerName
                           required=field.configuration.required />
                   <#elseif field.type == "ENUM">
                       <@enum.input label=field.label
@@ -88,7 +89,7 @@
                   <div class="pull-left">
                     <button type="reset" class="btn btn-default"
                       onclick="location.href='list.html'"
-                      data-th-onclick="'location.href=\'' + @{${"${"}(#mvc.url('${mvcUrl_list}')).build()}} + '\''"
+                      data-th-onclick="'location.href=\'' + @{${"${"}collectionLink.to('list')}} + '\''"
                       data-th-text="${r"#{"}label_reset}">Cancel</button>
                   </div>
                   <div class="pull-right">

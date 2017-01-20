@@ -28,7 +28,7 @@
     </header>
 
     <!-- CONTAINER -->
-    <div class="container bg-container">
+    <div class="container bg-container" data-th-with="collectionLink=${r"${@"}linkBuilder.of('${detail.configuration.mvcDetailCollectionControllerName}')}">
       <!-- CONTENT -->
       <!--
         Only the inner content of the following tag "section" is included
@@ -43,7 +43,7 @@
 
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="@{${r"${"}(#mvc.url('${dconfig.mvcUrl_create}')).buildAndExpand(${entity.modelAttribute}.${entity.configuration.identifierField})}}">
+            data-th-action="${r"${"}collectionLink.to('create')}">
 
             <fieldset id="containerFields">
               <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data </legend>
@@ -68,7 +68,8 @@
                           z=field.z
                           referencedEntity=field.configuration.referencedEntity
                           identifierField=field.configuration.identifierField
-                          referecedMvcUrl_select2=field.configuration.referecedMvcUrl_select2
+                          select2MethodName=field.configuration.select2MethodName
+                          select2ControllerName=field.configuration.select2ControllerName
                           required=field.configuration.required />
                   <#elseif field.type == "ENUM">
                       <@enum.input label=field.label
@@ -87,7 +88,6 @@
               <div class="form-group">
                 <div class="col-md-9 col-md-offset-3">
                     <button type="reset" class="btn btn-default"
-                      onclick="location.href='list.html'"
                       data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
                       data-th-text="${r"#{"}label_reset}">Cancel</button>
                     <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit}">Save</button>

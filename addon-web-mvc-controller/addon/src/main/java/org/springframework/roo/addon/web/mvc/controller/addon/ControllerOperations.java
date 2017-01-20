@@ -223,4 +223,11 @@ public interface ControllerOperations extends Feature {
    */
   public String getBaseUrlControllerForFinder(ClassOrInterfaceTypeDetails controller, String finder);
 
+  /**
+   * Method that creates a new LinkFactory class related to the provided controller
+   * 
+   * @param controller
+   */
+  void createLinkFactoryClass(JavaType controller);
+
 }

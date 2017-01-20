@@ -69,7 +69,8 @@
                           z=field.z
                           referencedEntity=field.configuration.referencedEntity
                           identifierField=field.configuration.identifierField
-                          referecedMvcUrl_select2=field.configuration.referecedMvcUrl_select2
+                          select2MethodName=field.configuration.select2MethodName
+                          select2ControllerName=field.configuration.select2ControllerName
                           required=field.configuration.required />
                   <#elseif field.type == "ENUM">
                       <@enum.input label=field.label
@@ -110,7 +111,8 @@
                           z=field.z
                           referencedEntity=field.configuration.referencedEntity
                           identifierField=field.configuration.identifierField
-                          referecedMvcUrl_select2=field.configuration.referecedMvcUrl_select2
+                          select2MethodName=field.configuration.select2MethodName
+                          select2ControllerName=field.configuration.select2ControllerName
                           required=field.configuration.required />
                       <#elseif field.type == "ENUM">
                         <@enum.input label=field.label
