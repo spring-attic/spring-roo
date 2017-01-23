@@ -211,6 +211,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private final MethodMetadata createFormDetailsMethod;
   private final MethodMetadata createDetailsMethod;
   private final MethodMetadata removeFromDetailsMethod;
+  private final MethodMetadata removeFromDetailsBatchMethod;
 
   // Finder Methods
   private final Map<String, MethodMetadata> finderFormMethods;
@@ -421,6 +422,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.createDetailsMethod = null;
         this.createFormDetailsMethod = null;
         this.removeFromDetailsMethod = null;
+        this.removeFromDetailsBatchMethod = null;
 
         this.editFormDetailMethod = null;
         this.updateDetailMethod = null;
@@ -488,6 +490,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.createDetailsMethod = null;
         this.createFormDetailsMethod = null;
         this.removeFromDetailsMethod = null;
+        this.removeFromDetailsBatchMethod = null;
 
         this.editFormDetailMethod = null;
         this.updateDetailMethod = null;
@@ -557,6 +560,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.createDetailsMethod = null;
         this.createFormDetailsMethod = null;
         this.removeFromDetailsMethod = null;
+        this.removeFromDetailsBatchMethod = null;
 
         this.editFormDetailMethod = null;
         this.updateDetailMethod = null;
@@ -613,6 +617,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
         if (controllerMetadata.getLastDetailsInfo().type == JpaRelationType.AGGREGATION) {
           this.removeFromDetailsMethod = addAndGet(getRemoveFromDetailsMethod(), allMethods);
+          this.removeFromDetailsBatchMethod =
+              addAndGet(getRemoveFromDetailsBatchMethod(), allMethods);
           this.createDetailsMethod = addAndGet(getCreateDetailsMethod(), allMethods);
           this.initBinderMethod = null;
         } else {
@@ -620,6 +626,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
               addAndGet(getInitBinderMethod(controllerMetadata.getLastDetailEntity()), allMethods);
           this.createDetailsMethod = addAndGet(getCreateDetailsCompositionMethod(), allMethods);
           this.removeFromDetailsMethod = null;
+          this.removeFromDetailsBatchMethod = null;
         }
 
         this.listMethod = null;
@@ -708,6 +715,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.select2Method = null;
         this.listDatatablesDetailsMethod = null;
         this.removeFromDetailsMethod = null;
+        this.removeFromDetailsBatchMethod = null;
         this.createDetailsMethod = null;
         this.createFormDetailsMethod = null;
 
@@ -3798,7 +3806,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // customerService.addToOrders(customer, Collections.singleton(order));
+    // customerService.removeFromOrders(customer, Collections.singleton(order));
     bodyBuilder.appendFormalLine("%s().%s(%s,%s.singleton(%s));",
         getAccessorMethod(detailsServiceField).getMethodName(), removeFromMethod.getMethodName(),
         removeFromMethod.getParameterNames().get(0), getNameOfJavaType(JavaType.COLLECTIONS),
@@ -3809,6 +3817,72 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  private MethodMetadata getRemoveFromDetailsBatchMethod() {
+    RelationInfoExtended detailsInfo = controllerMetadata.getLastDetailsInfo();
+    final ServiceMetadata detailsServiceMetadata =
+        controllerMetadata.getServiceMetadataForEntity(detailsInfo.entityType);
+    final MethodMetadata removeFromMethod =
+        detailsServiceMetadata.getRemoveFromRelationMethods().get(detailsInfo);
+    final FieldMetadata detailsServiceField =
+        controllerMetadata.getDetailsServiceFields(detailsInfo.entityType);
+
+
+    // Define methodName
+    final String methodName = removeFromMethod.getMethodName().getSymbolName().concat("Batch");
+    JavaSymbolName itemsName = removeFromMethod.getParameterNames().get(1);
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(removeFromMethod.getParameterTypes().get(0)
+        .getJavaType(), AnnotationMetadataBuilder.getInstance(SpringJavaType.MODEL_ATTRIBUTE)));
+    AnnotationMetadataBuilder pathVariableAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
+    pathVariableAnnotation.addStringAttribute("value", itemsName.getSymbolName());
+
+    parameterTypes.add(new AnnotatedJavaType(JavaType.collectionOf(removeFromMethod
+        .getParameterTypes().get(1).getJavaType().getParameters().get(0)), pathVariableAnnotation
+        .build()));
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(new JavaSymbolName(methodName),
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @DeleteMapping annotation
+    AnnotationMetadataBuilder postMappingAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.DELETE_MAPPING);
+    postMappingAnnotation.addStringAttribute("name", methodName);
+    postMappingAnnotation.addStringAttribute("value", "/batch/{" + itemsName.getSymbolName() + "}");
+    annotations.add(postMappingAnnotation);
+    this.mvcMethodNames.put(methodName, methodName);
+
+    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.addAll(removeFromMethod.getParameterNames());
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // customerService.removeFromOrders(customer, ordersToRemove);
+    bodyBuilder.appendFormalLine("%s().%s(%s, %s);", getAccessorMethod(detailsServiceField)
+        .getMethodName(), removeFromMethod.getMethodName(), removeFromMethod.getParameterNames()
+        .get(0), itemsName);
+
+    // return ResponseEntity.ok().build();
+    bodyBuilder.appendFormalLine("return %s.ok().build();", getNameOfJavaType(RESPONSE_ENTITY));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(methodName),
             JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 

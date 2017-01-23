@@ -40,21 +40,27 @@
                   <#else>
                     <table id="${detail.entityItemId}-table" style="width: 99.7%"
                       class="table table-striped table-hover table-bordered"
-                      data-z="${detail.z}"
-                      data-row-id="${dconfig.identifierField}"
                       data-datatables="true"
+                      data-row-id="${dconfig.identifierField}"
+                      data-z="${detail.z}"
+                      <#if entity.readOnly == false>
+                      data-order="[[ 1, &quot;asc&quot; ]]"
+                      <#else>
                       data-order="[[ 0, &quot;asc&quot; ]]"
+                      </#if>
                       data-data-load-url="${r"${"}detailCollectionLink.to('datatables').with('${modelAttributeName}', id)}"
                       data-data-show-url="${r"${"}detailItemLink.to('show').with('${detail.modelAttribute}', '_ID_')}"
                       <#if entity.readOnly == false>
                        data-data-edit-url="${r"${"}detailItemLink.to('editForm').with('${detail.modelAttribute}', '_ID_')}"
-                       data-data-delete-url="${r"${"}detailCollectionLink.to('removeFrom${detail.fieldNameCapitalized}').with('${modelAttributeName}', id).with('${detail.fieldName}ToRemove', '_ID_')}"
                        data-data-create-url="${r"${"}detailCollectionLink.to('createForm').with('${modelAttributeName}', id)}"
+                       data-data-delete-url="${r"${"}detailCollectionLink.to('removeFrom${detail.fieldNameCapitalized}').with('${modelAttributeName}', id).with('${detail.fieldName}ToRemove', '_ID_')}"
+                       data-data-delete-batch-url="${r"${"}detailCollectionLink.to('removeFrom${detail.fieldNameCapitalized}Batch').with('${modelAttributeName}', id).with('${detail.fieldName}ToRemove', '_ID_')}"
                       </#if>
                       >
                       <caption class="sr-only" data-th-text="${r"#{"}label_list_of_entity(${r"#"}{${dconfig.referencedFieldLabel}})}">${detail.fieldNameCapitalized} List</caption>
                       <thead>
                         <tr>
+                          <th data-data="id" data-checkboxes=true></th>
                           <#list detail.configuration.referenceFieldFields as referencedFieldField>
                           <#if referencedFieldField != entityName>
                               <th data-data="${referencedFieldField.fieldName}" data-th-text="${r"#{"}${referencedFieldField.label}}">${referencedFieldField.fieldName}</th>
@@ -79,6 +85,12 @@
                     <!-- content replaced by modal-confirm fragment of modal-confirm.html -->
                     <div data-th-replace="~{fragments/modal-confirm-delete :: modalConfirmDelete(tableId='${detail.entityItemId}-table',
                         title=${r"#{"}label_delete_entity(${r"#"}{${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_item_confirm})}">
+                    </div>
+                   <div data-th-replace="~{fragments/modal-confirm-delete-batch :: modalConfirmDeleteBatch(tableId='${detail.entityItemId}-table',
+                        title=${r"#{"}label_delete_entity(${r"#{"}${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_batch_confirm})}">
+                    </div>
+                    <div data-th-replace="~{fragments/modal-export-empty-error :: modalExportEmptyError(tableId='${detail.entityItemId}-table',
+                        title=${r"#{"}label_export_empty_error(${r"#{"}${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_export_empty_error})}">
                     </div>
                 </div> <!--/table-responsive">
                 <!--END TABLE-->

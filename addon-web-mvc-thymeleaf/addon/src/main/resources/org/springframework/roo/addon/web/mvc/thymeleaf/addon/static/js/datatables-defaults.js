@@ -94,7 +94,7 @@
       ],
       'deferRender': true,
       'dom': 'Bfrtip',
-      'fnInitComplete': saveSelectedRowToState,
+      'fnInitComplete': onInitComplete,
       'processing': true,
       'responsive': true,
       'retrieve': true,
@@ -167,9 +167,9 @@
      * the table tag attribute 'data-create-url' to be used as the URL.
      */
     function deleteBatchButton(datatables, conf) {
-      var deleteUrl = getDataDeleteBatchUrl(datatables);
+      var deleteBatchUrl = getDataDeleteBatchUrl(datatables);
 
-      if (deleteUrl) {
+      if (deleteBatchUrl) {
         return {
           'action': function(e, datatables, node, config) {
             var tableId = getTableId(datatables);
@@ -183,7 +183,7 @@
               var rows_selected = datatables.columns().checkboxes.selected();
               
               // Populate the row-id data attribute in the modal
-              $('#' + tableId + 'DeleteBatchRowId').data('row-id', rows_selected.join(","))
+              $('#' + tableId + 'DeleteBatchRowId').data('row-id', rows_selected.join(","));
             });
 
             $('#' + tableId + 'DeleteBatchButton').on('click', function() {
@@ -750,8 +750,7 @@
      */
     function getDeleteBatchUrl(datatables, idlist) {
       var url = getDataDeleteBatchUrl(datatables);
-      //return processUrl(datatables, url, idlist);
-      return url.concat(idlist);
+      return processUrl(datatables, url, idlist);
     }
 
     /**
@@ -806,16 +805,28 @@
         'recordsTotal' : '0'
       };
     }
+    
+    /**
+     * This function will be called when DataTables has been fully 
+     * initialised and data loaded.
+     */
+    function onInitComplete(oSettings, json){
+    	var datatables = this.DataTable();
+    	// Save the selected row to state
+    	saveSelectedRowToState(datatables, oSettings, json);
+    	// Register checkboxes
+    	registerCheckBoxesEvents(datatables);
+    }
 
     /**
      * If a row is selected, store it in the persisted table state
      * so if the user goes to another page and returns, the current
      * selected row is still selected.
+     * @param datatables the Datatables element
      * @param oSettings DataTable object options
      * @param json
      */
-    function saveSelectedRowToState(oSettings, json) {
-      var datatables = this.DataTable();
+    function saveSelectedRowToState(datatables, oSettings, json) {
       var state = datatables.state;
       datatables.on('select', function(e, dt, type, indexes) {
         if (type === 'row') {
@@ -868,6 +879,52 @@
       registerDeleteModalEvents(datatables);
       registerAddModalEvents(datatables);
       registerToParentEvents(datatables);
+      registerOnDrawFinishesEvents(datatables);
+    }
+    
+    /**
+     * This function registers all the necessary actions to execute
+     * when the provided datatables is completly drawed.
+     */
+    function registerOnDrawFinishesEvents(datatables) {
+        // When this datatable is re-drawed, the
+    	// following actions will be executed
+        datatables.on('draw.dt', function(){
+        	// Register events to the new included checkboxes
+        	registerCheckBoxesEvents(datatables);
+        });
+    }
+    
+    /**
+     * Registers events related to the checkboxes of the given 
+     * datatables.
+     */
+    function registerCheckBoxesEvents(datatables){
+    	// Getting the table id
+    	var tableId = getTableId(datatables);
+    	// Obtain all checkboxes for this table
+    	var checkBoxes = jQuery("#" + tableId + " input:checkbox");
+    	// Register change event for every checkbox. Every time that some checkbox
+    	// changes, validates if the delete batch button should be enabled or not
+    	jQuery.each(checkBoxes, function(item){
+    		jQuery(this).change(function(){
+    			var rows_selected = datatables.columns().checkboxes.selected();
+    			if(rows_selected.join(",") === ""){
+    				datatables.button('delete:name').disable();
+    			}else{
+    				datatables.button('delete:name').enable();
+    			}
+    		});
+    	});
+    	
+    	// Re-initialize the delete batch button
+    	var rows_selected = datatables.columns().checkboxes.selected();
+		if(rows_selected.join(",") === ""){
+			datatables.button('delete:name').disable();
+		}else{
+			datatables.button('delete:name').enable();
+		}
+    	
     }
 
     /**
