@@ -26,6 +26,7 @@ import org.springframework.roo.addon.web.mvc.views.AbstractViewMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
@@ -370,7 +371,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         // Build constructor
         String linkBuilderLine =
             String.format("%s(linkBuilder.of(%s.class));",
-                getMutatorMethod(methodLinkBuilderFactoryField).getMethodName(),
+                getMutatorMethod(this.methodLinkBuilderFactoryField).getMethodName(),
                 getNameOfJavaType(this.itemController));
         this.constructor = addAndGetConstructor(getConstructor(linkBuilderLine));
 

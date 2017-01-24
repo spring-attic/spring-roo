@@ -195,7 +195,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
     }
 
     if (includeAccessor) {
-      MethodMetadataBuilder accessorMethod = getAccessorMethod(fieldMetadata.build());
+      MethodMetadata accessorMethod = getAccessorMethod(fieldMetadata.build());
       if (accessorMethod != null
           && governorTypeDetails.getMethod(accessorMethod.getMethodName()) == null) {
         builder.addMethod(accessorMethod);
@@ -243,7 +243,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
     }
   }
 
-  protected MethodMetadataBuilder getAccessorMethod(final FieldMetadata field) {
+  protected MethodMetadata getAccessorMethod(final FieldMetadata field) {
     // Check if this method has been cached
     MethodMetadataBuilder accessor = accessorMethods.get(field);
     if (accessor == null) {
@@ -255,7 +255,12 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
       accessorMethods.put(field, accessor);
     }
 
-    return accessor;
+    // Return governor method if exists
+    if (accessor == null) {
+      return getGovernorMethod(BeanInfoUtils.getAccessorMethodName(field));
+    }
+
+    return accessor.build();
   }
 
   protected MethodMetadataBuilder getAccessorMethod(final FieldMetadata field,
@@ -338,6 +343,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
    * Returns a public method given the method name, return type, parameter
    * types, parameter names, and method body.
    *
+   * @param modifier the method modifier
    * @param methodName the method name
    * @param returnType the return type
    * @param parameterTypes a list of parameter types
@@ -367,9 +373,10 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
       mutatorMethods.put(field, mutator);
     }
 
-    // Prevent null exception
+    // Return governor method
     if (mutator == null) {
-      return null;
+      return getGovernorMethod(BeanInfoUtils.getMutatorMethodName(field.getFieldName()),
+          field.getFieldType());
     }
 
     return mutator.build();
