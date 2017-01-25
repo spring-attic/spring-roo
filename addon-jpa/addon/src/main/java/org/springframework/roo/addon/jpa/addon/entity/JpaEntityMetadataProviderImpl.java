@@ -327,8 +327,9 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
       List<FieldMetadata> embeddedIdentifierFields =
           entityDetails.getFieldsWithAnnotation(EMBEDDED_ID);
 
-      Validate.isTrue(!(identifierFields.isEmpty() && embeddedIdentifierFields.isEmpty()),
-          "ERROR: The annotated entity doesn't contain any identifier field.");
+      Validate.isTrue(!(identifierFields.isEmpty() && embeddedIdentifierFields.isEmpty()), String
+          .format("ERROR: The annotated entity '%s' doesn't contain any identifier field.",
+              entityDetails.getType().getFullyQualifiedTypeName()));
 
       if (!identifierFields.isEmpty()) {
         identifierField = identifierFields.get(0);
@@ -341,8 +342,9 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
       // Obtain version field from entity details
       List<FieldMetadata> versionFields = entityDetails.getFieldsWithAnnotation(VERSION);
 
-      Validate.notEmpty(versionFields,
-          "ERROR: The annotated entity doesn't contain any version field.");
+      Validate.notEmpty(versionFields, String.format(
+          "ERROR: The annotated entity '%s' doesn't contain any version field.", entityDetails
+              .getType().getFullyQualifiedTypeName()));
 
       versionField = versionFields.get(0);
 
