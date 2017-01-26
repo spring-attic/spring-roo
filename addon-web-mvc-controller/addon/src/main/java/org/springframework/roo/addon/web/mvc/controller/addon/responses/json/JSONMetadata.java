@@ -54,6 +54,7 @@ import java.util.TreeMap;
  *
  * @author Juan Carlos García
  * @author Jose Manuel Vivó
+ * @author Sergio Clares
  * @since 2.0
  */
 public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
@@ -612,10 +613,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         itemNames, getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(),
         serviceFinderMethod.getMethodName(), StringUtils.join(parameterStrings, ","));
 
-    // return ResponseEntity.status(HttpStatus.FOUND).body(owners);
-    bodyBuilder.appendFormalLine(String.format("return %s.status(%s.FOUND).body(%s);",
-        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS),
-        itemNames));
+    // return ResponseEntity.ok(owners);
+    bodyBuilder.appendFormalLine(String.format("return %s.ok(%s);",
+        getNameOfJavaType(RESPONSE_ENTITY), itemNames));
 
 
     MethodMetadataBuilder methodBuilder =
@@ -923,10 +923,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             .getMethodName(), findAllMethod.getMethodName(), parentParamName, GLOBAL_SEARCH_NAME,
         PAGEABLE_PARAM_NAME);
 
-    // return ResponseEntity.status(HttpStatus.FOUND).body(customers);
-    bodyBuilder.appendFormalLine(String.format("return %s.status(%s.FOUND).body(%s);",
-        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS),
-        itemNames));
+    // return ResponseEntity.ok(customers);
+    bodyBuilder.appendFormalLine(String.format("return %s.ok(%s);",
+        getNameOfJavaType(RESPONSE_ENTITY), itemNames));
 
 
     MethodMetadataBuilder methodBuilder =
@@ -1395,10 +1394,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         itemNames, getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(),
         findAllMethod.getMethodName(), GLOBAL_SEARCH_NAME, PAGEABLE_PARAM_NAME);
 
-    // return ResponseEntity.status(HttpStatus.FOUND).body(customers);
-    bodyBuilder.appendFormalLine(String.format("return %s.status(%s.FOUND).body(%s);",
-        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS),
-        itemNames));
+    // return ResponseEntity.ok(customers);
+    bodyBuilder.appendFormalLine(String.format("return %s.ok(%s);",
+        getNameOfJavaType(RESPONSE_ENTITY), itemNames));
 
 
     MethodMetadataBuilder methodBuilder =
@@ -1443,9 +1441,8 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // return ResponseEntity.status(HttpStatus.FOUND).body(customer);
-    bodyBuilder.appendFormalLine("return %s.status(%s.FOUND).body(%s);",
-        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS),
+    // return ResponseEntity.ok(customer);
+    bodyBuilder.appendFormalLine("return %s.ok(%s);", getNameOfJavaType(RESPONSE_ENTITY),
         entityItemName);
 
     MethodMetadataBuilder methodBuilder =
@@ -1502,9 +1499,8 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // return ResponseEntity.status(HttpStatus.FOUND).body(customer);
-    bodyBuilder.appendFormalLine("return %s.status(%s.FOUND).body(%s);",
-        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS),
+    // return ResponseEntity.ok(customer);
+    bodyBuilder.appendFormalLine("return %s.ok(%s);", getNameOfJavaType(RESPONSE_ENTITY),
         entityItemName);
 
     MethodMetadataBuilder methodBuilder =
