@@ -131,14 +131,23 @@ public class JpaAuditOperationsImpl implements JpaAuditOperations {
       annotations.add(columnAnnotation);
     }
 
+    // Add @CreatedDate
     AnnotationMetadataBuilder createdDateAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.CREATED_DATE);
     annotations.add(createdDateAnnotation);
+
+    // Add @Temporal
     AnnotationMetadataBuilder temporalAnnotation =
         new AnnotationMetadataBuilder(JpaJavaType.TEMPORAL);
     temporalAnnotation.addEnumAttribute("value", new EnumDetails(JpaJavaType.TEMPORAL_TYPE,
         new JavaSymbolName("TIMESTAMP")));
     annotations.add(temporalAnnotation);
+
+    // Add @DateTimeFormat
+    AnnotationMetadataBuilder dateTimeFormatAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.DATE_TIME_FORMAT);
+    dateTimeFormatAnnotation.addStringAttribute("style", "M-");
+    annotations.add(dateTimeFormatAnnotation);
 
     // Create field
     FieldDetails fieldDetails =
@@ -169,14 +178,23 @@ public class JpaAuditOperationsImpl implements JpaAuditOperations {
       annotations.add(columnAnnotation);
     }
 
+    // Add @LastModifiedDate
     AnnotationMetadataBuilder createdDateAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.LAST_MODIFIED_DATE);
     annotations.add(createdDateAnnotation);
+
+    // Add @Temporal
     AnnotationMetadataBuilder temporalAnnotation =
         new AnnotationMetadataBuilder(JpaJavaType.TEMPORAL);
     temporalAnnotation.addEnumAttribute("value", new EnumDetails(JpaJavaType.TEMPORAL_TYPE,
         new JavaSymbolName("TIMESTAMP")));
     annotations.add(temporalAnnotation);
+
+    // Add @DateTimeFormat
+    AnnotationMetadataBuilder dateTimeFormatAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.DATE_TIME_FORMAT);
+    dateTimeFormatAnnotation.addStringAttribute("style", "M-");
+    annotations.add(dateTimeFormatAnnotation);
 
     // Create field
     FieldDetails fieldDetails =
