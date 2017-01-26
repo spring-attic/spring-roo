@@ -10,6 +10,7 @@ import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_DATATA
 import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH;
 import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_NOT_FOUND_EXCEPTION;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,7 +27,6 @@ import org.springframework.roo.addon.web.mvc.views.AbstractViewMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
@@ -38,6 +38,9 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
+import org.springframework.roo.classpath.details.comments.CommentStructure.CommentLocation;
+import org.springframework.roo.classpath.details.comments.JavadocComment;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
@@ -958,22 +961,21 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
             parameterTypes, parameterNames, bodyBuilder);
 
-    // Deactivated until repaired comments push-in
     // Add Javadoc to method
-    //    CommentStructure commentStructure = new CommentStructure();
-    //    List<AbstractComment> comments = new ArrayList<AbstractComment>();
-    //    comments.add(new JavadocComment(
-    //        "This method contains all the entity fields that are able to be displayed in a "));
-    //    comments.add(new JavadocComment(
-    //        "report. The developer could add a new column to the report builder providing the "));
-    //    comments.add(new JavadocComment(
-    //        "field name and the builder where the new field will be added as column."));
-    //    comments.add(new JavadocComment(" "));
-    //    comments.add(new JavadocComment("@param columnName The field name to show as column"));
-    //    comments.add(new JavadocComment(
-    //        "@param builder The builder where the new field will be added as column."));
-    //    commentStructure.setBeginComments(comments);
-    //    methodBuilder.setCommentStructure(commentStructure);
+    CommentStructure commentStructure = new CommentStructure();
+    String description =
+        "This method contains all the entity fields that are able to be displayed in a "
+            .concat(IOUtils.LINE_SEPARATOR)
+            .concat(
+                "report. The developer could add a new column to the report builder providing the ")
+            .concat(IOUtils.LINE_SEPARATOR)
+            .concat("field name and the builder where the new field will be added as column.");
+    List<String> paramInfo = new ArrayList<String>();
+    paramInfo.add("columnName the field name to show as column");
+    paramInfo.add("builder The builder where the new field will be added as column.");
+    commentStructure.addComment(new JavadocComment(description, paramInfo, null, null),
+        CommentLocation.BEGINNING);
+    methodBuilder.setCommentStructure(commentStructure);
 
     return methodBuilder.build();
   }
@@ -1164,49 +1166,51 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
             parameterTypes, parameterNames, bodyBuilder);
 
-    // Deactivated until repaired comments push-in
     // Add Javadoc to method
-    //    CommentStructure commentStructure = new CommentStructure();
-    //    List<AbstractComment> comments = new ArrayList<AbstractComment>();
-    //    comments
-    //        .add(new JavadocComment(
-    //            "Method that obtains the filtered and ordered records using the Datatables information and "));
-    //    comments.add(new JavadocComment(
-    //        "export them to a new report file. (It ignores the current pagination)."));
-    //    comments.add(new JavadocComment(" "));
-    //    comments.add(new JavadocComment(
-    //        "To generate the report file it uses the `DynamicJasper` library"));
-    //    comments
-    //        .add(new JavadocComment(
-    //            "(http://dynamicjasper.com). This library allows developers to generate reports dynamically"));
-    //    comments.add(new JavadocComment("without use an specific template to each entity."));
-    //    comments.add(new JavadocComment(" "));
-    //    comments.add(new JavadocComment(
-    //        "To customize the appearance of ALL generated reports, you could customize the "));
-    //    comments
-    //        .add(new JavadocComment(
-    //            "\"export_default.jrxml\" template located in \"src/main/resources/templates/reports/\". However,"));
-    //    comments.add(new JavadocComment(
-    //        "if you want to customize the appearance of this specific report, you could create a new"));
-    //    comments
-    //        .add(new JavadocComment(
-    //            "\".jrxml\" file and provide it to the library replacing the `builder.setTemplateFile();`"));
-    //    comments.add(new JavadocComment("operation used in this implementation."));
-    //    comments.add(new JavadocComment(" "));
-    //    comments
-    //        .add(new JavadocComment(
-    //            "@param search GlobalSearch that contains the filter provided by the Datatables component"));
-    //    comments
-    //        .add(new JavadocComment(
-    //            "@param pageable Pageable that contains the Sort info provided by the Datatabes component"));
-    //    comments.add(new JavadocComment(
-    //        "@param datatablesColumns Columns displayed in the Datatables component"));
-    //    comments.add(new JavadocComment("@param response The HttpServletResponse"));
-    //    comments.add(new JavadocComment(
-    //        "@param exporter An specific JasperReportsExporter to be used during export process."));
-    //    comments.add(new JavadocComment("@param fileName The final filename to use"));
-    //    commentStructure.setBeginComments(comments);
-    //    methodBuilder.setCommentStructure(commentStructure);
+    CommentStructure commentStructure = new CommentStructure();
+    String description =
+        "Method that obtains the filtered and ordered records using the Datatables information and "
+            .concat(IOUtils.LINE_SEPARATOR)
+            .concat("export them to a new report file. (It ignores the current pagination).")
+            .concat(IOUtils.LINE_SEPARATOR)
+            .concat(IOUtils.LINE_SEPARATOR)
+            .concat("To generate the report file it uses the `DynamicJasper` library")
+            .concat(IOUtils.LINE_SEPARATOR)
+            .concat(
+                "(http://dynamicjasper.com). This library allows developers to generate reports dynamically")
+            .concat(IOUtils.LINE_SEPARATOR)
+            .concat("without use an specific template to each entity.")
+            .concat(IOUtils.LINE_SEPARATOR)
+            .concat(IOUtils.LINE_SEPARATOR)
+            .concat(
+                "To customize the appearance of ALL generated reports, you could customize the ")
+            .concat(IOUtils.LINE_SEPARATOR)
+            .concat(
+                "\"export_default.jrxml\" template located in \"src/main/resources/templates/reports/\". However,")
+            .concat(IOUtils.LINE_SEPARATOR)
+            .concat(
+                "if you want to customize the appearance of this specific report, you could create a new")
+            .concat(IOUtils.LINE_SEPARATOR)
+            .concat(
+                "\".jrxml\" file and provide it to the library replacing the `builder.setTemplateFile();`")
+            .concat(IOUtils.LINE_SEPARATOR).concat("operation used in this implementation.");
+
+    // Create params info
+    List<String> paramsInfo = new ArrayList<String>();
+    paramsInfo
+        .add("search GlobalSearch that contains the filter provided by the Datatables component.");
+    paramsInfo
+        .add("pageable Pageable that contains the Sort info provided by the Datatabes component.");
+    paramsInfo.add("datatablesColumns Columns displayed in the Datatables component.");
+    paramsInfo.add("response The HttpServletResponse.");
+    paramsInfo.add("exporter An specific JasperReportsExporter to be used during export process.");
+    paramsInfo.add("fileName The final filename to use.");
+    paramsInfo.add("locale The current Locale in the view context.");
+
+    // Add JavadocComment to CommentStructure and method 
+    commentStructure.addComment(new JavadocComment(description, paramsInfo, null, null),
+        CommentLocation.BEGINNING);
+    methodBuilder.setCommentStructure(commentStructure);
 
     return methodBuilder.build();
   }
@@ -1386,25 +1390,25 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
             JavaType.wrapperWilcard(RESPONSE_ENTITY), parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
-    // Deactivated until repaired comments push-in
     // Add JavaDoc
-    //    CommentStructure commentStructure = new CommentStructure();
-    //    List<AbstractComment> comments = new ArrayList<AbstractComment>();
-    //    comments.add(new JavadocComment(
-    //        "It delegates in the `export` method providing the necessary information"));
-    //    comments.add(new JavadocComment(String.format("to generate a %s report.", fileType)));
-    //    comments.add(new JavadocComment(" "));
-    //    comments
-    //        .add(new JavadocComment(
-    //            "@param search The GlobalSearch that contains the filter provided by the Datatables component"));
-    //    comments
-    //        .add(new JavadocComment(
-    //            "@param pageable The Pageable that contains the Sort info provided by the Datatabes component"));
-    //    comments.add(new JavadocComment(
-    //        "@param datatablesColumns The Columns displayed in the Datatables component"));
-    //    comments.add(new JavadocComment("@param response The HttpServletResponse"));
-    //    commentStructure.setBeginComments(comments);
-    //    methodBuilder.setCommentStructure(commentStructure);
+    CommentStructure commentStructure = new CommentStructure();
+    String description =
+        "It delegates in the `export` method providing the necessary information".concat(
+            IOUtils.LINE_SEPARATOR).concat(String.format("to generate a %s report.", fileType));
+
+    // Add params info to commment block
+    List<String> paramsInfo = new ArrayList<String>();
+    paramsInfo
+        .add("search The GlobalSearch that contains the filter provided by the Datatables component");
+    paramsInfo
+        .add("pageable The Pageable that contains the Sort info provided by the Datatabes component");
+    paramsInfo.add("datatablesColumns The Columns displayed in the Datatables component");
+    paramsInfo.add("response The HttpServletResponse");
+
+    // Add JavadocComment to CommentStructure and to method
+    commentStructure.addComment(new JavadocComment(description, paramsInfo, null, null),
+        CommentLocation.BEGINNING);
+    methodBuilder.setCommentStructure(commentStructure);
 
     return methodBuilder.build();
   }

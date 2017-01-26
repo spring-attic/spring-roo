@@ -198,7 +198,7 @@ public class JaxbEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 
   /**
-   * This method returns the getXmlIdentityInfoMethod().
+   * This method returns the getXmlIdentityInfo() method.
    * 
    * @return MethodMetadata that contains the getXmlIdentityInfoMethod
    */
@@ -229,7 +229,6 @@ public class JaxbEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     comment.addComment(new JavadocComment("Must return an unique ID across all entities"),
         CommentLocation.BEGINNING);
     method.setCommentStructure(comment);
-
 
     xmlIdentityInfoMethod = method.build();
 
