@@ -320,7 +320,7 @@ public class JavadocComment extends AbstractComment {
 
   /**
    * Indexes the JavadocComment indexes to know each component location within 
-   * the entire `String` (description, paramsInfo, returnInfo and throwsInfo.
+   * the entire `String` (description, paramsInfo, returnInfo and throwsInfo).
    */
   private void initializeCommentIndexes() {
 
