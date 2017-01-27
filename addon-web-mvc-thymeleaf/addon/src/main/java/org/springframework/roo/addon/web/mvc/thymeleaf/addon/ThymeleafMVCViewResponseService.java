@@ -1,13 +1,5 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -27,7 +19,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuil
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.operations.AbstractOperations;
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Dependency;
@@ -40,6 +31,14 @@ import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.FileUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Implementation of ControllerMVCResponseService that provides
@@ -454,7 +453,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
    *
    * @param module the module where Thymeleaf is going to be installed
    */
-  public void addWebJars(Pom module) {
+  private void addWebJars(Pom module) {
     String rootModuleName = "";
 
     List<Dependency> dependencies = new ArrayList<Dependency>();
@@ -506,6 +505,15 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     dependencies.add(new Dependency("org.webjars.bower", "datatables.net-select-bs",
         "${datatables-select-bs.version}"));
 
+    getProjectOperations().addProperty(rootModuleName,
+        new Property("datatables-checkboxes.version", "1.1.2"));
+    // Add exclusions to avoid conflicts with Bower dependencies
+    List<Dependency> exclusions = new ArrayList<Dependency>();
+    exclusions.add(new Dependency("org.webjars.npm", "jquery", null));
+    exclusions.add(new Dependency("org.webjars.npm", "datatables.net", null));
+    dependencies.add(new Dependency("org.webjars.npm", "jquery-datatables-checkboxes",
+        "${datatables-checkboxes.version}", exclusions));
+
     // Add DatetimePicker WebJar
     getProjectOperations().addProperty(rootModuleName,
         new Property("datetimepicker.version", "2.5.4"));
@@ -524,8 +532,11 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     // Add jQuery InputMask WebJar
     getProjectOperations().addProperty(rootModuleName,
         new Property("jquery-inputmask.version", "3.3.1"));
+    // Add exclusions to avoid conflicts with Bower dependencies
+    exclusions = new ArrayList<Dependency>();
+    exclusions.add(new Dependency("org.webjars", "jquery", null));
     dependencies.add(new Dependency("org.webjars", "jquery.inputmask",
-        "${jquery-inputmask.version}"));
+        "${jquery-inputmask.version}", exclusions));
 
     // Add jQuery InputMask WebJar
     getProjectOperations().addProperty(rootModuleName,
@@ -546,6 +557,14 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
         new Property("select2-bootstrap-theme.version", "0.1.0-beta.7"));
     dependencies.add(new Dependency("org.webjars.bower", "select2-bootstrap-theme",
         "${select2-bootstrap-theme.version}"));
+
+    // Add respond WebJar
+    getProjectOperations().addProperty(rootModuleName, new Property("respond.version", "1.4.2"));
+    dependencies.add(new Dependency("org.webjars", "respond", "${respond.version}"));
+
+    // Add html5shiv WebJar
+    getProjectOperations().addProperty(rootModuleName, new Property("html5shiv.version", "3.7.3"));
+    dependencies.add(new Dependency("org.webjars", "html5shiv", "${html5shiv.version}"));
 
     getProjectOperations().addDependencies(module.getModuleName(), dependencies);
 
@@ -597,8 +616,6 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
         LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, module.getModuleName());
 
     // copy all necessary styles inside SRC_MAIN_RESOURCES/static/public/css
-    copyDirectoryContents("static/css/checkboxes-1.0.4/*.css",
-        getPathResolver().getIdentifier(resourcesPath, "/static/public/css/checkboxes-1.0.4"), true);
     copyDirectoryContents("static/css/*.css",
         getPathResolver().getIdentifier(resourcesPath, "/static/public/css"), true);
 
@@ -627,8 +644,6 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     // copy all necessary scripts inside SRC_MAIN_RESOURCES/static/public/js
     copyDirectoryContents("static/js/*.js",
         getPathResolver().getIdentifier(resourcesPath, "/static/public/js"), true);
-    copyDirectoryContents("static/js/checkboxes-1.0.4/*.js",
-        getPathResolver().getIdentifier(resourcesPath, "/static/public/js/checkboxes-1.0.4"), true);
 
     // copy all necessary scripts inside SRC_MAIN_RESOURCES/templates/fragments/js
     copyDirectoryContents("templates/fragments/js/*.html",
