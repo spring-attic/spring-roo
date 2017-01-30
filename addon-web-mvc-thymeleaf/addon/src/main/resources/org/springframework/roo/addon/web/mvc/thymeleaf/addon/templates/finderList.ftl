@@ -3,10 +3,6 @@
 <html lang="en" data-layout-decorate="~{layouts/default-list-layout}">
 
   <head>
-    <#if isSecurityEnabled == true>
-      <meta data-th-if="${r"${"}csrf != null}" name="_csrf" data-th-content="${r"${"}_csrf.token}" />
-      <meta data-th-if="${r"${"}csrf != null}" name="_csrf_header" data-th-content="${r"${"}_csrf.headerName}" />
-    </#if>
 
     <title data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}})}">
     List ${entityName} - ${projectName} - SpringRoo Application</title>

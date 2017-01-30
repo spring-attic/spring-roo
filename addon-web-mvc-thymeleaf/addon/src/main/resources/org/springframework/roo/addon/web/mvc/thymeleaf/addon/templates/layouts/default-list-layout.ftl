@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="description" data-data-content="${r"#{"}info_description}"/>
     <meta name="author" data-data-content="${r"#{"}info_author}"/>
+    <meta data-th-if="${r"${"}_csrf != null}" name="_csrf" data-th-content="${r"${"}_csrf.token}" />
+    <meta data-th-if="${r"${"}_csrf != null}" name="_csrf_header" data-th-content="${r"${"}_csrf.headerName}" />
 
     <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
       data-th-href="@{/public/img/favicon.ico}"/>
