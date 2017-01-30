@@ -109,9 +109,6 @@ public class LinkFactoryMetadataProviderImpl extends AbstractMemberDiscoveringIt
     // Check if it is a valid controller
     ClassOrInterfaceTypeDetails controllerDetails =
         getTypeLocationService().getTypeDetails(controller);
-    Validate.isTrue(controllerDetails.getAnnotation(RooJavaType.ROO_CONTROLLER) != null,
-        "Error creating controller %s methods to generate URL's.",
-        controller.getFullyQualifiedTypeName());
 
     // Get ControllerMetadata to get info from it
     String controllerMetadataKey = ControllerMetadata.createIdentifier(controllerDetails);
