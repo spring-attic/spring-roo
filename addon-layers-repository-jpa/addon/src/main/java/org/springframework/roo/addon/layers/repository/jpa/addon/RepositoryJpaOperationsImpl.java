@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
+import static java.lang.reflect.Modifier.PUBLIC;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -28,7 +30,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
-import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
@@ -37,6 +38,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.FileUtils;
@@ -194,7 +196,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     }
 
     // Add Springlets base repository class
-    addBaseRepositoryClassToApplicationModules();
+    addRepositoryConfigurationClass();
 
     // Check if current entity is defined as "readOnly".
     AnnotationAttributeValue<Boolean> readOnlyAttr =
@@ -225,56 +227,50 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
   }
 
   /**
-   * Checks for all the application modules in project and adds the Springlets 
-   * base repository class if none is already specified.
+   * Checks for all the application modules in project and adds a repository 
+   * configuration class, which uses the Springlets base repository class if 
+   * none is already specified.
    *  
    */
-  private void addBaseRepositoryClassToApplicationModules() {
+  private void addRepositoryConfigurationClass() {
     Set<ClassOrInterfaceTypeDetails> applicationCids =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
             SpringJavaType.SPRING_BOOT_APPLICATION);
     for (ClassOrInterfaceTypeDetails applicationCid : applicationCids) {
-      if (applicationCid.getAnnotation(SpringJavaType.ENABLE_JPA_REPOSITORIES) != null) {
-        AnnotationAttributeValue<Object> attribute =
-            applicationCid.getAnnotation(SpringJavaType.ENABLE_JPA_REPOSITORIES).getAttribute(
-                "repositoryBaseClass");
-        if (attribute != null
-            && !((JavaType) attribute.getValue())
-                .equals(SpringletsJavaType.SPRINGLETS_DETACHABLE_JPA_REPOSITORY_IMPL)) {
-          LOGGER
-              .warning(String
-                  .format(
-                      "WARNING: Your application class in module %s is using other repository base "
-                          + "class different from which uses Spring Roo (`%s`). Some functionalities like version control "
-                          + "won't work.", applicationCid.getType().getModule(),
-                      SpringletsJavaType.SPRINGLETS_DETACHABLE_JPA_REPOSITORY_IMPL
-                          .getFullyQualifiedTypeName()));
-        } else if (attribute == null) {
 
-          // Add default Spring Roo repository class from Springlets to existing annotation
-          AnnotationMetadata enableRepositoriesAnnotation =
-              applicationCid.getAnnotation(SpringJavaType.ENABLE_JPA_REPOSITORIES);
-          AnnotationMetadataBuilder enableRepositoriesAnnotationBuilder =
-              new AnnotationMetadataBuilder(enableRepositoriesAnnotation);
-          enableRepositoriesAnnotationBuilder.addClassAttribute("repositoryBaseClass",
-              SpringletsJavaType.SPRINGLETS_DETACHABLE_JPA_REPOSITORY_IMPL);
-          ClassOrInterfaceTypeDetailsBuilder applicationClassBuilder =
-              new ClassOrInterfaceTypeDetailsBuilder(applicationCid);
-          applicationClassBuilder.updateTypeAnnotation(enableRepositoriesAnnotationBuilder);
-        }
-      } else {
+      // Obtain main application config class and its module
+      Pom module =
+          getProjectOperations().getPomFromModuleName(applicationCid.getType().getModule());
 
-        // Add default Spring Roo repository class from Springlets to new annotation
-        AnnotationMetadataBuilder enableRepositoriesAnnotationBuilder =
-            new AnnotationMetadataBuilder(SpringJavaType.ENABLE_JPA_REPOSITORIES);
-        enableRepositoriesAnnotationBuilder.addClassAttribute("repositoryBaseClass",
-            SpringletsJavaType.SPRINGLETS_DETACHABLE_JPA_REPOSITORY_IMPL);
-        ClassOrInterfaceTypeDetailsBuilder applicationClassBuilder =
-            new ClassOrInterfaceTypeDetailsBuilder(applicationCid);
-        applicationClassBuilder.addAnnotation(enableRepositoriesAnnotationBuilder);
+      // Create or update SpringDataJpaDetachableRepositoryConfiguration
+      JavaType repositoryConfigurationClass =
+          new JavaType(String.format("%s.config.SpringDataJpaDetachableRepositoryConfiguration",
+              getTypeLocationService().getTopLevelPackageForModule(module)), module.getModuleName());
 
-        // Save repository interface on disk
-        getTypeManagementService().createOrUpdateTypeOnDisk(applicationClassBuilder.build());
+      Validate.notNull(repositoryConfigurationClass.getModule(),
+          "ERROR: Module name is required to generate a valid JavaType");
+
+      // Checks if new service interface already exists.
+      final String repositoryConfigurationClassIdentifier =
+          getPathResolver().getCanonicalPath(repositoryConfigurationClass.getModule(),
+              Path.SRC_MAIN_JAVA, repositoryConfigurationClass);
+      final String mid =
+          PhysicalTypeIdentifier.createIdentifier(repositoryConfigurationClass, getPathResolver()
+              .getPath(repositoryConfigurationClassIdentifier));
+      if (!getFileManager().exists(repositoryConfigurationClassIdentifier)) {
+
+        // Repository config class doesn't exist. Create class builder
+        final ClassOrInterfaceTypeDetailsBuilder typeBuilder =
+            new ClassOrInterfaceTypeDetailsBuilder(mid, PUBLIC, repositoryConfigurationClass,
+                PhysicalTypeCategory.CLASS);
+
+        // Add @RooJpaRepositoryConfiguration
+        AnnotationMetadataBuilder repositoryCondigurationAnnotation =
+            new AnnotationMetadataBuilder(RooJavaType.ROO_JPA_REPOSITORY_CONFIGURATION);
+        typeBuilder.addAnnotation(repositoryCondigurationAnnotation);
+
+        // Write new class disk
+        getTypeManagementService().createOrUpdateTypeOnDisk(typeBuilder.build());
       }
     }
   }
@@ -571,11 +567,6 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
       // Replacing entity import
       input = input.replace("__ENTITY_IMPORT__", entity.getFullyQualifiedTypeName());
-
-      // Creates QEntity to be able to use QueryDsl
-      JavaType qEntity =
-          new JavaType(String.format("%s.Q%s", entity.getPackage(), entity.getSimpleTypeName()),
-              entity.getModule());
 
       // Replacing interface .class
       input = input.replace("__REPOSITORY_CUSTOM_INTERFACE__", interfaceType.getSimpleTypeName());

@@ -796,6 +796,17 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     return false;
   }
 
+  public boolean isFeatureInstalled(final Pom module, final String featureName) {
+    final Feature feature = features.get(featureName);
+    if (feature == null) {
+      return false;
+    }
+    if (feature.isInstalledInModule(module.getModuleName())) {
+      return true;
+    }
+    return false;
+  }
+
   public boolean isFocusedProjectAvailable() {
     return isProjectAvailable(getFocusedModuleName());
   }

@@ -106,6 +106,9 @@ public final class RooJavaType {
       "org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustom");
   public static final JavaType ROO_REPOSITORY_JPA_CUSTOM_IMPL = new JavaType(
       "org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl");
+  public static final JavaType ROO_JPA_REPOSITORY_CONFIGURATION =
+      new JavaType(
+          "org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryConfiguration");
   public static final JavaType ROO_FINDER = new JavaType(
       "org.springframework.roo.addon.layers.repository.jpa.annotations.RooFinder");
   public static final JavaType ROO_DTO = new JavaType(
