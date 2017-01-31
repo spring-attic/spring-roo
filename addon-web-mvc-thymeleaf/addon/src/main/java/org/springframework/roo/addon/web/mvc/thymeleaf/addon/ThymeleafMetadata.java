@@ -1420,7 +1420,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
    * @return a String with default field label
    */
   private String getFieldDefaultLabelValue(String fieldName) {
-    String[] splittedFieldName = fieldName.split("[A-Z]");
+    String[] splittedFieldName = StringUtils.splitByCharacterTypeCamelCase(fieldName);
     String label = "";
 
     for (int i = 0; i < splittedFieldName.length; i++) {

@@ -548,8 +548,10 @@
     	for(i = 0; i < columns.length; i++){
     		if(columns[i] != null && columns[i] != undefined
     				&& columns[i].data != null && columns[i].data != undefined){
-    			datatablesColumns += columns[i].data + ",";
-    			
+    			if(datatablesColumns.indexOf(columns[i].data) === -1){
+    				// Column has still not been added
+    				datatablesColumns += columns[i].data + ",";
+    			}
     		}
     	}
     	if(datatablesColumns.length > 0){
