@@ -28,7 +28,7 @@
     </header>
 
     <!-- CONTAINER -->
-    <div class="container bg-container" data-th-with="collectionLink=${r"${@"}linkBuilder.of('${detail.configuration.mvcDetailCollectionControllerName}')}">
+    <div class="container bg-container">
       <!-- CONTENT -->
       <!--
         Only the inner content of the following tag "section" is included
@@ -36,14 +36,14 @@
       -->
       <section data-layout-fragment="content">
 
-        <div class="container-fluid content">
+        <div class="container-fluid content" data-th-with="collectionLink=${r"${@"}linkBuilder.of('${detail.configuration.mvcDetailCollectionControllerName}')}">
 
           <h1 data-th-text="${r"#{"}label_create_entity(${r"#{"}${entityLabel}})}">Create ${entityName}</h1>
           <#assign dconfig=detail.configuration>
 
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="${r"${"}collectionLink.to('create')}">
+            data-th-action="${r"@{"}${r"${"}collectionLink.to('create').with('${detail.rootEntity.modelAttribute}', ${detail.rootEntity.modelAttribute}.${detail.rootEntity.configuration.identifierField})}}">
 
             <fieldset id="containerFields">
               <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data </legend>
