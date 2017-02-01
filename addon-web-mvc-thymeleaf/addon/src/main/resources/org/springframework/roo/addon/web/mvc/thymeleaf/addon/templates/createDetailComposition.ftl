@@ -52,16 +52,31 @@
                   <#if field.userManaged>
                       ${field.codeManaged}
                   <#elseif field.type == "TEXT">
-                      <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=6 required=field.configuration.required maxLength=field.configuration.maxLength />
+                      <@text.input label=field.label 
+                      fieldName=field.fieldName 
+                      fieldId=field.fieldId 
+                      z=field.z width=6 
+                      required=field.configuration.required 
+                      maxLength=field.configuration.maxLength />
                   <#elseif field.type == "NUMBER">
-                      <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max digitsFraction=field.configuration.digitsFraction digitsInteger=field.configuration.digitsInteger />
+                      <@number.input label=field.label 
+                      fieldName=field.fieldName 
+                      fieldId=field.fieldId 
+                      z=field.z width=3 
+                      required=field.configuration.required 
+                      min=field.configuration.min 
+                      max=field.configuration.max 
+                      digitsFraction=field.configuration.digitsFraction 
+                      digitsInteger=field.configuration.digitsInteger />
                   <#elseif field.type == "DATE">
                       <@date.input label=field.label
                           fieldName=field.fieldName
                           fieldId=field.fieldId
                           z=field.z
-                          format=field.configuration.format required=field.configuration.required />
+                          format=field.configuration.format 
+                          required=field.configuration.required />
                   <#elseif field.type == "REFERENCE">
+                  	<#if field.configuration.isCompositionChildField?? && field.configuration.isCompositionChildField == false>
                       <@reference.input label=field.label
                           fieldName=field.fieldName
                           fieldId=field.fieldId
@@ -71,14 +86,18 @@
                           select2MethodName=field.configuration.select2MethodName
                           select2ControllerName=field.configuration.select2ControllerName
                           required=field.configuration.required />
+                    </#if>
                   <#elseif field.type == "ENUM">
                       <@enum.input label=field.label
                           fieldName=field.fieldName
                           fieldId=field.fieldId
                           z=field.z
-                          items=field.configuration.items required=field.configuration.required />
+                          items=field.configuration.items 
+                          required=field.configuration.required />
                   <#elseif field.type == "BOOLEAN">
-                      <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
+                      <@checkbox.input label=field.label 
+                      fieldName=field.fieldName 
+                      fieldId=field.fieldId z=field.z />
                   </#if>
               </#list>
 

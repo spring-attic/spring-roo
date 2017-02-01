@@ -1048,6 +1048,17 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if is a referenced field
     if (typeDetails != null && typeDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
+      // Referenced field is a relation field      
+
+      // If is child part field of a composition relation, specify it if view context
+      if (entityMetadata.getCompositionRelationField() != null
+          && entityMetadata.getCompositionRelationField().getFieldName()
+              .equals(entityField.getFieldName())) {
+        fieldItem.addConfigurationElement("isCompositionChildField", true);
+      } else {
+        fieldItem.addConfigurationElement("isCompositionChildField", false);
+      }
+
       boolean shouldBeAdded = getReferenceField(fieldItem, typeDetails, ctx);
       if (!shouldBeAdded) {
         return null;
