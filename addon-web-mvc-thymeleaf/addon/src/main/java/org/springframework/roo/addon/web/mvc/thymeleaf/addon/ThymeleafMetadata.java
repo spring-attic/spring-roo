@@ -3666,7 +3666,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     }
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName(parentEntity.getSimpleTypeName()));
+    String parentEntityParamName = StringUtils.uncapitalize(parentEntity.getSimpleTypeName());
+    parameterNames.add(new JavaSymbolName(parentEntityParamName));
     parameterNames.add(MODEL_PARAM_NAME);
 
     // Adding annotations
