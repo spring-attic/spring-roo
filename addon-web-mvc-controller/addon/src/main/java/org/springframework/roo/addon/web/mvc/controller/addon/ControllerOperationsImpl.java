@@ -622,8 +622,36 @@ public class ControllerOperationsImpl implements ControllerOperations {
         getMetadataService().get(JpaEntityMetadata.createIdentifier(entityDetails));
     List<JavaType> entitiesToCreateSerializers = new ArrayList<JavaType>();
     entitiesToCreateSerializers.add(currentEntity);
+
+    // Get related child entities
     for (RelationInfo info : entityMetadata.getRelationInfos().values()) {
-      entitiesToCreateSerializers.add(info.childType);
+
+      // One-To-One composition child entities doesn't need deserializers
+      if (info.type == JpaRelationType.COMPOSITION && info.cardinality == Cardinality.ONE_TO_ONE) {
+        continue;
+      }
+
+      // Need serializer
+      if (!entitiesToCreateSerializers.contains(info.childType)) {
+        entitiesToCreateSerializers.add(info.childType);
+      }
+    }
+
+    // We need as well to get related parent entities
+    for (FieldMetadata parentEntityField : entityMetadata.getRelationsAsChild().values()) {
+      JavaType parentEntity = null;
+      if (parentEntityField.getFieldType().isCommonCollectionType()) {
+
+        // Get wrappedType
+        parentEntity = parentEntityField.getFieldType().getBaseType();
+      } else {
+        parentEntity = parentEntityField.getFieldType();
+      }
+
+      // Add parent entity to list
+      if (!entitiesToCreateSerializers.contains(parentEntity)) {
+        entitiesToCreateSerializers.add(parentEntity);
+      }
     }
 
     // Check if already exists a serializer for each entity
@@ -645,18 +673,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
       if (!deserializerFound) {
 
         // Not found deserializer. Create it
-
-        // Create fields and constructor and field to avoid AspectJ
-        // compiler problem
         ClassOrInterfaceTypeDetails serviceDetails = getServiceLocator().getService(entity);
-        if (serviceDetails == null) {
-
-          // Entity doesn't have service (it is a child side of a 
-          // one-to-one composition relation, for example)
-          continue;
-        }
-        Validate.notNull(serviceDetails, "Can't found service for Entity %s",
-            entity.getFullyQualifiedTypeName());
+        Validate.notNull(serviceDetails, "Can't found service for Entity %s to generate "
+            + "Serializer. If it is a related entity with the one to generate "
+            + "controller, it needs a service.", entity.getFullyQualifiedTypeName());
 
         // Build @RooDeserializer
         List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
