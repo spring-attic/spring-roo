@@ -432,6 +432,13 @@ body.home .navbar {  margin-bottom: 0px;}
 .select2-container--bootstrap .select2-selection--single .select2-selection__arrow b {
     border-color: #dfd7ca transparent transparent transparent;
 }
+/* align options in left */
+.select2-container--bootstrap .select2-selection--multiple .select2-selection__rendered{
+	padding-right: 0.5em !important;
+}
+.select2-container--bootstrap .select2-selection--multiple .select2-selection__clear {
+    margin-right: 0 !important;
+}
 
 /* MEDIA QUERIES
 -------------------------------------------------------------------------------*/
