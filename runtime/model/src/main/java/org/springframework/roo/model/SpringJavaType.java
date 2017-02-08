@@ -212,6 +212,8 @@ public final class SpringJavaType {
   public static final JavaType SPRING_BOOT_TEST = new JavaType(
       "org.springframework.boot.test.context.SpringBootTest");
   public static final JavaType STRING_UTILS = new JavaType("org.springframework.util.StringUtils");
+  public static final JavaType TEST_CONFIGURATION = new JavaType(
+      "org.springframework.boot.test.context.TestConfiguration");
   public static final JavaType TRANSACTIONAL = new JavaType(
       "org.springframework.transaction.annotation.Transactional");
   public static final JavaType URI_UTILS = new JavaType("org.springframework.web.util.UriUtils");

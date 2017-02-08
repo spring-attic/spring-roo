@@ -71,7 +71,8 @@ web mvc detail --all --responseType THYMELEAF
 
 web mvc language --code es
 
-test integration --class repository:~.PetRepository
-test integration --class repository:~.VetRepository
-test integration --class repository:~.OwnerRepository
-test integration --class repository:~.VisitRepository
+// Deactivated until finish changes of DoD and tests
+//test integration --class repository:~.PetRepository
+//test integration --class repository:~.VetRepository
+//test integration --class repository:~.OwnerRepository
+//test integration --class repository:~.VisitRepository

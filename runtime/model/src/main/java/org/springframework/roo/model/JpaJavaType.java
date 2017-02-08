@@ -12,6 +12,10 @@ public final class JpaJavaType {
   // javax.persistence
   public static final JavaType CASCADE_TYPE = new JavaType("javax.persistence.CascadeType");
   public static final JavaType COLUMN = new JavaType("javax.persistence.Column");
+  public static final JavaType CRITERIA_BUILDER = new JavaType(
+      "javax.persistence.criteria.CriteriaBuilder");
+  public static final JavaType CRITERIA_QUERY = new JavaType(
+      "javax.persistence.criteria.CriteriaQuery");
   public static final JavaType DISCRIMINATOR_COLUMN = new JavaType(
       "javax.persistence.DiscriminatorColumn");
   public static final JavaType ELEMENT_COLLECTION = new JavaType(
@@ -46,6 +50,7 @@ public final class JpaJavaType {
   public static final JavaType POST_UPDATE = new JavaType("javax.persistence.PostUpdate");
   public static final JavaType PRE_REMOVE = new JavaType("javax.persistence.PreRemove");
   public static final JavaType QUERY = new JavaType("javax.persistence.Query");
+  public static final JavaType ROOT = new JavaType("javax.persistence.criteria.Root");
   public static final JavaType SEQUENCE_GENERATOR = new JavaType(
       "javax.persistence.SequenceGenerator");
   public static final JavaType TABLE = new JavaType("javax.persistence.Table");

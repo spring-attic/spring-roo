@@ -328,20 +328,21 @@ test unit --class repository:~.CustomerOrderRepository
 test unit --class service-api:~.CustomerOrderService
 test unit --class service-impl:~.CustomerServiceImpl
 
+// Deactivated until finish changes of DoD and tests
 // Integration tests
-test integration --class repository:~.CategoryRepository
-test integration --class repository:~.CityRepository
-test integration --class repository:~.CountryRepository
-test integration --class repository:~.CustomerOrderRepository
-test integration --class repository:~.CustomerRepository
-test integration --class repository:~.EmployeeRepository
-test integration --class repository:~.OrderDetailRepository
-test integration --class repository:~.PartyRepository
-test integration --class repository:~.ProductRepository
-test integration --class repository:~.PurchaseOrderRepository
-test integration --class repository:~.RegionRepository
-test integration --class repository:~.ReportRepository
-test integration --class repository:~.ShipperRepository
-test integration --class repository:~.SoldProductRepository
-test integration --class repository:~.StoreRepository
-test integration --class repository:~.SupplierRepository
+//test integration --class repository:~.CategoryRepository
+//test integration --class repository:~.CityRepository
+//test integration --class repository:~.CountryRepository
+//test integration --class repository:~.CustomerOrderRepository
+//test integration --class repository:~.CustomerRepository
+//test integration --class repository:~.EmployeeRepository
+//test integration --class repository:~.OrderDetailRepository
+//test integration --class repository:~.PartyRepository
+//test integration --class repository:~.ProductRepository
+//test integration --class repository:~.PurchaseOrderRepository
+//test integration --class repository:~.RegionRepository
+//test integration --class repository:~.ReportRepository
+//test integration --class repository:~.ShipperRepository
+//test integration --class repository:~.SoldProductRepository
+//test integration --class repository:~.StoreRepository
+//test integration --class repository:~.SupplierRepository

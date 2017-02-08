@@ -2,13 +2,15 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_REPOSITORY_CONFIGURATION;
 
+import java.util.Set;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -21,9 +23,6 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
-
-import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * = RepositoryJpaConfigurationMetadataProviderImpl
@@ -43,7 +42,6 @@ public class RepositoryJpaConfigurationMetadataProviderImpl extends
       .getLogger(RepositoryJpaConfigurationMetadataProviderImpl.class);
 
   protected MetadataDependencyRegistryTracker registryTracker = null;
-  protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
 
   private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
 

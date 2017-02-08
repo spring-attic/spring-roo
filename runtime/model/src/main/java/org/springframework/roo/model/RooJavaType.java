@@ -92,6 +92,10 @@ public final class RooJavaType {
       "org.springframework.roo.addon.web.mvc.controller.annotations.scaffold.RooWebScaffold");
 
   // Spring Roo 2.x annotations
+  public static final JavaType ROO_DATA_ON_DEMAND_CONFIGURATION = new JavaType(
+      "org.springframework.roo.addon.dod.annotations.RooDataOnDemandConfiguration");
+  public static final JavaType ROO_ENTITY_FACTORY = new JavaType(
+      "org.springframework.roo.addon.dod.annotations.RooEntityFactory");
   public static final JavaType ROO_JPA_ENTITY = new JavaType(
       "org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity");
   public static final JavaType ROO_JPA_RELATION = new JavaType(
