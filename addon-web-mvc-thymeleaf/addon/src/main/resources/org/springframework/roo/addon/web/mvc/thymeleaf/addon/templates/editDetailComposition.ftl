@@ -43,6 +43,25 @@
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
             data-th-action="${r"${"}itemLink.to('update')}">
             <input type="hidden" name="_method" value="PUT" />
+            <input type="hidden" name="version" data-th-value="${r"*"}{${entity.configuration.versionField}}" />
+
+            <!-- CONCURRENCY CONTROL -->
+            <div class="alert alert-warning" data-th-if="${r"${"}concurrency}">
+              <h2 data-th-text="${r"#{"}label_concurrency_title}">Warning! This record has been updated by an other user.</h2>
+              <div class="radio">
+                <label>
+                  <input type="radio" name="concurrency" value="apply"> <span data-th-text="${r"#{"}label_concurrency_apply}">Apply my changes anyway</span> <i><span data-th-text="${r"#{"}label_concurrency_apply_info}">(discard all the changes applied by the other users).</span></i>
+                </label>
+              </div>
+              <div class="radio">
+                <label>
+                  <input type="radio" name="concurrency" value="discard" checked=""> <span data-th-text="${r"#{"}label_concurrency_discard}">Discard all my changes and reload this record.</span>
+                </label>
+              </div>
+              <br>
+              <button type="submit" class="btn btn-primary">Accept</button>
+            </div>
+            <!-- /CONCURRENCY CONTROL -->
 
              <fieldset id="containerFields">
               <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data </legend>
