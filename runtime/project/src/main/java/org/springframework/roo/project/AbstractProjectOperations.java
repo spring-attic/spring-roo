@@ -4,16 +4,6 @@ import static org.springframework.roo.project.DependencyScope.COMPILE;
 import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
 import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.logging.Level;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -34,6 +24,16 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Level;
 
 /**
  * Provides common project operations. Should be subclassed by a
@@ -796,6 +796,17 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     return false;
   }
 
+  public boolean isFeatureInstalled(final Pom module, final String featureName) {
+    final Feature feature = features.get(featureName);
+    if (feature == null) {
+      return false;
+    }
+    if (feature.isInstalledInModule(module.getModuleName())) {
+      return true;
+    }
+    return false;
+  }
+
   public boolean isFocusedProjectAvailable() {
     return isProjectAvailable(getFocusedModuleName());
   }
@@ -1024,7 +1035,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
    * @return Element without version if blank
    */
   private Element removeAllItems(Element element) {
-    element = removeVersionAndScope(element);
+    element = removeManagementConfiguration(element);
     NodeList elementAttributes = element.getChildNodes();
     List<Node> elementsToRemove = new ArrayList<Node>();
     for (int i = 0; i < elementAttributes.getLength(); i++) {
@@ -1050,12 +1061,12 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
   }
 
   /**
-   * Method that removes version and scope from provided element 
+   * Method that removes version, scope and exclusions from provided element. 
    * 
    * @param element
-   * @return Element without version and without scope
+   * @return Element without version, scope nor exclusions
    */
-  private Element removeVersionAndScope(Element element) {
+  private Element removeManagementConfiguration(Element element) {
     NodeList elementAttributes = element.getChildNodes();
     List<Node> elementsToRemove = new ArrayList<Node>();
     for (int i = 0; i < elementAttributes.getLength(); i++) {
@@ -1065,6 +1076,10 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
       }
 
       if (elementAttribute != null && elementAttribute.getTagName().equals("scope")) {
+        elementsToRemove.add(elementAttributes.item(i));
+      }
+
+      if (elementAttribute != null && elementAttribute.getTagName().equals("exclusions")) {
         elementsToRemove.add(elementAttributes.item(i));
       }
     }
@@ -1429,8 +1444,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
               Element newDependencyElement = null;
               if (addToDependencyManagement && !StringUtils.isEmpty(newDependency.getVersion())) {
                 // If this dependency has been added to dependencyManagement, is not necessary
-                // to include version
-                newDependencyElement = removeVersionAndScope(newDependency.getElement(document));
+                // to include version, scope or exclusions
+                newDependencyElement =
+                    removeManagementConfiguration(newDependency.getElement(document));
               } else {
                 // If this dependency has not been added to dependencyManagement, is necessary
                 // to include version, only if it's not blank or null.
@@ -1462,8 +1478,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
           Element newDependencyElement = null;
           if (addToDependencyManagement && !StringUtils.isEmpty(newDependency.getVersion())) {
             // If this dependency has been added to dependencyManagement, is not necessary
-            // to include version
-            newDependencyElement = removeVersionAndScope(newDependency.getElement(document));
+            // to include version, scope or exclusions
+            newDependencyElement =
+                removeManagementConfiguration(newDependency.getElement(document));
           } else {
             // If this dependency has not been added to dependencyManagement, is necessary
             // to include version, only if it's not blank or null.

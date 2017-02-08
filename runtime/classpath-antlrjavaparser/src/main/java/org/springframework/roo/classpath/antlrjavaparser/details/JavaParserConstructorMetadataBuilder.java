@@ -16,6 +16,7 @@ import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.comments.AbstractComment;
 import org.springframework.roo.classpath.details.comments.CommentStructure;
 import org.springframework.roo.classpath.details.comments.CommentStructure.CommentLocation;
 import org.springframework.roo.classpath.details.comments.JavadocComment;
@@ -43,6 +44,7 @@ import com.github.antlrjavaparser.api.type.Type;
  * 
  * @author Ben Alex
  * @author Juan Carlos García
+ * @author Sergio Clares
  * @since 1.0
  */
 public class JavaParserConstructorMetadataBuilder implements Builder<ConstructorMetadata> {
@@ -196,6 +198,7 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
     }
 
     // ROO-3834: Append Javadoc
+    CommentStructure commentStructure = constructor.getCommentStructure();
     if (constructor.getCommentStructure() != null) {
 
       // if the constructor has annotations, add JavaDoc comments to the first
@@ -204,30 +207,26 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
         AnnotationExpr firstAnnotation = annotations.get(0);
 
         JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(firstAnnotation,
-            constructor.getCommentStructure());
+            commentStructure);
 
         // Otherwise, add comments to the field declaration line
       } else {
-        JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(d,
-            constructor.getCommentStructure());
+        JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(d, commentStructure);
       }
     } else {
-      // ROO-3834: Include default documentation
+
+      // ROO-3834: Append default Javadoc if not exists a comment structure, 
+      // including constructor params
       CommentStructure defaultCommentStructure = new CommentStructure();
-
-      // Getting params list
-      String paramsListComment = "";
-      for (JavaSymbolName param : constructor.getParameterNames()) {
-        paramsListComment =
-            paramsListComment.concat(" * @param ").concat(param.getSymbolName()).concat("\n");
+      List<String> parameterNames = new ArrayList<String>();
+      for (JavaSymbolName name : constructor.getParameterNames()) {
+        parameterNames.add(name.getSymbolName());
       }
-
-      String defaultComment =
-          "/**\n * TODO Auto-generated constructor documentation\n *\n".concat(paramsListComment)
-              .concat(" */\n");
-
-      defaultCommentStructure.addComment(new JavadocComment(defaultComment),
-          CommentLocation.BEGINNING);
+      JavadocComment javadocComment =
+          new JavadocComment("TODO Auto-generated constructor documentation", parameterNames, null,
+              null);
+      defaultCommentStructure.addComment(javadocComment, CommentLocation.BEGINNING);
+      constructor.setCommentStructure(defaultCommentStructure);
 
       // if the constructor has annotations, add JavaDoc comments to the first
       // annotation

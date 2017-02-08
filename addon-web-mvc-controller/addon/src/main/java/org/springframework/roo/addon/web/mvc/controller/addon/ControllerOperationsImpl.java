@@ -108,7 +108,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
       "org.springframework.boot.jackson.JsonObjectDeserializer");
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.1.0.BUILD-SNAPSHOT");
+      "1.1.0.RELEASE");
   private static final Dependency SPRINGLETS_WEB_STARTER = new Dependency("io.springlets",
       "springlets-boot-starter-web", "${springlets.version}");
   private static final Property TRACEE_PROPERTY = new Property("tracee.version", "1.1.2");
@@ -145,8 +145,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
    * @param module
    *            Pom module where Spring MVC should be included
    * @param usesDefaultModule
-   * 			boolean that indicates if the setup command is using the default 
-   * 			application module
+   *            boolean that indicates if the setup command is using the
+   *            default application module
    */
   @Override
   public void setup(Pom module, boolean usesDefaultModule) {
@@ -164,7 +164,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
             "ERROR: You are trying to install Spring MVC inside module that doesn't match with APPLICATION modules features. "
                 + "Use --module parameter to specify a valid APPLICATION module where install Spring MVC.");
 
-    // Check if is already installed in the provided module, to show a message
+    // Check if is already installed in the provided module, to show a
+    // message
     if (isInstalledInModule(module.getModuleName())) {
 
       String message = "";
@@ -190,12 +191,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
     getProjectOperations().addProperty("", TRACEE_PROPERTY);
     getProjectOperations().addDependency(module.getModuleName(), TRACEE_SPRINGMVC);
 
-
     // Include Springlets Starter project dependencies and properties
     getProjectOperations().addProperty("", SPRINGLETS_VERSION_PROPERTY);
 
     getProjectOperations().addDependency(module.getModuleName(), SPRINGLETS_WEB_STARTER);
-
 
     // Create WebMvcConfiguration.java class
     JavaType webMvcConfiguration =
@@ -517,7 +516,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     // Check if requires Deserializer
     if (responseType.requiresJsonDeserializer()) {
-      createJsonDeserializerIfDontExists(entity, itemController.getModule());
+      createJsonDeserializersIfDontExists(entity, itemController.getModule());
     }
 
     if (responseType.requiresJsonMixin()) {
@@ -534,7 +533,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
   }
 
   /**
-   * Return true if field is annotated with @OneToOne or @ManyToOne JPA annotation
+   * Return true if field is annotated with @OneToOne or @ManyToOne JPA
+   * annotation
    *
    * @param field
    * @return
@@ -545,8 +545,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
   }
 
   /**
-   * Create the Json Mixin utility class (annotated with @RooJsonMixin) for target Entity
-   * if it isn't created yet.
+   * Create the Json Mixin utility class (annotated with @RooJsonMixin) for
+   * target Entity if it isn't created yet.
    *
    * @param entity
    * @param entityMetadata
@@ -600,85 +600,134 @@ public class ControllerOperationsImpl implements ControllerOperations {
     for (FieldMetadata field : entityMetadata.getRelationsAsChild().values()) {
       if (isAnyToOneRelation(field)) {
         // Create deserializer if doesn't exist
-        createJsonDeserializerIfDontExists(field.getFieldType(), module);
+        createJsonDeserializersIfDontExists(field.getFieldType(), module);
       }
     }
   }
 
   /**
-   * Create the Json Desearializer utility class (annotated with @RooDeserializer) for target Entity
-   * if it isn't created yet.
+   * Create the Json Desearializer utility class (annotated
+   * with @RooDeserializer) for target Entity and its related entities if they
+   * aren't created yet.
    *
    * @param entity
    * @param module
    */
-  private void createJsonDeserializerIfDontExists(JavaType entity, String module) {
-    Set<ClassOrInterfaceTypeDetails> allDeserializer =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_DESERIALIZER);
+  private void createJsonDeserializersIfDontExists(JavaType currentEntity, String module) {
 
-    EntityDeserializerAnnotationValues values;
-    for (ClassOrInterfaceTypeDetails deserializer : allDeserializer) {
-      values = new EntityDeserializerAnnotationValues(deserializer);
+    // Get related entities
+    ClassOrInterfaceTypeDetails entityDetails =
+        getTypeLocationService().getTypeDetails(currentEntity);
+    JpaEntityMetadata entityMetadata =
+        getMetadataService().get(JpaEntityMetadata.createIdentifier(entityDetails));
+    List<JavaType> entitiesToCreateSerializers = new ArrayList<JavaType>();
+    entitiesToCreateSerializers.add(currentEntity);
 
-      if (entity.equals(values.getEntity())) {
-        // Found mixing. Nothing to do.
-        return;
+    // Get related child entities
+    for (RelationInfo info : entityMetadata.getRelationInfos().values()) {
+
+      // One-To-One composition child entities doesn't need deserializers
+      if (info.type == JpaRelationType.COMPOSITION && info.cardinality == Cardinality.ONE_TO_ONE) {
+        continue;
+      }
+
+      // Need serializer
+      if (!entitiesToCreateSerializers.contains(info.childType)) {
+        entitiesToCreateSerializers.add(info.childType);
       }
     }
 
-    // Not found. Create class
-    List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+    // We need as well to get related parent entities
+    for (FieldMetadata parentEntityField : entityMetadata.getRelationsAsChild().values()) {
+      JavaType parentEntity = null;
+      if (parentEntityField.getFieldType().isCommonCollectionType()) {
 
-    annotations = new ArrayList<AnnotationMetadataBuilder>();
-    AnnotationMetadataBuilder mixinAnnotation =
-        new AnnotationMetadataBuilder(RooJavaType.ROO_DESERIALIZER);
-    mixinAnnotation.addClassAttribute("entity", entity);
-    annotations.add(mixinAnnotation);
+        // Get wrappedType
+        parentEntity = parentEntityField.getFieldType().getBaseType();
+      } else {
+        parentEntity = parentEntityField.getFieldType();
+      }
 
-    JavaPackage packageToUse = getDefaultControllerPackage();
-    JavaType mixinClass =
-        new JavaType(String.format("%s.%sDeserializer",
-            packageToUse.getFullyQualifiedPackageName(), entity.getSimpleTypeName()), module);
+      // Add parent entity to list
+      if (!entitiesToCreateSerializers.contains(parentEntity)) {
+        entitiesToCreateSerializers.add(parentEntity);
+      }
+    }
 
-    final LogicalPath mixinPath = getPathResolver().getPath(module, Path.SRC_MAIN_JAVA);
-    final String resourceIdentifierItem =
-        getTypeLocationService().getPhysicalTypeCanonicalPath(mixinClass, mixinPath);
-    final String declaredByMetadataIdItem =
-        PhysicalTypeIdentifier.createIdentifier(mixinClass,
-            getPathResolver().getPath(resourceIdentifierItem));
-    ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-        new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataIdItem, Modifier.PUBLIC,
-            mixinClass, PhysicalTypeCategory.CLASS);
-    cidBuilder.setAnnotations(annotations);
+    // Check if already exists a serializer for each entity
+    Set<ClassOrInterfaceTypeDetails> allDeserializer =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_DESERIALIZER);
+    for (JavaType entity : entitiesToCreateSerializers) {
+      EntityDeserializerAnnotationValues values;
+      boolean deserializerFound = false;
+      for (ClassOrInterfaceTypeDetails deserializer : allDeserializer) {
+        values = new EntityDeserializerAnnotationValues(deserializer);
 
-    /*
-     * Moved extend to java (instead ITD) because there were compilation problems when Mixin
-     * uses @JsonDeserialize(using=EntityDeserializer.class) annotation
-     * (requires extend of JsonDeseralizer)
-     */
-    cidBuilder.addExtendsTypes(JavaType.wrapperOf(JSON_OBJECT_DESERIALIZER, entity));
+        if (entity.equals(values.getEntity())) {
+          // Found mixing. Nothing to do.
+          deserializerFound = true;
+        }
+      }
 
-    // Create fields and constructor and field to avoid AspectJ compiler problem
-    ClassOrInterfaceTypeDetails serviceDetails = getServiceLocator().getService(entity);
-    Validate.notNull(serviceDetails, "Can't found service for Entity %s",
-        entity.getFullyQualifiedTypeName());
+      if (!deserializerFound) {
 
-    FieldMetadata serviceField =
-        EntityDeserializerMetadata.getFieldFor(declaredByMetadataIdItem, serviceDetails.getType());
-    FieldMetadata conversionServiceField =
-        EntityDeserializerMetadata.getFieldFor(declaredByMetadataIdItem,
-            SpringJavaType.CONVERSION_SERVICE);
-    cidBuilder.addField(serviceField);
-    cidBuilder.addField(conversionServiceField);
+        // Not found deserializer. Create it
+        ClassOrInterfaceTypeDetails serviceDetails = getServiceLocator().getService(entity);
+        Validate.notNull(serviceDetails, "Can't found service for Entity %s to generate "
+            + "Serializer. If it is a related entity with the one to generate "
+            + "controller, it needs a service.", entity.getFullyQualifiedTypeName());
 
-    ConstructorMetadata constructor =
-        EntityDeserializerMetadata.getConstructor(declaredByMetadataIdItem, serviceField,
-            conversionServiceField);
-    cidBuilder.addConstructor(constructor);
+        // Build @RooDeserializer
+        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        annotations = new ArrayList<AnnotationMetadataBuilder>();
+        AnnotationMetadataBuilder deserializerAnnotation =
+            new AnnotationMetadataBuilder(RooJavaType.ROO_DESERIALIZER);
+        deserializerAnnotation.addClassAttribute("entity", entity);
+        annotations.add(deserializerAnnotation);
 
-    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+        JavaPackage packageToUse = getDefaultControllerPackage();
+        JavaType deserializerClass =
+            new JavaType(String.format("%s.%sDeserializer",
+                packageToUse.getFullyQualifiedPackageName(), entity.getSimpleTypeName()), module);
 
+        final LogicalPath deserializerPath = getPathResolver().getPath(module, Path.SRC_MAIN_JAVA);
+        final String resourceIdentifierItem =
+            getTypeLocationService().getPhysicalTypeCanonicalPath(deserializerClass,
+                deserializerPath);
+        final String declaredByMetadataIdItem =
+            PhysicalTypeIdentifier.createIdentifier(deserializerClass,
+                getPathResolver().getPath(resourceIdentifierItem));
+        ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+            new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataIdItem, Modifier.PUBLIC,
+                deserializerClass, PhysicalTypeCategory.CLASS);
+        cidBuilder.setAnnotations(annotations);
+
+        /*
+         * Moved extend to java (instead ITD) because there were
+         * compilation problems when Mixin
+         * uses @JsonDeserialize(using=EntityDeserializer.class)
+         * annotation (requires extend of JsonDeseralizer)
+         */
+        cidBuilder.addExtendsTypes(JavaType.wrapperOf(JSON_OBJECT_DESERIALIZER, entity));
+
+        FieldMetadata serviceField =
+            EntityDeserializerMetadata.getFieldFor(declaredByMetadataIdItem,
+                serviceDetails.getType());
+        FieldMetadata conversionServiceField =
+            EntityDeserializerMetadata.getFieldFor(declaredByMetadataIdItem,
+                SpringJavaType.CONVERSION_SERVICE);
+        cidBuilder.addField(serviceField);
+        cidBuilder.addField(conversionServiceField);
+
+        ConstructorMetadata constructor =
+            EntityDeserializerMetadata.getConstructor(declaredByMetadataIdItem, serviceField,
+                conversionServiceField);
+        cidBuilder.addConstructor(constructor);
+
+        getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+      }
+    }
   }
 
   /**
@@ -711,9 +760,9 @@ public class ControllerOperationsImpl implements ControllerOperations {
    *
    * @param relationField
    *            Field that set the relationship
-   * @param viewsList Separated comma list that 
-   * 			defines the parent views where the new detail will be
-   * 			displayed.
+   * @param viewsList
+   *            Separated comma list that defines the parent views where the
+   *            new detail will be displayed.
    * @return
    */
   private AnnotationMetadataBuilder getRooDetailAnnotation(final String relationField,
@@ -917,9 +966,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
     if (StringUtils.isNotBlank(relationField)) {
       // Check field received as parameter
 
-
       List<RelationInfoExtended> infos = getRelationInfoFor(entityMetadata, relationField);
-
 
       // TODO support multilevel detail (TO BE ANALIZED)
       if (infos.size() > 1) {
@@ -1037,8 +1084,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
         responseType, controllerPackage, pathPrefixController, viewsList);
   }
 
-
-
   private boolean createDetailClass(String field, String controllerName, ControllerType type,
       JavaType entity, ControllerMVCResponseService responseType, JavaPackage controllerPackage,
       String pathPrefixController, String viewsList) {
@@ -1089,30 +1134,31 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     if (getProjectOperations().isMultimoduleProject()) {
       // TODO
-      //        // Getting related service
-      //        JavaType relatedEntityService = null;
-      //        Set<ClassOrInterfaceTypeDetails> services = getTypeLocationService()
-      //            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE);
-      //        Iterator<ClassOrInterfaceTypeDetails> itServices = services.iterator();
+      // // Getting related service
+      // JavaType relatedEntityService = null;
+      // Set<ClassOrInterfaceTypeDetails> services =
+      // getTypeLocationService()
+      // .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE);
+      // Iterator<ClassOrInterfaceTypeDetails> itServices =
+      // services.iterator();
       //
-      //        while (itServices.hasNext()) {
-      //          ClassOrInterfaceTypeDetails existingService = itServices.next();
-      //          AnnotationAttributeValue<Object> entityAttr =
-      //              existingService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
-      //          JavaType entityJavaType = (JavaType) entityAttr.getValue();
-      //          String entityField = relationFieldObject.get(field);
-      //          if (entityJavaType.getSimpleTypeName().equals(entityField)) {
-      //            relatedEntityService = existingService.getType();
-      //            break;
-      //          }
-      //        }
+      // while (itServices.hasNext()) {
+      // ClassOrInterfaceTypeDetails existingService = itServices.next();
+      // AnnotationAttributeValue<Object> entityAttr =
+      // existingService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
+      // JavaType entityJavaType = (JavaType) entityAttr.getValue();
+      // String entityField = relationFieldObject.get(field);
+      // if (entityJavaType.getSimpleTypeName().equals(entityField)) {
+      // relatedEntityService = existingService.getType();
+      // break;
+      // }
+      // }
       //
-      //        getProjectOperations().addModuleDependency(detailController.getModule(),
-      //            relatedEntityService.getModule());
+      // getProjectOperations().addModuleDependency(detailController.getModule(),
+      // relatedEntityService.getModule());
     }
     return true;
   }
-
 
   /**
    * Find recursively if relation field is valid. Check that the fields are
@@ -1161,7 +1207,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
     return infos;
   }
 
-
   /**
    * Check if detail controller exists for the values entity, responseType,
    * controllerPackage, pathPrefix and relationField provided by parameters
@@ -1201,10 +1246,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
   }
 
   /**
-   * Creates a new class which supports its associated controller building URL's 
-   * for its methods
+   * Creates a new class which supports its associated controller building
+   * URL's for its methods
    * 
-   * @param controller the JavaType of the associated controller
+   * @param controller
+   *            the JavaType of the associated controller
    */
   @Override
   public void createLinkFactoryClass(JavaType controller) {
@@ -1301,15 +1347,18 @@ public class ControllerOperationsImpl implements ControllerOperations {
   }
 
   /**
-   * Get all the methods that can be published from the service or the controller established by parameter
+   * Get all the methods that can be published from the service or the
+   * controller established by parameter
    *
-   * @param currentService Service from which obtain methods
-   * @param currentController Controller from which obtain methods
+   * @param currentService
+   *            Service from which obtain methods
+   * @param currentController
+   *            Controller from which obtain methods
    * @return methods names list
    */
   public List<String> getAllMethodsToPublish(String currentService, String currentController) {
 
-    //Generating all possible values
+    // Generating all possible values
     List<String> serviceMethodsToPublish = new ArrayList<String>();
 
     List<ClassOrInterfaceTypeDetails> servicesToPublish =
@@ -1389,7 +1438,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
           // If name is equals check the parameters
           if (method.getMethodName().equals(methodImplementedByRoo.getMethodName())) {
 
-            //Check parameters type are equals and in the same order
+            // Check parameters type are equals and in the same
+            // order
             if (method.getParameterTypes().size() == methodImplementedByRoo.getParameterTypes()
                 .size()) {
               Iterator<AnnotatedJavaType> iterParameterTypesMethodRoo =
@@ -1443,12 +1493,13 @@ public class ControllerOperationsImpl implements ControllerOperations {
     return serviceMethodsToPublish;
   }
 
-
   /**
    * Generate the operations selected in the controller indicated
    *
-   * @param controller Controller where the operations will be created
-   * @param operations Service operations names that will be created
+   * @param controller
+   *            Controller where the operations will be created
+   * @param operations
+   *            Service operations names that will be created
    */
   public void exportOperation(JavaType controller, List<String> operations) {
     ClassOrInterfaceTypeDetails controllerDetails =
@@ -1501,7 +1552,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
             (List<StringAttributeValue>) attributeOperations.getValue();
         Iterator<StringAttributeValue> it = existingOperations.iterator();
 
-        // Add existent operations to new attributes array to merge with new ones
+        // Add existent operations to new attributes array to merge with
+        // new ones
         while (it.hasNext()) {
           StringAttributeValue attributeValue = (StringAttributeValue) it.next();
           operationsToAdd.add(attributeValue);
@@ -1530,7 +1582,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
       }
     }
   }
-
 
   @Override
   public List<RelationInfoExtended> getRelationInfoFor(final JavaType entity, final String path) {
@@ -1569,14 +1620,12 @@ public class ControllerOperationsImpl implements ControllerOperations {
     return infos;
   }
 
-
   @Override
   public String getBaseUrlForController(ClassOrInterfaceTypeDetails controller) {
     Validate.notNull(controller, "controller is required");
     Validate.notNull(controller.getAnnotation(RooJavaType.ROO_CONTROLLER),
         "%s must be annotated with @%s", controller.getType(),
         RooJavaType.ROO_CONTROLLER.getSimpleTypeName());
-
 
     ControllerAnnotationValues values = new ControllerAnnotationValues(controller);
     StringBuilder sbuilder = getBasePathStringBuilder(controller, values);
@@ -1672,7 +1721,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
         "%s must be annotated with @%s", controller.getType(),
         RooJavaType.ROO_CONTROLLER.getSimpleTypeName());
 
-
     ControllerAnnotationValues values = new ControllerAnnotationValues(controller);
     StringBuilder sbuilder = getBasePathStringBuilder(controller, values);
     return sbuilder.toString();
@@ -1706,7 +1754,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
     return false;
   }
 
-  //Methods to obtain OSGi Services
+  // Methods to obtain OSGi Services
 
   private TypeLocationService getTypeLocationService() {
     return serviceInstaceManager.getServiceInstance(this, TypeLocationService.class);

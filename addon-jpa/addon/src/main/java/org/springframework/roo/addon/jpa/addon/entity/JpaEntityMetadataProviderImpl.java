@@ -32,13 +32,6 @@ import static org.springframework.roo.model.JpaJavaType.TRANSIENT;
 import static org.springframework.roo.model.JpaJavaType.VERSION;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -82,6 +75,13 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * The {@link JpaEntityMetadataProvider} implementation.
@@ -327,8 +327,9 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
       List<FieldMetadata> embeddedIdentifierFields =
           entityDetails.getFieldsWithAnnotation(EMBEDDED_ID);
 
-      Validate.isTrue(!(identifierFields.isEmpty() && embeddedIdentifierFields.isEmpty()),
-          "ERROR: The annotated entity doesn't contain any identifier field.");
+      Validate.isTrue(!(identifierFields.isEmpty() && embeddedIdentifierFields.isEmpty()), String
+          .format("ERROR: The annotated entity '%s' doesn't contain any identifier field.",
+              entityDetails.getType().getFullyQualifiedTypeName()));
 
       if (!identifierFields.isEmpty()) {
         identifierField = identifierFields.get(0);
@@ -341,8 +342,9 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
       // Obtain version field from entity details
       List<FieldMetadata> versionFields = entityDetails.getFieldsWithAnnotation(VERSION);
 
-      Validate.notEmpty(versionFields,
-          "ERROR: The annotated entity doesn't contain any version field.");
+      Validate.notEmpty(versionFields, String.format(
+          "ERROR: The annotated entity '%s' doesn't contain any version field.", entityDetails
+              .getType().getFullyQualifiedTypeName()));
 
       versionField = versionFields.get(0);
 

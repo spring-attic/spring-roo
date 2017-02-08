@@ -1,10 +1,15 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.config;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.layers.service.addon.ServiceLocator;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
@@ -24,10 +29,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Implementation of {@link EntityDeserializerMetadataProvider}.
@@ -155,22 +156,28 @@ public class EntityDeserializerMetadataProviderImpl extends
             entity.getFullyQualifiedTypeName(), deserializerType,
             RooJavaType.ROO_DESERIALIZER.getSimpleTypeName());
 
+    // Register JpaEntityMetadata dependency
     final String entityId = JpaEntityMetadata.createIdentifier(entityDetails);
     final JpaEntityMetadata entityMetadata = getMetadataService().get(entityId);
-
     if (entityMetadata == null) {
       // not ready to this metadata yet
       return null;
     }
-
-    // register metadata dependency
     registerDependency(entityId, metadataIdentificationString);
 
-    ClassOrInterfaceTypeDetails serviceDetails = getServiceLocator().getService(entity);
+    // Register JavaBeanMetadata dependency
+    final String javaBeanId = JavaBeanMetadata.createIdentifier(entityDetails);
+    final JavaBeanMetadata javaBeanMetadata = getMetadataService().get(javaBeanId);
+    if (javaBeanMetadata == null) {
+      // not ready to this metadata yet
+      return null;
+    }
+    registerDependency(javaBeanId, metadataIdentificationString);
 
+    // Register ServiceMetadata dependency
+    ClassOrInterfaceTypeDetails serviceDetails = getServiceLocator().getService(entity);
     String serviceMetadataId = ServiceMetadata.createIdentifier(serviceDetails);
     ServiceMetadata serviceMetadata = getMetadataService().get(serviceMetadataId);
-
     if (serviceMetadata == null) {
       // not ready to this metadata yet
       return null;

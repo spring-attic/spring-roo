@@ -356,8 +356,8 @@ public class JavaParserTypeParsingService implements TypeParsingService {
       CommentStructure defaultCommentStructure = new CommentStructure();
 
       String defaultComment =
-          "/**\n * = ".concat(cid.getType().getSimpleTypeName()).concat(
-              "\n *\n * TODO Auto-generated class documentation\n *\n */\n");
+          "= ".concat(cid.getType().getSimpleTypeName()).concat(
+              "\n \nTODO Auto-generated class documentation");
 
       defaultCommentStructure.addComment(new JavadocComment(defaultComment),
           CommentLocation.BEGINNING);

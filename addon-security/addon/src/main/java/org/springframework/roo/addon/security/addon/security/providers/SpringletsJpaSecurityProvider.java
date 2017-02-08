@@ -7,10 +7,6 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
@@ -35,7 +31,7 @@ import java.util.logging.Logger;
 public class SpringletsJpaSecurityProvider implements SecurityProvider {
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.1.0.BUILD-SNAPSHOT");
+      "1.1.0.RELEASE");
 
   private static final Dependency SPRINGLETS_SECURITY_AUTHENTICATION_STARTER = new Dependency(
       "io.springlets", "springlets-boot-starter-authentication", "${springlets.version}");
@@ -104,27 +100,6 @@ public class SpringletsJpaSecurityProvider implements SecurityProvider {
     // Add thymeleaf-extras-springsecurity4 dependency with Thymeleaf 3 support
     getProjectOperations().addProperty("", THYMELEAF_SPRING_SECURITY_VERSION_PROPERTY);
     getProjectOperations().addDependency(module.getModuleName(), THYMELEAF_SPRING_SECURITY);
-
-    // Add @EnableJpaRepositories and @EntityScan annotations to the
-    // @SpringBootApplication class
-    Set<ClassOrInterfaceTypeDetails> springBootApplicationClasses =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            SpringJavaType.SPRING_BOOT_APPLICATION);
-    if (!springBootApplicationClasses.isEmpty()) {
-      for (ClassOrInterfaceTypeDetails springBootApplicationClass : springBootApplicationClasses) {
-        ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-            new ClassOrInterfaceTypeDetailsBuilder(springBootApplicationClass);
-        if (springBootApplicationClass.getAnnotation(SpringJavaType.ENABLE_JPA_REPOSITORIES) == null) {
-          cidBuilder.addAnnotation(new AnnotationMetadataBuilder(
-              SpringJavaType.ENABLE_JPA_REPOSITORIES));
-        }
-        if (springBootApplicationClass.getAnnotation(SpringJavaType.ENTITY_SCAN) == null) {
-          cidBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.ENTITY_SCAN));
-        }
-        getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
-        break;
-      }
-    }
   }
 
   // Service references

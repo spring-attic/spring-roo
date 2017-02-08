@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="description" data-data-content="${r"#{"}info_description}"/>
     <meta name="author" data-data-content="${r"#{"}info_author}"/>
+    <meta data-th-if="${r"${"}_csrf != null}" name="_csrf" data-th-content="${r"${"}_csrf.token}" />
+    <meta data-th-if="${r"${"}_csrf != null}" name="_csrf_header" data-th-content="${r"${"}_csrf.headerName}" />
 
     <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
       data-th-href="@{/public/img/favicon.ico}"/>
@@ -30,25 +32,25 @@
       href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
       data-th-href="@{/webjars/font-awesome/css/font-awesome.min.css}"/>
 
-		<!-- Datatables -->
-		<link data-th-href="@{/webjars/datatables/media/css/jquery.dataTables.css}" rel="stylesheet" type="text/css"
-		  href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.css" />
+	<!-- Datatables -->
+	<link data-th-href="@{/webjars/datatables/media/css/jquery.dataTables.css}" rel="stylesheet" type="text/css"
+	  href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.css" />
 
-		<link data-th-href="@{/webjars/datatables.net-bs/css/dataTables.bootstrap.css}" rel="stylesheet" type="text/css"
-		  href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.css" />
+	<link data-th-href="@{/webjars/datatables.net-bs/css/dataTables.bootstrap.css}" rel="stylesheet" type="text/css"
+	  href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.css" />
 
-		<link data-th-href="@{/webjars/datatables.net-responsive-bs/css/responsive.bootstrap.css}" rel="stylesheet" type="text/css"
-		  href="https://cdn.datatables.net/responsive/2.0.2/css/responsive.bootstrap.css" />
+	<link data-th-href="@{/webjars/datatables.net-responsive-bs/css/responsive.bootstrap.css}" rel="stylesheet" type="text/css"
+	  href="https://cdn.datatables.net/responsive/2.0.2/css/responsive.bootstrap.css" />
 
-		<link data-th-href="@{/webjars/datatables.net-buttons-bs/css/buttons.bootstrap.css}" rel="stylesheet" type="text/css"
-		  href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.css" />
+	<link data-th-href="@{/webjars/datatables.net-buttons-bs/css/buttons.bootstrap.css}" rel="stylesheet" type="text/css"
+	  href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.css" />
 
-		<link data-th-href="@{/webjars/datatables.net-select-bs/css/select.bootstrap.css}" rel="stylesheet" type="text/css"
-		  href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css" />
+	<link data-th-href="@{/webjars/datatables.net-select-bs/css/select.bootstrap.css}" rel="stylesheet" type="text/css"
+	  href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css" />
 
-        <link data-th-href="@{/public/css/checkboxes-1.0.4/dataTables.checkboxes.css}" rel="stylesheet" type="text/css" 
-          href="https://gyrocode.github.io/jquery-datatables-checkboxes/1.0.4/css/dataTables.checkboxes.css" />
-
+    <link data-th-href="@{/webjars/jquery-datatables-checkboxes/css/dataTables.checkboxes.css}" rel="stylesheet" type="text/css" 
+      href="https://gyrocode.github.io/jquery-datatables-checkboxes/1.1.2/css/dataTables.checkboxes.css" />
+          
     <!-- Bootswatch CSS custom -->
     <link rel="stylesheet" type="text/css"
       href="../../static/public/css/theme.css"
@@ -62,8 +64,10 @@
    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"
+              data-th-src="@{/webjars/html5shiv/html5shiv.min.js}"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"
+              data-th-src="@{/webjars/respond/dest/respond.min.js}"></script>
     <![endif]-->
 
   </head>

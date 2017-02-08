@@ -1166,5 +1166,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     public int compareTo(RelationInfo o) {
       return fieldName.compareTo(o.fieldName);
     }
+
+    public JpaRelationType getType() {
+      return this.type;
+    }
   }
 }

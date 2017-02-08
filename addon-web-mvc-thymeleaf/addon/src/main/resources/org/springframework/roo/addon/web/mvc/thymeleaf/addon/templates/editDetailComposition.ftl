@@ -61,6 +61,7 @@
                           z=field.z
                           format=field.configuration.format required=field.configuration.required />
                   <#elseif field.type == "REFERENCE">
+                  	<#if field.configuration.isCompositionChildField?? && field.configuration.isCompositionChildField == false>
                       <@reference.input label=field.label
                           fieldName=field.fieldName
                           fieldId=field.fieldId
@@ -70,6 +71,7 @@
                           select2MethodName=field.configuration.select2MethodName
                           select2ControllerName=field.configuration.select2ControllerName
                           required=field.configuration.required />
+                    </#if>
                   <#elseif field.type == "ENUM">
                       <@enum.input label=field.label
                           fieldName=field.fieldName

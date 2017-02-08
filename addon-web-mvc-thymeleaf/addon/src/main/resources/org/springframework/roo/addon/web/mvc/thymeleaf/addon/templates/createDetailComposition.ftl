@@ -28,7 +28,7 @@
     </header>
 
     <!-- CONTAINER -->
-    <div class="container bg-container" data-th-with="collectionLink=${r"${@"}linkBuilder.of('${detail.configuration.mvcDetailCollectionControllerName}')}">
+    <div class="container bg-container">
       <!-- CONTENT -->
       <!--
         Only the inner content of the following tag "section" is included
@@ -36,14 +36,14 @@
       -->
       <section data-layout-fragment="content">
 
-        <div class="container-fluid content">
+        <div class="container-fluid content" data-th-with="collectionLink=${r"${@"}linkBuilder.of('${detail.configuration.mvcDetailCollectionControllerName}')}">
 
           <h1 data-th-text="${r"#{"}label_create_entity(${r"#{"}${entityLabel}})}">Create ${entityName}</h1>
           <#assign dconfig=detail.configuration>
 
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="${r"${"}collectionLink.to('create')}">
+            data-th-action="${r"@{"}${r"${"}collectionLink.to('create').with('${detail.rootEntity.modelAttribute}', ${detail.rootEntity.modelAttribute}.${detail.rootEntity.configuration.identifierField})}}">
 
             <fieldset id="containerFields">
               <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data </legend>
@@ -52,16 +52,31 @@
                   <#if field.userManaged>
                       ${field.codeManaged}
                   <#elseif field.type == "TEXT">
-                      <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=6 required=field.configuration.required maxLength=field.configuration.maxLength />
+                      <@text.input label=field.label 
+                      fieldName=field.fieldName 
+                      fieldId=field.fieldId 
+                      z=field.z width=6 
+                      required=field.configuration.required 
+                      maxLength=field.configuration.maxLength />
                   <#elseif field.type == "NUMBER">
-                      <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max digitsFraction=field.configuration.digitsFraction digitsInteger=field.configuration.digitsInteger />
+                      <@number.input label=field.label 
+                      fieldName=field.fieldName 
+                      fieldId=field.fieldId 
+                      z=field.z width=3 
+                      required=field.configuration.required 
+                      min=field.configuration.min 
+                      max=field.configuration.max 
+                      digitsFraction=field.configuration.digitsFraction 
+                      digitsInteger=field.configuration.digitsInteger />
                   <#elseif field.type == "DATE">
                       <@date.input label=field.label
                           fieldName=field.fieldName
                           fieldId=field.fieldId
                           z=field.z
-                          format=field.configuration.format required=field.configuration.required />
+                          format=field.configuration.format 
+                          required=field.configuration.required />
                   <#elseif field.type == "REFERENCE">
+                  	<#if field.configuration.isCompositionChildField?? && field.configuration.isCompositionChildField == false>
                       <@reference.input label=field.label
                           fieldName=field.fieldName
                           fieldId=field.fieldId
@@ -71,14 +86,18 @@
                           select2MethodName=field.configuration.select2MethodName
                           select2ControllerName=field.configuration.select2ControllerName
                           required=field.configuration.required />
+                    </#if>
                   <#elseif field.type == "ENUM">
                       <@enum.input label=field.label
                           fieldName=field.fieldName
                           fieldId=field.fieldId
                           z=field.z
-                          items=field.configuration.items required=field.configuration.required />
+                          items=field.configuration.items 
+                          required=field.configuration.required />
                   <#elseif field.type == "BOOLEAN">
-                      <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
+                      <@checkbox.input label=field.label 
+                      fieldName=field.fieldName 
+                      fieldId=field.fieldId z=field.z />
                   </#if>
               </#list>
 

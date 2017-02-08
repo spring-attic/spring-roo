@@ -40,6 +40,7 @@ import com.github.antlrjavaparser.api.type.Type;
  * 
  * @author Ben Alex
  * @author Juan Carlos García
+ * @author Sergio Clares
  * @since 1.0
  */
 public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
@@ -202,14 +203,13 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
             field.getCommentStructure());
       }
     } else {
-      // ROO-3834: Include default documentation
+
+      // ROO-3834: Append default Javadoc if not exists a comment structure
       CommentStructure defaultCommentStructure = new CommentStructure();
-
-      String defaultComment =
-          "/**\n * TODO Auto-generated field documentation\n *\n".concat(" */\n");
-
-      defaultCommentStructure.addComment(new JavadocComment(defaultComment),
-          CommentLocation.BEGINNING);
+      JavadocComment javadocComment =
+          new JavadocComment("TODO Auto-generated attribute documentation");
+      defaultCommentStructure.addComment(javadocComment, CommentLocation.BEGINNING);
+      field.setCommentStructure(defaultCommentStructure);
 
       // if the field has annotations, add JavaDoc comments to the first
       // annotation

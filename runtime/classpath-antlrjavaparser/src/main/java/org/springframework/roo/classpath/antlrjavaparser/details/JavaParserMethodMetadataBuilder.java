@@ -1,30 +1,5 @@
 package org.springframework.roo.classpath.antlrjavaparser.details;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.antlrjavaparser.CompilationUnitServices;
-import org.springframework.roo.classpath.antlrjavaparser.JavaParserUtils;
-import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.MethodMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.comments.CommentStructure;
-import org.springframework.roo.classpath.details.comments.CommentStructure.CommentLocation;
-import org.springframework.roo.classpath.details.comments.JavadocComment;
-import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.model.Builder;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
-
 import com.github.antlrjavaparser.JavaParser;
 import com.github.antlrjavaparser.ParseException;
 import com.github.antlrjavaparser.api.CompilationUnit;
@@ -41,11 +16,38 @@ import com.github.antlrjavaparser.api.type.ClassOrInterfaceType;
 import com.github.antlrjavaparser.api.type.ReferenceType;
 import com.github.antlrjavaparser.api.type.Type;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.antlrjavaparser.CompilationUnitServices;
+import org.springframework.roo.classpath.antlrjavaparser.JavaParserUtils;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.comments.AbstractComment;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
+import org.springframework.roo.classpath.details.comments.CommentStructure.CommentLocation;
+import org.springframework.roo.classpath.details.comments.JavadocComment;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.model.Builder;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Java Parser implementation of {@link MethodMetadata}.
  * 
  * @author Ben Alex
  * @author Juan Carlos García
+ * @author Sergio Clares
  * @since 1.0
  */
 public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> {
@@ -279,52 +281,48 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
     }*/
 
     // ROO-3834: Append Javadoc
-    if (method.getCommentStructure() != null) {
+    CommentStructure commentStructure = method.getCommentStructure();
+    if (commentStructure != null) {
 
-      // if the method has annotations, add JavaDoc comments to the first
+      // If the method has annotations, add JavaDoc comments to the first
       // annotation
       if (annotations != null && annotations.size() > 0) {
         AnnotationExpr firstAnnotation = annotations.get(0);
 
         JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(firstAnnotation,
-            method.getCommentStructure());
+            commentStructure);
 
         // Otherwise, add comments to the method declaration line
       } else {
-        JavaParserCommentMetadataBuilder
-            .updateCommentsToJavaParser(d, method.getCommentStructure());
+        JavaParserCommentMetadataBuilder.updateCommentsToJavaParser(d, commentStructure);
       }
     } else {
+
       // ROO-3834: Include default documentation
       CommentStructure defaultCommentStructure = new CommentStructure();
 
-      // Getting params list
-      String paramsListComment = "";
-      for (JavaSymbolName param : method.getParameterNames()) {
-        paramsListComment =
-            paramsListComment.concat(" * @param ").concat(param.getSymbolName()).concat("\n");
+      // ROO-3834: Append default Javadoc if not exists a comment structure, 
+      // including method params, return and throws.
+      List<String> parameterNames = new ArrayList<String>();
+      for (JavaSymbolName name : method.getParameterNames()) {
+        parameterNames.add(name.getSymbolName());
       }
-
-      // Getting return
-      String returnComment = "";
-      if (method.getReturnType() != JavaType.VOID_PRIMITIVE) {
-        returnComment =
-            " * @return ".concat(method.getReturnType().getSimpleTypeName()).concat("\n");
+      List<String> throwsTypesNames = new ArrayList<String>();
+      for (JavaType type : method.getThrowsTypes()) {
+        throwsTypesNames.add(type.getSimpleTypeName());
       }
-
-      // Getting throws
-      String throwsComment = "";
-      for (JavaType throwsType : method.getThrowsTypes()) {
-        throwsComment =
-            throwsComment.concat(" * @throws ").concat(throwsType.getSimpleTypeName()).concat("\n");
+      String returnInfo = null;
+      JavaType returnJavaType = method.getReturnType();
+      if (!returnJavaType.equals(JavaType.VOID_OBJECT)
+          && !returnJavaType.equals(JavaType.VOID_PRIMITIVE)) {
+        returnInfo = returnJavaType.getSimpleTypeName();
       }
+      JavadocComment javadocComment =
+          new JavadocComment("TODO Auto-generated method documentation", parameterNames,
+              returnInfo, throwsTypesNames);
 
-      String defaultComment =
-          "/**\n * TODO Auto-generated method documentation\n *\n".concat(paramsListComment)
-              .concat(returnComment).concat(throwsComment).concat(" */\n");
-
-      defaultCommentStructure.addComment(new JavadocComment(defaultComment),
-          CommentLocation.BEGINNING);
+      defaultCommentStructure.addComment(javadocComment, CommentLocation.BEGINNING);
+      method.setCommentStructure(defaultCommentStructure);
 
       // if the method has annotations, add JavaDoc comments to the first
       // annotation

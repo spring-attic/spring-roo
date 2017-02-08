@@ -2,16 +2,6 @@ package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_THYMELEAF;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -46,6 +36,16 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link ThymeleafMetadataProvider}.
@@ -216,9 +216,13 @@ public class ThymeleafMetadataProviderImpl extends
         "Couldn't find class `JasperReportsExporter` in project.");
 
     // Get valid entity fields (those suitable for reports)
+    JavaType defaultReturnType =
+        serviceMetadata.getCurrentFindAllWithGlobalSearchMethod().getReturnType().getParameters()
+            .get(0);
     List<FieldMetadata> entityFields =
-        getEntityValidFields(getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
-            getTypeLocationService().getTypeDetails(controllerMetadata.getEntity())).getFields());
+        getReturnTypeValidFields(getMemberDetailsScanner().getMemberDetails(
+            this.getClass().getName(), getTypeLocationService().getTypeDetails(defaultReturnType))
+            .getFields());
 
     // Getting the related linkFactory for this controller
     Set<ClassOrInterfaceTypeDetails> linkFactories =
@@ -307,7 +311,7 @@ public class ThymeleafMetadataProviderImpl extends
    * @return a List<FieldMetadata>
    * 
    */
-  private List<FieldMetadata> getEntityValidFields(List<FieldMetadata> fields) {
+  private List<FieldMetadata> getReturnTypeValidFields(List<FieldMetadata> fields) {
 
     // Iterate over entity fields
     List<FieldMetadata> validFields = new ArrayList<FieldMetadata>();
