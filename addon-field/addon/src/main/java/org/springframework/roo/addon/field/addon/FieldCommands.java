@@ -738,8 +738,15 @@ public class FieldCommands implements CommandMarker {
               + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords,
       ShellContext shellContext) {
 
+    final ClassOrInterfaceTypeDetails enumTypeCid = typeLocationService.getTypeDetails(fieldType);
+    Validate.notNull(enumTypeCid,
+        "The enum type specified, '%s', doesn't exist. Please, specify an existent enum type.",
+        fieldType.getSimpleTypeName());
+
     final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(typeName);
-    Validate.notNull(cid, "The type specified, '%s', doesn't exist", typeName);
+    Validate.notNull(cid,
+        "The class specified, '%s', doesn't exist. Please, specify an existent class.",
+        typeName.getSimpleTypeName());
 
     checkFieldExists(fieldName, shellContext, cid);
 
