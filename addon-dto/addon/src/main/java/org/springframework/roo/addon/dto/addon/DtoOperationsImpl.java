@@ -67,7 +67,7 @@ public class DtoOperationsImpl implements DtoOperations {
   protected final static Logger LOGGER = HandlerUtils.getLogger(DtoOperationsImpl.class);
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.1.0.RELEASE");
+      "1.2.0.BUILD-SNAPSHOT");
   private static final Dependency SPRINGLETS_CONTEXT_DEPENDENCY = new Dependency("io.springlets",
       "springlets-context", "${springlets.version}");
 

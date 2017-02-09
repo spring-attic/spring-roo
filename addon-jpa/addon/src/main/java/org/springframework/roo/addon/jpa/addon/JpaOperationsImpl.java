@@ -109,7 +109,7 @@ public class JpaOperationsImpl implements JpaOperations {
   private ServiceInstaceManager serviceManager = new ServiceInstaceManager();
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.1.0.RELEASE");
+      "1.2.0.BUILD-SNAPSHOT");
   private static final Dependency SPRINGLETS_DATA_JPA_STARTER = new Dependency("io.springlets",
       "springlets-data-jpa", "${springlets.version}");
   private static final Dependency SPRINGLETS_DATA_COMMONS_STARTER = new Dependency("io.springlets",

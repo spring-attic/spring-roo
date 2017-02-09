@@ -108,7 +108,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
       "org.springframework.boot.jackson.JsonObjectDeserializer");
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.1.0.RELEASE");
+      "1.2.0.BUILD-SNAPSHOT");
   private static final Dependency SPRINGLETS_WEB_STARTER = new Dependency("io.springlets",
       "springlets-boot-starter-web", "${springlets.version}");
   private static final Property TRACEE_PROPERTY = new Property("tracee.version", "1.1.2");
@@ -230,12 +230,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     // Create JSON configuration class
     createDomainModelModule(module);
-
-    // Create Roo Validator classes
-    createClassFromTemplate(module, "CollectionValidator-template._java", "CollectionValidator",
-        "validation");
-    createClassFromTemplate(module, "ValidatorAdvice-template._java", "ValidatorAdvice",
-        "validation");
 
     // Adding spring.jackson.serialization.indent-output property
     getApplicationConfigService().addProperty(module.getModuleName(),
@@ -786,63 +780,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
     }
 
     return annotationDetail;
-  }
-
-  /**
-   * Creates a class from a template
-   *
-   * @param module
-   *            the Pom related to modeule where the class should be created
-   * @param templateName
-   *            the String with the template name
-   * @param className
-   *            the String with the class name to create
-   * @param packageLastElement
-   *            the String (optional) with the last element of the package,
-   *            which will be appended to module artifactId. If null, package
-   *            will be module artifactId
-   */
-  public void createClassFromTemplate(Pom module, String templateName, String className,
-      String packageLastElement) {
-
-    // Set package
-    String packageName = null;
-    if (StringUtils.isNotBlank(packageLastElement)) {
-      packageName =
-          String.format("%s.%s", getTypeLocationService().getTopLevelPackageForModule(module),
-              packageLastElement);
-    } else {
-      packageName = module.getGroupId();
-    }
-
-    // Include implementation of Validator from template
-    final JavaType type =
-        new JavaType(String.format("%s.%s", packageName, className), module.getModuleName());
-    Validate.notNull(type.getModule(),
-        "ERROR: Module name is required to generate a valid JavaType");
-    final String identifier =
-        getPathResolver().getCanonicalPath(type.getModule(), Path.SRC_MAIN_JAVA, type);
-    InputStream inputStream = null;
-
-    // Check first if file exists
-    if (!getFileManager().exists(identifier)) {
-      try {
-
-        // Use defined template
-        inputStream = FileUtils.getInputStream(getClass(), templateName);
-        String input = IOUtils.toString(inputStream);
-
-        // Replacing package
-        input = input.replace("__PACKAGE__", packageName);
-
-        // Creating CollectionValidator
-        getFileManager().createOrUpdateTextFileIfRequired(identifier, input, true);
-      } catch (final IOException e) {
-        throw new IllegalStateException(String.format("Unable to create '%s'", identifier), e);
-      } finally {
-        IOUtils.closeQuietly(inputStream);
-      }
-    }
   }
 
   /**
