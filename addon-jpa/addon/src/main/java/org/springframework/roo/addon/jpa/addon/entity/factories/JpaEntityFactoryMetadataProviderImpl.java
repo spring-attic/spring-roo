@@ -124,7 +124,7 @@ public class JpaEntityFactoryMetadataProviderImpl extends
   }
 
   public String getItdUniquenessFilenameSuffix() {
-    return "EntityFactory";
+    return "JpaEntityFactory";
   }
 
   @Override

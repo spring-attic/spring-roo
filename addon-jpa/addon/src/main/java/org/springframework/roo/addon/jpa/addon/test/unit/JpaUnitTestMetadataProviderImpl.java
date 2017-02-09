@@ -96,7 +96,7 @@ public class JpaUnitTestMetadataProviderImpl extends AbstractMemberDiscoveringIt
 
   @Override
   public String getItdUniquenessFilenameSuffix() {
-    return "UnitTest";
+    return "JpaUnitTest";
   }
 
   @Override
