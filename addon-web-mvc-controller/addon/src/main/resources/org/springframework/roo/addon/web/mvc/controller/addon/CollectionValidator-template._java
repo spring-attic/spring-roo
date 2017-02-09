@@ -1,16 +1,13 @@
 package __PACKAGE__;
 
-import java.util.Collection;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.roo.addon.web.mvc.controller.annotations.RooCollectionValidator;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-import org.springframework.roo.addon.web.mvc.controller.annotations.RooCollectionValidator;
+import java.util.Collection;
 
 /**
  * = CollectionValidator
@@ -19,7 +16,6 @@ import org.springframework.roo.addon.web.mvc.controller.annotations.RooCollectio
  * validation process for each of them individually.
  * 
  */
-@Component
 @RooCollectionValidator
 public class CollectionValidator implements Validator {
 
@@ -33,7 +29,6 @@ public class CollectionValidator implements Validator {
    *
    * @param validatorFactory
    */ 
-  @Autowired
   public CollectionValidator(LocalValidatorFactoryBean validatorFactory) {
     this.validator = validatorFactory;
   }
