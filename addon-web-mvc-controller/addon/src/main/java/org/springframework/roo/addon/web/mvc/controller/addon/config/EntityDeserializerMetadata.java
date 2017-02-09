@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.config;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
@@ -22,14 +26,9 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Metadata for {@link RooJsonMixin}.
@@ -39,8 +38,6 @@ import java.util.List;
  */
 public class EntityDeserializerMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
-  private static final JavaType JSON_OBJECT_DESERIALIZER = new JavaType(
-      "org.springframework.boot.jackson.JsonObjectDeserializer");
   private static final JavaType JSON_COMPONENT = new JavaType(
       "org.springframework.boot.jackson.JsonComponent");
 
@@ -264,7 +261,11 @@ public class EntityDeserializerMetadata extends AbstractItdTypeDetailsProvidingM
 
     // add Service to constructor
     String serviceFieldName = serviceField.getFieldName().getSymbolName();
-    constructor.addParameter(serviceFieldName, serviceField.getFieldType());
+    AnnotatedJavaType serviceParameter =
+        new AnnotatedJavaType(serviceField.getFieldType(), new AnnotationMetadataBuilder(
+            SpringJavaType.LAZY).build());
+    constructor.addParameterName(serviceField.getFieldName());
+    constructor.addParameterType(serviceParameter);
 
     // Generating body
     bodyBuilder.appendFormalLine("this.%1$s = %1$s;", serviceFieldName);
