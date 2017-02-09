@@ -1,15 +1,17 @@
 package org.springframework.roo.addon.test.addon.integration;
 
-import static org.springframework.roo.model.RooJavaType.ROO_INTEGRATION_TEST;
 import static org.springframework.roo.model.SpringJavaType.MOCK_STATIC_ENTITY_METHODS;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.dod.addon.DataOnDemandOperations;
-import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -20,35 +22,23 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuil
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.DependencyScope;
 import org.springframework.roo.project.DependencyType;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
-import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.Element;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Provides convenience methods that can be used to create mock tests.
@@ -86,93 +76,93 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
   }
 
   public void newIntegrationTest(JavaType klass, Pom module) {
-    Validate
-        .isTrue(
-            getTypeLocationService().hasModuleFeature(module, ModuleFeatureName.APPLICATION),
-            "ERROR: You are trying to generate an integration test inside module that doesn't match with APPLICATION modules features.");
-
-    Validate.notNull(klass, "Repository to produce an integration test for is required");
-
-    // Verify the requested entity actually exists as a class and is not
-    // abstract
-    final ClassOrInterfaceTypeDetails cidRepository =
-        getTypeLocationService().getTypeDetails(klass);
-    Validate.notNull(cidRepository, "Java source code details unavailable for type %s",
-        cidRepository);
-    Validate.isTrue(!Modifier.isAbstract(cidRepository.getModifier()), "Type %s is abstract",
-        klass.getFullyQualifiedTypeName());
-
-    // Get entity related
-    AnnotationMetadata annotationRepository =
-        cidRepository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
-    AnnotationAttributeValue<Object> entityAttribute = annotationRepository.getAttribute("entity");
-    JavaType entity = (JavaType) entityAttribute.getValue();
-
-    JavaPackage topLevelPackage = getProjectOperations().getTopLevelPackage(module.getModuleName());
-    String dodPath = topLevelPackage.getFullyQualifiedPackageName().concat(".dod.");
-    getDataOnDemandOperations().newDod(
-        entity,
-        new JavaType(dodPath.concat(entity.getSimpleTypeName()).concat("DataOnDemand"), module
-            .getModuleName()));
-
-    final JavaType name = new JavaType(klass + "IT");
-    final String declaredByMetadataId =
-        PhysicalTypeIdentifier.createIdentifier(name,
-            Path.SRC_TEST_JAVA.getModulePathId(module.getModuleName()));
-
-    if (getMetadataService().get(declaredByMetadataId) != null) {
-
-      // The file already exists
-      LOGGER
-          .log(
-              Level.SEVERE,
-              String
-                  .format("The class selected already has defined an integration test. Please, select another"));
-      return;
-    }
-
-    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-    final List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
-    config.add(new ClassAttributeValue(new JavaSymbolName("source"), klass));
-    annotations.add(new AnnotationMetadataBuilder(ROO_INTEGRATION_TEST, config));
-
-    final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
-    final List<AnnotationMetadataBuilder> methodAnnotations =
-        new ArrayList<AnnotationMetadataBuilder>();
-    methodAnnotations.add(new AnnotationMetadataBuilder(TEST));
-    final MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName(
-            "testMarkerMethod"), JavaType.VOID_PRIMITIVE, new InvocableMemberBodyBuilder());
-    methodBuilder.setAnnotations(methodAnnotations);
-    methods.add(methodBuilder);
-
-    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-        new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name,
-            PhysicalTypeCategory.CLASS);
-    cidBuilder.setAnnotations(annotations);
-    cidBuilder.setDeclaredMethods(methods);
-
-    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
-
-    // Add spring-boot-test dependency
-    getProjectOperations().addDependency(module.getModuleName(),
-        DEPENDENCY_SPRING_BOOT_STARTER_TEST);
-
-    // Add plugin maven-failsafe-plugin
-    // Stop if the plugin is already installed
-    for (final Plugin plugin : module.getBuildPlugins()) {
-      if (plugin.getArtifactId().equals("maven-failsafe-plugin")) {
-        return;
-      }
-    }
-
-    final Element configuration = XmlUtils.getConfiguration(getClass());
-    final Element plugin = XmlUtils.findFirstElement("/configuration/plugin", configuration);
-
-    // Now install the plugin itself
-    if (plugin != null) {
-      getProjectOperations().addBuildPlugin(module.getModuleName(), new Plugin(plugin));
-    }
+    //    Validate
+    //        .isTrue(
+    //            getTypeLocationService().hasModuleFeature(module, ModuleFeatureName.APPLICATION),
+    //            "ERROR: You are trying to generate an integration test inside module that doesn't match with APPLICATION modules features.");
+    //
+    //    Validate.notNull(klass, "Repository to produce an integration test for is required");
+    //
+    //    // Verify the requested entity actually exists as a class and is not
+    //    // abstract
+    //    final ClassOrInterfaceTypeDetails cidRepository =
+    //        getTypeLocationService().getTypeDetails(klass);
+    //    Validate.notNull(cidRepository, "Java source code details unavailable for type %s",
+    //        cidRepository);
+    //    Validate.isTrue(!Modifier.isAbstract(cidRepository.getModifier()), "Type %s is abstract",
+    //        klass.getFullyQualifiedTypeName());
+    //
+    //    // Get entity related
+    //    AnnotationMetadata annotationRepository =
+    //        cidRepository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
+    //    AnnotationAttributeValue<Object> entityAttribute = annotationRepository.getAttribute("entity");
+    //    JavaType entity = (JavaType) entityAttribute.getValue();
+    //
+    //    JavaPackage topLevelPackage = getProjectOperations().getTopLevelPackage(module.getModuleName());
+    //    String dodPath = topLevelPackage.getFullyQualifiedPackageName().concat(".dod.");
+    //    getDataOnDemandOperations().newDod(
+    //        entity,
+    //        new JavaType(dodPath.concat(entity.getSimpleTypeName()).concat("DataOnDemand"), module
+    //            .getModuleName()));
+    //
+    //    final JavaType name = new JavaType(klass + "IT");
+    //    final String declaredByMetadataId =
+    //        PhysicalTypeIdentifier.createIdentifier(name,
+    //            Path.SRC_TEST_JAVA.getModulePathId(module.getModuleName()));
+    //
+    //    if (getMetadataService().get(declaredByMetadataId) != null) {
+    //
+    //      // The file already exists
+    //      LOGGER
+    //          .log(
+    //              Level.SEVERE,
+    //              String
+    //                  .format("The class selected already has defined an integration test. Please, select another"));
+    //      return;
+    //    }
+    //
+    //    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+    //    final List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
+    //    config.add(new ClassAttributeValue(new JavaSymbolName("source"), klass));
+    //    annotations.add(new AnnotationMetadataBuilder(ROO_INTEGRATION_TEST, config));
+    //
+    //    final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
+    //    final List<AnnotationMetadataBuilder> methodAnnotations =
+    //        new ArrayList<AnnotationMetadataBuilder>();
+    //    methodAnnotations.add(new AnnotationMetadataBuilder(TEST));
+    //    final MethodMetadataBuilder methodBuilder =
+    //        new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName(
+    //            "testMarkerMethod"), JavaType.VOID_PRIMITIVE, new InvocableMemberBodyBuilder());
+    //    methodBuilder.setAnnotations(methodAnnotations);
+    //    methods.add(methodBuilder);
+    //
+    //    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+    //        new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name,
+    //            PhysicalTypeCategory.CLASS);
+    //    cidBuilder.setAnnotations(annotations);
+    //    cidBuilder.setDeclaredMethods(methods);
+    //
+    //    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+    //
+    //    // Add spring-boot-test dependency
+    //    getProjectOperations().addDependency(module.getModuleName(),
+    //        DEPENDENCY_SPRING_BOOT_STARTER_TEST);
+    //
+    //    // Add plugin maven-failsafe-plugin
+    //    // Stop if the plugin is already installed
+    //    for (final Plugin plugin : module.getBuildPlugins()) {
+    //      if (plugin.getArtifactId().equals("maven-failsafe-plugin")) {
+    //        return;
+    //      }
+    //    }
+    //
+    //    final Element configuration = XmlUtils.getConfiguration(getClass());
+    //    final Element plugin = XmlUtils.findFirstElement("/configuration/plugin", configuration);
+    //
+    //    // Now install the plugin itself
+    //    if (plugin != null) {
+    //      getProjectOperations().addBuildPlugin(module.getModuleName(), new Plugin(plugin));
+    //    }
 
   }
 
@@ -261,10 +251,6 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 
   private ProjectOperations getProjectOperations() {
     return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
-  }
-
-  private DataOnDemandOperations getDataOnDemandOperations() {
-    return serviceInstaceManager.getServiceInstance(this, DataOnDemandOperations.class);
   }
 
   private MemberDetailsScanner getMemberDetailsScanner() {

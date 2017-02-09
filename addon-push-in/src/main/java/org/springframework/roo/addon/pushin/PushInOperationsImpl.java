@@ -267,7 +267,7 @@ public class PushInOperationsImpl implements PushInOperations {
     // Check if the provided class is a test to be able to select valid
     // class path
     Path path =
-        classDetails.getAnnotation(RooJavaType.ROO_UNIT_TEST) == null ? Path.SRC_MAIN_JAVA
+        classDetails.getAnnotation(RooJavaType.ROO_JPA_UNIT_TEST) == null ? Path.SRC_MAIN_JAVA
             : Path.SRC_TEST_JAVA;
     // Getting current class .java file metadata ID
     final String declaredByMetadataId =
@@ -476,7 +476,7 @@ public class PushInOperationsImpl implements PushInOperations {
     // Check if the provided class is a test to be able to select valid
     // class path
     Path path =
-        classDetails.getAnnotation(RooJavaType.ROO_UNIT_TEST) == null ? Path.SRC_MAIN_JAVA
+        classDetails.getAnnotation(RooJavaType.ROO_JPA_UNIT_TEST) == null ? Path.SRC_MAIN_JAVA
             : Path.SRC_TEST_JAVA;
 
     // Getting current class .java file metadata ID

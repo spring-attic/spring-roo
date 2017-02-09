@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.test.addon.integration;
 
-import static org.springframework.roo.model.RooJavaType.ROO_DATA_ON_DEMAND;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_DATA_ON_DEMAND;
 import static org.springframework.roo.model.RooJavaType.ROO_INTEGRATION_TEST;
 
 import org.apache.commons.lang3.Validate;
@@ -188,9 +188,9 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
       final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 
     for (final ClassOrInterfaceTypeDetails dodType : getTypeLocationService()
-        .findClassesOrInterfaceDetailsWithAnnotation(ROO_DATA_ON_DEMAND)) {
+        .findClassesOrInterfaceDetailsWithAnnotation(ROO_JPA_DATA_ON_DEMAND)) {
       final AnnotationMetadata dodAnnotation =
-          MemberFindingUtils.getFirstAnnotation(dodType, ROO_DATA_ON_DEMAND);
+          MemberFindingUtils.getFirstAnnotation(dodType, ROO_JPA_DATA_ON_DEMAND);
       if (dodAnnotation != null
           && dodAnnotation.getAttribute("entity").getValue().equals(entity)
           && governorPhysicalTypeMetadata.getType().getModule()

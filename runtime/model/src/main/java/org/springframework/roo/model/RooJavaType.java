@@ -13,8 +13,8 @@ public final class RooJavaType {
   // org.springframework.roo.addon
   public static final JavaType ROO_CONFIGURABLE = new JavaType(
       "org.springframework.roo.addon.configurable.annotations.RooConfigurable");
-  public static final JavaType ROO_DATA_ON_DEMAND = new JavaType(
-      "org.springframework.roo.addon.dod.annotations.RooDataOnDemand");
+  public static final JavaType ROO_JPA_DATA_ON_DEMAND = new JavaType(
+      "org.springframework.roo.addon.jpa.annotations.dod.RooJpaDataOnDemand");
   public static final JavaType ROO_DB_MANAGED = new JavaType(
       "org.springframework.roo.addon.dbre.annotations.RooDbManaged");
   public static final JavaType ROO_DESERIALIZER = new JavaType(
@@ -92,10 +92,10 @@ public final class RooJavaType {
       "org.springframework.roo.addon.web.mvc.controller.annotations.scaffold.RooWebScaffold");
 
   // Spring Roo 2.x annotations
-  public static final JavaType ROO_DATA_ON_DEMAND_CONFIGURATION = new JavaType(
-      "org.springframework.roo.addon.dod.annotations.RooDataOnDemandConfiguration");
-  public static final JavaType ROO_ENTITY_FACTORY = new JavaType(
-      "org.springframework.roo.addon.dod.annotations.RooEntityFactory");
+  public static final JavaType ROO_JPA_DATA_ON_DEMAND_CONFIGURATION = new JavaType(
+      "org.springframework.roo.addon.jpa.annotations.dod.RooJpaDataOnDemandConfiguration");
+  public static final JavaType ROO_JPA_ENTITY_FACTORY = new JavaType(
+      "org.springframework.roo.addon.jpa.annotations.entity.factory.RooJpaEntityFactory");
   public static final JavaType ROO_JPA_ENTITY = new JavaType(
       "org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity");
   public static final JavaType ROO_JPA_RELATION = new JavaType(
@@ -123,8 +123,8 @@ public final class RooJavaType {
       "org.springframework.roo.addon.layers.service.annotations.RooServiceImpl");
   public static final JavaType ROO_JPA_AUDIT = new JavaType(
       "org.springframework.roo.addon.jpa.annotations.audit.RooJpaAudit");
-  public static final JavaType ROO_UNIT_TEST = new JavaType(
-      "org.springframework.roo.addon.test.annotations.RooUnitTest");
+  public static final JavaType ROO_JPA_UNIT_TEST = new JavaType(
+      "org.springframework.roo.addon.jpa.annotations.test.RooJpaUnitTest");
   public static final JavaType ROO_CONTROLLER = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.RooController");
   public static final JavaType ROO_DETAIL = new JavaType(

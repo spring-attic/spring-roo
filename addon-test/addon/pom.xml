@@ -49,15 +49,15 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.dod.addon</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.plural.addon</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.classpath</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.converters</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>

@@ -36,7 +36,6 @@
         <module>addon-test</module>
         <module>addon-jpa</module>
         <module>addon-dto</module>
-        <module>addon-dod</module>
         <module>addon-backup</module>
         <module>addon-web-mvc-controller</module>
         <module>addon-web-mvc-exceptions</module>
@@ -493,16 +492,6 @@
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.configurable.annotations</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.dod.addon</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.dod.annotations</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
