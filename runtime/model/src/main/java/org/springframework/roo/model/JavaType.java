@@ -697,7 +697,7 @@ public class JavaType implements Comparable<JavaType> {
       // more details
       if (dataType == DataType.TYPE || !staticForm) {
         if (resolver != null) {
-          if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(this)) {
+          if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(this, staticForm)) {
             sb.append(fullyQualifiedTypeName);
           } else {
             sb.append(getSimpleTypeName());

@@ -3,9 +3,10 @@ package org.springframework.roo.classpath.itd;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,8 +24,8 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.comments.AbstractComment;
 import org.springframework.roo.classpath.details.comments.CommentStructure;
-import org.springframework.roo.classpath.details.comments.JavadocComment;
 import org.springframework.roo.classpath.details.comments.CommentStructure.CommentLocation;
+import org.springframework.roo.classpath.details.comments.JavadocComment;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaSymbolName;
@@ -68,10 +69,13 @@ public class ItdSourceFileComposer {
     resolver = new ImportRegistrationResolverImpl(itdTypeDetails.getAspect().getPackage());
     resolver.addImport(introductionTo); // ROO-2932
 
-    for (final JavaType registeredImport : itdTypeDetails.getRegisteredImports()) {
+    SortedMap<JavaType, Boolean> imports = itdTypeDetails.getRegisteredImports();
+    for (final Entry<JavaType, Boolean> entry : imports.entrySet()) {
+      JavaType registeredImport = entry.getKey();
+      boolean asStatic = entry.getValue();
       // Do a sanity check in case the user misused it
       if (resolver.isAdditionLegal(registeredImport)) {
-        resolver.addImport(registeredImport);
+        resolver.addImport(registeredImport, asStatic);
       }
     }
 
@@ -712,18 +716,47 @@ public class ItdSourceFileComposer {
     }
 
     // Ordered to ensure consistency of output
-    final SortedSet<JavaType> types = new TreeSet<JavaType>();
-    types.addAll(resolver.getRegisteredImports());
+    final SortedMap<JavaType, Boolean> types = new TreeMap<JavaType, Boolean>();
+    types.putAll(resolver.getRegisteredImports());
     if (!types.isEmpty()) {
-      for (final JavaType importType : types) {
+
+      // First of all include the static imports
+      boolean hasStaticImports = false;
+      for (final Entry<JavaType, Boolean> entry : types.entrySet()) {
+        JavaType importType = entry.getKey();
+        boolean asStatic = entry.getValue();
         if (introductionTo.equals(importType.getEnclosingType())) {
           // We don't "import" types defined within governor, as they
           // already have scope and this causes AJDT warnings (see
           // ROO-1686)
           continue;
         }
-        topOfFile.append("import ").append(importType.getFullyQualifiedTypeName()).append(";")
-            .append(getNewLine());
+        if (asStatic) {
+          topOfFile.append("import static ").append(importType.getFullyQualifiedTypeName())
+              .append(";").append(getNewLine());
+          hasStaticImports = true;
+        }
+      }
+
+      // If some static field has been included, append a new line after the static imports
+      if (hasStaticImports) {
+        topOfFile.append(getNewLine());
+      }
+
+      // After static imports, include the other ones
+      for (final Entry<JavaType, Boolean> entry : types.entrySet()) {
+        JavaType importType = entry.getKey();
+        boolean asStatic = entry.getValue();
+        if (introductionTo.equals(importType.getEnclosingType())) {
+          // We don't "import" types defined within governor, as they
+          // already have scope and this causes AJDT warnings (see
+          // ROO-1686)
+          continue;
+        }
+        if (!asStatic) {
+          topOfFile.append("import ").append(importType.getFullyQualifiedTypeName()).append(";")
+              .append(getNewLine());
+        }
       }
 
       topOfFile.append(getNewLine());
@@ -856,9 +889,7 @@ public class ItdSourceFileComposer {
       }
 
       // return type
-      final boolean staticMethod = Modifier.isStatic(method.getModifier());
-
-      append(method.getReturnType().getNameIncludingTypeParameters(staticMethod, resolver));
+      append(method.getReturnType().getNameIncludingTypeParameters(false, resolver));
       append(" ");
       if (defineTarget) {
         append(introductionTo.getSimpleTypeName());

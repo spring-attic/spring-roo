@@ -5,7 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.junit.Test;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -54,18 +55,21 @@ public class DefaultItdTypeDetailsTest extends ItdTypeDetailsTestCase {
     when(mockAspectType.isDefaultPackage()).thenReturn(false);
     when(mockAspectType.getSimpleTypeName()).thenReturn("Person_Roo_Extra");
 
+    SortedMap<JavaType, Boolean> imports = new TreeMap<JavaType, Boolean>();
+
     final JavaType mockImportType = mock(JavaType.class);
     when(mockImportType.getSimpleTypeName()).thenReturn("Person");
     when(mockImportType.getFullyQualifiedTypeName()).thenReturn("com.foo.bar.Person");
     when(mockImportType.getDataType()).thenReturn(DataType.TYPE);
+    imports.put(mockImportType, false);
 
     final String declaredByMetadataId = "MID:foo#bar";
 
     // Invoke
     final DefaultItdTypeDetails itd =
         new DefaultItdTypeDetails(mockCustomData, declaredByMetadataId, modifier, mockGovernor,
-            mockAspectType, privilegedAspect, Arrays.asList(mockImportType), null, null, null,
-            null, null, null, null, null, null, null);
+            mockAspectType, privilegedAspect, imports, null, null, null, null, null, null, null,
+            null, null, null);
 
     // Check
     assertEquals(0, itd.getAnnotations().size());

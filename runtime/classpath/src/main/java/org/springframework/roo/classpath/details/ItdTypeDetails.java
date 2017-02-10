@@ -2,6 +2,7 @@ package org.springframework.roo.classpath.details;
 
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
 
 import org.springframework.roo.model.JavaType;
 
@@ -70,9 +71,10 @@ public interface ItdTypeDetails extends MemberHoldingTypeDetails {
 
   /**
    * @return the explicitly-registered imports this user wishes to have
-   *         defined in the ITD (cannot be null, but may be empty)
+   *         defined in the ITD (cannot be null, but may be empty) indicating
+   *         if static.
    */
-  Set<JavaType> getRegisteredImports();
+  SortedMap<JavaType, Boolean> getRegisteredImports();
 
   boolean isPrivilegedAspect();
 

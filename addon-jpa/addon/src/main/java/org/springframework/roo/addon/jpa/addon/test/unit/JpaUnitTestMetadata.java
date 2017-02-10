@@ -52,7 +52,6 @@ public class JpaUnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadata
   private static final JavaType AFTER = new JavaType("org.junit.After");
   private static final JavaType TEST = new JavaType("org.junit.Test");
   private static final JavaType IGNORE = new JavaType("org.junit.Ignore");
-  private static final JavaType ASSERTIONS = new JavaType("org.assertj.core.api.Assertions");
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -243,10 +242,9 @@ public class JpaUnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
     // assertThat(entity.RELATION_FIELD_ACCESSOR()).as("Check 'ADD_METHOD_NAME' adds the FIELDNAME to the relationship")
     JavaSymbolName relationFieldAccessorName = BeanInfoUtils.getAccessorMethodName(relationField);
-    bodyBuilder.appendFormalLine(
-        "%s.assertThat(%s.%s()).as(\"Check '%s' adds the %s to the relationship\")",
-        getNameOfJavaType(ASSERTIONS), this.entityVar, relationFieldAccessorName,
-        addMethod.getMethodName(), relationFieldName);
+    bodyBuilder.appendFormalLine("%s(%s.%s()).as(\"Check '%s' adds the %s to the relationship\")",
+        getNameOfJavaType(new JavaType("org.assertj.core.api.Assertions.assertThat"), true),
+        this.entityVar, relationFieldAccessorName, addMethod.getMethodName(), relationFieldName);
 
     //  .contains(childEntity1).contains(childEntity2);
     bodyBuilder.indent();
@@ -254,10 +252,9 @@ public class JpaUnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadata
     bodyBuilder.indentRemove();
 
     // assertThat(entity).as("Check 'ADD_METHOD_NAME' updates the CHILD_ENTITY relationship side")
-    bodyBuilder.appendFormalLine(
-        "%s.assertThat(%s).as(\"Check '%s' updates the %s relationship side\")",
-        getNameOfJavaType(ASSERTIONS), this.entityVar, addMethod.getMethodName(),
-        getNameOfJavaType(childEntity));
+    bodyBuilder.appendFormalLine("%s(%s).as(\"Check '%s' updates the %s relationship side\")",
+        getNameOfJavaType(new JavaType("org.assertj.core.api.Assertions.assertThat"), true),
+        this.entityVar, addMethod.getMethodName(), getNameOfJavaType(childEntity));
 
     //  .isEqualTo(childEntity1.PARENT_ENTITY_ACCESSOR()).isEqualTo(childEntity2.PARENT_ENTITY_ACCESSOR());
     JavaSymbolName parentEntityAccessor =
@@ -355,10 +352,10 @@ public class JpaUnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // assertThat(childEntity1.PARENT_ENTITY_ACCESSOR()).as("Check 'REMOVE_METHOD' updates the CHILD_ENTITY relationship side") 
     JavaSymbolName parentEntityAccessor =
         BeanInfoUtils.getAccessorMethodName(new JavaSymbolName(relationInfo.mappedBy), this.entity);
-    bodyBuilder.appendFormalLine(
-        "%s.assertThat(%s.%s()).as(\"Check '%s' updates the %s relationship side\")",
-        getNameOfJavaType(ASSERTIONS), childEntityVar1, parentEntityAccessor,
-        relationInfo.removeMethod.getMethodName(), getNameOfJavaType(childEntity));
+    bodyBuilder.appendFormalLine("%s(%s.%s()).as(\"Check '%s' updates the %s relationship side\")",
+        getNameOfJavaType(new JavaType("org.assertj.core.api.Assertions.assertThat"), true),
+        childEntityVar1, parentEntityAccessor, relationInfo.removeMethod.getMethodName(),
+        getNameOfJavaType(childEntity));
 
     //  .isNull();
     bodyBuilder.indent();
@@ -368,9 +365,10 @@ public class JpaUnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // assertThat(entity.RELATION_FIELD_ACCESSOR()).as("Check 'REMOVE_METHOD' removes a CHILD_ENTITY from the relationship")
     JavaSymbolName relationFieldAccessorName = BeanInfoUtils.getAccessorMethodName(relationField);
     bodyBuilder.appendFormalLine(
-        "%s.assertThat(%s.%s()).as(\"Check '%s' removes a %s from the relationship\")",
-        getNameOfJavaType(ASSERTIONS), this.entityVar, relationFieldAccessorName,
-        relationInfo.removeMethod.getMethodName(), getNameOfJavaType(childEntity));
+        "%s(%s.%s()).as(\"Check '%s' removes a %s from the relationship\")",
+        getNameOfJavaType(new JavaType("org.assertj.core.api.Assertions.assertThat"), true),
+        this.entityVar, relationFieldAccessorName, relationInfo.removeMethod.getMethodName(),
+        getNameOfJavaType(childEntity));
 
     //  .doesNotContain(childEntity1).contains(childEntity2);
     bodyBuilder.indent();

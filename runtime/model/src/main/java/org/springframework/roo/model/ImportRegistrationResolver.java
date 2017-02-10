@@ -1,7 +1,7 @@
 package org.springframework.roo.model;
 
 import java.util.List;
-import java.util.Set;
+import java.util.SortedMap;
 
 /**
  * Represents the known imports for a particular compilation unit, and resolves
@@ -9,6 +9,7 @@ import java.util.Set;
  * requires a fully-qualified type name.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public interface ImportRegistrationResolver {
@@ -22,6 +23,19 @@ public interface ImportRegistrationResolver {
    * @param typeToImport to register (can be <code>null</code> to do nothing)
    */
   void addImport(JavaType typeToImport);
+
+  /**
+   * Explicitly registers an import. Note that no verification will be
+   * performed to ensure an import is legal or does not conflict with an
+   * existing import (use {@link #isAdditionLegal(JavaType)} for
+   * verification).
+   * 
+   * @param typeToImport to register (can be <code>null</code> to do nothing)
+   * @param boolean that indicates if the import should be static or not
+   * 
+   * @since 2.0
+   */
+  void addImport(JavaType typeToImport, boolean asStatic);
 
   /**
    * Explicitly registers the given imports. Note that no verification will be
@@ -54,9 +68,9 @@ public interface ImportRegistrationResolver {
    * Provides access to the registered imports.
    * 
    * @return an unmodifiable representation of all registered imports (never
-   *         null, but may be empty)
+   *         null, but may be empty) indicating if static
    */
-  Set<JavaType> getRegisteredImports();
+  SortedMap<JavaType, Boolean> getRegisteredImports();
 
   /**
    * Indicates whether the presented {@link JavaType} can be legally presented
@@ -108,4 +122,20 @@ public interface ImportRegistrationResolver {
    *         form can be used
    */
   boolean isFullyQualifiedFormRequiredAfterAutoImport(JavaType javaType);
+
+  /**
+   * Automatically invokes {@link #isAdditionLegal(JavaType)}, then
+   * {@link #addImport(JavaType)}, and finally
+   * {@link #isFullyQualifiedFormRequired(JavaType)}, returning the result of
+   * the final method. This method is the main method that should be used by
+   * callers, as it will automatically attempt to cause a {@link JavaType} to
+   * be used in its simple form if at all possible.
+   * 
+   * @param javaType to automatically register (if possible) and lookup
+   *            whether simplified used is available (required)
+   * @param boolean that indicates if this import should be static           
+   * @return true if a fully-qualified form must be used, or false if a simple
+   *         form can be used
+   */
+  boolean isFullyQualifiedFormRequiredAfterAutoImport(JavaType javaType, boolean asStatic);
 }

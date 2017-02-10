@@ -7,7 +7,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -52,8 +55,8 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
   private final List<DeclaredMethodAnnotationDetails> methodAnnotations =
       new ArrayList<DeclaredMethodAnnotationDetails>();
   private final boolean privilegedAspect;
-  private final Set<JavaType> registeredImports = new HashSet<JavaType>();
   private final Set<JavaType> declarePrecedence = new LinkedHashSet<JavaType>();
+  private final SortedMap<JavaType, Boolean> registeredImports = new TreeMap<JavaType, Boolean>();
 
   private Integer hashCode;
 
@@ -82,7 +85,7 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
    */
   DefaultItdTypeDetails(final CustomData customData, final String declaredByMetadataId,
       final int modifier, final ClassOrInterfaceTypeDetails governor, final JavaType aspect,
-      final boolean privilegedAspect, final Collection<? extends JavaType> registeredImports,
+      final boolean privilegedAspect, final SortedMap<JavaType, Boolean> registeredImports,
       final Collection<ConstructorMetadata> declaredConstructors,
       final Collection<FieldMetadata> declaredFields,
       final Collection<MethodMetadata> declaredMethods,
@@ -101,6 +104,7 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
     this.aspect = aspect;
     this.governor = governor;
     this.privilegedAspect = privilegedAspect;
+    this.registeredImports.putAll(registeredImports);
 
     CollectionUtils.populate(this.declaredConstructors, declaredConstructors);
     CollectionUtils.populate(this.declaredFields, declaredFields);
@@ -110,7 +114,6 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
     CollectionUtils.populate(this.implementsTypes, implementsTypes);
     CollectionUtils.populate(this.innerTypes, innerTypes);
     CollectionUtils.populate(this.methodAnnotations, methodAnnotations);
-    CollectionUtils.populate(this.registeredImports, registeredImports);
     CollectionUtils.populate(this.declarePrecedence, declarePrecedence);
   }
 
@@ -178,8 +181,8 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
     return PHYSICAL_TYPE_CATEGORY;
   }
 
-  public Set<JavaType> getRegisteredImports() {
-    return Collections.unmodifiableSet(registeredImports);
+  public SortedMap<JavaType, Boolean> getRegisteredImports() {
+    return Collections.unmodifiableSortedMap(registeredImports);
   }
 
   public JavaType getType() {
@@ -253,9 +256,11 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
   @Override
   public Set<ImportMetadata> getImports() {
     Set<ImportMetadata> imports = new HashSet<ImportMetadata>();
-    for (JavaType registeredImport : registeredImports) {
+    for (final Entry<JavaType, Boolean> entry : registeredImports.entrySet()) {
+      JavaType registeredImport = entry.getKey();
+      boolean asStatic = entry.getValue();
       imports.add(new ImportMetadataBuilder(getDeclaredByMetadataId(), Modifier.PUBLIC,
-          registeredImport.getPackage(), registeredImport, false, false).build());
+          registeredImport.getPackage(), registeredImport, asStatic, false).build());
     }
 
     return imports;
