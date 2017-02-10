@@ -505,9 +505,6 @@ finder add --entity ~.domain.Shipper --name findByPhone --formBean ~.domain.Ship
 // Add tests
 test unit --class ~.domain.CustomerOrder
 test unit --class ~.domain.Category
-test unit --class ~.repository.CustomerOrderRepository
-test unit --class ~.service.api.CustomerOrderService
-test unit --class ~.service.impl.CustomerServiceImpl
 
 // Add Spring MVC
 web mvc setup

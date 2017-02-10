@@ -30,6 +30,9 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.DependencyScope;
+import org.springframework.roo.project.DependencyType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
@@ -45,6 +48,12 @@ import org.springframework.roo.project.ProjectOperations;
 @Component
 @Service
 public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
+
+  private static final Dependency VALIDATION_API_DEPENDENCY = new Dependency("javax.validation",
+      "validation-api", null);
+  private static final Dependency SPRING_BOOT_TEST_DEPENDENCY = new Dependency(
+      "org.springframework.boot", "spring-boot-test", null, DependencyType.JAR,
+      DependencyScope.TEST);
 
   @Reference
   private MemberDetailsScanner memberDetailsScanner;
@@ -99,6 +108,9 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
    */
   public void addDataOnDemandConfigurationClass(LogicalPath path, JavaPackage javaPackage) {
 
+    // Add spring-boot-test dependency with test scope
+    projectOperations.addDependency(path.getModule(), SPRING_BOOT_TEST_DEPENDENCY);
+
     // Create the JavaType for the configuration class
     JavaType dodConfigurationClass =
         new JavaType(String.format("%s.JpaDataOnDemandConfiguration",
@@ -135,6 +147,9 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
 
     final LogicalPath path = LogicalPath.getInstance(Path.SRC_TEST_JAVA, name.getModule());
     Validate.notNull(path, "Location of the new data on demand provider is required");
+
+    // Add javax validation dependency
+    projectOperations.addDependency(name.getModule(), VALIDATION_API_DEPENDENCY);
 
     // Verify the requested entity actually exists as a class and is not
     // abstract

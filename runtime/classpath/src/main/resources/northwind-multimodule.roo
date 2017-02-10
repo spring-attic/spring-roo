@@ -324,9 +324,6 @@ jpa audit add --entity model:~.Category --createdDateColumn CREATED_DATE --modif
 // Unit tests
 test unit --class model:~.CustomerOrder
 test unit --class model:~.Category
-test unit --class repository:~.CustomerOrderRepository
-test unit --class service-api:~.CustomerOrderService
-test unit --class service-impl:~.CustomerServiceImpl
 
 // Deactivated until finish changes of DoD and tests
 // Integration tests
