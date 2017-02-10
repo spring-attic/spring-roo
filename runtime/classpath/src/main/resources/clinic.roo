@@ -119,6 +119,13 @@ jpa audit add --entity ~.domain.Vet
 ws endpoint --service ~.service.api.OwnerService --sei ~.ws.api.OwnerWebService --class ~.ws.endpoint.OwnerWebServiceEndpoint --config ~.config.WsEndpointsConfiguration
 ws endpoint --service ~.service.api.PetService --sei ~.ws.api.PetWebService --class ~.ws.endpoint.PetWebServiceEndpoint --config ~.config.WsEndpointsConfiguration
 
+
+// Generating unitary tests for all entities
+test unit --class ~.domain.Owner
+test unit --class ~.domain.Pet
+test unit --class ~.domain.Vet
+test unit --class ~.domain.Visit
+
 // Deactivated until finish changes of DoD and tests
 // Generate integration test
 //test integration --class ~.repository.VetRepository
