@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.jpa.addon.dod;
 
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
-import static org.springframework.roo.model.SpringJavaType.PERSISTENT;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -149,9 +148,8 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
     final MemberDetails memberDetails =
         memberDetailsScanner.getMemberDetails(JpaDataOnDemandCreator.class.getName(), cid);
     final AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
-    final AnnotationMetadata persistentAnnotation = memberDetails.getAnnotation(PERSISTENT);
-    Validate.isTrue(entityAnnotation != null || persistentAnnotation != null,
-        "Type %s must be a persistent type", entity.getFullyQualifiedTypeName());
+    Validate.isTrue(entityAnnotation != null, "Type %s must be a JPA entity type",
+        entity.getFullyQualifiedTypeName());
 
     // Everything is OK to proceed
     final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
