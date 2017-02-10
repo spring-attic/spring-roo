@@ -198,7 +198,7 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
           PhysicalTypeIdentifier.createIdentifier(factoryClass, path);
       if (metadataService.get(declaredByMetadataId) != null) {
         // The file already exists
-        return;
+        continue;
       }
 
       // Create the CID builder
