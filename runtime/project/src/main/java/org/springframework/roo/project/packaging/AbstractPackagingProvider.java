@@ -17,7 +17,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.ApplicationContextOperations;
 import org.springframework.roo.project.GAV;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -36,6 +35,7 @@ import org.w3c.dom.Node;
  *
  * @author Andrew Swan
  * @author Paula Navarro
+ * @author Juan Carlos García
  * @since 1.2.0
  */
 @Component(componentAbstract = true)
@@ -60,7 +60,6 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 
   private static final String VERSION_ELEMENT = "version";
 
-  protected ApplicationContextOperations applicationContextOperations;
   protected FileManager fileManager;
   protected PathResolver pathResolver;
   private final String id;
@@ -482,28 +481,6 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
       }
     } else {
       return pathResolver;
-    }
-  }
-
-  public ApplicationContextOperations getApplicationContextOperations() {
-    if (applicationContextOperations == null) {
-      // Get all Services implement ApplicationContextOperations interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(ApplicationContextOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (ApplicationContextOperations) context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ApplicationContextOperations on AbstractPackagingProvider.");
-        return null;
-      }
-    } else {
-      return applicationContextOperations;
     }
   }
 }

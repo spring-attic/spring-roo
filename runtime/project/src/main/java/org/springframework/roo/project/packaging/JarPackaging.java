@@ -37,16 +37,6 @@ public class JarPackaging extends AbstractCorePackagingProvider {
   }
 
   @Override
-  protected void createOtherArtifacts(final JavaPackage topLevelPackage, final String module,
-      final ProjectOperations projectOperations) {
-
-    super.createOtherArtifacts(topLevelPackage, module, projectOperations);
-    final String fullyQualifiedModuleName = getFullyQualifiedModuleName(module, projectOperations);
-    getApplicationContextOperations().createMiddleTierApplicationContext(topLevelPackage,
-        fullyQualifiedModuleName);
-  }
-
-  @Override
   protected String createPom(final JavaPackage topLevelPackage, final String nullableProjectName,
       final String javaVersion, final GAV parentPom, final String moduleName,
       final ProjectOperations projectOperations) {
