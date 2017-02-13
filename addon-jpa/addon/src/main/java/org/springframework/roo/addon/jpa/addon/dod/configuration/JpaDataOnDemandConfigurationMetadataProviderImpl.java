@@ -99,7 +99,7 @@ public class JpaDataOnDemandConfigurationMetadataProviderImpl extends
   }
 
   public String getItdUniquenessFilenameSuffix() {
-    return "JpaDataOnDemand_Configuration";
+    return "JpaDataOnDemandConfiguration";
   }
 
   @Override

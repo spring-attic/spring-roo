@@ -198,8 +198,10 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
     constructorBuilder.addParameter(ENTITY_MANAGER_VAR, JpaJavaType.ENTITY_MANAGER);
     constructorBuilder.addParameter(SIZE_VAR, JavaType.INT_PRIMITIVE);
-    bodyBuilder.appendFormalLine(String.format("this.%1$s = %1$s;", ENTITY_MANAGER_VAR));
-    bodyBuilder.appendFormalLine(String.format("this.%1$s = %1$s;", SIZE_VAR));
+    bodyBuilder.appendFormalLine(String.format("%1$s(%2$s);",
+        getMutatorMethod(getEntityManagerField().build()).getMethodName(), ENTITY_MANAGER_VAR));
+    bodyBuilder.appendFormalLine(String.format("%1$s(%2$s);", getMutatorMethod(getSizeField())
+        .getMethodName(), SIZE_VAR));
 
     constructorBuilder.setModifier(Modifier.PUBLIC);
     constructorBuilder.setBodyBuilder(bodyBuilder);
@@ -353,8 +355,9 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
 
     // CriteriaBuilder cb = entityManager.getCriteriaBuilder();
     bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine("%s cb = %s.getCriteriaBuilder();",
-        getNameOfJavaType(JpaJavaType.CRITERIA_BUILDER), ENTITY_MANAGER_VAR);
+    bodyBuilder.appendFormalLine("%s cb = %s().getCriteriaBuilder();",
+        getNameOfJavaType(JpaJavaType.CRITERIA_BUILDER),
+        getAccessorMethod(getEntityManagerField().build()).getMethodName());
 
     // CriteriaQuery<Entity> cq = cb.createQuery(Entity.class);
     bodyBuilder.appendFormalLine("%1$s<%2$s> cq = cb.createQuery(%2$s.class);",
@@ -374,15 +377,17 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
 
     //    entityManager.createQuery(all).setFirstResult(from).setMaxResults(to);
     bodyBuilder.indent();
-    bodyBuilder.appendFormalLine("%s.createQuery(all).setFirstResult(from).setMaxResults(to);",
-        ENTITY_MANAGER_VAR);
+    bodyBuilder.appendFormalLine("%s().createQuery(all).setFirstResult(from).setMaxResults(to);",
+        getAccessorMethod(getEntityManagerField().build()).getMethodName());
 
-    // data = allQuery.getResultList();
+    // setData(allQuery.getResultList());
     bodyBuilder.indentRemove();
-    bodyBuilder.appendFormalLine("%s = allQuery.getResultList();", dataField);
+    bodyBuilder.appendFormalLine("%s(allQuery.getResultList());",
+        getMutatorMethod(getDataField().build()).getMethodName());
 
-    // if (data == null) {
-    bodyBuilder.appendFormalLine("if (%s == null) {", dataField);
+    // if (getData() == null) {
+    bodyBuilder.appendFormalLine("if (%s() == null) {", getAccessorMethod(getDataField().build())
+        .getMethodName());
 
     //  throw new IllegalStateException(
     bodyBuilder.indent();
@@ -400,7 +405,8 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
     bodyBuilder.appendFormalLine("}");
 
     // if (!data.isEmpty()) {
-    bodyBuilder.appendFormalLine("if (!%s.isEmpty()) {", dataField);
+    bodyBuilder.appendFormalLine("if (!%s().isEmpty()) {",
+        getAccessorMethod(getDataField().build()).getMethodName());
 
     //  return;
     bodyBuilder.indent();
@@ -410,25 +416,29 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
 
-    // data = new ArrayList<Entity>();
+    // setData(new ArrayList<Entity>());
     bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine("%s = new %s<%s>();", dataField,
-        getNameOfJavaType(JdkJavaType.ARRAY_LIST), getNameOfJavaType(this.entity));
+    bodyBuilder
+        .appendFormalLine("%s(new %s<%s>());", getMutatorMethod(getDataField().build())
+            .getMethodName(), getNameOfJavaType(JdkJavaType.ARRAY_LIST),
+            getNameOfJavaType(this.entity));
 
     // for (int i = from; i < to; i++) {
     bodyBuilder.appendFormalLine("for (int i = from; i < to; i++) {");
     bodyBuilder.indent();
 
     // Entity obj = factory.create(i);
-    bodyBuilder.appendFormalLine("%s %s = %s.%s(i);", getNameOfJavaType(this.entity), OBJ_VAR,
-        FACTORY_VAR, this.entityFactoryMetadata.getCreateFactoryMethodName());
+    bodyBuilder.appendFormalLine("%s %s = %s().%s(i);", getNameOfJavaType(this.entity), OBJ_VAR,
+        getAccessorMethod(getEntityFactoryField().build()).getMethodName(),
+        this.entityFactoryMetadata.getCreateFactoryMethodName());
 
     // try {
     bodyBuilder.appendFormalLine("try {");
     bodyBuilder.indent();
 
     // entityManager.persist(obj);
-    bodyBuilder.appendFormalLine("%s.persist(%s);", ENTITY_MANAGER_VAR, OBJ_VAR);
+    bodyBuilder.appendFormalLine("%s().persist(%s);",
+        getAccessorMethod(getEntityManagerField().build()).getMethodName(), OBJ_VAR);
 
     // } catch (final ConstraintViolationException e) {
     bodyBuilder.indentRemove();
@@ -478,10 +488,12 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
     bodyBuilder.appendFormalLine("}");
 
     // entityManager.flush();
-    bodyBuilder.appendFormalLine("%s.%s();", ENTITY_MANAGER_VAR, flushMethod.getMethodName());
+    bodyBuilder.appendFormalLine("%s().%s();", getAccessorMethod(getEntityManagerField().build())
+        .getMethodName(), flushMethod.getMethodName());
 
     // data.add(obj);
-    bodyBuilder.appendFormalLine("%s.add(%s);", dataField, OBJ_VAR);
+    bodyBuilder.appendFormalLine("%s().add(%s);", getAccessorMethod(getDataField().build())
+        .getMethodName(), OBJ_VAR);
 
     // }
     bodyBuilder.indentRemove();
@@ -600,14 +612,15 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
     bodyBuilder.appendFormalLine(INDEX_VAR + " = 0;");
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
-    bodyBuilder.appendFormalLine("if (" + INDEX_VAR + " > (" + getDataFieldName().getSymbolName()
-        + ".size() - 1)) {");
+    bodyBuilder.appendFormalLine("if (" + INDEX_VAR + " > ("
+        + getAccessorMethod(getDataField().build()).getMethodName() + "().size() - 1)) {");
     bodyBuilder.indent();
-    bodyBuilder.appendFormalLine(INDEX_VAR + " = " + getDataFieldName().getSymbolName()
-        + ".size() - 1;");
+    bodyBuilder.appendFormalLine(INDEX_VAR + " = "
+        + getAccessorMethod(getDataField().build()).getMethodName() + "().size() - 1;");
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
-    bodyBuilder.appendFormalLine("return %s.get(%s);", getDataFieldName(), INDEX_VAR);
+    bodyBuilder.appendFormalLine("return %s().get(%s);", getAccessorMethod(getDataField().build())
+        .getMethodName(), INDEX_VAR);
 
     final MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, this.entity,
@@ -654,8 +667,9 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
     bodyBuilder.appendFormalLine("init();");
 
     // return data.get(rnd.nextInt(data.size()));
-    bodyBuilder.appendFormalLine("return %1$s.get(%2$s.nextInt(%1$s.size()));", getDataFieldName(),
-        getRndFieldName());
+    bodyBuilder.appendFormalLine("return %1$s().get(%2$s().nextInt(%1$s().size()));",
+        getAccessorMethod(getDataField().build()).getMethodName(),
+        getAccessorMethod(getRndField().build()).getMethodName());
 
     final MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, this.entity, bodyBuilder);
@@ -693,11 +707,12 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
 
     // int randomIndex = getSize() + rnd.nextInt(Integer.MAX_VALUE - getSize());
     bodyBuilder.appendFormalLine(
-        "int randomIndex = %1$s() + %2$s.nextInt(Integer.MAX_VALUE - %1$s());",
-        this.sizeAccesorName, getRndFieldName());
+        "int randomIndex = %1$s() + %2$s().nextInt(Integer.MAX_VALUE - %1$s());",
+        this.sizeAccesorName, getAccessorMethod(getRndField().build()).getMethodName());
 
     // return factory.create(randomIndex);
-    bodyBuilder.appendFormalLine("return %s.%s(randomIndex);", FACTORY_VAR,
+    bodyBuilder.appendFormalLine("return %s().%s(randomIndex);",
+        getAccessorMethod(getEntityFactoryField().build()).getMethodName(),
         this.entityFactoryMetadata.getCreateFactoryMethodName());
 
     final MethodMetadataBuilder methodBuilder =

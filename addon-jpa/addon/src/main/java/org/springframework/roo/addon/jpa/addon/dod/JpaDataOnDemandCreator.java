@@ -113,7 +113,7 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
 
     // Create the JavaType for the configuration class
     JavaType dodConfigurationClass =
-        new JavaType(String.format("%s.JpaDataOnDemandConfiguration",
+        new JavaType(String.format("%s.DataOnDemandConfiguration",
             javaPackage.getFullyQualifiedPackageName()), path.getModule());
 
     final String declaredByMetadataId =

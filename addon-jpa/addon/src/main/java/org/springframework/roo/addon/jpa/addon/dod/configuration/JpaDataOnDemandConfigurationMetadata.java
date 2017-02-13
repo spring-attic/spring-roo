@@ -107,7 +107,8 @@ public class JpaDataOnDemandConfigurationMetadata extends
 
     // Add body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder.appendFormalLine("this.%1$s = %1$s;", ENTITY_MANAGER_FIELD_NAME);
+    bodyBuilder.appendFormalLine("%1$s(%2$s);", getMutatorMethod(getEntityManagerField().build())
+        .getMethodName(), ENTITY_MANAGER_FIELD_NAME);
     constructorBuilder.setBodyBuilder(bodyBuilder);
     constructorBuilder.setModifier(Modifier.PUBLIC);
 
@@ -148,8 +149,8 @@ public class JpaDataOnDemandConfigurationMetadata extends
 
     // Add body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder.appendFormalLine("return new %s(%s);", getNameOfJavaType(dodType),
-        ENTITY_MANAGER_FIELD_NAME);
+    bodyBuilder.appendFormalLine("return new %s(%s());", getNameOfJavaType(dodType),
+        getAccessorMethod(getEntityManagerField().build()).getMethodName());
 
     // Create method
     MethodMetadataBuilder method =
