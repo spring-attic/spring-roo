@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
  * Creates equals and hashCode methods.
  * 
  * @author Alan Stewart
+ * @author Sergio Clares
  * @since 1.2.0
  */
 @Target(ElementType.TYPE)
@@ -18,7 +19,12 @@ public @interface RooEquals {
   boolean appendSuper() default false;
 
   /**
-   * @return an array of fields exclude in the equals and hashCode methods
+   * @return an array of fields exclude in the equals and hashCode methods.
    */
   String[] excludeFields() default "";
+
+  /**
+   * @return `true` if annotated type is a JPA Entity, `false` otherwise. 
+   */
+  boolean isJpaEntity() default false;
 }

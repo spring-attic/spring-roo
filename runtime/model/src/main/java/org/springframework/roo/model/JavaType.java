@@ -64,6 +64,7 @@ public class JavaType implements Comparable<JavaType> {
   public static final JavaType LONG_PRIMITIVE = new JavaType("java.lang.Long", 0,
       DataType.PRIMITIVE, null, null);
   public static final JavaType OBJECT = new JavaType("java.lang.Object");
+  public static final JavaType OBJECTS = new JavaType("java.util.Objects");
   public static final JavaType OBJECT_ARRAY = new JavaType("java.lang.Object", 1, DataType.TYPE,
       null, null);
   public static final JavaType NUMBER = new JavaType("java.lang.Number");

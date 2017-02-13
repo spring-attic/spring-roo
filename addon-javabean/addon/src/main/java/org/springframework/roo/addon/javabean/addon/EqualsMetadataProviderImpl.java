@@ -50,9 +50,9 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
    */
   @Override
   protected void activate(final ComponentContext cContext) {
-    context = cContext.getBundleContext();
+    super.activate(cContext);
     this.registryTracker =
-        new MetadataDependencyRegistryTracker(context, this,
+        new MetadataDependencyRegistryTracker(cContext.getBundleContext(), this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
     addMetadataTrigger(ROO_EQUALS);
@@ -114,14 +114,31 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
         locateFields(javaType, annotationValues.getExcludeFields(), memberDetails,
             metadataIdentificationString);
 
+    List<FieldMetadata> identifierFields =
+        getPersistenceMemberLocator().getIdentifierFields(governorPhysicalTypeMetadata.getType());
+    FieldMetadata identifierField = null;
+    if (!identifierFields.isEmpty()) {
+      identifierField = identifierFields.get(0);
+    }
+
     return new EqualsMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, equalityFields);
+        governorPhysicalTypeMetadata, annotationValues, equalityFields, identifierField);
   }
 
   public String getProvidesType() {
     return EqualsMetadata.getMetadataIdentiferType();
   }
 
+  /**
+   * Locates class fields needed to generate `equals` and `hashCode` methods. 
+   * Also fills id field info if class is an entity.
+   * 
+   * @param javaType the {@link JavaType} of the governor class.
+   * @param excludeFields the {@link String[]} with field names to exclude. 
+   * @param memberDetails the {@link MemberDetails} of the class.
+   * @param metadataIdentificationString
+   * @return a {@link List<FieldMetadata>}
+   */
   private List<FieldMetadata> locateFields(final JavaType javaType, final String[] excludeFields,
       final MemberDetails memberDetails, final String metadataIdentificationString) {
     final SortedSet<FieldMetadata> locatedFields =
@@ -153,4 +170,5 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 
     return new ArrayList<FieldMetadata>(locatedFields);
   }
+
 }

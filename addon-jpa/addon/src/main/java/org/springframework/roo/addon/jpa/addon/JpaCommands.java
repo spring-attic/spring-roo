@@ -563,10 +563,6 @@ public class JpaCommands implements CommandMarker {
       @CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity."
               + "Default if option present: `true`; default if option not present: `false`.") final boolean mappedSuperclass,
-      @CliOption(key = "equals", mandatory = false, unspecifiedDefaultValue = "false",
-          specifiedDefaultValue = "true",
-          help = "Whether the generated class should implement equals and hashCode methods."
-              + "Default if option present: `true`; default if option not present: `false`.") final boolean equals,
       @CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Whether the generated class should implement `java.io.Serializable`."
@@ -700,9 +696,16 @@ public class JpaCommands implements CommandMarker {
     annotationBuilder.add(ROO_TO_STRING_BUILDER);
     annotationBuilder.add(getEntityAnnotationBuilder(table, schema, catalog, inheritanceType,
         mappedSuperclass, entityName, readOnly, formatExpression, formatMessage));
-    if (equals) {
-      annotationBuilder.add(ROO_EQUALS_BUILDER);
+
+    // Add @RooEquals only if it's superclass is not an entity
+    ClassOrInterfaceTypeDetails superclassCid = typeLocationService.getTypeDetails(superclass);
+    if (superclassCid == null || superclassCid.getAnnotation(ROO_JPA_ENTITY) == null) {
+      final AnnotationMetadataBuilder equalsAnnotationBuilder = ROO_EQUALS_BUILDER;
+      equalsAnnotationBuilder.addBooleanAttribute("isJpaEntity", true);
+      annotationBuilder.add(equalsAnnotationBuilder);
     }
+
+    // Add @RooSerializable
     if (serializable) {
       annotationBuilder.add(ROO_SERIALIZABLE_BUILDER);
     }

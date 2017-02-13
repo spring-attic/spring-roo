@@ -12,6 +12,7 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
  * Represents a parsed {@link RooEquals} annotation.
  * 
  * @author Alan Stewart
+ * @author Sergio Clares
  * @since 1.2.0
  */
 public class EqualsAnnotationValues extends AbstractAnnotationValues {
@@ -20,6 +21,8 @@ public class EqualsAnnotationValues extends AbstractAnnotationValues {
   private boolean appendSuper;
   @AutoPopulate
   private String[] excludeFields;
+  @AutoPopulate
+  private boolean isJpaEntity;
 
   /**
    * Constructor
@@ -37,5 +40,9 @@ public class EqualsAnnotationValues extends AbstractAnnotationValues {
 
   public boolean isAppendSuper() {
     return appendSuper;
+  }
+
+  public boolean isJpaEntity() {
+    return isJpaEntity;
   }
 }
