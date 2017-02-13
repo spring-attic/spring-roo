@@ -2,8 +2,6 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import static java.lang.reflect.Modifier.PUBLIC;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +14,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -78,7 +75,6 @@ import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
-import org.springframework.roo.support.util.FileUtils;
 
 /**
  * Implementation of {@link ControllerOperations}.
@@ -510,11 +506,12 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     // Check if requires Deserializer
     if (responseType.requiresJsonDeserializer()) {
-      createJsonDeserializersIfDontExists(entity, itemController.getModule());
+      createJsonDeserializersIfDontExists(entity, itemController.getModule(), controllerPackage);
     }
 
     if (responseType.requiresJsonMixin()) {
-      createJsonMixinIfDontExists(entity, entityMetadata, itemController.getModule());
+      createJsonMixinIfDontExists(entity, entityMetadata, itemController.getModule(),
+          controllerPackage);
     }
 
     // Check multimodule project
@@ -546,9 +543,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
    * @param entityMetadata
    * @param requiresDeserializer
    * @param module
+   * @param controllerPackage 
    */
   private void createJsonMixinIfDontExists(JavaType entity, JpaEntityMetadata entityMetadata,
-      String module) {
+      String module, JavaPackage controllerPackage) {
     Set<ClassOrInterfaceTypeDetails> allJsonMixin =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
             RooJavaType.ROO_JSON_MIXIN);
@@ -572,10 +570,9 @@ public class ControllerOperationsImpl implements ControllerOperations {
     mixinAnnotation.addClassAttribute("entity", entity);
     annotations.add(mixinAnnotation);
 
-    JavaPackage packageToUse = getDefaultControllerPackage();
     JavaType mixinClass =
-        new JavaType(String.format("%s.%sJsonMixin", packageToUse.getFullyQualifiedPackageName(),
-            entity.getSimpleTypeName()), module);
+        new JavaType(String.format("%s.%sJsonMixin",
+            controllerPackage.getFullyQualifiedPackageName(), entity.getSimpleTypeName()), module);
 
     final LogicalPath mixinPath = getPathResolver().getPath(module, Path.SRC_MAIN_JAVA);
     final String resourceIdentifierItem =
@@ -589,14 +586,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
     cidBuilder.setAnnotations(annotations);
 
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
-
-    // Create related desarializer for relations
-    for (FieldMetadata field : entityMetadata.getRelationsAsChild().values()) {
-      if (isAnyToOneRelation(field)) {
-        // Create deserializer if doesn't exist
-        createJsonDeserializersIfDontExists(field.getFieldType(), module);
-      }
-    }
   }
 
   /**
@@ -606,47 +595,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
    *
    * @param entity
    * @param module
+   * @param controllerPackage 
    */
-  private void createJsonDeserializersIfDontExists(JavaType currentEntity, String module) {
-
-    // Get related entities
-    ClassOrInterfaceTypeDetails entityDetails =
-        getTypeLocationService().getTypeDetails(currentEntity);
-    JpaEntityMetadata entityMetadata =
-        getMetadataService().get(JpaEntityMetadata.createIdentifier(entityDetails));
-    List<JavaType> entitiesToCreateSerializers = new ArrayList<JavaType>();
-    entitiesToCreateSerializers.add(currentEntity);
-
-    // Get related child entities
-    for (RelationInfo info : entityMetadata.getRelationInfos().values()) {
-
-      // One-To-One composition child entities doesn't need deserializers
-      if (info.type == JpaRelationType.COMPOSITION && info.cardinality == Cardinality.ONE_TO_ONE) {
-        continue;
-      }
-
-      // Need serializer
-      if (!entitiesToCreateSerializers.contains(info.childType)) {
-        entitiesToCreateSerializers.add(info.childType);
-      }
-    }
-
-    // We need as well to get related parent entities
-    for (FieldMetadata parentEntityField : entityMetadata.getRelationsAsChild().values()) {
-      JavaType parentEntity = null;
-      if (parentEntityField.getFieldType().isCommonCollectionType()) {
-
-        // Get wrappedType
-        parentEntity = parentEntityField.getFieldType().getBaseType();
-      } else {
-        parentEntity = parentEntityField.getFieldType();
-      }
-
-      // Add parent entity to list
-      if (!entitiesToCreateSerializers.contains(parentEntity)) {
-        entitiesToCreateSerializers.add(parentEntity);
-      }
-    }
+  private void createJsonDeserializersIfDontExists(JavaType currentEntity, String module,
+      JavaPackage controllerPackage) {
+    List<JavaType> entitiesToCreateSerializers = getParentAndChildrenRelatedEntities(currentEntity);
 
     // Check if already exists a serializer for each entity
     Set<ClassOrInterfaceTypeDetails> allDeserializer =
@@ -680,10 +633,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
         deserializerAnnotation.addClassAttribute("entity", entity);
         annotations.add(deserializerAnnotation);
 
-        JavaPackage packageToUse = getDefaultControllerPackage();
         JavaType deserializerClass =
             new JavaType(String.format("%s.%sDeserializer",
-                packageToUse.getFullyQualifiedPackageName(), entity.getSimpleTypeName()), module);
+                controllerPackage.getFullyQualifiedPackageName(), entity.getSimpleTypeName()),
+                module);
 
         final LogicalPath deserializerPath = getPathResolver().getPath(module, Path.SRC_MAIN_JAVA);
         final String resourceIdentifierItem =
@@ -722,6 +675,48 @@ public class ControllerOperationsImpl implements ControllerOperations {
         getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
       }
     }
+  }
+
+  private List<JavaType> getParentAndChildrenRelatedEntities(JavaType currentEntity) {
+    // Get related entities
+    ClassOrInterfaceTypeDetails entityDetails =
+        getTypeLocationService().getTypeDetails(currentEntity);
+    JpaEntityMetadata entityMetadata =
+        getMetadataService().get(JpaEntityMetadata.createIdentifier(entityDetails));
+    List<JavaType> entitiesToCreateSerializers = new ArrayList<JavaType>();
+    entitiesToCreateSerializers.add(currentEntity);
+
+    // Get related child entities
+    for (RelationInfo info : entityMetadata.getRelationInfos().values()) {
+
+      // One-To-One composition child entities doesn't need deserializers
+      if (info.type == JpaRelationType.COMPOSITION && info.cardinality == Cardinality.ONE_TO_ONE) {
+        continue;
+      }
+
+      // Need serializer
+      if (!entitiesToCreateSerializers.contains(info.childType)) {
+        entitiesToCreateSerializers.add(info.childType);
+      }
+    }
+
+    // We need as well to get related parent entities
+    for (FieldMetadata parentEntityField : entityMetadata.getRelationsAsChild().values()) {
+      JavaType parentEntity = null;
+      if (parentEntityField.getFieldType().isCommonCollectionType()) {
+
+        // Get wrappedType
+        parentEntity = parentEntityField.getFieldType().getBaseType();
+      } else {
+        parentEntity = parentEntityField.getFieldType();
+      }
+
+      // Add parent entity to list
+      if (!entitiesToCreateSerializers.contains(parentEntity)) {
+        entitiesToCreateSerializers.add(parentEntity);
+      }
+    }
+    return entitiesToCreateSerializers;
   }
 
   /**
