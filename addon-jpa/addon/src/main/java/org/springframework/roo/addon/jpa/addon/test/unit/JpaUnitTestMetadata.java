@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -25,7 +26,6 @@ import org.springframework.roo.classpath.details.comments.JavadocComment;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
@@ -52,6 +52,8 @@ public class JpaUnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadata
   private static final JavaType AFTER = new JavaType("org.junit.After");
   private static final JavaType TEST = new JavaType("org.junit.Test");
   private static final JavaType IGNORE = new JavaType("org.junit.Ignore");
+
+  private Map<JavaType, FieldMetadata> entityFactories = new TreeMap<JavaType, FieldMetadata>();
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -111,9 +113,12 @@ public class JpaUnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
     // Add entity factory fields
     for (JavaType entityFactory : entityAndItsFactoryMap.values()) {
-      ensureGovernorHasField(new FieldMetadataBuilder(this.getId(), Modifier.PRIVATE,
-          new JavaSymbolName(StringUtils.uncapitalize(entityFactory.getSimpleTypeName())),
-          entityFactory, String.format("new %s()", getNameOfJavaType(entityFactory))));
+      FieldMetadataBuilder entityFactoryField =
+          new FieldMetadataBuilder(this.getId(), Modifier.PRIVATE, new JavaSymbolName(
+              StringUtils.uncapitalize(entityFactory.getSimpleTypeName())), entityFactory,
+              String.format("new %s()", getNameOfJavaType(entityFactory)));
+      entityFactories.put(entityFactory, entityFactoryField.build());
+      ensureGovernorHasField(entityFactoryField);
     }
 
     for (RelationInfo relationInfo : relationInfos) {
@@ -209,24 +214,26 @@ public class JpaUnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadata
     bodyBuilder.appendFormalLine("// Setup");
 
     // Entity entity = entityFactory.create(0);
-    bodyBuilder.appendFormalLine("%s %s = %s.create(0);", getNameOfJavaType(this.entity),
-        this.entityVar, StringUtils.uncapitalize(this.entityFactory.getSimpleTypeName()));
+    FieldMetadata entityFactory = entityFactories.get(this.entityFactory);
+    bodyBuilder.appendFormalLine("%s %s = %s().create(0);", getNameOfJavaType(this.entity),
+        this.entityVar, getAccessorMethod(entityFactory).getMethodName());
 
     // ChildEntity childEntity1 = childEntityFactory.create(0);
-    JavaType childEntityFactory = this.entityAndItsFactoryMap.get(childEntity);
+    FieldMetadata childEntityFactory =
+        entityFactories.get(this.entityAndItsFactoryMap.get(childEntity));
     Validate.notNull(childEntityFactory,
         "Unable to locate the entity factory of %s in JpaUnitTestMetadata",
         childEntity.getSimpleTypeName());
     String childEntityVar1 =
         String.format("%s1", StringUtils.uncapitalize(childEntity.getSimpleTypeName()));
-    bodyBuilder.appendFormalLine("%s %s = %s.create(0);", getNameOfJavaType(childEntity),
-        childEntityVar1, StringUtils.uncapitalize(childEntityFactory.getSimpleTypeName()));
+    bodyBuilder.appendFormalLine("%s %s = %s().create(0);", getNameOfJavaType(childEntity),
+        childEntityVar1, getAccessorMethod(childEntityFactory).getMethodName());
 
     // ChildEntity childEntity2 = childEntityFactory.create(1);
     String childEntityVar2 =
         String.format("%s2", StringUtils.uncapitalize(childEntity.getSimpleTypeName()));
-    bodyBuilder.appendFormalLine("%s %s = %s.create(1);", getNameOfJavaType(childEntity),
-        childEntityVar2, StringUtils.uncapitalize(childEntityFactory.getSimpleTypeName()));
+    bodyBuilder.appendFormalLine("%s %s = %s().create(1);", getNameOfJavaType(childEntity),
+        childEntityVar2, getAccessorMethod(childEntityFactory).getMethodName());
     bodyBuilder.newLine();
 
     // Exercise
@@ -312,24 +319,26 @@ public class JpaUnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadata
     bodyBuilder.appendFormalLine("// Setup");
 
     // Entity entity = entityFactory.create(0);
-    bodyBuilder.appendFormalLine("%s %s = %s.create(0);", getNameOfJavaType(this.entity),
-        this.entityVar, StringUtils.uncapitalize(this.entityFactory.getSimpleTypeName()));
+    FieldMetadata entityFactory = entityFactories.get(this.entityFactory);
+    bodyBuilder.appendFormalLine("%s %s = %s().create(0);", getNameOfJavaType(this.entity),
+        this.entityVar, getAccessorMethod(entityFactory).getMethodName());
 
     // ChildEntity childEntity1 = childEntityFactory.create(0);
-    JavaType childEntityFactory = this.entityAndItsFactoryMap.get(childEntity);
+    FieldMetadata childEntityFactory =
+        entityFactories.get(this.entityAndItsFactoryMap.get(childEntity));
     Validate.notNull(childEntityFactory,
         "Unable to locate the entity factory of %s in JpaUnitTestMetadata",
         childEntity.getSimpleTypeName());
     String childEntityVar1 =
         String.format("%s1", StringUtils.uncapitalize(childEntity.getSimpleTypeName()));
-    bodyBuilder.appendFormalLine("%s %s = %s.create(0);", getNameOfJavaType(childEntity),
-        childEntityVar1, StringUtils.uncapitalize(childEntityFactory.getSimpleTypeName()));
+    bodyBuilder.appendFormalLine("%s %s = %s().create(0);", getNameOfJavaType(childEntity),
+        childEntityVar1, getAccessorMethod(childEntityFactory).getMethodName());
 
     // ChildEntity childEntity2 = childEntityFactory.create(1);
     String childEntityVar2 =
         String.format("%s2", StringUtils.uncapitalize(childEntity.getSimpleTypeName()));
-    bodyBuilder.appendFormalLine("%s %s = %s.create(1);", getNameOfJavaType(childEntity),
-        childEntityVar2, StringUtils.uncapitalize(childEntityFactory.getSimpleTypeName()));
+    bodyBuilder.appendFormalLine("%s %s = %s().create(1);", getNameOfJavaType(childEntity),
+        childEntityVar2, getAccessorMethod(childEntityFactory).getMethodName());
 
     // entity.ADD_METHOD(Arrays.asList(childEntity1, childEntity2));
     bodyBuilder.appendFormalLine("%s.%s(%s.asList(%s, %s));", entityVar,
