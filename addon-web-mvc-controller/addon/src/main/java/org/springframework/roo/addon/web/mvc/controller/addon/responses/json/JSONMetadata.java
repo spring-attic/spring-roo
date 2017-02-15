@@ -319,15 +319,24 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         }
         this.modelAttributeDetailsMethod = Collections.unmodifiableMap(modelAtributeDetailsMethod);
         this.listDetailsMethod = addAndGet(getListDetailsMethod(), allMethods);
-        this.addToDetailsMethod = addAndGet(getAddToDetailsMethod(), allMethods);
-        if (controllerMetadata.getLastDetailsInfo().type == JpaRelationType.AGGREGATION) {
-          this.removeFromDetailsMethod = addAndGet(getRemoveFromDetailsMethod(), allMethods);
+        if (!entityMetadata.isReadOnly()) {
+          this.addToDetailsMethod = addAndGet(getAddToDetailsMethod(), allMethods);
+          this.addToDetailsBatchMethod = addAndGet(getAddToDetailsBatchMethod(), allMethods);
+          if (controllerMetadata.getLastDetailsInfo().type == JpaRelationType.AGGREGATION) {
+            this.removeFromDetailsMethod = addAndGet(getRemoveFromDetailsMethod(), allMethods);
+            this.removeFromDetailsBatchMethod =
+                addAndGet(getRemoveFromDetailsBatchMethod(), allMethods);
+          } else {
+            this.removeFromDetailsMethod = null;
+            this.removeFromDetailsBatchMethod = null;
+          }
+
         } else {
+          this.addToDetailsMethod = null;
+          this.addToDetailsBatchMethod = null;
           this.removeFromDetailsMethod = null;
+          this.removeFromDetailsBatchMethod = null;
         }
-        this.addToDetailsBatchMethod = addAndGet(getAddToDetailsBatchMethod(), allMethods);
-        this.removeFromDetailsBatchMethod =
-            addAndGet(getRemoveFromDetailsBatchMethod(), allMethods);
 
         this.listMethod = null;
         this.listURIMethod = null;

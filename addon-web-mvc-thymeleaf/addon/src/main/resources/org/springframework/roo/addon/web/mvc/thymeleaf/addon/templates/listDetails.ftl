@@ -50,15 +50,20 @@
                       data-order="[[ 0, &quot;asc&quot; ]]"
                       </#if>
                       data-data-load-url="${r"${"}detailCollectionLink.to('datatables').with('${modelAttributeName}', '_PARENTID_')}"
-                      data-data-create-url="${r"${"}detailCollectionLink.to('createForm').with('${modelAttributeName}', '_PARENTID_')}"
                       <#if detail.fieldInfo.type == 'COMPOSITION'>	
                       	data-data-show-url="${r"${"}detailItemLink.to('show').with('${modelAttributeName}', '_PARENTID_').with('${detail.fieldName}', '_ID_')}"
-                      	data-data-edit-url="${r"${"}detailItemLink.to('editForm').with('${modelAttributeName}', '_PARENTID_').with('${detail.fieldName}', '_ID_')}"
-                      	data-data-delete-url="${r"${"}detailItemLink.to('delete').with('${modelAttributeName}', '_PARENTID_').with('${detail.fieldName}', '_ID_')}"
+                      	<#if entity.readOnly == false>
+                      	 data-data-create-url="${r"${"}detailCollectionLink.to('createForm').with('${modelAttributeName}', '_PARENTID_')}"
+                      	 data-data-edit-url="${r"${"}detailItemLink.to('editForm').with('${modelAttributeName}', '_PARENTID_').with('${detail.fieldName}', '_ID_')}"
+                      	 data-data-delete-url="${r"${"}detailItemLink.to('delete').with('${modelAttributeName}', '_PARENTID_').with('${detail.fieldName}', '_ID_')}"
+                        </#if>
                       <#else>
                       	data-data-show-url="${r"${"}detailItemLink.to('show').with('${detail.modelAttribute}', '_ID_')}"
-                	  	data-data-edit-url="${r"${"}detailItemLink.to('editForm').with('${detail.modelAttribute}', '_ID_')}"
-                      	data-data-delete-url="${r"${"}detailCollectionLink.to('removeFrom${detail.fieldNameCapitalized}').with('${modelAttributeName}', '_PARENTID_').with('${detail.fieldName}ToRemove', '_ID_')}"
+                	  	  <#if entity.readOnly == false>
+                  	  	  data-data-create-url="${r"${"}detailCollectionLink.to('createForm').with('${modelAttributeName}', '_PARENTID_')}"
+                	  	    data-data-edit-url="${r"${"}detailItemLink.to('editForm').with('${detail.modelAttribute}', '_ID_')}"
+                      	  data-data-delete-url="${r"${"}detailCollectionLink.to('removeFrom${detail.fieldNameCapitalized}').with('${modelAttributeName}', '_PARENTID_').with('${detail.fieldName}ToRemove', '_ID_')}"
+                	      </#if>
                 	  </#if>
                       <#if entity.readOnly == false>
                       	<#if detail.fieldInfo.type != 'COMPOSITION'>
@@ -91,6 +96,7 @@
                       </tbody>
                     </table>
                   </#if>
+                  <#if entity.readOnly == false>
                     <!-- content replaced by modal-confirm fragment of modal-confirm.html -->
                     <div data-th-replace="~{fragments/modal-confirm-delete :: modalConfirmDelete(tableId='${detail.entityItemId}-table',
                         title=${r"#{"}label_delete_entity(${r"#"}{${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_item_confirm})}">
@@ -98,6 +104,7 @@
                    <div data-th-replace="~{fragments/modal-confirm-delete-batch :: modalConfirmDeleteBatch(tableId='${detail.entityItemId}-table',
                         title=${r"#{"}label_delete_entity(${r"#{"}${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_batch_confirm})}">
                     </div>
+                 </#if>
                     <div data-th-replace="~{fragments/modal-export-empty-error :: modalExportEmptyError(tableId='${detail.entityItemId}-table',
                         title=${r"#{"}label_export_empty_error(${r"#{"}${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_export_empty_error})}">
                     </div>

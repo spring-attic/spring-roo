@@ -622,16 +622,23 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.listDatatablesDetailsMethod = addAndGet(getListDatatablesDetailMethod(), allMethods);
         this.createFormDetailsMethod = addAndGet(getCreateFormDetailsMethod(), allMethods);
 
-        if (controllerMetadata.getLastDetailsInfo().type == JpaRelationType.AGGREGATION) {
+        // ReadOnly entities doesn't manage relations
+        if (controllerMetadata.getLastDetailsInfo().type == JpaRelationType.AGGREGATION
+            && !entityMetadata.isReadOnly()) {
           this.removeFromDetailsMethod = addAndGet(getRemoveFromDetailsMethod(), allMethods);
           this.removeFromDetailsBatchMethod =
               addAndGet(getRemoveFromDetailsBatchMethod(), allMethods);
           this.createDetailsMethod = addAndGet(getCreateDetailsMethod(), allMethods);
           this.initBinderMethod = null;
-        } else {
+        } else if (!entityMetadata.isReadOnly()) {
           this.initBinderMethod =
               addAndGet(getInitBinderMethod(controllerMetadata.getLastDetailEntity()), allMethods);
           this.createDetailsMethod = addAndGet(getCreateDetailsCompositionMethod(), allMethods);
+          this.removeFromDetailsMethod = null;
+          this.removeFromDetailsBatchMethod = null;
+        } else {
+          this.initBinderMethod = null;
+          this.createDetailsMethod = null;
           this.removeFromDetailsMethod = null;
           this.removeFromDetailsBatchMethod = null;
         }

@@ -25,10 +25,11 @@ public class MenuEntry {
   private boolean simple;
   private String z;
   private boolean addDefaultEntries;
+  private boolean readOnly;
 
   public MenuEntry(String entityName, String path, String pathPrefix, String entityLabel,
       String entityPluralLabel, Map<String, String> finderNamesAndPaths, boolean simple,
-      boolean addDefaultEntries) {
+      boolean addDefaultEntries, boolean readOnly) {
     this.entityName = entityName;
     this.path = path;
     this.pathPrefix = pathPrefix;
@@ -39,6 +40,7 @@ public class MenuEntry {
     this.finderNamesAndPaths = finderNamesAndPaths;
     this.simple = simple;
     this.addDefaultEntries = addDefaultEntries;
+    this.readOnly = readOnly;
     buildId();
 
     // Calculate the Z parameter as the hash code of the other parameters
@@ -118,14 +120,20 @@ public class MenuEntry {
     this.codeManaged = codeManaged;
   }
 
-
-
   public String getId() {
     return id;
   }
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public boolean isReadOnly() {
+    return readOnly;
+  }
+
+  public void setReadOnly(boolean readOnly) {
+    this.readOnly = readOnly;
   }
 
   /**

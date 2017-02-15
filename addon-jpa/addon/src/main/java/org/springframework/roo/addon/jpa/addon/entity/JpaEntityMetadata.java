@@ -184,12 +184,10 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // Ensure there's a no-arg constructor (explicit or default)
     builder.addConstructor(getNoArgConstructor());
 
-    ensureGovernorHasField(new FieldMetadataBuilder(getIterableToAddCantBeNullConstant()));
-    ensureGovernorHasField(new FieldMetadataBuilder(getIterableToRemoveCantBeNullConstant()));
-
     // Manage relations
 
-    MethodMetadata addMethod, removeMethod;
+    MethodMetadata addMethod = null;
+    MethodMetadata removeMethod = null;
     Cardinality cardinality;
     RelationInfo info;
     JavaType childType;
@@ -230,18 +228,29 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
           jpaAnnotation.getAnnotationType(), governorPhysicalTypeMetadata.getType(),
           field.getFieldName());
 
-      // Prepare methods
-      addMethodName = getAddMethodName(field);
-      removeMethodName = getRemoveMethodName(field);
-      addMethod =
-          getAddValueMethod(addMethodName, field, cardinality, childType, mappedBy,
-              removeMethodName, importResolver);
-      removeMethod =
-          getRemoveMethod(removeMethodName, field, cardinality, childType, mappedBy, importResolver);
+      // "addTo" and "removeFrom" relation methods will be included
+      // only if entity is not readOnly. Doesn't make sense to modify the relations
+      // of a readOnly entity.
+      if (!isReadOnly()) {
 
-      // Add to ITD builder
-      ensureGovernorHasMethod(new MethodMetadataBuilder(addMethod));
-      ensureGovernorHasMethod(new MethodMetadataBuilder(removeMethod));
+        // Include necessary static fields
+        ensureGovernorHasField(new FieldMetadataBuilder(getIterableToAddCantBeNullConstant()));
+        ensureGovernorHasField(new FieldMetadataBuilder(getIterableToRemoveCantBeNullConstant()));
+
+        // Prepare methods.
+        addMethodName = getAddMethodName(field);
+        removeMethodName = getRemoveMethodName(field);
+        addMethod =
+            getAddValueMethod(addMethodName, field, cardinality, childType, mappedBy,
+                removeMethodName, importResolver);
+        removeMethod =
+            getRemoveMethod(removeMethodName, field, cardinality, childType, mappedBy,
+                importResolver);
+        // Add to ITD builder
+        ensureGovernorHasMethod(new MethodMetadataBuilder(addMethod));
+        ensureGovernorHasMethod(new MethodMetadataBuilder(removeMethod));
+      }
+
 
       relationTypeAttribute =
           field.getAnnotation(RooJavaType.ROO_JPA_RELATION).getAttribute("type");

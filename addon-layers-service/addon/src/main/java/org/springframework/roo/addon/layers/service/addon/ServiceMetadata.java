@@ -246,7 +246,8 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     MethodMetadata tmpMethod;
     for (RelationInfo relationInfo : entityMetadata.getRelationInfos().values()) {
 
-      if (relationInfo.cardinality != Cardinality.ONE_TO_ONE) {
+      // Relations will be managed only for non readOnly entities	
+      if (relationInfo.cardinality != Cardinality.ONE_TO_ONE && !entityMetadata.isReadOnly()) {
         // addToRELATION
         tmpMethod = getAddToRelationMethod(relationInfo);
         addToRelationMethodsTemp.put(relationInfo, tmpMethod);
