@@ -18,8 +18,8 @@ import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.F
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderMethod;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderParameter;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.PartTree;
-import org.springframework.roo.addon.layers.repository.jpa.annotations.RooFinder;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepository;
+import org.springframework.roo.addon.layers.repository.jpa.annotations.finder.RooFinder;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;

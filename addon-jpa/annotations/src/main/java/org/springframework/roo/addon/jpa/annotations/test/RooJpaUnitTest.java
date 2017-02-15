@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates to produce an unit test class.
+ * Indicates to produce an unit test class for JPA entity classes.
  * 
  * @author Sergio Clares
  * @since 2.0

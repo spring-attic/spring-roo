@@ -113,8 +113,11 @@ public final class RooJavaType {
   public static final JavaType ROO_JPA_REPOSITORY_CONFIGURATION =
       new JavaType(
           "org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryConfiguration");
+  public static final JavaType ROO_REPOSITORY_JPA_INTEGRATION_TEST =
+      new JavaType(
+          "org.springframework.roo.addon.layers.repository.jpa.annotations.test.RooRepositoryJpaIntegrationTest");
   public static final JavaType ROO_FINDER = new JavaType(
-      "org.springframework.roo.addon.layers.repository.jpa.annotations.RooFinder");
+      "org.springframework.roo.addon.layers.repository.jpa.annotations.finder.RooFinder");
   public static final JavaType ROO_DTO = new JavaType(
       "org.springframework.roo.addon.dto.annotations.RooDTO");
   public static final JavaType ROO_SERVICE = new JavaType(

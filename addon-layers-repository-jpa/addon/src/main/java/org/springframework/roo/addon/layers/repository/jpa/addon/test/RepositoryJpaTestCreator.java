@@ -1,8 +1,9 @@
-package org.springframework.roo.addon.jpa.addon.test;
+package org.springframework.roo.addon.layers.repository.jpa.addon.test;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
@@ -13,6 +14,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaAnnotationValues;
 import org.springframework.roo.addon.test.addon.providers.DataOnDemandCreatorProvider;
 import org.springframework.roo.addon.test.addon.providers.TestCreatorProvider;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -37,16 +39,16 @@ import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Provides convenience methods that can be used to create mock tests 
- * for JPA Entities.
+ * for JPA Repositories.
  * 
  * @author Sergio Clares
  * @since 2.0
  */
 @Component
 @Service
-public class JpaTestCreator implements TestCreatorProvider {
+public class RepositoryJpaTestCreator implements TestCreatorProvider {
 
-  protected final static Logger LOGGER = HandlerUtils.getLogger(JpaTestCreator.class);
+  protected final static Logger LOGGER = HandlerUtils.getLogger(RepositoryJpaTestCreator.class);
 
   private static final Dependency JUNIT_DEPENDENCY = new Dependency("junit", "junit", null,
       DependencyType.JAR, DependencyScope.TEST);
@@ -85,7 +87,7 @@ public class JpaTestCreator implements TestCreatorProvider {
   @Override
   public boolean isValid(JavaType javaType) {
     ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(javaType);
-    if (cid.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
+    if (cid.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA) != null) {
       return true;
     }
     return false;
@@ -93,65 +95,85 @@ public class JpaTestCreator implements TestCreatorProvider {
 
   @Override
   public boolean isUnitTestCreationAvailable() {
-    return projectOperations.isFocusedProjectAvailable()
-        && projectOperations.isFeatureInstalled(FeatureNames.JPA);
+    return false;
   }
 
   @Override
-  public void createUnitTest(final JavaType entity) {
-    Validate.notNull(entity, "Class to produce an unit test class for is required");
+  public void createUnitTest(final JavaType projectType) {
+    throw new IllegalArgumentException("Unit test operations are not "
+        + "available for Repository JPA classes.");
+  }
+
+  @Override
+  public boolean isIntegrationTestCreationAvailable() {
+    Set<JavaType> repositories =
+        typeLocationService.findTypesWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
+    return projectOperations.isFocusedProjectAvailable()
+        && projectOperations.isFeatureInstalled(FeatureNames.JPA) && !repositories.isEmpty();
+  }
+
+  @Override
+  public void createIntegrationTest(JavaType type) {
+    Validate.notNull(type, "Class to produce an integration test class for is required");
 
     // Check if provided JavaType is a Repository
-    ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(entity);
-    Validate.notNull(cid.getAnnotation(RooJavaType.ROO_JPA_ENTITY),
-        "Type must be a Roo JPA Entity type.");
+    ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(type);
+    Validate.notNull(cid.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA),
+        "Type must be a Roo JPA Repository type.");
 
-    // Create JPA DataOnDemand artifacts
-    List<DataOnDemandCreatorProvider> dodCreators = getValidDataOnDemandCreatorsForType(entity);
-    for (DataOnDemandCreatorProvider dodCreator : dodCreators) {
-      dodCreator.createDataOnDemand(entity);
-    }
+    // Get the repository managed entity
+    RepositoryJpaAnnotationValues repositoryAnnotationValues =
+        new RepositoryJpaAnnotationValues(cid);
+    JavaType managedEntity = repositoryAnnotationValues.getEntity();
 
-    final JavaType name = new JavaType(entity + "Test", entity.getModule());
+    // Create Data On Demand artifacts for managed entity
+    List<DataOnDemandCreatorProvider> dodCreators =
+        getValidDataOnDemandCreatorsForType(managedEntity);
+    Validate.isTrue(!dodCreators.isEmpty(),
+        "Couldn't find any 'DataOnDemandCreatorProvider' for JPA entities.");
+    Validate
+        .isTrue(
+            dodCreators.size() == 1,
+            "More than 1 valid 'DataOnDemandCreatorProvider' found for JPA entities. %s can't decide which one to use.",
+            this.getClass().getName());
+    DataOnDemandCreatorProvider creator = dodCreators.get(0);
+    creator.createDataOnDemand(managedEntity);
+
+    // Create integration test class
+    final JavaType name = new JavaType(type + "IT", type.getModule());
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(name,
-            Path.SRC_TEST_JAVA.getModulePathId(entity.getModule()));
-
+            Path.SRC_TEST_JAVA.getModulePathId(type.getModule()));
     if (metadataService.get(declaredByMetadataId) != null) {
       // The file already exists
       return;
     }
 
     // Add dependencies if needed
-    projectOperations.addDependency(entity.getModule(), JUNIT_DEPENDENCY);
-    projectOperations.addDependency(entity.getModule(), ASSERTJ_CORE_DEPENDENCY);
-    projectOperations.addDependency(entity.getModule(), SPRING_TEST_DEPENDENCY);
+    projectOperations.addDependency(type.getModule(), JUNIT_DEPENDENCY);
+    projectOperations.addDependency(type.getModule(), ASSERTJ_CORE_DEPENDENCY);
+    projectOperations.addDependency(type.getModule(), SPRING_TEST_DEPENDENCY);
 
     // Add plugins if needed
-    projectOperations.addBuildPlugin(entity.getModule(), MAVEN_SUREFIRE_PLUGIN);
+    projectOperations.addBuildPlugin(type.getModule(), MAVEN_SUREFIRE_PLUGIN);
 
-    // Add @RooUnitTest to source file
-    AnnotationMetadataBuilder rooUnitTestAnnotation =
-        new AnnotationMetadataBuilder(RooJavaType.ROO_JPA_UNIT_TEST);
-    rooUnitTestAnnotation.addClassAttribute("targetClass", entity);
+    // Add @RooRepositoryJpaIntegrationTest to source file
+    AnnotationMetadataBuilder rooIntegrationTestAnnotation =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_REPOSITORY_JPA_INTEGRATION_TEST);
+    rooIntegrationTestAnnotation.addClassAttribute("targetClass", type);
+    rooIntegrationTestAnnotation.addClassAttribute("dodConfigurationClass",
+        creator.getDataOnDemandConfiguration());
+    rooIntegrationTestAnnotation.addClassAttribute("dodClass",
+        creator.getDataOnDemand(managedEntity));
 
+    // Create integration test class
     final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
         new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name,
             PhysicalTypeCategory.CLASS);
-    cidBuilder.addAnnotation(rooUnitTestAnnotation);
+    cidBuilder.addAnnotation(rooIntegrationTestAnnotation);
 
+    // Write changes to disk
     typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-  }
-
-  @Override
-  public boolean isIntegrationTestCreationAvailable() {
-    return false;
-  }
-
-  @Override
-  public void createIntegrationTest(JavaType projectType) {
-    throw new IllegalArgumentException("Integration test operations are not "
-        + "available for JPA entities.");
   }
 
   /**

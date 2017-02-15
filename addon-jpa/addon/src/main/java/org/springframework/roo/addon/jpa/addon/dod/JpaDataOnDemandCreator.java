@@ -4,7 +4,9 @@ import static org.springframework.roo.model.JpaJavaType.ENTITY;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -26,7 +28,6 @@ import org.springframework.roo.classpath.details.annotations.ClassAttributeValue
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
@@ -36,6 +37,7 @@ import org.springframework.roo.project.DependencyType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 
 /**
  * Implementation of {@link DataOnDemandOperations}, based on old 
@@ -76,8 +78,13 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
   }
 
   @Override
-  public void createDataOnDemand(JavaType entity) {
+  public JavaType createDataOnDemand(JavaType entity) {
     Validate.notNull(entity, "Entity to produce a data on demand provider for is required");
+
+    JavaType dodClass = getDataOnDemand(entity);
+    if (dodClass != null) {
+      return dodClass;
+    }
 
     // Create the JavaType for DoD class
     JavaType name =
@@ -88,39 +95,37 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
     Validate.notNull(path, "Location of the new data on demand provider is required");
 
     // Create DoD configuration class
-    addDataOnDemandConfigurationClass(path, name.getPackage());
+    createDataOnDemandConfiguration(entity.getModule());
 
     // Create entity factories for the given entity and its related entities
-    newEntityFactory(entity, path, name.getPackage());
+    createEntityFactory(entity);
 
     // Create data on demand class
-    newDataOnDemandClass(entity, name);
+    return newDataOnDemandClass(entity, name);
   }
 
-  /**
-   * Creates a DoD configuration class if it still doesn't exist in provided
-   * {@link LogicalPath} and with the provided {@link JavaPackage}. This class 
-   * will be in carry of injecting every DataOnDemand class into the Spring 
-   * context when required.
-   * 
-   * @param path the {@link LogicalPath} where test classes are going to be created.
-   * @param the {@link JavaPackage} to use for creating the configuration class.
-   */
-  public void addDataOnDemandConfigurationClass(LogicalPath path, JavaPackage javaPackage) {
+  @Override
+  public JavaType createDataOnDemandConfiguration(String moduleName) {
 
     // Add spring-boot-test dependency with test scope
-    projectOperations.addDependency(path.getModule(), SPRING_BOOT_TEST_DEPENDENCY);
+    projectOperations.addDependency(moduleName, SPRING_BOOT_TEST_DEPENDENCY);
+
+    // Get Pom
+    final Pom module = projectOperations.getPomFromModuleName(moduleName);
+
+    // Get test Path for module
+    final LogicalPath path = LogicalPath.getInstance(Path.SRC_TEST_JAVA, moduleName);
 
     // Create the JavaType for the configuration class
     JavaType dodConfigurationClass =
         new JavaType(String.format("%s.DataOnDemandConfiguration",
-            javaPackage.getFullyQualifiedPackageName()), path.getModule());
+            typeLocationService.getTopLevelPackageForModule(module), moduleName));
 
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(dodConfigurationClass, path);
     if (metadataService.get(declaredByMetadataId) != null) {
       // The file already exists
-      return;
+      return new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId).getName();
     }
 
     // Create the CID builder
@@ -131,7 +136,131 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
         RooJavaType.ROO_JPA_DATA_ON_DEMAND_CONFIGURATION));
 
     // Write changes to disk
-    typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    final ClassOrInterfaceTypeDetails configDodCid = cidBuilder.build();
+    typeManagementService.createOrUpdateTypeOnDisk(configDodCid);
+
+    return configDodCid.getName();
+  }
+
+  @Override
+  public JavaType createEntityFactory(JavaType currentEntity) {
+    Validate.notNull(currentEntity, "Entity to produce a data on demand provider for is required");
+
+    // Verify the requested entity actually exists as a class and is not
+    // abstract
+    final ClassOrInterfaceTypeDetails cid = getEntityDetails(currentEntity);
+    Validate.isTrue(cid.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS,
+        "Type %s is not a class", currentEntity.getFullyQualifiedTypeName());
+    Validate.isTrue(!Modifier.isAbstract(cid.getModifier()), "Type %s is abstract",
+        currentEntity.getFullyQualifiedTypeName());
+
+    // Check if the requested entity is a JPA @Entity
+    final MemberDetails memberDetails =
+        memberDetailsScanner.getMemberDetails(JpaDataOnDemandCreator.class.getName(), cid);
+    final AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
+    Validate.isTrue(entityAnnotation != null, "Type %s must be a JPA entity type",
+        currentEntity.getFullyQualifiedTypeName());
+
+    // Get related entities
+    List<JavaType> entities = getEntityAndRelatedEntitiesList(currentEntity);
+
+    // Get test Path for module
+    final LogicalPath path = LogicalPath.getInstance(Path.SRC_TEST_JAVA, currentEntity.getModule());
+
+    JavaType currentEntityFactory = null;
+    for (JavaType entity : entities) {
+
+      // Create the JavaType for the configuration class
+      JavaType factoryClass =
+          new JavaType(String.format("%s.%sFactory", entity.getPackage()
+              .getFullyQualifiedPackageName(), entity.getSimpleTypeName()), entity.getModule());
+
+      final String declaredByMetadataId =
+          PhysicalTypeIdentifier.createIdentifier(factoryClass, path);
+      if (metadataService.get(declaredByMetadataId) != null) {
+        // The file already exists
+        continue;
+      }
+
+      // Create the CID builder
+      ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+          new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC,
+              factoryClass, PhysicalTypeCategory.CLASS);
+
+      // Add @RooEntityFactory annotation
+      AnnotationMetadataBuilder entityFactoryAnnotation =
+          new AnnotationMetadataBuilder(RooJavaType.ROO_JPA_ENTITY_FACTORY);
+      entityFactoryAnnotation.addClassAttribute("entity", entity);
+      cidBuilder.addAnnotation(entityFactoryAnnotation);
+
+      // Write changes to disk
+      typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+
+      // First entity is current entity
+      if (currentEntityFactory == null) {
+        currentEntityFactory = cidBuilder.getName();
+      }
+    }
+
+    return currentEntityFactory;
+  }
+
+  @Override
+  public JavaType getDataOnDemand(JavaType entity) {
+    Set<ClassOrInterfaceTypeDetails> dataOnDemandCids =
+        typeLocationService
+            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_DATA_ON_DEMAND);
+    JavaType typeToReturn = null;
+    for (ClassOrInterfaceTypeDetails cid : dataOnDemandCids) {
+      if (entity.equals((JavaType) cid.getAnnotation(RooJavaType.ROO_JPA_DATA_ON_DEMAND)
+          .getAttribute("entity").getValue())) {
+        typeToReturn = cid.getName();
+        break;
+      }
+    }
+    return typeToReturn;
+  }
+
+  @Override
+  public JavaType getDataOnDemandConfiguration() {
+    Set<JavaType> dodConfigurationTypes =
+        typeLocationService
+            .findTypesWithAnnotation(RooJavaType.ROO_JPA_DATA_ON_DEMAND_CONFIGURATION);
+    if (!dodConfigurationTypes.isEmpty()) {
+      return dodConfigurationTypes.iterator().next();
+    }
+    return null;
+  }
+
+  @Override
+  public JavaType getDataOnDemandConfiguration(String moduleName) {
+    Set<JavaType> dodConfigurationTypes =
+        typeLocationService
+            .findTypesWithAnnotation(RooJavaType.ROO_JPA_DATA_ON_DEMAND_CONFIGURATION);
+    Iterator<JavaType> it = dodConfigurationTypes.iterator();
+    while (it.hasNext()) {
+      JavaType dodConfigType = it.next();
+      if (dodConfigType.getModule().equals(moduleName)) {
+        return dodConfigType;
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public JavaType getEntityFactory(JavaType entity) {
+    Set<ClassOrInterfaceTypeDetails> dataOnDemandCids =
+        typeLocationService
+            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY_FACTORY);
+    JavaType typeToReturn = null;
+    for (ClassOrInterfaceTypeDetails cid : dataOnDemandCids) {
+      if (entity.equals((JavaType) cid.getAnnotation(RooJavaType.ROO_JPA_ENTITY_FACTORY)
+          .getAttribute("entity").getValue())) {
+        typeToReturn = cid.getName();
+        break;
+      }
+    }
+    return typeToReturn;
   }
 
   /**
@@ -141,7 +270,7 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
    * @param entity to produce a DoD provider for
    * @param name the name of the new DoD class
    */
-  public void newDataOnDemandClass(JavaType entity, JavaType name) {
+  private JavaType newDataOnDemandClass(JavaType entity, JavaType name) {
     Validate.notNull(entity, "Entity to produce a data on demand provider for is required");
     Validate.notNull(name, "Name of the new data on demand provider is required");
 
@@ -168,10 +297,9 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
 
     // Everything is OK to proceed
     final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
-
     if (metadataService.get(declaredByMetadataId) != null) {
       // The file already exists
-      return;
+      return new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId).getName();
     }
 
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -185,51 +313,11 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
             PhysicalTypeCategory.CLASS);
     cidBuilder.setAnnotations(annotations);
 
-    typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-  }
+    // Write changes on disk
+    final ClassOrInterfaceTypeDetails dodClassCid = cidBuilder.build();
+    typeManagementService.createOrUpdateTypeOnDisk(dodClassCid);
 
-  /**
-   * Creates a new entity factory class for the entity and its related entities 
-   * (one factory for each entity). These factories are used for creating 
-   * transient instances to use in tests. Silently returns if the entity 
-   * factory class already exists.
-   * 
-   * @param entity the {@link JavaType} to produce a factory for.
-   * @param path the {@link LogicalPath} where test classes are going to be created.
-   * @param javaPackage the {@link JavaPackage} used to generate the entity factory.
-   */
-  public void newEntityFactory(JavaType currentEntity, LogicalPath path, JavaPackage javaPackage) {
-
-    // Get related entities
-    List<JavaType> entities = getEntityAndRelatedEntitiesList(currentEntity);
-    for (JavaType entity : entities) {
-
-      // Create the JavaType for the configuration class
-      JavaType factoryClass =
-          new JavaType(String.format("%s.%sFactory", javaPackage.getFullyQualifiedPackageName(),
-              entity.getSimpleTypeName()), entity.getModule());
-
-      final String declaredByMetadataId =
-          PhysicalTypeIdentifier.createIdentifier(factoryClass, path);
-      if (metadataService.get(declaredByMetadataId) != null) {
-        // The file already exists
-        continue;
-      }
-
-      // Create the CID builder
-      ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-          new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC,
-              factoryClass, PhysicalTypeCategory.CLASS);
-
-      // Add @RooEntityFactory annotation
-      AnnotationMetadataBuilder entityFactoryAnnotation =
-          new AnnotationMetadataBuilder(RooJavaType.ROO_JPA_ENTITY_FACTORY);
-      entityFactoryAnnotation.addClassAttribute("entity", entity);
-      cidBuilder.addAnnotation(entityFactoryAnnotation);
-
-      // Write changes to disk
-      typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-    }
+    return cid.getName();
   }
 
   /**

@@ -68,6 +68,8 @@ public final class SpringJavaType {
   public static final JavaType CREATED_DATE = new JavaType(
       "org.springframework.data.annotation.CreatedDate");
   public static final JavaType DATA_ID = new JavaType("org.springframework.data.annotation.Id");
+  public static final JavaType DATA_JPA_TEST = new JavaType(
+      "org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest");
   public static final JavaType DATE_TIME_FORMAT = new JavaType(
       "org.springframework.format.annotation.DateTimeFormat");
   public static final JavaType DELETE_MAPPING = new JavaType(
@@ -211,6 +213,8 @@ public final class SpringJavaType {
       "org.springframework.beans.SimpleTypeConverter");
   public static final JavaType SPRING_BOOT_TEST = new JavaType(
       "org.springframework.boot.test.context.SpringBootTest");
+  public static final JavaType SPRING_RUNNER = new JavaType(
+      "org.springframework.test.context.junit4.SpringRunner");
   public static final JavaType STRING_UTILS = new JavaType("org.springframework.util.StringUtils");
   public static final JavaType TEST_CONFIGURATION = new JavaType(
       "org.springframework.boot.test.context.TestConfiguration");

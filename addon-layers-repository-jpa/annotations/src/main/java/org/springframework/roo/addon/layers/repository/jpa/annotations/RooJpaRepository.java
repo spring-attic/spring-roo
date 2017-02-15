@@ -5,6 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.roo.addon.layers.repository.jpa.annotations.finder.RooFinder;
+
 /**
  * Marks the annotated type as a Spring Data JPA repository interface. For the
  * time being, we don't allow users to customise the names of repository methods

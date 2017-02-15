@@ -1,8 +1,9 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
-import org.springframework.roo.addon.layers.repository.jpa.annotations.RooFinder;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepository;
+import org.springframework.roo.addon.layers.repository.jpa.annotations.finder.RooFinder;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
@@ -29,6 +30,16 @@ public class RepositoryJpaAnnotationValues extends AbstractAnnotationValues {
    */
   public RepositoryJpaAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
     super(governorPhysicalTypeMetadata, RooJavaType.ROO_REPOSITORY_JPA);
+    AutoPopulationUtils.populate(this, annotationMetadata);
+  }
+
+  /**
+   * Constructor
+   *
+   * @param cid the {@link ClassOrInterfaceTypeDetails} to parse (required)
+   */
+  public RepositoryJpaAnnotationValues(final ClassOrInterfaceTypeDetails cid) {
+    super(cid, RooJavaType.ROO_REPOSITORY_JPA);
     AutoPopulationUtils.populate(this, annotationMetadata);
   }
 
