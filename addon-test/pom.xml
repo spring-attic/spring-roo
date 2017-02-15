@@ -13,11 +13,6 @@
     <description>Integration of JUnit integration tests in the target project.</description>
     
     <dependencies>
-        <!-- Annotations dependency -->
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.test.annotations</artifactId>
-        </dependency>
         <!-- Test -->
         <dependency>
             <groupId>junit</groupId>

@@ -48,11 +48,6 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.security.annotations</artifactId>
         </dependency>
-        <!-- Roo Test Annotations -->
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.test.annotations</artifactId>
-        </dependency>
         <!-- Roo Web MVC Controller Annotations -->
         <dependency>
             <groupId>org.springframework.roo</groupId>
