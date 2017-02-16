@@ -184,6 +184,12 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // Ensure there's a no-arg constructor (explicit or default)
     builder.addConstructor(getNoArgConstructor());
 
+    // Include necessary static fields
+    if (!isReadOnly()) {
+      ensureGovernorHasField(new FieldMetadataBuilder(getIterableToAddCantBeNullConstant()));
+      ensureGovernorHasField(new FieldMetadataBuilder(getIterableToRemoveCantBeNullConstant()));
+    }
+
     // Manage relations
 
     MethodMetadata addMethod = null;
@@ -233,10 +239,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       // of a readOnly entity.
       if (!isReadOnly()) {
 
-        // Include necessary static fields
-        ensureGovernorHasField(new FieldMetadataBuilder(getIterableToAddCantBeNullConstant()));
-        ensureGovernorHasField(new FieldMetadataBuilder(getIterableToRemoveCantBeNullConstant()));
-
         // Prepare methods.
         addMethodName = getAddMethodName(field);
         removeMethodName = getRemoveMethodName(field);
@@ -250,7 +252,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
         ensureGovernorHasMethod(new MethodMetadataBuilder(addMethod));
         ensureGovernorHasMethod(new MethodMetadataBuilder(removeMethod));
       }
-
 
       relationTypeAttribute =
           field.getAnnotation(RooJavaType.ROO_JPA_RELATION).getAttribute("type");
