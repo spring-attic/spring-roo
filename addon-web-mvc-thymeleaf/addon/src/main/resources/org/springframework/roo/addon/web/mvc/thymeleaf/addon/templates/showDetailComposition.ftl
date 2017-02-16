@@ -105,7 +105,7 @@
           	       <span data-th-text="${r"#{"}label_back}">Back</span>
     	          </a>
               </div>
-              <div class="pull-right">
+              <div class="pull-right" style="border: 1px solid red;">
         	     <a id="${entityName}_edit" href="edit.html" class="btn btn-primary"
         	        data-th-title="${r"#{"}label_goEdit}"
         	        data-th-href="${r"${"}detailItemLink.to('editForm')}"

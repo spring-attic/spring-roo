@@ -43,7 +43,7 @@
               <#else>
                 <div class="form-group has-error has-feedback" data-z="${detail.z}" id="${detail.entityItemId}"
                     data-th-class="form-group" data-th-with="select2ControllerLink=${r"${@"}linkBuilder.of('${dconfig.select2ControllerName}')}">
-                    <div class="col-md-6">
+                    <div class="col-md-6 col-md-offset-3">
                       <select id="${detail.fieldName}" name="${detail.fieldName}Ids"
                         class="form-control dropdown-select-ajax"
                         data-allow-clear="true"
@@ -64,12 +64,12 @@
 
               <!-- buttons form -->
               <div class="form-group">
-                <div class="col-md-9 col-md-offset-3">
+                <div class="col-md-6 col-md-offset-3">
+                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_save}">Save</button>
                     <button type="reset" class="btn btn-default"
                       onclick="location.href='list.html'"
                       data-th-onclick="'location.href=\'' + @{${"${"}collectionLink.to('list')}} + '\''"
                       data-th-text="${r"#{"}label_reset}">Cancel</button>
-                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit}">Save</button>
                 </div>
               </div>
 

@@ -114,7 +114,7 @@
                       data-th-text="${r"#{"}label_reset}">Cancel</button>
                   </div>
                   <div class="pull-right">
-                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit}" >Save</button>
+                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_save}" >Save</button>
                   </div>
                 </div>
               </div>

@@ -67,6 +67,15 @@
               </#list>
             </#if>
 
+          <div class="clearfix">
+            <div class="pull-right">
+             <a id="${entityName}_edit" href="edit.html" class="btn btn-primary"
+                 data-th-title="${r"#{"}label_goEdit}"
+                 data-th-href="${"${"}@linkBuilder.of('${mvcItemControllerName}').to('editForm').with('${modelAttributeName}', ${modelAttributeName}.${identifierField})}"
+                 data-th-text="${r"#{"}label_edit}">Edit</a>
+            </div>
+          </div>
+
           <#if detailsLevels?size != 0>
           <!-- details -->
             <#list detailsLevels as detailsLevel>
@@ -83,16 +92,9 @@
   	             <span data-th-text="${r"#{"}label_back}">Back</span>
   	          </a>
             </div>
-            <div class="pull-right">
-      	       <a id="${entityName}_edit" href="edit.html" class="btn btn-primary"
-      	           data-th-title="${r"#{"}label_goEdit}"
-      	           data-th-href="${"${"}@linkBuilder.of('${mvcItemControllerName}').to('editForm').with('${modelAttributeName}', ${modelAttributeName}.${identifierField})}"
-      	           data-th-text="${r"#{"}label_edit}">Edit</a>
-            </div>
           </div>
-
         </div>
-        
+
       </section>
       <!-- /CONTENT -->
   </div>

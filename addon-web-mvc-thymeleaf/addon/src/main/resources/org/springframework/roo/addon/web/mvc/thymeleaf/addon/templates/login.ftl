@@ -92,8 +92,8 @@
                 </div>
                 <div class="form-group">
                  <div class="col-md-9 col-md-offset-3">
-                  <button type="reset" class="btn btn-default" data-th-text="${r"#{"}label_reset}">Cancel</button>
                   <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit}">Accept</button>
+                  <button type="reset" class="btn btn-default" data-th-text="${r"#{"}label_reset}">Cancel</button>
                  </div>
                 </div>
                </fieldset>

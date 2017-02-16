@@ -132,11 +132,11 @@
               <!-- buttons form -->
               <div class="form-group">
                 <div class="col-md-9 col-md-offset-3">
+                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_save}">Save</button>
                     <button type="reset" class="btn btn-default"
                       onclick="location.href='list.html'"
                       data-th-onclick="'location.href=\'' + @{${"${"}collectionLink.to('list')}} + '\''"
                       data-th-text="${r"#{"}label_reset}">Cancel</button>
-                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit}">Save</button>
                 </div>
               </div>
 
