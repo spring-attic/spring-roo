@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.test.addon;
+package org.springframework.roo.addon.test;
 
 import org.springframework.roo.model.JavaType;
 

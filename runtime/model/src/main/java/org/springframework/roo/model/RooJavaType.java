@@ -40,8 +40,6 @@ public final class RooJavaType {
       "org.springframework.roo.addon.gwt.RooGwtUnmanagedRequest");
   public static final JavaType ROO_IDENTIFIER = new JavaType(
       "org.springframework.roo.addon.jpa.annotations.identifier.RooIdentifier");
-  public static final JavaType ROO_INTEGRATION_TEST = new JavaType(
-      "org.springframework.roo.addon.test.annotations.RooIntegrationTest");
   public static final JavaType ROO_JAVA_BEAN = new JavaType(
       "org.springframework.roo.addon.javabean.annotations.RooJavaBean");
   @Deprecated
@@ -113,9 +111,6 @@ public final class RooJavaType {
   public static final JavaType ROO_JPA_REPOSITORY_CONFIGURATION =
       new JavaType(
           "org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryConfiguration");
-  public static final JavaType ROO_REPOSITORY_JPA_INTEGRATION_TEST =
-      new JavaType(
-          "org.springframework.roo.addon.layers.repository.jpa.annotations.test.RooRepositoryJpaIntegrationTest");
   public static final JavaType ROO_FINDER = new JavaType(
       "org.springframework.roo.addon.layers.repository.jpa.annotations.finder.RooFinder");
   public static final JavaType ROO_DTO = new JavaType(
@@ -126,8 +121,6 @@ public final class RooJavaType {
       "org.springframework.roo.addon.layers.service.annotations.RooServiceImpl");
   public static final JavaType ROO_JPA_AUDIT = new JavaType(
       "org.springframework.roo.addon.jpa.annotations.audit.RooJpaAudit");
-  public static final JavaType ROO_JPA_UNIT_TEST = new JavaType(
-      "org.springframework.roo.addon.jpa.annotations.test.RooJpaUnitTest");
   public static final JavaType ROO_CONTROLLER = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.RooController");
   public static final JavaType ROO_DETAIL = new JavaType(
@@ -186,6 +179,19 @@ public final class RooJavaType {
       "org.springframework.roo.addon.security.annotations.RooSecurityAuthorization");
   public static final JavaType ROO_SECURITY_AUTHORIZATIONS = new JavaType(
       "org.springframework.roo.addon.security.annotations.RooSecurityAuthorizations");
+
+  // Test classes annotations
+  public static final JavaType ROO_JPA_UNIT_TEST = new JavaType(
+      "org.springframework.roo.addon.jpa.annotations.test.RooJpaUnitTest");
+  public static final JavaType ROO_REPOSITORY_JPA_INTEGRATION_TEST =
+      new JavaType(
+          "org.springframework.roo.addon.layers.repository.jpa.annotations.test.RooRepositoryJpaIntegrationTest");
+  public static final JavaType ROO_JSON_CONTROLLER_INTEGRATION_TEST =
+      new JavaType(
+          "org.springframework.roo.addon.web.mvc.controller.annotations.test.RooJsonControllerIntegrationTest");
+  public static final JavaType ROO_THYMELEAF_CONTROLLER_INTEGRATION_TEST =
+      new JavaType(
+          "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.test.RooThymeleafControllerIntegrationTest");
 
   /**
    * Constructor is private to prevent instantiation

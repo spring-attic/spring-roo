@@ -71,8 +71,20 @@ web mvc detail --all --responseType THYMELEAF
 
 web mvc language --code es
 
-// Deactivated until finish changes of DoD and tests
-//test integration --class repository:~.PetRepository
-//test integration --class repository:~.VetRepository
-//test integration --class repository:~.OwnerRepository
-//test integration --class repository:~.VisitRepository
+// Generating unitary tests for all entities
+test unit --class model:~.Owner
+test unit --class model:~.Pet
+test unit --class model:~.Vet
+test unit --class model:~.Visit
+
+// Repository integration tests
+test integration --class repository:~.VetRepository
+test integration --class repository:~.OwnerRepository
+test integration --class repository:~.VisitRepository
+test integration --class repository:~.PetRepository
+
+// Controller integration tests
+//test integration --class web:~.VetsThymeleafCollectionController
+//test integration --class web:~.PetsThymeleafCollectionController
+//test integration --class web:~.OwnersJsonCollectionController
+//test integration --class web:~.VisitsJsonCollectionController

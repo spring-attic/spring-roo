@@ -14,7 +14,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
-import org.springframework.roo.addon.test.addon.providers.DataOnDemandCreatorProvider;
+import org.springframework.roo.addon.test.providers.DataOnDemandCreatorProvider;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -88,7 +88,8 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
 
     // Create the JavaType for DoD class
     JavaType name =
-        new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand", entity.getModule());
+        new JavaType(entity.getPackage().getFullyQualifiedPackageName().concat(".dod.")
+            .concat(entity.getSimpleTypeName()).concat("DataOnDemand"), entity.getModule());
 
     // Obatain test path for the module of the new class
     final LogicalPath path = LogicalPath.getInstance(Path.SRC_TEST_JAVA, name.getModule());
@@ -118,7 +119,7 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
 
     // Create the JavaType for the configuration class
     JavaType dodConfigurationClass =
-        new JavaType(String.format("%s.DataOnDemandConfiguration",
+        new JavaType(String.format("%s.dod.DataOnDemandConfiguration",
             typeLocationService.getTopLevelPackageForModule(module), moduleName));
 
     final String declaredByMetadataId =
@@ -172,7 +173,7 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
 
       // Create the JavaType for the configuration class
       JavaType factoryClass =
-          new JavaType(String.format("%s.%sFactory", entity.getPackage()
+          new JavaType(String.format("%s.dod.%sFactory", entity.getPackage()
               .getFullyQualifiedPackageName(), entity.getSimpleTypeName()), entity.getModule());
 
       final String declaredByMetadataId =

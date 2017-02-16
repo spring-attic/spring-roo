@@ -81,6 +81,7 @@ public final class JdkJavaType {
   public static final JavaType GREGORIAN_CALENDAR = new JavaType(GregorianCalendar.class);
   public static final JavaType HASH_SET = new JavaType(HashSet.class);
   public static final JavaType ITERATOR = new JavaType(Iterator.class);
+  public static final JavaType ILLEGAL_STATE_EXCEPTION = new JavaType(IllegalStateException.class);
 
   private static final List<String> javaLangSimpleTypeNames = new ArrayList<String>();
   private static final List<String> javaLangTypes = new ArrayList<String>();
@@ -98,6 +99,7 @@ public final class JdkJavaType {
   public static final JavaType SERIALIZABLE = new JavaType(Serializable.class);
   public static final JavaType SET = new JavaType(Set.class);
   public static final JavaType SIMPLE_DATE_FORMAT = new JavaType(SimpleDateFormat.class);
+  public static final JavaType STRING_BUILDER = new JavaType(StringBuilder.class);
   public static final JavaType STRUCT = new JavaType(Struct.class);
   public static final JavaType SUPPRESS_WARNINGS = new JavaType(SuppressWarnings.class);
   // java.sql

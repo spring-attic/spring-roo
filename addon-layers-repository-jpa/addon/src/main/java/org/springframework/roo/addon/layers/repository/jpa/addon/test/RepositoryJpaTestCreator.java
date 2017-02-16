@@ -15,8 +15,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaAnnotationValues;
-import org.springframework.roo.addon.test.addon.providers.DataOnDemandCreatorProvider;
-import org.springframework.roo.addon.test.addon.providers.TestCreatorProvider;
+import org.springframework.roo.addon.test.providers.DataOnDemandCreatorProvider;
+import org.springframework.roo.addon.test.providers.TestCreatorProvider;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -24,16 +24,11 @@ import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.project.Dependency;
-import org.springframework.roo.project.DependencyScope;
-import org.springframework.roo.project.DependencyType;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -50,19 +45,8 @@ public class RepositoryJpaTestCreator implements TestCreatorProvider {
 
   protected final static Logger LOGGER = HandlerUtils.getLogger(RepositoryJpaTestCreator.class);
 
-  private static final Dependency JUNIT_DEPENDENCY = new Dependency("junit", "junit", null,
-      DependencyType.JAR, DependencyScope.TEST);
-  private static final Dependency ASSERTJ_CORE_DEPENDENCY = new Dependency("org.assertj",
-      "assertj-core", null, DependencyType.JAR, DependencyScope.TEST);
-  private static final Dependency SPRING_TEST_DEPENDENCY = new Dependency("org.springframework",
-      "spring-test", null, DependencyType.JAR, DependencyScope.TEST);
-  private static final Plugin MAVEN_SUREFIRE_PLUGIN = new Plugin("org.apache.maven.plugins",
-      "maven-surefire-plugin", null);
-
   private BundleContext context;
 
-  @Reference
-  private MemberDetailsScanner memberDetailsScanner;
   @Reference
   private MetadataService metadataService;
   @Reference
@@ -82,6 +66,13 @@ public class RepositoryJpaTestCreator implements TestCreatorProvider {
 
   protected void deactivate(final ComponentContext context) {
     this.context = null;
+  }
+
+  @Override
+  public List<JavaType> getValidTypes() {
+    List<JavaType> validTypes = new ArrayList<JavaType>();
+    validTypes.add(RooJavaType.ROO_REPOSITORY_JPA);
+    return validTypes;
   }
 
   @Override
@@ -130,11 +121,11 @@ public class RepositoryJpaTestCreator implements TestCreatorProvider {
     List<DataOnDemandCreatorProvider> dodCreators =
         getValidDataOnDemandCreatorsForType(managedEntity);
     Validate.isTrue(!dodCreators.isEmpty(),
-        "Couldn't find any 'DataOnDemandCreatorProvider' for JPA entities.");
+        "Couldn't find any 'DataOnDemandCreatorProvider' for JPA repositories.");
     Validate
         .isTrue(
             dodCreators.size() == 1,
-            "More than 1 valid 'DataOnDemandCreatorProvider' found for JPA entities. %s can't decide which one to use.",
+            "More than 1 valid 'DataOnDemandCreatorProvider' found for JPA repositories. %s can't decide which one to use.",
             this.getClass().getName());
     DataOnDemandCreatorProvider creator = dodCreators.get(0);
     creator.createDataOnDemand(managedEntity);
@@ -148,14 +139,6 @@ public class RepositoryJpaTestCreator implements TestCreatorProvider {
       // The file already exists
       return;
     }
-
-    // Add dependencies if needed
-    projectOperations.addDependency(type.getModule(), JUNIT_DEPENDENCY);
-    projectOperations.addDependency(type.getModule(), ASSERTJ_CORE_DEPENDENCY);
-    projectOperations.addDependency(type.getModule(), SPRING_TEST_DEPENDENCY);
-
-    // Add plugins if needed
-    projectOperations.addBuildPlugin(type.getModule(), MAVEN_SUREFIRE_PLUGIN);
 
     // Add @RooRepositoryJpaIntegrationTest to source file
     AnnotationMetadataBuilder rooIntegrationTestAnnotation =
@@ -198,7 +181,7 @@ public class RepositoryJpaTestCreator implements TestCreatorProvider {
         }
 
       } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load DataOnDemandCreatorProvider on TestOperationsImpl.");
+        LOGGER.warning("Cannot load DataOnDemandCreatorProvider on RepositoryJpaTestCreator.");
         return null;
       }
     }

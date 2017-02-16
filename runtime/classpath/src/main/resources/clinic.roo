@@ -126,9 +126,14 @@ test unit --class ~.domain.Pet
 test unit --class ~.domain.Vet
 test unit --class ~.domain.Visit
 
-// Deactivated until finish changes of DoD and tests
-// Generate integration test
-//test integration --class ~.repository.VetRepository
-//test integration --class ~.repository.OwnerRepository
-//test integration --class ~.repository.VisitRepository
-//test integration --class ~.repository.PetRepository
+// Repository integration tests
+test integration --class ~.repository.VetRepository
+test integration --class ~.repository.OwnerRepository
+test integration --class ~.repository.VisitRepository
+test integration --class ~.repository.PetRepository
+
+// Controller integration tests
+test integration --class ~.web.OwnersCollectionJsonController
+test integration --class ~.web.PetsItemJsonController
+test integration --class ~.web.VetsCollectionThymeleafController
+test integration --class ~.web.VisitsItemThymeleafController

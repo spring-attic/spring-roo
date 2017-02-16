@@ -9,6 +9,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
+import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -128,15 +129,20 @@ public class RepositoryJpaIntegrationTestMetadataProviderImpl extends
     }
 
     // Get entity identifier info
-    JavaType identifierType =
-        getPersistenceMemberLocator().getIdentifierType(repositoryMetadata.getEntity());
+    JavaType entity = repositoryMetadata.getEntity();
+    JavaType identifierType = getPersistenceMemberLocator().getIdentifierType(entity);
     JavaSymbolName identifierAccessorMethodName =
-        getPersistenceMemberLocator().getIdentifierAccessor(repositoryMetadata.getEntity())
-            .getMethodName();
+        getPersistenceMemberLocator().getIdentifierAccessor(entity).getMethodName();
+
+    // Get entity plural
+    String entityPlural = getPluralService().getPlural(entity);
+
+    // Get repository default return type
+    JavaType defaultReturnType = repositoryMetadata.getDefaultReturnType();
 
     return new RepositoryJpaIntegrationTestMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, annotationValues, jpaDetachableRepositoryClass,
-        repositoryMetadata, identifierType, identifierAccessorMethodName);
+        identifierType, identifierAccessorMethodName, entityPlural, entity, defaultReturnType);
   }
 
   public String getProvidesType() {
@@ -146,4 +152,9 @@ public class RepositoryJpaIntegrationTestMetadataProviderImpl extends
   protected PersistenceMemberLocator getPersistenceMemberLocator() {
     return this.serviceManager.getServiceInstance(this, PersistenceMemberLocator.class);
   }
+
+  protected PluralService getPluralService() {
+    return this.serviceManager.getServiceInstance(this, PluralService.class);
+  }
+
 }

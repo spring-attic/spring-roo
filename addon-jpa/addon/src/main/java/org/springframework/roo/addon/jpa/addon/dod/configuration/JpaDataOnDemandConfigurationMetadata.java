@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.jpa.addon.dod.configuration;
 
 import java.lang.reflect.Modifier;
-import java.util.Set;
+import java.util.SortedSet;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -70,7 +70,8 @@ public class JpaDataOnDemandConfigurationMetadata extends
    * @param dataOnDemandTypes
    */
   public JpaDataOnDemandConfigurationMetadata(final String identifier, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalTypeMetadata, final Set<JavaType> dataOnDemandTypes) {
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+      final SortedSet<JavaType> dataOnDemandTypes) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.isTrue(isValid(identifier),
         "Metadata identification string '%s' does not appear to be a valid", identifier);
@@ -111,6 +112,9 @@ public class JpaDataOnDemandConfigurationMetadata extends
         .getMethodName(), ENTITY_MANAGER_FIELD_NAME);
     constructorBuilder.setBodyBuilder(bodyBuilder);
     constructorBuilder.setModifier(Modifier.PUBLIC);
+
+    // Add @Autowired
+    constructorBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.AUTOWIRED));
 
     return constructorBuilder;
   }

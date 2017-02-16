@@ -132,6 +132,10 @@ public final class SpringJavaType {
   public static final JavaType MEDIA_TYPE = new JavaType("org.springframework.http.MediaType");
   public static final JavaType MESSAGE_SOURCE = new JavaType(
       "org.springframework.context.MessageSource");
+  public static final JavaType MOCK_BEAN = new JavaType(
+      "org.springframework.boot.test.mock.mockito.MockBean");
+  public static final JavaType MOCK_MVC = new JavaType(
+      "org.springframework.test.web.servlet.MockMvc");
   public static final JavaType MOCK_STATIC_ENTITY_METHODS = new JavaType(
       "org.springframework.mock.staticmock.MockStaticEntityMethods");
   public static final JavaType MODEL = new JavaType("org.springframework.ui.Model");

@@ -2,7 +2,7 @@ package org.springframework.roo.addon.jpa.addon.dod.configuration;
 
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_DATA_ON_DEMAND_CONFIGURATION;
 
-import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 
@@ -112,7 +112,7 @@ public class JpaDataOnDemandConfigurationMetadataProviderImpl extends
       final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final String itdFilename) {
 
-    Set<JavaType> dataOnDemandTypes = new TreeSet<JavaType>();
+    SortedSet<JavaType> dataOnDemandTypes = new TreeSet<JavaType>();
     dataOnDemandTypes.addAll(getTypeLocationService().findTypesWithAnnotation(
         RooJavaType.ROO_JPA_DATA_ON_DEMAND));
 

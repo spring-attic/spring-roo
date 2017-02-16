@@ -72,6 +72,9 @@ public class SpringletsJavaType {
   public static final JavaType SPRINGLETS_MVC_URI_COMPONENTS_BUILDER = new JavaType(
       "io.springlets.web.mvc.util.SpringletsMvcUriComponentsBuilder");
 
+  public static final JavaType SPRINGLETS_WEB_MVC_TEST = new JavaType(
+      "io.springlets.boot.test.autoconfigure.web.servlet.SpringletsWebMvcTest");
+
   public static final JavaType SPRINGLETS_JMS_SENDING_SERVICE = new JavaType(
       "io.springlets.jms.JmsMessageSenderService");
 

@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.test.addon;
+package org.springframework.roo.addon.test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,10 +11,18 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.test.addon.providers.TestCreatorProvider;
+import org.springframework.roo.addon.test.providers.TestCreatorProvider;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.DependencyScope;
+import org.springframework.roo.project.DependencyType;
+import org.springframework.roo.project.Plugin;
+import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Element;
 
 /**
  * Provides convenience methods that can be used to create unit and integration tests.
@@ -29,10 +37,21 @@ public class TestOperationsImpl implements TestOperations {
 
   protected final static Logger LOGGER = HandlerUtils.getLogger(TestCommands.class);
 
+  private static final Dependency JUNIT_DEPENDENCY = new Dependency("junit", "junit", null,
+      DependencyType.JAR, DependencyScope.TEST);
+  private static final Dependency ASSERTJ_CORE_DEPENDENCY = new Dependency("org.assertj",
+      "assertj-core", null, DependencyType.JAR, DependencyScope.TEST);
+  private static final Dependency SPRING_TEST_DEPENDENCY = new Dependency("org.springframework",
+      "spring-test", null, DependencyType.JAR, DependencyScope.TEST);
+  private static final Plugin MAVEN_SUREFIRE_PLUGIN = new Plugin("org.apache.maven.plugins",
+      "maven-surefire-plugin", null);
+
   private BundleContext context;
 
   @Reference
   private TypeLocationService typeLocationService;
+  @Reference
+  private ProjectOperations projectOperations;
 
   // TestCreatorProvider implementations
   private List<TestCreatorProvider> testCreators = new ArrayList<TestCreatorProvider>();
@@ -55,8 +74,13 @@ public class TestOperationsImpl implements TestOperations {
           "The class '%s' doesn't exists in the project. Please, specify an existing class", type));
     }
 
-    // Adding test classes
+    // Adding unit test dependencies
     List<TestCreatorProvider> validTestCreators = getValidTestCreatorsForType(type);
+    if (!validTestCreators.isEmpty()) {
+      addUnitTestDependencies(type.getModule());
+    }
+
+    // Creating tests
     if (validTestCreators.isEmpty()) {
       throw new IllegalArgumentException(
           "Unable to find a valid test creator for this type of class. "
@@ -78,8 +102,13 @@ public class TestOperationsImpl implements TestOperations {
           "The class '%s' doesn't exists in the project. Please, specify an existing class", type));
     }
 
-    // Adding test classes
+    // Adding integration test dependencies
     List<TestCreatorProvider> validTestCreators = getValidTestCreatorsForType(type);
+    if (!validTestCreators.isEmpty()) {
+      addIntegrationTestDependencies(type.getModule());
+    }
+
+    // Creating tests
     if (validTestCreators.isEmpty()) {
       throw new IllegalArgumentException(
           "Unable to find a valid test creator for this type of class. "
@@ -89,6 +118,52 @@ public class TestOperationsImpl implements TestOperations {
         creator.createIntegrationTest(type);
       }
     }
+  }
+
+  /**
+   * Add needed dependencies and plugins to run created integration tests.
+   * 
+   * @param module {@link String} the module name where add dependencies.
+   */
+  private void addIntegrationTestDependencies(String moduleName) {
+
+    // Add dependencies if needed
+    projectOperations.addDependency(moduleName, JUNIT_DEPENDENCY);
+    projectOperations.addDependency(moduleName, ASSERTJ_CORE_DEPENDENCY);
+    projectOperations.addDependency(moduleName, SPRING_TEST_DEPENDENCY);
+
+    // Add plugin maven-failsafe-plugin
+    Pom module = projectOperations.getPomFromModuleName(moduleName);
+    // Stop if the plugin is already installed
+    for (final Plugin plugin : module.getBuildPlugins()) {
+      if (plugin.getArtifactId().equals("maven-failsafe-plugin")) {
+        return;
+      }
+    }
+
+    final Element configuration = XmlUtils.getConfiguration(getClass());
+    final Element plugin = XmlUtils.findFirstElement("/configuration/plugin", configuration);
+
+    // Now install the plugin itself
+    if (plugin != null) {
+      projectOperations.addBuildPlugin(moduleName, new Plugin(plugin));
+    }
+  }
+
+  /**
+   * Add needed dependencies and plugins to run created unit tests.
+   * 
+   * @param module {@link String} the module name where add dependencies.
+   */
+  private void addUnitTestDependencies(String module) {
+
+    // Add dependencies if needed
+    projectOperations.addDependency(module, JUNIT_DEPENDENCY);
+    projectOperations.addDependency(module, ASSERTJ_CORE_DEPENDENCY);
+    projectOperations.addDependency(module, SPRING_TEST_DEPENDENCY);
+
+    // Add plugins if needed
+    projectOperations.addBuildPlugin(module, MAVEN_SUREFIRE_PLUGIN);
   }
 
   /**

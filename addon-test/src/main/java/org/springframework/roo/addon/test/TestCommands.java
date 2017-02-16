@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.test.addon;
+package org.springframework.roo.addon.test;
 
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
@@ -17,7 +17,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.test.addon.providers.TestCreatorProvider;
+import org.springframework.roo.addon.test.providers.TestCreatorProvider;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
@@ -25,7 +25,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.converters.LastUsed;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
@@ -83,11 +82,12 @@ public class TestCommands implements CommandMarker {
         }
       }
     }
-    return getTestCreationAvailable();
+    return getUnitTestCreationAvailable();
   }
 
   @CliOptionAutocompleteIndicator(command = "test unit", help = "Option `--class` must "
-      + "be a non-abstract entity annotated with `@RooJpaEntity`.", param = "class")
+      + "be a non-abstract valid type. Please, use auto-complete feature to select it.",
+      param = "class")
   public List<String> getClassPosibleValues(ShellContext shellContext) {
 
     // Get current value of class
@@ -96,13 +96,21 @@ public class TestCommands implements CommandMarker {
     // Create results to return
     List<String> results = new ArrayList<String>();
 
-    // Get entity fully qualified names
-    Set<ClassOrInterfaceTypeDetails> entities =
-        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY);
-    for (ClassOrInterfaceTypeDetails entity : entities) {
-      String name = replaceTopLevelPackageString(entity, currentText);
-      if (!results.contains(name) && !entity.isAbstract()) {
-        results.add(name);
+    // Look for all valid types for all available test creators
+    for (TestCreatorProvider creator : getAllTestCreators()) {
+      if (creator.isUnitTestCreationAvailable()) {
+        for (JavaType annotationType : creator.getValidTypes()) {
+
+          // Look for types with this annotation type
+          Set<ClassOrInterfaceTypeDetails> types =
+              typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(annotationType);
+          for (ClassOrInterfaceTypeDetails typeCid : types) {
+            String name = replaceTopLevelPackageString(typeCid.getType(), currentText);
+            if (!results.contains(name) && !typeCid.isAbstract()) {
+              results.add(name);
+            }
+          }
+        }
       }
     }
 
@@ -149,7 +157,7 @@ public class TestCommands implements CommandMarker {
         }
       }
     }
-    return getTestCreationAvailable();
+    return getIntegrationTestCreationAvailable();
   }
 
   @CliOptionVisibilityIndicator(command = "test integration", params = {"module"},
@@ -171,10 +179,9 @@ public class TestCommands implements CommandMarker {
     return true;
   }
 
-  @CliOptionAutocompleteIndicator(
-      command = "test integration",
-      param = "class",
-      help = "--class parameter must be an existing class annotated with @RooJpaRepository. Please, assign a valid one.")
+  @CliOptionAutocompleteIndicator(command = "test integration", param = "class",
+      help = "Option `--class` must "
+          + "be a non-abstract valid type. Please, use auto-complete feature to select it.")
   public List<String> getAllEntities(ShellContext shellContext) {
 
     // Get current value of class
@@ -183,14 +190,21 @@ public class TestCommands implements CommandMarker {
     // Create results to return
     List<String> results = new ArrayList<String>();
 
-    // Get entity full qualified names
-    Set<ClassOrInterfaceTypeDetails> repositories =
-        typeLocationService
-            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
-    for (ClassOrInterfaceTypeDetails repository : repositories) {
-      String name = replaceTopLevelPackageString(repository, currentText);
-      if (!results.contains(name)) {
-        results.add(name);
+    // Look for all valid types for all available test creators
+    for (TestCreatorProvider creator : getAllTestCreators()) {
+      if (creator.isIntegrationTestCreationAvailable()) {
+        for (JavaType annotationType : creator.getValidTypes()) {
+
+          // Look for types with this annotation type
+          Set<ClassOrInterfaceTypeDetails> types =
+              typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(annotationType);
+          for (ClassOrInterfaceTypeDetails typeCid : types) {
+            String name = replaceTopLevelPackageString(typeCid.getType(), currentText);
+            if (!results.contains(name)) {
+              results.add(name);
+            }
+          }
+        }
       }
     }
 
@@ -245,34 +259,32 @@ public class TestCommands implements CommandMarker {
    * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
    * TopLevelPackage
    *
-   * @param cid ClassOrInterfaceTypeDetails of a JavaType
+   * @param type ClassOrInterfaceTypeDetails of a JavaType
    * @param currentText String current text for option value
    * @return the String representing a JavaType with its name shortened
    */
-  private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText) {
-    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
+  private String replaceTopLevelPackageString(JavaType type, String currentText) {
+    String javaTypeFullyQualilfiedName = type.getFullyQualifiedTypeName();
     String javaTypeString = "";
     String topLevelPackageString = "";
 
     // Add module value to topLevelPackage when necessary
-    if (StringUtils.isNotBlank(cid.getType().getModule())
-        && !cid.getType().getModule().equals(projectOperations.getFocusedModuleName())) {
+    if (StringUtils.isNotBlank(type.getModule())
+        && !type.getModule().equals(projectOperations.getFocusedModuleName())) {
 
       // Target module is not focused
-      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      javaTypeString = type.getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
       topLevelPackageString =
-          projectOperations.getTopLevelPackage(cid.getType().getModule())
-              .getFullyQualifiedPackageName();
-    } else if (StringUtils.isNotBlank(cid.getType().getModule())
-        && cid.getType().getModule().equals(projectOperations.getFocusedModuleName())
-        && (currentText.startsWith(cid.getType().getModule()) || cid.getType().getModule()
-            .startsWith(currentText)) && StringUtils.isNotBlank(currentText)) {
+          projectOperations.getTopLevelPackage(type.getModule()).getFullyQualifiedPackageName();
+    } else if (StringUtils.isNotBlank(type.getModule())
+        && type.getModule().equals(projectOperations.getFocusedModuleName())
+        && (currentText.startsWith(type.getModule()) || type.getModule().startsWith(currentText))
+        && StringUtils.isNotBlank(currentText)) {
 
       // Target module is focused but user wrote it
-      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      javaTypeString = type.getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
       topLevelPackageString =
-          projectOperations.getTopLevelPackage(cid.getType().getModule())
-              .getFullyQualifiedPackageName();
+          projectOperations.getTopLevelPackage(type.getModule()).getFullyQualifiedPackageName();
     } else {
 
       // Not multimodule project
@@ -320,7 +332,7 @@ public class TestCommands implements CommandMarker {
         }
 
       } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TestCreatorProvider on UnitTestCommands.");
+        LOGGER.warning("Cannot load TestCreatorProvider on TestCommands.");
         return null;
       }
     }
@@ -336,13 +348,79 @@ public class TestCommands implements CommandMarker {
   }
 
   /**
+   * Gets all the implementations of TestCreatorProvider
+   *
+   * @param type the JavaType to get the valid implementations.
+   * @return a `List` with the {@link TestCreatorProvider} valid 
+   *            implementations. Never `null`.
+   */
+  public List<TestCreatorProvider> getAllTestCreators() {
+
+    // Get all Services implement TestCreatorProvider interface
+    if (this.testCreators.isEmpty()) {
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(TestCreatorProvider.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          TestCreatorProvider testCreatorProvider =
+              (TestCreatorProvider) this.context.getService(ref);
+          this.testCreators.add(testCreatorProvider);
+        }
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load TestCreatorProvider on TestCommands.");
+        return null;
+      }
+    }
+
+    return this.testCreators;
+  }
+
+  /**
    * Checks all {@link TestCreatorProvider} implementations looking for any 
-   * available.
+   * available for 'test unit' command.
    *
    * @return `true` if any of the implementations is available or
    *            `false` if none of the implementations are available.
    */
-  private boolean getTestCreationAvailable() {
+  private boolean getUnitTestCreationAvailable() {
+
+    // Get all Services implement TestCreatorProvider interface
+    if (this.testCreators.isEmpty()) {
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(TestCreatorProvider.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          TestCreatorProvider testCreatorProvider =
+              (TestCreatorProvider) this.context.getService(ref);
+          this.testCreators.add(testCreatorProvider);
+        }
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load TestCreatorProvider on TestCommands.");
+        return false;
+      }
+    }
+
+    for (TestCreatorProvider provider : this.testCreators) {
+      if (provider.isUnitTestCreationAvailable()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Checks all {@link TestCreatorProvider} implementations looking for any 
+   * available for 'test integration' command.
+   *
+   * @return `true` if any of the implementations is available or
+   *            `false` if none of the implementations are available.
+   */
+  private boolean getIntegrationTestCreationAvailable() {
 
     // Get all Services implement TestCreatorProvider interface
     if (this.testCreators.isEmpty()) {
@@ -363,7 +441,7 @@ public class TestCommands implements CommandMarker {
     }
 
     for (TestCreatorProvider provider : this.testCreators) {
-      if (provider.isUnitTestCreationAvailable()) {
+      if (provider.isIntegrationTestCreationAvailable()) {
         return true;
       }
     }

@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 public @interface RooRepositoryJpaIntegrationTest {
 
   /**
-   * The target class from which unit test class is created.
+   * The target class from which integration test class is created.
    */
   Class<?> targetClass();
 

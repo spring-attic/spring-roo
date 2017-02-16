@@ -1,4 +1,6 @@
-package org.springframework.roo.addon.test.addon.providers;
+package org.springframework.roo.addon.test.providers;
+
+import java.util.List;
 
 import org.springframework.roo.model.JavaType;
 
@@ -21,6 +23,13 @@ public interface TestCreatorProvider {
    * @return `true` if the implementation is valid, `false` otherwise.
    */
   boolean isValid(JavaType javaType);
+
+  /**
+   * Return all valid Roo annotation types for which the creator is valid. 
+   * 
+   * @return a {@link List} with all valid annotation types for this creator.
+   */
+  List<JavaType> getValidTypes();
 
   /**
    * Check if 'test unit' command is available.

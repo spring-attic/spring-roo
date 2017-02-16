@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.test.addon.providers;
+package org.springframework.roo.addon.test.providers;
 
 import org.springframework.roo.model.JavaType;
 
