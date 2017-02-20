@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon.test;
 
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -67,9 +68,8 @@ public class ThymeleafControllerIntegrationTestMetadata extends
   }
 
   private final JavaType controller;
-  private final JavaType entityService;
+  private final List<JavaType> entityServices;
   private final JavaType entityFactory;
-  private final JavaSymbolName serviceFieldName;
   private final JavaSymbolName entityFactoryFieldName;
 
   /**
@@ -82,24 +82,21 @@ public class ThymeleafControllerIntegrationTestMetadata extends
    * @param controller 
    * @param managedEntity
    * @param entityFactory 
-   * @param entityService
+   * @param relatedServices
    */
   public ThymeleafControllerIntegrationTestMetadata(final String identifier,
       final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final ThymeleafControllerIntegrationTestAnnotationValues annotationValues,
       final JavaType controller, final JavaType managedEntity, final JavaType entityFactory,
-      final JavaType entityService) {
+      final List<JavaType> relatedServices) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.isTrue(isValid(identifier),
         "Metadata identification string '%s' does not appear to be a valid", identifier);
     Validate.notNull(annotationValues, "Annotation values required");
 
     this.controller = controller;
-    this.entityService = entityService;
+    this.entityServices = relatedServices;
     this.entityFactory = entityFactory;
-    this.serviceFieldName =
-        new JavaSymbolName(String.format("%sService",
-            StringUtils.uncapitalize(managedEntity.getSimpleTypeName())));
     this.entityFactoryFieldName = new JavaSymbolName("factory");
 
     // Add @RunWith(SpringRunner.class)
@@ -111,8 +108,10 @@ public class ThymeleafControllerIntegrationTestMetadata extends
     // Add MockMvc field
     ensureGovernorHasField(getMockMvcField());
 
-    // Add entity service field
-    ensureGovernorHasField(getEntityServiceField());
+    // Add entity service fields
+    for (JavaType service : this.entityServices) {
+      ensureGovernorHasField(getEntityServiceField(service));
+    }
 
     // Add entity factory field
     ensureGovernorHasField(getEntityFactoryField());
@@ -185,12 +184,15 @@ public class ThymeleafControllerIntegrationTestMetadata extends
   /**
    * Builds and returns the entity service field, annotated with @MockBean
    * 
+   * @param the service {@link JavaType}
    * @return {@link FieldMetadataBuilder}
    */
-  private FieldMetadataBuilder getEntityServiceField() {
+  private FieldMetadataBuilder getEntityServiceField(JavaType service) {
+    JavaSymbolName fieldName =
+        new JavaSymbolName(String.format("%sService",
+            StringUtils.uncapitalize(service.getSimpleTypeName())));
     FieldMetadataBuilder fieldBuilder =
-        new FieldMetadataBuilder(this.getId(), Modifier.PRIVATE, this.serviceFieldName,
-            this.entityService, null);
+        new FieldMetadataBuilder(this.getId(), Modifier.PRIVATE, fieldName, service, null);
 
     // Add @Autowired
     fieldBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.MOCK_BEAN));

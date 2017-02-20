@@ -96,6 +96,13 @@ web mvc detail --entity ~.model.Category --field products --responseType THYMELE
 web mvc detail --entity ~.model.CustomerOrder --field details
 web mvc detail --entity ~.model.CustomerOrder --field details --responseType THYMELEAF
 
-// two level details
-// web mvc detail --entity ~.model.Customer --field orders.details
-// web mvc detail --entity ~.model.Customer --field orders.details --responseType THYMELEAF
+// Unit tests
+test unit --class ~.model.Product
+test unit --class ~.model.CustomerOrder
+test unit --class ~.model.Address
+
+// Integration tests
+test integration --class ~.repository.CustomerRepository
+test integration --class ~.repository.CategoryRepository
+test integration --class ~.web.CustomerOrdersCollectionThymeleafController
+test integration --class ~.web.CustomerOrdersCollectionJsonController

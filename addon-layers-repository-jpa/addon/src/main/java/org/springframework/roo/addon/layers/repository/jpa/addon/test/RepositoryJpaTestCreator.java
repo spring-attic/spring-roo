@@ -144,11 +144,9 @@ public class RepositoryJpaTestCreator implements TestCreatorProvider {
     // Add module dependency with test-jar dependency
     String managedEntityModuleName = managedEntity.getModule();
     Pom managedEntityModule = projectOperations.getPomFromModuleName(managedEntityModuleName);
-    projectOperations
-        .addDependency(module.getModuleName(),
-            new Dependency(managedEntityModule.getGroupId(), managedEntityModule.getArtifactId(),
-                null, DependencyType.valueOfTypeCode("test-jar"),
-                DependencyScope.TEST), false, true);
+    projectOperations.addDependency(module.getModuleName(),
+        new Dependency(managedEntityModule.getGroupId(), managedEntityModule.getArtifactId(), null,
+            DependencyType.valueOfTypeCode("test-jar"), DependencyScope.TEST), false, true);
 
     // Create integration test class
     final JavaType name = new JavaType(type + "IT", module.getModuleName());

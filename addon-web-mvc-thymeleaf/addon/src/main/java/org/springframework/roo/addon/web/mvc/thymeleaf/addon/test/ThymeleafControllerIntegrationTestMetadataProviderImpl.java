@@ -2,10 +2,16 @@ package org.springframework.roo.addon.web.mvc.thymeleaf.addon.test;
 
 import static org.springframework.roo.model.RooJavaType.ROO_THYMELEAF_CONTROLLER_INTEGRATION_TEST;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.jpa.addon.entity.factories.JpaEntityFactoryLocator;
 import org.springframework.roo.addon.layers.service.addon.ServiceLocator;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -117,16 +123,44 @@ public class ThymeleafControllerIntegrationTestMetadataProviderImpl extends
     final JavaType managedEntity =
         (JavaType) rooControllerAnnotation.getAttribute("entity").getValue();
 
+    // Get the entity metadata
+    String jpaEntityIdentifier =
+        JpaEntityMetadata.createIdentifier(getTypeLocationService().getTypeDetails(managedEntity));
+    JpaEntityMetadata entityMetadata = getMetadataService().get(jpaEntityIdentifier);
+    if (entityMetadata == null) {
+      return null;
+    }
+
+    // Get child related entities
+    Collection<RelationInfo> relatioInfos = entityMetadata.getRelationInfos().values();
+    List<JavaType> relatedEntities = new ArrayList<JavaType>();
+    // First, add managed entity
+    relatedEntities.add(managedEntity);
+    for (RelationInfo relationInfo : relatioInfos) {
+      JavaType entity = relationInfo.childType;
+      if (!relatedEntities.contains(entity)) {
+        relatedEntities.add(entity);
+      }
+    }
+
     // Get the entity factory of managed entity
     final JavaType entityFactory =
         getJpaEntityFactoryLocator().getFirstJpaEntityFactoryForEntity(managedEntity);
 
-    // Get the service related to managed entity
-    final JavaType entityService = getServiceLocator().getFirstService(managedEntity).getType();
+    // Get the services related to managed entity
+    List<JavaType> relatedServices = new ArrayList<JavaType>();
+    for (JavaType entity : relatedEntities) {
+      final JavaType service = getServiceLocator().getFirstService(entity).getType();
+      Validate.notNull(service, "Couldn't find service of %s in %s", entity.getSimpleTypeName(),
+          this.getClass().getName());
+      if (!relatedServices.contains(service)) {
+        relatedServices.add(service);
+      }
+    }
 
     return new ThymeleafControllerIntegrationTestMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, annotationValues, jsonController, managedEntity,
-        entityFactory, entityService);
+        entityFactory, relatedServices);
   }
 
   public String getProvidesType() {
