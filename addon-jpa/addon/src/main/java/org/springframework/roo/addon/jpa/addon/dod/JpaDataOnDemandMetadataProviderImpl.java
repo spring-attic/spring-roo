@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.jpa.addon.dod;
 
-import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_DATA_ON_DEMAND;
 
 import java.util.LinkedHashMap;
@@ -15,6 +14,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.addon.ConfigurableMetadataProvider;
+import org.springframework.roo.addon.jpa.addon.dod.configuration.JpaDataOnDemandConfigurationMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.factories.JpaEntityFactoryMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -209,20 +209,6 @@ public class JpaDataOnDemandMetadataProviderImpl extends
       return null;
     }
 
-    // Get the additions to make for each required method
-    final MemberTypeAdditions findMethodAdditions =
-        layerService.getMemberTypeAdditions(dodMetadataId, FIND_METHOD.name(), entity,
-            identifierType, LayerType.HIGHEST.getPosition(), new MethodParameter(identifierType,
-                "id"));
-    final MethodParameter entityParameter = new MethodParameter(entity, "obj");
-    final MemberTypeAdditions flushMethod =
-        layerService.getMemberTypeAdditions(dodMetadataId, FLUSH_METHOD, entity, identifierType,
-            LayerType.HIGHEST.getPosition(), entityParameter);
-
-    if (findMethodAdditions == null) {
-      return null;
-    }
-
     // Get associated factory class (factory for current associated entity)
     Set<ClassOrInterfaceTypeDetails> entityFactoryClasses =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
@@ -245,8 +231,21 @@ public class JpaDataOnDemandMetadataProviderImpl extends
       return null;
     }
 
+    // Register JpaDataOndDemandConfiguration as downstream dependency
+    Set<ClassOrInterfaceTypeDetails> dataOnDemandConfigurationClasses =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_JPA_DATA_ON_DEMAND_CONFIGURATION);
+    if (dataOnDemandConfigurationClasses.isEmpty()) {
+      return null;
+    }
+    ClassOrInterfaceTypeDetails jpaDataOnDemandConfigurationDetails =
+        dataOnDemandConfigurationClasses.iterator().next();
+    String dodConfigurationId =
+        JpaDataOnDemandConfigurationMetadata.createIdentifier(jpaDataOnDemandConfigurationDetails);
+    registerDependency(dodMetadataId, dodConfigurationId);
+
     return new JpaDataOnDemandMetadata(dodMetadataId, aspectName, governorPhysicalTypeMetadata,
-        annotationValues, flushMethod, entityFactoryMetadata);
+        annotationValues, entityFactoryMetadata);
   }
 
   public String getProvidesType() {

@@ -3,6 +3,7 @@ package org.springframework.roo.addon.test.providers;
 import java.util.List;
 
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.maven.Pom;
 
 /**
  * Provides a test creation API which can be implemented by each add-on that
@@ -58,7 +59,9 @@ public interface TestCreatorProvider {
    * returns if the integration test file already exists.
    * 
    * @param projectType the class to produce an integration test for (required).
+   * @param module the @SpringBootApplication module where test class should 
+   *            be created.
    */
-  void createIntegrationTest(JavaType projectType);
+  void createIntegrationTest(JavaType projectType, Pom module);
 
 }

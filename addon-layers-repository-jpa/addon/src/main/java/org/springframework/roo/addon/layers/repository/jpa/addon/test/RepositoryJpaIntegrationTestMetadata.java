@@ -96,6 +96,7 @@ public class RepositoryJpaIntegrationTestMetadata extends
   private final String getRandomMethodName;
   private final String entityPlural;
   private final JavaType defaultReturnType;
+  private final boolean isReadOnly;
 
   /**
    * Constructor
@@ -112,13 +113,14 @@ public class RepositoryJpaIntegrationTestMetadata extends
    * @param entity 
    * @param defaultReturnType the repository default return type for default 
    *            queries
+   * @param isReadOnly whether the entity is read only
    */
   public RepositoryJpaIntegrationTestMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaIntegrationTestAnnotationValues annotationValues,
       final JavaType jpaDetachableRepositoryClass, final JavaType identifierType,
       final JavaSymbolName identifierAccessorMethodName, final String entityPlural,
-      final JavaType entity, final JavaType defaultReturnType) {
+      final JavaType entity, final JavaType defaultReturnType, final boolean isReadOnly) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.isTrue(isValid(identifier),
         "Metadata identification string '%s' does not appear to be a valid", identifier);
@@ -135,6 +137,7 @@ public class RepositoryJpaIntegrationTestMetadata extends
     this.identifierAccessorMethodName = identifierAccessorMethodName;
     this.entityPlural = entityPlural;
     this.defaultReturnType = defaultReturnType;
+    this.isReadOnly = isReadOnly;
 
     // Add @RunWith(SpringRunner.class)
     ensureGovernorIsAnnotated(getRunWithAnnotation());
@@ -164,12 +167,16 @@ public class RepositoryJpaIntegrationTestMetadata extends
     // Add find all test method
     ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllTestMethod()));
 
-    // Add persist should generate id method
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getPersistGenerateIdTestMethod()));
+    if (!this.isReadOnly) {
 
-    // Add delete should make entity unavailable method
-    ensureGovernorHasMethod(new MethodMetadataBuilder(
-        getDeleteShouldMakeEntityUnavailableTestMethod()));
+      // Add persist should generate id method
+      ensureGovernorHasMethod(new MethodMetadataBuilder(getPersistGenerateIdTestMethod()));
+
+      // Add delete should make entity unavailable method
+      ensureGovernorHasMethod(new MethodMetadataBuilder(
+          getDeleteShouldMakeEntityUnavailableTestMethod()));
+    }
+
 
     // Add find all custom not filtered and not paged test method 
     ensureGovernorHasMethod(new MethodMetadataBuilder(

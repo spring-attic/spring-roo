@@ -34,6 +34,7 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
@@ -116,7 +117,7 @@ public class ThymeleafControllerTestCreator implements TestCreatorProvider {
   }
 
   @Override
-  public void createIntegrationTest(JavaType type) {
+  public void createIntegrationTest(JavaType type, Pom module) {
     Validate.notNull(type, "Class to produce an integration test class for is required");
 
     // Check if provided JavaType is a Thymeleaf Controller
@@ -128,11 +129,19 @@ public class ThymeleafControllerTestCreator implements TestCreatorProvider {
 
     // Add springlets-boot-starter-test dependency
     projectOperations.addProperty("", SPRINGLETS_VERSION_PROPERTY);
-    projectOperations.addDependency(type.getModule(), SPRINGLETS_BOOT_STARTER_TEST_DEPENDENCY);
+    projectOperations
+        .addDependency(module.getModuleName(), SPRINGLETS_BOOT_STARTER_TEST_DEPENDENCY);
 
     // Get the controller managed entity
     ControllerAnnotationValues controllerAnnotationValues = new ControllerAnnotationValues(cid);
     JavaType managedEntity = controllerAnnotationValues.getEntity();
+
+    // Workaround to get a JavaType with not null module when recovering it 
+    // from a ClassAttributeValue
+    managedEntity =
+        new JavaType(managedEntity.getFullyQualifiedTypeName(), managedEntity.getArray(),
+            managedEntity.getDataType(), managedEntity.getArgName(), managedEntity.getParameters(),
+            typeLocationService.getTypeDetails(managedEntity).getType().getModule());
 
     // Create Data On Demand artifacts for managed entity
     List<DataOnDemandCreatorProvider> dodCreators =
@@ -146,12 +155,21 @@ public class ThymeleafControllerTestCreator implements TestCreatorProvider {
             this.getClass().getName());
     DataOnDemandCreatorProvider creator = dodCreators.get(0);
     creator.createDataOnDemand(managedEntity);
+    
+    // Add module dependency with test-jar dependency
+    String managedEntityModuleName = managedEntity.getModule();
+    Pom managedEntityModule = projectOperations.getPomFromModuleName(managedEntityModuleName);
+    projectOperations
+        .addDependency(module.getModuleName(),
+            new Dependency(managedEntityModule.getGroupId(), managedEntityModule.getArtifactId(),
+                null, DependencyType.valueOfTypeCode("test-jar"),
+                DependencyScope.TEST), false, true);
 
     // Create integration test class
-    final JavaType name = new JavaType(type + "IT", type.getModule());
+    final JavaType name = new JavaType(type + "IT", module.getModuleName());
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(name,
-            Path.SRC_TEST_JAVA.getModulePathId(type.getModule()));
+            Path.SRC_TEST_JAVA.getModulePathId(module.getModuleName()));
     if (metadataService.get(declaredByMetadataId) != null) {
       // The file already exists
       return;

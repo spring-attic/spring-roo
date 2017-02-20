@@ -7,8 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.addon.jpa.annotations.dod.RooJpaDataOnDemandConfiguration;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -40,6 +42,12 @@ public class JpaDataOnDemandConfigurationMetadata extends
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
+  }
+
+  public static String createIdentifier(ClassOrInterfaceTypeDetails details) {
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(details.getDeclaredByMetadataId());
+    return createIdentifier(details.getType(), logicalPath);
   }
 
   public static JavaType getJavaType(final String metadataIdentificationString) {

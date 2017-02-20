@@ -45,6 +45,9 @@ public class TestOperationsImpl implements TestOperations {
       "spring-test", null, DependencyType.JAR, DependencyScope.TEST);
   private static final Plugin MAVEN_SUREFIRE_PLUGIN = new Plugin("org.apache.maven.plugins",
       "maven-surefire-plugin", null);
+  private static final Dependency SPRING_BOOT_TEST_DEPENDENCY = new Dependency(
+      "org.springframework.boot", "spring-boot-test", null, DependencyType.JAR,
+      DependencyScope.TEST);
 
   private BundleContext context;
 
@@ -93,7 +96,7 @@ public class TestOperationsImpl implements TestOperations {
   }
 
   @Override
-  public void createIntegrationTest(JavaType type) {
+  public void createIntegrationTest(JavaType type, Pom module) {
 
     // Check if specified type exists in the project
     String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(type);
@@ -105,7 +108,7 @@ public class TestOperationsImpl implements TestOperations {
     // Adding integration test dependencies
     List<TestCreatorProvider> validTestCreators = getValidTestCreatorsForType(type);
     if (!validTestCreators.isEmpty()) {
-      addIntegrationTestDependencies(type.getModule());
+      addIntegrationTestDependencies(module.getModuleName());
     }
 
     // Creating tests
@@ -115,7 +118,7 @@ public class TestOperationsImpl implements TestOperations {
               + "Please, select another type of class to generate the test, such a repository.");
     } else {
       for (TestCreatorProvider creator : validTestCreators) {
-        creator.createIntegrationTest(type);
+        creator.createIntegrationTest(type, module);
       }
     }
   }
@@ -131,6 +134,7 @@ public class TestOperationsImpl implements TestOperations {
     projectOperations.addDependency(moduleName, JUNIT_DEPENDENCY);
     projectOperations.addDependency(moduleName, ASSERTJ_CORE_DEPENDENCY);
     projectOperations.addDependency(moduleName, SPRING_TEST_DEPENDENCY);
+    projectOperations.addDependency(moduleName, SPRING_BOOT_TEST_DEPENDENCY);
 
     // Add plugin maven-failsafe-plugin
     Pom module = projectOperations.getPomFromModuleName(moduleName);

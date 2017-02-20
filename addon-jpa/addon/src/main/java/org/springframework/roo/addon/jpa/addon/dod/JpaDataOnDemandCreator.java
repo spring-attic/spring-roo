@@ -36,8 +36,11 @@ import org.springframework.roo.project.DependencyScope;
 import org.springframework.roo.project.DependencyType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Element;
 
 /**
  * Implementation of {@link DataOnDemandOperations}, based on old 
@@ -56,6 +59,8 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
   private static final Dependency SPRING_BOOT_TEST_DEPENDENCY = new Dependency(
       "org.springframework.boot", "spring-boot-test", null, DependencyType.JAR,
       DependencyScope.TEST);
+
+  private static final String MAVEN_JAR_PLUGIN = "maven-jar-plugin";
 
   @Reference
   private MemberDetailsScanner memberDetailsScanner;
@@ -86,6 +91,9 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
       return dodClass;
     }
 
+    // Add plugin to generate test jar
+    addMavenJarPlugin(entity.getModule());
+
     // Create the JavaType for DoD class
     JavaType name =
         new JavaType(entity.getPackage().getFullyQualifiedPackageName().concat(".dod.")
@@ -107,6 +115,12 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
 
   @Override
   public JavaType createDataOnDemandConfiguration(String moduleName) {
+
+    // Check if alreafy exists
+    JavaType dodConfig = getDataOnDemandConfiguration();
+    if (dodConfig != null) {
+      return dodConfig;
+    }
 
     // Add spring-boot-test dependency with test scope
     projectOperations.addDependency(moduleName, SPRING_BOOT_TEST_DEPENDENCY);
@@ -262,6 +276,31 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
       }
     }
     return typeToReturn;
+  }
+
+  /**
+   * Add maven-jar-plugin to provided module.
+   * 
+   * @param moduleName the name of the module.
+   */
+  private void addMavenJarPlugin(String moduleName) {
+
+    // Add plugin maven-jar-plugin
+    Pom module = projectOperations.getPomFromModuleName(moduleName);
+    // Stop if the plugin is already installed
+    for (final Plugin plugin : module.getBuildPlugins()) {
+      if (plugin.getArtifactId().equals(MAVEN_JAR_PLUGIN)) {
+        return;
+      }
+    }
+
+    final Element configuration = XmlUtils.getConfiguration(getClass());
+    final Element plugin = XmlUtils.findFirstElement("/configuration/plugin", configuration);
+
+    // Now install the plugin itself
+    if (plugin != null) {
+      projectOperations.addBuildPlugin(moduleName, new Plugin(plugin), false);
+    }
   }
 
   /**

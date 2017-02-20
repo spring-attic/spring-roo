@@ -29,6 +29,7 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
@@ -135,7 +136,7 @@ public class JpaTestCreator implements TestCreatorProvider {
   }
 
   @Override
-  public void createIntegrationTest(JavaType projectType) {
+  public void createIntegrationTest(JavaType projectType, Pom module) {
     throw new IllegalArgumentException("Integration test operations are not "
         + "available for JPA entities.");
   }

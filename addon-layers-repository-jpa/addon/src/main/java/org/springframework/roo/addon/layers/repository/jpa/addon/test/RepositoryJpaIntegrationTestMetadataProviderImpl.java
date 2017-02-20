@@ -8,6 +8,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
 import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -134,6 +135,17 @@ public class RepositoryJpaIntegrationTestMetadataProviderImpl extends
     JavaSymbolName identifierAccessorMethodName =
         getPersistenceMemberLocator().getIdentifierAccessor(entity).getMethodName();
 
+    // Get entity metadata
+    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
+    String jpaEntityMetadataId = JpaEntityMetadata.createIdentifier(entityDetails);
+    JpaEntityMetadata jpaEntityMetadata = getMetadataService().get(jpaEntityMetadataId);
+    if (jpaEntityMetadata == null) {
+      return null;
+    }
+
+    // Get entity read only
+    boolean isReadOnly = jpaEntityMetadata.isReadOnly();
+
     // Get entity plural
     String entityPlural = getPluralService().getPlural(entity);
 
@@ -142,7 +154,8 @@ public class RepositoryJpaIntegrationTestMetadataProviderImpl extends
 
     return new RepositoryJpaIntegrationTestMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, annotationValues, jpaDetachableRepositoryClass,
-        identifierType, identifierAccessorMethodName, entityPlural, entity, defaultReturnType);
+        identifierType, identifierAccessorMethodName, entityPlural, entity, defaultReturnType,
+        isReadOnly);
   }
 
   public String getProvidesType() {

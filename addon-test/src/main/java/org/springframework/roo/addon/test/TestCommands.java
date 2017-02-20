@@ -252,7 +252,7 @@ public class TestCommands implements CommandMarker {
             BeanInfoUtils.isEntityReasonablyNamed(klass),
             "Cannot create an integration test for an entity named 'Test' or 'TestCase' under any circumstances");
 
-    testOperations.createIntegrationTest(klass);
+    testOperations.createIntegrationTest(klass, module);
   }
 
   /**

@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.test;
 
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.maven.Pom;
 
 /**
  * Interface of {@link TestOperationsImpl}.
@@ -24,7 +25,9 @@ public interface TestOperations {
    * test file already exists.
    * 
    * @param type the {@link JavaType} to produce the test for.
+   * @param module the @SpringBootApplication module where test class should be 
+   *            created.
    */
-  void createIntegrationTest(JavaType type);
+  void createIntegrationTest(JavaType type, Pom module);
 
 }

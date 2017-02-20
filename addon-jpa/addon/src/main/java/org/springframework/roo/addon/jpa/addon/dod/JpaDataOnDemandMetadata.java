@@ -30,7 +30,6 @@ import org.springframework.roo.classpath.details.comments.CommentStructure.Comme
 import org.springframework.roo.classpath.details.comments.JavadocComment;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
@@ -61,6 +60,7 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
   private static final String ENTITY_MANAGER_VAR = "entityManager";
   private static final String SIZE_VAR = "size";
   private static final String FACTORY_VAR = "factory";
+  private static final JavaSymbolName FLUSH_METHOD_NAME = new JavaSymbolName("flush");
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -103,14 +103,12 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
    * @param aspectName
    * @param governorPhysicalTypeMetadata
    * @param annotationValues
-   * @param findMethod
-   * @param flushMethod
    * @param entityFactoryMetadata
    */
   public JpaDataOnDemandMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final JpaDataOnDemandAnnotationValues annotationValues,
-      final MemberTypeAdditions flushMethod, final JpaEntityFactoryMetadata entityFactoryMetadata) {
+      final JpaEntityFactoryMetadata entityFactoryMetadata) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.isTrue(isValid(identifier),
         "Metadata identification string '%s' does not appear to be a valid", identifier);
@@ -154,7 +152,7 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
     ensureGovernorHasMethod(new MethodMetadataBuilder(getRandomPersistentEntityMethod()));
 
     // Add init method
-    builder.addMethod(getInitMethod(annotationValues.getQuantity(), flushMethod));
+    builder.addMethod(getInitMethod(annotationValues.getQuantity()));
 
     itdTypeDetails = builder.build();
   }
@@ -272,10 +270,6 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
     }
   }
 
-  private JavaSymbolName getDataFieldName() {
-    return dataFieldName;
-  }
-
   /**
    * Creates an EntityFactory field related to this entity.
    *
@@ -326,12 +320,9 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
    *
    * @param persistMethod
    *            (required)
-   * @param flushMethod
-   *            (required)
    * @return never `null`
    */
-  private MethodMetadataBuilder getInitMethod(final int quantity,
-      final MemberTypeAdditions flushMethod) {
+  private MethodMetadataBuilder getInitMethod(final int quantity) {
     // Method definition to find or build
     final JavaSymbolName methodName = new JavaSymbolName("init");
     final JavaType[] parameterTypes = {};
@@ -349,7 +340,6 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
 
     // Create the method body
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    final String dataField = getDataFieldName().getSymbolName();
     bodyBuilder.appendFormalLine("int from = 0;");
     bodyBuilder.appendFormalLine("int to = " + quantity + ";");
 
@@ -489,7 +479,7 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
 
     // entityManager.flush();
     bodyBuilder.appendFormalLine("%s().%s();", getAccessorMethod(getEntityManagerField().build())
-        .getMethodName(), flushMethod.getMethodName());
+        .getMethodName(), FLUSH_METHOD_NAME);
 
     // data.add(obj);
     bodyBuilder.appendFormalLine("%s().add(%s);", getAccessorMethod(getDataField().build())
@@ -554,14 +544,6 @@ public class JpaDataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMeta
 
       return fieldBuilder;
     }
-  }
-
-  /**
-   * @return the "rnd" field to use, which is either provided by the user or
-   *         produced on demand (never returns null)
-   */
-  private JavaSymbolName getRndFieldName() {
-    return rndFieldName;
   }
 
   /**
