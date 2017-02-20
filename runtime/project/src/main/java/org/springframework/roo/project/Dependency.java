@@ -283,8 +283,14 @@ public class Dependency implements Comparable<Dependency> {
 
     if (type != null && type != DependencyType.JAR) {
       // Keep the XML short, we don't need "JAR" given it's the default
-      final Element typeElement =
-          XmlUtils.createTextElement(document, "type", type.toString().toLowerCase());
+      String typeContent = "";
+      if (type == DependencyType.TESTJAR) {
+        typeContent = "test-jar";
+      } else {
+        typeContent = type.toString().toLowerCase();
+      }
+
+      final Element typeElement = XmlUtils.createTextElement(document, "type", typeContent);
       dependencyElement.appendChild(typeElement);
     }
 

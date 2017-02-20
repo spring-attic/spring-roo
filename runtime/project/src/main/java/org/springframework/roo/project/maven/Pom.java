@@ -151,10 +151,22 @@ public class Pom {
   /**
    * Returns this module as a Dependency with the given scope
    * 
+   * @param scope the DependencyScope to use
    * @return a non-<code>null</code> instance
    */
   public Dependency asDependency(final DependencyScope scope) {
     return new Dependency(gav, DependencyType.valueOfTypeCode(packaging), scope);
+  }
+
+  /**
+   * Returns this module as a Dependency with the given scope and type
+   * 
+   * @param scope the DependencyScope to use
+   * @param type the DependencyType to use
+   * @return a non-<code>null</code> instance
+   */
+  public Dependency asDependency(final DependencyScope scope, final DependencyType type) {
+    return new Dependency(gav, type, scope);
   }
 
   private void cachePhysicalPaths(final Collection<Path> paths) {

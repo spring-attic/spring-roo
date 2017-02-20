@@ -4,6 +4,16 @@ import static org.springframework.roo.project.DependencyScope.COMPILE;
 import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
 import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -24,16 +34,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.logging.Level;
 
 /**
  * Provides common project operations. Should be subclassed by a
@@ -113,7 +113,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
       boolean addToPluginManagement) {
     Validate.isTrue(isProjectAvailable(moduleName), "Plugin modification prohibited at this time");
     Validate.notNull(plugin, "Plugin required");
-    addBuildPlugins(moduleName, Collections.singletonList(plugin));
+    addBuildPlugins(moduleName, Collections.singletonList(plugin), addToPluginManagement);
   }
 
   @Override
@@ -161,12 +161,13 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
   @Override
   public List<Dependency> addDependencies(final String moduleName,
       final Collection<? extends Dependency> newDependencies) {
-    return addDependencies(moduleName, newDependencies, true);
+    return addDependencies(moduleName, newDependencies, true, false);
   }
 
   @Override
   public List<Dependency> addDependencies(final String moduleName,
-      final Collection<? extends Dependency> newDependencies, boolean addToDependencyManagement) {
+      final Collection<? extends Dependency> newDependencies, boolean addToDependencyManagement,
+      boolean checkFullDependency) {
     Validate.isTrue(isProjectAvailable(moduleName),
         "Dependency modification prohibited; no such module '%s'", moduleName);
     final Pom parentPom = getPomFromModuleName("");
@@ -190,23 +191,29 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     }
     return writeDependencyInPom(newDependencies, parentPom, pom, parentDocument, document,
         parentDocument.getDocumentElement(), document.getDocumentElement(),
-        addToDependencyManagement, isSamePom);
+        addToDependencyManagement, isSamePom, checkFullDependency);
   }
 
   @Override
   public Dependency addDependency(final String moduleName, final Dependency dependency) {
-    return addDependency(moduleName, dependency, true);
+    return addDependency(moduleName, dependency, true, false);
   }
 
   @Override
   public Dependency addDependency(final String moduleName, final Dependency dependency,
       boolean addToDependencyManagement) {
+    return addDependency(moduleName, dependency, addToDependencyManagement, false);
+  }
+
+  @Override
+  public Dependency addDependency(final String moduleName, final Dependency dependency,
+      boolean addToDependencyManagement, boolean checkFullDependency) {
     Validate.isTrue(isProjectAvailable(moduleName),
         "Dependency modification prohibited at this time");
     Validate.notNull(dependency, "Dependency required");
     List<Dependency> result =
         addDependencies(moduleName, Collections.singletonList(dependency),
-            addToDependencyManagement);
+            addToDependencyManagement, checkFullDependency);
 
     if (result.isEmpty()) {
       return null;
@@ -261,7 +268,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     }
     final Dependency dependency =
         new Dependency(groupId, artifactId, version, DependencyType.JAR, scope, classifier);
-    return addDependency(moduleName, dependency, addToDependencyManagement);
+    return addDependency(moduleName, dependency, addToDependencyManagement, false);
   }
 
   public void addFilter(final String moduleName, final Filter filter) {
@@ -473,10 +480,15 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
   }
 
   public void addModuleDependency(final String moduleToDependUpon) {
-    addModuleDependency(getFocusedModuleName(), moduleToDependUpon);
+    addModuleDependency(getFocusedModuleName(), moduleToDependUpon, false);
   }
 
   public void addModuleDependency(final String moduleName, final String moduleToDependUpon) {
+    addModuleDependency(moduleName, moduleToDependUpon, false);
+  }
+
+  public void addModuleDependency(final String moduleName, final String moduleToDependUpon,
+      boolean testDependency) {
     Validate.isTrue(isProjectAvailable(moduleName),
         "Dependency modification prohibited at this time");
     Validate.notNull(moduleToDependUpon, "Dependency required");
@@ -491,10 +503,22 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
       if (dependencyProject != null) {
         final Pom dependencyPom = dependencyProject.getPom();
         if (!dependencyPom.getPath().equals(module.getPath())) {
-          final Dependency dependency = dependencyPom.asDependency(COMPILE);
-          if (!module.hasDependencyExcludingVersion(dependency)) {
+          if (testDependency) {
+
+            // Add as test-type dependency
+            final Dependency dependency =
+                dependencyPom.asDependency(DependencyScope.TEST,
+                    DependencyType.valueOfTypeCode("test-jar"));
             detectCircularDependency(module, dependencyPom);
             addDependency(module.getModuleName(), dependency);
+          } else {
+
+            // Add as "normal" dependency
+            final Dependency dependency = dependencyPom.asDependency(COMPILE);
+            if (!module.hasDependencyExcludingVersion(dependency)) {
+              detectCircularDependency(module, dependencyPom);
+              addDependency(module.getModuleName(), dependency);
+            }
           }
         }
       }
@@ -1362,13 +1386,44 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
    *            children.
    * @param addToDependencyManagement boolean that indicates if is necessary to include 
    * the dependency in dependencyManagement section 
-   * @param isSamePom boolean that indicates if parentPom and pom is the same 
+   * @param isSamePom boolean that indicates if parentPom and pom is the same
+   * @param checkFullDependency whether should check the existence with full 
+   *            dependency element or only compare 'artifactId' and 'groupId'. 
    * @return the list of added dependencies.
    */
   private List<Dependency> writeDependencyInPom(
       final Collection<? extends Dependency> newDependencies, final Pom parentPom, final Pom pom,
       final Document parentDocument, final Document document, final Element parentElement,
       final Element element, boolean addToDependencyManagement, boolean isSamePom) {
+    return writeDependencyInPom(newDependencies, parentPom, pom, parentDocument, document,
+        parentElement, element, addToDependencyManagement, isSamePom, false);
+  }
+
+  /**
+   * Write the dependencies provided in specified pom, as children of the provided
+   * Element (usually 'dependencies' or 'dependencyManagement').
+   *
+   * @param newDependencies the collection of Dependency to be added.
+   * @param parentPom the parent module which the dependencies should be added.
+   * @param pom the module which the dependencies should be added.
+   * @param parentDocument the parent Document to act upon.
+   * @param document the Document to act upon.
+   * @param parentElement the element where append the collection of dependencies as 
+   *            children.
+   * @param element the element where append the collection of dependencies as 
+   *            children.
+   * @param addToDependencyManagement boolean that indicates if is necessary to include 
+   * the dependency in dependencyManagement section 
+   * @param isSamePom boolean that indicates if parentPom and pom is the same
+   * @param checkFullDependency whether should check the existence with full 
+   *            dependency element or only compare 'artifactId' and 'groupId'. 
+   * @return the list of added dependencies.
+   */
+  private List<Dependency> writeDependencyInPom(
+      final Collection<? extends Dependency> newDependencies, final Pom parentPom, final Pom pom,
+      final Document parentDocument, final Document document, final Element parentElement,
+      final Element element, final boolean addToDependencyManagement, final boolean isSamePom,
+      final boolean checkFullDependency) {
 
     final List<Dependency> finalDependencies = new ArrayList<Dependency>();
     final List<String> addedDependencies = new ArrayList<String>();
@@ -1430,7 +1485,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     for (final Dependency newDependency : newDependencies) {
       // ROO-3465: Prevent version changes adding checkVersion to false
       // when check if is possible to add the new dependency
-      if (pom.canAddDependency(newDependency, false)) {
+      if (pom.canAddDependency(newDependency, checkFullDependency)) {
         // Look for any existing instances of this dependency
         boolean inserted = false;
         for (final Element existingDependencyElement : existingDependencyElements) {

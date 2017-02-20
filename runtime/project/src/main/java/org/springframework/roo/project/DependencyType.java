@@ -14,7 +14,7 @@ import org.w3c.dom.Element;
  */
 public enum DependencyType {
 
-  JAR, POM, OTHER, WAR, ZIP, APKLIB;
+  JAR, POM, OTHER, WAR, ZIP, APKLIB, TESTJAR;
 
   /**
    * Returns the type of the dependency represented by the given XML element
@@ -51,6 +51,9 @@ public enum DependencyType {
   public static DependencyType valueOfTypeCode(final String typeCode) {
     if (StringUtils.isBlank(typeCode)) {
       return JAR;
+    }
+    if ("test-jar".equals(typeCode)) {
+      return TESTJAR;
     }
     try {
       return valueOf(typeCode.toUpperCase());

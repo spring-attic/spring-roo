@@ -272,10 +272,13 @@ public interface ProjectOperations {
    * @param dependencies the dependencies to add (required)
    * @param addToDependencyManagement boolean that indicates if the new Dependency
    * 		should be included into dependencyManagement element or not.
+   * @param checkFullDependency whether should check the existence with full 
+   *            dependency element or only compare 'artifactId' and 'groupId'.
    * @return List of dependencies added on current operation
    */
   List<Dependency> addDependencies(final String moduleName,
-      Collection<? extends Dependency> dependencies, boolean addToDependencyManagement);
+      Collection<? extends Dependency> dependencies, boolean addToDependencyManagement,
+      boolean checkFullDependency);
 
   /**
    * Attempts to add the specified dependency. If the dependency already
@@ -313,11 +316,37 @@ public interface ProjectOperations {
    * @param moduleName the name of the module to act upon (required)
    * @param dependency the dependency to add (required)
    * @param addToDependencyManagement boolean that indicates if the new Dependency
-   * 		should be included into dependencyManagement element or not.
+   *        should be included into dependencyManagement element or not.
    * @return added dependency
    */
   Dependency addDependency(final String moduleName, Dependency dependency,
       boolean addToDependencyManagement);
+
+
+  /**
+   * Attempts to add the specified dependency. If the dependency already
+   * exists according to to
+   * {@link ProjectMetadata#isDependencyRegistered(org.springframework.roo.project.Dependency)}
+   * , the method silently returns. Otherwise the dependency is added.
+   * <p>
+   * If addToDependencyManagement parameter has true value, the new dependency will
+   * be included into dependencyManagement element. If false, the provided dependency
+   * will be included only as dependency.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param moduleName the name of the module to act upon (required)
+   * @param dependency the dependency to add (required)
+   * @param addToDependencyManagement boolean that indicates if the new Dependency
+   * 		should be included into dependencyManagement element or not.
+   * @param checkFullDependency whether should check the existence with full 
+   *            dependency element or only compare 'artifactId' and 'groupId'.
+   * @return added dependency
+   */
+  Dependency addDependency(final String moduleName, Dependency dependency,
+      boolean addToDependencyManagement, boolean checkFullDependency);
 
   /**
    * Allows addition of a JAR dependency to the POM.
@@ -484,6 +513,16 @@ public interface ProjectOperations {
    */
   void addModuleDependency(String moduleName, String moduleToDependUpon);
 
+  /**
+   * Adds to the given module the dependency with a module and with the 
+   * possibility of adding it only with test scope and type.
+   *
+   * @param moduleName the name of the module where to install the dependency (required)
+   * @param moduleToDependUpon the name of the module to act upon (required)
+   * @param testDependency whether the module dependency should be added with test 
+   *            scope and as test type dependency.
+   */
+  void addModuleDependency(String moduleName, String moduleToDependUpon, boolean testDependency);
 
   /**
    * Attempts to add the specified plugin repositories. If all the
