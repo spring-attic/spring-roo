@@ -535,9 +535,6 @@ public class DtoOperationsImpl implements DtoOperations {
         }
       }
 
-      projectOperations.addDependency(projectionBuilder.getName().getModule(), new Dependency(
-          "org.springframework.boot", "spring-boot-starter-data-jpa", null));
-
       fieldBuilder.setModifier(Modifier.PRIVATE);
 
       // Build field
