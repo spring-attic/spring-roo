@@ -1394,34 +1394,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
   private List<Dependency> writeDependencyInPom(
       final Collection<? extends Dependency> newDependencies, final Pom parentPom, final Pom pom,
       final Document parentDocument, final Document document, final Element parentElement,
-      final Element element, boolean addToDependencyManagement, boolean isSamePom) {
-    return writeDependencyInPom(newDependencies, parentPom, pom, parentDocument, document,
-        parentElement, element, addToDependencyManagement, isSamePom, false);
-  }
-
-  /**
-   * Write the dependencies provided in specified pom, as children of the provided
-   * Element (usually 'dependencies' or 'dependencyManagement').
-   *
-   * @param newDependencies the collection of Dependency to be added.
-   * @param parentPom the parent module which the dependencies should be added.
-   * @param pom the module which the dependencies should be added.
-   * @param parentDocument the parent Document to act upon.
-   * @param document the Document to act upon.
-   * @param parentElement the element where append the collection of dependencies as 
-   *            children.
-   * @param element the element where append the collection of dependencies as 
-   *            children.
-   * @param addToDependencyManagement boolean that indicates if is necessary to include 
-   * the dependency in dependencyManagement section 
-   * @param isSamePom boolean that indicates if parentPom and pom is the same
-   * @param checkFullDependency whether should check the existence with full 
-   *            dependency element or only compare 'artifactId' and 'groupId'. 
-   * @return the list of added dependencies.
-   */
-  private List<Dependency> writeDependencyInPom(
-      final Collection<? extends Dependency> newDependencies, final Pom parentPom, final Pom pom,
-      final Document parentDocument, final Document document, final Element parentElement,
       final Element element, final boolean addToDependencyManagement, final boolean isSamePom,
       final boolean checkFullDependency) {
 
@@ -1449,7 +1421,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
         // ROO-3465: Prevent version changes adding checkVersion to false
         // when check if is possible to add the new dependency
-        if (!parentPom.canAddDependencyToDependencyManagement(newDependency, false)) {
+        if (!parentPom.canAddDependencyToDependencyManagement(newDependency, checkFullDependency)) {
           continue;
         }
 

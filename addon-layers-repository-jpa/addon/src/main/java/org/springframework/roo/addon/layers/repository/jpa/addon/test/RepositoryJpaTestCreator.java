@@ -147,7 +147,8 @@ public class RepositoryJpaTestCreator implements TestCreatorProvider {
       Pom managedEntityModule = projectOperations.getPomFromModuleName(managedEntityModuleName);
       projectOperations.addDependency(module.getModuleName(),
           new Dependency(managedEntityModule.getGroupId(), managedEntityModule.getArtifactId(),
-              null, DependencyType.valueOfTypeCode("test-jar"), DependencyScope.TEST), false, true);
+              "${project.version}", DependencyType.valueOfTypeCode("test-jar"),
+              DependencyScope.TEST), true, true);
     }
 
     // Create integration test class
