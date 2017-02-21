@@ -55,7 +55,7 @@
                         data-data-placeholder="${r"#{"}${select2_placeholder}}">
                           <option data-th-each="item: *{${detail.pathStringFieldNames}}"
                              selected="true"
-                             data-th-text="${r"${"}item}" data-th-value="${r"${"}item.${dconfig.identifierField}}">Another product to select</option>
+                             data-th-text="${r"${{"}item}}" data-th-value="${r"${"}item.${dconfig.identifierField}}">Another product to select</option>
                       </select>
                     </div>
                 </div>
