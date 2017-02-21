@@ -5,7 +5,7 @@
  * @summary     Advanced configuration and extra features for DataTables
  * @description A collection of API methods, events and buttons for DataTables
  *   that provides advanced features in a DataTable element. Allows developers
- *   to customize the common Datatables functions easily during the DataTables 
+ *   to customize the common Datatables functions easily during the DataTables
  *   initialization.
  * @version     1.0.0
  * @file        dataTables.advanced.js
@@ -75,7 +75,7 @@
         var opts = $.extend(true, {}, DataTable.defaults.advanced);
 
         // If developer has customize some function or property,
-        // override the default ones.  
+        // override the default ones.
         if ($.isPlainObject(init)) {
 
             if (init.btnsContainerClass !== undefined) {
@@ -85,16 +85,18 @@
             if (init.buttons !== undefined && $.isPlainObject(init.buttons)) {
                 $.extend(opts.buttons, init.buttons);
 
-                // If button is provided as null, is necessary to register it 
+                // If button is provided as null, is necessary to register it
                 // with the default functionality, but will not be included to be
                 // displayed.
-                var hiddenButtons = new Array();
+                var hiddenButtons = [];
                 for (var i in opts.buttons) {
+                  if (opts.buttons.hasOwnProperty(i)) {
                     var button = opts.buttons[i];
                     if (!button) {
-                        opts.buttons[i] = DataTable.defaults.advanced.buttons[i];
-                        hiddenButtons.push(i);
+                      opts.buttons[i] = DataTable.defaults.advanced.buttons[i];
+                      hiddenButtons.push(i);
                     }
+                  }
                 }
 
             }
@@ -203,11 +205,11 @@
         });
 
         // After extend this datatable functions, is necessary to reinitialize
-        // the table to apply the new configuration, so is necessary to detroy it 
-        // and draw it again. 
+        // the table to apply the new configuration, so is necessary to detroy it
+        // and draw it again.
         // IMPORTANT: To prevent that some event registered by other plugin in the original
         // table could be called, is necessary to unregister events.
-        // IMPORTANT: You must not specify again the advanced 
+        // IMPORTANT: You must not specify again the advanced
         // attribute during the Datatables initialization to prevent that this process starts again
         $jQueryTableBody.off("click");
         $jQueryTable.DataTable().destroy();
@@ -225,12 +227,12 @@
 
 
     /*
-     * Default configuration for the DataTable Advanced 
+     * Default configuration for the DataTable Advanced
      * component.
      *
-     * IMPORTANT: Don't modify this object manually. You should 
+     * IMPORTANT: Don't modify this object manually. You should
      * configure your DataTables during the initialization. Ex:
-     * 
+     *
      * $('table').DataTable({
      *    advanced : {
      *      loadData: function(data, callback, settings) {
@@ -285,13 +287,11 @@
      */
     function getButtonsList(buttons, hiddenButtons) {
         // Create an empty array
-        var buttonsArray = new Array();
+        var buttonsArray = [];
 
         // Obtain buttons and exclude the hidden buttons
         for (var i in buttons) {
-            if (hiddenButtons == undefined) {
-                buttonsArray.push(i);
-            } else if (hiddenButtons.indexOf(i) == -1) {
+            if (hiddenButtons === undefined || hiddenButtons.indexOf(i) === -1) {
                 buttonsArray.push(i);
             }
         }
@@ -432,9 +432,9 @@
     }
 
     /**
-     * Creates a new button in the buttons plugin toolbar to export data in 
-     * CSV format using the value of the table tag attribute 
-     * 'data-export-csv-url' as a function which returns the value 
+     * Creates a new button in the buttons plugin toolbar to export data in
+     * CSV format using the value of the table tag attribute
+     * 'data-export-csv-url' as a function which returns the value
      * to be used as the URL.
      */
     function exportCsvButton(datatables, conf) {
@@ -445,9 +445,9 @@
     }
 
     /**
-     * Creates a new button in the buttons plugin toolbar to export data in 
-     * XLS format using the value of the table tag attribute 
-     * 'data-export-xls-url' as a function which returns the value 
+     * Creates a new button in the buttons plugin toolbar to export data in
+     * XLS format using the value of the table tag attribute
+     * 'data-export-xls-url' as a function which returns the value
      * to be used as the URL.
      */
     function exportExcelButton(datatables, conf) {
@@ -459,9 +459,9 @@
 
 
     /**
-     * Creates a new button in the buttons plugin toolbar to export data in 
-     * PDF format using the value of the table tag attribute 
-     * 'data-export-pdf-url' as a function which returns the value 
+     * Creates a new button in the buttons plugin toolbar to export data in
+     * PDF format using the value of the table tag attribute
+     * 'data-export-pdf-url' as a function which returns the value
      * to be used as the URL.
      */
     function exportPdfButton(datatables, conf) {
@@ -474,7 +474,7 @@
     /**
      * Generates a Datatables export button object using the provided URL
      * and the provided type.
-     * 
+     *
      * @param datatables DataTable on which the calling should act upon
      * @param url The url where export button will load
      * @param type The type of the export button. Will be used to set
@@ -484,7 +484,7 @@
     function getExportButton(datatables, url, type) {
         return {
             'action': function(e, datatables, node, config) {
-                // Check if current datatable has some records. If not, 
+                // Check if current datatable has some records. If not,
                 // show an error modal and prevent to continue
                 if (datatables.context[0]._iRecordsDisplay === 0) {
                     var tableId = getTableId(datatables);
@@ -579,7 +579,7 @@
                 }
             })
             .fail(function(jqXHR, status) {
-                if (jqXHR.responseJSON != null && jqXHR.responseJSON.status == 403) {
+                if (jqXHR.responseJSON != null && jqXHR.responseJSON.status === 403) {
                     var settings = this.settings()[0];
                     settings.oLanguage.sEmptyTable = "<p>Your session has expired or you have insufficient permissions</p>" +
                         "<a class='btn btn-primary' onclick='javascript:location.reload();'><span>Refresh</span></a>";
@@ -621,7 +621,6 @@
      * Returns the parent table id when this datatables is a detail.
      */
     function getParentTableId(datatables) {
-        var $jQueryTable = jQueryTable(datatables);
         var parentTableId = getDataValue(datatables, 'parent-table');
         if (parentTableId) {
             return "#" + parentTableId;
@@ -699,9 +698,9 @@
     /**
      * Process the given Url and the Datatables configuration to build
      * an URL that contains the Datatables parameters.
-     * This function is useful when is necessary to make a petition 
+     * This function is useful when is necessary to make a petition
      * to the server side without using AJAX.
-     * 
+     *
      * @param datatables DataTable on which the calling should act upon
      * @param url to process
      * @returns the processed url
@@ -777,7 +776,6 @@
                 params += "&";
             }
             params += datatablesColumns;
-            hasParameters = true;
         }
 
         return url + "?" + params;
@@ -1005,7 +1003,7 @@
     }
 
     /**
-     * This function will be called when DataTables has been fully 
+     * This function will be called when DataTables has been fully
      * initialised and data loaded.
      */
     function onInitComplete(oSettings, json) {
@@ -1093,7 +1091,7 @@
     }
 
     /**
-     * Registers events related to the checkboxes of the given 
+     * Registers events related to the checkboxes of the given
      * datatables.
      */
     function registerCheckBoxesEvents(datatables) {
