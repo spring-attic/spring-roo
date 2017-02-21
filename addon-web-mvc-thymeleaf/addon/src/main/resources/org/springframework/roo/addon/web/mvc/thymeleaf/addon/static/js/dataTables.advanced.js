@@ -148,6 +148,10 @@
             if (init.stateSave !== undefined) {
                 opts.stateSave = init.stateSave;
             }
+            
+            if (init.defaultButtons !== undefined) {
+            	opts.defaultButtons = init.defaultButtons;
+            }
 
         }
 
@@ -172,7 +176,7 @@
                     }
                 },
                 // Obtains a button list from the specified buttons
-                'buttons': getButtonsList(opts.buttons, hiddenButtons)
+                'buttons': getButtonsList(opts.buttons, opts.defaultButtons, hiddenButtons)
             },
             'columnDefs': [{
                 'targets': 'checkboxcol', // First column from the left
@@ -263,6 +267,14 @@
             "sPaging": "dataTables_paginate col-sm-6 paging_",
             "sProcessing": "dataTables_processing progress-bar progress-bar-striped active"
         },
+        "defaultButtons": [{
+            'extend': 'colvis',
+            'className': 'btn-action',
+        },
+        {
+            'extend': 'pageLength',
+            'className': 'btn-action',
+        }],
         "deferRender": true,
         "dom": 'Bfrtip',
         "loadData": loadData,
@@ -285,7 +297,7 @@
      * in the default options or in the custom values provided by the
      * developer.
      */
-    function getButtonsList(buttons, hiddenButtons) {
+    function getButtonsList(buttons, defaultButtons, hiddenButtons) {
         // Create an empty array
         var buttonsArray = [];
 
@@ -296,14 +308,8 @@
             }
         }
 
-        // Include default buttons
-        buttonsArray.push({
-            'extend': 'colvis',
-            'className': 'btn-action',
-        }, {
-            'extend': 'pageLength',
-            'className': 'btn-action',
-        });
+        // Finally include default buttons
+        buttonsArray.push(defaultButtons);
 
         return buttonsArray;
 
