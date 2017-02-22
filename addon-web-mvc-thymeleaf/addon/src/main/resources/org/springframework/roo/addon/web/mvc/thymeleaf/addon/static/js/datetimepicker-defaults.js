@@ -94,9 +94,9 @@
 					formatTime : getSelectorTimeFormat(momentPattern)
 				});
 			} else {
-				var momentPattern = moment.javaToMomentDateFormat();
+				var emptyMomentPattern = moment.javaToMomentDateFormat();
 				jQuery.extend(options, {
-					format : momentPattern,
+					format : emptyMomentPattern,
 					formatDate : "YYYY/MM/DD",
 					formatTime : "HH:mm"
 				});

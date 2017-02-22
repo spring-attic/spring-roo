@@ -50,7 +50,7 @@
 				pattern = pattern.replace(/w{1,}/g, "WW");
 			}
 		} else {
-			var pattern = "YYYY/MM/DD HH:mm";
+			return "YYYY/MM/DD HH:mm";
 		}
 
 		return pattern;
@@ -63,7 +63,7 @@
 	 *            string
 	 * @returns true if !format or format contains ('YQDMdw')
 	 */
-	moment.isDateFormatDate = function isDateFormatDate(format) {
+	moment.isDateFormatDate = function (format) {
 		if (!format) {
 			return true;
 		}
