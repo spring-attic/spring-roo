@@ -377,6 +377,54 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
   }
 
   @Override
+  public void addShowInlineView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entityDetails, ViewContext<T> ctx) {
+
+    // Getting entity fields that should be included on view
+    List<FieldMetadata> entityFields = new ArrayList<FieldMetadata>();
+
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
+
+    Map<String, List<FieldItem>> compositeRelationFields =
+        manageChildcompositionFields(entityMetadata, entityDetails, ctx);
+
+    // Remove one-to-one fields from composite relations and create EntityItems
+    // for each referenced entity field
+    Set<String> compositeRelationFieldNames = compositeRelationFields.keySet();
+    for (FieldMetadata field : getPersistentFields(entityDetails.getFields())) {
+      if (!compositeRelationFieldNames.contains(field.getFieldName().getSymbolName())) {
+        entityFields.add(field);
+      }
+    }
+    List<FieldItem> fields =
+        getFieldViewItems(entityMetadata, entityFields, ctx.getEntityName(), false, ctx,
+            FIELD_SUFFIX);
+
+    ctx.addExtraParameter("fields", fields);
+    ctx.addExtraParameter("entity", entityItem);
+    ctx.addExtraParameter("compositeRelationFields", compositeRelationFields);
+
+    // Process elements to generate
+    DOC newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/")
+            .concat("/showInline").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge("showInline", loadExistingDoc(viewName), ctx, fields);
+    } else {
+      newDoc = process("showInline", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
   public void addCreateView(String moduleName, JpaEntityMetadata entityMetadata,
       MemberDetails entityDetails, ViewContext<T> ctx) {
 

@@ -1219,9 +1219,13 @@
         var buttons = '<div class="btn-group" role="group">';
 
         var showUrl = getShowUrl(datatables, rowId);
-        if (showUrl) {
+        // Check if the show will be inline
+        var showInline = getDataValue(datatables, 'show-inline');
+        if (showUrl && !showInline) {
             buttons = buttons.concat('<a class="btn btn-action btn-sm" href="')
                 .concat(showUrl).concat('" ><span class="glyphicon glyphicon-eye-open"></span></a>');
+        }else if(showUrl && showInline){
+        	buttons = buttons.concat('<a class="btn btn-action btn-sm" href="#" onclick="jQuery(\'#').concat(tableId).concat('\').DataTable().advanced.showInline(this, jQuery(\'#').concat(tableId).concat('\').DataTable(),\'').concat(showUrl).concat('\')"><span class="glyphicon glyphicon-eye-open"></span></a>');
         }
 
         var editUrl = getEditUrl(datatables, rowId);
@@ -1240,7 +1244,32 @@
         buttons = buttons.concat('</div>');
         return buttons;
     }
-
+    
+    
+    /**
+     * This method tries to display the show view of the selected record
+     * expanding the selected row.
+     */
+    function showInline(showButton, datatables, showUrl){
+    	var tr = showButton.closest('tr');
+        var row = datatables.row( tr );
+        if ( row.child.isShown() ) {
+            // This row is already open - close it
+            row.child.hide();
+        }
+        else {
+        	$.ajax({
+    		  url: showUrl + "/inline",
+    		  dataType: 'html'
+    		}).done(function(data) {
+    			// Open this row
+    			row.child(data).show();
+    		}).fail(function(data){
+    			// Show error in new row
+    			row.child("<div class='alert alert-danger'>ERROR: An error occurred while trying to obtain more info.</div>").show();
+    		});
+        }
+    }
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * DataTables Advanced Extension API
@@ -1272,6 +1301,8 @@
     apiRegister('advanced.getExportCsvButton()', exportCsvButton);
     apiRegister('advanced.getExportExcelButton()', exportExcelButton);
     apiRegister('advanced.getExportPdfButton()', exportPdfButton);
+    
+    apiRegister('advanced.showInline()', showInline);
 
 
 

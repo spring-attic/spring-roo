@@ -103,6 +103,20 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
       List<T> detailsControllers, ViewContext<T> ctx);
 
   /**
+   * This operation will add a showInline view using entityDetails
+   * and the provided context
+   *
+   * @param moduleName module where show view will be added
+   * @param entityMetadata entity metadata which contains information about it
+   * @param entity Details of an entity to be able to generate view
+   * @param detailsControllers list of related details controller to include
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addShowInlineView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
+      ViewContext<T> ctx);
+
+  /**
    * This operation will add views related to a details controller using entityDetails
    * and the provided context
    *

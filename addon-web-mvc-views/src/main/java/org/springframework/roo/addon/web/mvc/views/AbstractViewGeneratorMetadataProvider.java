@@ -455,6 +455,9 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
         viewGenerationService.addShowView(module, entityMetadata, entityMemberDetails,
             detailsControllersForShowView, ctx);
 
+        // Add showInline view
+        viewGenerationService.addShowInlineView(module, entityMetadata, entityMemberDetails, ctx);
+
         if (!entityMetadata.isReadOnly()) {
           // If not readOnly, add update view
           viewGenerationService.addUpdateView(module, entityMetadata, entityMemberDetails, ctx);

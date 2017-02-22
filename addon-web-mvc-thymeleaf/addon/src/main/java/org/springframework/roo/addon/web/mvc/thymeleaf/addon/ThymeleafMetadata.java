@@ -85,6 +85,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   protected static final JavaSymbolName SELECT2_METHOD_NAME = new JavaSymbolName("select2");
   protected static final JavaSymbolName SHOW_URI_METHOD_NAME = new JavaSymbolName("showURI");
   protected static final JavaSymbolName SHOW_METHOD_NAME = new JavaSymbolName("show");
+  protected static final JavaSymbolName SHOW_INLINE_METHOD_NAME = new JavaSymbolName("showInline");
   protected static final JavaSymbolName CREATE_FORM_METHOD_NAME = new JavaSymbolName("createForm");
   protected static final JavaSymbolName EDIT_FORM_METHOD_NAME = new JavaSymbolName("editForm");
   protected static final JavaSymbolName UPDATE_METHOD_NAME = new JavaSymbolName("update");
@@ -206,6 +207,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private final MethodMetadata updateMethod;
   private final MethodMetadata deleteMethod;
   private final MethodMetadata showMethod;
+  private final MethodMetadata showInlineMethod;
   private final MethodMetadata populateFormMethod;
   private final MethodMetadata populateFormatsMethod;
 
@@ -248,6 +250,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private final MethodMetadata updateDetailMethod;
   private final MethodMetadata deleteDetailMethod;
   private final MethodMetadata showDetailMethod;
+  private final MethodMetadata showDetailInlineMethod;
   private final String ITEM_LINK = "itemLink";
   private final String COLLECTION_LINK = "collectionLink";
   private final String entityPluralUncapitalized;
@@ -421,6 +424,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateMethod = null;
         this.deleteMethod = null;
         this.showMethod = null;
+        this.showInlineMethod = null;
         this.modelAttributeDetailsMethod = null;
         this.listDatatablesDetailsMethod = null;
         this.finderListMethods = null;
@@ -435,6 +439,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateDetailMethod = null;
         this.deleteDetailMethod = null;
         this.showDetailMethod = null;
+        this.showDetailInlineMethod = null;
 
         // Jasper export methods
         List<MethodMetadata> exportMethods = new ArrayList<MethodMetadata>();
@@ -467,6 +472,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         // Build methods
         this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
         this.showMethod = addAndGet(getShowMethod(), allMethods);
+        this.showInlineMethod = addAndGet(getShowInlineMethod(), allMethods);
         if (readOnly) {
           this.editFormMethod = null;
           this.updateMethod = null;
@@ -503,6 +509,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateDetailMethod = null;
         this.deleteDetailMethod = null;
         this.showDetailMethod = null;
+        this.showDetailInlineMethod = null;
 
         // Jasper export methods
         this.exportMethod = null;
@@ -558,6 +565,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateMethod = null;
         this.deleteMethod = null;
         this.showMethod = null;
+        this.showInlineMethod = null;
         this.populateFormMethod = null;
         this.populateFormatsMethod = null;
         this.modelAttributeDetailsMethod = null;
@@ -572,6 +580,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateDetailMethod = null;
         this.deleteDetailMethod = null;
         this.showDetailMethod = null;
+        this.showDetailInlineMethod = null;
 
         // Jasper export methods
         this.exportMethod = null;
@@ -653,6 +662,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateMethod = null;
         this.deleteMethod = null;
         this.showMethod = null;
+        this.showInlineMethod = null;
         this.finderListMethods = null;
         this.finderDatatableMethods = null;
         this.finderFormMethods = null;
@@ -662,6 +672,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateDetailMethod = null;
         this.deleteDetailMethod = null;
         this.showDetailMethod = null;
+        this.showDetailInlineMethod = null;
 
         // Jasper export methods
         this.exportMethod = null;
@@ -713,6 +724,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateDetailMethod = addAndGet(getUpdateDetailMethod(), allMethods);
         this.deleteDetailMethod = addAndGet(getDeleteDetailMethod(), allMethods);
         this.showDetailMethod = addAndGet(getShowDetailMethod(), allMethods);
+        this.showDetailInlineMethod = addAndGet(getShowDetailInlineMethod(), allMethods);
         this.listMethod = null;
         this.listDatatablesMethod = null;
         this.createMethod = null;
@@ -723,6 +735,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.updateMethod = null;
         this.deleteMethod = null;
         this.showMethod = null;
+        this.showInlineMethod = null;
         this.finderDatatableMethods = null;
         this.finderListMethods = null;
         this.finderFormMethods = null;
@@ -3470,6 +3483,54 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   }
 
   /**
+   * This method provides the "showInline" method using Thymeleaf view response type
+   *
+   * @return MethodMetadata
+   */
+  private MethodMetadata getShowInlineMethod() {
+    // Define methodName
+    final JavaSymbolName methodName = SHOW_INLINE_METHOD_NAME;
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(this.entity, ANN_METADATA_MODEL_ATTRIBUTE));
+    parameterTypes.add(MODEL_PARAM);
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName(entityItemName));
+    parameterNames.add(MODEL_PARAM_NAME);
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    AnnotationMetadataBuilder getMappingAnnotation = new AnnotationMetadataBuilder(GET_MAPPING);
+    getMappingAnnotation.addStringAttribute("value", "/inline");
+    getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    annotations.add(getMappingAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // return new ModelAndView("customers/showInline :: inline-content");
+    bodyBuilder.appendFormalLine("return new %s(\"%s/showInline :: inline-content\");",
+        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            SpringJavaType.MODEL_AND_VIEW, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
    * This method provides the "show" detail method using Thymeleaf view
    * response type
    *
@@ -3515,6 +3576,64 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // return new ModelAndView("customerorders/details/show");
     bodyBuilder.appendFormalLine("return new %s(\"%s/%s/show\");",
+        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath,
+        controllerMetadata.getDetailsPathAsString("/"));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            SpringJavaType.MODEL_AND_VIEW, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "showInline" detail method using Thymeleaf view
+   * response type
+   *
+   * @return MethodMetadata
+   */
+  private MethodMetadata getShowDetailInlineMethod() {
+    // Define methodName
+    final JavaSymbolName methodName = SHOW_INLINE_METHOD_NAME;
+
+    final RelationInfoExtended info = controllerMetadata.getLastDetailsInfo();
+    final JavaType parentEntity = info.entityType;
+    final JavaType entity = info.childType;
+    final String entityItemName = StringUtils.uncapitalize(entity.getSimpleTypeName());
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(parentEntity, ANN_METADATA_MODEL_ATTRIBUTE));
+    parameterTypes.add(new AnnotatedJavaType(entity, ANN_METADATA_MODEL_ATTRIBUTE));
+    parameterTypes.add(MODEL_PARAM);
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName(
+        StringUtils.uncapitalize(parentEntity.getSimpleTypeName())));
+    parameterNames.add(new JavaSymbolName(entityItemName));
+    parameterNames.add(MODEL_PARAM_NAME);
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    AnnotationMetadataBuilder getMappingAnnotation = new AnnotationMetadataBuilder(GET_MAPPING);
+    getMappingAnnotation.addStringAttribute("value", "/inline");
+    getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    annotations.add(getMappingAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // return new ModelAndView("customerorders/details/showInline :: inline-content");
+    bodyBuilder.appendFormalLine("return new %s(\"%s/%s/showInline :: inline-content\");",
         getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath,
         controllerMetadata.getDetailsPathAsString("/"));
 
