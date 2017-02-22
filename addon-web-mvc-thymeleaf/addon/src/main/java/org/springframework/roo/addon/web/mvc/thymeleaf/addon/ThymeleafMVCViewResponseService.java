@@ -566,6 +566,12 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     getProjectOperations().addProperty(rootModuleName, new Property("html5shiv.version", "3.7.3"));
     dependencies.add(new Dependency("org.webjars", "html5shiv", "${html5shiv.version}"));
 
+    // Add ie10-viewport-bug-workaround WebJar
+    getProjectOperations().addProperty(rootModuleName,
+        new Property("bootstrap.ie10-viewport-bug-workaround.version", "1.0.3"));
+    dependencies.add(new Dependency("org.webjars.bower", "ie10-viewport-bug-workaround",
+        "${bootstrap.ie10-viewport-bug-workaround.version}"));
+
     getProjectOperations().addDependencies(module.getModuleName(), dependencies);
 
   }

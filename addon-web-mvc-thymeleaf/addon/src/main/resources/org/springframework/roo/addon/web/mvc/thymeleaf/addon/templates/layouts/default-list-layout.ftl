@@ -23,9 +23,9 @@
       data-th-href="@{/webjars/bootstrap/dist/css/bootstrap.css}"></link>
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <link rel="stylesheet" type="text/css"
-      href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
-      data-th-href="@{/public/css/ie10-viewport-bug-workaround.css}"></link>
+    <link rel="stylesheet" type="text/css" 
+      href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" 
+      data-th-href="@{/webjars/ie10-viewport-bug-workaround/dist/ie10-viewport-bug-workaround.min.css}" />
 
     <!-- Font Awesome -->
     <link rel="stylesheet" type="text/css"
@@ -116,9 +116,9 @@
       data-th-src="@{/webjars/bootstrap/dist/js/bootstrap.js}"></script>
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="../../static/public/js/ie10-viewport-bug-workaround.js"
-      data-th-src="@{/public/js/ie10-viewport-bug-workaround.js}">
-      </script>
+    <script src="https://maxcdn.bootstrapcdn.com/js/ie10-viewport-bug-workaround.js" 
+      data-th-src="@{/webjars/ie10-viewport-bug-workaround/dist/ie10-viewport-bug-workaround.min.js}" >
+    </script>
 
     <!-- MomentJS - date format -->
     <script
