@@ -231,8 +231,9 @@ public class TestCommands implements CommandMarker {
           key = "module",
           mandatory = true,
           help = "The application module where generate the integration test."
-              + "This option is mandatory if the focus is not set in an application module, that is, a "
-              + "module containing an `@SpringBootApplication` class. "
+              + "This option is mandatory if the focus is not set in an 'application' module and there "
+              + "are more than one 'application' modules, that is, a module containing an "
+              + "`@SpringBootApplication` class. "
               + "This option is available only if there are more than one application module and none of"
               + " them is focused. "
               + "Default if option not present: the unique 'application' module, or focused 'application'"

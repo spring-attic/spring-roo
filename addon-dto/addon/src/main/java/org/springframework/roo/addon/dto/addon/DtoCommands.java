@@ -132,9 +132,8 @@ public class DtoCommands implements CommandMarker {
           key = "entityFormatExpression",
           mandatory = false,
           help = "The SpEL expression used to format the entity when showing it in presentation layer e.g. "
-              + "{#fieldA} {#fieldB}. It adds the `value` attribute to `io.springlets.format.EntityFormat` "
-              + "annotation."
-              + "This option is available only if `--entityFormatMessage` has not been specified.") String formatExpression,
+              + "`{#fieldA} {#fieldB}`. It adds the `value` attribute to `io.springlets.format.EntityFormat` "
+              + "annotation.") String formatExpression,
       @CliOption(
           key = "entityFormatMessage",
           mandatory = false,
@@ -142,8 +141,7 @@ public class DtoCommands implements CommandMarker {
               + "showing it in presentation layer. It adds the `message` attribute to "
               + "`io.springlets.format.EntityFormat` annotation and creates a message in all message bundles "
               + "with the provided key. Message value should be  modified by developer. This kind of format "
-              + "has more priority that 'expression' format added with `--entityFormatExpression`"
-              + "This option is available only if `--entityFormatExpression` has not been specified.") String formatMessage,
+              + "has more priority that 'expression' format added with `--entityFormatExpression`.") String formatMessage,
       ShellContext shellContext) {
 
     // Check if DTO already exists
@@ -572,8 +570,9 @@ public class DtoCommands implements CommandMarker {
               + "Ex.: `--class ~.domain.MyProjection`. You can specify module as well, if necessary. "
               + "Ex.: `--class model:~.domain.MyProjection`. When working with a multi-module "
               + "project, if module is not specified the projection will be created in the module "
-              + "which has the focus."
-              + "This option is mandatory if `--all` is not specified. Otherwise, using `--all` will cause the parameter `--class` won't be") final JavaType name,
+              + "which has the focus. "
+              + "This option is mandatory if `--all` is not specified. Otherwise, using `--all` will "
+              + "cause the parameter `--class` won't be available.") final JavaType name,
       @CliOption(
           key = "entity",
           mandatory = true,
@@ -592,15 +591,15 @@ public class DtoCommands implements CommandMarker {
           mandatory = false,
           unspecifiedDefaultValue = "Projection",
           help = "Suffix added to each Projection class name, built from each associated entity name. "
-              + "This option is only available if `--all` has been already specified."
+              + "This option is only available if `--all` has been already specified. "
               + "Default if option not present: 'Projection'.") final String suffix,
       @CliOption(
           key = "entityFormatExpression",
           mandatory = false,
           help = "The SpEL expression used to format the entity when showing it in presentation layer e.g. "
               + "{#fieldA} {#fieldB}. It adds the `value` attribute to `io.springlets.format.EntityFormat` "
-              + "annotation."
-              + "This option is available only if `--entityFormatMessage` has not been specified.") String formatExpression,
+              + "annotation. "
+              + "This option is available only if `--entity` has been specified.") String formatExpression,
       @CliOption(
           key = "entityFormatMessage",
           mandatory = false,
@@ -608,8 +607,8 @@ public class DtoCommands implements CommandMarker {
               + "showing it in presentation layer. It adds the `message` attribute to "
               + "`io.springlets.format.EntityFormat` annotation and creates a message in all message bundles "
               + "with the provided key. Message value should be  modified by developer. This kind of format "
-              + "has more priority that 'expression' format added with `--entityFormatExpression`"
-              + "This option is available only if `--entityFormatExpression` has not been specified.") String formatMessage,
+              + "has more priority that 'expression' format added with `--entityFormatExpression`. "
+              + "This option is available only if `--entity` has been specified.") String formatMessage,
       ShellContext shellContext) {
 
     // Check if Projection already exists

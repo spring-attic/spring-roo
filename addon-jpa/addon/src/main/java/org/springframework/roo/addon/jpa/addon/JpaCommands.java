@@ -155,7 +155,7 @@ public class JpaCommands implements CommandMarker {
               + "Default if option present: `true`; default if option not present: `false`.") final boolean serializable,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates whether reserved words are ignored by Roo."
+          help = "Indicates whether reserved words are ignored by Roo. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords) {
 
     if (!permitReservedWords) {
@@ -536,32 +536,32 @@ public class JpaCommands implements CommandMarker {
           mandatory = true,
           specifiedDefaultValue = "AUTO",
           help = "The generation value strategy to be used."
-              + " This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting it’s `true`."
+              + " This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting it’s `true`. "
               + "Default if option present: `AUTO`.") final IdentifierStrategy identifierStrategy,
       @CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object",
           optionContext = SUPERCLASS, help = "The fully qualified name of the superclass. "
               + "Default if option not present: `java.lang.Object`.") final JavaType superclass,
       @CliOption(key = "implements", mandatory = false, optionContext = INTERFACE,
-          help = "The fully qualified name of the interface to implement") final JavaType implementsType,
+          help = "The fully qualified name of the interface to implement.") final JavaType implementsType,
       @CliOption(key = "abstract", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
           help = "Whether the generated class should be marked as abstract. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean createAbstract,
       @CliOption(key = "schema", mandatory = false,
-          help = "The JPA table schema name to use for this entity") final String schema,
+          help = "The JPA table schema name to use for this entity.") final String schema,
       @CliOption(key = "catalog", mandatory = false,
-          help = "The JPA table catalog name to use for this entity") final String catalog,
+          help = "The JPA table catalog name to use for this entity.") final String catalog,
       @CliOption(key = "identifierField", mandatory = false,
-          help = "The JPA identifier field name to use for this entity") final String identifierField,
+          help = "The JPA identifier field name to use for this entity.") final String identifierField,
       @CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang,project",
           unspecifiedDefaultValue = IDENTIFIER_DEFAULT_TYPE,
           specifiedDefaultValue = "java.lang.Long",
-          help = "The data type that will be used for the JPA identifier field."
+          help = "The data type that will be used for the JPA identifier field. "
               + "Default: `java.lang.Long`.") final JavaType identifierType,
       @CliOption(key = "inheritanceType", mandatory = false,
           help = "The JPA @Inheritance value (apply to base class)") final InheritanceType inheritanceType,
       @CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true",
-          unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity."
+          unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean mappedSuperclass,
       @CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
@@ -569,25 +569,24 @@ public class JpaCommands implements CommandMarker {
               + "Default if option present: `true`; default if option not present: `false`.") final boolean serializable,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates whether reserved words are ignored by Roo."
+          help = "Indicates whether reserved words are ignored by Roo. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords,
       @CliOption(key = "entityName", mandatory = false,
-          help = "The name used to refer to the entity in queries") final String entityName,
+          help = "The name used to refer to the entity in queries.") final String entityName,
       @CliOption(key = "readOnly", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether the generated entity should be used for read operations only."
+          help = "Whether the generated entity should be used for read operations only. "
               + "Default if option present: `true`; default if option not present `false`.") final boolean readOnly,
       @CliOption(
           key = "plural",
           mandatory = false,
-          help = "Specify the plural of this new entity. If not provided, a calculated plural will be used by default") String plural,
+          help = "Specify the plural of this new entity. If not provided, a calculated plural will be used by default.") String plural,
       @CliOption(
           key = "entityFormatExpression",
           mandatory = false,
           help = "The SpEL expression used to format the entity when showing it in presentation layer e.g. "
-              + "{#fieldA} {#fieldB}. It adds the `value` attribute to `io.springlets.format.EntityFormat` "
-              + "annotation."
-              + "This option is available only if `--entityFormatMessage` has not been specified.") String formatExpression,
+              + "`{#fieldA} {#fieldB}`. It adds the `value` attribute to `io.springlets.format.EntityFormat` "
+              + "annotation.") String formatExpression,
       @CliOption(
           key = "entityFormatMessage",
           mandatory = false,
@@ -595,8 +594,7 @@ public class JpaCommands implements CommandMarker {
               + "showing it in presentation layer. It adds the `message` attribute to "
               + "`io.springlets.format.EntityFormat` annotation and creates a message in all message bundles "
               + "with the provided key. Message value should be  modified by developer. This kind of format "
-              + "has more priority that 'expression' format added with `--entityFormatExpression`"
-              + "This option is available only if `--entityFormatExpression` has not been specified.") String formatMessage,
+              + "has more priority that 'expression' format added with `--entityFormatExpression`.") String formatMessage,
       ShellContext shellContext) {
 
     Validate.isTrue(!identifierType.isPrimitive(), "Identifier type cannot be a primitive");

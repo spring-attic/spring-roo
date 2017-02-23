@@ -52,7 +52,7 @@ public class ClasspathCommands implements CommandMarker {
           mandatory = false,
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether the generated class should have common Roo annotations (`@RooToString`, `@RooEquals` and `@RooSerializable`)"
+          help = "Whether the generated class should have common Roo annotations (`@RooToString`, `@RooEquals` and `@RooSerializable`). "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean rooAnnotations,
       @CliOption(key = "path", mandatory = false,
           unspecifiedDefaultValue = "FOCUSED:SRC_MAIN_JAVA",
@@ -94,7 +94,7 @@ public class ClasspathCommands implements CommandMarker {
         createAbstract, permitReservedWords);
   }
 
-  @CliCommand(value = "constructor", help = "Creates a class constructor")
+  @CliCommand(value = "constructor", help = "Creates a class constructor.")
   public void createConstructor(
       @CliOption(
           key = "class",
@@ -118,7 +118,7 @@ public class ClasspathCommands implements CommandMarker {
     classpathOperations.createConstructor(name, fields);
   }
 
-  @CliCommand(value = "enum type", help = "Creates a new Java enum source file in any project path")
+  @CliCommand(value = "enum type", help = "Creates a new Java enum source file in any project path.")
   public void createEnum(
       @CliOption(
           key = "class",
@@ -132,11 +132,11 @@ public class ClasspathCommands implements CommandMarker {
       @CliOption(key = "path", mandatory = false,
           unspecifiedDefaultValue = "FOCUSED:SRC_MAIN_JAVA",
           specifiedDefaultValue = "FOCUSED:SRC_MAIN_JAVA",
-          help = "Source directory where create the enum."
+          help = "Source directory where create the enum. "
               + "Default: _[FOCUSED-MODULE]/src/main/java_") final LogicalPath path,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates whether reserved words are ignored by Roo"
+          help = "Indicates whether reserved words are ignored by Roo. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords,
       ShellContext shellContext) {
 
@@ -189,7 +189,7 @@ public class ClasspathCommands implements CommandMarker {
     classpathOperations.createInterface(name, path, permitReservedWords);
   }
 
-  @CliCommand(value = "enum constant", help = "Inserts a new enum constant into an enum")
+  @CliCommand(value = "enum constant", help = "Inserts a new enum constant into an enum class.")
   public void enumConstant(
       @CliOption(key = "name", mandatory = true,
           help = "The name of the constant. It will converted to upper case automatically.") final JavaSymbolName fieldName,
@@ -204,10 +204,12 @@ public class ClasspathCommands implements CommandMarker {
               + "(where `~` is the base package). When working with multiple modules, you should specify the "
               + "name of the class and the module where it is. Ex.: `--class model:~.domain.MyEnumClass`. "
               + "If the module is not specified, it is assumed that the class is in the module which has the "
-              + "focus.") final JavaType name,
+              + "focus. "
+              + "Default if option not present: the class focused by Roo shell.") final JavaType name,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+          help = "Indicates whether reserved words are ignored by Roo. "
+              + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords) {
 
     classpathOperations.enumConstant(name, fieldName, permitReservedWords);
   }

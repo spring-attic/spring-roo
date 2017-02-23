@@ -21,7 +21,7 @@ public class BackupCommands implements CommandMarker {
   private BackupOperations backupOperations;
 
   @CliCommand(value = "backup",
-      help = "Backup your project to a zip file located in root directory.")
+      help = "Backups your project to a zip file located in root directory.")
   public String backup() {
     return backupOperations.backup();
   }

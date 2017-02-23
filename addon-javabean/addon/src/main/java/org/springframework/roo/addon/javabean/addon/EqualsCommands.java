@@ -67,7 +67,8 @@ public class EqualsCommands implements CommandMarker {
               + "Default if option not present: the class focused by Roo shell.") final JavaType javaType,
       @CliOption(key = "appendSuper", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "Whether to call the super class `equals()` and `hashCode()` methods."
+          help = "Whether to call the super class `equals()` and `hashCode()` methods. This param "
+              + "has no effect when used against JPA entities. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean appendSuper,
       @CliOption(
           key = "excludeFields",
