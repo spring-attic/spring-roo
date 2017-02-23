@@ -1655,6 +1655,26 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     ControllerAnnotationValues values = new ControllerAnnotationValues(controller);
     StringBuilder sbuilder = getBasePathStringBuilder(controller, values);
+
+    // Before continue, check if the controller has a custom @RequestMapping annotation
+    AnnotationMetadata requestMappingAnnotation =
+        controller.getAnnotation(SpringJavaType.REQUEST_MAPPING);
+    if (requestMappingAnnotation != null) {
+      String customPath = "";
+      if (requestMappingAnnotation.getAttribute("value") != null) {
+        String path = (String) requestMappingAnnotation.getAttribute("value").getValue();
+        // Only the base path should be returned
+        customPath = path.split("\\{")[0];
+        if (customPath.endsWith("/")) {
+          customPath = customPath.substring(0, customPath.length() - 1);
+        }
+      }
+      // If some path has been specified and is different of the calculated one, return this one
+      if (StringUtils.isNotEmpty(customPath) && !customPath.equals(sbuilder.toString())) {
+        return customPath;
+      }
+    }
+
     return sbuilder.toString();
   }
 
