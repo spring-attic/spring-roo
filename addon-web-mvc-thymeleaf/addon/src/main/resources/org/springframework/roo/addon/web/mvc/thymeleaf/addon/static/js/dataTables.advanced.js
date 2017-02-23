@@ -1225,7 +1225,7 @@
             buttons = buttons.concat('<a class="btn btn-action btn-sm" href="')
                 .concat(showUrl).concat('" ><span class="glyphicon glyphicon-eye-open"></span></a>');
         }else if(showUrl && showInline){
-        	buttons = buttons.concat('<a class="btn btn-action btn-sm" href="#" onclick="jQuery(\'#').concat(tableId).concat('\').DataTable().advanced.showInline(this, jQuery(\'#').concat(tableId).concat('\').DataTable(),\'').concat(showUrl).concat('\')"><span class="glyphicon glyphicon-eye-open"></span></a>');
+        	buttons = buttons.concat('<a aria-expanded="false" class="btn btn-action btn-sm" href="#" onclick="event.preventDefault();jQuery(\'#').concat(tableId).concat('\').DataTable().advanced.showInline(this, jQuery(\'#').concat(tableId).concat('\').DataTable(),\'').concat(showUrl).concat('\')" role="button"><span class="glyphicon glyphicon-eye-open"></span></button>');
         }
 
         var editUrl = getEditUrl(datatables, rowId);
@@ -1255,19 +1255,21 @@
         var row = datatables.row( tr );
         if ( row.child.isShown() ) {
             // This row is already open - close it
+            $(showButton).attr("aria-expanded", "false");
             row.child.hide();
         }
         else {
-        	$.ajax({
-    		  url: showUrl + "/inline",
-    		  dataType: 'html'
-    		}).done(function(data) {
-    			// Open this row
-    			row.child(data).show();
-    		}).fail(function(data){
-    			// Show error in new row
-    			row.child("<div class='alert alert-danger'>ERROR: An error occurred while trying to obtain more info.</div>").show();
-    		});
+           $(showButton).attr("aria-expanded", "true");
+           $.ajax({
+    		      url: showUrl + "/inline",
+    		      dataType: 'html'
+    		    }).done(function(data) {
+    			    // Open this row
+    			    row.child(data).show();
+    		    }).fail(function(data){
+    			    // Show error in new row
+    			    row.child("<div class='alert alert-danger'>ERROR: An error occurred while trying to obtain more info.</div>").show();
+    		    });
         }
     }
 
