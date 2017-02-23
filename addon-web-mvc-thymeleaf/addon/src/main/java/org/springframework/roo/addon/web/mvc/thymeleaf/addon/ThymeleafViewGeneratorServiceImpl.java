@@ -118,10 +118,63 @@ public class ThymeleafViewGeneratorServiceImpl extends
     Map<String, String> structureUserManaged = new HashMap<String, String>();
     Elements elementsUserManaged =
         loadExistingDoc.getElementsByAttributeValue("data-z", "user-managed");
-    for (Element elementUserManaged : elementsUserManaged) {
+
+    List<Element> elementsToCheck = new ArrayList<Element>();
+    List<Element> topMostElements = new ArrayList<Element>();
+
+    // Get the top most user-managed level
+    Integer topMostElementLevel = null;
+    for (Element element : elementsUserManaged) {
+      if (topMostElementLevel == null) {
+
+        // Add first element always
+        topMostElementLevel = element.parents().size();
+        topMostElements.add(element);
+        continue;
+      }
+      if (element.parents().size() < topMostElementLevel) {
+
+        // Clear list and add the new element
+        topMostElementLevel = element.parents().size();
+        topMostElements.clear();
+        topMostElements.add(element);
+        continue;
+      }
+
+      if (element.parents().size() == topMostElementLevel) {
+
+        // Its a sibling element. Add the element to list without clearing it
+        topMostElements.add(element);
+      }
+    }
+
+    // First, add the top most elements
+    elementsToCheck.addAll(topMostElements);
+
+    for (Element element : elementsUserManaged) {
+
+      // Check if element is child any of the other elements added
+      boolean isChildElement = false;
+      for (Element topMostElement : topMostElements) {
+        if (StringUtils.isNotBlank(element.id())
+            && topMostElement.getElementById(element.id()) != null) {
+          isChildElement = true;
+          break;
+        }
+      }
+
+      if (!isChildElement) {
+
+        // It is not child of top most level elements, so add it 
+        elementsToCheck.add(element);
+      }
+    }
+
+    // Add elements to user managed structure
+    for (Element elementUserManaged : elementsToCheck) {
       String id = elementUserManaged.attr("id");
-      if (id != null) {
-        String code = elementsUserManaged.outerHtml();
+      if (StringUtils.isNotBlank(id)) {
+        String code = elementUserManaged.outerHtml();
         structureUserManaged.put(id, code);
       }
     }
