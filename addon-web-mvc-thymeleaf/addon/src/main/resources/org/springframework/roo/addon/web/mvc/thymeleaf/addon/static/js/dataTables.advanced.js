@@ -1225,7 +1225,7 @@
             buttons = buttons.concat('<a class="btn btn-action btn-sm" href="')
                 .concat(showUrl).concat('" ><span class="glyphicon glyphicon-eye-open"></span></a>');
         }else if(showUrl && showInline){
-        	buttons = buttons.concat('<a aria-expanded="false" class="btn btn-action btn-sm" href="#" onclick="event.preventDefault();jQuery(\'#').concat(tableId).concat('\').DataTable().advanced.showInline(this, jQuery(\'#').concat(tableId).concat('\').DataTable(),\'').concat(showUrl).concat('\')" role="button"><span class="glyphicon glyphicon-eye-open"></span></button>');
+        	buttons = buttons.concat('<a aria-expanded="false" class="btn btn-action btn-sm" href="#" onclick="event.preventDefault();jQuery(\'#').concat(tableId).concat('\').DataTable().advanced.showInline(this, jQuery(\'#').concat(tableId).concat('\').DataTable(),\'').concat(showUrl).concat('\')" role="button"><span class="glyphicon glyphicon-eye-open"></span></a>');
         }
 
         var editUrl = getEditUrl(datatables, rowId);
