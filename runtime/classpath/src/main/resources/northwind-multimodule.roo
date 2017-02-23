@@ -275,7 +275,7 @@ web mvc detail --entity model:~.Category --field products --responseType THYMELE
 web mvc detail --entity model:~.Category --responseType THYMELEAF --field products.purchaseOrders
 web mvc detail --entity model:~.Product --field purchaseOrders --responseType THYMELEAF
 web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions
-//web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions.cities
+web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions.cities
 web mvc detail --entity model:~.Region --responseType THYMELEAF --field cities
 
 //// Search controllers
@@ -322,7 +322,7 @@ jpa audit add --entity model:~.Category --createdDateColumn CREATED_DATE --modif
 // Unit tests
 test unit --class model:~.CustomerOrder
 test unit --class model:~.Category
-test unit --class model:~.City
+test unit --class model:~.Product
 
 // Repository integration tests
 test integration --class repository:~.CategoryRepository
