@@ -118,7 +118,8 @@ public class ClasspathCommands implements CommandMarker {
     classpathOperations.createConstructor(name, fields);
   }
 
-  @CliCommand(value = "enum type", help = "Creates a new Java enum source file in any project path.")
+  @CliCommand(value = "enum type",
+      help = "Creates a new Java enum source file in any project path.")
   public void createEnum(
       @CliOption(
           key = "class",
@@ -204,8 +205,7 @@ public class ClasspathCommands implements CommandMarker {
               + "(where `~` is the base package). When working with multiple modules, you should specify the "
               + "name of the class and the module where it is. Ex.: `--class model:~.domain.MyEnumClass`. "
               + "If the module is not specified, it is assumed that the class is in the module which has the "
-              + "focus. "
-              + "Default if option not present: the class focused by Roo shell.") final JavaType name,
+              + "focus. " + "Default if option not present: the class focused by Roo shell.") final JavaType name,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo. "

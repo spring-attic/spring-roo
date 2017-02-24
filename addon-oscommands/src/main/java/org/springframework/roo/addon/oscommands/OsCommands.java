@@ -32,8 +32,8 @@ public class OsCommands implements CommandMarker {
   @CliCommand(value = "!os", help = "Allows execution of operating system (OS) commands. "
       + "Ex.: `!os mkdir test_dir`")
   public void command(@CliOption(key = {"", "command"}, mandatory = false,
-      specifiedDefaultValue = "", unspecifiedDefaultValue = "", help = "The OS command to execute. "
-          + "Default: ''") final String command) {
+      specifiedDefaultValue = "", unspecifiedDefaultValue = "",
+      help = "The OS command to execute. " + "Default: ''") final String command) {
 
     if (StringUtils.isNotBlank(command)) {
       try {

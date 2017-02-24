@@ -598,8 +598,7 @@ public class DtoCommands implements CommandMarker {
           mandatory = false,
           help = "The SpEL expression used to format the entity when showing it in presentation layer e.g. "
               + "{#fieldA} {#fieldB}. It adds the `value` attribute to `io.springlets.format.EntityFormat` "
-              + "annotation. "
-              + "This option is available only if `--entity` has been specified.") String formatExpression,
+              + "annotation. " + "This option is available only if `--entity` has been specified.") String formatExpression,
       @CliOption(
           key = "entityFormatMessage",
           mandatory = false,

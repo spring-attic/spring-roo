@@ -208,9 +208,7 @@ public class FieldCommands implements CommandMarker {
               + "is assumed that the class is in the module which has the focus. "
               + "This option is mandatory for this command when the focus is not set to one class. "
               + "Default if option not present: the class focused by Roo shell.") final JavaType typeName,
-      @CliOption(
-          key = "column",
-          mandatory = true,
+      @CliOption(key = "column", mandatory = true,
           help = "The JPA @Column name. This option is only available for JPA entities and "
               + "embeddable classes. "
               + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` "
@@ -224,10 +222,7 @@ public class FieldCommands implements CommandMarker {
               + "annotation. This marks the field as not persistent. "
               + "This option is only available for JPA entities and embeddable classes. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean transientModifier,
-      @CliOption(
-          key = "notNull",
-          mandatory = false,
-          unspecifiedDefaultValue = "false",
+      @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` "
               + "annotation to the field. "
@@ -500,8 +495,7 @@ public class FieldCommands implements CommandMarker {
               + "Possible values are: `MEDIUM` (style='-M'), `NONE` (style='--') and "
               + "`SHORT` (style='-S'). "
               + "This option is not available if `--dateTimeFormatPattern` has already "
-              + "been specified. "
-              + "Default: `NONE`.") final DateTime timeFormat,
+              + "been specified. " + "Default: `NONE`.") final DateTime timeFormat,
       @CliOption(
           key = "dateTimeFormatPattern",
           mandatory = false,
@@ -550,8 +544,7 @@ public class FieldCommands implements CommandMarker {
     return new ArrayList<String>();
   }
 
-  @CliCommand(
-      value = "field embedded",
+  @CliCommand(value = "field embedded",
       help = "Adds a private `@Embedded` field to an existing Java source file. "
           + "This command is only available for entities annotated with `@RooJpaEntity` (Roo JPA "
           + "entities). Therefore, you should focus the desired entity in the Roo Shell to make "
@@ -1796,8 +1789,7 @@ public class FieldCommands implements CommandMarker {
               + "relation the parent entity of the relationship also owns the life cycle of related "
               + "entities. The parent entity is responsible for the creation and destruction of children"
               + " entities, these being linked to a single parent entity. A child entity cannot be in two"
-              + " different composition relationships. "
-              + "Default: `true`.") final boolean aggregation,
+              + " different composition relationships. " + "Default: `true`.") final boolean aggregation,
       @CliOption(
           key = "orphanRemoval",
           mandatory = false,
@@ -1805,8 +1797,7 @@ public class FieldCommands implements CommandMarker {
           help = "Indicates whether to apply the remove operation to entities that have been removed from"
               + " the relationship and to cascade the remove operation to those entities. If this "
               + "relation represents a 'composition' relation and this option is not present, "
-              + "`--orphanRemoval` value will be `true`. "
-              + "Default if option present: `true`.") Boolean orphanRemoval,
+              + "`--orphanRemoval` value will be `true`. " + "Default if option present: `true`.") Boolean orphanRemoval,
       @CliOption(
           key = "sizeMin",
           mandatory = false,
@@ -2100,12 +2091,9 @@ public class FieldCommands implements CommandMarker {
   public void addFileUploadField(
       @CliOption(key = {"", "fieldName"}, mandatory = true,
           help = "The name of the file upload field to add.") final JavaSymbolName fieldName,
-      @CliOption(
-          key = "contentType",
-          mandatory = true,
-          help = "The content type of the file. "
-              + "Possible values are: `CSS`, `CSV`, `DOC`, `GIF`, `HTML`, `JAVASCRIPT`, `JPG`, "
-              + "`JSON`, `MP3`, `MP4`, `MPEG`, `PDF`, `PNG`, `TXT`, `XLS`, `XML` and `ZIP`.") final UploadedFileContentType contentType,
+      @CliOption(key = "contentType", mandatory = true, help = "The content type of the file. "
+          + "Possible values are: `CSS`, `CSV`, `DOC`, `GIF`, `HTML`, `JAVASCRIPT`, `JPG`, "
+          + "`JSON`, `MP3`, `MP4`, `MPEG`, `PDF`, `PNG`, `TXT`, `XLS`, `XML` and `ZIP`.") final UploadedFileContentType contentType,
       @CliOption(
           key = "class",
           mandatory = true,
