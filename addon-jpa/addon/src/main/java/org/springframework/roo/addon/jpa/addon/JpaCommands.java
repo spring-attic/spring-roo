@@ -254,25 +254,26 @@ public class JpaCommands implements CommandMarker {
   public void installJpa(
       @CliOption(key = "provider", mandatory = true,
           help = "The persistence ORM provider to support. "
-              + "Possible values are: ECLIPSELINK and HIBERNATE. "
-              + "This option is available only if `--jndiDataSource` has not been specified."
+              + "Possible values are: `ECLIPSELINK` and `HIBERNATE`. "
+              + "This option is available only if `--jndiDataSource` has not been specified. "
               + "This option is mandatory if `--jndiDataSource` has not been specified.") final OrmProvider ormProvider,
       @CliOption(
           key = "database",
           mandatory = false,
           help = "The database type to support."
-              + "Possible values are: DB2_400, DB2_EXPRESS_C, DERBY_CLIENT, DERBY_EMBEDDED, FIREBIRD, H2_IN_MEMORY,"
-              + " HYPERSONIC_IN_MEMORY, HYPERSONIC_PERSISTENT, MSSQL, MYSQL, ORACLE, POSTGRES and SYBASE. "
-              + "This option is available only if `--jndiDataSource` has not been specified."
-              + "This option is mandatory if `--jndiDataSource` has not been specified.") final JdbcDatabase jdbcDatabase,
+              + "Possible values are: `DB2_400`, `DB2_EXPRESS_C`, `DERBY_CLIENT`, `DERBY_EMBEDDED`, "
+              + "`FIREBIRD`, `H2_IN_MEMORY`, `HYPERSONIC_IN_MEMORY`, `HYPERSONIC_PERSISTENT`, `MSSQL`, "
+              + "`MYSQL`, `ORACLE`, `POSTGRES` and `SYBASE`. "
+              + "This option is mandatory if `--jndiDataSource` has not been specified. "
+              + "This option is available only if `--jndiDataSource` has not been specified.") final JdbcDatabase jdbcDatabase,
       @CliOption(
           key = "module",
           mandatory = true,
           help = "The application module where to install the persistence. "
               + "This option is mandatory if the focus is not set in an application module, that is, a "
-              + "module containing an `@SpringBootApplication` class."
+              + "module containing an `@SpringBootApplication` class. "
               + "This option is available only if there are more than one application module and none "
-              + "of them is focused."
+              + "of them is focused. "
               + "Default if option not present: the unique 'application' module, or focused 'application'"
               + " module.", unspecifiedDefaultValue = ".",
           optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
@@ -282,13 +283,13 @@ public class JpaCommands implements CommandMarker {
       @CliOption(key = "hostName", mandatory = false, help = "The host name to use. "
           + "This option is available if `--database` has already been specified and its value is"
           + " not `HYPERSONIC` or `H2_IN_MEMORY` and `--jndiDatasource` has not been specified.") final String hostName,
-      @CliOption(key = "databaseName", mandatory = false, help = "The database name to use."
+      @CliOption(key = "databaseName", mandatory = false, help = "The database name to use. "
           + "This option is available if `--database` has already been specified and its value is"
           + " not `HYPERSONIC` or `H2_IN_MEMORY` and `--jndiDatasource` has not been specified.") final String databaseName,
-      @CliOption(key = "userName", mandatory = false, help = "The username to use."
+      @CliOption(key = "userName", mandatory = false, help = "The username to use. "
           + "This option is available if `--database` has already been specified and its value is"
           + " not `HYPERSONIC` or `H2_IN_MEMORY` and `--jndiDatasource` has not been specified.") final String userName,
-      @CliOption(key = "password", mandatory = false, help = "The password to use."
+      @CliOption(key = "password", mandatory = false, help = "The password to use. "
           + "This option is available if `--database` has already been specified and its value is"
           + " not `HYPERSONIC` or `H2_IN_MEMORY` and `--jndiDatasource` has not been specified.") final String password,
       ShellContext shellContext) {

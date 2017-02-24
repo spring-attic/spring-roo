@@ -20,14 +20,14 @@ public class HintCommands implements CommandMarker {
   @Reference
   private HintOperations hintOperations;
 
-  @CliCommand(value = "hint", help = "Provides step-by-step hints and context-sensitive guidance")
+  @CliCommand(value = "hint", help = "Provides step-by-step hints and context-sensitive guidance.")
   public String hint(
       @CliOption(
           key = {"topic", ""},
           mandatory = false,
           unspecifiedDefaultValue = "",
           optionContext = "disable-string-converter,topics",
-          help = "The topic for which advice should be provided"
+          help = "The topic for which advice should be provided. "
               + "Possible values are: `controllers`, `eclipse`, `entities`, `fields`, `finders`, `general`, "
               + "`mvc`, `persistence`, `relationships`, `repositories`, `services`, `start` and `topics`.") final String topic) {
 

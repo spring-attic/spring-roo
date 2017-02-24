@@ -842,7 +842,7 @@ public class FieldCommands implements CommandMarker {
           key = "type",
           mandatory = true,
           optionContext = "java-number",
-          help = "The Java type of the field. Only numeric types allowed."
+          help = "The Java type of the field. Only numeric types allowed. "
               + "Possible values are: `java.math.BigDecimal`, `java.math.BigInteger`, `byte`, "
               + "`java.lang.Byte`, `double`, `java.lang.Double`, `float`, `java.lang.Float`, `int`, "
               + "`java.lang.Integer`, `long`, `java.lang.Long`, `java.lang.Number`, `short` and "
@@ -859,16 +859,16 @@ public class FieldCommands implements CommandMarker {
               + "multiple modules, you should specify the name of the class and the module where it "
               + "is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is "
               + "assumed that the class is in the module which has the focus. "
-              + "This option is mandatory for this command when the focus is not set to one class."
+              + "This option is mandatory for this command when the focus is not set to one class. "
               + "Default if option not present: the class focused by Roo Shell.") final JavaType typeName,
-      @CliOption(key = "column", mandatory = true, help = "The JPA @Column name."
+      @CliOption(key = "column", mandatory = true, help = "The JPA `@Column` name."
           + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` "
-          + "configuration setting exists and it's `true`."
+          + "configuration setting exists and it's `true`. "
           + "This option is only available for JPA entities and embeddable classes.") final String column,
       @CliOption(key = "unique", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates whether to mark the field with a unique constraint."
-              + "This option is only available for JPA entities and embeddable classes."
+          help = "Indicates whether to mark the field with a unique constraint. "
+              + "This option is only available for JPA entities and embeddable classes. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean unique,
       @CliOption(
           key = "transient",
@@ -876,8 +876,8 @@ public class FieldCommands implements CommandMarker {
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` "
-              + "annotation. This marks the field as not persistent."
-              + "This option is only available for JPA entities and embeddable classes."
+              + "annotation. This marks the field as not persistent. "
+              + "This option is only available for JPA entities and embeddable classes. "
               + "Default if option present:`true`. Default if option not present: `false`.") final boolean transientModifier,
       @CliOption(
           key = "notNull",
@@ -924,17 +924,19 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = "max", mandatory = false,
           help = "The maximum value of the numeric field. It adds "
               + "`javax.validation.constraints.Max` with provided value to the field.") final Long max,
-      @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
-      @CliOption(key = "value", mandatory = false,
+      @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs.") final String comment,
+      @CliOption(
+          key = "value",
+          mandatory = false,
           help = "Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` "
-              + "annotation with the given content, typically used for expression-driven "
-              + "dependency injection. ") final String value,
+              + "annotation with the given content, typically used for expression-driven dependency "
+              + "injection. ") final String value,
       @CliOption(key = "primitive", mandatory = false, unspecifiedDefaultValue = "false",
-          specifiedDefaultValue = "true", help = "Indicates to use a primitive type if possible."
+          specifiedDefaultValue = "true", help = "Indicates to use a primitive type if possible. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean primitive,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates whether reserved words are ignored by Roo."
+          help = "Indicates whether reserved words are ignored by Roo. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords,
       ShellContext shellContext) {
 
@@ -1066,14 +1068,17 @@ public class FieldCommands implements CommandMarker {
       value = "field reference",
       help = "Adds a private reference field, representing (always) a bidirectional 'one-to-one' "
           + "relation, to an existing Java source file. Therefore, this command will add as well a "
-          + "'one-to-one' field on the other side of the relation."
+          + "'one-to-one' field on the other side of the relation. "
           + "This command is only available for entities annotated with `@RooJpaEntity`, so you "
           + "should focus the desired entity in the Roo Shell to make this command available.")
   public void addFieldReferenceJpa(
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add.") final JavaSymbolName fieldName,
       @CliOption(key = "type", mandatory = true, optionContext = PROJECT,
           help = "The Java type of the entity to reference.") final JavaType fieldType,
-      @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
+      @CliOption(
+          key = "class",
+          mandatory = true,
+          unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT,
           help = "The name of the class to generate the field. When working on a mono module "
               + "project, simply specify the name of the class in which the field will be "
@@ -1081,14 +1086,13 @@ public class FieldCommands implements CommandMarker {
               + "Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working "
               + "with multiple modules, you should specify the name of the class and the module "
               + "where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not "
-              + "specified, it is assumed that the class is in the module which has the focus."
-              + "This option is mandatory for this command when the focus is not set to one class."
+              + "specified, it is assumed that the class is in the module which has the focus. "
+              + "This option is mandatory for this command when the focus is not set to one class. "
               + "Default if option not present: the class focused by Roo Shell.") final JavaType typeName,
-      @CliOption(
-          key = "joinColumnName",
-          mandatory = true,
-          help = "The JPA `@JoinColumn` `name` attribute."
-              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`."
+      @CliOption(key = "joinColumnName", mandatory = true,
+          help = "The JPA `@JoinColumn` `name` attribute. "
+              + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` "
+              + "configuration setting exists and it's `true`. "
               + "This option is only available for JPA entities.") final String joinColumnName,
       @CliOption(key = "referencedColumnName", mandatory = false,
           help = "The JPA `@JoinColumn` `referencedColumnName` attribute."
@@ -1097,8 +1101,8 @@ public class FieldCommands implements CommandMarker {
           key = "fetch",
           mandatory = false,
           help = "The fetch semantics at a JPA level. It adds the provided value to `fetch` attribute "
-              + "of JPA `@OneToOne`. If this option is not provided, default fetch type will be `LAZY`."
-              + "Possible values are `LAZY`and `EAGER`."
+              + "of JPA `@OneToOne`. If this option is not provided, default fetch type will be `LAZY`. "
+              + "Possible values are `LAZY`and `EAGER`. "
               + "This option is only available for JPA entities.") final Fetch fetch,
       @CliOption(
           key = "mappedBy",
@@ -1106,8 +1110,8 @@ public class FieldCommands implements CommandMarker {
           help = "The field name on the referenced type which owns the relationship, which will be also "
               + "created due to bidirectional relation. If not specified, it will take the lower camel "
               + "case of the current entity (focused entity or specified in `--class` option). If the "
-              + "field already exists in the related entity, command won't be executed."
-              + "This option is only available for JPA entities."
+              + "field already exists in the related entity, command won't be executed. "
+              + "This option is only available for JPA entities. "
               + "Default if not present: current entity name in lower camel case.") final JavaSymbolName mappedBy,
       @CliOption(key = "aggregation", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "true",
@@ -1117,13 +1121,13 @@ public class FieldCommands implements CommandMarker {
               + "a composition relation the parent entity of the relationship also owns the life "
               + "cycle of related entities. The parent entity is responsible for the creation and "
               + "destruction of children entities, these being linked to a single parent entity. "
-              + "A child entity cannot be in two different composition relationships."
+              + "A child entity cannot be in two different composition relationships. "
               + "Default: `true`.") final boolean aggregation,
       @CliOption(key = "orphanRemoval", mandatory = false, specifiedDefaultValue = "true",
           help = "Indicates whether to apply the remove operation to entities that have been "
               + "removed from the relationship and to cascade the remove operation to those "
               + "entities. If this relation represents a 'composition' relation and this option "
-              + "is not present, `--orphanRemoval` value will be `true`."
+              + "is not present, `--orphanRemoval` value will be `true`. "
               + "Default if option present: `true`.") Boolean orphanRemoval,
       @CliOption(
           key = "notNull",
@@ -1144,23 +1148,21 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs.") final String comment,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates whether reserved words are ignored by Roo."
+          help = "Indicates whether reserved words are ignored by Roo. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords,
       @CliOption(
           key = "entityFormatExpression",
           mandatory = false,
           help = "The SpEL expression used to format the related entity when showing it in presentation layer e.g. "
-              + "{#fieldA} {#fieldB}. It adds the `value` attribute to `io.springlets.format.EntityFormat` "
-              + "annotation."
-              + "This option is available only if `--entityFormatMessage` has not been specified.") String formatExpression,
+              + "`{#fieldA} {#fieldB}`. It adds the `value` attribute to `io.springlets.format.EntityFormat` "
+              + "annotation.") String formatExpression,
       @CliOption(
           key = "entityFormatMessage",
           mandatory = false,
           help = "The message key used to obtain a localized SpEL expression to format the related entity when "
               + "showing it in presentation layer. It adds the `message` attribute to "
               + "`io.springlets.format.EntityFormat` annotation and creates a message in all message bundles "
-              + "with the provided key. Message value should be modified by developer."
-              + "This option is available only if `--entityFormatExpression` has not been specified.") String formatMessage,
+              + "with the provided key. Message value should be modified by developer.") String formatMessage,
       //      @CliOption(
       //          key = "cascadeType",
       //          mandatory = false,
@@ -1962,15 +1964,15 @@ public class FieldCommands implements CommandMarker {
               + " (where `~` is the base package). When working with multiple modules, you should specify"
               + " the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`."
               + " If the module is not specified, it is assumed that the class is in the module which has"
-              + " the focus."
-              + "This option is mandatory for this command when the focus is not set to one class."
+              + " the focus. "
+              + "This option is mandatory for this command when the focus is not set to one class. "
               + "Default if option not present: the class focused by Roo Shell.") final JavaType typeName,
       @CliOption(
           key = "column",
           mandatory = true,
-          help = "The JPA @Column name."
+          help = "The JPA `@Column` name. "
               + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration "
-              + "setting exists and it's `true`."
+              + "setting exists and it's `true`. "
               + "This option is only available for JPA entities and embeddable classes.") final String column,
       @CliOption(
           key = "transient",
@@ -1978,8 +1980,8 @@ public class FieldCommands implements CommandMarker {
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` "
-              + "annotation. This marks the field as not persistent."
-              + "This option is only available for JPA entities and embeddable classes."
+              + "annotation. This marks the field as not persistent. "
+              + "This option is only available for JPA entities and embeddable classes. "
               + "Default if option present:`true`. Default if option not present: `false`") final boolean transientModifier,
       @CliOption(
           key = "lob",
@@ -1987,13 +1989,13 @@ public class FieldCommands implements CommandMarker {
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates that this field is a Large Object. This option adds `javax.persistence.Lob` "
-              + "annotation to the field."
-              + "This option is only available for JPA entities and embeddable classes."
+              + "annotation to the field. "
+              + "This option is only available for JPA entities and embeddable classes. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean lob,
       @CliOption(key = "unique", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates whether to mark the field with a unique constraint."
-              + "This option is only available for JPA entities and embeddable classes."
+          help = "Indicates whether to mark the field with a unique constraint. "
+              + "This option is only available for JPA entities and embeddable classes. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean unique,
       @CliOption(
           key = "regexp",
@@ -2035,7 +2037,7 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs.") final String comment,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates whether reserved words are ignored by Roo."
+          help = "Indicates whether reserved words are ignored by Roo. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords,
       ShellContext shellContext) {
 
@@ -2227,12 +2229,12 @@ public class FieldCommands implements CommandMarker {
               + "Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working "
               + "with multiple modules, you should specify the name of the class and the module "
               + "where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not "
-              + "specified, it is assumed that the class is in the module which has the focus."
-              + "This option is mandatory for this command when the focus is not set to one class."
+              + "specified, it is assumed that the class is in the module which has the focus. "
+              + "This option is mandatory for this command when the focus is not set to one class. "
               + "Default if option not present: the class focused by Roo Shell.") final JavaType typeName,
-      @CliOption(key = "column", mandatory = true, help = "The JPA @Column name."
+      @CliOption(key = "column", mandatory = true, help = "The JPA `@Column` name."
           + "This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration"
-          + " setting exists and it's `true`."
+          + " setting exists and it's `true`. "
           + "This option is only available for JPA entities and embeddable classes.") final String column,
       @CliOption(
           key = "transient",
@@ -2240,15 +2242,13 @@ public class FieldCommands implements CommandMarker {
           unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` "
-              + "annotation. This marks the field as not persistent."
-              + "This option is only available for JPA entities and embeddable classes."
+              + "annotation. This marks the field as not persistent. "
+              + "This option is only available for JPA entities and embeddable classes. "
               + "Default if option present:`true`. Default if option not present: `false`") final boolean transientModifier,
-      @CliOption(
-          key = "notNull",
-          mandatory = false,
-          unspecifiedDefaultValue = "false",
+      @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field. "
+          help = "Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` "
+              + "annotation to the field. "
               + "This option is not available if `--nullRequired` has already been specified. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean notNull,
       @CliOption(
@@ -2266,7 +2266,7 @@ public class FieldCommands implements CommandMarker {
               + "dependency injection.") final String value,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates whether reserved words are ignored by Roo."
+          help = "Indicates whether reserved words are ignored by Roo. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords,
       ShellContext shellContext) {
 

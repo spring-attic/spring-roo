@@ -305,7 +305,7 @@ public class RepositoryJpaCommands implements CommandMarker {
           help = "Indicates if developer wants to generate repositories for every entity of current "
               + "project. "
               + "This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` "
-              + "will cause the parameter `--all` won't be available."
+              + "will cause the parameter `--all` won't be available. "
               + "Default if option present: `true`; default if option not present: `false`.") boolean all,
       @CliOption(
           key = "entity",
@@ -316,8 +316,8 @@ public class RepositoryJpaCommands implements CommandMarker {
               + "also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). "
               + "When working with multiple modules, you should specify the name of the entity and the "
               + "module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not specified, "
-              + "it is assumed that the entity is in the module which has the focus."
-              + "Possible values are: any of the entities in the project."
+              + "it is assumed that the entity is in the module which has the focus. "
+              + "Possible values are: any of the entities in the project. "
               + "This option is mandatory if `--all` is not specified. Otherwise, using `--all` "
               + "will cause the parameter `--entity` won't be available.") final JavaType domainType,
       @CliOption(
@@ -328,19 +328,17 @@ public class RepositoryJpaCommands implements CommandMarker {
               + "also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). "
               + "When working with multiple modules, you should specify the name of the class and the "
               + "module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, "
-              + "it is assumed that the class is in the module which has the focus."
-              + "This option is mandatory if `--entity` has been already specified and the project is"
-              + "multi-module."
-              + "This option is available only when `--entity` has been specified."
-              + "Default if option not present: concatenation of entity simple name with 'Repository' in "
-              + "`~.repository` package, or 'repository:~.' if multi-module project.") final JavaType interfaceType,
+              + "it is assumed that the class is in the module which has the focus. "
+              + "This option is mandatory if `--entity` has been already specified and the project is "
+              + "multi-module. "
+              + "This option is available only when `--entity` has been specified.") final JavaType interfaceType,
       @CliOption(
           key = "defaultReturnType",
           mandatory = false,
           help = "The default return type which this repository will have for all finders, including those"
-              + "created by default. the default return type should be a Projection class associated to "
+              + "created by default. The default return type should be a Projection class associated to "
               + "the entity specified in `--entity` parameter. "
-              + "Possible values are: any of the projections associated to the entity in `--entity` option."
+              + "Possible values are: any of the projections associated to the entity in `--entity` option. "
               + "This option is not available if domain entity specified in `--entity` parameter has no "
               + "associated Projections.") JavaType defaultReturnType,
       @CliOption(
@@ -350,7 +348,7 @@ public class RepositoryJpaCommands implements CommandMarker {
               + "specify the module name before the package name. "
               + "Ex.: `--package model:org.springframework.roo` but, if module name is not present, "
               + "the Roo Shell focused module will be used. "
-              + "This option is not available if `--all` option has not been specified."
+              + "This option is not available if `--all` option has not been specified. "
               + "Default value if not present: `~.repository` package, or 'repository:~.' if multi-module "
               + "project.") JavaPackage repositoriesPackage) {
 

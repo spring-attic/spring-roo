@@ -346,17 +346,17 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
       @CliOption(
           key = "name",
           mandatory = true,
-          help = "The finder string defined as a Spring Data query. Use Spring Data JPA nomenclature."
-              + "Possible values are: any finder name following Spring Data nomenclature."
+          help = "The finder string defined as a Spring Data query. Use Spring Data JPA nomenclature. "
+              + "Possible values are: any finder name following Spring Data nomenclature. "
               + "This option will not be available until `--entity` is specified.") final JavaSymbolName finderName,
       @CliOption(
           key = "formBean",
           mandatory = true,
           help = "The finder's search parameter. Should be a DTO and it must have at least same fields "
               + "(name and type) as those included in the finder `--name`, which can be target entity"
-              + " fields or related entity fields."
-              + "Possible values are: any of the DTO's in the project."
-              + "This option is mandatory if `--returnType` is specified and its a projection."
+              + " fields or related entity fields. "
+              + "Possible values are: any of the DTO's in the project. "
+              + "This option is mandatory if `--returnType` is specified and its a projection. "
               + "This option is not available if `--entity` parameter has not been specified before or "
               + "if it does not exist any DTO in generated project. "
               + "Default if option not present: the entity specified in `--entity` option.") final JavaType formBean,
@@ -364,13 +364,14 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
           key = "returnType",
           mandatory = false,
           optionContext = PROJECT,
-          help = "The finder's results return type."
-              + "Possible values are: link:#entity-projection-command[Projection] classes annotated with "
-              + "`@RooEntityProjection` and related to the entity specified in `--entity` option or the same entity."
+          help = "The finder's results return type. "
+              + "Possible values are: Projection classes annotated with `@RooEntityProjection` and "
+              + "related to the entity specified in `--entity` option (use `entity projection` command), "
+              + "or the same entity. "
               + "This option is not available if `--entity` parameter has not been specified before or "
-              + "if it does not exist any Projection class associated to the targeted entity."
-              + "Default if not present: the value of the `--defaultReturnType` parameter specified during JPA repository"
-              + " creation.") JavaType returnType) {
+              + "if it does not exist any Projection class associated to the targeted entity. "
+              + "Default if not present: the default return type of the repository related to the entity, "
+              + "which can be specified with `--defaultReturnType` parameter in `repository jpa` command.") JavaType returnType) {
 
     // Check if specified finderName follows Spring Data nomenclature
     PartTree partTree = new PartTree(finderName.getSymbolName(), getEntityDetails(entity), this);

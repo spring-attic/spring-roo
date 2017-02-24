@@ -76,11 +76,11 @@ public class PropFileCommands implements CommandMarker {
       @CliOption(
           key = "module",
           mandatory = true,
-          help = "Module where property will be added."
+          help = "Module where property will be added. "
               + "This option is mandatory if the focus is not set in an application module, that is, a "
-              + "module containing an `@SpringBootApplication` class."
+              + "module containing an `@SpringBootApplication` class. "
               + "This option is available only if there are more than one application module and none of "
-              + "them is focused."
+              + "them is focused. "
               + "Default if option not present: the unique 'application' module, or focused 'application'"
               + " module.", unspecifiedDefaultValue = ".",
           optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
@@ -110,9 +110,9 @@ public class PropFileCommands implements CommandMarker {
           mandatory = true,
           help = "Module where property will be removed."
               + "This option is mandatory if the focus is not set in an application module, that is, a "
-              + "module containing an `@SpringBootApplication` class."
+              + "module containing an `@SpringBootApplication` class. "
               + "This option is available only if there are more than one application module and none of "
-              + "them is focused."
+              + "them is focused. "
               + "Default if option not present: the unique 'application' module, or focused 'application'"
               + " module.", unspecifiedDefaultValue = ".",
           optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
@@ -139,11 +139,11 @@ public class PropFileCommands implements CommandMarker {
           key = "module",
           mandatory = true,
           unspecifiedDefaultValue = ".",
-          help = "Module which properties will be listed."
+          help = "Module which properties will be listed. "
               + "This option is mandatory if the focus is not set in an application module, that is, a "
-              + "module containing an `@SpringBootApplication` class."
+              + "module containing an `@SpringBootApplication` class. "
               + "This option is available only if there are more than one application module and none of "
-              + "them is focused."
+              + "them is focused. "
               + "Default if option not present: the unique 'application' module, or focused 'application'"
               + " module.", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
       ShellContext shellContext) {

@@ -101,21 +101,22 @@ public class ProjectCommands implements CommandMarker {
           help = "The uppermost package name (this becomes the `<groupId>` in Maven and also the `~` value "
               + "when using Roo Shell).") final JavaPackage topLevelPackage,
       @CliOption(key = "projectName",
-          help = "The name of the project (this becomes the `<artifactId>` in Maven)."
+          help = "The name of the project (this becomes the `<artifactId>` in Maven). "
               + "Default if option not present: last segment of `--topLevelPackage` name used.") final String projectName,
       @CliOption(
           key = "multimodule",
           mandatory = false,
           specifiedDefaultValue = "STANDARD",
-          help = "Option to use a multimodule architecture."
+          help = "Option to use a multimodule architecture. "
               + "Possible values are: `BASIC` (root module with child 'application' module), and "
               + "`STANDARD` (root module with children modules: 'application', 'model', 'repository', "
-              + "'service-api', 'service-impl' and 'integration')."
+              + "'service-api', 'service-impl' and 'integration'). "
               + "Default if option present: `STANDARD`") final Multimodule multimodule,
-      @CliOption(key = "java", help = "Forces a particular major version of Java to be used."
+      @CliOption(key = "java", help = "Forces a particular major version of Java to be used. "
           + "Default if option not present: Java 6 inherited from Spring Boot.") final Integer majorJavaVersion,
-      @CliOption(key = "packaging", help = "The Maven packaging of this project",
-          unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging) {
+      @CliOption(key = "packaging", help = "The Maven packaging of this project."
+          + "This option is not available if 'multimodule' is specified. "
+          + "Default if option not present: 'jar'.", unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging) {
 
     if (multimodule != null) {
       getMavenOperations().createMultimoduleProject(topLevelPackage, projectName, majorJavaVersion,

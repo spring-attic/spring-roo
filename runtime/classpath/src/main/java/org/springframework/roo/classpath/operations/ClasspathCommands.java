@@ -169,11 +169,11 @@ public class ClasspathCommands implements CommandMarker {
       @CliOption(key = "path", mandatory = false,
           unspecifiedDefaultValue = "FOCUSED:SRC_MAIN_JAVA",
           specifiedDefaultValue = "FOCUSED:SRC_MAIN_JAVA",
-          help = "Source directory to create the interface in."
+          help = "Source directory to create the interface in. "
               + "Default: _[FOCUSED-MODULE]/src/main/java_.") final LogicalPath path,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
-          help = "Indicates whether reserved words are ignored by Roo."
+          help = "Indicates whether reserved words are ignored by Roo. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean permitReservedWords,
       ShellContext shellContext) {
 

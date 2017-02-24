@@ -524,12 +524,12 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
   @CliCommand(
       value = {"script"},
       help = "Parses the specified resource file and executes its Roo commands. You can as well execute "
-          + "_*.roo_ example scripts in the Roo classpath. Ex.: `script clinic.roo`.")
+          + "_*.roo_ example scripts in the Roo classpath. Ex.: `script --file clinic.roo`.")
   public void script(
       @CliOption(key = {"", "file"}, help = "The file to locate and execute.", mandatory = true) final File script,
       @CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "Display line numbers when executing the script."
+          help = "Display line numbers when executing the script. "
               + "Default if option present: `true`; default if option not present: `false`.") final boolean lineNumbers,
       @CliOption(key = "ignoreLines", mandatory = false,
           help = "Comma-list of prefixes to ignore the lines that starts with any of the provided "

@@ -250,7 +250,7 @@ public class PushInCommands implements CommandMarker {
               + "is the base package). When working with multiple modules, you should specify the name "
               + "of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the "
               + "module is not specified, it is assumed that the class is in the module which has the "
-              + "focus."
+              + "focus. "
               + "This option is not avalaible if `--all` parameter has been already specified.") final JavaType klass,
       @CliOption(
           key = "method",

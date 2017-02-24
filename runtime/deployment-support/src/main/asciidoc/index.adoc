@@ -947,7 +947,7 @@ Installs support for using intermediate memory in generated project by using Spr
 
 [source,sh]            
 ----
-roo> cache setup [--provider]
+roo> cache setup [--provider --profile]
 ---- 
 
 * _Optional:_
@@ -964,7 +964,7 @@ Creates a new Java class source file in any project path.
 
 [source,sh]
 ----
-roo> class {--class} [--abstract --extends --implements --path --permitReservedWords --rooAnnotations]
+roo> class {--class} [--abstract --extends --implements --path --permitReservedWords --rooAnnotations --force]
 ----
 
 * _Mandatory:_
@@ -1033,7 +1033,7 @@ Creates a new DTO (Data Transfer Object) class in the directory _src/main/java_ 
 
 [source,sh]
 ----
-roo> dto {--class} [--entityFormatExpression | --entityFormatMessage] [--immutable --serializable --utilityMethods]
+roo> dto {--class} [--entityFormatExpression --entityFormatMessage --immutable --serializable --utilityMethods --force]
 ----
 
 * _Mandatory:_
@@ -1102,7 +1102,7 @@ Creates a new JPA persistent entity in the directory _src/main/java_ of the sele
 
 [source,sh]
 ----
-roo> entity jpa {--class} (--identifierColumn --identifierStrategy --table --sequenceName --versionField --versionColumn --versionType) [--entityFormatExpression | --entityFormatMessage] [--abstract --catalog --entityName --extends --identifierField --identifierType --implements --inheritanceType --mappedSuperclass --permitReservedWords --plural --readOnly --schema --serializable]
+roo> entity jpa {--class} (--identifierColumn --identifierStrategy --table --sequenceName --versionField --versionColumn --versionType) [--entityFormatExpression --entityFormatMessage --abstract --catalog --entityName --extends --identifierField --identifierType --implements --inheritanceType --mappedSuperclass --permitReservedWords --plural --readOnly --schema --serializable --force]
 ----
 
 * _Mandatory:_
@@ -1217,10 +1217,10 @@ Creates new projection classes from entities in the directory _src/main/java_ of
 
 [source,bash]
 ----
-roo> entity projection {--all --suffix | --class --entity --fields [--entityFormatExpression --entityFormatMessage]}
+roo> entity projection (--all [--suffix] | --class --entity --fields [--entityFormatExpression --entityFormatMessage]) [--force]
 ----
 
-* Mandatory on Conditional:
+* _Conditional:_
 
 --all::
   Create one projection class for each entity in the project.
@@ -1237,6 +1237,15 @@ This option is mandatory if `--all` is not specified. Otherwise, using `--all` w
 +
 This option is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--entity` won't be available.
 
+--fields::
+  Comma separated list of entity fields to be included into the Projection.
++
+Possible values are: non-static, nor transient, nor entity collection fields from main entity or its related entities (only for one-to-one or many-to-one relations).
++
+This option is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--fields` won't be available.
+
+* _Optional:_
+
 --entityFormatExpression::
   The SpEL expression used to format the entity when showing it in presentation layer e.g. {#fieldA} {#fieldB}. It adds the `value` attribute to `io.springlets.format.EntityFormat` annotation. 
 +
@@ -1247,23 +1256,12 @@ This option is available only if `--entity` has been specified.
 +
 This option is available only if `--entity` has been specified.
 
---fields::
-  Comma separated list of entity fields to be included into the Projection.
-+
-Possible values are: non-static, nor transient, nor entity collection fields from main entity or its related entities (only for one-to-one or many-to-one relations).
-+
-This option is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--fields` won't be available.
-
-* _Conditional:_
-
 --suffix::
   Suffix added to each Projection class name, built from each associated entity name. 
 +  
 This option is only available if `--all` has been already specified.
 +
 Default if option not present: 'Projection'.
-
-* _Optional:_
 
 --force::
   Force command execution
@@ -1303,7 +1301,7 @@ Creates a new Java enum source file in any project path
 
 [source,sh]
 ----
-roo> enum type {--class} [--path --permitReservedWords]
+roo> enum type {--class} [--path --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1369,7 +1367,7 @@ Adds a private boolean field to an existing Java source file.
 
 [source,sh]
 ----
-roo> field boolean {--fieldName} (--class --column --transient) [--notNull --assertFalse --assertTrue --value --comment --primitive --permitReservedWords]
+roo> field boolean {--fieldName} (--class --column [--transient]) [--assertFalse | --assertTrue] [--notNull --value --comment --primitive --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1399,21 +1397,25 @@ This option is only available for JPA entities and embeddable classes.
 This option is only available for JPA entities and embeddable classes.
 +
 Default if option present:`true`. Default if option not present: `false`.
-  
-* _Optional:_
 
---notNull::
-  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
-+
-Default if option present: `true`; default if option not present: `false`.
+* _Optional:_
 
 --assertFalse::
   Whether the value of this field must be false. Adds `javax.validation.constraints.AssertFalse` annotation to the field.
++
+This option is not available if `--asssertTrue` has already been specified.
 +
 Default if option present: `true`; default if option not present: `false`.
 
 --assertTrue::
   Whether the value of this field must be true. Adds `javax.validation.constraints.AssertTrue` annotation to the field.
++
+This option is not available if `--asssertFalse` has already been specified. 
++
+Default if option present: `true`; default if option not present: `false`.
+
+--notNull::
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -1444,7 +1446,7 @@ Adds a private date field to an existing Java source file.
 
 [source,sh]
 ----
-roo> field date {--fieldName --type} (--class --persistenceType --column --transient) [--notNull --nullRequired --comment --value --permitReservedWords] [--future | --past] [--dateTimeFormatPattern | --dateFormat --timeFormat]
+roo> field date {--fieldName --type} (--class --column [--persistenceType --transient]) [--notNull | --nullRequired] [--future | --past] [--dateTimeFormatPattern | --dateFormat --timeFormat] [--comment --value --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1464,19 +1466,19 @@ This option is mandatory for this command when the focus is not set to one class
 +
 Default if option not present: the class focused by Roo shell.
 
---persistenceType::
-  The type of persistent storage to be used. It adds a `javax.persistence.TemporalType` to a `javax.persistence.Temporal` annotation into the field.
-+
-This option is only available for JPA entities and embeddable classes.
-+
-Default if option not present: `TemporalType.TIMESTAMP`
-
 --column::
   The JPA @Column name.
 +
 This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available for JPA entities and embeddable classes.
+
+--persistenceType::
+  The type of persistent storage to be used. It adds a `javax.persistence.TemporalType` to a `javax.persistence.Temporal` annotation into the field.
++
+This option is only available for JPA entities and embeddable classes.
++
+Default if option not present: `TemporalType.TIMESTAMP`
 
 --transient::
   Indicates to mark the field as transient, adding JPA `javax.persistence.Transient` annotation. This marks the field as not persistent.
@@ -1490,10 +1492,14 @@ Default if option present:`true`. Default if option not present: `false`.
 --notNull::
   Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
 +
+This option is not available if `--nullRequired` has already been specified.
++
 Default if option present: `true`; default if option not present: `false`.
 
 --nullRequired::
   Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
++
+This option is not available if `--notNull` has already been specified.
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -1508,17 +1514,6 @@ Default if option present: `true`; default if option not present: `false`.
   Whether this value must be in the past. Adds `field.javax.validation.constraints.Past` annotation to the field.
 +
 This option is not available if `--future` option has already been specified.
-+
-Default if option present: `true`; default if option not present: `false`.
-
---comment::
-  An optional comment for JavaDocs.
-
---value::
-  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection. 
-
---permitReservedWords::
-  Indicates whether reserved words are ignored by Roo.
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -1545,6 +1540,17 @@ Default: `NONE`.
 +
 This option is not available if `--timeFormat` or `--dateFormat` have already been specified.
 
+--comment::
+  An optional comment for JavaDocs.
+
+--value::
+  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection. 
+
+--permitReservedWords::
+  Indicates whether reserved words are ignored by Roo.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --force::
   Force command execution. 
 +
@@ -1556,7 +1562,7 @@ Adds a private @Embedded field to an existing Java source file. This command is 
 
 [source,sh]
 ----
-roo> field embedded {--fieldName --type} (--class) [--permitReservedWords]
+roo> field embedded {--fieldName --type} (--class) [--permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1596,7 +1602,7 @@ Adds a private enum field to an existing Java source file. The field type must b
 
 [source,sh]
 ----
-roo> field enum {--fieldName --type} (--class --column --transient --enumType) [--notNull --nullRequired --comment --permitReservedWords]
+roo> field enum {--fieldName --type} (--class --column [--transient --enumType]) [--notNull | --nullRequired] [--comment --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1644,10 +1650,14 @@ This option is only available for JPA entities and embeddable classes.
 --notNull::
   Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
 +
+This option is not available if `--nullRequired` has already been specified. 
++
 Default if option present: `true`; default if option not present: `false`.
 
 --nullRequired::
   Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
++
+This option is not available if `--notNull` has already been specified. 
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -1670,7 +1680,7 @@ Adds a byte array field for storing uploaded file contents.
 
 [source,sh]
 ----
-roo> field file {--fieldName --contentType} (--class --column) [--autoUpload --notNull --permitReservedWords]
+roo> field file {--fieldName --contentType} (--class --column) [--autoUpload --notNull --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1729,7 +1739,7 @@ This command is only available for entities annotated with `@RooJpaEntity` (Roo 
 
 [source,sh]
 ----
-roo> field list {--fieldName --type} (--class --mappedBy --cardinality --fetch --notNull --nullRequired) (--joinColumnName --referencedColumnName | --joinTable --joinColumns --referencedColumns --inverseJoinColumns --inverseReferencedColumns) [--aggregation --comment --entityFormatExpression --entityFormatMessage --orphanRemoval --sizeMin --sizeMax --permitReservedWords]
+roo> field list {--fieldName --type} (--class) (--joinColumnName --referencedColumnName | --joinTable --joinColumns --referencedColumns --inverseJoinColumns --inverseReferencedColumns) [--notNull | --nullRequired] [--mappedBy --cardinality --fetch --aggregation --comment --entityFormatExpression --entityFormatMessage --orphanRemoval --sizeMin --sizeMax --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1794,10 +1804,10 @@ This option is mandatory if `--joinTable` option has been specified and if `spri
 +
 This option is only available when `--joinTable` option is set.
 
+* _Optional:_
+
 --mappedBy::
   The field name on the referenced type which owns the relationship, which will be also created due to bidirectional relation. If the field already exists in the related entity, command won't be executed.
-+
-This option is only available for JPA entities.
 +
 Default if not present: current entity name in lower camel case.
 
@@ -1826,8 +1836,6 @@ Default if option present: `true`; default if option not present: `false`.
 This option is not available if `--notNull` has already been specified. 
 +
 Default if option present: `true`; default if option not present: `false`.
-
-* _Optional:_
 
 --aggregation::                    
   Whether the relationship type is 'aggregation' or 'composition'. An aggregation relation means that children entities aren't dependent from parent entity (current entity) and they can exist without parent entity. In the other hand, in a composition relation the parent entity of the relationship also owns the life cycle of related entities. The parent entity is responsible for the creation and destruction of children entities, these being linked to a single parent entity. A child entity cannot be in two different composition relationships.
@@ -1870,7 +1878,7 @@ Adds a private numeric field to an existing Java source file. User can choose th
 
 [source,sh]
 ----
-roo> field number --fieldName --type
+roo> field number {--fieldName --type} (--class --column [--unique --transient]) [--nullRequired | --notNull --primitive] [--decimalMin --decimalMax --digitsInteger --digitsFraction --min --max --comment --value --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1893,7 +1901,7 @@ This option is mandatory for this command when the focus is not set to one class
 Default if option not present: the class focused by Roo Shell.
 
 --column::
-  The JPA @Column name.
+  The JPA `@Column` name.
 +
 This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
@@ -1918,10 +1926,14 @@ Default if option present:`true`. Default if option not present: `false`.
 --notNull::
   Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
 +
+This option is not available if `--nullRequired` has already been specified.
++
 Default if option present: `true`; default if option not present: `false`.
 
 --nullRequired::
   Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
++
+This option is not available if `--notNull` or `--primitive` option have already been specified with value `true` or without value.
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -1970,7 +1982,7 @@ Inserts a private field into the specified file. User can choose a custom type f
 
 [source,sh]
 ----
-roo> field other --fieldName --type --class --column
+roo> field other {--fieldName --type} (--class --column [--transient]) [--notNull | --nullRequired] [--comment --value --permitReservedWords --force] 
 ----
 
 * _Mandatory:_
@@ -1991,7 +2003,7 @@ This option is mandatory for this command when the focus is not set to one class
 Default if option not present: the class focused by Roo Shell.
 
 --column::
-  The JPA @Column name.
+  The JPA `@Column` name.
 +
 This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
@@ -2009,10 +2021,14 @@ Default if option present:`true`. Default if option not present: `false`
 --notNull::
   Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
 +
+This option is not available if `--nullRequired` has already been specified.
++
 Default if option present: `true`; default if option not present: `false`.
 
 --nullRequired::
   Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
++
+This option is not available if `--notNull` has already been specified.
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -2040,7 +2056,7 @@ This command is only available for entities annotated with `@RooJpaEntity`, so y
 
 [source,sh]
 ----
-roo> field reference --fieldName --type
+roo> field reference {--fieldName --type} (--class --joinColumnName --referencedColumnName [--fetch --mappedBy]) [--notNull | --nullRequired] [--aggregation --entityFormatExpression --entityFormatMessage --orphanRemoval --comment --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -2067,12 +2083,12 @@ Default if option not present: the class focused by Roo Shell.
 +
 This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
-This option is only available for JPA entities and embeddable classes.
+This option is only available for JPA entities.
 
 --referencedColumnName::
   The JPA `@JoinColumn` `referencedColumnName` attribute.
 +
-This option is only available for JPA entities and embeddable classes.
+This option is only available for JPA entities.
 
 --fetch::
   The fetch semantics at a JPA level. It adds the provided value to `fetch` attribute of JPA `@OneToOne`. If this option is not provided, default fetch type will be `LAZY`.
@@ -2090,20 +2106,35 @@ Default if not present: current entity name in lower camel case.
 
 * _Optional:_
 
+--notNull::
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
++
+This option is not available if `--nullRequired` has already been specified.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--nullRequired::
+  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
++
+This option is not available if `--notNull` has already been specified. 
++
+Default if option present: `true`; default if option not present: `false`.
+
 --aggregation::                    
   Whether the relationship type is 'aggregation' or 'composition'. An aggregation relation means that children entities aren't dependent from parent entity (current entity) and they can exist without parent entity. In the other hand, in a composition relation the parent entity of the relationship also owns the life cycle of related entities. The parent entity is responsible for the creation and destruction of children entities, these being linked to a single parent entity. A child entity cannot be in two different composition relationships.
 +
 Default: `true`.
 
+--entityFormatExpression::
+  The SpEL expression used to format the related entity when showing it in presentation layer e.g. `{#fieldA} {#fieldB}`. It adds the `value` attribute to `io.springlets.format.EntityFormat` annotation.
+
+--entityFormatMessage::
+  The message key used to obtain a localized SpEL expression to format the related entity when showing it in presentation layer. It adds the `message` attribute to `io.springlets.format.EntityFormat` annotation and creates a message in all message bundles with the provided key. Message value should be modified by developer.
+
 --orphanRemoval::
   Indicates whether to apply the remove operation to entities that have been removed from the relationship and to cascade the remove operation to those entities. If this relation represents a 'composition' relation and this option is not present, `--orphanRemoval` value will be `true`.
 +
 Default if option present: `true`.
-
---notNull::
-  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
-+
-Default if option present: `true`; default if option not present: `false`.
 
 --comment::
   An optional comment for JavaDocs.
@@ -2126,7 +2157,7 @@ This command is only available for entities annotated with `@RooJpaEntity` (Roo 
 
 [source,sh]
 ----
-roo> field set --fieldName --type
+roo> field set {--fieldName --type} (--class) (--joinColumnName --referencedColumnName | --joinTable --joinColumns --referencedColumns --inverseJoinColumns --inverseReferencedColumns) [--notNull | --nullRequired] [--mappedBy --cardinality --fetch --aggregation --comment --entityFormatExpression --entityFormatMessage --orphanRemoval --sizeMin --sizeMax --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -2148,66 +2179,92 @@ This option is mandatory for this command when the focus is not set to one class
 +
 Default if option not present: the class focused by Roo Shell.
 
+--joinColumnName::
+  The JPA `@JoinColumn` `name` attribute. When this option is set, cardinality will be set as `ONE_TO_MANY`.
++
+This option is mandatory for 'ONE_TO_MANY' relationships without join table, if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
+
+--referencedColumnName::
+  The JPA `@JoinColumn` `referencedColumnName` attribute.
++
+This option is only available when `--joinColumnName` option is set.
+
 --joinTable::
-  Join table name. Most usually used in @ManyToMany relations.
+  Join table name. Most usually used in `@ManyToMany` relations. 
 +
 This option is mandatory for this command if `--cardinality` is set to `MANY_TO_MANY` and `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
-+
-This option is only available for JPA entities and embeddable classes.
 
 --joinColumns::
   Comma separated list of join table's foreign key columns which references the table of the related entity (the owner entity in bidirectional relations).
 +
 This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
-This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
+This option is only available when `--joinTable` option is set.
 
 --referencedColumns::
   Comma separated list of foreign key referenced columns in the primary table of the related entity (the owner entity in bidirectional relations).
 +
 This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
-This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
+This option is only available when `--joinTable` option is set.
 
 --inverseJoinColumns::
-  Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation (current entity).
+  Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation (current entity). 
 +
 This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
-This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
+This option is only available when `--joinTable` option is set.
 
 --inverseReferencedColumns::
-  Comma separated list of foreign key referenced columns in the primary table of the entity that does not own the relation (current entity).
+  Comma separated list of foreign key referenced columns in the primary table of the entity that does not own the relation (current entity). 
 +
 This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
-This option is only available for JPA entities and embeddable classes when `--joinTable` option is set.
+This option is only available when `--joinTable` option is set.
+
+* _Optional:_
 
 --mappedBy::
-  The field name on the referenced type which owns the relationship, which will be also created due to bidirectional relation. If not specified, it will take the lower camel case of the current entity (focused entity or specified in `--class` option). If the field already exists in the related entity, command won't be executed.
-+
-This option is only available for JPA entities.
+  The field name on the referenced type which owns the relationship, which will be also created due to bidirectional relation. If the field already exists in the related entity, command won't be executed.
 +
 Default if not present: current entity name in lower camel case.
 
 --cardinality::
-  The relationship cardinality at a JPA level. This option is only available for JPA entities and embeddable classes.
+  The relationship cardinality at a JPA level.
 +
 Default: `ONE_TO_MANY`.
 
 --fetch::
-  The fetch semantics at a JPA level. It adds the provided value to `fetch` attribute of JPA `@OneToMany`, `@ManyToMany` and `@ManyToOne`. If this option is not provided, default fetch type will be `LAZY`.
+  The fetch semantics at a JPA level. It adds the provided value to `fetch` attribute of JPA `@OneToMany`, `@ManyToMany` and `@ManyToOne`.
 +
 Possible values are `LAZY`and `EAGER`.
 +
-This option is only available for JPA entities and embeddable classes.
-
-* _Optional:_
+Default if option not present: `LAZY`.
 
 --aggregation::                    
   Whether the relationship type is 'aggregation' or 'composition'. An aggregation relation means that children entities aren't dependent from parent entity (current entity) and they can exist without parent entity. In the other hand, in a composition relation the parent entity of the relationship also owns the life cycle of related entities. The parent entity is responsible for the creation and destruction of children entities, these being linked to a single parent entity. A child entity cannot be in two different composition relationships.
 +
 Default: `true`.
+
+--notNull:: 
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field. 
++
+This option is not available if `--nullRequired` has already been specified. 
++
+Default if option present: `true`; default if option not present: `false`.
+
+--nullRequired::
+  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field. 
++
+This option is not available if `--notNull` has already been specified. 
++
+Default if option present: `true`; default if option not present: `false`.
+
+--entityFormatExpression::
+  The SpEL expression used to format the related entity when showing it in presentation layer e.g. `{#fieldA} {#fieldB}`. It adds the `value` attribute to `io.springlets.format.EntityFormat` annotation.
+
+--entityFormatMessage::
+  The message key used to obtain a localized SpEL expression to format the related entity when showing it in presentation layer. It adds the `message` attribute to `io.springlets.format.EntityFormat` annotation and creates a message in all message bundles with the provided key. Message value should be modified by developer.
 
 --orphanRemoval::
   Indicates whether to apply the remove operation to entities that have been removed from the relationship and to cascade the remove operation to those entities. If this relation represents a 'composition' relation and this option is not present, `--orphanRemoval` value will be `true`.
@@ -2219,16 +2276,6 @@ Default if option present: `true`.
 
 --sizeMax::
   The maximum number of elements in the collection. This option adds or updates `javax.validation.constraints.Size` with the provided value as `max` attribute value.
-
---notNull::
-  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
-+
-Default if option present: `true`; default if option not present: `false`.
-
---nullRequired::
-  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
-+
-Default if option present: `true`; default if option not present: `false`.
 
 --comment::
   An optional comment for JavaDocs.
@@ -2245,11 +2292,11 @@ Default if option present: `true`; default if option not present: `false`.
 
 === field string
 
-Adds a private string field to an existing Java source file
+Adds a private string field to an existing Java source file.
 
 [source,sh]
 ----
-roo> field string --fieldName
+roo> field string {--fieldName} (--class --column [--transient --lob --unique]) [--notNull | --nullRequired] [--regexp --sizeMin --sizeMax --value --comment --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -2267,7 +2314,7 @@ This option is mandatory for this command when the focus is not set to one class
 Default if option not present: the class focused by Roo Shell.
 
 --column::
-  The JPA @Column name.
+  The JPA `@Column` name.
 +
 This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
@@ -2296,6 +2343,20 @@ Default if option present: `true`; default if option not present: `false`.
 
 * _Optional:_
 
+--notNull::
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
++
+This option is not available if `--nullRequired` has already been specified.
++
+Default if option present: `true`; default if option not present: `false`.
+
+--nullRequired::
+  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
++
+This option is not available if `--notNull` has already been specified.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --regexp::
   The required regular expression pattern. This option adds `javax.validation.constraints.Pattern` with the provided value as `regexp` attribute.
 
@@ -2304,16 +2365,6 @@ Default if option present: `true`; default if option not present: `false`.
 
 --sizeMax::
   The maximum string length. This option adds or updates `javax.validation.constraints.Size` with the provided value as `max` attribute value.
-
---notNull::
-  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
-+
-Default if option present: `true`; default if option not present: `false`.
-
---nullRequired::
-  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
-+
-Default if option present: `true`; default if option not present: `false`.
 
 --value::
   Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection.
@@ -2338,7 +2389,7 @@ Installs a finder in the given target (must be an entity). This command needs an
 
 [source,sh]
 ----
-roo> finder add --entity --name
+roo> finder add {--entity --name} (--formBean --returnType)
 ----
 
 * _Mandatory:_
@@ -2360,7 +2411,7 @@ This option will not be available until `--entity` is specified.
 +
 Possible values are: any of the DTO's in the project.
 +
-This option is mandatory if `--returnType` is specified.
+This option is mandatory if `--returnType` is specified and its a projection.
 +
 This option is not available if `--entity` parameter has not been specified before or if it does not exist any DTO in generated project. 
 +
@@ -2369,11 +2420,11 @@ Default if option not present: the entity specified in `--entity` option.
 --returnType::
   The finder's results return type.
 +
-Possible values are: Projection classes annotated with `@RooEntityProjection` and related to the entity specified in `--entity` option.
+Possible values are: Projection classes annotated with `@RooEntityProjection` and related to the entity specified in `--entity` option (use `entity projection` command), or the same entity. 
 +
 This option is not available if `--entity` parameter has not been specified before or if it does not exist any Projection class associated to the targeted entity.
 +
-Default if not present: the entity specified in `--entity`.
+Default if not present: the default return type of the repository related to the entity, which can be specified with `--defaultReturnType` parameter in `repository jpa` command.
 
 === focus
 
@@ -2381,7 +2432,7 @@ Changes Roo Shell focus to a different type in the project.
 
 [source,sh]
 ----
-roo> focus --class
+roo> focus {--class}
 ----
 
 * _Mandatory:_
@@ -2396,7 +2447,7 @@ Shows a summary of all Spring Roo commands.
 
 [source,sh]
 ----
-roo> help
+roo> help [--command]
 ----
 
 * _Optional:_
@@ -2411,7 +2462,7 @@ Provides step-by-step hints and context-sensitive guidance.
 
 [source,sh]
 ----
-roo> hint
+roo> hint [--topic]
 ----
 
 * _Optional:_
@@ -2427,7 +2478,7 @@ Creates a new Java interface source file in any project path.
 
 [source,sh]
 ----
-roo> interface --class
+roo> interface {--class} [--path --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -2459,7 +2510,7 @@ Adds support for auditing a JPA entity. This will add JPA and Spring listeners t
 
 [source,sh]
 ----
-roo> jpa audit add --entity
+roo> jpa audit add {--entity} (--createdDateColumn --modifiedDateColumn --createdByColumn --modifiedByColumn)
 ----
 
 * _Mandatory:_
@@ -2496,7 +2547,7 @@ Installs audit support into your project, preparing it to audit entity changes.
 
 [source,sh]
 ----
-roo> jpa audit setup
+roo> jpa audit setup (--module)
 ----
 
 * _Conditional:_
@@ -2512,40 +2563,74 @@ Default if option not present: the unique 'application' module, or focused 'appl
 
 === jpa setup
 
-Install or updates a JPA persistence provider in your project
+Installs or updates a JPA persistence provider in your project. User can execute this command for diferent profiles with different persistence configurations.
 
 [source,sh]
 ----
-roo> jpa setup --provider --database
+roo> jpa setup {--provider} (--jndiDataSource | --database [--hostName --databaseName --userName --password]) (--module) [--force --profile]
 ----
 
+* _Mandatory:_
+
 --provider::
-  The persistence provider to support (mandatory)
+  The persistence ORM provider to support.
++
+Possible values are: `ECLIPSELINK` and `HIBERNATE`.
++
+This option is available only if `--jndiDataSource` has not been specified.
++
+This option is mandatory if `--jndiDataSource` has not been specified.
+
+* _Conditional:_
+
 --database::
-  The database to support (mandatory)
+  The database type to support.Possible values are: `DB2_400`, `DB2_EXPRESS_C`, `DERBY_CLIENT`, `DERBY_EMBEDDED`, `FIREBIRD`, `H2_IN_MEMORY`, `HYPERSONIC_IN_MEMORY`, `HYPERSONIC_PERSISTENT`, `MSSQL`, `MYSQL`, `ORACLE`, `POSTGRES` and `SYBASE`. 
++
+This option is mandatory if `--jndiDataSource` has not been specified.
++
+This option is available only if `--jndiDataSource` has not been specified.
+
 --module::
-  The application module where to install the persistence. This option is available if there is more than 
-  one application module (mandatory if the focus is not set in application module); 
-  default if option not present: '.' 
+  The application module where to install the persistence.
++
+This option is mandatory if the focus is not set in an application module, that is, a module containing an `@SpringBootApplication` class.
++
+This option is available only if there are more than one application module and none of them is focused.
++
+Default if option not present: the unique 'application' module, or focused 'application' module.
+
 --jndiDataSource::
-  The JNDI datasource to use. This option is not available if any of databaseName, hostName, password or userName options are 
-  specified, or you are using an 'HYPERSONIC' or 'H2_IN_MEMORY' database.
+  The JNDI datasource to use.
++
+This option is not available if any of `--provider`, `--database`, `--databaseName`, `--hostName`, `--password` or `--userName` options are specified.
+
 --hostName::
-  The host name to use. Parameter database must be defined. Not available if jndiDatasource is specified or you
-  are using an 'HYPERSONIC' or 'H2_IN_MEMORY' database. 
+  The host name to use.
++
+This option is available if `--database` has already been specified and its value is not `HYPERSONIC` or `H2_IN_MEMORY` and `--jndiDatasource` has not been specified.
+
 --databaseName::
-  The database name to use. Parameter database must be defined. Not available if jndiDatasource is specified or 
-  you are using an 'HYPERSONIC' or 'H2_IN_MEMORY' database.
+  The database name to use.
++
+This option is available if `--database` has already been specified and its value is not `HYPERSONIC` or `H2_IN_MEMORY` and `--jndiDatasource` has not been specified.
+
 --userName::
-  The username to use. Parameter database must be defined. Not available if jndiDatasource is specified or you 
-  are using an 'HYPERSONIC' or 'H2_IN_MEMORY' database
+  The username to use.
++
+This option is available if `--database` has already been specified and its value is not `HYPERSONIC` or `H2_IN_MEMORY` and `--jndiDatasource` has not been specified.
+
 --password::
-  The password to use. Parameter database must be defined. Not available if jndiDatasource is specified or you 
-  are using an 'HYPERSONIC' or 'H2_IN_MEMORY' database
+  The password to use.
++
+This option is available if `--database` has already been specified and its value is not `HYPERSONIC` or `H2_IN_MEMORY` and `--jndiDatasource` has not been specified.
+
+* _Optional:_
+
 --force::
   Force command execution; default if option present: `true`; default if option not present: `false`
+
 --profile::
-  Parameter that indicates the name of the profile that will be applied
+  Parameter that indicates the name of the profile that will be applied.
 
 === module create
 
@@ -2553,73 +2638,121 @@ Creates a new Maven module in current *multimodule* project.
 
 [source,sh]
 ----
-roo> module create --moduleName
+roo> module create {--moduleName} [--packaging --artifactId]
 ----
 
+* _Mandatory:_
+
 --moduleName::
-  The name of the module (mandatory)
+  The name of the module to create.
+
+* _Optional:_
+
 --packaging::
-  The Maven packaging of this module; default if option not present:
-  'jar'
+  The Maven packaging of this module.
++
+Possible values are: `BUNDLE`, `EAR`, `ESA`, `JAR` and `WAR`.
++
+Default if option not present: `JAR` (equals to 'jar').
+
 --artifactId::
-  The artifact ID of this module; defaults: moduleName if not
-  specified
+  The artifact ID of this module.
++
+Default if option not present: `--moduleName` value.
 
 === module focus
 
-Changes focus to a different project module
+Changes Roo Shell focus to a different project module, when in a multimodule project.
 
 [source,sh]
 ----
-roo> module focus --moduleName
+roo> module focus {--moduleName}
 ----
 
+* _Mandatory:_
+
 --moduleName::
-  The module to focus on (mandatory)
+  The module name to focus on.
++
+Possible values are: any of the project module names (`~` for root module).
 
 === project setup
 
-Creates a new Maven project
+Creates a new Maven project.
 
 [source,sh]
 ----
-roo> project setup --topLevelPackage
+roo> project setup {--topLevelPackage} [--multimodule | --packaging] [--projectName --java]
 ----
 
+* _Mandatory:_
+
 --topLevelPackage::
-  The uppermost package name (this becomes the <groupId> in Maven and
-  also the '~' value when using Roo's shell) (mandatory)
+  The uppermost package name (this becomes the `<groupId>` in Maven and also the `~` value when using Roo Shell).
+
+* _Optional:_
+
 --projectName::
-  The name of the project; default: last segment of package name used
+  The name of the project (this becomes the `<artifactId>` in Maven).
++
+Default if option not present: last segment of `--topLevelPackage` name used.
+
 --multimodule::
-  Option to use a multimodule architecture; default if option present:
-  'STANDARD'
+  Option to use a multimodule architecture.
++
+Possible values are: `BASIC` (root module with child 'application' module), and `STANDARD` `BASIC` (root module with child 'application' module), and (root module with children modules: 'application', 'model', 'repository', 'service-api', 'service-impl' and 'integration').
++
+Default if option present: `STANDARD`
+
 --java::
-  Forces a particular major version of Java to be used; default: 8
+  Forces a particular major version of Java to be used.
++
+Default if option not present: Java 6 inherited from Spring Boot.
+
 --packaging::
-  The Maven packaging of this project. This option is not available if 'multimodule' is specified; default if option not present:
-  'jar'
+  The Maven packaging of this project. 
++
+This option is not available if 'multimodule' is specified. 
++
+Default if option not present: 'jar'.
 
 === property add
 
-Adds or updates a particular property from application config properties
-file.
+Adds or updates a particular property from application config properties file.
 
 [source,sh]
 ----
-roo> property add --key --value --module
+roo> property add {--key --value} (--module) [--force --profile]
 ----
 
+* _Mandatory:_
+
 --key::
-  The property key that should be changed (mandatory)
+  The property key that should be changed.
+
 --value::
-  The new vale for this property key (mandatory)
+  The new value for this property key.
+
+* _Conditional:_
+
 --module::
-  Module where property will be added. Not available if there is only one application module (mandatory if the focus is not set in application module); default if option not present: '.'
+  Module where property will be added.
++
+This option is mandatory if the focus is not set in an application module, that is, a module containing an `@SpringBootApplication` class.
++
+This option is available only if there are more than one application module and none of them is focused.
++
+Default if option not present: the unique 'application' module, or focused 'application' module.
+
+* _Optional:_
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
+  Force command execution.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --profile::
-  Parameter that indicates the name of the profile that will be applied
+  Parameter that indicates the name of the profile that will be applied.
 
 === property list
 
@@ -2627,15 +2760,29 @@ List all properties from application config properties file.
 
 [source,sh]
 ----
-roo> property list --module
+roo> property list (--module) [--force --profile]
 ----
 
+* _Conditional:_
+
 --module::
-  Module which properties will be listed. Not available if there is only one application module (mandatory if the focus is not set in application module); default if option not present: '.' 
+  Module which properties will be listed.
++
+This option is mandatory if the focus is not set in an application module, that is, a module containing an `@SpringBootApplication` class.
++
+This option is available only if there are more than one application module and none of them is focused.
++
+Default if option not present: the unique 'application' module, or focused 'application' module.
+
+* _Optional:_
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
+  Force command execution.
++
+Default if option present: `true`; default if option not present: `false`
+
 --profile::
-  Parameter that indicates the name of the profile that will be applied
+  Parameter that indicates the name of the profile that will be applied.
 
 === property remove
 
@@ -2643,143 +2790,248 @@ Removes a particular property from application config properties file.
 
 [source,sh]
 ----
-roo> property remove --key --module
+roo> property remove {--key} (--module) [--force --profile]
 ----
 
+* _Mandatory:_
+
 --key::
-  The property key that should be removed (mandatory)
+  The property key that should be removed.
+
+* _Conditional:_
+
 --module::
-  Module where property will be removed. Not available if there is only one application module (mandatory if the focus is not set in application module); default if option not present: '.'
+  Module where property will be removed.
++
+This option is mandatory if the focus is not set in an application module, that is, a module containing an `@SpringBootApplication` class.
++
+This option is available only if there are more than one application module and none of them is focused.
++
+Default if option not present: the unique 'application' module, or focused 'application' module.
+
+* _Optional:_
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
+  Force command execution.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --profile::
-  Parameter that indicates the name of the profile that will be applied 
+  Parameter that indicates the name of the profile that will be applied.
 
 === push-in
 
-Push-in all methods, fields, annotations, imports, extends, etc..
-declared on ITDs to its .java files. You could specify --all parameter
-to apply push-in on every component of generated project, or you could
-define package, class or method where wants to apply push-in.
+Allows to push-in elements declared in the ITDs to its .java files. You could specify `--all` option to apply push-in on every component of generated project, or you could define any package, class or method to apply push-in, combining them.
 
 [source,sh]
 ----
-roo> push-in
+roo> push-in (--all | --package --class --method) [--force]
 ----
 
+* _Conditional:_
+
 --all::
-  Parameter that indicates if push-in process should be applied to
-  entire project. If specified, 'package', 'class' or 'method' parameters will be unavailable.
-  This option is avalaible if 'package', 'class' and 'method' parameters have not specified. It doesn't allow any value.
+  Option that indicates if push-in process should be applied to entire project. 
++
+This option is mandatory if none of `--package`, `--class` or `--method` are specified. Otherwise, using `--package`, `--class` or `--method` will cause the parameter `--all` won't be available.
+
 --package::
-  JavaPackage with the specified package where developers wants to make
-  push-in. This option is avalaible if 'all' parameter is not specified.
+  JavaPackage with the specified package where developer wants to make push-in. In multi-module project you should specify the module name before the package name. Ex.: `--package model:org.springframework.roo` but, if module name is not present, the Roo Shell focused module will be used. 
++
+This option is not avalaible if `--all` parameter has been already specified.
+
 --class::
-  JavaType with the specified class where developer wants to make
-  push-in. This option is avalaible if 'all' parameter is not specified.
+  JavaType with the specified class where developer wants to make push-in. When working on a single module project, simply specify the name of the class. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+This option is not avalaible if `--all` parameter has been already specified.
+
 --method::
-  String with the specified name of the method that developer wants to
-  push-in. You could use a Regular Expression to make push-in of more
-  than one method on the same execution. This option is avalaible if 'all' parameter is not specified.
+  String with the specified name of the method which developer wants to push-in. You could use a Regular Expression to make push-in of more than one method on the same execution. 
++
+This option is not avalaible if `--all` parameter has been already specified.
+
+* _Optional:_
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
---profile::
-  Parameter that indicates the name of the profile that will be applied
+  Force command execution.
++
+Default if option present: `true`; default if option not present: `false`.
 
 [[repository-jpa-command]]
 === repository jpa
 
-Generates new Spring Data repository for specified entity.
+Generates new Spring Data repository for specified entity or for all entities in generated project.
 
 [source,sh]
 ----
-roo> repository jpa --interface
+roo> repository jpa (--all [--package] | --entity --interface [--defaultReturnType])
 ----
 
+* _Conditional:_
+
 --all::
-  Indicates if developer wants to generate repositories for every entity
-  of current project. Not avalaible if 'entity' parameter has been specified before; default if option present: `true`; default if
-  option not present: `false`
---interface::
-  The java Spring Data repository to generate. Not avalaible if 'entity' parameter has not been specified before (mandatory if 'entity' 
-  parameter has been specified and you are working under multimodule project)
+  Indicates if developer wants to generate repositories for every entity of current project. 
++
+This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` will cause the parameter `--all` won't be available.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --entity::
-  The domain entity this repository should expose. Not avalaible if 'all' parameter has been specified before
+  The domain entity this repository should manage. When working on a single module project, simply specify the name of the entity. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). When working with multiple modules, you should specify the name of the entity and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not specified, it is assumed that the entity is in the module which has the focus.
++
+Possible values are: any of the entities in the project.
++
+This option is mandatory if `--all` is not specified. Otherwise, using `--all` will cause the parameter `--entity` won't be available.
+
+--interface::
+  The java Spring Data repository to generate. When working on a single module project, simply specify the name of the class. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+This option is mandatory if `--entity` has been already specified and the project is multi-module.
++
+This option is available only when `--entity` has been specified.
+
+* _Optional:_
+
 --defaultReturnType::
-  The findAll finder return type. Should be a Projection class associated to the entity specified in 'entity' parameter. 
-  This option is not available if domain entity specified in 'entity' parameter has no associated Projections
+  The default return type which this repository will have for all finders, including those created by default. The default return type should be a Projection class associated to the entity specified in `--entity` parameter. 
++
+Possible values are: any of the projections associated to the entity in `--entity` option.
++
+This option is not available if domain entity specified in `--entity` parameter has no associated Projections.
+
 --package::
-  The package where repositories will be generated. Not avalaible if 'all' parameter has not been specified before
+  The package where repositories will be generated. In multi-module project you should specify the module name before the package name. Ex.: `--package model:org.springframework.roo` but, if module name is not present, the Roo Shell focused module will be used. 
++
+This option is not available if `--all` option has not been specified.
++
+Default value if not present: `~.repository` package, or 'repository:~.' if multi-module project.
 
 [[script-command]]
 === script
 
-Parses the specified resource file and executes its commands
+Parses the specified resource file and executes its Roo commands. You can as well execute _*.roo_ example scripts in the Roo classpath. Ex.: `script --file clinic.roo`.
 
 [source,sh]
 ----
-roo> script --file
+roo> script {--file} [--ignoreLines --lineNumbers]
 ----
 
+* _Mandatory:_
+
 --file::
-  The file to locate and execute (mandatory)
+  The file to locate and execute.
+
+* _Optional:_
+
 --ignoreLines::
   Comma-list of prefixes to ignore the lines that starts with any of the provided case-sensitive prefixes.
+
 --lineNumbers::
-  Display line numbers when executing the script; default if option present: `true`; default if option not present: `false`
+  Display line numbers when executing the script.
++
+Default if option present: `true`; default if option not present: `false`
 
 === security authorize
 
-Include @PreAuthorize annotation to an specific method.
+Includes `@PreAuthorize` annotation to an specific method for controlling access to its invocation.
 
 [source,sh]
 ----
-roo> security authorize --class --method
+roo> security authorize {--class --method} (--roles | --usernames)
 ----
+
+* _Mandatory:_
                 
 --class::
-  The service class that contains the method to annotate with @PreAuthorize (mandatory) 
+  The service class that contains the method to annotate with `@PreAuthorize`. When working on a single module project, simply specify the name of the class. If you consider it necessary, you can also specify the package. Ex.: `--class ~.service.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class service:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+Possible values are: any of the service classes in the project.
+
 --method::
-  The service method name and its params that will be annotated with @PreAuthorize. Is possible to specify a regular expression (mandatory) 
+  The service method name (including its params) that will be annotated with `@PreAuthorize`. Is possible to specify a regular expression.
++
+Possible values are: any of the existing methods of the class specified in `--class` option, or regular expression.
+
+* _Conditional:_
+
 --roles::
-  Comma separated list with all the roles to add inside 'hasAnyRole' instruction
+  Comma separated list with all the roles to add inside 'hasAnyRole' instruction.
++
+This option is mandatory if `--usernames` is not specified.
+
 --usernames::
-  Comma separated list with all the usernames to add inside Spring Security annotation
+  Comma separated list with all the usernames to add inside Spring Security annotation. 
++
+This option is mandatory if `--roles` is not specified.
         
 === security filtering
 
-Include @PreFilter/@PostFilter annotation to an specific method.
+Include `@PreFilter`/`@PostFilter` annotation to an specific method to filter results of a method invocation based on an expression.
 
 [source,sh]
 ----
-roo> security filtering --class --method
+roo> security filtering {--class --method} (--roles | --usernames) [--when]
 ----
-                
+
+* _Mandatory:_
+     
 --class::
-  The service class that contains the method to annotate with @PreFilter/@PostFilter (mandatory) 
+  The service class that contains the method to annotate. When working on a single module project, simply specify the name of the class. If you consider it necessary, you can also specify the package. Ex.: `--class ~.service.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class service:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+Possible values are: any of the service classes in the project.
+
 --method::
-  The service method name and its params that will be annotated with @PreFilter/@PostFilter. Is possible to specify a regular 
-  expression --	(mandatory) 
+  The service method name (including its params), that will be annotated with `@PreFilter`/`@PostFilter`. Is possible to specify a regular expression.
++
+Possible values are: any of the existing methods of the class specified in `--class` option, or regular expression. 
+
+* _Conditional:_
+
 --roles::
-  Comma separated list with all the roles to add inside 'hasAnyRole' instruction
+  Comma separated list with all the roles to add inside 'hasAnyRole' instruction. 
++
+This option is mandatory if `--usernames` is not specified.
+
 --usernames::
-  Comma separated list with all the usernames to add inside Spring Security annotation
+  Comma separated list with all the usernames to add inside Spring Security annotation. 
++
+This option is mandatory if `--roles` is not specified.
+
+* _Optional:_
+
 --when::
-  Indicates if filtering should be after or before to execute the operation. Depends of the specified value, @PreFilter annotation or @PostFilter annotation will be included.; default: 'PRE'
+  Indicates if filtering should be after or before to execute the operation. Depends of the specified value, `@PreFilter` annotation or `@PostFilter` annotation will be included. 
++
+Possible values are: `PRE` and `POST`.
++
+Default: `PRE`.
 
 === security setup
 
-Install Spring Security into your project
+Install Spring Security into your project.
 
 [source,sh]
 ----
-roo> security setup --module
+roo> security setup (--module) [--provider]
 ----
 
---type::
-  The Spring Security provider to install.; default: 'DEFAULT'
+* _Conditional:_
+
 --module::
-  The application module where to install the persistence. Not available if there is only one application module (mandatory if the focus is not set in application module); default if option not present: '.' 
+  The application module where to install the security support. 
++
+This option is mandatory if the focus is not set in an application module, that is, a module containing an `@SpringBootApplication` class. 
++
+This option is available only if there are more than one application module and none of them is focused.
++
+Default if option not present: the unique 'application' module, or focused 'application' module.
+
+* _Optional:_
+
+--provider::
+  The Spring Security provider to install.
++
+Possible values are: `DEFAULT` (default Spring Security configuration provided by Spring Boot will be used), and `SPRINGLETS_JPA` (advanced Spring Security configuration will be included using Springlets JPA Authentication).
 
 [[service-command]]
 === service
