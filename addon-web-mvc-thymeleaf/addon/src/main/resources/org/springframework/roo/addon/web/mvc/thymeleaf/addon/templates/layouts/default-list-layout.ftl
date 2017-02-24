@@ -48,9 +48,12 @@
 	<link data-th-href="@{/webjars/datatables.net-select-bs/css/select.bootstrap.css}" rel="stylesheet" type="text/css"
 	  href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css" />
 
-    <link data-th-href="@{/webjars/jquery-datatables-checkboxes/css/dataTables.checkboxes.css}" rel="stylesheet" type="text/css" 
-      href="https://gyrocode.github.io/jquery-datatables-checkboxes/1.1.2/css/dataTables.checkboxes.css" />
-          
+  <link data-th-href="@{/webjars/jquery-datatables-checkboxes/css/dataTables.checkboxes.css}" rel="stylesheet" type="text/css" 
+    href="https://gyrocode.github.io/jquery-datatables-checkboxes/1.1.2/css/dataTables.checkboxes.css" />
+
+  <link data-th-href="@{/webjars/github-com-julmot-datatables-mark-js/dist/datatables.mark.min.css}" rel="stylesheet" type="text/css" 
+    href="https://cdn.datatables.net/plug-ins/1.10.13/features/mark.js/datatables.mark.min.css" />          
+
     <!-- Bootswatch CSS custom -->
     <link rel="stylesheet" type="text/css"
       href="../../static/public/css/theme.css"

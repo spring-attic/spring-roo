@@ -16,6 +16,7 @@
       // Use the advanced extension to auto-configure all
       // advanced features (ajax, export, add, edit, show, delete, etc.)
       $(this).DataTable({
+    	  mark: true,
           advanced: true
       });
     });

@@ -213,11 +213,14 @@
         // and draw it again.
         // IMPORTANT: To prevent that some event registered by other plugin in the original
         // table could be called, is necessary to unregister events.
+        $jQueryTableBody.off("click");
         // IMPORTANT: You must not specify again the advanced
         // attribute during the Datatables initialization to prevent that this process starts again
-        $jQueryTableBody.off("click");
+        delete settings.oInit.advanced;
+        // Destroy the existing table
         $jQueryTable.DataTable().destroy();
-        var datatables = $jQueryTable.DataTable();
+        // Create the new table using the initial configuration
+        var datatables = $jQueryTable.DataTable(settings.oInit);
 
         // Next tables should use the default configuration, so restore it.
         DataTable.ext.classes = dtClasses;

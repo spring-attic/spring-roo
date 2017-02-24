@@ -507,12 +507,21 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
 
     getProjectOperations().addProperty(rootModuleName,
         new Property("datatables-checkboxes.version", "1.1.2"));
+
+    getProjectOperations().addProperty(rootModuleName,
+        new Property("datatables-mark.version", "2.0.0"));
+
+
     // Add exclusions to avoid conflicts with Bower dependencies
     List<Dependency> exclusions = new ArrayList<Dependency>();
     exclusions.add(new Dependency("org.webjars.npm", "jquery", null));
     exclusions.add(new Dependency("org.webjars.npm", "datatables.net", null));
     dependencies.add(new Dependency("org.webjars.npm", "jquery-datatables-checkboxes",
         "${datatables-checkboxes.version}", exclusions));
+
+    // Add Datatables mark WebJar
+    dependencies.add(new Dependency("org.webjars.bower", "github-com-julmot-datatables-mark-js",
+        "${datatables-mark.version}"));
 
     // Add DatetimePicker WebJar
     getProjectOperations().addProperty(rootModuleName,
