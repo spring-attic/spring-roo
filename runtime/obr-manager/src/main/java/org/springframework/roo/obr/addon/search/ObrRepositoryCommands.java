@@ -32,13 +32,11 @@ public class ObrRepositoryCommands implements CommandMarker {
 
   @CliCommand(value = "addon repository remove",
       help = "Removes an existing OBR Repository from ROO Shell.")
-  public void removeRepo(
-      @CliOption(key = "url", mandatory = true,
-          help = "URL file that defines repository. Ex: 'http://localhost/repo/index.xml'. "
-              + "See that in Windows systems, you must use `file:\\` protocol when you specify "
+  public void removeRepo(@CliOption(key = "url", mandatory = true,
+      help = "URL file that defines repository. Ex: 'http://localhost/repo/index.xml'. "
+          + "See that in Windows systems, you must use `file:\\` protocol when you specify "
           + "a local repository URL. However, in Unix systems the protocol for local "
-          + "repositories URL must be `file://`.") final String url)
-      throws Exception {
+          + "repositories URL must be `file://`.") final String url) throws Exception {
     operations.removeRepo(url);
   }
 

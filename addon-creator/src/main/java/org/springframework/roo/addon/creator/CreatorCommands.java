@@ -93,9 +93,7 @@ public class CreatorCommands implements CommandMarker {
       @CliOption(key = "topLevelPackage", mandatory = true, optionContext = UPDATE,
           help = "The top level package of all Spring Roo Addon Suite. In Maven, this will be the "
               + "`<groupId>`.") final JavaPackage tlp,
-      @CliOption(
-          key = "locale",
-          mandatory = true,
+      @CliOption(key = "locale", mandatory = true,
           help = "The locale abbreviation (ie: en, or more specific like en_AU, or de_DE) for the "
               + "new language.") final Locale locale,
       @CliOption(

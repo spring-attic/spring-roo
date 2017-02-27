@@ -35,32 +35,34 @@ public class AddonSuiteCommands implements CommandMarker {
     operations.installRooAddonSuiteByUrl(url);
   }
 
-  @CliCommand(value = "addon suite uninstall", help = "Uninstalls some installed 'Roo Addon Suite'.")
-  public void uninstallAddonSuite(@CliOption(key = "symbolicName", mandatory = true,
-      help = "Name that identifies the 'Roo Addon Suite'.") final AddonSuiteSymbolicName symbolicName)
+  @CliCommand(value = "addon suite uninstall",
+      help = "Uninstalls some installed 'Roo Addon Suite'.")
+  public void uninstallAddonSuite(
+      @CliOption(key = "symbolicName", mandatory = true,
+          help = "Name that identifies the 'Roo Addon Suite'.") final AddonSuiteSymbolicName symbolicName)
       throws Exception {
     operations.uninstallRooAddonSuite(symbolicName);
   }
 
-  @CliCommand(
-      value = "addon suite start",
+  @CliCommand(value = "addon suite start",
       help = "Starts some installed 'Roo Addon Suite'. By default, an installed 'Roo Addon "
           + "Suite' is started automatically.")
-  public void startAddonSuite(@CliOption(key = "symbolicName", mandatory = true,
-      help = "Name that identifies the 'Roo Addon Suite'.") final AddonSuiteSymbolicName symbolicName)
+  public void startAddonSuite(
+      @CliOption(key = "symbolicName", mandatory = true,
+          help = "Name that identifies the 'Roo Addon Suite'.") final AddonSuiteSymbolicName symbolicName)
       throws Exception {
     operations.startRooAddonSuite(symbolicName);
   }
 
   @CliCommand(value = "addon suite stop", help = "Stops some started 'Roo Addon Suite'.")
-  public void stopAddonSuite(@CliOption(key = "symbolicName", mandatory = true,
-      help = "Name that identifies the 'Roo Addon Suite'.") final AddonSuiteSymbolicName symbolicName)
+  public void stopAddonSuite(
+      @CliOption(key = "symbolicName", mandatory = true,
+          help = "Name that identifies the 'Roo Addon Suite'.") final AddonSuiteSymbolicName symbolicName)
       throws Exception {
     operations.stopRooAddonSuite(symbolicName);
   }
 
-  @CliCommand(
-      value = "addon suite list",
+  @CliCommand(value = "addon suite list",
       help = "Lists all installed 'Roo Addon Suite'. If you want to list all available 'Roo Addon "
           + "Suites' on Repository, use --repository parameter.")
   public void stopAddonSuite(
