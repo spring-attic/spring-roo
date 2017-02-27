@@ -324,8 +324,8 @@ public class WebFinderCommands implements CommandMarker {
               + "also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base "
               + "package). When working with multiple modules, you should specify the name of the entity "
               + "and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not "
-              + "specified, it is assumed that the entity is in the module which has the focus."
-              + "Possible values are: any of the entities in the project."
+              + "specified, it is assumed that the entity is in the module which has the focus. "
+              + "Possible values are: any of the entities in the project. "
               + "This option is mandatory if `--all` is not specified. Otherwise, using `--all` "
               + "will cause the parameter `--entity` won't be available.") JavaType entity,
       @CliOption(
@@ -336,21 +336,21 @@ public class WebFinderCommands implements CommandMarker {
           help = "Indicates if developer wants to publish in web layer all finders from all entities in "
               + "project. "
               + "This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` "
-              + "will cause the parameter `--all` won't be available."
+              + "will cause the parameter `--all` won't be available. "
               + "Default if option present: `true`; default if option not present: `false`.") boolean all,
       @CliOption(key = "queryMethod", mandatory = false,
           help = "Indicates the name of the finder to add to web layer. "
               + "Possible values are: any of the finder names created for the entity, included in "
-              + "`@RooJpaRepository` of the `--entity` associated repository."
+              + "`@RooJpaRepository` of the `--entity` associated repository. "
               + "This option is available only when `--entity` has been specified.") String queryMethod,
       @CliOption(
           key = "responseType",
           mandatory = false,
           help = "Indicates the responseType to be used by generated finder controllers. Depending on "
-              + "the selected responseType, generated methods and views will vary."
+              + "the selected responseType, generated methods and views will vary. "
               + "Possible values are: `JSON` plus any response type installed with `web mvc view setup` "
               + "command. "
-              + "This option is only available if `--all` or `--entity` parameters have been specified."
+              + "This option is only available if `--all` or `--entity` parameters have been specified. "
               + "Default: `JSON`.") String responseType,
       @CliOption(
           key = "package",
@@ -360,7 +360,7 @@ public class WebFinderCommands implements CommandMarker {
               + " multi-module project you should specify the module name before the package name. "
               + "Ex.: `--package application:org.springframework.roo.web` but, if module name is not "
               + "present, the Roo Shell focused module will be used. "
-              + "This option is available only if `--all` or `--entity` option has been specified."
+              + "This option is available only if `--all` or `--entity` option has been specified. "
               + "Default value if not present: `~.web` package, or 'application:~.web' if multi-module "
               + "project.") JavaPackage controllerPackage,
       @CliOption(
@@ -369,7 +369,7 @@ public class WebFinderCommands implements CommandMarker {
           unspecifiedDefaultValue = "",
           specifiedDefaultValue = "",
           help = "Indicates the default path value for accesing finder resources in controller, used for "
-              + "this controller `@RequestMapping` excluding first '/'."
+              + "this controller `@RequestMapping` excluding first '/'. "
               + "This option is available only if `--all` or `--entity` option has been specified.") String pathPrefix) {
 
     // Getting --responseType service

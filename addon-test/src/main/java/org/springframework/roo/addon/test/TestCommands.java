@@ -211,26 +211,26 @@ public class TestCommands implements CommandMarker {
     return results;
   }
 
-  @CliCommand(
-      value = "test integration",
-      help = "Creates a new integration test class for the specified entity using its associated "
-          + "repository. The generated test class will contain a basic structure and the necessary "
-          + "testing components.")
+  @CliCommand(value = "test integration",
+      help = "Creates a new integration test class for the specified class. The generated test "
+          + "class will contain a basic structure and the necessary testing components.")
   public void newIntegrationTest(
       @CliOption(
           key = "class",
           mandatory = false,
           unspecifiedDefaultValue = "*",
-          help = "The name of the repository to create an integration test. If you consider it necessary, you can "
-              + "also specify the package. Ex.: `--class ~.repository.MyRepository` (where `~` is the "
+          help = "The name of the class to create an integration test. If you consider it necessary, you can "
+              + "also specify the package. Ex.: `--class ~.package.MyClass` (where `~` is the "
               + "base package). When working with multiple modules, you should specify the name of the "
-              + "class and the module where it is. Ex.: `--class repository:~.MyRepository`. If the "
-              + "module is not specified, it is assumed that the repository is in the module which has the "
-              + "focus. " + "Possible values are: any of the repositories in the project.") final JavaType klass,
+              + "class and the module where it is. Ex.: `--class module:~.MyClass`. If the "
+              + "module is not specified, it is assumed that the class is in the module which has the "
+              + "focus. "
+              + "Possible values are: any of the valid classes in the project which support "
+              + "automatically integration test creation.") final JavaType klass,
       @CliOption(
           key = "module",
           mandatory = true,
-          help = "The application module where generate the integration test."
+          help = "The application module where generate the integration test. "
               + "This option is mandatory if the focus is not set in an 'application' module and there "
               + "are more than one 'application' modules, that is, a module containing an "
               + "`@SpringBootApplication` class. "

@@ -101,11 +101,11 @@ public class I18nCommands implements CommandMarker {
       @CliOption(
           key = "code",
           mandatory = true,
-          help = "The language code for the desired bundle."
+          help = "The language code for the desired bundle. "
               + "Possible values are: supported languages. Currently `en` (English, default) and `es` (Spanish).") final I18n i18n,
       @CliOption(key = "useAsDefault", mandatory = false,
           help = "Indicates if selected language should be used as default on this application. "
-              + "Default: `false`.", specifiedDefaultValue = "false",
+              + "Default: `false`.", specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false") boolean useAsDefault,
       @CliOption(
           key = "module",

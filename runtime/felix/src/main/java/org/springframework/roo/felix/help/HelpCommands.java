@@ -53,7 +53,7 @@ public class HelpCommands implements CommandMarker {
   @CliCommand(
       value = REFERENCE_GUIDE_COMMAND,
       help = "Writes the reference guide XML fragments (in DocBook format) into the current working directory. "
-          + "It is only available if 'development mode' is true.")
+          + "It is only available if 'development mode' is `true`.")
   public void helpReferenceGuide() {
     helpService.helpReferenceGuide();
   }

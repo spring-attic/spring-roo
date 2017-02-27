@@ -44,7 +44,7 @@ public class CreatorCommands implements CommandMarker {
       @CliOption(
           key = "projectName",
           mandatory = false,
-          help = "Provide a custom project name. In Maven, this will be the `<artifactId>`."
+          help = "Provide a custom project name. In Maven, this will be the `<artifactId>`. "
               + "Default if option not present: the top level package specified in `--topLevelPackage`.") final String projectName) {
 
     creatorOperations.createSimpleAddon(tlp, description, projectName, null);
@@ -61,7 +61,7 @@ public class CreatorCommands implements CommandMarker {
       @CliOption(
           key = "projectName",
           mandatory = false,
-          help = "Provide a custom project name. In Maven, this will be the `<artifactId>`."
+          help = "Provide a custom project name. In Maven, this will be the `<artifactId>`. "
               + "Default if option not present: the top level package specified in `--topLevelPackage`.") final String projectName) {
 
     creatorOperations.createAdvancedAddon(tlp, description, projectName, null);
@@ -76,18 +76,18 @@ public class CreatorCommands implements CommandMarker {
           help = "The top level package of all Spring Roo Addon Suite. In Maven, this will be the "
               + "`<groupId>`.") final JavaPackage tlp,
       @CliOption(key = "description", mandatory = false,
-          help = "Description of your Roo Addon Suite (surround text with double quotes)") final String description,
+          help = "Description of your Roo Addon Suite (surround text with double quotes).") final String description,
       @CliOption(
           key = "projectName",
           mandatory = false,
-          help = "Provide a custom project name for root module. In Maven, this will be the `<artifactId>`."
+          help = "Provide a custom project name for root module. In Maven, this will be the `<artifactId>`. "
               + "Default if option not present: the top level package specified in `--topLevelPackage`.") final String projectName) {
     creatorOperations.createRooAddonSuite(tlp, description, projectName);
   }
 
   @CliCommand(
       value = "addon create i18n",
-      help = "Create a new Internationalization add-on for Spring Roo, with a new language. Created "
+      help = "Create a new internationalization add-on for Spring Roo, with a new language. Created "
           + "add-on can be installed later into a project for localizing the project to that new language.")
   public void i18n(
       @CliOption(key = "topLevelPackage", mandatory = true, optionContext = UPDATE,
@@ -96,7 +96,7 @@ public class CreatorCommands implements CommandMarker {
       @CliOption(
           key = "locale",
           mandatory = true,
-          help = "The locale abbreviation (ie: en, or more specific like en_AU, or de_DE).) for the "
+          help = "The locale abbreviation (ie: en, or more specific like en_AU, or de_DE) for the "
               + "new language.") final Locale locale,
       @CliOption(
           key = "messageBundle",
@@ -112,7 +112,7 @@ public class CreatorCommands implements CommandMarker {
       @CliOption(
           key = "projectName",
           mandatory = false,
-          help = "Provide a custom project name. In Maven, this will be the `<artifactId>`."
+          help = "Provide a custom project name. In Maven, this will be the `<artifactId>`. "
               + "Default if option not present: the top level package specified in `--topLevelPackage`.") final String projectName) {
 
     if (locale == null) {
@@ -125,7 +125,7 @@ public class CreatorCommands implements CommandMarker {
 
   @CliCommand(value = "addon create wrapper",
       help = "Create a new add-on for Spring Roo which wraps a maven artifact to create a OSGi "
-          + "compliant bundle")
+          + "compliant bundle.")
   public void wrapper(
       @CliOption(key = "topLevelPackage", mandatory = true, optionContext = UPDATE,
           help = "The top level package of the new wrapper bundle.") final JavaPackage tlp,
@@ -134,7 +134,7 @@ public class CreatorCommands implements CommandMarker {
       @CliOption(key = "version", mandatory = true, help = "Dependency version.") final String version,
       @CliOption(key = "vendorName", mandatory = true, help = "Dependency vendor name.") final String vendorName,
       @CliOption(key = "licenseUrl", mandatory = true, help = "Dependency license URL.") final String lincenseUrl,
-      @CliOption(key = "docUrl", mandatory = false, help = "Dependency documentation URL") final String docUrl,
+      @CliOption(key = "docUrl", mandatory = false, help = "Dependency documentation URL.") final String docUrl,
       @CliOption(
           key = "description",
           mandatory = false,

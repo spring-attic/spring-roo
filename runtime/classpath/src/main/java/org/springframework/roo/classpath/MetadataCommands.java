@@ -61,7 +61,7 @@ public class MetadataCommands implements CommandMarker {
   @CliCommand(value = METADATA_CACHE_COMMAND,
       help = "Shows detailed metadata for the indicated type.")
   public String metadataCacheMaximum(@CliOption(key = {"maximumCapacity"}, mandatory = true,
-      help = "The maximum number of metadata items to cache") final int maxCapacity) {
+      help = "The maximum number of metadata items to cache.") final int maxCapacity) {
     Validate.isTrue(maxCapacity >= 100, "Maximum capacity must be 100 or greater");
     metadataService.setMaxCapacity(maxCapacity);
     // Show them that the change has taken place
@@ -117,7 +117,7 @@ public class MetadataCommands implements CommandMarker {
       help = "Shows the ProjectMetadata for the indicated project module.")
   public String metadataForModule(@CliOption(key = {"", "module"}, mandatory = false,
       optionContext = INCLUDE_CURRENT_MODULE,
-      help = "The module for which to retrieve the metadata."
+      help = "The module for which to retrieve the metadata. "
           + "Default if option not present: the Roo Shell focused module.") final Pom pom) {
     final Pom targetPom = ObjectUtils.defaultIfNull(pom, projectOperations.getFocusedModule());
     if (targetPom == null) {

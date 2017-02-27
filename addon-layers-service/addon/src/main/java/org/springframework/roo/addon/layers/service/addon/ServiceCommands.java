@@ -300,7 +300,7 @@ public class ServiceCommands implements CommandMarker {
   @CliCommand(
       value = "service",
       help = "Creates new service interface and its implementation related to an entity, or for all the "
-          + "entities in generated project, with some basic management methods by using repository methods.")
+          + "entities in generated project, with some basic management methods by using Spring Data repository methods.")
   public void service(
       @CliOption(
           key = "all",
@@ -310,7 +310,7 @@ public class ServiceCommands implements CommandMarker {
           help = "Indicates if developer wants to generate service interfaces and their implementations "
               + "for every entity of current project. "
               + "This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` "
-              + "will cause the parameter `--all` won't be available."
+              + "will cause the parameter `--all` won't be available. "
               + "Default if option present: `true`; default if option not present: `false`.") boolean all,
       @CliOption(
           key = "entity",
@@ -321,8 +321,8 @@ public class ServiceCommands implements CommandMarker {
               + "also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). "
               + "When working with multiple modules, you should specify the name of the entity and the "
               + "module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not specified, "
-              + "it is assumed that the entity is in the module which has the focus."
-              + "Possible values are: any of the entities in the project."
+              + "it is assumed that the entity is in the module which has the focus. "
+              + "Possible values are: any of the entities in the project. "
               + "This option is mandatory if `--all` is not specified. Otherwise, using `--all` "
               + "will cause the parameter `--entity` won't be available.") final JavaType domainType,
       @CliOption(
@@ -334,13 +334,13 @@ public class ServiceCommands implements CommandMarker {
               + "specify the package. Ex.: `--class ~.repository.MyClass` (where `~` is the base "
               + "package). When working with multiple modules, you should specify the name of the class "
               + "and the module where it is. Ex.: `--class repository:~.MyClass`. If the module is not "
-              + "specified, it is assumed that the class is in the module which has the focus."
+              + "specified, it is assumed that the class is in the module which has the focus. "
               + "Possible values are: any of the repositories annotated with `@RooJpaRepository` and "
-              + "associated to the entity specified in `--entity`."
-              + "This option is mandatory if `--entity` has been already specified and the project is"
-              + "multi-module."
-              + "This option is available only when `--entity` has been specified."
-              + "Default if option not present: first repository annotated with `@RooJpaRepository` and"
+              + "associated to the entity specified in `--entity`. "
+              + "This option is mandatory if `--entity` has been already specified and the project is "
+              + "multi-module. "
+              + "This option is available only when `--entity` has been specified. "
+              + "Default if option not present: first repository annotated with `@RooJpaRepository` and "
               + "associated to the entity specified in `--entity`.") final JavaType repositoryType,
       @CliOption(
           key = "interface",
@@ -350,10 +350,10 @@ public class ServiceCommands implements CommandMarker {
               + "package. Ex.: `--class ~.service.api.MyClass` (where `~` is the base package). When "
               + "working with multiple modules, you should specify the name of the class and the module "
               + "where it is. Ex.: `--class service-api:~.MyClass`. If the module is not specified, it "
-              + "is assumed that the class is in the module which has the focus."
-              + "This option is mandatory if `--entity` has been already specified and the project is"
+              + "is assumed that the class is in the module which has the focus. "
+              + "This option is mandatory if `--entity` has been already specified and the project is "
               + "multi-module. "
-              + "This option is available only when `--entity` has been specified."
+              + "This option is available only when `--entity` has been specified. "
               + "Default if option not present: concatenation of entity simple name with 'Service' in "
               + "`~.service.api` package, or 'service-api:~.' if multi-module project.") final JavaType interfaceType,
       @CliOption(
@@ -364,7 +364,7 @@ public class ServiceCommands implements CommandMarker {
               + "also specify the package. Ex.: `--class ~.service.impl.MyClass` (where `~` is the base "
               + "package). When working with multiple modules, you should specify the name of the class "
               + "and the module where it is. Ex.: `--class service-impl:~.MyClass`. If the module is not "
-              + "specified, it is assumed that the class is in the module which has the focus."
+              + "specified, it is assumed that the class is in the module which has the focus. "
               + "This option is available only when `--entity` has been specified. "
               + "Default if option not present: concatenation of entity simple name with 'ServiceImpl' "
               + "in `~.service.impl` package, or 'service-impl:~.' if multi-module project.") final JavaType implType,
@@ -373,8 +373,8 @@ public class ServiceCommands implements CommandMarker {
           mandatory = false,
           help = "The java interface package. In multi-module project you should specify the module name"
               + " before the package name. Ex.: `--apiPackage service-api:org.springframework.roo` but, "
-              + "if module name is not present, the Roo Shell focused module will be used."
-              + "This option is available only when `--all` parameter has been specified."
+              + "if module name is not present, the Roo Shell focused module will be used. "
+              + "This option is available only when `--all` parameter has been specified. "
               + "Default value if not present: `~.service.api` package, or 'service-api:~.' if "
               + "multi-module project.") JavaPackage apiPackage,
       @CliOption(
@@ -383,8 +383,8 @@ public class ServiceCommands implements CommandMarker {
           help = "The java package of the implementation classes for the interfaces. In multi-module "
               + "project you should specify the module name before the package name. Ex.: `--implPackage "
               + "service-impl:org.springframework.roo` but, if module name is not present, the Roo Shell "
-              + "focused module will be used."
-              + "This option is available only when `--all` parameter has been specified."
+              + "focused module will be used. "
+              + "This option is available only when `--all` parameter has been specified. "
               + "Default value if not present: `~.service.impl` package, or 'service-impl:~.' if "
               + "multi-module project.") JavaPackage implPackage) {
 

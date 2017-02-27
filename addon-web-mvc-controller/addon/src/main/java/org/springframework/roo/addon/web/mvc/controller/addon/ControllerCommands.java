@@ -328,9 +328,9 @@ public class ControllerCommands implements CommandMarker {
           specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
           help = "Indicates if developer wants to generate controllers for every entity of current "
-              + "project."
+              + "project. "
               + "This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` "
-              + "will cause the parameter `--all` won't be available."
+              + "will cause the parameter `--all` won't be available. "
               + "Default if option present: `true`; default if option not present: `false`.") boolean all,
       @CliOption(
           key = "entity",
@@ -340,8 +340,8 @@ public class ControllerCommands implements CommandMarker {
               + "also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). "
               + "When working with multiple modules, you should specify the name of the entity and the "
               + "module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not "
-              + "specified, it is assumed that the entity is in the module which has the focus."
-              + "Possible values are: any of the entities in the project."
+              + "specified, it is assumed that the entity is in the module which has the focus. "
+              + "Possible values are: any of the entities in the project. "
               + "This option is mandatory if `--all` is not specified. Otherwise, using `--all` "
               + "will cause the parameter `--entity` won't be available.") JavaType entity,
       @CliOption(
@@ -350,10 +350,10 @@ public class ControllerCommands implements CommandMarker {
           unspecifiedDefaultValue = "JSON",
           specifiedDefaultValue = "JSON",
           help = "Indicates the responseType to be used by generated controller. Depending on the selected "
-              + "responseType, generated methods and views will vary."
+              + "responseType, generated methods and views will vary. "
               + "Possible values are: `JSON` plus any response type installed with `web mvc view setup` "
               + "command. "
-              + "This option is available once `--all` or `--entity` parameters have been specified."
+              + "This option is available once `--all` or `--entity` parameters have been specified. "
               + "Default: `JSON`.") String responseType,
       @CliOption(
           key = "package",
@@ -363,7 +363,7 @@ public class ControllerCommands implements CommandMarker {
               + "multi-module project you should specify the module name before the package name. "
               + "Ex.: `--package application:org.springframework.roo.web` but, if module name is not "
               + "present, the Roo Shell focused module will be used. "
-              + "This option is available only if `--all` or `--entity` option has been specified."
+              + "This option is available only if `--all` or `--entity` option has been specified. "
               + "Default value if not present: `~.web` package, or 'application:~.web' if multi-module "
               + "project.") JavaPackage controllersPackage,
       @CliOption(
@@ -372,7 +372,7 @@ public class ControllerCommands implements CommandMarker {
           specifiedDefaultValue = "",
           unspecifiedDefaultValue = "",
           help = "Indicates `@RequestMapping` prefix to be used on this controller. It is not necessary "
-              + "to specify '/' as Spring Roo shell will include it automatically."
+              + "to specify '/' as Spring Roo shell will include it automatically. "
               + "This option is available only if `--all` or `--entity` option has been specified.") String pathPrefix) {
 
     // Getting --responseType service
@@ -719,9 +719,9 @@ public class ControllerCommands implements CommandMarker {
           specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
           help = "Indicates if developer wants to generate detail controllers for each `@OneToMany` "
-              + "relation of field in each entity in the project."
+              + "relation of field in each entity in the project. "
               + "This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` "
-              + "will cause the parameter `--all` won't be available."
+              + "will cause the parameter `--all` won't be available. "
               + "Default if option present: `true`; default if option not present: `false`.") boolean all,
       @CliOption(
           key = "entity",
@@ -731,8 +731,8 @@ public class ControllerCommands implements CommandMarker {
               + "can also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base "
               + "package). When working with multiple modules, you should specify the name of the entity "
               + "and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is "
-              + "not specified, it is assumed that the entity is in the module which has the focus."
-              + "Possible values are: any of the entities in the project."
+              + "not specified, it is assumed that the entity is in the module which has the focus. "
+              + "Possible values are: any of the entities in the project. "
               + "This option is mandatory if `--all` is not specified. Otherwise, using `--all` "
               + "will cause the parameter `--entity` won't be available.") JavaType entity,
       @CliOption(
@@ -743,7 +743,7 @@ public class ControllerCommands implements CommandMarker {
           help = "Indicates the entity's field on which the detail controller is generated. It must be "
               + "a `@OneToMany` field. "
               + "Possible values are: fields representing a `@OneToMany` relation of the entity specified"
-              + " in `--entity` parameter."
+              + " in `--entity` parameter. "
               + "This param is only available if `--entity` parameter has been specified before.") String field,
       @CliOption(
           key = "package",
@@ -753,8 +753,8 @@ public class ControllerCommands implements CommandMarker {
               + " multi-module project you should specify the module name before the package name. "
               + "Ex.: `--package application:org.springframework.roo.web` but, if module name is not "
               + "present, the Roo Shell focused module will be used. "
-              + "This option is available only if `--all` or `--entity` option has been specified."
-              + "Default value if not present: `~.web` package, or 'application:~.web' if multi-module "
+              + "This option is available only if `--all` or `--entity` option has been specified. "
+              + "Default if option not present: `~.web` package, or 'application:~.web' if multi-module "
               + "project.") JavaPackage controllersPackage,
       @CliOption(
           key = "responseType",
@@ -762,21 +762,21 @@ public class ControllerCommands implements CommandMarker {
           unspecifiedDefaultValue = "JSON",
           specifiedDefaultValue = "JSON",
           help = "Indicates the responseType to be used by generated detail controllers. Depending on "
-              + "the selected responseType, generated methods and views will vary."
+              + "the selected responseType, generated methods and views will vary. "
               + "Possible values are: `JSON` plus any response type installed with `web mvc view setup` "
               + "command. "
-              + "This option is available once `--all` or `--entity` parameters have been specified."
+              + "This option is available once `--all` or `--entity` parameters have been specified. "
               + "Default: `JSON`.") String responseType,
       @CliOption(
           key = "views",
           mandatory = false,
           specifiedDefaultValue = "list",
           help = "Separated comma list where developer could specify the different parent views where "
-              + "this new detail will be displayed. By default, detail will be displayed only in the"
-              + "parent list view. This option could be autocompleted with 'list', 'show' or the different"
-              + "parent finder views (if exists). "
-              + "This parameter is not visible if the provided `--responseType` doesn't use views to display "
-              + "the data.") String viewsList) {
+              + "this new detail will be displayed. "
+              + "This parameter is not available if the provided `--responseType` doesn't use views to display "
+              + "the data. "
+              + "Possible values are: 'list', 'show' or the different parent finder views (if exists). "
+              + "Default if option not present: The parent 'list' view if it exists.") String viewsList) {
 
     // Getting --responseType service
     Map<String, ControllerMVCResponseService> responseTypeServices =

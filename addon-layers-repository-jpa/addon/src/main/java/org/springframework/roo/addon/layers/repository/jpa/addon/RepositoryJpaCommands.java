@@ -340,7 +340,8 @@ public class RepositoryJpaCommands implements CommandMarker {
               + "the entity specified in `--entity` parameter. "
               + "Possible values are: any of the projections associated to the entity in `--entity` option. "
               + "This option is not available if domain entity specified in `--entity` parameter has no "
-              + "associated Projections.") JavaType defaultReturnType,
+              + "associated Projections. "
+              + "Default: the entity specified in the `entity` option.") JavaType defaultReturnType,
       @CliOption(
           key = "package",
           mandatory = false,

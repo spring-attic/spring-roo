@@ -156,10 +156,10 @@ public class ViewCommands implements CommandMarker {
           help = "The application module where to install views. "
               + "This option is mandatory if the focus is not set in an application module, that is, a "
               + "module containing an `@SpringBootApplication` class. "
-              + "This option is available only if there are more than one application module and none of"
+              + "This option is available only if there are more than one application module and none of "
               + " them is focused. "
               + "Default if option not present: the unique 'application' module, or focused 'application'"
-              + " module.)", unspecifiedDefaultValue = ".",
+              + " module.", unspecifiedDefaultValue = ".",
           optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
 
     Map<String, ControllerMVCResponseService> responseTypes = getControllerMVCResponseTypes(false);

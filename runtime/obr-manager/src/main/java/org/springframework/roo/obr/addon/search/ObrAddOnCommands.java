@@ -24,46 +24,46 @@ public class ObrAddOnCommands implements CommandMarker {
 
 
   @CliCommand(value = "addon info bundle",
-      help = "Provide information about a specific Spring Roo Add-on from installed repositories")
+      help = "Provide information about a specific Spring Roo Add-on from installed repositories.")
   public void infoBundle(
       @CliOption(key = "bundleSymbolicName", mandatory = true,
-          help = "The bundle symbolic name of the add-on of interest") final ObrAddOnBundleSymbolicName bsn) {
+          help = "The bundle symbolic name of the add-on of interest.") final ObrAddOnBundleSymbolicName bsn) {
 
     operations.addOnInfo(bsn);
   }
 
   @CliCommand(value = "addon install bundle",
-      help = "Install Spring Roo Add-on from installed repositories")
+      help = "Install Spring Roo Add-on from installed repositories.")
   public void installBsn(
       @CliOption(key = "bundleSymbolicName", mandatory = true,
-          help = "The bundle symbolic name of the add-on of interest") final ObrAddOnBundleSymbolicName bsn) {
+          help = "The bundle symbolic name of the add-on of interest.") final ObrAddOnBundleSymbolicName bsn) {
     operations.installAddOn(bsn);
   }
 
-  @CliCommand(value = "addon install url", help = "Install Spring Roo Add-on using an URL")
+  @CliCommand(value = "addon install url", help = "Install Spring Roo Add-on using an URL.")
   public void installByUrl(@CliOption(key = "url", mandatory = true,
-      help = "The url of the add-on of interest") final String url) {
+      help = "The url of the add-on of interest.") final String url) {
     operations.installAddOnByUrl(url);
   }
 
-  @CliCommand(value = "addon remove", help = "Remove an installed Spring Roo Add-on")
+  @CliCommand(value = "addon remove", help = "Removes an installed Spring Roo Add-on.")
   public void remove(@CliOption(key = "bundleSymbolicName", mandatory = true,
-      help = "The bundle symbolic name of the add-on of interest") final BundleSymbolicName bsn) {
+      help = "The bundle symbolic name of the add-on of interest.") final BundleSymbolicName bsn) {
 
     operations.removeAddOn(bsn);
   }
 
-  @CliCommand(value = "addon list", help = "List all installed addons")
+  @CliCommand(value = "addon list", help = "List all installed addons.")
   public void list() {
 
     operations.list();
   }
 
   @CliCommand(value = "addon search",
-      help = "Search all known Spring Roo Add-ons from installed repositories")
+      help = "Search all known Spring Roo Add-ons from installed repositories.")
   public void search(
       @CliOption(key = "requiresCommand", mandatory = true,
-          help = "Only display add-ons in search results that offer this command") final String requiresCommand) {
+          help = "Only display add-ons in search results that offer this command.") final String requiresCommand) {
 
     operations.searchAddOns(requiresCommand, SearchType.ADDON);
   }
