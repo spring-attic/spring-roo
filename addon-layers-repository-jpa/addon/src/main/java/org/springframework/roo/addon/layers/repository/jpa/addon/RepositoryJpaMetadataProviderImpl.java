@@ -4,6 +4,16 @@ import static org.springframework.roo.model.RooJavaType.ROO_READ_ONLY_REPOSITORY
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA;
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -43,16 +53,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * Implementation of {@link RepositoryJpaMetadataProvider}.
@@ -284,8 +284,6 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
       defaultReturnType = annotationDefaultReturnType;
     }
 
-
-
     // Get field which entity is field part
     List<Pair<FieldMetadata, RelationInfo>> relationsAsChild =
         getJpaOperations().getFieldChildPartOfRelation(entityDetails);
@@ -293,7 +291,6 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
     // Get Annotation
     ClassOrInterfaceTypeDetails cid = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
     AnnotationMetadata repositoryAnnotation = cid.getAnnotation(ROO_REPOSITORY_JPA);
-
 
     // Create list of finder to add
     List<FinderMethod> findersToAdd = new ArrayList<FinderMethod>();

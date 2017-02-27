@@ -2,6 +2,13 @@ package org.springframework.roo.addon.layers.service.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -37,13 +44,6 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
 /**
  * Implementation of {@link ServiceMetadataProvider}.
  *
@@ -76,18 +76,18 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
   @Override
   @SuppressWarnings("unchecked")
   protected void activate(final ComponentContext cContext) {
-    context = cContext.getBundleContext();
+    super.activate(cContext);
     super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
-        new MetadataDependencyRegistryTracker(context, this,
+        new MetadataDependencyRegistryTracker(cContext.getBundleContext(), this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
     addMetadataTrigger(ROO_SERVICE);
 
     this.keyDecoratorTracker =
-        new CustomDataKeyDecoratorTracker(context, getClass(), new LayerTypeMatcher(ROO_SERVICE,
-            new JavaSymbolName(RooService.ENTITY_ATTRIBUTE)));
+        new CustomDataKeyDecoratorTracker(cContext.getBundleContext(), getClass(),
+            new LayerTypeMatcher(ROO_SERVICE, new JavaSymbolName(RooService.ENTITY_ATTRIBUTE)));
     this.keyDecoratorTracker.open();
   }
 
@@ -192,7 +192,6 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
     final RepositoryJpaMetadata repositoryMetadata =
         getMetadataService().get(repositoryMetadataKey);
 
-
     List<MethodMetadata> finders = new ArrayList<MethodMetadata>();
     List<MethodMetadata> countMethods = new ArrayList<MethodMetadata>();
 
@@ -208,7 +207,7 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
       // Add to service finders list
       finders.add(finder);
 
-      registerDependencyModolesOfFinder(governorPhysicalTypeMetadata, finder);
+      registerDependencyModulesOfFinder(governorPhysicalTypeMetadata, finder);
     }
 
     // Get count methods
@@ -254,7 +253,7 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
       // Add to service finders list
       finders.add(finderInfo.getKey());
 
-      registerDependencyModolesOfFinder(governorPhysicalTypeMetadata, finderInfo.getKey());
+      registerDependencyModulesOfFinder(governorPhysicalTypeMetadata, finderInfo.getKey());
     }
 
     // Add custom count methods to count method list
@@ -309,7 +308,7 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
         repositoryCustomFindersAndCounts);
   }
 
-  private void registerDependencyModolesOfFinder(
+  private void registerDependencyModulesOfFinder(
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, MethodMetadata finder) {
     // Add dependencies between modules
     List<JavaType> types = new ArrayList<JavaType>();
