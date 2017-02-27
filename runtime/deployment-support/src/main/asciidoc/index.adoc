@@ -912,31 +912,46 @@ image::sts-boot-dashboard.png["Boot Dashboard", width="50%"]
 [[application-development-command-index]]
 == Command index for application development
 
-Commands are listed in alphabetic order, and are shown in monospaced
-font with any mandatory options you must specify when using the command.
-Most commands accept a large number of options, and all of the possible
-options for each command are presented in this appendix.
+* *Description:*
 
+Commands are listed in alphabetic order, and are shown in monospaced font. with all the options you can specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.
+
+[[command-syntax]]
+* *Syntax:*
++
+The Roo command syntax is presented with some marks to easily distingish the different parameters of the commands depending their behaviour in the shell:
++
+** Mandatory: `{--parameter}`. This kind of parameter must always be provided when executing the command.
+** Dynamic mandatory: `(--parameter)`. Depending on the project's context or the already provided parameters, this kind of parameter may be mandatory.
+** Optional: `[--parameter]`. This kind of parameter is optional when executing the command.
+** Dynamic optional: `([--parameter])`. This kind of parameter is optional, but it can only be used when an particular condition is fulfilled.
+** Mutual excluding: `--parameter ... | --parameter ...`. Both groups of parameters in the two sides of the `|` are mutually selective. If one of them is specified, the other won't be available.
+
+[[os-command]]
 === !os
 
 Allows execution of operating system (OS) commands. Ex.: `!os mkdir test_dir`
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> !os
+*roo>* !os [--command]
 ----
 
+* _Optional:_
+
 --command::
-  The OS command to execute. Default: ''
+  The OS command to execute.
++
+Default: ''
 
 [[backup-command]]
 === backup
 
 Backups your project to a zip file located in root directory.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> backup
+*roo>* backup
 ----
 
 This command does not accept any options.
@@ -945,9 +960,9 @@ This command does not accept any options.
             
 Installs support for using intermediate memory in generated project by using Spring Cache abstraction. Users can specify different providers to use for managing it.
 
-[source,sh]            
+[source,sh,subs=quotes]            
 ----
-roo> cache setup [--provider --profile]
+*roo>* cache setup [--provider --profile]
 ---- 
 
 * _Optional:_
@@ -962,9 +977,9 @@ roo> cache setup [--provider --profile]
 
 Creates a new Java class source file in any project path.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> class {--class} [--abstract --extends --implements --path --permitReservedWords --rooAnnotations --force]
+*roo>* class {--class} [--abstract --extends --implements --path --permitReservedWords --rooAnnotations --force]
 ----
 
 * _Mandatory:_
@@ -1011,9 +1026,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Creates a class constructor.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> constructor [--class --fields]
+*roo>* constructor [--class --fields]
 ----
 
 * _Optional:_
@@ -1031,9 +1046,9 @@ Default if option not present: the class focused by Roo shell.
 
 Creates a new DTO (Data Transfer Object) class in the directory _src/main/java_ of the selected project module (if any) with `@RooDTO` annotation.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> dto {--class} [--entityFormatExpression --entityFormatMessage --immutable --serializable --utilityMethods --force]
+*roo>* dto {--class} [--entityFormatExpression --entityFormatMessage --immutable --serializable --utilityMethods --force]
 ----
 
 * _Mandatory:_
@@ -1073,9 +1088,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Creates a new Java class source file with the JPA `@Embeddable` annotation in the directory _src/main/java_ of the selected project module (if any).
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> embeddable {--class} [--permitReservedWords --serializable]
+*roo>* embeddable {--class} [--permitReservedWords --serializable]
 ----
 
 * _Mandatory:_
@@ -1100,9 +1115,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Creates a new JPA persistent entity in the directory _src/main/java_ of the selected project module (if any) with `@RooEntity` annotation.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> entity jpa {--class} (--identifierColumn --identifierStrategy --table --sequenceName --versionField --versionColumn --versionType) [--entityFormatExpression --entityFormatMessage --abstract --catalog --entityName --extends --identifierField --identifierType --implements --inheritanceType --mappedSuperclass --permitReservedWords --plural --readOnly --schema --serializable --force]
+*roo>* entity jpa {--class} (--identifierColumn --identifierStrategy --table --sequenceName --versionField --versionColumn --versionType) [--entityFormatExpression --entityFormatMessage --abstract --catalog --entityName --extends --identifierField --identifierType --implements --inheritanceType --mappedSuperclass --permitReservedWords --plural --readOnly --schema --serializable --force]
 ----
 
 * _Mandatory:_
@@ -1215,9 +1230,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Creates new projection classes from entities in the directory _src/main/java_ of the selected project module (if any) annotated with `@RooEntityProjection`. Transient, static and entity collection fields are not valid for projections.
 
-[source,bash]
+[source,bash,subs=quotes]
 ----
-roo> entity projection (--all [--suffix] | --class --entity --fields [--entityFormatExpression --entityFormatMessage]) [--force]
+*roo>* entity projection (--all [--suffix] | --class --entity --fields [--entityFormatExpression --entityFormatMessage]) [--force]
 ----
 
 * _Conditional:_
@@ -1272,9 +1287,9 @@ Default if option not present: 'Projection'.
 
 Inserts a new enum constant into an enum class.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> enum constant {--name} [--class --permitReservedWords]
+*roo>* enum constant {--name} [--class --permitReservedWords]
 ----
 
 * _Mandatory:_
@@ -1299,9 +1314,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Creates a new Java enum source file in any project path
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> enum type {--class} [--path --permitReservedWords --force]
+*roo>* enum type {--class} [--path --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1330,9 +1345,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Adds `equals()` and `hashCode()` methods to a class.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> equals [--class --appendSuper --excludeFields]
+*roo>* equals [--class --appendSuper --excludeFields]
 ----
 
 * _Optional:_
@@ -1354,9 +1369,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Waits until all metadata and files are refreshed and updated, then exits the shell. You can also use `quit` command.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> exit
+*roo>* exit
 ----
 
 This command does not accept any options. 
@@ -1365,9 +1380,9 @@ This command does not accept any options.
 
 Adds a private boolean field to an existing Java source file.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> field boolean {--fieldName} (--class --column [--transient]) [--assertFalse | --assertTrue] [--notNull --value --comment --primitive --permitReservedWords --force]
+*roo>* field boolean {--fieldName} (--class --column [--transient]) [--assertFalse | --assertTrue] [--notNull --value --comment --primitive --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1444,9 +1459,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Adds a private date field to an existing Java source file.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> field date {--fieldName --type} (--class --column [--persistenceType --transient]) [--notNull | --nullRequired] [--future | --past] [--dateTimeFormatPattern | --dateFormat --timeFormat] [--comment --value --permitReservedWords --force]
+*roo>* field date {--fieldName --type} (--class --column [--persistenceType --transient]) [--notNull | --nullRequired] [--future | --past] [--dateTimeFormatPattern | --dateFormat --timeFormat] [--comment --value --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1560,9 +1575,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Adds a private @Embedded field to an existing Java source file. This command is only available for entities annotated with `@RooJpaEntity`. Therefore, you should focus the desired entity in the Roo Shell to make this command available.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> field embedded {--fieldName --type} (--class) [--permitReservedWords --force]
+*roo>* field embedded {--fieldName --type} (--class) [--permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1600,9 +1615,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Adds a private enum field to an existing Java source file. The field type must be a Java enum type.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> field enum {--fieldName --type} (--class --column [--transient --enumType]) [--notNull | --nullRequired] [--comment --permitReservedWords --force]
+*roo>* field enum {--fieldName --type} (--class --column [--transient --enumType]) [--notNull | --nullRequired] [--comment --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1678,9 +1693,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Adds a byte array field for storing uploaded file contents.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> field file {--fieldName --contentType} (--class --column) [--autoUpload --notNull --permitReservedWords --force]
+*roo>* field file {--fieldName --contentType} (--class --column) [--autoUpload --notNull --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1737,9 +1752,9 @@ Adds a private `List` field to an existing Java source file, representing (alway
 
 This command is only available for entities annotated with `@RooJpaEntity` (Roo JPA entities). Therefore, you should focus the desired entity in the Roo Shell to make this command available.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> field list {--fieldName --type} (--class) (--joinColumnName --referencedColumnName | --joinTable --joinColumns --referencedColumns --inverseJoinColumns --inverseReferencedColumns) [--notNull | --nullRequired] [--mappedBy --cardinality --fetch --aggregation --comment --entityFormatExpression --entityFormatMessage --orphanRemoval --sizeMin --sizeMax --permitReservedWords --force]
+*roo>* field list {--fieldName --type} (--class) (--joinColumnName --referencedColumnName | --joinTable --joinColumns --referencedColumns --inverseJoinColumns --inverseReferencedColumns) [--notNull | --nullRequired] [--mappedBy --cardinality --fetch --aggregation --comment --entityFormatExpression --entityFormatMessage --orphanRemoval --sizeMin --sizeMax --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1876,9 +1891,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Adds a private numeric field to an existing Java source file. User can choose the field type between a wide range of numeric types.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> field number {--fieldName --type} (--class --column [--unique --transient]) [--nullRequired | --notNull --primitive] [--decimalMin --decimalMax --digitsInteger --digitsFraction --min --max --comment --value --permitReservedWords --force]
+*roo>* field number {--fieldName --type} (--class --column [--unique --transient]) [--nullRequired | --notNull --primitive] [--decimalMin --decimalMax --digitsInteger --digitsFraction --min --max --comment --value --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -1980,9 +1995,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Inserts a private field into the specified file. User can choose a custom type for the field by specifying its fully qualified name.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> field other {--fieldName --type} (--class --column [--transient]) [--notNull | --nullRequired] [--comment --value --permitReservedWords --force] 
+*roo>* field other {--fieldName --type} (--class --column [--transient]) [--notNull | --nullRequired] [--comment --value --permitReservedWords --force] 
 ----
 
 * _Mandatory:_
@@ -2054,9 +2069,9 @@ Adds a private reference field, representing (always) a bidirectional 'one-to-on
 
 This command is only available for entities annotated with `@RooJpaEntity`, so you should focus the desired entity in the Roo Shell to make this command available.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> field reference {--fieldName --type} (--class --joinColumnName --referencedColumnName [--fetch --mappedBy]) [--notNull | --nullRequired] [--aggregation --entityFormatExpression --entityFormatMessage --orphanRemoval --comment --permitReservedWords --force]
+*roo>* field reference {--fieldName --type} (--class --joinColumnName --referencedColumnName [--fetch --mappedBy]) [--notNull | --nullRequired] [--aggregation --entityFormatExpression --entityFormatMessage --orphanRemoval --comment --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -2155,9 +2170,9 @@ Adds a private `Set` field to an existing Java source file, representing (always
 
 This command is only available for entities annotated with `@RooJpaEntity` (Roo JPA entities). Therefore, you should focus the desired entity in the Roo Shell to make this command available.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> field set {--fieldName --type} (--class) (--joinColumnName --referencedColumnName | --joinTable --joinColumns --referencedColumns --inverseJoinColumns --inverseReferencedColumns) [--notNull | --nullRequired] [--mappedBy --cardinality --fetch --aggregation --comment --entityFormatExpression --entityFormatMessage --orphanRemoval --sizeMin --sizeMax --permitReservedWords --force]
+*roo>* field set {--fieldName --type} (--class) (--joinColumnName --referencedColumnName | --joinTable --joinColumns --referencedColumns --inverseJoinColumns --inverseReferencedColumns) [--notNull | --nullRequired] [--mappedBy --cardinality --fetch --aggregation --comment --entityFormatExpression --entityFormatMessage --orphanRemoval --sizeMin --sizeMax --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -2294,9 +2309,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Adds a private string field to an existing Java source file.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> field string {--fieldName} (--class --column [--transient --lob --unique]) [--notNull | --nullRequired] [--regexp --sizeMin --sizeMax --value --comment --permitReservedWords --force]
+*roo>* field string {--fieldName} (--class --column [--transient --lob --unique]) [--notNull | --nullRequired] [--regexp --sizeMin --sizeMax --value --comment --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -2387,9 +2402,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Installs a finder in the given target (must be an entity). This command needs an existing repository for the target entity, you can create it with `repository jpa` command. The finder will be added to targeted entity associated repository and associated service if exists or when it will be created.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> finder add {--entity --name} (--formBean --returnType)
+*roo>* finder add {--entity --name} (--formBean --returnType)
 ----
 
 * _Mandatory:_
@@ -2430,9 +2445,9 @@ Default if not present: the default return type of the repository related to the
 
 Changes Roo Shell focus to a different type in the project.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> focus {--class}
+*roo>* focus {--class}
 ----
 
 * _Mandatory:_
@@ -2445,9 +2460,9 @@ roo> focus {--class}
 
 Shows a summary of all Spring Roo commands.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> help [--command]
+*roo>* help [--command]
 ----
 
 * _Optional:_
@@ -2460,9 +2475,9 @@ roo> help [--command]
 
 Provides step-by-step hints and context-sensitive guidance.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> hint [--topic]
+*roo>* hint [--topic]
 ----
 
 * _Optional:_
@@ -2476,9 +2491,9 @@ Possible values are: `controllers`, `eclipse`, `entities`, `fields`, `finders`, 
 
 Creates a new Java interface source file in any project path.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> interface {--class} [--path --permitReservedWords --force]
+*roo>* interface {--class} [--path --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -2508,9 +2523,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Adds support for auditing a JPA entity. This will add JPA and Spring listeners to this entity to record the entity changes.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> jpa audit add {--entity} (--createdDateColumn --modifiedDateColumn --createdByColumn --modifiedByColumn)
+*roo>* jpa audit add {--entity} (--createdDateColumn --modifiedDateColumn --createdByColumn --modifiedByColumn)
 ----
 
 * _Mandatory:_
@@ -2545,9 +2560,9 @@ This option is mandatory if `spring.roo.jpa.require.schema-object-name` configur
 
 Installs audit support into your project, preparing it to audit entity changes.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> jpa audit setup (--module)
+*roo>* jpa audit setup (--module)
 ----
 
 * _Conditional:_
@@ -2565,9 +2580,9 @@ Default if option not present: the unique 'application' module, or focused 'appl
 
 Installs or updates a JPA persistence provider in your project. User can execute this command for diferent profiles with different persistence configurations.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> jpa setup {--provider} (--jndiDataSource | --database [--hostName --databaseName --userName --password]) (--module) [--force --profile]
+*roo>* jpa setup {--provider} (--jndiDataSource | --database [--hostName --databaseName --userName --password]) (--module) [--force --profile]
 ----
 
 * _Mandatory:_
@@ -2636,9 +2651,9 @@ This option is available if `--database` has already been specified and its valu
 
 Creates a new Maven module in current *multimodule* project.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> module create {--moduleName} [--packaging --artifactId]
+*roo>* module create {--moduleName} [--packaging --artifactId]
 ----
 
 * _Mandatory:_
@@ -2664,9 +2679,9 @@ Default if option not present: `--moduleName` value.
 
 Changes Roo Shell focus to a different project module, when in a multimodule project.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> module focus {--moduleName}
+*roo>* module focus {--moduleName}
 ----
 
 * _Mandatory:_
@@ -2680,9 +2695,9 @@ Possible values are: any of the project module names (`~` for root module).
 
 Creates a new Maven project.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> project setup {--topLevelPackage} [--multimodule | --packaging] [--projectName --java]
+*roo>* project setup {--topLevelPackage} [--multimodule | --packaging] [--projectName --java]
 ----
 
 * _Mandatory:_
@@ -2720,9 +2735,9 @@ Default if option not present: 'jar'.
 
 Adds or updates a particular property from application config properties file.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> property add {--key --value} (--module) [--force --profile]
+*roo>* property add {--key --value} (--module) [--force --profile]
 ----
 
 * _Mandatory:_
@@ -2758,9 +2773,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 List all properties from application config properties file.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> property list (--module) [--force --profile]
+*roo>* property list (--module) [--force --profile]
 ----
 
 * _Conditional:_
@@ -2788,9 +2803,9 @@ Default if option present: `true`; default if option not present: `false`
 
 Removes a particular property from application config properties file.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> property remove {--key} (--module) [--force --profile]
+*roo>* property remove {--key} (--module) [--force --profile]
 ----
 
 * _Mandatory:_
@@ -2823,9 +2838,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Allows to push-in elements declared in the ITDs to its .java files. You could specify `--all` option to apply push-in on every component of generated project, or you could define any package, class or method to apply push-in, combining them.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> push-in (--all | --package --class --method) [--force]
+*roo>* push-in (--all | --package --class --method) [--force]
 ----
 
 * _Conditional:_
@@ -2862,9 +2877,9 @@ Default if option present: `true`; default if option not present: `false`.
 
 Generates new Spring Data repository for specified entity or for all entities in generated project.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> repository jpa (--all [--package] | --entity --interface [--defaultReturnType])
+*roo>* repository jpa (--all [--package] | --entity --interface [--defaultReturnType])
 ----
 
 * _Conditional:_
@@ -2898,6 +2913,8 @@ This option is available only when `--entity` has been specified.
 Possible values are: any of the projections associated to the entity in `--entity` option.
 +
 This option is not available if domain entity specified in `--entity` parameter has no associated Projections.
++
+Default: the entity specified in the `entity` option.
 
 --package::
   The package where repositories will be generated. In multi-module project you should specify the module name before the package name. Ex.: `--package model:org.springframework.roo` but, if module name is not present, the Roo Shell focused module will be used. 
@@ -2911,9 +2928,9 @@ Default value if not present: `~.repository` package, or 'repository:~.' if mult
 
 Parses the specified resource file and executes its Roo commands. You can as well execute _*.roo_ example scripts in the Roo classpath. Ex.: `script --file clinic.roo`.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> script {--file} [--ignoreLines --lineNumbers]
+*roo>* script {--file} [--ignoreLines --lineNumbers]
 ----
 
 * _Mandatory:_
@@ -2935,9 +2952,9 @@ Default if option present: `true`; default if option not present: `false`
 
 Includes `@PreAuthorize` annotation to an specific method for controlling access to its invocation.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> security authorize {--class --method} (--roles | --usernames)
+*roo>* security authorize {--class --method} (--roles | --usernames)
 ----
 
 * _Mandatory:_
@@ -2968,9 +2985,9 @@ This option is mandatory if `--roles` is not specified.
 
 Include `@PreFilter`/`@PostFilter` annotation to an specific method to filter results of a method invocation based on an expression.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> security filtering {--class --method} (--roles | --usernames) [--when]
+*roo>* security filtering {--class --method} (--roles | --usernames) [--when]
 ----
 
 * _Mandatory:_
@@ -3010,9 +3027,9 @@ Default: `PRE`.
 
 Install Spring Security into your project.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> security setup (--module) [--provider]
+*roo>* security setup (--module) [--provider]
 ----
 
 * _Conditional:_
@@ -3036,262 +3053,459 @@ Possible values are: `DEFAULT` (default Spring Security configuration provided b
 [[service-command]]
 === service
 
-Creates new service interface and its implementation.
+Creates new service interface and its implementation related to an entity, or for all the entities in generated project, with some basic management methods by using Spring Data repository methods.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> service --repository --interface
+*roo>* service (--all [--apiPackage --implPackage] | --entity --repository --interface [--class])
 ----
+
+* _Conditional:_
 
 --all::
-  Indicates if developer wants to generate service interfaces and their
-  implementations for every entity of current project. Not avalaible if 'entity' parameter has been specified before; default if
-  option present: `true`; default if option not present: `false`
+  Indicates if developer wants to generate service interfaces and their implementations for every entity of current project. 
++
+This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` will cause the parameter `--all` won't be available.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --entity::
-  The domain entity this service should expose. Not avalaible if 'all' parameter has been specified before 
+  The domain entity this service should manage. When working on a single module project, simply specify the name of the entity. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). When working with multiple modules, you should specify the name of the entity and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not specified, it is assumed that the entity is in the module which has the focus.
++
+Possible values are: any of the entities in the project.
++
+This option is mandatory if `--all` is not specified. Otherwise, using `--all` will cause the parameter `--entity` won't be available.
+
 --repository::
-  The repository this service should expose. Not available if you don't specify 'entity' parameter (mandatory if multimodule project)
+  The repository this service should expose. When working on a single module project, simply specify the name of the class. If you consider it necessary, you can also specify the package. Ex.: `--class ~.repository.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class repository:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+Possible values are: any of the repositories annotated with `@RooJpaRepository` and associated to the entity specified in `--entity`.
++
+This option is mandatory if `--entity` has been already specified and the project is multi-module.
++
+This option is available only when `--entity` has been specified.
++
+Default if option not present: first repository annotated with `@RooJpaRepository` and associated to the entity specified in `--entity`.
+
 --interface::
-  The service interface to be generated. Not available if you don't specify 'entity' parameter (mandatory if multimodule project)
+  The service interface to be generated. When working on a single module project, simply specify the name of the class. If you consider it necessary, you can also specify the package. Ex.: `--class ~.service.api.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class service-api:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+This option is mandatory if `--entity` has been already specified and the project is multi-module. 
++
+This option is available only when `--entity` has been specified.
++
+Default if option not present: concatenation of entity simple name with 'Service' in `~.service.api` package, or 'service-api:~.' if multi-module project.
+
+* _Optional:_
+
 --class::
-  The service implementation to be generated. Not available if you don't specify 'entity' parameter
+  The service implementation to be generated. When working on a single module project, simply specify the name of the class. If you consider it necessary, you can also specify the package. Ex.: `--class ~.service.impl.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class service-impl:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+This option is available only when `--entity` has been specified. 
++
+Default if option not present: concatenation of entity simple name with 'ServiceImpl' in `~.service.impl` package, or 'service-impl:~.' if multi-module project.
+
 --apiPackage::
-  The java interface package. Not avalaible if 'all' parameter has not been specified before
+  The java interface package. In multi-module project you should specify the module name before the package name. Ex.: `--apiPackage service-api:org.springframework.roo` but, if module name is not present, the Roo Shell focused module will be used.
++
+This option is available only when `--all` parameter has been specified.
++
+Default value if not present: `~.service.api` package, or 'service-api:~.' if multi-module project.
+
 --implPackage::
-  The java package of the implementation classes for the interfaces. Not avalaible if 'all' parameter has not been specified before
+  The java package of the implementation classes for the interfaces. In multi-module project you should specify the module name before the package name. Ex.: `--implPackage service-impl:org.springframework.roo` but, if module name is not present, the Roo Shell focused module will be used.
++
+This option is available only when `--all` parameter has been specified.
++
+Default value if not present: `~.service.impl` package, or 'service-impl:~.' if multi-module project.
 
 [[settings-commands]]
 === settings add
 
-Adds or updates a particular setting
+Adds or updates a Roo project setting, which can modify the configuration of some commands acting in the current project. These settings are located in _[PROJECT-ROOT]/.roo/config/project.properties_.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> settings add --name --value
+*roo>* settings add {--name --value} [--force]
 ----
+
+* _Mandatory:_
 
 --name::
-  The setting name that should be changed (mandatory)
+  The setting name that should be added or changed.
+
 --value::
-  The new vale for thi (mandatory)
+  The value for this settings name.
+
+* _Optional:_
+
 --force::
-  Force command execution; default if option present: `true`; default if option not present: `false`
---profile::
-  Parameter that indicates the name of the profile that will be applied
+  Force command execution. 
++
+Default if option present: `true`; default if option not present: `false`.
 
 === settings list
 
-Lists all settings added into configuration
+Lists all settings added into Roo project configuration. These settings are located in _[PROJECT-ROOT]/.roo/config/project.properties_.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> settings list
+*roo>* settings list
 ----
 
 This command does not accept any options.
 
 === settings remove
 
-Removes an specific setting from configuration
+Removes a specific setting from Roo project configuration. Use 'settings list' to see the Roo settings added to the project.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> settings remove --name
+*roo>* settings remove {--name}
 ----
+
+* _Mandatory:_
 
 --name::
-  The settings name that should be removed (mandatory)
+  The settings name that should be removed.
 
 === test integration
 
-Creates a new integration test for the specified entity
+Creates a new integration test class for the specified class. The generated test class will contain a basic structure and the necessary testing components.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> test integration
+*roo>* test integration {--class} (--module) [--permitReservedWords]
 ----
 
---entity::
-  The name of the entity to create an integration test; default if
-  option not present: '*'
+* _Mandatory:_
+
+--class::
+  The name of the class to create an integration test. If you consider it necessary, you can also specify the package. Ex.: `--class ~.package.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class module:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
++
+Possible values are: any of the valid classes in the project which support automatically integration test creation.
+
+* _Conditional:_
+
+--module::
+  The application module where generate the integration test.
++
+This option is mandatory if the focus is not set in an 'application' module and there are more than one 'application' modules, that is, a module containing an `@SpringBootApplication` class. 
++
+This option is available only if there are more than one application module and none of them is focused. 
++
+Default if option not present: the unique 'application' module, or focused 'application' module.   
+
+* _Optional:_
+
 --permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: `true`; default if option not present: `false`
---transactional::
-  Indicates whether the created test cases should be run withing a
-  Spring transaction; default: `true`
+  Indicates whether reserved words are ignored by Roo.
++
+Default if option present: `true`; default if option not present: `false`.
 
 [[test-unit-command]]
 === test unit
 
-Creates a unit test class for the specified class
+Creates a unit test class with a basic structure and with the necessary testing components, for the specified class.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> test unit --class
+*roo>* test unit {--class} [--permitReservedWords]
 ----
+
+* _Mandatory:_
 
 --class::
-  The name of the project class which this unit test class is targeting (mandatory)
+  The name of the project class which this unit test class is targeting. If you consider it necessary, you can also specify the package. Ex.: `--class ~.model.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name" of the class and the module where it is. Ex.: `--class model:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
+
+* _Optional:_
+
 --permitReservedWords::
-  Indicates whether reserved words are ignored by Roo; default if option
-  present: `true`; default if option not present: `false`
+  Indicates whether reserved words are ignored by Roo. 
++
+Default if option present: `true`; default if option not present: `false`.
 
 [[web-mvc-controller-command]]
 === web mvc controller
 
-Generates new @RooController's inside current project. The controllers should manage specific entities in the project.
+Generates new `@RooController's` in the directory _src/main/java_ of the selected project module (if any). The generated controllers should manage specific entities in the project.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> web mvc controller
+*roo>* web mvc controller (--all | --entity ) [--responseType --package --pathPrefix]
 ----
+
+* _Conditional:_
 
 --all::                    
-  Indicates if developer wants to generate controllers for every entity of current project. This param will be visible if 'entity' parameter has not been specified; default if option present: `true`; default if option not present: `false`                   
+  Indicates if developer wants to generate controllers for every entity of current project.
++
+This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` will cause the parameter `--all` won't be available.
++
+Default if option present: `true`; default if option not present: `false`.
+
 --entity::                    
-  Indicates the entity that new controller will manage. This param will be visible if 'all' parameter has not been specified                   
+  The domain entity this controller should manage. When working on a single module project, simply specify the name of the entity. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). When working with multiple modules, you should specify the name of the entity and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not specified, it is assumed that the entity is in the module which has the focus.
++
+Possible values are: any of the entities in the project.
++
+This option is mandatory if `--all` is not specified. Otherwise, using `--all` will cause the parameter `--entity` won't be available.                   
+
+* _Optional:_
+
 --responseType::                    
-  Indicates the responseType to be used by generated controller. Depending of the selected responseType, generated methods and views will vary. This param will be visible if 'all' or 'entity' parameters have been specified; default: 'JSON'                    
+  Indicates the responseType to be used by generated controller. Depending on the selected responseType, generated methods and views will vary.
++
+Possible values are: `JSON` plus any response type installed with `web mvc view setup` command.
++
+This option is available once `--all` or `--entity` parameters have been specified.
++
+Default: `JSON`.
+
 --package::                    
-  Indicates which package should be used to include generated controllers. This param will be visible if 'all' or 'entity' parameters have been specified          
+  Indicates which package should be used to include generated controllers. In multi-module project you should specify the module name before the package name. Ex.: `--package application:org.springframework.roo.web` but, if module name is not present, the Roo Shell focused module will be used.
++
+This option is available only if `--all` or `--entity` option has been specified.
++
+Default value if not present: `~.web` package, or 'application:~.web' if multi-module project.
+
 --pathPrefix::                    
-  Indicates @ResquestMapping prefix to be used on this controller. Is not necessary to specify '/'. Spring Roo shell will include it automatically. This param will be visible if 'all' or 'entity' parameters have been specified; default: ''
+  Indicates `@RequestMapping` prefix to be used on this controller. It is not necessary to specify '/' as Spring Roo shell will include it automatically.
++
+This option is available only if `--all` or `--entity` option has been specified.
 
 [[web-mvc-detail-command]]
 === web mvc detail
 
-Generates new @RooController's for relation fields which detail wants to be managed. It must be a @OneToMany field. Generated controllers will have @RooDetail with info about the parent entity.
+Generates new `@RooController` for relation fields which detail wants to be managed. It must be a `@OneToMany` field. Generated controllers will have `@RooDetail` with info about the parent entity and the parent views where the detail will be displayed.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> web mvc detail
+*roo>* web mvc detail (--all | --entity [--field]) [--package --responseType --views]
 ----
                 
+* _Conditional:_
+
 --all::                    
-  Indicates if developer wants to generate first detail controllers for every entity that has a controller of current project. This param will be visible if 'entity' parameter has not been specified; default if option present: `true`; default if option not present: `false`                           
+  Indicates if developer wants to generate detail controllers for each `@OneToMany` relation of field in each entity in the project. 
++
+This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` will cause the parameter `--all` won't be available. 
++
+Default if option present: `true`; default if option not present: `false`.
+                           
 --entity::                    
-  Indicates the entity on which the detail controller is generated. This param will be visible if 'all' parameter has not been specified 
+  Indicates the entity which this detail controller manages. When working on a single module project, simply specify the name of the entity. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). When working with multiple modules, you should specify the name of the entity and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not specified, it is assumed that the entity is in the module which has the focus.
++
+Possible values are: any of the entities in the project.
++
+This option is mandatory if `--all` is not specified. Otherwise, using `--all` will cause the parameter `--entity` won't be available.
+
+* _Optional:_
+
 --field::                    
-  Indicates the entity's field on which the detail controller is generated. It must be a @OneToMany field. This param will be visible if 'entity' parameter has been specified before; default: ''                  
+  Indicates the entity's field on which the detail controller is generated. It must be a `@OneToMany` field. 
++
+Possible values are: fields representing a `@OneToMany` relation of the entity specified in `--entity` parameter. 
++
+This param is only available if `--entity` parameter has been specified before.
+     
 --package::
-  Indicates which package has the controllers on which the detail controllers are generated. This param will be visible if 'all' or 'entity' parameters have been specified
+  Indicates the Java package where the detail controllers should be generated. In multi-module project you should specify the module name before the package name. Ex.: `--package application:org.springframework.roo.web` but, if module name is not present, the Roo Shell focused module will be used. 
++
+This option is available only if `--all` or `--entity` option has been specified. 
++
+Default if option not present: `~.web` package, or 'application:~.web' if multi-module project.
+
 --responseType::                    
-  Indicates the responseType to be used by generated controller. Depending of the selected responseType, generated methods and views will vary. This param will be visible if 'all' or 'entity' parameters have been specified; default: 'JSON'
+  Indicates the responseType to be used by generated detail controllers. Depending on the selected responseType, generated methods and views will vary. 
++
+Possible values are: `JSON` plus any response type installed with `web mvc view setup` command. 
++
+This option is available once `--all` or `--entity` parameters have been specified.
++
+Default: `JSON`.
+
 --views::
-  Separated comma list where developer could specify the different parent views where the new detail will be displayed. By default, detail will be displayed only in the parent list view. This option could be autocompleted with 'list', 'show' or the different parent finder views (if exists). This parameter is not visible if the provided `--responseType` doesn't use views to display the data.
+  Separated comma list where developer could specify the different parent views where this new detail will be displayed.
++
+This parameter is not available if the provided `--responseType` doesn't use views to display the data. 
++
+Possible values are: 'list', 'show' or the different parent finder views (if exists).
++
+Default if option not present: The parent 'list' view if it exists.
 
 [[web-mvc-finder-command]]
 === web mvc finder
 
-Adds @RooWebFinder annotation to MVC controller type
+Publishes existing finders to web layer, generating controllers and additional views for them. It adds `@RooWebFinder` annotation to MVC controller type.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> web mvc finder --package
+*roo>* web mvc finder (--all | --entity [--queryMethod]) [--package --pathPrefix --responseType]
 ----
+
+* _Conditional:_
 
 --entity::
-  The entity owning the finders that should be published. Not avalaible if 'all' parameter has been specified before
+  The entity owning the finders that should be published. When working on a single module project, simply specify the name of the entity. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). When working with multiple modules, you should specify the name of the entity and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not specified, it is assumed that the entity is in the module which has the focus. 
++
+Possible values are: any of the entities in the project.
++
+This option is mandatory if `--all` is not specified. Otherwise, using `--all` will cause the parameter `--entity` won't be available.
+
 --all::
-  Indicates if developer wants to publish in web layer all finders from all entities in project. Not avalaible if 'entity' parameter has been specified before; default if option present: `true`; default if option not present: `false`
+  Indicates if developer wants to publish in web layer all finders from all entities in project. This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` will cause the parameter `--all` won't be available.
++
+Default if option present: `true`; default if option not present: `false`.
+
+* _Optional:_
+
 --queryMethod::
-  Indicates the name of the finder to add to web layer. Not avalaible if 'entity' parameter has not been specified before
+  Indicates the name of the finder to add to web layer. 
++
+Possible values are: any of the finder names created for the entity, included in `@RooJpaRepository` of the `--entity` associated repository.
++
+This option is available only when `--entity` has been specified.
+
 --responseType::
-  Indicates the responseType to be used by generated controller. Depending of the selected responseType, generated methods and views will vary. Not avalaible if 'all' or 'entity' parameters have not been specified before
+  Indicates the responseType to be used by generated finder controllers. Depending on the selected responseType, generated methods and views will vary.
++
+Possible values are: `JSON` plus any response type installed with `web mvc view setup` command. 
++
+This option is only available if `--all` or `--entity` parameters have been specified.Default: `JSON`.
+
 --package::
-   Indicates the package where generated controller will be located. If multimodule project, package must be in an application module (those with @SpringBootApplication class). Not avalaible if 'all' or 'entity' parameters have not been specified before (mandatory if project has more than one 'application' modules) ; default if option not present: '~.web' 
+   Indicates the Java package where the finder controllers should be generated. In multi-module project you should specify the module name before the package name. Ex.: `--package application:org.springframework.roo.web` but, if module name is not present, the Roo Shell focused module will be used. 
++
+This option is available only if `--all` or `--entity` option has been specified.
++
+Default value if not present: `~.web` package, or 'application:~.web' if multi-module project.
+
 --pathPrefix::
-  Indicates the default path value for accesing finder resources in controller, excluding first '/'. Not avalaible if 'all' or 'entity' parameters have not been specified before; default: ''
+  Indicates the default path value for accesing finder resources in controller, used for this controller `@RequestMapping` excluding first '/'.
++
+This option is available only if `--all` or `--entity` option has been specified.
 
 [[i18n-command]]
 === web mvc language
 
-Install new language in generated project. Also, could be used to specify the default language of the project.
+Installs new language in generated project views. Also, could be used to specify the default language of the project.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> web mvc language --code --module
+*roo>* web mvc language {--code} (--module) [--useAsDefault]
 ----
+
+* _Mandatory:_
 
 --code::
-  The language code for the desired bundle (mandatory)
---useAsDefault::
-  Indicates if selected language should be used as default on this application. By default false.; default: `false`
+  The language code for the desired bundle.
++
+Possible values are: supported languages. Currently `en` (English, default) and `es` (Spanish).
+
+* _Conditional:_
+
 --module::
-  The application module where to install message bundles. This option is not available if there is only one application module 
-  (mandatory if the focus is not set in application module); default if option not present: '.'
+  The application module where to install the language support.
++
+This option is mandatory if the focus is not set in an application module, that is, a module containing an `@SpringBootApplication` class. 
++
+This option is available only if there are more than one application module and none of them is focused. 
++
+Default if option not present: the unique 'application' module, or focused 'application' module.
+
+* _Optional:_
+
+--useAsDefault::
+  Indicates if selected language should be used as default on this application.
++
+Default: `false`.
 
 [[web-mvc-setup-command]]
 === web mvc setup
 
-Includes Spring MVC on generated project
+Includes Spring MVC configuration on generated project. Needed for several MVC related commands.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> web mvc setup --module
+*roo>* web mvc setup (--module)
 ----
+
+* _Conditional:_
 
 --module::
-  The application module where to install the persistence. This option is available if there is more than 
-  one application module (mandatory if the focus is not set in application module); default if option not present: '.'
+   The application module where to install the Spring MVC support.
++
+This option is mandatory if the focus is not set in an application module, that is, a module containing an `@SpringBootApplication` class. This option is available only if there are more than one application module and none of them is focused.
++
+Default if option not present: the unique 'application' module, or focused 'application' module.
 
 === web mvc templates setup
 
-Includes view generation templates on current project. Will allow
-developers to customize view generation.
+Includes view generation templates on current project. Will allow developers to customize view generation by modifying the templates from _[PROJECT-ROOT]/.roo/templates/..._
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> web mvc templates setup --type
+*roo>* web mvc templates setup {--type}
 ----
+
+* _Mandatory:_
 
 --type::
-  View identifier of templates you want to install. Only installed views
-  are available (mandatory)
+  View identifier of templates you want to install. Only installed views are available. Views can be installed with `web mvc view setup` command.
 
 [[web-mvc-view-setup-command]]
 === web mvc view setup
 
-Includes all necessary resources of provided responseType on generated
-project
+Includes all necessary resources of provided response type on generated project. This response type will be needed by `web mvc controller`, `web mvc detail` and `web mvc templates setup` commands.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> web mvc view setup --type --module
+*roo>* web mvc view setup {--type} (--module)
 ----
+
+* _Mandatory:_
 
 --type::
-  View identifier you want to install. Install your necessary views
-  before to be used on controller generation command (mandatory)
---module::
-  The application module where to install views. Not available if there is only one application module (mandatory if the focus is not set in application module); default if option not present: '.' 
+  View identifier you want to install. This is known as 'responseType' in other `web mvc` commands.
 
+* _Conditional:_
+
+--module::
+  The application module where to install views. 
++
+This option is mandatory if the focus is not set in an application module, that is, a module containing an `@SpringBootApplication` class. 
++
+This option is available only if there are more than one application module and none of them is focused. 
++
+Default if option not present: the unique 'application' module, or focused 'application' module.
 
 [[version-command]]
 === version
 
-Displays shell version
+Displays Roo Shell banner and version.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> version
+*roo>* version
 ----
 
---[default]::
-  Special version flags
+This command does not accept any options.
 
 [appendix]
-[[application-development-command-index]]
+[[addon-management-command-index]]
 == Command index for add-on management
+
+[NOTE]
+link:#command-syntax[Command syntax]
 
 === addon info bundle
 
 Provide information about a specific Spring Roo Add-on from installed repositories.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon info bundle --bundleSymbolicName
+*roo>* addon info bundle {--bundleSymbolicName}
 ----
 
 * _Mandatory:_
@@ -3301,25 +3515,25 @@ roo> addon info bundle --bundleSymbolicName
 
 === addon install bundle
 
-Installs Spring Roo Add-on.
+Install Spring Roo Add-on from installed repositories
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon install bundle --bundleSymbolicName
+*roo>* addon install bundle {--bundleSymbolicName}
 ----
 
 * _Mandatory:_
 
 --bundleSymbolicName::
-  The bundle symbolic name of the add-on of interest from installed repositories.
+  The bundle symbolic name of the add-on of interest.
 
 === addon install url
 
 Installs Spring Roo Add-on using an URL.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon install url --url
+*roo>* addon install url {--url}
 ----
 
 * _Mandatory:_
@@ -3331,9 +3545,9 @@ roo> addon install url --url
 
 Lists all installed add-ons.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon list
+*roo>* addon list
 ----
 
 This command does not accept any options.
@@ -3342,9 +3556,9 @@ This command does not accept any options.
 
 Removes an installed Spring Roo Add-on.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon remove --bundleSymbolicName
+*roo>* addon remove {--bundleSymbolicName}
 ----
 
 * _Mandatory:_
@@ -3356,9 +3570,9 @@ roo> addon remove --bundleSymbolicName
 
 Adds a new OBR Repository to Roo Shell.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon repository add --url
+*roo>* addon repository add {--url}
 ----
 
 * _Mandatory:_
@@ -3366,15 +3580,16 @@ roo> addon repository add --url
 --url::
   URL file that defines repository. Ex: 'http://localhost/repo/index.xml'.
 
-[NOTE] See that in Windows systems, you must use file:\ protocol when you specify a local repository URL. However, in nix systems the protocol for local repositories URL must be file://.
+[NOTE]
+See that in Windows systems, you must use `file:\` protocol when you specify a local repository URL. However, in Unix systems the protocol for local repositories URL must be `file://`.
 
 === addon repository introspect
 
 Introspects all installed OBR Repositories and list all their add-ons.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon repository introspect
+*roo>* addon repository introspect
 ----
 
 This command does not accept any options.
@@ -3383,9 +3598,9 @@ This command does not accept any options.
 
 Lists installed OBR Repositories.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon repository list
+*roo>* addon repository list
 ----
 
 This command does not accept any options.
@@ -3394,9 +3609,9 @@ This command does not accept any options.
 
 Removes an existing OBR Repository from Roo Shell.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon repository remove --url
+*roo>* addon repository remove {--url}
 ----
 
 * _Mandatory:_
@@ -3404,13 +3619,16 @@ roo> addon repository remove --url
 --url::
   URL file that defines repository. Ex: 'http://localhost/repo/index.xml'.
 
+[NOTE] 
+See that in Windows systems, you must use `file:\` protocol when you specify a local repository URL. However, in Unix systems the protocol for local repositories URL must be `file://`.
+
 === addon search
 
 Searches all known Spring Roo Add-ons from installed repositories.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon search --requiresCommand
+*roo>* addon search {--requiresCommand}
 ----
 
 * _Mandatory:_
@@ -3422,9 +3640,9 @@ roo> addon search --requiresCommand
 
 Installs some 'Roo Addon Suite' from installed OBR Repository.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon suite install name --symbolicName
+*roo>* addon suite install name {--symbolicName}
 ----
 
 * _Mandatory:_
@@ -3436,9 +3654,9 @@ roo> addon suite install name --symbolicName
 
 Installs some 'Roo Addon Suite' from URL.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon suite install url --url
+*roo>* addon suite install url {--url}
 ----
 
 * _Mandatory:_
@@ -3450,9 +3668,9 @@ roo> addon suite install url --url
 
 Lists all installed 'Roo Addon Suite'. If you want to list all available 'Roo Addon Suites' on Repository, use `--repository` parameter.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon suite list
+*roo>* addon suite list [--repository]
 ----
 
 * _Optional:_
@@ -3464,9 +3682,9 @@ roo> addon suite list
 
 Starts some installed 'Roo Addon Suite'. By default, an installed 'Roo Addon Suite' is started automatically.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon suite start --symbolicName
+*roo>* addon suite start {--symbolicName}
 ----
 
 * _Mandatory:_
@@ -3478,9 +3696,9 @@ roo> addon suite start --symbolicName
 
 Stops some started 'Roo Addon Suite'.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon suite stop --symbolicName
+*roo>* addon suite stop {--symbolicName}
 ----
 
 * _Mandatory:_
@@ -3490,11 +3708,11 @@ roo> addon suite stop --symbolicName
 
 === addon suite uninstall
 
-Uninstall some installed 'Roo Addon Suite'.
+Uninstalls some installed 'Roo Addon Suite'.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon suite uninstall --symbolicName
+*roo>* addon suite uninstall {--symbolicName}
 ----
 
 * _Mandatory:_
@@ -3509,14 +3727,19 @@ roo> addon suite uninstall --symbolicName
 
 These commands are specific for developing Spring Roo add-ons and will be only available if user enables the add-on "development mode" with `addon development mode` command.
 
+[NOTE]
+link:#command-syntax[Command syntax]
+
 === !g
 
 Passes a command directly through to the Felix shell infrastructure
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> !g
+*roo>* !g
 ----
+
+* _Mandatory:_
 
 --[default]::
   The command to pass to Felix (WARNING: no validation or security
@@ -3524,268 +3747,327 @@ roo> !g
 
 === addon create advanced
 
-Create a new advanced add-on for Spring Roo (commands + operations +
-metadata + trigger annotation + dependencies)
+Create a new advanced add-on for Spring Roo (commands + operations + metadata + trigger annotation + dependencies).
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon create advanced --topLevelPackage
+*roo>* addon create advanced {--topLevelPackage} [--description --projectName]
 ----
+
+* _Mandatory:_
 
 --topLevelPackage::
-  The top level package of the new addon (mandatory)
+  The top level package of the new addon. In Maven, this will be the `<groupId>`.
+
+* _Optional:_
+
 --description::
-  Description of your addon (surround text with double quotes)
+  Description of your addon (surround text with double quotes).
+
 --projectName::
-  Provide a custom project name (if not provided the top level package
-  name will be used instead)
+  Provide a custom project name. In Maven, this will be the `<artifactId>`.
++
+Default if option not present: the top level package specified in `--topLevelPackage`.
 
 === addon create i18n
 
-Create a new Internationalization add-on for Spring Roo
+Create a new internationalization add-on for Spring Roo, with a new language. Created add-on can be installed later into a project for localizing the project to that new language.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon create i18n --topLevelPackage --locale --messageBundle
+*roo>* addon create i18n {--topLevelPackage --locale --messageBundle} [--language --flagGraphic --description --projectName]
 ----
+
+* _Mandatory:_
 
 --topLevelPackage::
-  The top level package of the new addon (mandatory)
+  The top level package of all Spring Roo Addon Suite. In Maven, this will be the `<groupId>`.
+
 --locale::
-  The locale abbreviation (ie: en, or more specific like en_AU, or
-  de_DE) (mandatory)
+  The locale abbreviation (ie: en, or more specific like en_AU, or de_DE) for the new language.
+
 --messageBundle::
-  Fully qualified path to the messages_xx.properties file (mandatory)
+  Fully qualified path to the messages_xx.properties file which contains the messages in the new language.
+
+* _Optional:_
+
 --language::
-  The full name of the language (used as a label for the UI)
+  The full name of the language (used as a label for the UI).
+
 --flagGraphic::
-  Fully qualified path to flag xx.png file
+  Fully qualified path to new flag xx.png file.
+
 --description::
-  Description of your addon (surround text with double quotes)
+  Description of your addon (surround text with double quotes).
+
 --projectName::
-  Provide a custom project name (if not provided the top level package
-  name will be used instead)
+  Provide a custom project name. In Maven, this will be the `<artifactId>`.
++
+Default if option not present: the top level package specified in `--topLevelPackage`.
 
 === addon create simple
 
-Create a new simple add-on for Spring Roo (commands + operations)
+Create a new simple add-on for Spring Roo (commands + operations).
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon create simple --topLevelPackage
+*roo>* addon create simple {--topLevelPackage} [--description --projectName]
 ----
+
+* _Mandatory:_
 
 --topLevelPackage::
-  The top level package of the new addon (mandatory)
+  The top level package of the new addon. In Maven, this will be the `<groupId>`.
+
+* _Optional:_
+
 --description::
-  Description of your addon (surround text with double quotes)
+  Description of your addon (surround text with double quotes).
+
 --projectName::
-  Provide a custom project name (if not provided the top level package
-  name will be used instead)
+  Provide a custom project name. In Maven, this will be the `<artifactId>`.
++
+Default if option not present: the top level package specified in `--topLevelPackage`.
 
 === addon create suite
 
-Create a new Spring Roo Addon Suite for Spring Roo (two sample addons +
-repository + suite generator)
+Create a new Spring Roo Addon Suite for Spring Roo (two sample addons + repository + suite generator).
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon create suite --topLevelPackage
+*roo>* addon create suite {--topLevelPackage} [--description --projectName]
 ----
+
+* _Mandatory:_
 
 --topLevelPackage::
-  The top level package of all Spring Roo Addon Suite (mandatory)
+  The top level package of all Spring Roo Addon Suite. In Maven, this will be the `<groupId>`.
+
+* _Optional:_
+
 --description::
-  Description of your Roo Addon Suite (surround text with double
-  quotes)
+  Description of your Roo Addon Suite (surround text with double quotes).
+
 --projectName::
-  Provide a custom project name (if not provided the top level package
-  name will be used instead)
+  Provide a custom project name for root module. In Maven, this will be the `<artifactId>`.
++
+Default if option not present: the top level package specified in `--topLevelPackage`.
 
 === addon create wrapper
 
-Create a new add-on for Spring Roo which wraps a maven artifact to
-create a OSGi compliant bundle
+Create a new add-on for Spring Roo which wraps a maven artifact to create a OSGi compliant bundle.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon create wrapper --topLevelPackage --groupId --artifactId --version --vendorName --licenseUrl
+*roo>* addon create wrapper {--topLevelPackage --groupId --artifactId --version --vendorName --licenseUrl} [--docUrl --description --projectName --osgiImports]
 ----
+
+* _Mandatory:_
 
 --topLevelPackage::
-  The top level package of the new wrapper bundle (mandatory)
+  The top level package of the new wrapper bundle.
+
 --groupId::
-  Dependency group id (mandatory)
+  Dependency group id.
+
 --artifactId::
-  Dependency artifact id (mandatory)
+  Dependency artifact id.
+
 --version::
-  Dependency version (mandatory)
+  Dependency version.
+
 --vendorName::
-  Dependency vendor name (mandatory)
+  Dependency vendor name.
+
 --licenseUrl::
-  Dependency license URL (mandatory)
+  Dependency license URL.
+
+* _Optional:_
+
 --docUrl::
-  Dependency documentation URL
+  Dependency documentation URL.
+
 --description::
-  Description of the bundle (use keywords with #-tags for better search
-  integration)
+  Description of the bundle (use keywords with #-tags for better search integration).
+
 --projectName::
-  Provide a custom project name (if not provided the top level package
-  name will be used instead)
+  Provide a custom project name. In Maven, this will be the `<artifactId>`.
++
+Default if option not present: the top level package specified in `--topLevelPackage`.
+
 --osgiImports::
-  Contents of Import-Package in OSGi manifest
+  Contents of Import-Package in OSGi manifest.
 
 [[addon-development-mode]]
 === addon development mode
 
-Switches the system into addon development mode, getting a greater diagnostic
-information and gaining access to addon development commands.
+Switches the system into development mode, which enables add-on development commands and shows greater diagnostic information.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> addon development mode
+*roo>* addon development mode [--enabled]
 ----
+
+* _Optional:_
 
 --enabled::
-  Activates addon development mode; default: `true`
+  Activates addon development mode.
++
+Default: `true`
 
 === metadata cache
 
-Shows detailed metadata for the indicated type
+Shows detailed metadata for the indicated type.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> metadata cache --maximumCapacity
+*roo>* metadata cache {--maximumCapacity}
 ----
+
+* _Mandatory:_
 
 --maximumCapacity::
-  The maximum number of metadata items to cache (mandatory)
+  The maximum number of metadata items to cache.
 
 === metadata for id
 
-Shows detailed information about the metadata item
+Shows detailed information about the metadata item.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> metadata for id --metadataId
+*roo>* metadata for id {--metadataId}
 ----
+
+* _Mandatory:_
 
 --metadataId::
-  The metadata ID (should start with MID:) (mandatory)
+  The metadata ID (should start with MID:).
 
 === metadata for module
 
-Shows the ProjectMetadata for the indicated project module
+Shows the ProjectMetadata for the indicated project module.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> metadata for module
+*roo>* metadata for module [--module]
 ----
+
+* _Optional:_
 
 --module::
-  The module for which to retrieve the metadata ; default: the focused module
+  The module for which to retrieve the metadata. 
++
+Default if option not present: the Roo Shell focused module.
 
 === metadata for type
 
 Shows detailed metadata for the indicated type
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> metadata for type --type
+*roo>* metadata for type {--type}
 ----
 
+* _Mandatory:_
+
 --type::
-  The Java type for which to display metadata
-  (mandatory)
+  The Java type for which to display metadata. When working on a single module project, simply specify the name of the class. If you consider it necessary, you can also specify the package. Ex.: `--type ~.domain.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--type model:~.domain.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
 
 === metadata status
 
-Shows metadata statistics
+Shows metadata statistics of the current project.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> metadata status
+*roo>* metadata status
 ----
 
 This command does not accept any options.
 
 === metadata trace
 
-Traces metadata event delivery notifications
+Traces metadata event delivery notifications.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> metadata trace --level
+*roo>* metadata trace {--level}
 ----
+
+* _Mandatory:_
 
 --level::
-  The verbosity of notifications (0=none, 1=some, 2=all) (mandatory)
+  The verbosity of notifications (0=none, 1=some, 2=all).
 
 === process manager debug
 
-Indicates if process manager debugging is desired. It is only available if 'development mode' is true.
+Indicates if process manager debugging is desired. It is only available if 'addon development mode' is true.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> process manager debug
+*roo>* process manager debug [--enabled]
 ----
+
+* _Optional:_
 
 --enabled::
-  Activates debug mode; default: `true`
+  Activates debug mode, which shows status of process manager such as 'Active' or 'Scanning'.
++
+Default: `true`.
 
 === project scan now
 
-Scan the project directory looking for artifacts that have changed since the last scan and if any, update the internal metadata cache.
+Performs a manual file system scan, calling thread monitors and checking that all files are updated.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> project scan now
+*roo>* project scan now
 ----
 
 This command does not accept any options.
 
 === project scan speed
 
-Changes the file system scanning frequency.
+Changes the time inteval between file system scans.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> project scan speed --ms
+*roo>* project scan speed {--ms}
 ----
+
+* _Mandatory:_
 
 --ms::
-  The number of milliseconds between each scan (mandatory)
+  The number of milliseconds between each scan.
 
 === project scan status
 
-Display scanning process information.
+Displays file system scanning information such as the time lasted for last scan and scanning frequency.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> project scan status
+*roo>* project scan status
 ----
 
 This command does not accept any options.
 
 === reference guide
 
-Writes the reference guide XML fragments (in DocBook format) into the
-current working directory. It is only available if 'development mode' is true.
+Writes the reference guide XML fragments (in DocBook format) into the current working directory. It is only available if 'development mode' is `true`.
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> reference guide
+*roo>* reference guide
 ----
 
 This command does not accept any options.
 
 === system properties
 
-Shows the shell's properties
+Shows the shell's properties such as if 'addon development mode' is enabled, JVM version, file encoding...
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> system properties
+*roo>* system properties
 ----
 
 This command does not accept any options.
@@ -3801,18 +4083,19 @@ Once you have met the initial link:#getting-started-requirements[requirements], 
 
 . Download the current release from Spring Roo project page http://projects.spring.io/spring-roo/#download-widget[downloads section].
 +
-NOTE:: You can also build a distribution ZIP yourself from our link:http://github.com/spring-projects/spring-roo#resources-source-repository[source control repository.]
+[NOTE]
+You can also build a distribution ZIP yourself from our link:http://github.com/spring-projects/spring-roo#resources-source-repository[source control repository.]
 . Unzip the distribution, which will unpack to a single installation directory; this will be known as `$ROO_HOME` in the paths below.
 ** If using Windows, add `$ROO_HOME\bin` to your *PATH* environment variable
 ** If using Linux or MacOS, create a symbolic link using a command such as:
 +
-[source,sh]
+[source,sh,subs=quotes]
 ----
 $ sudo ln -s $ROO_HOME/bin/roo.sh /usr/bin/roo
 ----
 . Next verify Roo has been installed correctly. This can be done, using the following commands:
 +
-[source,subs="quotes"]
+[source,sh]
 ----
 $ mkdir roo-test
 $ cd roo-test
@@ -3825,7 +4108,7 @@ $ roo
     |_|                 |___/           W.X.Y.ZZ
 
 Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
-*roo>*
+roo>
 ----
 +
 If Roo logo appears, you have installed Roo successfully. For those curious, the "[rev RRR]" refers to the Git commit ID used to compile that particular build of Roo.
@@ -3835,23 +4118,23 @@ If Roo logo appears, you have installed Roo successfully. For those curious, the
 
 A very useful command is the link:#backup-command[backup] command. Using this command you will create a backup of the current workspace with all sources, log files and the script log file (excluding the target directory):
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> backup
+*roo>* backup
 ----
 
-Finally, you may wish to deploy your application to a production Web container. For this you can easily create two war files, by taking advantage of the link:#perform-package-command[perform package command]:
+Finally, you may wish to deploy your application to a production Web container. For this you can easily create two war files, by using the Maven command `mvn package` in the project base directory. You can perform this as well without exiting from Roo shell by using link:#os-command[`!os`] command, providing you have Maven in the `$PATH` variable:
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
-roo> perform package
+*roo>* !os mvn package
 ----
 
 This command generates a "*.war" file which can then be easily copied into your production Web container and a "*exec.war" file that uses a embedded web server.
 
 You can execute "*exec.war" as follows:
 
-[source,sh]
+[source,sh,subs=quotes]
 ----
 $ java -jar name-exec.war
 ----
@@ -3899,7 +4182,7 @@ dedicated "Spring Roo" tag at Stack Overflow for all your questions, comments
 and experiences.
 
 If you have any question about Spring Roo project and its functionalities,
-you can check and ask a questions at
+you can check and ask at
 http://stackoverflow.com/questions/tagged/spring-roo[Spring Roo tagged questions at Stack Overflow].
 We monitor stackoverflow.com for questions tagged with spring-roo.
 
