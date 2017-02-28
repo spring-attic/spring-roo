@@ -525,16 +525,20 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
     // Override hashCode to propagate changes in non-modified-itd changes
     // (as finders which will generate on RepositoryCustom)
     int result = super.hashCode();
-    result = +findersToAddInCustom.size();
+    String finderNames = "";
     for (Pair<FinderMethod, PartTree> finder : findersToAddInCustom) {
-      result = +finder.getLeft().getMethodName().hashCode();
+      finderNames = finderNames.concat(finder.getLeft().getMethodName().getSymbolName());
     }
 
     // Add hashCode changes for normal finders as they change an annotation 
     // inside the annotation which triggers this metadata
     for (FinderMethod finder : findersDeclared) {
-      result = +finder.getMethodName().hashCode();
+      finderNames = finderNames.concat(finder.getMethodName().getSymbolName());
     }
+
+    // Combine hashCodes
+    result += finderNames.hashCode();
+
     return result;
   }
 
