@@ -153,6 +153,51 @@ Features of the Thymeleaf views:
 * View layer generation engine is based on Freemarker templates. Additionally Roo provides a command to install them in your project letting the ability to customize the view layer scaffold before executing it.
 * New amazing Spring Roo Responsive Theme!
 
+== Spring-Roo 2.0.0.RC1 New Features
+
+The most important changes the new version of Spring Roo features regarding Roo 2.0.0.M3 are the following:
+
+=== Changes in the Roo Shell
+
+* New commands which allow:
+** Creating web flows in the generated applications.
+** Adding email senders and receivers.
+** Adding JMS senders and receivers.
+** Creating Web Services clients (WSDL) and endpoints (SEI).
+
+* Improvements on test commands using latest Spring Boot Test features:
+** Improved data-on-demand generation to use in test commands.
+** Improved `test unit` command which now creates fully functional tests for JPA entities.
+** Improved `test integration` command which now allows integration test creation for JPA repositories and JSON/Thymeleaf controllers.
+
+* Other command improvements:
+** Improved `field ...` commands readability, removing unnecessary options and make other dynamically visible.
+** Improved `push-in --method` command, allowing to distinguish between methods with same name but different arguments.
+** Bug fixes.
+
+=== Changes in generated applications
+
+* Generated code:
+** Improved read-only entities management.
+** Improved Deserializers generation.
+** Added default JavaDoc to all generated methods, constructors and fields.
+** Created DataTables Advanced extension to apply advanced configuration on DataTables elements.
+** Use Springlets URL generation.
+** Bug fixes.
+
+* View layer:
+** Added https://github.com/julmot/datatables.mark.js/[datatables.mark.js] to mark the filtered text in DataTables component.
+** Added concurrency control in view layer.
+** Improved forms in view layer.
+** Integrated http://community.jaspersoft.com/project/jasperreports-library[JasperReports] with DataTables to allow exporting data to CSV, PDF and XLS.
+** Migrated Thymeleaf views to Thymeleaf 3.
+** Added new entity visualization support using `--entityFormatExpression` and `--entityFormatMessage` in some commands.
+** Added support for selecting those views of a particular entity which should show details.
+** Added new visualization system for one-to-one composition related entities.
+** Added multi-language support for Java enumerated constants.
+** Added support for multi row selection and batch delete.
+** Bug fixes.
+
 [[getting-started-requirements]]
 == Requirements
 
@@ -217,7 +262,7 @@ a|_Spring Roo 2.0 (Release)_
 .. Select the feature *Spring IDE Roo Support*.
 +
 [align="center"]
-image::install-roo-extension.png["STS Spring IDE - Roo Extension", width="60%"]
+image::install-roo-extension.png["STS Spring IDE - Roo Extension", width="80%"]
 .. Press btn:[Next]
 .. Review the list of software that will be installed. Press btn:[Next] again.
 .. Review and accept licence agreement and press btn:[Finish].
@@ -231,15 +276,15 @@ image::install-roo-extension.png["STS Spring IDE - Roo Extension", width="60%"]
 . In _"Roo Configure Roo Installation"_ press btn:[Browse] button, then select the the directory in which Spring Roo 2.0.0 was unpacked, `$ROO_HOME`.
 +
 [align="center"]
-image::sts-add-installation-01.png["Select Roo installation", width="60%"]
+image::sts-add-installation-01.png["Select Roo installation", width="80%"]
 . Confirm the new Roo installation.
 +
 [align="center"]
-image::sts-add-installation-02.png["Confirm Roo installation", width="60%"]
+image::sts-add-installation-02.png["Confirm Roo installation", width="80%"]
 . Now Roo is installed in your STS.
 +
 [align="center"]
-image::sts-add-installation-03.png["Roo support installed", width="60%"]
+image::sts-add-installation-03.png["Roo support installed", width="80%"]
 . Press btn:[Roo Shell] button to open the Spring Roo Shell.
 +
 [align="center"]
@@ -268,12 +313,13 @@ Moreover by loading the "shell" in a window and leaving it running, as you make 
 We say "maintaining files" because Roo is fully round-trip aware. This means you can change any code you like, at any time and without telling Roo about it, yet Roo will intelligently and automatically deal with whatever changes need to be made in response. It might sound magical, but it isn't. This documentation will clearly explain how Roo works and you'll find yourself loving the approach - just like so the many other people who are already using Roo.
 
 [align="center"]
-image::sts-roo-shell.png["Spring Roo Shell", width="60%"]
+image::sts-roo-shell.png["Spring Roo Shell", width="80%"]
 
 Here are some of the usability features that make the shell so nice to work with:
 
 * _Tab completion_: The cornerstone of command-line usability is tab assist. Hit kbd:[Ctrl+Space] (or kbd:[TAB] if you're in a bash-like shell) and Roo will show you the applicable options.
-* _Command hiding_: Command hiding will remove commands which do not make sense given the current context of your project. For example, if you're in an empty directory, you can type `project`, hit kbd:[Ctrl+Space], and see the options for creating a project. But once you've created the project, the `project` command is no longer visible. The same applies for most Roo commands. This is nice as it means you only see commands which you can actually use right now. Of course, a full list of commands applicable to your version of Roo is available in the command index appendix and also via help.
+* _Command hiding_: Command hiding will remove commands which do not make sense given the current context of your project. For example, if you're in an empty directory, you can type `project`, hit kbd:[Ctrl+Space], and see the options for creating a project. But once you've created the project, the `project` command is no longer visible. The same applies for most Roo commands. This is nice as it means you only see commands which you can actually use right now. Of course, a full list of commands applicable to your version of Roo is available in the link:#application-development-command-index[command index appendix] and also via link:#help-command[help].
+* _Option hiding_: Like command hiding, Roo will hide irrelevant command options for the current command context. This is specially useful for commands which have many options, giving the user an inside-command guidance by showing only the most important parameters for each moment of the command writing.
 * _Contextual awareness_: Roo remembers the last Java type you are working with in your current shell session and automatically treats it as the argument to a command. You always know what Roo considers the current context because the shell prompt will indicate this just before it writes `roo>`.
 * _Hinting_: Not sure what to do next? Just use the hint command. It's the perfect lightweight substitute for documentation if you're in a hurry!
 * _Inbuilt help_: If you'd like to know all the options available for a given command, use the help command. It lists every option directly within the shell.
@@ -319,13 +365,13 @@ If you are in a hurry to have an Spring Boot application up and running right aw
 . Open the menu:File[New > Spring Roo Project] wizard.
 +
 [align="center"]
-image::sts-new-roo-project.png["New Spring Roo Project", width="50%"]
+image::sts-new-roo-project.png["New Spring Roo Project", width="70%"]
 . Fill the project data an press the btn:[Next >] button. Then press btn:[Finish].
 
 Note we selected the _Multimodule Standard_ project type, so Roo created you a Spring Boot & Maven multimodule project following the usual Maven-style directory structure:
 
 [align="center"]
-image::sts-folder-structure.png["Folder structure", width="25%"]
+image::sts-folder-structure.png["Folder structure", width="35%"]
 
 For those familiar with Maven you will notice that this folder structure follows standard Maven conventions by creating separate folders for your main project resources and tests.
 
@@ -383,7 +429,7 @@ To change that configuration or to create another persistence configuration in a
 == The domain model
 
 [align="center"]
-image::northwind-diagram.png["Northwind diagram", width="60%"]
+image::northwind-diagram.png["Northwind diagram", width="80%", link="{imagesdir}/northwind-diagram.png"]
 
 This class diagram represents a simplified model of the problem domain for the Northwind company, it is a good starting point for the application in order to deliver a first prototype.
 
@@ -536,7 +582,7 @@ Following the above class diagram, run the next commands to generate the Northwi
      field string --fieldName description
      field set --fieldName cities --type ~.City --mappedBy region
      field set --fieldName parties --type ~.Party --mappedBy region
-     field set --fieldName customerOrders --type --mappedBy region
+     field set --fieldName customerOrders --type ~.CustomerOrder --mappedBy region
      field set --fieldName stores --type ~.Store --mappedBy region
      field set --fieldName suppliers --type ~.Supplier --mappedBy region
     
@@ -690,7 +736,6 @@ You can generate master-detail views to manage the entity relations as follows:
 .Relationship controllers and views
 ----
 *roo>* web mvc detail --entity model:~.Category --field products --responseType THYMELEAF --views list,show
-     web mvc detail --entity model:~.Category --responseType THYMELEAF --field products.purchaseOrders --views list,show
      web mvc detail --entity model:~.Product --field purchaseOrders --responseType THYMELEAF --views list,show
      web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions --views list,show
      web mvc detail --entity model:~.Region --responseType THYMELEAF --field cities --views list,show
@@ -1083,6 +1128,132 @@ Default if option present: `true`; default if option not present: `false`.
   Force command execution.
 +
 Default if option present: `true`; default if option not present: `false`.
+
+=== email receiver setup
+
+Installs a Spring JavaMailReceiver in your project.
+
+[source,sh,subs=quotes]
+----
+*roo>* email receiver setup (--module) [--jndiName | --host --port --protocol --username --password --starttls] [--profile --service]
+----
+
+* _Conditional:_
+
+--module::
+  The application module where to install the mail configuration. 
++
+This option is mandatory if the focus is not set in an 'application' module and there are more than one 'application' modules, that is, a module containing an `@SpringBootApplication` class. 
++
+This option is available only if there are more than one application module and none of them is focused. 
++
+Default if option not present: the unique 'application' module, or focused 'application' module.
+  
+* _Optional:_
+
+--host::
+  The host server. 
++
+This option is not available if `--jndiName` has already been specified.
+
+--jndiName::
+  The jndi name where the mail configuration has been defined. 
++
+This option is not available if any of `--host`, `--port`, `--protocol`, `--username`, `--password` or `--starttls` has been specified before.
+
+--password::
+  The mail account password. 
++
+This option is not available if `--jndiName` has already been specified.
+
+--port::
+  The port used by mail server.
++
+This option is not available if `--jndiName` has already been specified.
+
+--profile::
+  The profile where the properties will be set.
+
+--protocol::
+  The protocol used by mail server. 
++
+This option is not available if `--jndiName` has already been specified.
+
+--service::
+  The service where include an instance of MailReceiverService, which is a service that have methods to receive emails.
+
+--starttls::
+  If true, enables the use of the STARTTLS command. 
++
+This option is not available if `--jndiName` has already been specified.
+
+--username::
+  The mail account username. 
++
+This option is not available if `--jndiName` has already been specified.
+
+=== email sender setup
+
+Installs a Spring JavaMailSender in your project.
+
+[source,sh,subs=quotes]
+----
+*roo>* email sender setup (--module) [--jndiName | --host --port --protocol --username --password --starttls] [--profile --service]
+----
+
+* _Conditional:_
+
+--module::
+  The application module where to install the mail configuration. 
++
+This option is mandatory if the focus is not set in an 'application' module and there are more than one 'application' modules, that is, a module containing an `@SpringBootApplication` class. 
++
+This option is available only if there are more than one application module and none of them is focused. 
++
+Default if option not present: the unique 'application' module, or focused 'application' module.
+  
+* _Optional:_
+
+--host::
+  The host server. 
++
+This option is not available if `--jndiName` has already been specified.
+
+--jndiName::
+  The jndi name where the mail configuration has been defined. 
++
+This option is not available if any of `--host`, `--port`, `--protocol`, `--username`, `--password` or `--starttls` has been specified before.
+
+--password::
+  The mail account password. 
++
+This option is not available if `--jndiName` has already been specified.
+
+--port::
+  The port used by mail server.
++
+This option is not available if `--jndiName` has already been specified.
+
+--profile::
+  The profile where the properties will be set.
+
+--protocol::
+  The protocol used by mail server. 
++
+This option is not available if `--jndiName` has already been specified.
+
+--service::
+  The service where include an instance of JavaMailSender, which is a service that have methods to receive emails.
+
+--starttls::
+  If true, enables the use of the STARTTLS command. 
++
+This option is not available if `--jndiName` has already been specified.
+
+--username::
+  The mail account username. 
++
+This option is not available if `--jndiName` has already been specified.
 
 === embeddable
 
@@ -2518,6 +2689,66 @@ Default if option present: `true`; default if option not present: `false`.
 +
 Default if option present: `true`; default if option not present: `false`.
 
+=== jms receiver
+
+Creates an JMS receiver.
+
+[source,sh,subs=quotes]
+----
+*roo>* jms receiver {--destinationName --endpoint --jndiConnectionFactory} [--profile --force]
+----
+
+* _Mandatory:_
+
+--destinationName::
+  The name of the JMS destination, composed by 'application' type module and destination name. If only have one 'application' type module or focused module is the 'application' module that you want to use, don't include it, only write destination name. If only have one 'application' type module or focused module is the 'application' module that you want to use, don't include it, only write destination name.
+
+--endpoint::
+  The service where include the method that receives JMS messages.
+
+--jndiConnectionFactory::
+  The jndi name for which the JMS receiver configuration has been defined.
+
+* _Optional:_
+
+--profile::
+  The profile where the properties will be set.
+
+--force::
+  Force command execution.
++
+Default if option present: `true`; default if option not present: `false`.
+
+=== jms sender
+
+Creates an JMS sender.
+
+[source,sh,subs=quotes]
+----
+*roo>* jms sender {--class --destinationName --jndiConnectionFactory} [--profile --force]
+----
+
+* _Mandatory:_
+
+--class::
+  The class where include a reference to the JMS which sends messages.
+
+--destinationName::
+  The name of the JMS destination, composed by 'application' type module and destination name. module and destination name.If only have one 'application' type module or focused module is the 'application' module that you want to use, don't include it, only write destination name.
+
+--jndiConnectionFactory::
+  The jndi name where the JMS sender configuration has been defined.
+
+* _Optional:_
+
+--profile::
+  The profile where the properties will be set.
+
+--force::
+  Force command execution.
++
+Default if option present: `true`; default if option not present: `false`.
+
 [[jpa-audit-add-command]]     
 === jpa audit add
 
@@ -2872,6 +3103,17 @@ This option is not avalaible if `--all` parameter has been already specified.
 +
 Default if option present: `true`; default if option not present: `false`.
 
+=== quit
+
+Waits until all metadata and files are refreshed and updated, then exits the shell. You can also use `exit` command.
+
+[source,sh,subs=quotes]
+----
+*roo>* quit
+----
+
+This command does not accept any options.
+
 [[repository-jpa-command]]
 === repository jpa
 
@@ -3225,6 +3467,48 @@ Creates a unit test class with a basic structure and with the necessary testing 
 +
 Default if option present: `true`; default if option not present: `false`.
 
+[[version-command]]
+=== version
+
+Displays Roo Shell banner and version.
+
+[source,sh,subs=quotes]
+----
+*roo>* version
+----
+
+This command does not accept any options.
+
+=== web flow
+
+Installs a Spring Web Flow into your project.
+
+[source,sh,subs=quotes]
+----
+*roo>* web flow {--flowName} (--module) [--class]
+----
+
+* _Mandatory:_
+
+--flowName::
+  The name for your web flow.
+
+* _Conditional:_
+
+--module::
+  The application module where create the web flow. 
++
+This option is mandatory if the focus is not set in an 'application' module and there are more than one 'application' modules, that is, a module containing an `@SpringBootApplication` class. 
++
+This option is available only if there are more than one application module and none of them is focused. 
++
+Default if option not present: the unique 'application' module, or focused 'application' module.
+
+* _Optional:_
+
+--class::
+  The class used to create the model object this flow is mainly bound to. Can be an entity or a DTO and must be serializable.
+
 [[web-mvc-controller-command]]
 === web mvc controller
 
@@ -3333,6 +3617,31 @@ This parameter is not available if the provided `--responseType` doesn't use vie
 Possible values are: 'list', 'show' or the different parent finder views (if exists).
 +
 Default if option not present: The parent 'list' view if it exists.
+
+=== web mvc exception handler
+
+Adds methods to handle an application exception in a specified controller or a class annotated with `@ControllerAdvice`.
+
+[source,sh,subs=quotes]
+----
+*roo>* web mvc exception handler {--exception} [--class --controller --errorView]
+----
+                
+* _Mandatory:_
+
+--exception::                    
+  The exception to handle. If you consider it necessary, you can also specify the package. Ex.: `--class ~.model.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
+
+* _Optional:_
+
+--class::                    
+  Class annotated with `@ControllerAdvice` where include the handler methods. If you consider it necessary, you can also specify the package. Ex.: `--class ~.model.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
+
+--controller::                    
+  Controller where include the handler methods. If you consider it necessary, you can also specify the package. Ex.: `--class ~.model.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
+     
+--errorView::
+  View to be returned when specified exception is thrown.
 
 [[web-mvc-finder-command]]
 === web mvc finder
@@ -3480,17 +3789,69 @@ This option is available only if there are more than one application module and 
 +
 Default if option not present: the unique 'application' module, or focused 'application' module.
 
-[[version-command]]
-=== version
+=== ws client
 
-Displays Roo Shell banner and version.
+Generates a new Web Service client by the provided WSDL file.
 
 [source,sh,subs=quotes]
 ----
-*roo>* version
+*roo>* ws client {--wsdl --endpoint --class} [--binding --serviceUrl --profile]
 ----
 
-This command does not accept any options.
+* _Mandatory:_
+
+--wsdl::
+  WSDL file located in some specific module. By default, Spring Roo searches .wsdl files in the 'src/main/resources/' folder of the existing modules.
+
+--endpoint::
+  Select some endpoint defined in the .wsdl file provided before. This parameter will be autocompleted with the attribute 'name' of the 'port' element inside the 'service' element.
+
+--class::
+  Configuration class that will include the method to define the Web Service client. You could provide a new class.
+
+* _Optional:_
+
+--binding::
+  The binding type to be used. You could choose between SOAP11 and SOAP12. If not specified, it will be calculated using the .wsdl file namespace.
+
+--serviceUrl::
+  The service URL to be used. If This option is not specified, default location provided by the .wsdl file will be used. This default location will be obtained from the 'location' attribute of the 'address' element located inside the 'port' element provided in the '--endpoint' parameter.
+
+--profile::
+  Parameter that indicates the name of the profile that will be applied.
+
+=== ws endpoint
+
+Generates a new Service Endpoint Interface (SEI) and its implementation.
+
+[source,sh,subs=quotes]
+----
+*roo>* ws endpoint {--service --sei} [--class --config --profile --force]
+----
+
+* _Mandatory:_
+
+--service::
+  Existing service annotated with `@RooService` that will be used to generate the new SEI. The new generated SEI will include all defined operations in the provided service interface. 
++
+Possible values are: any of the project service classes, annotated with `@RooService`.
+
+--sei::
+  New Service Endpoint Interface to generate. It's not possible to indicate an existing class.
+
+* _Optional:_
+
+--class::
+  New class that will implement the new generated SEI. If not specified, a new implementation class will be generated in the same module using the SEI name and the 'Endpoint' suffix.
+
+--config::
+  Configuration class that will register the new endpoint. You could specify an existing `@Configuration` class or indicates a new one to be generated. If not specified, a new `@Configuration` class will be generated in the same module using the SEI name and the 'Configuration' suffix.
+
+--profile::
+  Parameter that indicates the name of the profile that will be applied.
+
+--force::
+  Force command execution. 
 
 [appendix]
 [[addon-management-command-index]]
