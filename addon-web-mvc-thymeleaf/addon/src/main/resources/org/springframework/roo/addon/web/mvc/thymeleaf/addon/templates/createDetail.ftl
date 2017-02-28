@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" data-layout-decorate="~{layouts/default-layout}">
-  <head>
+  <#if userManagedComponents?has_content && userManagedComponents["head"]??>
+  ${userManagedComponents["head"]}
+  <#else>
+  <head id="head">
     <title data-th-text="${r"#{"}label_create_entity(${r"#{"}${entityLabel}})}">
     Create ${entityName} - ${projectName} - SpringRoo Application</title>
     <!-- DateTimePicker -->
@@ -8,6 +11,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.min.css"
       data-th-href="@{/webjars/datetimepicker/build/jquery.datetimepicker.min.css}"/>
   </head>
+  </#if>
 <#if userManagedComponents?has_content && userManagedComponents["body"]??>
   ${userManagedComponents["body"]}
 <#else>

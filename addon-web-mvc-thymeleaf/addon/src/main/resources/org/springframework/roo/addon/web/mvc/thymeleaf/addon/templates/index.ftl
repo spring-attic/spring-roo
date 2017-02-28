@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" data-layout-decorate="~{layouts/home-layout}">
-  <head>
+  <#if userManagedComponents?has_content && userManagedComponents["head"]??>
+  ${userManagedComponents["head"]}
+  <#else>
+  <head id="head">
 
     <title data-th-text="${r"#"}{welcome_label}">Welcome - SpringRoo Application</title>
 
   </head>
+  </#if>
 
   <#if userManagedComponents?has_content && userManagedComponents["body"]??>
     ${userManagedComponents["body"]}

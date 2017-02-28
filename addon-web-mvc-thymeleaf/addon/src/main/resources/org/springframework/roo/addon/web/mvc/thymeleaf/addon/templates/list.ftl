@@ -2,10 +2,15 @@
 <!DOCTYPE html>
 <html lang="en" data-layout-decorate="~{layouts/default-list-layout}">
 
+  <#if userManagedComponents?has_content && userManagedComponents["head"]??>
+  ${userManagedComponents["head"]}
+  <#else>
+  <head id="head">
     <title data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}})}">
     List ${entityName} - ${projectName} - SpringRoo Application</title>
 
   </head>
+  </#if>
 
   <#if userManagedComponents?has_content && userManagedComponents["body"]??>
     ${userManagedComponents["body"]}

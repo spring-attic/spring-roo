@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" data-layout-decorate="~{layouts/default-list-layout}">
-  <head>
+  <#if userManagedComponents?has_content && userManagedComponents["head"]??>
+  ${userManagedComponents["head"]}
+  <#else>
+  <head id="head">
 
     <title data-th-text="|${r"#{"}label_show_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}|">Show ${entityName} - Spring Roo application</title>
 
   </head>
+  </#if>
 
   <#if userManagedComponents?has_content && userManagedComponents["body"]??>
     ${userManagedComponents["body"]}
