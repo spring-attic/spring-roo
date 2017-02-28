@@ -149,15 +149,24 @@ public class WebFlowCommands implements CommandMarker {
     return allPossibleValues;
   }
 
-  @CliCommand(value = "web flow",
-      help = "Install Spring Web Flow configuration artifacts into your project")
-  public void addWebFlow(@CliOption(key = {"flowName"}, mandatory = true,
-      help = "The name for your web flow") final String flowName, @CliOption(key = {"module"},
-      mandatory = true, help = "The name for your web flow", unspecifiedDefaultValue = ".",
-      optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module, @CliOption(
-      key = {"class"}, mandatory = false,
-      help = "The class used to create the model object this flow is mainly "
-          + "bound to. Can be an entity or a DTO and must be serializable.") final JavaType klass) {
+  @CliCommand(value = "web flow", help = "Installs a Spring Web Flow into your project.")
+  public void addWebFlow(
+      @CliOption(key = {"flowName"}, mandatory = true, help = "The name for your web flow.") final String flowName,
+      @CliOption(
+          key = {"module"},
+          mandatory = true,
+          help = "The application module where create the web flow. "
+              + "This option is mandatory if the focus is not set in an 'application' module and "
+              + "there are more than one 'application' modules, that is, a module containing an "
+              + "`@SpringBootApplication` class. "
+              + "This option is available only if there are more than one application module and none of"
+              + " them is focused. "
+              + "Default if option not present: the unique 'application' module, or focused 'application'"
+              + " module.", unspecifiedDefaultValue = ".",
+          optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
+      @CliOption(key = {"class"}, mandatory = false,
+          help = "The class used to create the model object this flow is mainly "
+              + "bound to. Can be an entity or a DTO and must be serializable.") final JavaType klass) {
 
     if (module == null) {
 

@@ -71,7 +71,7 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
   }
 
   @CliCommand(value = {"exit", "quit"}, help = "Waits until all metadata and files are refreshed "
-      + "and updated, then exits the shell. You can also use `quit` command.")
+      + "and updated, then exits the shell. You can also use `exit` command.")
   public ExitShellRequest quit() {
     return ExitShellRequest.NORMAL_EXIT;
   }

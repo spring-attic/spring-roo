@@ -63,14 +63,33 @@ public class ExceptionsCommands implements CommandMarker {
    * handler.
    */
   @CliCommand(value = "web mvc exception handler",
-      help = "Adds methods to handle an application exception in a specified"
-          + "controller or a class annotated with @ControllerAdvice.")
+      help = "Adds methods to handle an application exception in a specified "
+          + "controller or a class annotated with `@ControllerAdvice`.")
   public void exceptionHandler(
-      @CliOption(key = "exception", mandatory = true, help = "The exception to handle.") final JavaType exception,
-      @CliOption(key = "controller", mandatory = false,
-          help = "Controller where include the handler methods") final JavaType controller,
-      @CliOption(key = "class", mandatory = false,
-          help = "Class annotated with @ControllerAdvice where include the handler methods") final JavaType controllerAdvice,
+      @CliOption(key = "exception", mandatory = true, help = "The exception to handle. "
+          + "If you consider it necessary, you can also specify the package. "
+          + "Ex.: `--class ~.model.MyClass` (where `~` is the base package). When working with "
+          + "multiple modules, you should specify the name of the class and the module where "
+          + "it is. Ex.: `--class model:~.MyClass`. If the module is not specified, it is "
+          + "assumed that the class is in the module which has the focus.") final JavaType exception,
+      @CliOption(
+          key = "controller",
+          mandatory = false,
+          help = "Controller where include the handler methods. "
+              + "If you consider it necessary, you can also specify the package. "
+              + "Ex.: `--class ~.model.MyClass` (where `~` is the base package). When working with "
+              + "multiple modules, you should specify the name of the class and the module where "
+              + "it is. Ex.: `--class model:~.MyClass`. If the module is not specified, it is "
+              + "assumed that the class is in the module which has the focus.") final JavaType controller,
+      @CliOption(
+          key = "class",
+          mandatory = false,
+          help = "Class annotated with `@ControllerAdvice` where include the handler methods. "
+              + "If you consider it necessary, you can also specify the package. "
+              + "Ex.: `--class ~.model.MyClass` (where `~` is the base package). When working with "
+              + "multiple modules, you should specify the name of the class and the module where "
+              + "it is. Ex.: `--class model:~.MyClass`. If the module is not specified, it is "
+              + "assumed that the class is in the module which has the focus.") final JavaType controllerAdvice,
       @CliOption(key = "errorView", mandatory = false,
           help = "View to be returned when specified exception is thrown") final String errorView) {
 

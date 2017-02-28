@@ -89,12 +89,10 @@ public class JmsCommands implements CommandMarker {
     return jmsOperations.isJmsInstallationPossible();
   }
 
-  @CliOptionAutocompleteIndicator(
-      command = "jms receiver",
-      param = "endpoint",
-      validate = false,
+  @CliOptionAutocompleteIndicator(command = "jms receiver", param = "endpoint", validate = false,
       includeSpaceOnFinish = false,
-      help = "--endpoint parameter parameter is the service where will be added the support to send emails")
+      help = "--endpoint parameter parameter is the service where will be added the "
+          + "support to send emails.")
   public List<String> returnApplicationPackages(ShellContext shellContext) {
 
     List<String> applicationPackages = new ArrayList<String>();
@@ -115,16 +113,19 @@ public class JmsCommands implements CommandMarker {
     return applicationPackages;
   }
 
-  @CliCommand(value = "jms receiver", help = "Create an JMS receiver")
+  @CliCommand(value = "jms receiver", help = "Creates an JMS receiver.")
   public void addJmsReceiver(
       @CliOption(key = {"destinationName"}, mandatory = true,
-          help = "The name of the JMS destination") final String destinationName,
+          help = "The name of the JMS destination, composed by 'application' type module "
+              + "and destination name. If only have one 'application' type module or focused "
+              + "module is the 'application' module that you want to use, don't include it, "
+              + "only write destination name.") final String destinationName,
       @CliOption(key = "endpoint", mandatory = true,
-          help = "The service where include the method that receive JMS messages") final JavaType endpointService,
+          help = "The service where include the method that receives JMS messages.") final JavaType endpointService,
       @CliOption(key = {"jndiConnectionFactory"}, mandatory = true,
-          help = "The jndi name where the JMS receiver configuration has been defined") final String jndiConnectionFactory,
+          help = "The jndi name for which the JMS receiver configuration has been defined.") final String jndiConnectionFactory,
       @CliOption(key = {"profile"}, mandatory = false,
-          help = "The profile where the properties will be set") final String profile,
+          help = "The profile where the properties will be set.") final String profile,
       ShellContext shellContext) {
     jmsOperations.addJmsReceiver(destinationName, endpointService, jndiConnectionFactory, profile,
         shellContext.isForce());
@@ -159,18 +160,19 @@ public class JmsCommands implements CommandMarker {
     return applicationModules;
   }
 
-  @CliCommand(value = "jms sender", help = "Create an JMS receiver")
+  @CliCommand(value = "jms sender", help = "Creates an JMS sender.")
   public void addJmsSender(
-      @CliOption(
-          key = {"destinationName"},
-          mandatory = true,
-          help = "The name of the JMS destination. Composed by application type module and destination name. If only have one application type module or focused module is the application module that you want to use, don't include it, only write destination name") final String destinationName,
+      @CliOption(key = {"destinationName"}, mandatory = true,
+          help = "The name of the JMS destination, composed by 'application' type module "
+              + "and destination name. If only have one 'application' type module or focused "
+              + "module is the 'application' module that you want to use, don't include it, "
+              + "only write destination name.") final String destinationName,
       @CliOption(key = "class", mandatory = true,
-          help = "The class where include the method that receive JMS messages") final JavaType classSelected,
+          help = "The class where include a reference to the JMS which sends messages.") final JavaType classSelected,
       @CliOption(key = {"jndiConnectionFactory"}, mandatory = true,
-          help = "The jndi name where the JMS receiver configuration has been defined") final String jndiConnectionFactory,
+          help = "The jndi name where the JMS sender configuration has been defined.") final String jndiConnectionFactory,
       @CliOption(key = {"profile"}, mandatory = false,
-          help = "The profile where the properties will be set") final String profile,
+          help = "The profile where the properties will be set.") final String profile,
       ShellContext shellContext) {
 
     jmsOperations.addJmsSender(destinationName, classSelected, jndiConnectionFactory, profile,

@@ -188,8 +188,10 @@ public class WsCommands implements CommandMarker {
    * @param context
    * @return true if --binding and --serviceUrl parameter should be visible
    */
-  @CliOptionVisibilityIndicator(command = "ws client", params = {"binding", "serviceUrl"},
-      help = "--class parameter is not available if --endpoint parameter has not been specified")
+  @CliOptionVisibilityIndicator(
+      command = "ws client",
+      params = {"binding", "serviceUrl"},
+      help = "`--binding` and `--serviceUrl` parameters are not available if `--class` parameter has not been specified")
   public boolean areBindingAndServiceUrlParameterVisibleForClient(ShellContext context) {
     // Getting value of class
     String classParameter = context.getParameters().get("class");
@@ -392,9 +394,11 @@ public class WsCommands implements CommandMarker {
       help = "Generates a new Service Endpoint Interface (SEI) and its implementation.")
   public void addSEI(
       @CliOption(key = "service", mandatory = true,
-          help = "Existing service annotated with @RooService that will be used to generate "
+          help = "Existing service annotated with `@RooService` that will be used to generate "
               + "the new SEI. The new generated SEI will include all defined operations in "
-              + "the provided service interface.") JavaType service,
+              + "the provided service interface. "
+              + "Possible values are: any of the project service classes, annotated "
+              + "with `@RooService`") JavaType service,
       @CliOption(key = "sei", mandatory = true,
           help = "New Service Endpoint Interface to generate. It's not possible to indicate "
               + "an existing class.") JavaType sei,
@@ -406,8 +410,8 @@ public class WsCommands implements CommandMarker {
           key = "config",
           mandatory = false,
           help = "Configuration class that will register the new endpoint. You could specify an "
-              + "existing @Configuration class or indicates a new one to be generated. If not specified, "
-              + "a new @Configuration class will be generated in the same module using the "
+              + "existing `@Configuration` class or indicates a new one to be generated. If not specified, "
+              + "a new `@Configuration` class will be generated in the same module using the "
               + "SEI name and the 'Configuration' suffix.") JavaType configClass,
       ShellContext context) {
 
