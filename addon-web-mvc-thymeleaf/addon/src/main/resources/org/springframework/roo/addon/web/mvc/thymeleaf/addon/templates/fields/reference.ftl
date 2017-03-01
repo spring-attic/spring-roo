@@ -19,7 +19,7 @@ data-th-with="collectionLink=${r"${@"}linkBuilder.of('${select2ControllerName}')
         data-data-placeholder="${r"#{"}info_select_an_option}">
           <option data-th-unless="*{${fieldName}} == null"
             data-th-value="*{${fieldName}.${identifierField}}"
-            data-th-text="*{${fieldName}}"
+            data-th-text="*{{${fieldName}}}"
          selected="selected">${referencedEntity}</option>
       </select>
       <span
