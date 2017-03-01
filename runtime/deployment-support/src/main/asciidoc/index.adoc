@@ -474,10 +474,8 @@ Following the above class diagram, run the next commands to generate the Northwi
      entity jpa --class ~.Country --readOnly
      entity jpa --class ~.Region --readOnly
      entity jpa --class ~.Category 
-     entity jpa --class ~.CustomerOrder 
      entity jpa --class ~.OrderDetail
      entity jpa --class ~.Party 
-     entity jpa --class ~.Product 
      entity jpa --class ~.PurchaseOrder 
      entity jpa --class ~.Report 
      entity jpa --class ~.Shipper
@@ -491,6 +489,13 @@ Following the above class diagram, run the next commands to generate the Northwi
 ----
 *roo>* entity jpa --class ~.Customer --extends ~.Party --force
      entity jpa --class ~.Employee --extends ~.Party --force
+----
++
+[source,sh,subs="quotes"]
+.Create the entities with special format when showing them in view layer. The format can be specified by a Spring Expression Language expression and also with a localized message (wich can contain a SpEL too):
+----
+*roo>* entity jpa --class ~.Product --entityFormatExpression "#{name} #{code}"
+     entity jpa --class ~.CustomerOrder --entityFormatMessage customerorder_format
 ----
 . Add the attributes to the entites:
 +
@@ -610,6 +615,7 @@ Following the above class diagram, run the next commands to generate the Northwi
      field string --fieldName fax
      field string --fieldName web
      field set --fieldName products --type ~.Product --mappedBy supplier
+     field set --fieldName stores --type ~.Store --cardinality MANY_TO_MANY
 ----
 
 === DTOs
@@ -635,6 +641,24 @@ Following the above class diagram, run the next commands to generate the Northwi
 == The data access layer
 
 === Spring Data repositories
+
+It is possible to specify an entity projection as a default return type for repository queries:
+
+* Create the entity projection:
++
+[source,sh,subs="quotes"]
+----
+*roo>* entity projection --class model:~.CustomerInfo --entity model:~.Customer --fields id,companyName,email,fax --entityFormatExpression #{companyName}
+----
++
+* Create the repository for the entity, which will use the projection as default return type of queries:
++
+[source,sh,subs="quotes"]
+----
+*roo>* repository jpa --entity model:~.Customer --interface repository:~.CustomerRepository --defaultReturnType model:~.CustomerInfo
+----
+
+Create repositories for all the remaining entities:
 
 [source,sh,subs="quotes"]
 ----
@@ -791,13 +815,13 @@ Spring Roo generate SOAP Services easily, available under `/services` URL.
 [source,sh,subs="quotes"]
 .Send email
 ----
-*roo>* email sender setup --service service-impl:~.CustomerServiceImpl --username USERNAME --password PASSWORD --host HOST --port PORT --protocol PROTOCOL --starttls true
+*roo>* email sender setup --service service-impl:~.CustomerServiceImpl --username USERNAME --password PASSWORD --host HOST --port 1000 --protocol PROTOCOL --starttls true
 ----
 
 [source,sh,subs="quotes"]
 .Receive email
 ----
-*roo>* email receiver setup --service service-impl:~.EmployeeServiceImpl --username USERNAME --password PASSWORD --host HOST --port PORT --protocol PROTOCOL --starttls true
+*roo>* email receiver setup --service service-impl:~.EmployeeServiceImpl --username USERNAME --password PASSWORD --host HOST --port 1000 --protocol PROTOCOL --starttls true
 ----
 
 [[the-security-layer]]
