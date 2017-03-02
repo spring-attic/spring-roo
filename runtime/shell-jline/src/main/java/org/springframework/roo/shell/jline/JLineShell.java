@@ -369,6 +369,12 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
         return;
       }
     }
+
+    // Don't write exit or quit commands
+    if (processedLine.trim().startsWith("quit") || processedLine.trim().startsWith("exit")) {
+      return;
+    }
+
     try {
       // Unix line endings only from Roo
       fileLog.write(processedLine + "\n");

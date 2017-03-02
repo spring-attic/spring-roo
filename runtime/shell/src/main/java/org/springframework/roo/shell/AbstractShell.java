@@ -563,7 +563,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
         if (!"".equals(line.trim()) && !ignoreLine) {
           final boolean success = executeScriptLine(line);
-          if (success && (line.trim().startsWith("q") || line.trim().startsWith("ex"))) {
+          if (success && (line.trim().startsWith("quit") || line.trim().startsWith("exit"))) {
             break;
           } else if (!success) {
             // Abort script processing, given something went wrong
