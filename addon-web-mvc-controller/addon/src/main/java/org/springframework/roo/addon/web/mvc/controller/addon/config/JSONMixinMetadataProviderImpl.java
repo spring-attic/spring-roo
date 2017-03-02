@@ -1,5 +1,11 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.config;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -27,14 +33,8 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.logging.Logger;
-
 /**
- * Implementation of {@link DomainModelModuleMetadataProvider}.
+ * Implementation of {@link JSONMixinMetadataProvider}.
  *
  * @author Jose Manuel Vivó
  * @since 2.0
@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 @Component
 @Service
 public class JSONMixinMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider
-    implements DomainModelModuleMetadataProvider {
+    implements JSONMixinMetadataProvider {
 
   protected final static Logger LOGGER = HandlerUtils
       .getLogger(JSONMixinMetadataProviderImpl.class);
@@ -58,7 +58,7 @@ public class JSONMixinMetadataProviderImpl extends AbstractMemberDiscoveringItdM
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_DOMAIN_MODEL_MODULE} as additional
+   * <li>Registers {@link RooJavaType#ROO_JSON_MIXIN} as additional
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -169,6 +169,15 @@ public class JSONMixinMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     // register metadata dependency
     registerDependency(entityId, metadataIdentificationString);
 
+    // Register dependency with DomainModelModule
+    Set<ClassOrInterfaceTypeDetails> domainModelModuleDetails =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_DOMAIN_MODEL_MODULE);
+    if (!domainModelModuleDetails.isEmpty()) {
+      String domainModelModuleMetadataId =
+          DomainModelModuleMetadata.createIdentifier(domainModelModuleDetails.iterator().next());
+      registerDependency(metadataIdentificationString, domainModelModuleMetadataId);
+    }
 
     Map<FieldMetadata, JavaType> jsonDeserializerByEntity =
         new TreeMap<FieldMetadata, JavaType>(FieldMetadata.COMPARATOR_BY_NAME);

@@ -4,11 +4,17 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaConfigurationMetadata;
 import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
@@ -100,6 +106,27 @@ public class SpringletsJpaSecurityProvider implements SecurityProvider {
     // Add thymeleaf-extras-springsecurity4 dependency with Thymeleaf 3 support
     getProjectOperations().addProperty("", THYMELEAF_SPRING_SECURITY_VERSION_PROPERTY);
     getProjectOperations().addDependency(module.getModuleName(), THYMELEAF_SPRING_SECURITY);
+
+    // Do changes to files now
+    getFileManager().commit();
+
+    // If a special JPA repositories configuration exists, get its metadata 
+    // to allow implementing needed changes
+    Set<ClassOrInterfaceTypeDetails> repositoryConfigClasses =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_JPA_REPOSITORY_CONFIGURATION);
+    if (!repositoryConfigClasses.isEmpty()) {
+
+      // We should evict Pom metadata for being aware of recently added starter
+      getMetadataService().evict(
+          getProjectOperations().getProjectMetadata(module.getModuleName()).getId());
+
+      // Evict and get RepositoryJpaConfigurationMetadata
+      ClassOrInterfaceTypeDetails repoConfigDetails = repositoryConfigClasses.iterator().next();
+      String metadataIdentifier =
+          RepositoryJpaConfigurationMetadata.createIdentifier(repoConfigDetails);
+      getMetadataService().evictAndGet(metadataIdentifier);
+    }
   }
 
   // Service references
@@ -117,6 +144,14 @@ public class SpringletsJpaSecurityProvider implements SecurityProvider {
 
   public TypeManagementService getTypeManagementService() {
     return serviceInstaceManager.getServiceInstance(this, TypeManagementService.class);
+  }
+
+  public MetadataService getMetadataService() {
+    return serviceInstaceManager.getServiceInstance(this, MetadataService.class);
+  }
+
+  public FileManager getFileManager() {
+    return serviceInstaceManager.getServiceInstance(this, FileManager.class);
   }
 
 }

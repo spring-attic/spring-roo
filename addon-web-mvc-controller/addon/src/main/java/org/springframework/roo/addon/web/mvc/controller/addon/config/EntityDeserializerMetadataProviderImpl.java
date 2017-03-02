@@ -39,7 +39,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Component
 @Service
 public class EntityDeserializerMetadataProviderImpl extends
-    AbstractMemberDiscoveringItdMetadataProvider implements DomainModelModuleMetadataProvider {
+    AbstractMemberDiscoveringItdMetadataProvider implements EntityDeserializerMetadataProvider {
 
   protected final static Logger LOGGER = HandlerUtils
       .getLogger(EntityDeserializerMetadataProviderImpl.class);
