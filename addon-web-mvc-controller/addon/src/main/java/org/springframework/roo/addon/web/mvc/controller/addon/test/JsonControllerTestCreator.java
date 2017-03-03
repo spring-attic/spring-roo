@@ -54,7 +54,7 @@ public class JsonControllerTestCreator implements TestCreatorProvider {
       "io.springlets", "springlets-boot-starter-test", "${springlets.version}", DependencyType.JAR,
       DependencyScope.TEST);
   private final static Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.2.0.BUILD-SNAPSHOT");
+      "1.2.0.RC1");
 
   private BundleContext context;
 
