@@ -2079,9 +2079,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     bodyBuilder.appendFormalLine("%s(model);", populateFormMethod.getMethodName());
     bodyBuilder.newLine();
 
-    // model.addAttribute(new Entity());
-    bodyBuilder.appendFormalLine(String.format("model.addAttribute(new %s());",
-        getNameOfJavaType(this.entity)));
+    // model.addAttribute("entity", new Entity());
+    bodyBuilder.appendFormalLine(String.format("model.addAttribute(\"%s\", new %s());",
+        StringUtils.uncapitalize(getNameOfJavaType(this.entity)), getNameOfJavaType(this.entity)));
 
     // return "path/create";
     bodyBuilder.appendFormalLine("return new %s(\"%s/create\");",
@@ -2272,6 +2272,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // populateForm(model);
     bodyBuilder.appendFormalLine("populateForm(model);");
+
+    // model.addAttribute("entity", entityParam)
+    bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", entityItemName, entityItemName);
 
     // model.addAttribute("concurrency", true);
     bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", true);");
@@ -3360,6 +3363,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     bodyBuilder.appendFormalLine("%s(model);", populateFormMethod.getMethodName());
     bodyBuilder.newLine();
 
+    // model.addAttribute("entity", entityParam)
+    bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", entityItemName, entityItemName);
+
     // return new ModelAndView("customers/edit");
     bodyBuilder.appendFormalLine("return new %s(\"%s/edit\");",
         getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
@@ -3422,6 +3428,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     bodyBuilder.appendFormalLine("%s(model);", populateFormMethod.getMethodName());
     bodyBuilder.newLine();
 
+    // model.addAttribute("entity", entityParam)
+    bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", entityItemName, entityItemName);
+
     // return new ModelAndView("customerorders/details/edit");
     bodyBuilder.appendFormalLine("return new %s(\"%s/%s/edit\");",
         getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath,
@@ -3470,6 +3479,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
+    // model.addAttribute("entity", entityParam)
+    bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", entityItemName, entityItemName);
+
     // return new ModelAndView("customers/show");
     bodyBuilder.appendFormalLine("return new %s(\"%s/show\");",
         getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
@@ -3517,6 +3529,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // model.addAttribute("entity", entityParam)
+    bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", entityItemName, entityItemName);
 
     // return new ModelAndView("customers/showInline :: inline-content");
     bodyBuilder.appendFormalLine("return new %s(\"%s/showInline :: inline-content\");",
@@ -3573,6 +3588,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // model.addAttribute("entity", entityParam)
+    bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", entityItemName, entityItemName);
 
     // return new ModelAndView("customerorders/details/show");
     bodyBuilder.appendFormalLine("return new %s(\"%s/%s/show\");",
@@ -3631,6 +3649,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // model.addAttribute("entity", entityParam)
+    bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", entityItemName, entityItemName);
 
     // return new ModelAndView("customerorders/details/showInline :: inline-content");
     bodyBuilder.appendFormalLine("return new %s(\"%s/%s/showInline :: inline-content\");",
@@ -4169,9 +4190,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // populateForm(model);
     bodyBuilder.appendFormalLine("%s(model);", populateFormMethod.getMethodName());
-    // model.addAttribute(new Entity());
-    bodyBuilder.appendFormalLine(String.format("model.addAttribute(new %s());",
-        getNameOfJavaType(entity)));
+    // model.addAttribute("entity", new Entity());
+    bodyBuilder.appendFormalLine(String.format("model.addAttribute(\"%s\", new %s());",
+        StringUtils.uncapitalize(getNameOfJavaType(entity)), getNameOfJavaType(entity)));
 
     // return new ModelAndView("path/create");
     bodyBuilder.appendFormalLine("return new %s(\"%s/%s/create\");",
