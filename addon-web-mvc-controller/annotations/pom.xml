@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.springframework.roo</groupId>
         <artifactId>org.springframework.roo.addon.web.mvc.controller</artifactId>
-        <version>2.0.0.BUILD-SNAPSHOT</version>
+        <version>2.0.0.RC1</version>
         <relativePath>../../addon-web-mvc-controller</relativePath>
     </parent>
     <artifactId>org.springframework.roo.addon.web.mvc.controller.annotations</artifactId>

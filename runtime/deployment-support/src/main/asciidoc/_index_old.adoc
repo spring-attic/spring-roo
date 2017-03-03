@@ -24,7 +24,7 @@
 :author: 		DISID Corporation S.L. - Pivotal Software, Inc
 :authorsite: 		www.disid.com
 :description: 		Spring Roo - Reference Documentation
-:version:		2.0.0.BUILD-SNAPSHOT
+:version:		2.0.0.RC1
 :copyright: 		CC BY-NC-SA 3.0
 :doctype: 		book
 :keywords:		SpringRoo, Reference
@@ -6050,7 +6050,7 @@ The information is intended to be treated as a reference and not read consecutiv
 [[command-index]]
 == Command Index
 
-This appendix was automatically built from Roo 2.0.0.BUILD-SNAPSHOT
+This appendix was automatically built from Roo 2.0.0.RC1
 
 Commands are listed in alphabetic order, and are shown in monospaced
 font with any mandatory options you must specify when using the command.

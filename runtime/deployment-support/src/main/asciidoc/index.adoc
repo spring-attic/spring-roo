@@ -38,7 +38,7 @@ DISID CORPORATION S.L.
 :toclevels: 2
 :toc-placement: left
 :toc-title: Table of Contents
-:version: 2.0.0.BUILD-SNAPSHOT
+:version: 2.0.0.RC1
 ifdef::backend-pdf[]
 :pdf-style: asciidoctor
 :pagenums:
@@ -51,7 +51,7 @@ endif::[]
 _{version}_
 
 [abstract]
-_© 2016 The original authors._ +
+_© 2017 The original authors._ +
 _Copies of this document may be made for your own use and for distribution to others,
 provided that you do not charge any fee for such copies and further provided that
 each copy contains this Copyright Notice, whether distributed in print or
