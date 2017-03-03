@@ -5,7 +5,7 @@ import java.util.Locale;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.web.mvc.jsp.i18n.AbstractLanguage;
+import org.springframework.roo.addon.web.mvc.i18n.components.AbstractLanguage;
 import org.springframework.roo.support.util.FileUtils;
 
 /** 
