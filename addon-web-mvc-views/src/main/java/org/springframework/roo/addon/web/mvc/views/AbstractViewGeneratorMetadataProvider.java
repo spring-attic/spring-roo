@@ -466,6 +466,23 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
       case DETAIL:
         viewGenerationService.addDetailsViews(module, entityMetadata, entityMemberDetails,
             controllerMetadata, viewMetadata, ctx);
+
+        // Add this metadata as upstream dependency for parent controllers
+        // for updating views of parent controllers
+        JavaType parentEntity = entityMetadata.getAnnotatedEntity();
+        List<ClassOrInterfaceTypeDetails> parentControllers =
+            new ArrayList<ClassOrInterfaceTypeDetails>();
+        parentControllers.addAll(getControllerLocator().getControllers(parentEntity,
+            ControllerType.COLLECTION, viewType));
+        parentControllers.addAll(getControllerLocator().getControllers(parentEntity,
+            ControllerType.ITEM, viewType));
+        parentControllers.addAll(getControllerLocator().getControllers(parentEntity,
+            ControllerType.SEARCH, viewType));
+        for (ClassOrInterfaceTypeDetails parentController : parentControllers) {
+          String viewMetadatIdentifier = createLocalIdentifier(parentController);
+          registerDependency(metadataIdentificationString, viewMetadatIdentifier);
+        }
+
         break;
 
       case DETAIL_ITEM:
@@ -676,12 +693,9 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
   protected void registerDependency(final String upstreamDependency,
       final String downStreamDependency) {
 
-    if (getMetadataDependencyRegistry() != null
-        && StringUtils.isNotBlank(upstreamDependency)
+    if (getMetadataDependencyRegistry() != null && StringUtils.isNotBlank(upstreamDependency)
         && StringUtils.isNotBlank(downStreamDependency)
-        && !upstreamDependency.equals(downStreamDependency)
-        && !MetadataIdentificationUtils.getMetadataClass(downStreamDependency).equals(
-            MetadataIdentificationUtils.getMetadataClass(upstreamDependency))) {
+        && !upstreamDependency.equals(downStreamDependency)) {
       getMetadataDependencyRegistry().registerDependency(upstreamDependency, downStreamDependency);
     }
   }
