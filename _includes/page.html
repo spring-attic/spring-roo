@@ -15,6 +15,8 @@
     <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/css/buttons.css.css" />
     <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/css/guide.css.css" />
     <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/css/highlight.css.css" />
+    <!-- Cookies Alert -->
+    <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/css/cookiecuttr.css">
 
     {{ head_links }}
 
@@ -34,23 +36,29 @@
     </script>
     <script src="{{site.baseurl}}/js/copySnippets.js"></script>
     <meta name="google-site-verification" content="7qGntFPD9lWAVCtUu5U77v4l68PsTHf6xpzgjQv2j2M" />
-    <script>
+
+    {% if site.google_analytics %}
+
+      <!-- jQuery CookieCuttr -->
+      <script type="text/javascript" src="{{site.baseurl}}/js/jquery.cookie.js"></script>
+      <script type="text/javascript" src="{{site.baseurl}}/js/jquery.cookiecuttr.js"></script>
+
+      <script type="text/javascript">
+      if (jQuery.cookie('cc_cookie_accept') == "cc_cookie_accept") {
+        // insert the code you do not want to run UNTIL cookies are accepted here
         var _gaq = _gaq || [];
-        var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
-        _gaq.push(
-            ['_require', 'inpage_linkid', pluginUrl],
-            ['_setAccount', 'UA-2728886-22'],
-            ['_trackPageview'],
-            ['b._require', 'inpage_linkid', pluginUrl],
-            ['b._setAccount', 'UA-2728886-19'],
-            ['b._trackPageview']
-        );
+        _gaq.push(['_setAccount', '{{ site.google_analytics }}']);
+        _gaq.push(['_trackPageview']);
+
         (function() {
-            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document. getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
         })();
-    </script>
+        }
+      </script>
+
+    {% endif %}
 
     <!-- meta info -->
     <meta name="description" content="{{ site.description }}">
@@ -154,5 +162,15 @@
   <!-- Start of HubSpot Embed Code -->
     <script type="text/javascript" id="hs-script-loader" async defer src="//js.hs-scripts.com/2869130.js"></script>
   <!-- End of HubSpot Embed Code -->
+
+  <!-- Cookies consent -->
+  {% if site.google_analytics %}
+    <script>
+        $(document).ready(function () {
+          console.log("Cookies consent loaded");
+          $.cookieCuttr();
+        });
+    </script>
+  {% endif %}
 
 </body>

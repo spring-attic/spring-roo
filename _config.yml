@@ -15,6 +15,9 @@ gems:
 
 ### The following properties will change on a project-by-project basis
 
+#Google Analytics
+google_analytics: UA-93241150-1 #Google analytics code in the format XX-nnnnnnnn-n
+
 # Context path in the remote website (usually /<project>), will be prepended to absolute URLs for static resources
 baseurl: /spring-roo
 
@@ -50,3 +53,4 @@ url: http://projects.spring.io/spring-roo
 title: Spring Roo Project
 description: A next-generation rapid application development tool for Java developers. With Roo you can easily build full Java applications in minutes.
 default_bg: default_bg.png
+
