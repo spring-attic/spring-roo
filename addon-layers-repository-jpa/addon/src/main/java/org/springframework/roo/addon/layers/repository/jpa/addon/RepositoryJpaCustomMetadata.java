@@ -56,11 +56,13 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
 
 
   private final JavaType defaultReturnType;
+  private final JavaType identifierType;
   private final Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods;
   private final List<Pair<MethodMetadata, PartTree>> customFinderMethods;
   private final List<Pair<MethodMetadata, PartTree>> customCountMethods;
 
   private final MethodMetadata findAllGlobalSearchMethod;
+  private final MethodMetadata findAllByIdsInGlobalSearchMethod;
 
   private Map<JavaSymbolName, MethodMetadata> finderMethodsAndCounts;
 
@@ -110,15 +112,15 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
    */
   public RepositoryJpaCustomMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      final RepositoryJpaCustomAnnotationValues annotationValues, final JavaType domainType,
-      final RepositoryJpaMetadata repositoryMetadata,
+      final RepositoryJpaCustomAnnotationValues annotationValues, final JavaType identifierType,
+      final JavaType domainType, final RepositoryJpaMetadata repositoryMetadata,
       List<Pair<FieldMetadata, RelationInfo>> relationsAsChild) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
     Validate.notNull(repositoryMetadata, "Referenced fields could be empty but not null");
 
     this.defaultReturnType = repositoryMetadata.getDefaultReturnType();
-
+    this.identifierType = identifierType;
     this.finderMethodsAndCounts = new HashMap<JavaSymbolName, MethodMetadata>();
 
     ArrayList<Pair<MethodMetadata, PartTree>> tmpCustomFinderMethods =
@@ -151,8 +153,11 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     if (!composition) {
       findAllGlobalSearchMethod = getFindAllGlobalSearchMethod();
       ensureGovernorHasMethod(new MethodMetadataBuilder(findAllGlobalSearchMethod));
+      findAllByIdsInGlobalSearchMethod = getFindAllByIdsInGlobalSearchMethod();
+      ensureGovernorHasMethod(new MethodMetadataBuilder(findAllByIdsInGlobalSearchMethod));
     } else {
       findAllGlobalSearchMethod = null;
+      findAllByIdsInGlobalSearchMethod = null;
     }
 
     // Prepare a list of all finder and count methods already declared on
@@ -228,6 +233,46 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
 
     // Method name
     JavaSymbolName methodName = new JavaSymbolName("findAll");
+
+    // Return type
+    JavaType returnType =
+        new JavaType("org.springframework.data.domain.Page", 0, DataType.TYPE, null,
+            Arrays.asList(defaultReturnType));
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
+            returnType, parameterTypes, parameterNames, null);
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+  }
+
+  /**
+   * Method that generates the findAllByIdsIn method on current interface.
+   *
+   * @return
+   */
+  private MethodMetadata getFindAllByIdsInGlobalSearchMethod() {
+
+    // Define method parameter types and parameter names
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    // Identifiers parameter
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType.wrapperOf(JavaType.LIST,
+        identifierType)));
+    parameterNames.add(new JavaSymbolName("ids"));
+
+    //Global search parameter
+    parameterTypes.add(GLOBAL_SEARCH_PARAMETER);
+    parameterNames.add(GOBAL_SEARCH_PARAMETER_NAME);
+
+    // Pageable parameter
+    parameterTypes.add(PAGEABLE_PARAMETER);
+    parameterNames.add(PAGEABLE_PARAMETER_NAME);
+
+    // Method name
+    JavaSymbolName methodName = new JavaSymbolName("findAllByIdsIn");
 
     // Return type
     JavaType returnType =
@@ -420,5 +465,13 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
    */
   public MethodMetadata getCurrentFindAllGlobalSearchMethod() {
     return findAllGlobalSearchMethod;
+  }
+
+  /**
+  *
+  * @return method findAll declared for this repository
+  */
+  public MethodMetadata getCurrentFindAllByIdsInGlobalSearchMethod() {
+    return findAllByIdsInGlobalSearchMethod;
   }
 }

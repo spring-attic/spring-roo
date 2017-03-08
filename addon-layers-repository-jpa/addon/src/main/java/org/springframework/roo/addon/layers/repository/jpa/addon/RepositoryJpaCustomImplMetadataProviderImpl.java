@@ -355,6 +355,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         governorPhysicalTypeMetadata, annotationValues, entity, entityMetadata,
         entityMetadata.getCurrentIndentifierField(), validFields,
         repositoryCustomMetadata.getCurrentFindAllGlobalSearchMethod(),
+        repositoryCustomMetadata.getCurrentFindAllByIdsInGlobalSearchMethod(),
         repositoryCustomMetadata.getDefaultReturnType(), referencedFieldsMethods,
         referencedFieldsIdentifierNames, typesFieldMaps, customFinderMethods, customCountMethods,
         typesFieldsMetadataMap, typesAreProjections);

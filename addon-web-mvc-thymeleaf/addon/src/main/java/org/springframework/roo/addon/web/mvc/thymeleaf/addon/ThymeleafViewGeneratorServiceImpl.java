@@ -247,6 +247,87 @@ public class ThymeleafViewGeneratorServiceImpl extends
   }
 
   @Override
+  public Document mergeListDeleteModalView(String templateName, Document loadExistingDoc,
+      ViewContext<ThymeleafMetadata> ctx, EntityItem entity, List<FieldItem> fields) {
+
+    // Get field code if data-z attribute value is equals to user-managed
+    Element elementField =
+        loadExistingDoc.getElementById(entity.getEntityItemId().concat("-table"));
+    if (elementField != null && elementField.hasAttr("data-z")
+        && elementField.attr("data-z").equals("user-managed")) {
+      entity.setUserManaged(true);
+      entity.setCodeManaged(elementField.outerHtml());
+    }
+
+    ctx.addExtraParameter("userManagedComponents", mergeStructure(loadExistingDoc));
+    ctx.addExtraParameter("entity", entity);
+    ctx.addExtraParameter("fields", fields);
+    Document newDoc = process(templateName, ctx);
+    return newDoc;
+  }
+
+  @Override
+  public Document mergeListDeleteModalDetailView(String templateName, Document loadExistingDoc,
+      ViewContext<ThymeleafMetadata> ctx, EntityItem entity, List<FieldItem> fields) {
+
+    // Get field code if data-z attribute value is equals to user-managed
+    Element elementField =
+        loadExistingDoc.getElementById(entity.getEntityItemId().concat("-table"));
+    if (elementField != null && elementField.hasAttr("data-z")
+        && elementField.attr("data-z").equals("user-managed")) {
+      entity.setUserManaged(true);
+      entity.setCodeManaged(elementField.outerHtml());
+    }
+
+    ctx.addExtraParameter("userManagedComponents", mergeStructure(loadExistingDoc));
+    ctx.addExtraParameter("entity", entity);
+    ctx.addExtraParameter("fields", fields);
+    Document newDoc = process(templateName, ctx);
+    return newDoc;
+  }
+
+  @Override
+  public Document mergeListDeleteModalBatchView(String templateName, Document loadExistingDoc,
+      ViewContext<ThymeleafMetadata> ctx, EntityItem entity, List<FieldItem> fields) {
+
+    // Get field code if data-z attribute value is equals to user-managed
+    Element elementField =
+        loadExistingDoc.getElementById(entity.getEntityItemId().concat("-table"));
+    if (elementField != null && elementField.hasAttr("data-z")
+        && elementField.attr("data-z").equals("user-managed")) {
+      entity.setUserManaged(true);
+      entity.setCodeManaged(elementField.outerHtml());
+    }
+
+    ctx.addExtraParameter("userManagedComponents", mergeStructure(loadExistingDoc));
+    ctx.addExtraParameter("entity", entity);
+    ctx.addExtraParameter("fields", fields);
+    Document newDoc = process(templateName, ctx);
+    return newDoc;
+  }
+
+  @Override
+  public Document mergeListDeleteModalBatchDetailView(String templateName,
+      Document loadExistingDoc, ViewContext<ThymeleafMetadata> ctx, EntityItem entity,
+      List<FieldItem> fields) {
+
+    // Get field code if data-z attribute value is equals to user-managed
+    Element elementField =
+        loadExistingDoc.getElementById(entity.getEntityItemId().concat("-table"));
+    if (elementField != null && elementField.hasAttr("data-z")
+        && elementField.attr("data-z").equals("user-managed")) {
+      entity.setUserManaged(true);
+      entity.setCodeManaged(elementField.outerHtml());
+    }
+
+    ctx.addExtraParameter("userManagedComponents", mergeStructure(loadExistingDoc));
+    ctx.addExtraParameter("entity", entity);
+    ctx.addExtraParameter("fields", fields);
+    Document newDoc = process(templateName, ctx);
+    return newDoc;
+  }
+
+  @Override
   public Document mergeMenu(String templateName, Document loadExistingDoc,
       ViewContext<ThymeleafMetadata> ctx, List<MenuEntry> menuEntries) {
 
@@ -449,6 +530,9 @@ public class ThymeleafViewGeneratorServiceImpl extends
       addCreateDetailsCompositionView(moduleName, entityMetadata, entity, controllerMetadata,
           viewMetadata, ctx);
     }
+
+    addListDeleteModalDetailView(moduleName, entityMetadata, entity, controllerMetadata, ctx);
+    addListDeleteModalDetailBatchView(moduleName, entityMetadata, entity, controllerMetadata, ctx);
   }
 
 
@@ -479,6 +563,9 @@ public class ThymeleafViewGeneratorServiceImpl extends
         childCtx);
     addUpdateDetailsCompositionView(moduleName, entityMetadata, viewMetadata, entityItem, detail,
         childCtx);
+
+    addListDeleteModalDetailView(moduleName, entityMetadata, entity, controllerMetadata, ctx);
+    addListDeleteModalDetailBatchView(moduleName, entityMetadata, entity, controllerMetadata, ctx);
   }
 
   @Override

@@ -44,6 +44,7 @@ public class ViewContext<T extends AbstractViewMetadata> {
   private boolean securityEnabled;
 
 
+
   public String getControllerPath() {
     return controllerPath;
   }

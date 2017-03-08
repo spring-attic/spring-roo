@@ -10,6 +10,15 @@ import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_DATATA
 import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH;
 import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_NOT_FOUND_EXCEPTION;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -52,15 +61,6 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
 /**
  * Metadata for {@link RooThymeleaf}.
  *
@@ -80,8 +80,12 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   protected static final JavaSymbolName LIST_URI_METHOD_NAME = new JavaSymbolName("listURI");
   protected static final JavaSymbolName LIST_DATATABLES_METHOD_NAME = new JavaSymbolName(
       "datatables");
+  protected static final JavaSymbolName LIST_DATATABLES_BY_IDS_IN_METHOD_NAME = new JavaSymbolName(
+      "datatablesByIdsIn");
   protected static final JavaSymbolName LIST_DATATABLES_DETAILS_METHOD_NAME = new JavaSymbolName(
       "datatables");
+  protected static final JavaSymbolName LIST_DATATABLES_BY_IDS_IN_DETAILS_METHOD_NAME =
+      new JavaSymbolName("datatablesByIdsIn");
   protected static final JavaSymbolName SELECT2_METHOD_NAME = new JavaSymbolName("select2");
   protected static final JavaSymbolName SHOW_URI_METHOD_NAME = new JavaSymbolName("showURI");
   protected static final JavaSymbolName SHOW_METHOD_NAME = new JavaSymbolName("show");
@@ -198,6 +202,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private final MethodMetadata createMethod;
   private final MethodMetadata listMethod;
   private final MethodMetadata listDatatablesMethod;
+  private final MethodMetadata listDatatablesByIdsInMethod;
   private final MethodMetadata select2Method;
   private final MethodMetadata deleteBatchMethod;
 
@@ -214,6 +219,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   // Details Methods
   private final Map<RelationInfo, MethodMetadata> modelAttributeDetailsMethod;
   private final MethodMetadata listDatatablesDetailsMethod;
+  private final MethodMetadata listDatatablesByIdsInDetailsMethod;
   private final MethodMetadata createFormDetailsMethod;
   private final MethodMetadata createDetailsMethod;
   private final MethodMetadata removeFromDetailsMethod;
@@ -385,6 +391,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         // Build methods
         this.listMethod = addAndGet(getListMethod(), allMethods);
         this.listDatatablesMethod = addAndGet(getListDatatablesMethod(), allMethods);
+        this.listDatatablesByIdsInMethod = addAndGet(getListDatatablesByIdsInMethod(), allMethods);
 
         boolean generateSelect2 = true;
         // XXX To Be Analyzed
@@ -427,6 +434,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.showInlineMethod = null;
         this.modelAttributeDetailsMethod = null;
         this.listDatatablesDetailsMethod = null;
+        this.listDatatablesByIdsInDetailsMethod = null;
         this.finderListMethods = null;
         this.finderDatatableMethods = null;
         this.finderFormMethods = null;
@@ -492,10 +500,12 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.deleteBatchMethod = null;
         this.listMethod = null;
         this.listDatatablesMethod = null;
+        this.listDatatablesByIdsInMethod = null;
         this.createMethod = null;
         this.createFormMethod = null;
         this.modelAttributeDetailsMethod = null;
         this.listDatatablesDetailsMethod = null;
+        this.listDatatablesByIdsInDetailsMethod = null;
         this.finderListMethods = null;
         this.finderDatatableMethods = null;
         this.finderFormMethods = null;
@@ -556,6 +566,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.deleteBatchMethod = null;
         this.listMethod = null;
         this.listDatatablesMethod = null;
+        this.listDatatablesByIdsInMethod = null;
         this.createMethod = null;
         this.createFormMethod = null;
         this.initBinderMethod = null;
@@ -570,6 +581,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.populateFormatsMethod = null;
         this.modelAttributeDetailsMethod = null;
         this.listDatatablesDetailsMethod = null;
+        this.listDatatablesByIdsInDetailsMethod = null;
         this.select2Method = null;
         this.createDetailsMethod = null;
         this.createFormDetailsMethod = null;
@@ -629,6 +641,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.populateFormatsMethod = addAndGet(getPopulateFormatsMethod(), allMethods);
         this.populateFormMethod = addAndGet(getPopulateFormMethod(), allMethods);
         this.listDatatablesDetailsMethod = addAndGet(getListDatatablesDetailMethod(), allMethods);
+        this.listDatatablesByIdsInDetailsMethod =
+            addAndGet(getListDatatablesByIdsInDetailMethod(), allMethods);
         this.createFormDetailsMethod = addAndGet(getCreateFormDetailsMethod(), allMethods);
 
         // ReadOnly entities doesn't manage relations
@@ -654,6 +668,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
         this.listMethod = null;
         this.listDatatablesMethod = null;
+        this.listDatatablesByIdsInMethod = null;
         this.createMethod = null;
         this.createFormMethod = null;
 
@@ -727,6 +742,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.showDetailInlineMethod = addAndGet(getShowDetailInlineMethod(), allMethods);
         this.listMethod = null;
         this.listDatatablesMethod = null;
+        this.listDatatablesByIdsInMethod = null;
         this.createMethod = null;
         this.createFormMethod = null;
 
@@ -741,6 +757,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.finderFormMethods = null;
         this.select2Method = null;
         this.listDatatablesDetailsMethod = null;
+        this.listDatatablesByIdsInDetailsMethod = null;
         this.removeFromDetailsMethod = null;
         this.removeFromDetailsBatchMethod = null;
         this.createDetailsMethod = null;
@@ -3233,6 +3250,119 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   }
 
   /**
+   * This method provides the "list" Datatables JSON method using JSON
+   * response type and returns Datatables element
+   *
+   * @return MethodMetadata
+   */
+  private MethodMetadata getListDatatablesByIdsInMethod() {
+    // Define methodName
+    final JavaSymbolName methodName = LIST_DATATABLES_BY_IDS_IN_METHOD_NAME;
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    AnnotationMetadataBuilder requestParamIdsAnnotation =
+        new AnnotationMetadataBuilder(REQUEST_PARAM);
+    requestParamIdsAnnotation.addStringAttribute("value", "ids");
+    parameterTypes.add(new AnnotatedJavaType(JavaType.wrapperOf(JavaType.LIST, entityMetadata
+        .getCurrentIndentifierField().getFieldType()), requestParamIdsAnnotation.build()));
+    parameterTypes.add(DATATABLES_COLUMNS_PARAM);
+    parameterTypes.add(GLOBAL_SEARCH_PARAM);
+    parameterTypes.add(DATATABLES_PAGEABLE_PARAM);
+    AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM);
+    requestParamAnnotation.addStringAttribute("value", "draw");
+    parameterTypes.add(new AnnotatedJavaType(JavaType.INT_OBJECT, requestParamAnnotation.build()));
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("ids"));
+    parameterNames.add(DATATABLES_COLUMNS_PARAM_NAME);
+    parameterNames.add(new JavaSymbolName("search"));
+    parameterNames.add(new JavaSymbolName("pageable"));
+    parameterNames.add(new JavaSymbolName("draw"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @GetMapping annotation
+    final AnnotationMetadataBuilder getMappingAnnotation =
+        new AnnotationMetadataBuilder(GET_MAPPING);
+    getMappingAnnotation.addEnumAttribute("produces", SPRINGLETS_DATATABLES, "MEDIA_TYPE");
+    getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    getMappingAnnotation.addStringAttribute("value", "/dtByIdsIn");
+    annotations.add(getMappingAnnotation);
+    this.mvcMethodNames.put(methodName.getSymbolName(), methodName.getSymbolName());
+
+    // Adding @ResponseBody annotation
+    annotations.add(RESPONSE_BODY_ANNOTATION);
+
+    // Generate body
+    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    final String itemNames = StringUtils.uncapitalize(this.entityPlural);
+
+    // Getting the findAllMethod
+    MethodMetadata findAllMethod =
+        this.serviceMetadata.getCurrentFindAllByIdsInWithGlobalSearchMethod();
+
+    // Getting the findAll return type
+    JavaType defaultReturnType = findAllMethod.getReturnType().getParameters().get(0);
+
+    // Page<Customer> customers = customerService.findAllByIdsIn(ids, search, pageable);
+    bodyBuilder.appendFormalLine("%s<%s> %s = %s().%s(ids, search, pageable);",
+        getNameOfJavaType(SpringJavaType.PAGE), getNameOfJavaType(defaultReturnType), itemNames,
+        getAccessorMethod(this.controllerMetadata.getServiceField()).getMethodName(),
+        findAllMethod.getMethodName());
+
+    final String totalVarName = "total" + StringUtils.capitalize(this.entityPlural) + "Count";
+    // long totalCustomersCount = customers.getTotalElements();
+    bodyBuilder.appendFormalLine("long %s = %s.getTotalElements();", totalVarName, itemNames);
+
+    // if (search != null && StringUtils.hasText(search.getText())) {
+    // totalCustomersCount = customerService.count();
+    // }
+    bodyBuilder.appendFormalLine("if (search != null && %s.isNotBlank(search.getText())) {",
+        getNameOfJavaType(STRING_UTILS_APACHE));
+    bodyBuilder.indent();
+    bodyBuilder.appendFormalLine("%s = %s().%s();", totalVarName,
+        getAccessorMethod(this.controllerMetadata.getServiceField()).getMethodName(),
+        serviceMetadata.getCurrentCountMethod().getMethodName());
+    bodyBuilder.indentRemove();
+    bodyBuilder.appendFormalLine("}");
+
+    // ConvertedDatatablesData<Owner> datatablesData = new
+    // ConvertedDatatablesData<Owner>(owners,
+    // totalOwnersCount, draw, conversionService, columns);
+    bodyBuilder.appendFormalLine(
+        "%1$s<%2$s> datatablesData = new %1$s<%2$s>(%3$s, %4$s, draw, %5$s(), %6$s);",
+        getNameOfJavaType(SpringletsJavaType.SPRINGLETS_CONVERTED_DATATABLES_DATA),
+        getNameOfJavaType(defaultReturnType), itemNames, totalVarName,
+        getAccessorMethod(this.conversionServiceField).getMethodName(),
+        DATATABLES_COLUMNS_PARAM_NAME);
+
+    // return ResponseEntity.ok(datatablesData);
+    bodyBuilder.appendFormalLine("return %s.ok(datatablesData);",
+        getNameOfJavaType(RESPONSE_ENTITY));
+
+    // Generating returnType
+    JavaType returnType =
+        JavaType.wrapperOf(RESPONSE_ENTITY, JavaType.wrapperOf(
+            SpringletsJavaType.SPRINGLETS_CONVERTED_DATATABLES_DATA, defaultReturnType));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, parameterTypes,
+            parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
    * This method provides the "select2" Select2 JSON method using JSON
    * response type and returns Select2Data element
    *
@@ -3818,6 +3948,118 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         getNameOfJavaType(countByDetailMethod.getReturnType()), totalVarName,
         getAccessorMethod(detailsServiceField).getMethodName(),
         countByDetailMethod.getMethodName(), parentParamName);
+
+    // ConvertedDatatablesData<CustomerOrder> data = new
+    // ConvertedDatatablesData<CustomerOrder>(orders,
+    // totalOrdersCount, draw, conversionService, columns);
+    bodyBuilder.appendFormalLine("%1$s data =  new %1$s(%2$s, %3$s, draw, %4$s(), %5$s);",
+        getNameOfJavaType(dataReturnType), itemsName, totalVarName,
+        getAccessorMethod(this.conversionServiceField).getMethodName(),
+        DATATABLES_COLUMNS_PARAM_NAME);
+
+    // return ResponseEntity.ok(data);
+    bodyBuilder.appendFormalLine("return %s.ok(data);",
+        getNameOfJavaType(SpringJavaType.RESPONSE_ENTITY));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, parameterTypes,
+            parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides detail datatablesByIdsIn list method using Thymeleaf
+   * response type
+   *
+   * @return MethodMetadata
+   */
+  private MethodMetadata getListDatatablesByIdsInDetailMethod() {
+    RelationInfo detailsInfo = controllerMetadata.getLastDetailsInfo();
+    final ServiceMetadata detailsServiceMetadata =
+        controllerMetadata.getServiceMetadataForEntity(detailsInfo.childType);
+    final MethodMetadata findAllByIdsInMethod =
+        detailsServiceMetadata.getCurrentFindAllByIdsInWithGlobalSearchMethod();
+    final FieldMetadata detailsServiceField =
+        controllerMetadata.getDetailsServiceFields(detailsInfo.childType);
+
+    // Define methodName
+    final JavaSymbolName methodName = LIST_DATATABLES_BY_IDS_IN_DETAILS_METHOD_NAME;
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    AnnotationMetadataBuilder requestParamIdsAnnotation =
+        new AnnotationMetadataBuilder(REQUEST_PARAM);
+    requestParamIdsAnnotation.addStringAttribute("value", "ids");
+    parameterTypes
+        .add(new AnnotatedJavaType(JavaType.wrapperOf(JavaType.LIST, findAllByIdsInMethod
+            .getParameterTypes().get(0).getJavaType().getBaseType()), requestParamIdsAnnotation
+            .build()));
+    parameterTypes.add(DATATABLES_COLUMNS_PARAM);
+    parameterTypes.add(GLOBAL_SEARCH_PARAM);
+    parameterTypes.add(DATATABLES_PAGEABLE_PARAM);
+    AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM);
+    requestParamAnnotation.addStringAttribute("value", "draw");
+    parameterTypes.add(new AnnotatedJavaType(JavaType.INT_OBJECT, requestParamAnnotation.build()));
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("ids"));
+    parameterNames.add(DATATABLES_COLUMNS_PARAM_NAME);
+    parameterNames.add(new JavaSymbolName("search"));
+    parameterNames.add(new JavaSymbolName("pageable"));
+    parameterNames.add(new JavaSymbolName("draw"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @GetMapping annotation
+    AnnotationMetadataBuilder getMappingAnnotation = new AnnotationMetadataBuilder(GET_MAPPING);
+    getMappingAnnotation.addStringAttribute("name", methodName.getSymbolName());
+    getMappingAnnotation.addEnumAttribute("produces", SPRINGLETS_DATATABLES, "MEDIA_TYPE");
+    getMappingAnnotation.addStringAttribute("value", "/dtByIdsIn");
+    annotations.add(getMappingAnnotation);
+    this.mvcMethodNames.put(methodName.getSymbolName(), methodName.getSymbolName());
+
+    // Adding @ResponseBody annotation
+    annotations.add(RESPONSE_BODY_ANNOTATION);
+
+    // Generating returnType
+    final JavaType serviceReturnType = findAllByIdsInMethod.getReturnType();
+    final JavaType dataReturnType =
+        JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_CONVERTED_DATATABLES_DATA,
+            serviceReturnType.getParameters().get(0));
+    final JavaType returnType = JavaType.wrapperOf(RESPONSE_ENTITY, dataReturnType);
+
+    // TODO
+    // Add module dependency
+    // getTypeLocationService().addModuleDependency(this.controller.getType().getModule(),
+    // returnParameterTypes.get(i));
+
+    // Generate body
+    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    final String itemsName = StringUtils.uncapitalize(detailsInfo.fieldName);
+
+    // Page<CustomerOrder> orders =
+    // customerOrderService.findByCustomer(customer, globalSearch,
+    // pageable);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine("%s %s = %s().%s(ids, search, pageable);",
+        getNameOfJavaType(serviceReturnType), itemsName, getAccessorMethod(detailsServiceField)
+            .getMethodName(), findAllByIdsInMethod.getMethodName());
+
+    final String totalVarName = "total" + StringUtils.capitalize(itemsName) + "Count";
+
+    // long totalOrdersCount =
+    // customerOrderService.countByCustomer(customer);
+    bodyBuilder.appendFormalLine("long %s = %s.getTotalElements();", totalVarName, itemsName);
 
     // ConvertedDatatablesData<CustomerOrder> data = new
     // ConvertedDatatablesData<CustomerOrder>(orders,
@@ -4531,6 +4773,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
   public MethodMetadata getListDatatablesDetailsMethod() {
     return listDatatablesDetailsMethod;
+  }
+
+  public MethodMetadata getListDatatablesByIdsInDetailsMethod() {
+    return listDatatablesByIdsInDetailsMethod;
   }
 
   @Override

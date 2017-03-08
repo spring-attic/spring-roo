@@ -387,7 +387,28 @@
                         var rows_selected = datatables.columns().checkboxes.selected();
 
                         // Populate the row-id data attribute in the modal
-                        $('#' + tableId + 'DeleteBatchRowId').data('row-id', rows_selected.join(","));
+                        var ids = rows_selected.join(",");
+                        $('#' + tableId + 'DeleteBatchRowId').data('row-id', ids);
+                        
+                        // Populate DeleteBatchConfirm table which displays the item that
+                        // will be removed
+                    	$('#' + tableId + '-items-to-remove-batch').DataTable({
+                    		advanced: {
+                    			loadData: loadDataForConfirmDeleteBatchDialog,
+                    			dom: 'rtip',
+                    		}
+                    	});
+                        
+                    });
+                    
+                    // When the delete modal confirm is closed, is necessary to destroy
+                    // the datatables that displays the information of the item to be removed
+                    $deleteConfirm.on('hidden.bs.modal', function(e) {
+                        $('#' + tableId + '-items-to-remove-batch').DataTable().destroy();
+                        // Remove previous events
+                        $deleteConfirm.off("show.bs.modal");
+                        $deleteConfirm.off("hidden.bs.modal");
+                        $('#' + tableId + 'DeleteBatchButton').off("click");
                     });
 
                     $('#' + tableId + 'DeleteBatchButton').on('click', function() {
@@ -536,6 +557,50 @@
             callback(emptyData(data.draw));
         }
     }
+    
+    /**
+     * Generates and executes an ajax request whose goal is to load data for a
+     * DataTable element inside the Delete confirm Dialog.
+     *
+     * @param data DataTable object data
+     * @param callback Name of the function to call with the server data obtained
+     *        once the ajax request has been completed
+     * @param settings DataTable object options
+     */
+    function loadDataForConfirmDeleteBatchDialog(data, callback, settings) {
+        var datatables = this.DataTable();
+        var url = getLoadUrl(datatables);
+        if (url) {
+        	var parentTableId = settings.oInstance.attr("id").replace("-items-to-remove-batch", "");
+        	var ids = jQuery("#" + parentTableId + "DeleteBatchRowId").data("row-id");
+        	data.ids = ids;
+            loadDataFromUrl(datatables, data, callback, url);
+        } else {
+            callback(emptyData(data.draw));
+        }
+    }
+    
+    /**
+     * Generates and executes an ajax request whose goal is to load data for a
+     * DataTable element inside the Delete confirm Dialog.
+     *
+     * @param data DataTable object data
+     * @param callback Name of the function to call with the server data obtained
+     *        once the ajax request has been completed
+     * @param settings DataTable object options
+     */
+    function loadDataForConfirmDeleteDialog(data, callback, settings) {
+        var datatables = this.DataTable();
+        var url = getLoadUrl(datatables);
+        if (url) {
+        	var parentTableId = settings.oInstance.attr("id").replace("-item-to-remove", "");
+        	var id = jQuery("#" + parentTableId + "DeleteRowId").data("row-id");
+        	data.ids = id;
+            loadDataFromUrl(datatables, data, callback, url);
+        } else {
+            callback(emptyData(data.draw));
+        }
+    }
 
     /**
      * Generates and executes an ajax request whose goal is to load data for a
@@ -651,6 +716,8 @@
             if (selected.any()) {
                 return selected.data().id;
             }
+        }else{
+        	return getDataValue(datatables, "parent-id");
         }
     }
 
@@ -836,7 +903,7 @@
         var url = getDataValue(datatables, 'load-url');
         return processUrl(datatables, url);
     }
-
+    
     /**
      * Returns the URL to create a new element for the Datatables.
      * The URL is processed to replace any parameters.
@@ -1146,7 +1213,22 @@
             // Get data-row-id attribute of the clicked element
             var rowId = jQuery(e.relatedTarget).data('row-id');
             // Populate the row-id data attribute in the modal
-            $('#' + tableId + 'DeleteRowId').data('row-id', rowId)
+            $('#' + tableId + 'DeleteRowId').data('row-id', rowId);
+            
+            // Populate DeleteConfirm table which displays the item that
+            // will be removed
+        	$('#' + tableId + '-item-to-remove').DataTable({
+        		advanced: {
+        			loadData: loadDataForConfirmDeleteDialog,
+        			dom: ''
+        		}
+        	});
+        });
+        
+        // When the delete modal confirm is closed, is necessary to destroy
+        // the datatables that displays the information of the item to be removed
+        $deleteConfirm.on('hidden.bs.modal', function(e) {
+            $('#' + tableId + '-item-to-remove').DataTable().destroy();
         });
 
         $('#' + tableId + 'DeleteButton').on('click', function() {

@@ -12,7 +12,7 @@
     Only the inner content of the following div is included within the
     template, in the section modal
     -->
-  <div data-th-fragment="modalConfirmDelete(tableId, title, message)">
+  <div data-th-fragment="modalConfirmDelete(tableId, title, message, content)">
       <div data-th-replace="~{fragments/modal :: modal(id = ${r"$"}{tableId} + 'DeleteConfirm',
            title = ${r"$"}{title}, body = ~{::modalConfirmBody}, footer = ~{::modalConfirmFooter})}">
         <div data-row-id=""
@@ -20,6 +20,7 @@
              data-th-fragment="modalConfirmBody">
           <p data-th-text="${r"$"}{message}">Going to remove the selected
               element</p>
+          <div data-th-insert="${r"${"}content}"></div>
         </div>
         <div data-th-fragment="modalConfirmFooter">
             <button type="reset" class="btn btn-default pull-left"

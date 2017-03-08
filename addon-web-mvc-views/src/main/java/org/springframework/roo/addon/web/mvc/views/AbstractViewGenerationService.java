@@ -1,5 +1,26 @@
 package org.springframework.roo.addon.web.mvc.views;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.logging.Logger;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -52,27 +73,6 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.XmlUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.logging.Logger;
-
 /**
  * This abstract class implements MVCViewGenerationService interface that
  * provides all necessary elements to generate views inside project.
@@ -121,6 +121,18 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
   protected abstract DOC mergeListView(String templateName, DOC loadExistingDoc,
       ViewContext<T> ctx, EntityItem entity, List<FieldItem> fields,
       List<List<DetailEntityItem>> detailsLevels);
+
+  protected abstract DOC mergeListDeleteModalView(String templateName, DOC loadExistingDoc,
+      ViewContext<T> ctx, EntityItem entity, List<FieldItem> fields);
+
+  protected abstract DOC mergeListDeleteModalDetailView(String templateName, DOC loadExistingDoc,
+      ViewContext<T> ctx, EntityItem entity, List<FieldItem> fields);
+
+  protected abstract DOC mergeListDeleteModalBatchView(String templateName, DOC loadExistingDoc,
+      ViewContext<T> ctx, EntityItem entity, List<FieldItem> fields);
+
+  protected abstract DOC mergeListDeleteModalBatchDetailView(String templateName,
+      DOC loadExistingDoc, ViewContext<T> ctx, EntityItem entity, List<FieldItem> fields);
 
   protected abstract DOC mergeMenu(String templateName, DOC loadExistingDoc, ViewContext<T> ctx,
       List<MenuEntry> menuEntries);
@@ -235,6 +247,294 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       ctx.addExtraParameter("fields", fields);
       ctx.addExtraParameter("detailsLevels", detailsLevels);
       newDoc = process("list", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
+  public void addListDeleteModalView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, ViewContext<T> ctx) {
+
+    // Get the repository related with the entity to check the default return type
+    RepositoryJpaMetadata repository =
+        getRepositoryJpaLocator().getFirstRepositoryMetadata(entityMetadata.getAnnotatedEntity());
+
+    // All views should have a repository
+    Validate.notNull(repository,
+        "ERROR: The provided entity should have an associated repository to be able "
+            + "to generate the list view.");
+
+    // Obtain the defaultReturnType
+    JavaType defaultReturnType = repository.getDefaultReturnType();
+
+    // The defaultReturnType must not be null. If it's not an entity projection,
+    // it must be an entity
+    Validate
+        .notNull(defaultReturnType,
+            "ERROR: The repository associated to the provided entity should define a defaultReturnType");
+
+    // Obtain details of the provided defaultReturnType. If not exists as type, show an error
+    ClassOrInterfaceTypeDetails defaultReturnTypeCid =
+        getTypeLocationService().getTypeDetails(defaultReturnType);
+    Validate.notNull(defaultReturnTypeCid,
+        "ERROR: The provided defaultReturnType is not a valid type");
+    MemberDetails defaultReturnTypeDetails =
+        getMemberDetailsScanner().getMemberDetails(getClass().toString(), defaultReturnTypeCid);
+    Validate.notNull(defaultReturnTypeDetails,
+        "ERROR: Is not possible to obtain any detail from the " + "provided defaultReturnType.");
+
+    List<FieldMetadata> defaultReturnTypeFields = defaultReturnTypeDetails.getFields();
+
+    // To prevent errors during generation, is defaultReturnTypeFields is empty,
+    // all the entity fields will be used
+    if (defaultReturnTypeFields.isEmpty()) {
+      defaultReturnTypeFields = entity.getFields();
+    }
+
+    // Getting entity fields that should be included on view
+    List<FieldMetadata> entityFields = getPersistentFields(defaultReturnTypeFields);
+    List<FieldItem> fields =
+        getFieldViewItems(entityMetadata, entityFields, ctx.getEntityName(), true, ctx,
+            TABLE_SUFFIX);
+
+    // Process elements to generate
+    DOC newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/")
+            .concat("/listDeleteModal").concat(getViewsExtension());
+
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc =
+          mergeListDeleteModalView("listDeleteModal", loadExistingDoc(viewName), ctx, entityItem,
+              fields);
+    } else {
+      ctx.addExtraParameter("entity", entityItem);
+      ctx.addExtraParameter("fields", fields);
+      newDoc = process("listDeleteModal", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
+  public void addListDeleteModalDetailView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, ControllerMetadata controllerMetadata, ViewContext<T> ctx) {
+    // Get the repository related with the entity to check the default return type
+    RepositoryJpaMetadata repository =
+        getRepositoryJpaLocator().getFirstRepositoryMetadata(entityMetadata.getAnnotatedEntity());
+
+    // All views should have a repository
+    Validate.notNull(repository,
+        "ERROR: The provided entity should have an associated repository to be able "
+            + "to generate the list view.");
+
+    // Obtain the defaultReturnType
+    JavaType defaultReturnType = repository.getDefaultReturnType();
+
+    // The defaultReturnType must not be null. If it's not an entity projection,
+    // it must be an entity
+    Validate
+        .notNull(defaultReturnType,
+            "ERROR: The repository associated to the provided entity should define a defaultReturnType");
+
+    // Obtain details of the provided defaultReturnType. If not exists as type, show an error
+    ClassOrInterfaceTypeDetails defaultReturnTypeCid =
+        getTypeLocationService().getTypeDetails(defaultReturnType);
+    Validate.notNull(defaultReturnTypeCid,
+        "ERROR: The provided defaultReturnType is not a valid type");
+    MemberDetails defaultReturnTypeDetails =
+        getMemberDetailsScanner().getMemberDetails(getClass().toString(), defaultReturnTypeCid);
+    Validate.notNull(defaultReturnTypeDetails,
+        "ERROR: Is not possible to obtain any detail from the " + "provided defaultReturnType.");
+
+    List<FieldMetadata> defaultReturnTypeFields = defaultReturnTypeDetails.getFields();
+
+    // To prevent errors during generation, is defaultReturnTypeFields is empty,
+    // all the entity fields will be used
+    if (defaultReturnTypeFields.isEmpty()) {
+      defaultReturnTypeFields = entity.getFields();
+    }
+
+    // Getting entity fields that should be included on view
+    List<FieldMetadata> entityFields = getPersistentFields(defaultReturnTypeFields);
+    List<FieldItem> fields =
+        getFieldViewItems(entityMetadata, entityFields, ctx.getEntityName(), true, ctx,
+            TABLE_SUFFIX);
+
+    // Process elements to generate
+    DOC newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/")
+            .concat(controllerMetadata.getDetailsPathAsString("/")).concat("/listDeleteModal")
+            .concat(getViewsExtension());
+
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc =
+          mergeListDeleteModalDetailView("listDeleteModalDetail", loadExistingDoc(viewName), ctx,
+              entityItem, fields);
+    } else {
+      ctx.addExtraParameter("entity", entityItem);
+      ctx.addExtraParameter("fields", fields);
+      newDoc = process("listDeleteModalDetail", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+  }
+
+  @Override
+  public void addListDeleteModalBatchView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, ViewContext<T> ctx) {
+
+    // Get the repository related with the entity to check the default return type
+    RepositoryJpaMetadata repository =
+        getRepositoryJpaLocator().getFirstRepositoryMetadata(entityMetadata.getAnnotatedEntity());
+
+    // All views should have a repository
+    Validate.notNull(repository,
+        "ERROR: The provided entity should have an associated repository to be able "
+            + "to generate the list view.");
+
+    // Obtain the defaultReturnType
+    JavaType defaultReturnType = repository.getDefaultReturnType();
+
+    // The defaultReturnType must not be null. If it's not an entity projection,
+    // it must be an entity
+    Validate
+        .notNull(defaultReturnType,
+            "ERROR: The repository associated to the provided entity should define a defaultReturnType");
+
+    // Obtain details of the provided defaultReturnType. If not exists as type, show an error
+    ClassOrInterfaceTypeDetails defaultReturnTypeCid =
+        getTypeLocationService().getTypeDetails(defaultReturnType);
+    Validate.notNull(defaultReturnTypeCid,
+        "ERROR: The provided defaultReturnType is not a valid type");
+    MemberDetails defaultReturnTypeDetails =
+        getMemberDetailsScanner().getMemberDetails(getClass().toString(), defaultReturnTypeCid);
+    Validate.notNull(defaultReturnTypeDetails,
+        "ERROR: Is not possible to obtain any detail from the " + "provided defaultReturnType.");
+
+    List<FieldMetadata> defaultReturnTypeFields = defaultReturnTypeDetails.getFields();
+
+    // To prevent errors during generation, is defaultReturnTypeFields is empty,
+    // all the entity fields will be used
+    if (defaultReturnTypeFields.isEmpty()) {
+      defaultReturnTypeFields = entity.getFields();
+    }
+
+    // Getting entity fields that should be included on view
+    List<FieldMetadata> entityFields = getPersistentFields(defaultReturnTypeFields);
+    List<FieldItem> fields =
+        getFieldViewItems(entityMetadata, entityFields, ctx.getEntityName(), true, ctx,
+            TABLE_SUFFIX);
+
+    // Process elements to generate
+    DOC newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/")
+            .concat("/listDeleteModalBatch").concat(getViewsExtension());
+
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc =
+          mergeListDeleteModalBatchView("listDeleteModalBatch", loadExistingDoc(viewName), ctx,
+              entityItem, fields);
+    } else {
+      ctx.addExtraParameter("entity", entityItem);
+      ctx.addExtraParameter("fields", fields);
+      newDoc = process("listDeleteModalBatch", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
+  public void addListDeleteModalDetailBatchView(String moduleName,
+      JpaEntityMetadata entityMetadata, MemberDetails entity,
+      ControllerMetadata controllerMetadata, ViewContext<T> ctx) {
+    // Get the repository related with the entity to check the default return type
+    RepositoryJpaMetadata repository =
+        getRepositoryJpaLocator().getFirstRepositoryMetadata(entityMetadata.getAnnotatedEntity());
+
+    // All views should have a repository
+    Validate.notNull(repository,
+        "ERROR: The provided entity should have an associated repository to be able "
+            + "to generate the list view.");
+
+    // Obtain the defaultReturnType
+    JavaType defaultReturnType = repository.getDefaultReturnType();
+
+    // The defaultReturnType must not be null. If it's not an entity projection,
+    // it must be an entity
+    Validate
+        .notNull(defaultReturnType,
+            "ERROR: The repository associated to the provided entity should define a defaultReturnType");
+
+    // Obtain details of the provided defaultReturnType. If not exists as type, show an error
+    ClassOrInterfaceTypeDetails defaultReturnTypeCid =
+        getTypeLocationService().getTypeDetails(defaultReturnType);
+    Validate.notNull(defaultReturnTypeCid,
+        "ERROR: The provided defaultReturnType is not a valid type");
+    MemberDetails defaultReturnTypeDetails =
+        getMemberDetailsScanner().getMemberDetails(getClass().toString(), defaultReturnTypeCid);
+    Validate.notNull(defaultReturnTypeDetails,
+        "ERROR: Is not possible to obtain any detail from the " + "provided defaultReturnType.");
+
+    List<FieldMetadata> defaultReturnTypeFields = defaultReturnTypeDetails.getFields();
+
+    // To prevent errors during generation, is defaultReturnTypeFields is empty,
+    // all the entity fields will be used
+    if (defaultReturnTypeFields.isEmpty()) {
+      defaultReturnTypeFields = entity.getFields();
+    }
+
+    // Getting entity fields that should be included on view
+    List<FieldMetadata> entityFields = getPersistentFields(defaultReturnTypeFields);
+    List<FieldItem> fields =
+        getFieldViewItems(entityMetadata, entityFields, ctx.getEntityName(), true, ctx,
+            TABLE_SUFFIX);
+
+    // Process elements to generate
+    DOC newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/")
+            .concat(controllerMetadata.getDetailsPathAsString("/")).concat("/listDeleteModalBatch")
+            .concat(getViewsExtension());
+
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc =
+          mergeListDeleteModalBatchDetailView("listDeleteModalBatchDetail",
+              loadExistingDoc(viewName), ctx, entityItem, fields);
+    } else {
+      ctx.addExtraParameter("entity", entityItem);
+      ctx.addExtraParameter("fields", fields);
+      newDoc = process("listDeleteModalBatchDetail", ctx);
     }
 
     // Write newDoc on disk
@@ -1264,8 +1564,12 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
         getTypeLocationService().getTypeDetails(last.childType);
     JpaEntityMetadata childEntityMetadata = last.childEntityMetadata;
 
+    String controllerPath =
+        getControllerOperations().getBasePathForController(controllerMetadata.getDestination());
+
     DetailEntityItem detailItem =
-        new DetailEntityItem(childEntityMetadata, controllerMetadata, detailSuffix, rootEntity);
+        new DetailEntityItem(childEntityMetadata, controllerMetadata, controllerPath, detailSuffix,
+            rootEntity);
     // Saving necessary configuration
     detailItem.addConfigurationElement("referencedFieldType", last.childType.getSimpleTypeName());
 

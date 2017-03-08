@@ -54,6 +54,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   private final JavaType identifierType;
   private final List<MethodMetadata> finders;
   private final MethodMetadata findAllGlobalSearchMethod;
+  private final MethodMetadata findAllByIdsInGlobalSearchMethod;
   private final List<MethodMetadata> transactionalDefinedMethod;
   private final List<MethodMetadata> notTransactionalDefinedMethod;
   private final Map<FieldMetadata, MethodMetadata> countByReferenceFieldDefinedMethod;
@@ -71,6 +72,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   private final MethodMetadata findAllIterableMethod;
   private final MethodMetadata countMethod;
   private final MethodMetadata findAllWithGlobalSearchMethod;
+  private final MethodMetadata findAllByIdsInWithGlobalSearchMethod;
   private final Map<JavaType, JpaEntityMetadata> relatedEntitiesMetadata;
   private final Set<MethodMetadata> allMethods;
   private final Map<RelationInfo, MethodMetadata> addToRelationMethods;
@@ -134,6 +136,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       final JavaType identifierType, final JpaEntityMetadata entityMetadata,
       RepositoryJpaMetadata repositoryMetadata, final List<MethodMetadata> finders,
       final MethodMetadata findAllGlobalSearchMethod,
+      final MethodMetadata findAllByIdsInGlobalSearchMethod,
       final Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods,
       final Map<FieldMetadata, MethodMetadata> countByReferencedFieldsMethods,
       final List<MethodMetadata> customCountMethods,
@@ -153,6 +156,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     this.repositoryMetadata = repositoryMetadata;
     this.finders = finders;
     this.findAllGlobalSearchMethod = findAllGlobalSearchMethod;
+    this.findAllByIdsInGlobalSearchMethod = findAllByIdsInGlobalSearchMethod;
     this.repositoryFindersAndCounts = repositoryFindersAndCounts;
     this.repositoryCustomFindersAndCounts = repositoryCustomFindersAndCounts;
 
@@ -219,6 +223,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       this.findAllMethod = null;
       this.countMethod = null;
       this.findAllWithGlobalSearchMethod = null;
+      this.findAllByIdsInWithGlobalSearchMethod = null;
 
     } else {
       // Add standard finders methods
@@ -234,6 +239,11 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       this.findAllWithGlobalSearchMethod = getFindAllGlobalSearchMethod();
       notTransactionalDefinedMethod.add(findAllWithGlobalSearchMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(findAllWithGlobalSearchMethod));
+
+      // Generating findAllByIdsIn method
+      this.findAllByIdsInWithGlobalSearchMethod = getFindAllByIdsInGlobalSearchMethod();
+      notTransactionalDefinedMethod.add(findAllByIdsInWithGlobalSearchMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(findAllByIdsInWithGlobalSearchMethod));
     }
 
     // Add relation management methods
@@ -529,6 +539,40 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
             this.findAllGlobalSearchMethod.getReturnType(), parameterTypes, parameterNames, null);
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
+  }
+
+  /**
+   * Method that generates method "findAll" method. This method includes
+   * GlobalSearch parameters to be able to filter results.
+   *
+   * @return MethodMetadata
+   */
+  private MethodMetadata getFindAllByIdsInGlobalSearchMethod() {
+    // Define method name
+    JavaSymbolName methodName = this.findAllByIdsInGlobalSearchMethod.getMethodName();
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes =
+        this.findAllByIdsInGlobalSearchMethod.getParameterTypes();
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = this.findAllByIdsInGlobalSearchMethod.getParameterNames();
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
+            this.findAllByIdsInGlobalSearchMethod.getReturnType(), parameterTypes, parameterNames,
+            null);
 
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
@@ -1108,6 +1152,13 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    */
   public MethodMetadata getCurrentFindAllWithGlobalSearchMethod() {
     return this.findAllWithGlobalSearchMethod;
+  }
+
+  /**
+   * @return method findAllByIdsIn(List<?> ids, GlobalSearch, Pageable) implemented in service
+   */
+  public MethodMetadata getCurrentFindAllByIdsInWithGlobalSearchMethod() {
+    return this.findAllByIdsInWithGlobalSearchMethod;
   }
 
   /**

@@ -27,6 +27,7 @@ public class DetailEntityItem extends EntityItem {
   private List<RelationInfo> path;
   private String pathString;
   private String pathStringFieldNames;
+  private String controllerPath;
 
   /**
    * Constructs a DetailEntityItem using the fieldName and suffixId
@@ -37,7 +38,8 @@ public class DetailEntityItem extends EntityItem {
    *            used to generate field id
    */
   public DetailEntityItem(JpaEntityMetadata childEntityMetadata,
-      ControllerMetadata controllerMetadata, String detailSuffix, EntityItem rootEntity) {
+      ControllerMetadata controllerMetadata, String controllerPath, String detailSuffix,
+      EntityItem rootEntity) {
     super(childEntityMetadata.getDestination().getSimpleTypeName(), detailSuffix,
         childEntityMetadata.isReadOnly());
     this.level = controllerMetadata.getDetailsFieldInfo().size();
@@ -48,6 +50,7 @@ public class DetailEntityItem extends EntityItem {
     this.tabLinkCode = null;
     this.pathString = controllerMetadata.getDetailsPathAsString("-");
     this.pathStringFieldNames = controllerMetadata.getDetailsPathAsString(".");
+    this.controllerPath = controllerPath;
     this.z = calculateZ();
     buildDetailItemId(detailSuffix);
   }
@@ -146,4 +149,11 @@ public class DetailEntityItem extends EntityItem {
     return fieldInfo;
   }
 
+  public String getControllerPath() {
+    return controllerPath;
+  }
+
+  public void setControllerPath(String controllerPath) {
+    this.controllerPath = controllerPath;
+  }
 }

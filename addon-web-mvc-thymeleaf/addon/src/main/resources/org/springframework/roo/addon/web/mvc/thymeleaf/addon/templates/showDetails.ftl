@@ -84,10 +84,10 @@
                   </#if>
                     <!-- content replaced by modal-confirm fragment of modal-confirm.html -->
                     <div data-th-replace="~{fragments/modal-confirm-delete :: modalConfirmDelete(tableId='${detail.entityItemId}-table',
-                        title=${r"#{"}label_delete_entity(${r"#"}{${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_item_confirm})}">
+                        title=${r"#{"}label_delete_entity(${r"#"}{${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_item_confirm}, content=~{${detail.controllerPath}/${detail.fieldName}/listDeleteModal :: ${detail.entityItemId}ModalConfirmBody})}">
                     </div>
                    <div data-th-replace="~{fragments/modal-confirm-delete-batch :: modalConfirmDeleteBatch(tableId='${detail.entityItemId}-table',
-                        title=${r"#{"}label_delete_entity(${r"#{"}${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_batch_confirm})}">
+                        title=${r"#{"}label_delete_entity(${r"#{"}${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_batch_confirm}, content=~{${detail.controllerPath}/${detail.fieldName}/listDeleteModalBatch :: ${detail.entityItemId}ModalConfirmBody})}">
                     </div>
                     <div data-th-replace="~{fragments/modal-export-empty-error :: modalExportEmptyError(tableId='${detail.entityItemId}-table',
                         title=${r"#{"}label_export_empty_error(${r"#{"}${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_export_empty_error})}">

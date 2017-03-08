@@ -88,6 +88,39 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
   void addListView(String moduleName, JpaEntityMetadata entityMetadata, MemberDetails entity,
       List<T> detailsControllers, ViewContext<T> ctx);
 
+
+  /**
+   * This operation will add a list view to be displayed inside a confirmation 
+   * modal dialog during the deletion process.
+   * 
+   * @param moduleName module where list view will be added
+   * @param entityMetadata entity metadata which contains information about it
+   * @param entity Details of an entity to be able to generate view
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addListDeleteModalView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, ViewContext<T> ctx);
+
+  void addListDeleteModalDetailView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, ControllerMetadata controllerMetadata, ViewContext<T> ctx);
+
+  /**
+   * This operation will add a list view to be displayed inside a confirmation 
+   * modal dialog during the batch deletion process
+   * 
+   * @param moduleName module where list view will be added
+   * @param entityMetadata entity metadata which contains information about it
+   * @param entity Details of an entity to be able to generate view
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addListDeleteModalBatchView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, ViewContext<T> ctx);
+
+  void addListDeleteModalDetailBatchView(String moduleName, JpaEntityMetadata entityMetadata,
+      MemberDetails entity, ControllerMetadata controllerMetadata, ViewContext<T> ctx);
+
   /**
    * This operation will add a show view using entityDetails
    * and the provided context
@@ -398,5 +431,4 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
    * Return the templates base path
    */
   String getTemplatesLocation();
-
 }

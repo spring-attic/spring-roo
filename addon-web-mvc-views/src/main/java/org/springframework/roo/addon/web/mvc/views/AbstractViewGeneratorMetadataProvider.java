@@ -441,6 +441,11 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
         if (!entityMetadata.isReadOnly()) {
           // If not readOnly, add create view
           viewGenerationService.addCreateView(module, entityMetadata, entityMemberDetails, ctx);
+          // If not readOnly, add the modal dialogs for delete and delete batch
+          viewGenerationService.addListDeleteModalView(module, entityMetadata, entityMemberDetails,
+              ctx);
+          viewGenerationService.addListDeleteModalBatchView(module, entityMetadata,
+              entityMemberDetails, ctx);
         }
 
         break;

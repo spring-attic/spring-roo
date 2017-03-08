@@ -140,7 +140,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       final RepositoryJpaCustomImplAnnotationValues annotationValues, final JavaType domainType,
       JpaEntityMetadata entityMetadata, final FieldMetadata idField,
       final List<FieldMetadata> validFields, final MethodMetadata findAllGlobalSearchMethod,
-      final JavaType defaultReturnType,
+      final MethodMetadata findAllByIdsInGlobalSearchMethod, final JavaType defaultReturnType,
       final Map<FieldMetadata, MethodMetadata> allFindReferencedFieldsMethods,
       final Map<FieldMetadata, String> referencedFieldsIdentifierNames,
       final Map<JavaType, List<Pair<String, String>>> typesFieldMaps,
@@ -205,6 +205,12 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     if (findAllGlobalSearchMethod != null) {
       ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllImpl(findAllGlobalSearchMethod,
           idField, validFields)));
+    }
+
+    // Generate findAllByIdsIn implementation method
+    if (findAllByIdsInGlobalSearchMethod != null) {
+      ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllByIdsInImpl(
+          findAllByIdsInGlobalSearchMethod, idField, validFields)));
     }
 
     // ROO-3765: Prevent ITD regeneration applying the same sort to provided map. If this sort is not applied, maybe some
@@ -296,6 +302,119 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     // Construct query
     buildQuery(bodyBuilder, entityVariable, globalSearch, null, null, null, null, null,
         this.defaultReturnType, null, null);
+    bodyBuilder.newLine();
+
+    // AttributeMappingBuilder mapping = buildMapper()
+    StringBuffer mappingBuilderLine = new StringBuffer();
+    mappingBuilderLine
+        .append(String
+            .format(
+                "%s mapping = buildMapper()",
+                getNameOfJavaType(SpringletsJavaType.SPRINGLETS_QUERYDSL_REPOSITORY_SUPPORT_ATTRIBUTE_BUILDER)));
+
+    if (!this.typesAreProjections.get(this.defaultReturnType)) {
+
+      // Return type is the same entity
+      Iterator<FieldMetadata> iterator = fields.iterator();
+      while (iterator.hasNext()) {
+        FieldMetadata field = iterator.next();
+        String fieldName = field.getFieldName().getSymbolName();
+        mappingBuilderLine.append(String.format("\n\t\t\t.map(%s, %s.%s)",
+            getConstantForField(fieldName).getFieldName(), entityVariable, fieldName));
+      }
+    } else {
+
+      // Return type is a projection
+      List<Pair<String, String>> projectionFields = this.typesFieldMaps.get(this.defaultReturnType);
+      Iterator<Pair<String, String>> iterator = projectionFields.iterator();
+      while (iterator.hasNext()) {
+        Entry<String, String> entry = iterator.next();
+        mappingBuilderLine.append(String.format("\n\t\t\t.map(%s, %s)",
+            getConstantForField(entry.getKey()).getFieldName(), entry.getValue()));
+      }
+    }
+    mappingBuilderLine.append(";");
+    bodyBuilder.appendFormalLine(mappingBuilderLine.toString());
+    bodyBuilder.newLine();
+
+    // applyPagination(pageable, query, mapping);
+    bodyBuilder.appendFormalLine(String.format("applyPagination(%s, query, mapping);", pageable));
+
+    //applyOrderById(query);
+    bodyBuilder.appendFormalLine("applyOrderById(query);");
+    bodyBuilder.newLine();
+
+
+    buildQueryResult(bodyBuilder, pageable, entityVariable, projection, this.defaultReturnType);
+
+    // Sets body to generated method
+    methodBuilder.setBodyBuilder(bodyBuilder);
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
+  }
+
+  /**
+   * Method that generates the findAllByIdsIn implementation method
+   * @param findAllByIdsInGlobalSearchMethod
+   * @param ids the entity id fields
+   * @param fields the entity fields to search for
+   *
+   * @return
+   */
+  private MethodMetadata getFindAllByIdsInImpl(MethodMetadata findAllByIdsInGlobalSearchMethod,
+      FieldMetadata idField, List<FieldMetadata> fields) {
+
+    // Define method name
+    JavaSymbolName methodName = findAllByIdsInGlobalSearchMethod.getMethodName();
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = findAllByIdsInGlobalSearchMethod.getParameterTypes();
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = findAllByIdsInGlobalSearchMethod.getParameterNames();
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Use provided findAll method to generate its implementation
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
+            findAllByIdsInGlobalSearchMethod.getMethodName(),
+            findAllByIdsInGlobalSearchMethod.getReturnType(),
+            findAllByIdsInGlobalSearchMethod.getParameterTypes(),
+            findAllByIdsInGlobalSearchMethod.getParameterNames(), null);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Getting variable name to use in the code
+    JavaSymbolName globalSearch = parameterNames.get(1);
+    JavaSymbolName pageable = parameterNames.get(2);
+    String entity = this.entity.getSimpleTypeName();
+    String entityVariable = StringUtils.uncapitalize(entity);
+
+    // Types to import
+    JavaType projection = QUERYDSL_PROJECTIONS;
+
+    bodyBuilder.newLine();
+
+    // QEntity qEntity = QEntity.entity;
+    bodyBuilder.appendFormalLine(String.format("%1$s %2$s = %1$s.%2$s;",
+        entityQtype.getNameIncludingTypeParameters(false, importResolver), entityVariable));
+    bodyBuilder.newLine();
+
+    // Construct query
+    buildQuery(bodyBuilder, entityVariable, globalSearch, null, null, null, null, null,
+        this.defaultReturnType, null, null);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine("// Also, filter by the provided ids");
+    bodyBuilder.appendFormalLine("query.where(%s.%s.in(ids));", entityVariable,
+        idField.getFieldName());
     bodyBuilder.newLine();
 
     // AttributeMappingBuilder mapping = buildMapper()

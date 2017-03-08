@@ -11,6 +11,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.jpa.addon.JpaOperations;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderMethod;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustom;
@@ -29,6 +30,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -202,10 +204,17 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
     final String javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails);
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
+    String entityMetadataKey = JpaEntityMetadata.createIdentifier(entityDetails);
+    JpaEntityMetadata entityMetadata = getMetadataService().get(entityMetadataKey);
+
+    // Entity metadata is not available
+    if (entityMetadata == null) {
+      return null;
+    }
 
     return new RepositoryJpaCustomMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entity, repositoryMetadata,
-        relationsAsChild);
+        governorPhysicalTypeMetadata, annotationValues, entityMetadata.getCurrentIndentifierField()
+            .getFieldType(), entity, repositoryMetadata, relationsAsChild);
   }
 
   private JpaOperations getJpaOperations() {
