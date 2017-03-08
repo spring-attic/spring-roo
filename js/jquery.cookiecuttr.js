@@ -33,11 +33,11 @@
             cookieAcceptButton: true, // this will disable non essential cookies
             cookieResetButton: false,
             cookieOverlayEnabled: false, // don't want a discreet toolbar? Fine, set this to true
-            cookiePolicyLink: 'http://www.disid.com/cookies-policy/', // if applicable, enter the link to your privacy policy here...
+            cookiePolicyLink: 'http://projects.spring.io/spring-roo/cookies-policy/', // if applicable, enter the link to your privacy policy here...
             cookieMessage: 'We use cookies on this website, you can <a href="{{cookiePolicyLink}}" title="read about our cookies">read about them here</a>. To use the website as intended please...',
             cookieAnalyticsMessage: "This site uses own and third-party cookies just to track visits to our website, we store no personal details. If you continue to browse, consider accepting its use.",
             cookieErrorMessage: "We\'re sorry, this feature places cookies in your browser and has been disabled. <br>To continue using this functionality, please",
-            cookieWhatAreTheyLink: "http://www.disid.com/cookies-policy/",
+            cookieWhatAreTheyLink: "http://projects.spring.io/spring-roo/cookies-policy/",
             cookieDisable: '',
             cookieExpires: 365,
             cookieAcceptButtonText: "Accept cookies",
