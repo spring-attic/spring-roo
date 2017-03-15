@@ -255,7 +255,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         bodyBuilder
                     .appendFormalLine(
                         (!includeParams ? "" : ".include(fields)")
-                        + ".exclude(\"*.class\")"
+                        + (!includeParams ? ".exclude(\"*.class\")": ".exclude(\"*\")")
                         + (annotationValues.isDeepSerialize() ? ".deepSerialize(collection)"
                                 : ".serialize(collection)") + ";");
 
@@ -306,7 +306,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         }
         bodyBuilder.appendFormalLine(
                 (!includeParams ? "" : ".include(fields)")
-                + ".exclude(\"*.class\")"
+                + (!includeParams ? ".exclude(\"*.class\")": ".exclude(\"*\")")
                 + (annotationValues.isDeepSerialize() ? ".deepSerialize(this)"
                         : ".serialize(this)") + ";");
 
