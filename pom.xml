@@ -7,6 +7,9 @@
     <packaging>pom</packaging>
     <version>2.0.0.BUILD-SNAPSHOT</version>
     <name>Spring Roo</name>
+    <organization>
+        <name>spring.io by Pivotal Software, Inc.</name>
+    </organization>
     <url>http://projects.spring.io/spring-roo/</url>
     <licenses>
         <license>
