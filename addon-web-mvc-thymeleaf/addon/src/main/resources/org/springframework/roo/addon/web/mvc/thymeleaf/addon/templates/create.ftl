@@ -45,7 +45,7 @@
 
           <!-- FORM -->
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-            data-th-action="@{${r"${"}collectionLink.to('create').with('${modelAttributeName}', ${modelAttributeName}.${identifierField})}}">
+            data-th-action="${r"${"}collectionLink.to('create').with('${modelAttributeName}', ${modelAttributeName}.${identifierField})}">
 
             <fieldset id="containerFields">
               <legend class="sr-only" data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}})}">${entityName} data </legend>
