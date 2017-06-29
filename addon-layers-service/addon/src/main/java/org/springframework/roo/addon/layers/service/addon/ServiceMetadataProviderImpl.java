@@ -227,6 +227,11 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
     final RepositoryJpaCustomMetadata repositoryCustomMetadata =
         getMetadataService().get(customRepositoryMetadataKey);
 
+    // Return null if repository dependency is not satisfied
+    if (repositoryCustomMetadata == null) {
+      return null;
+    }
+
     // Get finders and its associated count method from custom repository metadata
     Map<JavaSymbolName, MethodMetadata> repositoryCustomFindersAndCounts =
         repositoryCustomMetadata.getFinderMethodsAndCounts();

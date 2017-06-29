@@ -1,15 +1,5 @@
 package org.springframework.roo.addon.pushin;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -30,6 +20,7 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -44,6 +35,16 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Operations for the 'push-in' add-on.
@@ -185,6 +186,9 @@ public class PushInOperationsImpl implements PushInOperations {
             }
           }
         }
+
+        // Scan and update files status
+        getFileManager().scan();
       }
 
       Validate.isTrue(methodExists, String.format(
@@ -219,6 +223,9 @@ public class PushInOperationsImpl implements PushInOperations {
         if (declaredType.getPackage().equals(specifiedPackage)) {
           pushedElements.addAll(pushInClass(declaredType, writeOnDisk, true));
         }
+
+        // Scan and update files status
+        getFileManager().scan();
       }
     } else {
       LOGGER.log(Level.WARNING, "ERROR: You must specify at least one parameter. ");
@@ -491,8 +498,28 @@ public class PushInOperationsImpl implements PushInOperations {
     ClassOrInterfaceTypeDetailsBuilder detailsBuilder =
         new ClassOrInterfaceTypeDetailsBuilder(classDetails);
 
+    // Avoid AspectJ error when push-in from *RepositoryImpl classes
+    AnnotationMetadata rooRepositoryCustomImplAnnotation =
+        classDetails.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL);
+    JavaType relatedRepositoryCustom = null;
+    if (rooRepositoryCustomImplAnnotation != null) {
+      AnnotationAttributeValue<Object> attribute =
+          rooRepositoryCustomImplAnnotation.getAttribute("repository");
+      Validate.notNull(attribute,
+          "Unable to find 'repository' attribute of @RooJpaRepositoryCustomImpl on '%s'",
+          classDetails.getType().getSimpleTypeName());
+      relatedRepositoryCustom = (JavaType) attribute.getValue();
+    }
+
     // Getting all details
     for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+
+      // Avoid AspectJ error when push-in from *RepositoryImpl classes
+      if (rooRepositoryCustomImplAnnotation != null
+          && memberHoldingTypeDetails.getImplementsTypes().contains(relatedRepositoryCustom)) {
+        detailsBuilder.addImplementsType(relatedRepositoryCustom);
+        pushedElements.add(relatedRepositoryCustom);
+      }
 
       // Prevent that details from inheritance classes could be include on
       // this .java file
