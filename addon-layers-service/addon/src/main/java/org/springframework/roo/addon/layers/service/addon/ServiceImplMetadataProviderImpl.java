@@ -2,13 +2,6 @@ package org.springframework.roo.addon.layers.service.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE_IMPL;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -18,7 +11,6 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.JpaOperations;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
-import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
 import org.springframework.roo.addon.layers.service.annotations.RooServiceImpl;
@@ -45,6 +37,13 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link ServiceImplMetadataProvider}.
@@ -217,12 +216,10 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
       if (info.cardinality != Cardinality.ONE_TO_ONE
           && !requiredServicesByEntity.containsKey(info.childType)) {
         relatedService = getServiceLocator().getFirstService(info.childType);
-        if (relatedService == null) {
-          // Exit without metadata. This should be called in next metadata iteration
-          return null;
+        if (relatedService != null) {
+          requiredServicesByEntity.put(info.childType,
+              getServiceMetadata(metadataIdentificationString, relatedService));
         }
-        requiredServicesByEntity.put(info.childType,
-            getServiceMetadata(metadataIdentificationString, relatedService));
       }
     }
 

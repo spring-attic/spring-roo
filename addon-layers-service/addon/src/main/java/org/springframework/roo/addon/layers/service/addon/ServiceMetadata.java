@@ -80,6 +80,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   private final Map<RelationInfo, MethodMetadata> setRelationMethods;
   private final Map<JavaSymbolName, MethodMetadata> repositoryFindersAndCounts;
   private final Map<JavaSymbolName, MethodMetadata> repositoryCustomFindersAndCounts;
+  private final List<RelationInfo> relatedInfosWithServiceLayer;
 
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
@@ -129,6 +130,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * @param countByReferencedFieldsMethods
    * @param customCountMethods
    * @param relatedEntities
+   * @param relatedInfosWithServiceLayer the RelationInfo of child entities which have service layer
    *
    */
   public ServiceMetadata(final String identifier, final JavaType aspectName,
@@ -142,7 +144,8 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       final List<MethodMetadata> customCountMethods,
       Map<JavaType, JpaEntityMetadata> relatedEntities,
       Map<JavaSymbolName, MethodMetadata> repositoryFindersAndCounts,
-      Map<JavaSymbolName, MethodMetadata> repositoryCustomFindersAndCounts) {
+      Map<JavaSymbolName, MethodMetadata> repositoryCustomFindersAndCounts,
+      List<RelationInfo> relatedInfosWithServiceLayer) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     Validate.notNull(entity, "ERROR: Entity required to generate service interface");
@@ -159,6 +162,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     this.findAllByIdsInGlobalSearchMethod = findAllByIdsInGlobalSearchMethod;
     this.repositoryFindersAndCounts = repositoryFindersAndCounts;
     this.repositoryCustomFindersAndCounts = repositoryCustomFindersAndCounts;
+    this.relatedInfosWithServiceLayer = relatedInfosWithServiceLayer;
 
     Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllDefinedMethods =
         new HashMap<FieldMetadata, MethodMetadata>();
@@ -254,7 +258,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     Map<RelationInfo, MethodMetadata> setRelationMethodsTemp =
         new TreeMap<RelationInfo, MethodMetadata>();
     MethodMetadata tmpMethod;
-    for (RelationInfo relationInfo : entityMetadata.getRelationInfos().values()) {
+    for (RelationInfo relationInfo : relatedInfosWithServiceLayer) {
 
       // Relations will be managed only for non readOnly entities	
       if (relationInfo.cardinality != Cardinality.ONE_TO_ONE && !entityMetadata.isReadOnly()) {

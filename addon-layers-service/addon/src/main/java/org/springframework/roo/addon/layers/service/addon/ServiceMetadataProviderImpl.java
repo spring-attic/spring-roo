@@ -2,13 +2,6 @@ package org.springframework.roo.addon.layers.service.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -43,6 +36,13 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link ServiceMetadataProvider}.
@@ -274,18 +274,25 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
     // As parent
     JavaType childEntity;
     JpaEntityMetadata childEntityMetadata;
+    List<RelationInfo> relatedInfosWithServiceLayer = new ArrayList<RelationInfo>();
     for (RelationInfo info : entityMetadata.getRelationInfos().values()) {
       childEntity = info.fieldMetadata.getFieldType().getBaseType();
       if (relatedEntities.containsKey(childEntity)) {
         continue;
       }
-      childEntityMetadata = getEntityMetadata(childEntity);
-      if (childEntityMetadata == null) {
-        // We need child metadata. Return null waiting next metadata iteration
-        return null;
+
+      // No need to add relation methods if related entity has not service
+      ClassOrInterfaceTypeDetails childService = getServiceLocator().getFirstService(childEntity);
+      if (childService != null) {
+        relatedInfosWithServiceLayer.add(info);
+        childEntityMetadata = getEntityMetadata(childEntity);
+        if (childEntityMetadata == null) {
+          // We need child metadata. Return null waiting next metadata iteration
+          return null;
+        }
+        registerDependency(childEntityMetadata.getId(), metadataIdentificationString);
+        relatedEntities.put(childEntity, childEntityMetadata);
       }
-      registerDependency(childEntityMetadata.getId(), metadataIdentificationString);
-      relatedEntities.put(childEntity, childEntityMetadata);
     }
 
     // As child
@@ -311,7 +318,7 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
         repositoryCustomMetadata.getCurrentFindAllByIdsInGlobalSearchMethod(),
         repositoryCustomMetadata.getReferencedFieldsFindAllMethods(),
         countByReferencedFieldMethods, countMethods, relatedEntities, repositoryFindersAndCounts,
-        repositoryCustomFindersAndCounts);
+        repositoryCustomFindersAndCounts, relatedInfosWithServiceLayer);
   }
 
   private void registerDependencyModulesOfFinder(
@@ -347,8 +354,6 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
     return getServiceManager().getServiceInstance(this, RepositoryJpaLocator.class);
   }
 
-
-
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
 
     if (getMetadataDependencyRegistry() != null
@@ -363,5 +368,9 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 
   public String getProvidesType() {
     return ServiceMetadata.getMetadataIdentiferType();
+  }
+
+  private ServiceLocator getServiceLocator() {
+    return getServiceManager().getServiceInstance(this, ServiceLocator.class);
   }
 }
