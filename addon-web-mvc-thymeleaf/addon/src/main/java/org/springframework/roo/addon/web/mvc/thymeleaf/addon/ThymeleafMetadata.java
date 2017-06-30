@@ -2206,6 +2206,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(new AnnotatedJavaType(this.entity, ANN_METADATA_VALID,
         ANN_METADATA_MODEL_ATTRIBUTE));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.BINDING_RESULT));
 
     // Version parameter
     AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM);
@@ -2221,7 +2222,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     concurrencyControlRequestParam.addStringAttribute("defaultValue", "");
     parameterTypes.add(new AnnotatedJavaType(JavaType.STRING, concurrencyControlRequestParam
         .build()));
-    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.BINDING_RESULT));
     parameterTypes.add(MODEL_PARAM);
 
     MethodMetadata existingMethod =
@@ -2233,9 +2233,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName(entityItemName));
+    parameterNames.add(new JavaSymbolName("result"));
     parameterNames.add(this.entityMetadata.getCurrentVersionField().getFieldName());
     parameterNames.add(new JavaSymbolName("concurrencyControl"));
-    parameterNames.add(new JavaSymbolName("result"));
     parameterNames.add(MODEL_PARAM_NAME);
 
     // Adding annotations
