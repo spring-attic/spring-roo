@@ -150,11 +150,12 @@ public class ThymeleafControllerIntegrationTestMetadataProviderImpl extends
     // Get the services related to managed entity
     List<JavaType> relatedServices = new ArrayList<JavaType>();
     for (JavaType entity : relatedEntities) {
-      final JavaType service = getServiceLocator().getFirstService(entity).getType();
-      Validate.notNull(service, "Couldn't find service of %s in %s", entity.getSimpleTypeName(),
-          this.getClass().getName());
-      if (!relatedServices.contains(service)) {
-        relatedServices.add(service);
+      final ClassOrInterfaceTypeDetails serviceDetails =
+          getServiceLocator().getFirstService(entity);
+      Validate.notNull(serviceDetails, "Couldn't find service of related entity %s in %s",
+          entity.getSimpleTypeName(), this.getClass().getName());
+      if (!relatedServices.contains(serviceDetails.getType())) {
+        relatedServices.add(serviceDetails.getType());
       }
     }
 
