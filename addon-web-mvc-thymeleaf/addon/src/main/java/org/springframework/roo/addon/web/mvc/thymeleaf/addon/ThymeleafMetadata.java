@@ -67,6 +67,7 @@ import org.springframework.roo.project.LogicalPath;
  * @author Juan Carlos García
  * @author Jose Manuel Vivó
  * @author Sergio Clares
+ * @author Fran Cardoso
  * @since 2.0
  */
 public class ThymeleafMetadata extends AbstractViewMetadata {
@@ -244,7 +245,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
   private final List<MethodMetadata> allMethods;
   private final FieldMetadata messageSourceField;
-  private final FieldMetadata methodLinkBuilderFactoryField;
+  private final FieldMetadata collectionMethodLinkBuilderFactoryField;
+  private final FieldMetadata itemMethodLinkBuilderFactoryField;
   private final FieldMetadata conversionServiceField;
   private final String viewsPath;
   private final JavaType collectionController;
@@ -371,10 +373,15 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     switch (this.type) {
       case COLLECTION: {
 
-        // Add MethodLinkBuilderFactory field
-        this.methodLinkBuilderFactoryField =
+        // Add MethodLinkBuilderFactory fields
+        this.itemMethodLinkBuilderFactoryField =
             getMethodLinkBuilderFactoryField(ITEM_LINK, this.itemController);
-        ensureGovernorHasField(new FieldMetadataBuilder(this.methodLinkBuilderFactoryField));
+        ensureGovernorHasField(new FieldMetadataBuilder(this.itemMethodLinkBuilderFactoryField));
+
+        this.collectionMethodLinkBuilderFactoryField =
+            getMethodLinkBuilderFactoryField(COLLECTION_LINK, this.governorTypeDetails.getType());
+        ensureGovernorHasField(new FieldMetadataBuilder(
+            this.collectionMethodLinkBuilderFactoryField));
 
         // ROO-3868: New entity visualization support needs a
         // ConversionService field
@@ -382,11 +389,16 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         ensureGovernorHasField(new FieldMetadataBuilder(this.conversionServiceField));
 
         // Build constructor
-        String linkBuilderLine =
+        String itemLinkBuilderLine =
             String.format("%s(linkBuilder.of(%s.class));",
-                getMutatorMethod(this.methodLinkBuilderFactoryField).getMethodName(),
+                getMutatorMethod(this.itemMethodLinkBuilderFactoryField).getMethodName(),
                 getNameOfJavaType(this.itemController));
-        this.constructor = addAndGetConstructor(getConstructor(linkBuilderLine));
+        String collectionLinkBuilderLine =
+            String.format("%s(linkBuilder.of(%s.class));",
+                getMutatorMethod(this.collectionMethodLinkBuilderFactoryField).getMethodName(),
+                getNameOfJavaType(this.governorTypeDetails.getType()));
+        this.constructor =
+            addAndGetConstructor(getConstructor(itemLinkBuilderLine, collectionLinkBuilderLine));
 
         // Build methods
         this.listMethod = addAndGet(getListMethod(), allMethods);
@@ -463,19 +475,31 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       }
       case ITEM: {
 
-        // Add MethodLinkBuilderFactory field
-        this.methodLinkBuilderFactoryField =
+        // Add MethodLinkBuilderFactory fields
+        this.itemMethodLinkBuilderFactoryField =
             getMethodLinkBuilderFactoryField(ITEM_LINK, this.governorTypeDetails.getType());
-        ensureGovernorHasField(new FieldMetadataBuilder(this.methodLinkBuilderFactoryField));
+        ensureGovernorHasField(new FieldMetadataBuilder(this.itemMethodLinkBuilderFactoryField));
+
+        this.collectionMethodLinkBuilderFactoryField =
+            getMethodLinkBuilderFactoryField(COLLECTION_LINK, this.collectionController);
+        ensureGovernorHasField(new FieldMetadataBuilder(
+            this.collectionMethodLinkBuilderFactoryField));
 
         this.conversionServiceField = null;
 
         // Build constructor
-        String linkBuilderLine =
+        String itemLinkBuilderLine =
             String.format("%s(linkBuilder.of(%s.class));",
-                getMutatorMethod(methodLinkBuilderFactoryField).getMethodName(),
+                getMutatorMethod(itemMethodLinkBuilderFactoryField).getMethodName(),
                 getNameOfJavaType(this.governorTypeDetails.getType()));
-        this.constructor = addAndGetConstructor(getConstructor(linkBuilderLine));
+
+        String collectionLinkBuilderLine =
+            String.format("%s(linkBuilder.of(%s.class));",
+                getMutatorMethod(collectionMethodLinkBuilderFactoryField).getMethodName(),
+                getNameOfJavaType(this.collectionController));
+
+        this.constructor =
+            addAndGetConstructor(getConstructor(itemLinkBuilderLine, collectionLinkBuilderLine));
 
         // Build methods
         this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
@@ -533,12 +557,15 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       }
       case SEARCH: {
 
-        this.methodLinkBuilderFactoryField = null;
+        this.collectionMethodLinkBuilderFactoryField = null;
+        this.itemMethodLinkBuilderFactoryField = null;
         this.conversionServiceField = null;
 
         // Build constructor
-        String linkBuilderLine = "";
-        this.constructor = addAndGetConstructor(getConstructor(linkBuilderLine));
+        String itemLinkBuilderLine = "";
+        String collectionLinkBuilderLine = "";
+        this.constructor =
+            addAndGetConstructor(getConstructor(itemLinkBuilderLine, collectionLinkBuilderLine));
 
         // Build methods
         Map<String, MethodMetadata> tmpFindersDtt = new TreeMap<String, MethodMetadata>();
@@ -607,9 +634,12 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       case DETAIL: {
 
         // Add MethodLinkBuilderFactory field
-        this.methodLinkBuilderFactoryField =
+        this.collectionMethodLinkBuilderFactoryField =
             getMethodLinkBuilderFactoryField(COLLECTION_LINK, this.collectionController);
-        ensureGovernorHasField(new FieldMetadataBuilder(this.methodLinkBuilderFactoryField));
+        ensureGovernorHasField(new FieldMetadataBuilder(
+            this.collectionMethodLinkBuilderFactoryField));
+
+        this.itemMethodLinkBuilderFactoryField = null;
 
         // ROO-3868: New entity visualization support needs a
         // ConversionService field
@@ -617,11 +647,11 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         ensureGovernorHasField(new FieldMetadataBuilder(this.conversionServiceField));
 
         // Build constructor
-        String linkBuilderLine =
+        String collectionLinkBuilderLine =
             String.format("%s(linkBuilder.of(%s.class));",
-                getMutatorMethod(methodLinkBuilderFactoryField).getMethodName(),
+                getMutatorMethod(collectionMethodLinkBuilderFactoryField).getMethodName(),
                 getNameOfJavaType(this.collectionController));
-        this.constructor = addAndGetConstructor(getConstructor(linkBuilderLine));
+        this.constructor = addAndGetConstructor(getConstructor("", collectionLinkBuilderLine));
 
         // Build methods
         this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
@@ -702,18 +732,21 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       case DETAIL_ITEM: {
 
         // Add MethodLinkBuilderFactory field
-        this.methodLinkBuilderFactoryField =
+        this.collectionMethodLinkBuilderFactoryField =
             getMethodLinkBuilderFactoryField(COLLECTION_LINK, this.collectionController);
-        ensureGovernorHasField(new FieldMetadataBuilder(this.methodLinkBuilderFactoryField));
+        ensureGovernorHasField(new FieldMetadataBuilder(
+            this.collectionMethodLinkBuilderFactoryField));
+
+        this.itemMethodLinkBuilderFactoryField = null;
 
         this.conversionServiceField = null;
 
         // Build constructor
-        String linkBuilderLine =
+        String collectionLinkBuilderLine =
             String.format("%s(linkBuilder.of(%s.class));",
-                getMutatorMethod(methodLinkBuilderFactoryField).getMethodName(),
+                getMutatorMethod(collectionMethodLinkBuilderFactoryField).getMethodName(),
                 getNameOfJavaType(this.collectionController));
-        this.constructor = addAndGetConstructor(getConstructor(linkBuilderLine));
+        this.constructor = addAndGetConstructor(getConstructor("", collectionLinkBuilderLine));
 
         // Build methods
         this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
@@ -825,7 +858,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     return annotationBuilder;
   }
 
-  private ConstructorMetadata getConstructor(String linkBuilderLine) {
+  private ConstructorMetadata getConstructor(String itemLinkBuilderLine,
+      String collectionLinkBuilderLine) {
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // Generating constructor
@@ -872,12 +906,19 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         .getMethodName(), messageSourceName);
 
     // Add ControllerMethodLinkBuilderFactory argument
-    if (StringUtils.isNotBlank(linkBuilderLine)) {
+    if (StringUtils.isNotBlank(itemLinkBuilderLine)
+        || StringUtils.isNotBlank(collectionLinkBuilderLine)) {
       constructor.addParameter(LINK_BUILDER_ARGUMENT_NAME,
           SpringletsJavaType.SPRINGLETS_CONTROLLER_METHOD_LINK_BUILDER_FACTORY);
-      bodyBuilder.appendFormalLine(linkBuilderLine);
       this.builder.getImportRegistrationResolver().addImport(
           SpringletsJavaType.SPRINGLETS_CONTROLLER_METHOD_LINK_BUILDER_FACTORY);
+      if (StringUtils.isNotBlank(itemLinkBuilderLine)) {
+        bodyBuilder.appendFormalLine(itemLinkBuilderLine);
+      }
+      if (StringUtils.isNotBlank(collectionLinkBuilderLine)) {
+        bodyBuilder.appendFormalLine(collectionLinkBuilderLine);
+
+      }
     }
 
     // Adding body
@@ -2178,7 +2219,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // newCategory.getId()).toUri();
     bodyBuilder.appendFormalLine("%s showURI = %s().to(%s.SHOW).with(\"%s\", %s.getId()).toUri();",
         getNameOfJavaType(SpringJavaType.URI_COMPONENTS),
-        getAccessorMethod(this.methodLinkBuilderFactoryField).getMethodName(),
+        getAccessorMethod(this.itemMethodLinkBuilderFactoryField).getMethodName(),
         getNameOfJavaType(relatedItemLinkFactory), this.entityItemName, newValueVar);
 
     // return new ModelAndView("redirect:" + showURI.toUriString());
@@ -2360,7 +2401,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // savedCategory.getId()).toUri();
     bodyBuilder.appendFormalLine("%s showURI = %s().to(%s.SHOW).with(\"%s\", %s.getId()).toUri();",
         getNameOfJavaType(SpringJavaType.URI_COMPONENTS),
-        getAccessorMethod(this.methodLinkBuilderFactoryField).getMethodName(),
+        getAccessorMethod(this.itemMethodLinkBuilderFactoryField).getMethodName(),
         getNameOfJavaType(relatedItemLinkFactory), this.entityItemName, savedVarName);
 
     // return new ModelAndView("redirect:" + showURI.toUriString());
@@ -2544,7 +2585,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // collectionLink.to("list").toUriString());
     bodyBuilder.appendFormalLine("return new %s(\"redirect:\" + %s().to(%s.LIST).toUriString());",
         getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW),
-        getAccessorMethod(this.methodLinkBuilderFactoryField).getMethodName(),
+        getAccessorMethod(this.collectionMethodLinkBuilderFactoryField).getMethodName(),
         getNameOfJavaType(relatedCollectionLinkFactory));
 
     MethodMetadataBuilder methodBuilder =
@@ -4165,7 +4206,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // collectionLink.to("list").toUriString());
     bodyBuilder.appendFormalLine("return new %s(\"redirect:\" + %s().to(%s.LIST).toUriString());",
         getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW),
-        getAccessorMethod(this.methodLinkBuilderFactoryField).getMethodName(),
+        getAccessorMethod(this.collectionMethodLinkBuilderFactoryField).getMethodName(),
         getNameOfJavaType(relatedCollectionLinkFactory));
 
     MethodMetadataBuilder methodBuilder =
@@ -4374,7 +4415,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // collectionLink.to("list").toUriString());
     bodyBuilder.appendFormalLine("return new %s(\"redirect:\" + %s().to(%s.LIST).toUriString());",
         getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW),
-        getAccessorMethod(this.methodLinkBuilderFactoryField).getMethodName(),
+        getAccessorMethod(this.collectionMethodLinkBuilderFactoryField).getMethodName(),
         getNameOfJavaType(relatedCollectionLinkFactory));
 
     MethodMetadataBuilder methodBuilder =
