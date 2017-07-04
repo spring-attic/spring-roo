@@ -23,8 +23,8 @@
       data-th-href="@{/webjars/bootstrap/dist/css/bootstrap.css}"></link>
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <link rel="stylesheet" type="text/css" 
-      href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css" 
+    <link rel="stylesheet" type="text/css"
+      href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
       data-th-href="@{/webjars/ie10-viewport-bug-workaround/dist/ie10-viewport-bug-workaround.min.css}" />
 
     <!-- Font Awesome -->
@@ -98,7 +98,7 @@
       data-th-src="@{/webjars/bootstrap/dist/js/bootstrap.js}"></script>
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="https://maxcdn.bootstrapcdn.com/js/ie10-viewport-bug-workaround.js" 
+    <script src="https://maxcdn.bootstrapcdn.com/js/ie10-viewport-bug-workaround.js"
       data-th-src="@{/webjars/ie10-viewport-bug-workaround/dist/ie10-viewport-bug-workaround.min.js}" >
     </script>
 
@@ -108,7 +108,7 @@
        data-th-src="@{/webjars/momentjs/moment.min.js}">
       </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/locale/es.js"
-      data-th-src="@{/webjars/momentjs/locale/}+ ${r"${#"}locale.language}+'.js'"
+      data-th-src="@{/webjars/momentjs/2.13.0/locale}+ '/' + ${r"${#"}locale.language}+'.js'"
       data-th-if="${r"${#"}locale.language} != 'en' and ${r"${#"}locale.language} != 'es'">
       </script>
     <script src="../../static/public/js/moment-locale-es.js"
