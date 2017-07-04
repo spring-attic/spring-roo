@@ -123,16 +123,18 @@
 	        </configuration>
 	      </plugin>
 	      <!-- Compiler plugin -->
-	      <plugin>
-	        <groupId>org.apache.maven.plugins</groupId>
-	        <artifactId>maven-compiler-plugin</artifactId>
-	        <configuration>
-	          <source>${java.version}</source>
-	          <target>${java.version}</target>
-	          <encoding>${project.build.sourceEncoding}</encoding>
-	          <useIncrementalCompilation>false</useIncrementalCompilation>
-	        </configuration>
-	      </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <source>${java.version}</source>
+              <target>${java.version}</target>
+              <encoding>${project.build.sourceEncoding}</encoding>
+              <useIncrementalCompilation>false</useIncrementalCompilation>
+              <proc>none</proc>
+            </configuration>
+          </plugin>
+
 	      <!-- AspectJ plugins -->
 	      <plugin>
 	        <groupId>org.codehaus.mojo</groupId>

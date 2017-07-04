@@ -75,6 +75,7 @@
             <target>${java.version}</target>
             <encoding>${project.build.sourceEncoding}</encoding>
             <useIncrementalCompilation>false</useIncrementalCompilation>
+            <proc>none</proc>
           </configuration>
         </plugin>
 
