@@ -1378,7 +1378,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     if (entityField.getAnnotation(JpaJavaType.ID) != null
         || entityField.getAnnotation(JpaJavaType.VERSION) != null
         || identifierField.getFieldName().equals(entityField.getFieldName())
-        || versionField.getFieldName().equals(entityField.getFieldName())) {
+        || (versionField != null && versionField.getFieldName().equals(entityField.getFieldName()))) {
       return null;
     }
 

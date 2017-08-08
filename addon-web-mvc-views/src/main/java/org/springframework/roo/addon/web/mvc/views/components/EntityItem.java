@@ -53,7 +53,9 @@ public class EntityItem {
     this.configuration = new HashMap<String, Object>();
     this.configuration.put("identifierField", identifierField);
     this.configuration.put("controllerPath", controllerPath);
-    this.configuration.put("versionField", versionField);
+    if (versionField != null) {
+    	this.configuration.put("versionField", versionField);
+    }
     buildId(suffixId);
 
     // Calculate the Z parameter as the hash code of the other parameters

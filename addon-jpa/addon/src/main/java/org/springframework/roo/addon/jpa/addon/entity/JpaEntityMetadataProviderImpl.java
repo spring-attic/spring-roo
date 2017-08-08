@@ -346,9 +346,11 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
           "ERROR: The annotated entity '%s' doesn't contain any version field.", entityDetails
               .getType().getFullyQualifiedTypeName()));
 
-      versionField = versionFields.get(0);
-
-      versionAccessor = entityJavaBeanMetadata.getAccesorMethod(versionField);
+      // Check and add version field
+      if (!versionFields.isEmpty()) {
+    	  versionField = versionFields.get(0);
+    	  versionAccessor = entityJavaBeanMetadata.getAccesorMethod(versionField);
+      }
 
     } else {
       identifierField = parent.getCurrentIndentifierField();
