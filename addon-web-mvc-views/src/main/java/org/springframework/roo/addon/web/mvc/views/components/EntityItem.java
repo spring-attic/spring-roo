@@ -54,7 +54,7 @@ public class EntityItem {
     this.configuration.put("identifierField", identifierField);
     this.configuration.put("controllerPath", controllerPath);
     if (versionField != null) {
-    	this.configuration.put("versionField", versionField);
+      this.configuration.put("versionField", versionField);
     }
     buildId(suffixId);
 

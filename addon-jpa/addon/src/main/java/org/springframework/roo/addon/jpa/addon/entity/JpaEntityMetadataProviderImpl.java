@@ -348,8 +348,8 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 
       // Check and add version field
       if (!versionFields.isEmpty()) {
-    	  versionField = versionFields.get(0);
-    	  versionAccessor = entityJavaBeanMetadata.getAccesorMethod(versionField);
+        versionField = versionFields.get(0);
+        versionAccessor = entityJavaBeanMetadata.getAccesorMethod(versionField);
       }
 
     } else {

@@ -2251,19 +2251,20 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // Version parameter
     if (this.entityMetadata.getCurrentVersionField() != null) {
-    	AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM);
-    	requestParamAnnotation.addStringAttribute("value", VERSION_PARAM_NAME.getSymbolName());
-    	parameterTypes.add(new AnnotatedJavaType(this.entityMetadata.getCurrentVersionField()
-    			.getFieldType(), requestParamAnnotation.build()));
+      AnnotationMetadataBuilder requestParamAnnotation =
+          new AnnotationMetadataBuilder(REQUEST_PARAM);
+      requestParamAnnotation.addStringAttribute("value", VERSION_PARAM_NAME.getSymbolName());
+      parameterTypes.add(new AnnotatedJavaType(this.entityMetadata.getCurrentVersionField()
+          .getFieldType(), requestParamAnnotation.build()));
 
-    	// Concurrency control parameter
-    	AnnotationMetadataBuilder concurrencyControlRequestParam =
-    			new AnnotationMetadataBuilder(REQUEST_PARAM);
-    	concurrencyControlRequestParam.addStringAttribute("value", "concurrency");
-    	concurrencyControlRequestParam.addBooleanAttribute("required", false);
-    	concurrencyControlRequestParam.addStringAttribute("defaultValue", "");
-    	parameterTypes.add(new AnnotatedJavaType(JavaType.STRING, concurrencyControlRequestParam
-    			.build()));
+      // Concurrency control parameter
+      AnnotationMetadataBuilder concurrencyControlRequestParam =
+          new AnnotationMetadataBuilder(REQUEST_PARAM);
+      concurrencyControlRequestParam.addStringAttribute("value", "concurrency");
+      concurrencyControlRequestParam.addBooleanAttribute("required", false);
+      concurrencyControlRequestParam.addStringAttribute("defaultValue", "");
+      parameterTypes.add(new AnnotatedJavaType(JavaType.STRING, concurrencyControlRequestParam
+          .build()));
     }
 
     parameterTypes.add(MODEL_PARAM);
@@ -2279,8 +2280,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     parameterNames.add(new JavaSymbolName(entityItemName));
     parameterNames.add(new JavaSymbolName("result"));
     if (this.entityMetadata.getCurrentVersionField() != null) {
-    	parameterNames.add(this.entityMetadata.getCurrentVersionField().getFieldName());
-    	parameterNames.add(new JavaSymbolName("concurrencyControl"));
+      parameterNames.add(this.entityMetadata.getCurrentVersionField().getFieldName());
+      parameterNames.add(new JavaSymbolName("concurrencyControl"));
     }
     parameterNames.add(MODEL_PARAM_NAME);
 
@@ -2317,84 +2318,85 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // // Concurrency control
     if (this.entityMetadata.getCurrentVersionField() != null) {
-	    bodyBuilder.appendFormalLine("// Concurrency control");
-	
-	    // Pet existingPet = getPetService().findOne(pet.getId());
-	    String existingVarName = "existing".concat(entity.getSimpleTypeName());
-	    bodyBuilder.appendFormalLine("%s %s = %s().%s(%s.%s());", getNameOfJavaType(entity),
-	        existingVarName, getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(),
-	        serviceMetadata.getCurrentFindOneMethod().getMethodName(), entityItemName,
-	        getAccessorMethod(this.entityMetadata.getCurrentIndentifierField()).getMethodName());
-	
-	    // if(pet.getVersion() != existingPet.getVersion() && StringUtils.isEmpty(concurrencyControl)){
-	    bodyBuilder.appendFormalLine("if(%s.%s() != %s.%s() && %s.isEmpty(concurrencyControl)){",
-	        entityItemName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
-	            .getMethodName(), existingVarName,
-	        getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
-	        getNameOfJavaType(new JavaType("org.apache.commons.lang3.StringUtils")));
-	    bodyBuilder.indent();
-	
-	    // populateForm(model);
-	    bodyBuilder.appendFormalLine("populateForm(model);");
-	
-	    // model.addAttribute("entity", entityParam)
-	    bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", entityItemName, entityItemName);
-	
-	    // model.addAttribute("concurrency", true);
-	    bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", true);");
-	
-	    // return new ModelAndView("pets/edit");
-	    bodyBuilder.appendFormalLine("return new %s(\"%s/edit\");",
-	        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
-	
-	    bodyBuilder.indentRemove();
-	
-	    // } else if(pet.getVersion() != existingPet.getVersion() && "discard".equals(concurrencyControl)){
-	    bodyBuilder.appendFormalLine(
-	        "} else if(%s.%s() != %s.%s() && \"discard\".equals(concurrencyControl)){", entityItemName,
-	        getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
-	        existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
-	            .getMethodName());
-	    bodyBuilder.indent();
-	
-	    // populateForm(model);
-	    bodyBuilder.appendFormalLine("populateForm(model);");
-	
-	    // model.addAttribute("pet", existingPet);
-	    bodyBuilder
-	        .appendFormalLine("model.addAttribute(\"%s\", %s);", entityItemName, existingVarName);
-	
-	    // model.addAttribute("concurrency", false);
-	    bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", false);");
-	
-	    // return new ModelAndView("pets/edit");
-	    bodyBuilder.appendFormalLine("return new %s(\"%s/edit\");",
-	        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
-	
-	    bodyBuilder.indentRemove();
-	
-	    // } else if(pet.getVersion() != existingPet.getVersion() && "apply".equals(concurrencyControl)){
-	    bodyBuilder.appendFormalLine(
-	        "} else if(%s.%s() != %s.%s() && \"apply\".equals(concurrencyControl)){", entityItemName,
-	        getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
-	        existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
-	            .getMethodName());
-	    bodyBuilder.indent();
-	
-	    // // Update the version field to be able to override the existing values
-	    bodyBuilder
-	        .appendFormalLine("// Update the version field to be able to override the existing values");
-	
-	    // pet.setVersion(existingPet.getVersion());
-	    bodyBuilder.appendFormalLine("%s.%s(%s.%s());", entityItemName,
-	        getMutatorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
-	        existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
-	            .getMethodName());
-	
-	    bodyBuilder.indentRemove();
-	    bodyBuilder.appendFormalLine("}");
+      bodyBuilder.appendFormalLine("// Concurrency control");
+
+      // Pet existingPet = getPetService().findOne(pet.getId());
+      String existingVarName = "existing".concat(entity.getSimpleTypeName());
+      bodyBuilder.appendFormalLine("%s %s = %s().%s(%s.%s());", getNameOfJavaType(entity),
+          existingVarName, getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(),
+          serviceMetadata.getCurrentFindOneMethod().getMethodName(), entityItemName,
+          getAccessorMethod(this.entityMetadata.getCurrentIndentifierField()).getMethodName());
+
+      // if(pet.getVersion() != existingPet.getVersion() && StringUtils.isEmpty(concurrencyControl)){
+      bodyBuilder.appendFormalLine("if(%s.%s() != %s.%s() && %s.isEmpty(concurrencyControl)){",
+          entityItemName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
+              .getMethodName(), existingVarName,
+          getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
+          getNameOfJavaType(new JavaType("org.apache.commons.lang3.StringUtils")));
+      bodyBuilder.indent();
+
+      // populateForm(model);
+      bodyBuilder.appendFormalLine("populateForm(model);");
+
+      // model.addAttribute("entity", entityParam)
+      bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", entityItemName,
+          entityItemName);
+
+      // model.addAttribute("concurrency", true);
+      bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", true);");
+
+      // return new ModelAndView("pets/edit");
+      bodyBuilder.appendFormalLine("return new %s(\"%s/edit\");",
+          getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
+
+      bodyBuilder.indentRemove();
+
+      // } else if(pet.getVersion() != existingPet.getVersion() && "discard".equals(concurrencyControl)){
+      bodyBuilder.appendFormalLine(
+          "} else if(%s.%s() != %s.%s() && \"discard\".equals(concurrencyControl)){",
+          entityItemName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
+              .getMethodName(), existingVarName,
+          getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName());
+      bodyBuilder.indent();
+
+      // populateForm(model);
+      bodyBuilder.appendFormalLine("populateForm(model);");
+
+      // model.addAttribute("pet", existingPet);
+      bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", entityItemName,
+          existingVarName);
+
+      // model.addAttribute("concurrency", false);
+      bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", false);");
+
+      // return new ModelAndView("pets/edit");
+      bodyBuilder.appendFormalLine("return new %s(\"%s/edit\");",
+          getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
+
+      bodyBuilder.indentRemove();
+
+      // } else if(pet.getVersion() != existingPet.getVersion() && "apply".equals(concurrencyControl)){
+      bodyBuilder.appendFormalLine(
+          "} else if(%s.%s() != %s.%s() && \"apply\".equals(concurrencyControl)){", entityItemName,
+          getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
+          existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
+              .getMethodName());
+      bodyBuilder.indent();
+
+      // // Update the version field to be able to override the existing values
+      bodyBuilder
+          .appendFormalLine("// Update the version field to be able to override the existing values");
+
+      // pet.setVersion(existingPet.getVersion());
+      bodyBuilder.appendFormalLine("%s.%s(%s.%s());", entityItemName,
+          getMutatorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
+          existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
+              .getMethodName());
+
+      bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine("}");
     }
-    
+
     String savedVarName = "saved" + entity.getSimpleTypeName();
     // Customer savedCustomer = customerService.save(customer);;
     bodyBuilder.appendFormalLine("%s %s = %s().%s(%s);", getNameOfJavaType(entity), savedVarName,
@@ -2444,21 +2446,22 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // Version parameter
     if (this.entityMetadata.getCurrentVersionField() != null) {
-	    AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM);
-	    requestParamAnnotation.addStringAttribute("value", VERSION_PARAM_NAME.getSymbolName());
-	    parameterTypes.add(new AnnotatedJavaType(this.entityMetadata.getCurrentVersionField()
-	        .getFieldType(), requestParamAnnotation.build()));
+      AnnotationMetadataBuilder requestParamAnnotation =
+          new AnnotationMetadataBuilder(REQUEST_PARAM);
+      requestParamAnnotation.addStringAttribute("value", VERSION_PARAM_NAME.getSymbolName());
+      parameterTypes.add(new AnnotatedJavaType(this.entityMetadata.getCurrentVersionField()
+          .getFieldType(), requestParamAnnotation.build()));
 
-	    // Concurrency control parameter
-	    AnnotationMetadataBuilder concurrencyControlRequestParam =
-	    		new AnnotationMetadataBuilder(REQUEST_PARAM);
-	    concurrencyControlRequestParam.addStringAttribute("value", "concurrency");
-	    concurrencyControlRequestParam.addBooleanAttribute("required", false);
-	    concurrencyControlRequestParam.addStringAttribute("defaultValue", "");
-	    parameterTypes.add(new AnnotatedJavaType(JavaType.STRING, concurrencyControlRequestParam
-	    		.build()));
+      // Concurrency control parameter
+      AnnotationMetadataBuilder concurrencyControlRequestParam =
+          new AnnotationMetadataBuilder(REQUEST_PARAM);
+      concurrencyControlRequestParam.addStringAttribute("value", "concurrency");
+      concurrencyControlRequestParam.addBooleanAttribute("required", false);
+      concurrencyControlRequestParam.addStringAttribute("defaultValue", "");
+      parameterTypes.add(new AnnotatedJavaType(JavaType.STRING, concurrencyControlRequestParam
+          .build()));
     }
-    
+
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.BINDING_RESULT));
     parameterTypes.add(MODEL_PARAM);
 
@@ -2474,8 +2477,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         StringUtils.uncapitalize(parentEntity.getSimpleTypeName())));
     parameterNames.add(new JavaSymbolName(entityItemName));
     if (this.entityMetadata.getCurrentVersionField() != null) {
-    	parameterNames.add(this.entityMetadata.getCurrentVersionField().getFieldName());
-    	parameterNames.add(new JavaSymbolName("concurrencyControl"));
+      parameterNames.add(this.entityMetadata.getCurrentVersionField().getFieldName());
+      parameterNames.add(new JavaSymbolName("concurrencyControl"));
     }
     parameterNames.add(new JavaSymbolName("result"));
     parameterNames.add(MODEL_PARAM_NAME);
@@ -2512,80 +2515,80 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // // Concurrency control
     if (this.entityMetadata.getCurrentVersionField() != null) {
-	    bodyBuilder.appendFormalLine("// Concurrency control");
-	
-	    // Pet existingPet = getPetService().findOne(pet.getId());
-	    String existingVarName = "existing".concat(entity.getSimpleTypeName());
-	    bodyBuilder.appendFormalLine("%s %s = %s().%s(%s.%s());", getNameOfJavaType(entity),
-	        existingVarName, getAccessorMethod(controllerMetadata.getLastDetailServiceField())
-	            .getMethodName(), serviceMetadata.getCurrentFindOneMethod().getMethodName(),
-	        entityItemName, getAccessorMethod(this.entityMetadata.getCurrentIndentifierField())
-	            .getMethodName());
-	
-	    // if(pet.getVersion() != existingPet.getVersion() && StringUtils.isEmpty(concurrencyControl)){
-	    bodyBuilder.appendFormalLine("if(%s.%s() != %s.%s() && %s.isEmpty(concurrencyControl)){",
-	        entityItemName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
-	            .getMethodName(), existingVarName,
-	        getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
-	        getNameOfJavaType(new JavaType("org.apache.commons.lang3.StringUtils")));
-	    bodyBuilder.indent();
-	
-	    // populateForm(model);
-	    bodyBuilder.appendFormalLine("populateForm(model);");
-	
-	    // model.addAttribute("concurrency", true);
-	    bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", true);");
-	
-	    // return new ModelAndView("pets/edit");
-	    bodyBuilder.appendFormalLine("return new %s(\"%s/edit\");",
-	        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
-	
-	    bodyBuilder.indentRemove();
-	
-	    // } else if(pet.getVersion() != existingPet.getVersion() && "discard".equals(concurrencyControl)){
-	    bodyBuilder.appendFormalLine(
-	        "} else if(%s.%s() != %s.%s() && \"discard\".equals(concurrencyControl)){", entityItemName,
-	        getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
-	        existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
-	            .getMethodName());
-	    bodyBuilder.indent();
-	
-	    // populateForm(model);
-	    bodyBuilder.appendFormalLine("populateForm(model);");
-	
-	    // model.addAttribute("pet", existingPet);
-	    bodyBuilder
-	        .appendFormalLine("model.addAttribute(\"%s\", %s);", entityItemName, existingVarName);
-	
-	    // model.addAttribute("concurrency", false);
-	    bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", false);");
-	
-	    // return new ModelAndView("pets/edit");
-	    bodyBuilder.appendFormalLine("return new %s(\"%s/edit\");",
-	        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
-	
-	    bodyBuilder.indentRemove();
-	
-	    // } else if(pet.getVersion() != existingPet.getVersion() && "apply".equals(concurrencyControl)){
-	    bodyBuilder.appendFormalLine(
-	        "} else if(%s.%s() != %s.%s() && \"apply\".equals(concurrencyControl)){", entityItemName,
-	        getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
-	        existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
-	            .getMethodName());
-	    bodyBuilder.indent();
-	
-	    // // Update the version field to be able to override the existing values
-	    bodyBuilder
-	        .appendFormalLine("// Update the version field to be able to override the existing values");
-	
-	    // pet.setVersion(existingPet.getVersion());
-	    bodyBuilder.appendFormalLine("%s.%s(%s.%s());", entityItemName,
-	        getMutatorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
-	        existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
-	            .getMethodName());
-	
-	    bodyBuilder.indentRemove();
-	    bodyBuilder.appendFormalLine("}");
+      bodyBuilder.appendFormalLine("// Concurrency control");
+
+      // Pet existingPet = getPetService().findOne(pet.getId());
+      String existingVarName = "existing".concat(entity.getSimpleTypeName());
+      bodyBuilder.appendFormalLine("%s %s = %s().%s(%s.%s());", getNameOfJavaType(entity),
+          existingVarName, getAccessorMethod(controllerMetadata.getLastDetailServiceField())
+              .getMethodName(), serviceMetadata.getCurrentFindOneMethod().getMethodName(),
+          entityItemName, getAccessorMethod(this.entityMetadata.getCurrentIndentifierField())
+              .getMethodName());
+
+      // if(pet.getVersion() != existingPet.getVersion() && StringUtils.isEmpty(concurrencyControl)){
+      bodyBuilder.appendFormalLine("if(%s.%s() != %s.%s() && %s.isEmpty(concurrencyControl)){",
+          entityItemName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
+              .getMethodName(), existingVarName,
+          getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
+          getNameOfJavaType(new JavaType("org.apache.commons.lang3.StringUtils")));
+      bodyBuilder.indent();
+
+      // populateForm(model);
+      bodyBuilder.appendFormalLine("populateForm(model);");
+
+      // model.addAttribute("concurrency", true);
+      bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", true);");
+
+      // return new ModelAndView("pets/edit");
+      bodyBuilder.appendFormalLine("return new %s(\"%s/edit\");",
+          getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
+
+      bodyBuilder.indentRemove();
+
+      // } else if(pet.getVersion() != existingPet.getVersion() && "discard".equals(concurrencyControl)){
+      bodyBuilder.appendFormalLine(
+          "} else if(%s.%s() != %s.%s() && \"discard\".equals(concurrencyControl)){",
+          entityItemName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
+              .getMethodName(), existingVarName,
+          getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName());
+      bodyBuilder.indent();
+
+      // populateForm(model);
+      bodyBuilder.appendFormalLine("populateForm(model);");
+
+      // model.addAttribute("pet", existingPet);
+      bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", entityItemName,
+          existingVarName);
+
+      // model.addAttribute("concurrency", false);
+      bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", false);");
+
+      // return new ModelAndView("pets/edit");
+      bodyBuilder.appendFormalLine("return new %s(\"%s/edit\");",
+          getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
+
+      bodyBuilder.indentRemove();
+
+      // } else if(pet.getVersion() != existingPet.getVersion() && "apply".equals(concurrencyControl)){
+      bodyBuilder.appendFormalLine(
+          "} else if(%s.%s() != %s.%s() && \"apply\".equals(concurrencyControl)){", entityItemName,
+          getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
+          existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
+              .getMethodName());
+      bodyBuilder.indent();
+
+      // // Update the version field to be able to override the existing values
+      bodyBuilder
+          .appendFormalLine("// Update the version field to be able to override the existing values");
+
+      // pet.setVersion(existingPet.getVersion());
+      bodyBuilder.appendFormalLine("%s.%s(%s.%s());", entityItemName,
+          getMutatorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
+          existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
+              .getMethodName());
+
+      bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine("}");
     }
 
     // Customer savedCustomer = customerService.save(customer);
@@ -4263,20 +4266,20 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // Version parameter
     if (this.entityMetadata.getCurrentVersionField() != null) {
-    	AnnotationMetadataBuilder versionRequestParamAnnotation =
-    			new AnnotationMetadataBuilder(REQUEST_PARAM);
-    	versionRequestParamAnnotation.addStringAttribute("value", "parentVersion");
-    	parameterTypes.add(new AnnotatedJavaType(this.entityMetadata.getCurrentVersionField()
-    			.getFieldType(), versionRequestParamAnnotation.build()));
+      AnnotationMetadataBuilder versionRequestParamAnnotation =
+          new AnnotationMetadataBuilder(REQUEST_PARAM);
+      versionRequestParamAnnotation.addStringAttribute("value", "parentVersion");
+      parameterTypes.add(new AnnotatedJavaType(this.entityMetadata.getCurrentVersionField()
+          .getFieldType(), versionRequestParamAnnotation.build()));
 
-    	// Concurrency control parameter
-    	AnnotationMetadataBuilder concurrencyControlRequestParam =
-    			new AnnotationMetadataBuilder(REQUEST_PARAM);
-    	concurrencyControlRequestParam.addStringAttribute("value", "concurrency");
-    	concurrencyControlRequestParam.addBooleanAttribute("required", false);
-    	concurrencyControlRequestParam.addStringAttribute("defaultValue", "");
-    	parameterTypes.add(new AnnotatedJavaType(JavaType.STRING, concurrencyControlRequestParam
-    			.build()));
+      // Concurrency control parameter
+      AnnotationMetadataBuilder concurrencyControlRequestParam =
+          new AnnotationMetadataBuilder(REQUEST_PARAM);
+      concurrencyControlRequestParam.addStringAttribute("value", "concurrency");
+      concurrencyControlRequestParam.addBooleanAttribute("required", false);
+      concurrencyControlRequestParam.addStringAttribute("defaultValue", "");
+      parameterTypes.add(new AnnotatedJavaType(JavaType.STRING, concurrencyControlRequestParam
+          .build()));
     }
 
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.MODEL));
@@ -4332,94 +4335,94 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     bodyBuilder.appendFormalLine("}");
 
     if (this.entityMetadata.getCurrentVersionField() != null) {
-	    // // Concurrency control
-	    bodyBuilder.appendFormalLine("// Concurrency control");
-	
-	    JavaSymbolName parentName = setMethod.getParameterNames().get(0);
-	    // if(version != pet.getVersion() && StringUtils.isEmpty(concurrencyControl)){
-	    bodyBuilder.appendFormalLine("if(%s != %s.%s() && %s.isEmpty(concurrencyControl)){",
-	        VERSION_PARAM_NAME, parentName,
-	        getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
-	        getNameOfJavaType(new JavaType("org.apache.commons.lang3.StringUtils")));
-	    bodyBuilder.indent();
-	
-	    // populateForm(model);
-	    bodyBuilder.appendFormalLine("populateForm(model);");
-	
-	    // // Obtain the selected books and include them in the author that will be
-	    bodyBuilder
-	        .appendFormalLine("// Obtain the selected books and include them in the author that will be ");
-	    // // included in the view
-	    bodyBuilder.appendFormalLine("// included in the view");
-	
-	    // if(books != null){
-	    bodyBuilder.appendFormalLine("if (%s != null) {", itemsName);
-	    bodyBuilder.indent();
-	
-	    // author.setBooks(new HashSet<Book>(getBookService().findAll(books)));
-	    bodyBuilder.appendFormalLine("%s.%s(new %s<%s>(%s().findAll(%s)));", parentName, setMethod
-	        .getMethodName(), getNameOfJavaType(JavaType.HASH_SET),
-	        getNameOfJavaType(detailsInfo.childType),
-	        getAccessorMethod(controllerMetadata.getDetailsServiceFields(detailsInfo.childType))
-	            .getMethodName(), itemsName);
-	
-	    bodyBuilder.indentRemove();
-	    bodyBuilder.appendFormalLine("}else{");
-	    bodyBuilder.indent();
-	
-	    // author.setBooks(new HashSet<Book>());
-	    bodyBuilder.appendFormalLine("%s.%s(new %s<%s>());", parentName, setMethod.getMethodName(),
-	        getNameOfJavaType(JavaType.HASH_SET), getNameOfJavaType(detailsInfo.childType));
-	
-	    bodyBuilder.indentRemove();
-	    bodyBuilder.appendFormalLine("}");
-	
-	    // // Reset the version to prevent update
-	    bodyBuilder.appendFormalLine("// Reset the version to prevent update");
-	
-	    // author.setVersion(version);
-	    bodyBuilder.appendFormalLine(" %s.setVersion(%s);", parentName, VERSION_PARAM_NAME);
-	
-	    // // Include the updated author in the model
-	    bodyBuilder.appendFormalLine("// Include the updated element in the model");
-	
-	    // model.addAttribute("author", author);
-	    bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", parentName, parentName);
-	
-	    // model.addAttribute("concurrency", true);
-	    bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", true);");
-	
-	    // return new ModelAndView("owners/pets/create");
-	    bodyBuilder.appendFormalLine("return new %s(\"%s/%s/create\");",
-	        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath, itemsName);
-	
-	    bodyBuilder.indentRemove();
-	
-	    // }else if(version != pet.getVersion() && "discard".equals(concurrencyControl)){
-	    bodyBuilder
-	        .appendFormalLine("}else if(%s != %s.%s() && \"discard\".equals(concurrencyControl)){",
-	            VERSION_PARAM_NAME, parentName,
-	            getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName());
-	    bodyBuilder.indent();
-	
-	    // populateForm(model);
-	    bodyBuilder.appendFormalLine("populateForm(model);");
-	
-	    // // Provide the original author from the Database
-	    bodyBuilder.appendFormalLine("// Provide the original element from the Database");
-	
-	    // model.addAttribute("author", author);
-	    bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", parentName, parentName);
-	
-	    // model.addAttribute("concurrency", false);
-	    bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", false);");
-	
-	    // return new ModelAndView("owners/pets/create");
-	    bodyBuilder.appendFormalLine("return new %s(\"%s/%s/create\");",
-	        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath, itemsName);
-	
-	    bodyBuilder.indentRemove();
-	    bodyBuilder.appendFormalLine("}");
+      // // Concurrency control
+      bodyBuilder.appendFormalLine("// Concurrency control");
+
+      JavaSymbolName parentName = setMethod.getParameterNames().get(0);
+      // if(version != pet.getVersion() && StringUtils.isEmpty(concurrencyControl)){
+      bodyBuilder.appendFormalLine("if(%s != %s.%s() && %s.isEmpty(concurrencyControl)){",
+          VERSION_PARAM_NAME, parentName,
+          getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
+          getNameOfJavaType(new JavaType("org.apache.commons.lang3.StringUtils")));
+      bodyBuilder.indent();
+
+      // populateForm(model);
+      bodyBuilder.appendFormalLine("populateForm(model);");
+
+      // // Obtain the selected books and include them in the author that will be
+      bodyBuilder
+          .appendFormalLine("// Obtain the selected books and include them in the author that will be ");
+      // // included in the view
+      bodyBuilder.appendFormalLine("// included in the view");
+
+      // if(books != null){
+      bodyBuilder.appendFormalLine("if (%s != null) {", itemsName);
+      bodyBuilder.indent();
+
+      // author.setBooks(new HashSet<Book>(getBookService().findAll(books)));
+      bodyBuilder.appendFormalLine("%s.%s(new %s<%s>(%s().findAll(%s)));", parentName, setMethod
+          .getMethodName(), getNameOfJavaType(JavaType.HASH_SET),
+          getNameOfJavaType(detailsInfo.childType),
+          getAccessorMethod(controllerMetadata.getDetailsServiceFields(detailsInfo.childType))
+              .getMethodName(), itemsName);
+
+      bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine("}else{");
+      bodyBuilder.indent();
+
+      // author.setBooks(new HashSet<Book>());
+      bodyBuilder.appendFormalLine("%s.%s(new %s<%s>());", parentName, setMethod.getMethodName(),
+          getNameOfJavaType(JavaType.HASH_SET), getNameOfJavaType(detailsInfo.childType));
+
+      bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine("}");
+
+      // // Reset the version to prevent update
+      bodyBuilder.appendFormalLine("// Reset the version to prevent update");
+
+      // author.setVersion(version);
+      bodyBuilder.appendFormalLine(" %s.setVersion(%s);", parentName, VERSION_PARAM_NAME);
+
+      // // Include the updated author in the model
+      bodyBuilder.appendFormalLine("// Include the updated element in the model");
+
+      // model.addAttribute("author", author);
+      bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", parentName, parentName);
+
+      // model.addAttribute("concurrency", true);
+      bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", true);");
+
+      // return new ModelAndView("owners/pets/create");
+      bodyBuilder.appendFormalLine("return new %s(\"%s/%s/create\");",
+          getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath, itemsName);
+
+      bodyBuilder.indentRemove();
+
+      // }else if(version != pet.getVersion() && "discard".equals(concurrencyControl)){
+      bodyBuilder.appendFormalLine(
+          "}else if(%s != %s.%s() && \"discard\".equals(concurrencyControl)){", VERSION_PARAM_NAME,
+          parentName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
+              .getMethodName());
+      bodyBuilder.indent();
+
+      // populateForm(model);
+      bodyBuilder.appendFormalLine("populateForm(model);");
+
+      // // Provide the original author from the Database
+      bodyBuilder.appendFormalLine("// Provide the original element from the Database");
+
+      // model.addAttribute("author", author);
+      bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", parentName, parentName);
+
+      // model.addAttribute("concurrency", false);
+      bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", false);");
+
+      // return new ModelAndView("owners/pets/create");
+      bodyBuilder.appendFormalLine("return new %s(\"%s/%s/create\");",
+          getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath, itemsName);
+
+      bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine("}");
     }
 
     // categoryService.setProducts(category, products);
