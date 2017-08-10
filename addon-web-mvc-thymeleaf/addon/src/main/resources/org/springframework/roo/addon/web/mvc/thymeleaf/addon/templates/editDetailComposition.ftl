@@ -47,7 +47,7 @@
           <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
             data-th-action="${r"${"}itemLink.to('update')}">
             <input type="hidden" name="_method" value="PUT" />
-            <#if ${entity.configuration.versionField?>
+            <#if entity.configuration.versionField?? && entity.configuration.versionField?has_content>
             	<input type="hidden" name="version" data-th-value="${r"*"}{${entity.configuration.versionField}}" />
             </#if>
 

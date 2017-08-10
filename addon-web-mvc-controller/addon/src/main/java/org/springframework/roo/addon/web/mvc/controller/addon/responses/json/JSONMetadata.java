@@ -1135,47 +1135,89 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // if (customer.getId() != null || customer.getVersion() != null
-    bodyBuilder.newLine();
-    bodyBuilder.appendIndent();
-    bodyBuilder.append("if (%s || %s",
-        createNullExpression(entityMetadata.getCurrentIndentifierField()),
-        createNullExpression(entityMetadata.getCurrentVersionField()));
-    if (compositionRelationOneToOne.isEmpty()) {
-      bodyBuilder.append(") {");
-      bodyBuilder.newLine();
-    } else {
-      bodyBuilder.indent();
-      bodyBuilder.indent();
-      for (Pair<RelationInfo, JpaEntityMetadata> item : compositionRelationOneToOne) {
-        JavaSymbolName versionFieldName = item.getRight().getCurrentVersionField().getFieldName();
-        JavaSymbolName idFieldName = item.getRight().getCurrentIndentifierField().getFieldName();
-        JavaSymbolName relationFieldName = item.getKey().fieldMetadata.getFieldName();
+    // Concurrency control
+    if (entityMetadata.getCurrentVersionField() != null) {
 
-        // || (customer.getAddress() != null && (customer.getAddress().getId() != null || customer.getAddress().getVersion() != null))
+      // if (customer.getId() != null || customer.getVersion() != null
+      bodyBuilder.newLine();
+      bodyBuilder.appendIndent();
+      bodyBuilder.append("if (%s || %s",
+          createNullExpression(entityMetadata.getCurrentIndentifierField()),
+          createNullExpression(entityMetadata.getCurrentVersionField()));
+      if (compositionRelationOneToOne.isEmpty()) {
+        bodyBuilder.append(") {");
         bodyBuilder.newLine();
-        bodyBuilder.appendIndent();
-        bodyBuilder.append("|| ( ");
-        bodyBuilder
-            .append(
-                "%1$s.get%2$s() != null && (%1$s.get%2$s().get%3$s() != null || %1$s.get%2$s().get%4$s() != null)",
-                entityItemName, relationFieldName.getSymbolNameCapitalisedFirstLetter(),
-                idFieldName.getSymbolNameCapitalisedFirstLetter(),
-                versionFieldName.getSymbolNameCapitalisedFirstLetter());
-        bodyBuilder.append(")");
-      }
-      bodyBuilder.append(") {");
-      bodyBuilder.newLine();
+      } else {
+        bodyBuilder.indent();
+        bodyBuilder.indent();
+        for (Pair<RelationInfo, JpaEntityMetadata> item : compositionRelationOneToOne) {
+          JavaSymbolName versionFieldName = item.getRight().getCurrentVersionField().getFieldName();
+          JavaSymbolName idFieldName = item.getRight().getCurrentIndentifierField().getFieldName();
+          JavaSymbolName relationFieldName = item.getKey().fieldMetadata.getFieldName();
 
+          // || (customer.getAddress() != null && (customer.getAddress().getId() != null || customer.getAddress().getVersion() != null))
+          bodyBuilder.newLine();
+          bodyBuilder.appendIndent();
+          bodyBuilder.append("|| ( ");
+          bodyBuilder
+              .append(
+                  "%1$s.get%2$s() != null && (%1$s.get%2$s().get%3$s() != null || %1$s.get%2$s().get%4$s() != null)",
+                  entityItemName, relationFieldName.getSymbolNameCapitalisedFirstLetter(),
+                  idFieldName.getSymbolNameCapitalisedFirstLetter(),
+                  versionFieldName.getSymbolNameCapitalisedFirstLetter());
+          bodyBuilder.append(")");
+        }
+        bodyBuilder.append(") {");
+        bodyBuilder.newLine();
+
+        bodyBuilder.indentRemove();
+        bodyBuilder.indentRemove();
+      }
+      bodyBuilder.indent();
+      // return ResponseEntity.status(HttpStatus.CONFLICT).build();
+      bodyBuilder.appendFormalLine("return %s.status(%s.CONFLICT).build();",
+          getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS));
       bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine("}");
+    } else {
+
+      // if (customer.getId() != null)
+      bodyBuilder.newLine();
+      bodyBuilder.appendIndent();
+      bodyBuilder.append("if (%s",
+          createNullExpression(entityMetadata.getCurrentIndentifierField()));
+      if (compositionRelationOneToOne.isEmpty()) {
+        bodyBuilder.append(") {");
+        bodyBuilder.newLine();
+      } else {
+        bodyBuilder.indent();
+        bodyBuilder.indent();
+        for (Pair<RelationInfo, JpaEntityMetadata> item : compositionRelationOneToOne) {
+          JavaSymbolName idFieldName = item.getRight().getCurrentIndentifierField().getFieldName();
+          JavaSymbolName relationFieldName = item.getKey().fieldMetadata.getFieldName();
+
+          // || (customer.getAddress() != null && (customer.getAddress().getId() != null || customer.getAddress().getVersion() != null))
+          bodyBuilder.newLine();
+          bodyBuilder.appendIndent();
+          bodyBuilder.append("|| ( ");
+          bodyBuilder.append("%1$s.get%2$s() != null && %1$s.get%2$s().get%3$s() != null",
+              entityItemName, relationFieldName.getSymbolNameCapitalisedFirstLetter(),
+              idFieldName.getSymbolNameCapitalisedFirstLetter());
+          bodyBuilder.append(")");
+        }
+        bodyBuilder.append(") {");
+        bodyBuilder.newLine();
+
+        bodyBuilder.indentRemove();
+        bodyBuilder.indentRemove();
+      }
+      bodyBuilder.indent();
+      // return ResponseEntity.status(HttpStatus.CONFLICT).build();
+      bodyBuilder.appendFormalLine("return %s.status(%s.CONFLICT).build();",
+          getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS));
       bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine("}");
     }
-    bodyBuilder.indent();
-    // return ResponseEntity.status(HttpStatus.CONFLICT).build();
-    bodyBuilder.appendFormalLine("return %s.status(%s.CONFLICT).build();",
-        getNameOfJavaType(RESPONSE_ENTITY), getNameOfJavaType(SpringJavaType.HTTP_STATUS));
-    bodyBuilder.indentRemove();
-    bodyBuilder.appendFormalLine("}");
 
     // if (result.hasErrors()) {
     // return ResponseEntity.status(HttpStatus.CONFLICT).body(result);

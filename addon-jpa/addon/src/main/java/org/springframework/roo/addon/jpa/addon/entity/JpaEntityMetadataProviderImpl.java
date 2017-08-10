@@ -342,10 +342,6 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
       // Obtain version field from entity details
       List<FieldMetadata> versionFields = entityDetails.getFieldsWithAnnotation(VERSION);
 
-      Validate.notEmpty(versionFields, String.format(
-          "ERROR: The annotated entity '%s' doesn't contain any version field.", entityDetails
-              .getType().getFullyQualifiedTypeName()));
-
       // Check and add version field
       if (!versionFields.isEmpty()) {
         versionField = versionFields.get(0);

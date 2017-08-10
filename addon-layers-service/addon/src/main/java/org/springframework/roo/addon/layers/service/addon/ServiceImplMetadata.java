@@ -401,15 +401,19 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     bodyBuilder.appendFormalLine("%s.%s(%s);", param0, relationInfo.addMethod.getMethodName(),
         childListVariable);
 
-    // // Force the version update of the parent side to know that the parent has changed
-    bodyBuilder
-        .appendFormalLine("// Force the version update of the parent side to know that the parent has changed");
+    // Concurrency control
+    if (this.entityMetadata.getCurrentVersionField() != null) {
 
-    // // because it has new books assigned
-    bodyBuilder.appendFormalLine("// because it has new books assigned");
+      // // Force the version update of the parent side to know that the parent has changed
+      bodyBuilder
+          .appendFormalLine("// Force the version update of the parent side to know that the parent has changed");
 
-    // {param0}.setVersion({param0}.getVersion() + 1);
-    bodyBuilder.appendFormalLine("%s.setVersion(%s.getVersion() + 1);", param0, param0);
+      // // because it has new books assigned
+      bodyBuilder.appendFormalLine("// because it has new books assigned");
+
+      // {param0}.setVersion({param0}.getVersion() + 1);
+      bodyBuilder.appendFormalLine("%s.setVersion(%s.getVersion() + 1);", param0, param0);
+    }
 
     // return {repoField}.{saveMethod}({param0});
     bodyBuilder.appendFormalLine("return %s().%s(%s);", getAccessorMethod(repositoryFieldMetadata)
