@@ -1,26 +1,5 @@
 package org.springframework.roo.addon.web.mvc.views;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.logging.Logger;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -72,6 +51,27 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.XmlUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.logging.Logger;
 
 /**
  * This abstract class implements MVCViewGenerationService interface that
@@ -138,6 +138,8 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
       List<MenuEntry> menuEntries);
 
   protected abstract void writeDoc(DOC document, String viewPath);
+
+  protected abstract boolean isUserManagedDocument(DOC document);
 
   @Override
   public void addListView(String moduleName, JpaEntityMetadata entityMetadata,
@@ -240,8 +242,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc =
-          mergeListView("list", loadExistingDoc(viewName), ctx, entityItem, fields, detailsLevels);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = mergeListView("list", existingDoc, ctx, entityItem, fields, detailsLevels);
+      }
     } else {
       ctx.addExtraParameter("entity", entityItem);
       ctx.addExtraParameter("fields", fields);
@@ -312,9 +316,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc =
-          mergeListDeleteModalView("listDeleteModal", loadExistingDoc(viewName), ctx, entityItem,
-              fields);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = mergeListDeleteModalView("listDeleteModal", existingDoc, ctx, entityItem, fields);
+      }
     } else {
       ctx.addExtraParameter("entity", entityItem);
       ctx.addExtraParameter("fields", fields);
@@ -384,9 +389,12 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc =
-          mergeListDeleteModalDetailView("listDeleteModalDetail", loadExistingDoc(viewName), ctx,
-              entityItem, fields);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc =
+            mergeListDeleteModalDetailView("listDeleteModalDetail", existingDoc, ctx, entityItem,
+                fields);
+      }
     } else {
       ctx.addExtraParameter("entity", entityItem);
       ctx.addExtraParameter("fields", fields);
@@ -455,9 +463,12 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc =
-          mergeListDeleteModalBatchView("listDeleteModalBatch", loadExistingDoc(viewName), ctx,
-              entityItem, fields);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc =
+            mergeListDeleteModalBatchView("listDeleteModalBatch", loadExistingDoc(viewName), ctx,
+                entityItem, fields);
+      }
     } else {
       ctx.addExtraParameter("entity", entityItem);
       ctx.addExtraParameter("fields", fields);
@@ -528,9 +539,12 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc =
-          mergeListDeleteModalBatchDetailView("listDeleteModalBatchDetail",
-              loadExistingDoc(viewName), ctx, entityItem, fields);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc =
+            mergeListDeleteModalBatchDetailView("listDeleteModalBatchDetail",
+                loadExistingDoc(viewName), ctx, entityItem, fields);
+      }
     } else {
       ctx.addExtraParameter("entity", entityItem);
       ctx.addExtraParameter("fields", fields);
@@ -669,7 +683,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("show", loadExistingDoc(viewName), ctx, fields);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("show", existingDoc, ctx, fields);
+      }
     } else {
       newDoc = process("show", ctx);
     }
@@ -717,7 +734,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("showInline", loadExistingDoc(viewName), ctx, fields);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("showInline", existingDoc, ctx, fields);
+      }
     } else {
       newDoc = process("showInline", ctx);
     }
@@ -766,7 +786,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("create", loadExistingDoc(viewName), ctx, fields);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("create", existingDoc, ctx, fields);
+      }
     } else {
       newDoc = process("create", ctx);
     }
@@ -816,7 +839,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("edit", loadExistingDoc(viewName), ctx, fields);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("edit", existingDoc, ctx, fields);
+      }
     } else {
       newDoc = process("edit", ctx);
     }
@@ -850,7 +876,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("index", loadExistingDoc(viewName), ctx);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("index", existingDoc, ctx);
+      }
 
     } else {
       newDoc = process("index", ctx);
@@ -872,7 +901,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("login", loadExistingDoc(viewName), ctx);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("login", existingDoc, ctx);
+      }
     } else {
       newDoc = process("login", ctx);
     }
@@ -894,7 +926,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("accessibility", loadExistingDoc(viewName), ctx);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("accessibility", existingDoc, ctx);
+      }
     } else {
       newDoc = process("accessibility", ctx);
     }
@@ -915,7 +950,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("error", loadExistingDoc(viewName), ctx);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("error", existingDoc, ctx);
+      }
     } else {
       newDoc = process("error", ctx);
     }
@@ -937,7 +975,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("layouts/default-layout", loadExistingDoc(viewName), ctx);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("layouts/default-layout", existingDoc, ctx);
+      }
     } else {
       newDoc = process("layouts/default-layout", ctx);
     }
@@ -959,7 +1000,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("layouts/default-layout-no-menu", loadExistingDoc(viewName), ctx);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("layouts/default-layout-no-menu", existingDoc, ctx);
+      }
     } else {
       newDoc = process("layouts/default-layout-no-menu", ctx);
     }
@@ -981,7 +1025,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("layouts/home-layout", loadExistingDoc(viewName), ctx);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("layouts/home-layout", existingDoc, ctx);
+      }
     } else {
       newDoc = process("layouts/home-layout", ctx);
     }
@@ -1001,7 +1048,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("fragments/footer", loadExistingDoc(viewName), ctx);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("fragments/footer", existingDoc, ctx);
+      }
     } else {
       newDoc = process("fragments/footer", ctx);
     }
@@ -1021,7 +1071,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("fragments/header", loadExistingDoc(viewName), ctx);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("fragments/header", existingDoc, ctx);
+      }
     } else {
       newDoc = process("fragments/header", ctx);
     }
@@ -1176,7 +1229,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = mergeMenu("fragments/menu", loadExistingDoc(viewName), ctx, menuEntries);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = mergeMenu("fragments/menu", existingDoc, ctx, menuEntries);
+      }
     } else {
       ctx.addExtraParameter("menuEntries", menuEntries);
       newDoc = process("fragments/menu", ctx);
@@ -1231,7 +1287,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("fragments/modal", loadExistingDoc(viewName), ctx);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("fragments/modal", existingDoc, ctx);
+      }
     } else {
       newDoc = process("fragments/modal", ctx);
     }
@@ -1252,7 +1311,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("fragments/modal-confirm", loadExistingDoc(viewName), ctx);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("fragments/modal-confirm", existingDoc, ctx);
+      }
     } else {
       newDoc = process("fragments/modal-confirm", ctx);
     }
@@ -1273,7 +1335,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("fragments/session-links", loadExistingDoc(viewName), ctx);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("fragments/session-links", existingDoc, ctx);
+      }
     } else {
       newDoc = process("fragments/session-links", ctx);
     }
@@ -1305,7 +1370,10 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("fragments/languages", loadExistingDoc(viewName), ctx);
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("fragments/languages", existingDoc, ctx);
+      }
     } else {
       newDoc = process("fragments/languages", ctx);
     }
@@ -1409,7 +1477,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
     // Check if is a referenced field
     if (typeDetails != null && typeDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
-      // Referenced field is a relation field      
+      // Referenced field is a relation field
 
       // If is child part field of a composition relation, specify it if view context
       if (entityMetadata.getCompositionRelationField() != null
@@ -1795,9 +1863,9 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
 
   /**
    * Locates `@EntityFormat` annotations at type-level and relation fields and
-   * adds a new message to provided map if the annotation has the `message` 
+   * adds a new message to provided map if the annotation has the `message`
    * attribute.
-   * 
+   *
    * @param properties the Map<String, String> to be added to message bundles.
    * @param details the ClassOrInterfaceTypeDetails to check.
    */
@@ -1837,7 +1905,7 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
   /**
    * This method obtains all necessary information about fields from each
    * one-to-one referenced entity.
-   * 
+   *
    * @param fieldList the List with main entity fields.
    * @param checkMaxFields whether field number is restricted.
    * @param ctx the context with all the necessary information for view
@@ -1904,14 +1972,14 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
   }
 
   /**
-   * Checks if entity has child one-to-one composition relations and gets 
+   * Checks if entity has child one-to-one composition relations and gets
    * referenced fields info for adding it to the view context.
-   * 
-   * @param entityMetadata the JpaEntityMetadata from parent entity 
+   *
+   * @param entityMetadata the JpaEntityMetadata from parent entity
    * @param entityDetails the MemeberDetails from parent entity
    * @param ctx the ViewContext of view to create
-   * @return a Map<String, List<FieldItem>> where the keys are the referenced 
-   *            field names on parent entity and the values are the referenced 
+   * @return a Map<String, List<FieldItem>> where the keys are the referenced
+   *            field names on parent entity and the values are the referenced
    *            entity fields info to add to ViewContext
    */
   private Map<String, List<FieldItem>> manageChildcompositionFields(

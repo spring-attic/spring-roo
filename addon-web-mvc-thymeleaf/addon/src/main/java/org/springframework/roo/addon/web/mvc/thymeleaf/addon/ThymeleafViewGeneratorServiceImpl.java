@@ -165,7 +165,7 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
       if (!isChildElement) {
 
-        // It is not child of top most level elements, so add it 
+        // It is not child of top most level elements, so add it
         elementsToCheck.add(element);
       }
     }
@@ -401,7 +401,10 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("fragments/modal-confirm-delete", loadExistingDoc(viewName), ctx);
+      Document existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("fragments/modal-confirm-delete", existingDoc, ctx);
+      }
     } else {
       newDoc = process("fragments/modal-confirm-delete", ctx);
     }
@@ -423,7 +426,10 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("fragments/modal-confirm-delete-batch", loadExistingDoc(viewName), ctx);
+      Document existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("fragments/modal-confirm-delete-batch", existingDoc, ctx);
+      }
     } else {
       newDoc = process("fragments/modal-confirm-delete-batch", ctx);
     }
@@ -444,7 +450,10 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("fragments/modal-export-empty-error", loadExistingDoc(viewName), ctx);
+      Document existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("fragments/modal-export-empty-error", existingDoc, ctx);
+      }
     } else {
       newDoc = process("fragments/modal-export-empty-error", ctx);
     }
@@ -600,9 +609,12 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc =
-          mergeListView("finderForm", loadExistingDoc(viewName), ctx, entityItem, fields,
-              new ArrayList<List<DetailEntityItem>>());
+      Document existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc =
+            mergeListView("finderForm", existingDoc, ctx, entityItem, fields,
+                new ArrayList<List<DetailEntityItem>>());
+      }
     } else {
       newDoc = process("finderForm", ctx);
     }
@@ -713,9 +725,10 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc =
-          mergeListView("finderList", loadExistingDoc(viewName), ctx, entityItem, fields,
-              detailsLevels);
+      Document existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = mergeListView("finderList", existingDoc, ctx, entityItem, fields, detailsLevels);
+      }
     } else {
       newDoc = process("finderList", ctx);
     }
@@ -745,9 +758,12 @@ public class ThymeleafViewGeneratorServiceImpl extends
     ctx.addExtraParameter("details", Collections.EMPTY_LIST);
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc =
-          mergeDetailsCompositionView("showDetailComposition", loadExistingDoc(viewName), ctx,
-              entityItem, detail, (List<FieldItem>) detail.getConfiguration().get("fields"));
+      Document existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc =
+            mergeDetailsCompositionView("showDetailComposition", existingDoc, ctx, entityItem,
+                detail, (List<FieldItem>) detail.getConfiguration().get("fields"));
+      }
     } else {
       ctx.addExtraParameter("fields", detail.getConfiguration().get("fields"));
       newDoc = process("showDetailComposition", ctx);
@@ -775,9 +791,12 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc =
-          mergeDetailsCompositionView("editDetailComposition", loadExistingDoc(viewName), ctx,
-              entityItem, detail, (List<FieldItem>) detail.getConfiguration().get("fields"));
+      Document existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc =
+            mergeDetailsCompositionView("editDetailComposition", existingDoc, ctx, entityItem,
+                detail, (List<FieldItem>) detail.getConfiguration().get("fields"));
+      }
     } else {
       ctx.addExtraParameter("fields", detail.getConfiguration().get("fields"));
       newDoc = process("editDetailComposition", ctx);
@@ -819,8 +838,10 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc =
-          mergeCreateDetailsView("createDetail", loadExistingDoc(viewName), ctx, entityItem, detail);
+      Document existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = mergeCreateDetailsView("createDetail", existingDoc, ctx, entityItem, detail);
+      }
     } else {
       newDoc = process("createDetail", ctx);
     }
@@ -863,10 +884,12 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc =
-          mergeDetailsCompositionView("createDetailComposition", loadExistingDoc(viewName),
-              childCtx, entityItem, detail,
-              (List<FieldItem>) detail.getConfiguration().get("fields"));
+      Document existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc =
+            mergeDetailsCompositionView("createDetailComposition", existingDoc, childCtx,
+                entityItem, detail, (List<FieldItem>) detail.getConfiguration().get("fields"));
+      }
     } else {
       childCtx.addExtraParameter("fields", detail.getConfiguration().get("fields"));
       newDoc = process("createDetailComposition", childCtx);
@@ -984,7 +1007,10 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge("layouts/default-list-layout", loadExistingDoc(viewName), ctx);
+      Document existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("layouts/default-list-layout", existingDoc, ctx);
+      }
     } else {
       newDoc = process("layouts/default-list-layout", ctx);
     }
@@ -994,4 +1020,20 @@ public class ThymeleafViewGeneratorServiceImpl extends
 
   }
 
+  /**
+   * Checks if a complete document is user managed checking if the root tag has the attribute 'data-z="user-managed"'
+   *
+   * @param document
+   * @return boolean
+   */
+  @Override
+  protected boolean isUserManagedDocument(Document document) {
+
+    Element root = document.getElementsByTag("html").get(0);
+
+    if (root != null && root.hasAttr("data-z") && root.attr("data-z").equals("user-managed")) {
+      return true;
+    }
+    return false;
+  }
 }
