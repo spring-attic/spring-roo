@@ -1029,10 +1029,15 @@ public class ThymeleafViewGeneratorServiceImpl extends
   @Override
   protected boolean isUserManagedDocument(Document document) {
 
-    Element root = document.getElementsByTag("html").get(0);
+    Elements match = document.getElementsByTag("html");
 
-    if (root != null && root.hasAttr("data-z") && root.attr("data-z").equals("user-managed")) {
-      return true;
+    if (match != null && match.size() > 0) {
+      Element root = match.get(0);
+      if (root != null && root.hasAttr("data-z") && root.attr("data-z").equals("user-managed")) {
+        return true;
+      }
+    } else {
+      return false;
     }
     return false;
   }
