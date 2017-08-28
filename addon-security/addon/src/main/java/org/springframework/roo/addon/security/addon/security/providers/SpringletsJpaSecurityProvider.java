@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  * Implementation of SecurityProvider to work with the domain model during the
  * authentication process. The name of this provider is "SPRINGLETS_JPA" and
  * must be unique. It will be used to recognize this Spring Security Provider.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 public class SpringletsJpaSecurityProvider implements SecurityProvider {
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.2.0.RC1");
+      "1.2.0.RC2");
 
   private static final Dependency SPRINGLETS_SECURITY_AUTHENTICATION_STARTER = new Dependency(
       "io.springlets", "springlets-boot-starter-authentication", "${springlets.version}");
@@ -110,7 +110,7 @@ public class SpringletsJpaSecurityProvider implements SecurityProvider {
     // Do changes to files now
     getFileManager().commit();
 
-    // If a special JPA repositories configuration exists, get its metadata 
+    // If a special JPA repositories configuration exists, get its metadata
     // to allow implementing needed changes
     Set<ClassOrInterfaceTypeDetails> repositoryConfigClasses =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(

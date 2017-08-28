@@ -109,7 +109,7 @@ public class JpaOperationsImpl implements JpaOperations {
   private ServiceInstaceManager serviceManager = new ServiceInstaceManager();
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.2.0.RC1");
+      "1.2.0.RC2");
   private static final Dependency SPRINGLETS_DATA_JPA_STARTER = new Dependency("io.springlets",
       "springlets-data-jpa", "${springlets.version}");
   private static final Dependency SPRINGLETS_DATA_COMMONS_STARTER = new Dependency("io.springlets",
@@ -852,7 +852,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
   /**
    * This method generates the identifier field using the provided values.
-   * 
+   *
    * @param entity
    * @param identifierField
    * @param identifierType
@@ -942,7 +942,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
   /**
    * This method generates the version field using the provided values
-   * 
+   *
    * @param entity
    * @param versionField
    * @param versionType

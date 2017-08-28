@@ -56,7 +56,7 @@ import java.util.logging.Logger;
 
 /**
  * Implementation of {@link JpaOperations}.
- * 
+ *
  * @author Sergio Clares
  * @since 2.0
  */
@@ -67,7 +67,7 @@ public class DtoOperationsImpl implements DtoOperations {
   protected final static Logger LOGGER = HandlerUtils.getLogger(DtoOperationsImpl.class);
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.2.0.RC1");
+      "1.2.0.RC2");
   private static final Dependency SPRINGLETS_CONTEXT_DEPENDENCY = new Dependency("io.springlets",
       "springlets-context", "${springlets.version}");
 
@@ -174,7 +174,7 @@ public class DtoOperationsImpl implements DtoOperations {
       String formatExpression, String formatMessage) {
     Validate.notNull(name, "Use --class to select the name of the Projection.");
 
-    // TODO: Validate fields for excluding entity collection, transient and 
+    // TODO: Validate fields for excluding entity collection, transient and
     // static fields from operations (already doing when comming from commands).
 
     // Set focus on projection module
@@ -243,7 +243,7 @@ public class DtoOperationsImpl implements DtoOperations {
       }
     } else {
 
-      // --fields option has been completed and validated, so build annotation 'fields' 
+      // --fields option has been completed and validated, so build annotation 'fields'
       // param from selected fields
       String[] fieldsFromCommand = StringUtils.split(fields, ",");
       for (int i = 0; i < fieldsFromCommand.length; i++) {
@@ -312,10 +312,10 @@ public class DtoOperationsImpl implements DtoOperations {
 
   /**
    * Returns the list of fields to include in Projection.
-   * 
+   *
    * @param fieldsString the fields provided by user.
    * @param entity the associated entity to use for searching the fields.
-   * @return Map<String, FieldMetadata> with the field name to add in the Projection 
+   * @return Map<String, FieldMetadata> with the field name to add in the Projection
    *            and its metadata.
    */
   public Map<String, FieldMetadata> buildFieldsFromString(String fieldsString, JavaType entity) {
@@ -422,9 +422,9 @@ public class DtoOperationsImpl implements DtoOperations {
   }
 
   /**
-   * Check if provided fields contain the related entity id field and otherwise 
+   * Check if provided fields contain the related entity id field and otherwise
    * adds it to the Map.
-   * 
+   *
    * @param entity JavaType the Projection related entity.
    * @param fieldsString the String with the fields received from operation
    * @return the String with the fields to add to Projection.
@@ -458,11 +458,11 @@ public class DtoOperationsImpl implements DtoOperations {
   }
 
   /**
-   * Removes persistence annotations of provided fields and adds them to a 
-   * ClassOrInterfaceTypeDetailsBuilder representing a Projection in construction. 
+   * Removes persistence annotations of provided fields and adds them to a
+   * ClassOrInterfaceTypeDetailsBuilder representing a Projection in construction.
    * Also adds final modifier to fields if required.
-   * 
-   * @param projectionBuilder the ClassOrInterfaceTypeDetailsBuilder for building the 
+   *
+   * @param projectionBuilder the ClassOrInterfaceTypeDetailsBuilder for building the
    *            Projection class.
    * @param fieldsToAdd the List<FieldMetadata> to add.
    */

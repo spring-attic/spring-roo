@@ -38,9 +38,9 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
- * Provides convenience methods that can be used to create mock tests 
+ * Provides convenience methods that can be used to create mock tests
  * for JPA Repositories.
- * 
+ *
  * @author Sergio Clares
  * @since 2.0
  */
@@ -55,7 +55,7 @@ public class ThymeleafControllerTestCreator implements TestCreatorProvider {
       "io.springlets", "springlets-boot-starter-test", "${springlets.version}", DependencyType.JAR,
       DependencyScope.TEST);
   private final static Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.2.0.RC1");
+      "1.2.0.RC2");
 
   private BundleContext context;
 
@@ -136,7 +136,7 @@ public class ThymeleafControllerTestCreator implements TestCreatorProvider {
     ControllerAnnotationValues controllerAnnotationValues = new ControllerAnnotationValues(cid);
     JavaType managedEntity = controllerAnnotationValues.getEntity();
 
-    // Workaround to get a JavaType with not null module when recovering it 
+    // Workaround to get a JavaType with not null module when recovering it
     // from a ClassAttributeValue
     managedEntity =
         new JavaType(managedEntity.getFullyQualifiedTypeName(), managedEntity.getArray(),
@@ -195,7 +195,7 @@ public class ThymeleafControllerTestCreator implements TestCreatorProvider {
    * Gets all the valid implementations of DataOnDemandCreatorProvider for a JavaType.
    *
    * @param type the JavaType to get the valid implementations.
-   * @return a `List` with the {@link DataOnDemandCreatorProvider} valid 
+   * @return a `List` with the {@link DataOnDemandCreatorProvider} valid
    *            implementations. Never `null`.
    */
   private List<DataOnDemandCreatorProvider> getValidDataOnDemandCreatorsForType(JavaType type) {

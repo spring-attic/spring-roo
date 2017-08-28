@@ -37,7 +37,7 @@ import org.springframework.roo.support.osgi.ServiceInstaceManager;
 /**
  * Implements {@link JpaAuditOperations} to be able to include
  * Jpa Audit support in generated projects
- * 
+ *
  * @author Sergio Clares
  * @author Juan Carlos García
  * @since 2.0
@@ -54,7 +54,7 @@ public class JpaAuditOperationsImpl implements JpaAuditOperations {
   private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.2.0.RC1");
+      "1.2.0.RC2");
   private static final Dependency SPRINGLETS_DATA_JPA_STARTER = new Dependency("io.springlets",
       "springlets-boot-starter-data-jpa", "${springlets.version}");
 
@@ -113,9 +113,9 @@ public class JpaAuditOperationsImpl implements JpaAuditOperations {
   }
 
   /**
-   * Builds createdDate field for storing entity's created date 
-   * 
-   * @return FieldMetadataBuilder 
+   * Builds createdDate field for storing entity's created date
+   *
+   * @return FieldMetadataBuilder
    */
   private FieldMetadataBuilder getCreatedDateField(ClassOrInterfaceTypeDetails entityDetails,
       String columnName) {
@@ -160,8 +160,8 @@ public class JpaAuditOperationsImpl implements JpaAuditOperations {
   }
 
   /**
-   * Builds modifiedDate field for storing entity's last modified date 
-   * 
+   * Builds modifiedDate field for storing entity's last modified date
+   *
    * @return FieldMetadataBuilder
    */
   private FieldMetadataBuilder getModifiedDateField(ClassOrInterfaceTypeDetails entityDetails,
@@ -208,7 +208,7 @@ public class JpaAuditOperationsImpl implements JpaAuditOperations {
 
   /**
    * Builds createdBy field for storing user who creates entity registers
-   * 
+   *
    * @return FieldMetadataBuilder
    */
   private FieldMetadataBuilder getCreatedByField(ClassOrInterfaceTypeDetails entityDetails,
@@ -241,7 +241,7 @@ public class JpaAuditOperationsImpl implements JpaAuditOperations {
 
   /**
    * Builds modifiedBy field for storing user who last modifies entity registers
-   * 
+   *
    * @return FieldMetadataBuilder
    */
   private FieldMetadataBuilder getModifiedByField(ClassOrInterfaceTypeDetails entityDetails,

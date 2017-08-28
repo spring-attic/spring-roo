@@ -104,7 +104,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
       "org.springframework.boot.jackson.JsonObjectDeserializer");
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.2.0.RC1");
+      "1.2.0.RC2");
   private static final Dependency SPRINGLETS_WEB_STARTER = new Dependency("io.springlets",
       "springlets-boot-starter-web", "${springlets.version}");
   private static final Property TRACEE_PROPERTY = new Property("tracee.version", "1.1.2");
@@ -543,7 +543,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
    * @param entityMetadata
    * @param requiresDeserializer
    * @param module
-   * @param controllerPackage 
+   * @param controllerPackage
    */
   private void createJsonMixinIfDontExists(JavaType entity, JpaEntityMetadata entityMetadata,
       String module, JavaPackage controllerPackage) {
@@ -595,7 +595,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
    *
    * @param entity
    * @param module
-   * @param controllerPackage 
+   * @param controllerPackage
    */
   private void createJsonDeserializersIfDontExists(JavaType currentEntity, String module,
       JavaPackage controllerPackage) {
@@ -1180,7 +1180,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
   /**
    * Creates a new class which supports its associated controller building
    * URL's for its methods
-   * 
+   *
    * @param controller
    *            the JavaType of the associated controller
    */

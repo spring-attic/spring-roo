@@ -1772,15 +1772,11 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
           unitTestType.getSimpleTypeName()));
 
       if (parentType.equals(targetClass.getValue())) {
-        // Check if child entity has not factory class
         if (jpaEntityFactoryLocator.getFirstJpaEntityFactoryForEntity(childType) == null) {
-          // Create factory class for child entity
+          // Create factory class for child entity if doesn't exist
           dataOnDemandCreatorProvider.createEntityFactory(childType);
-          break;
-        } else {
-          // Break the loop if factory class already exists
-          break;
         }
+        break;
       }
     }
   }
