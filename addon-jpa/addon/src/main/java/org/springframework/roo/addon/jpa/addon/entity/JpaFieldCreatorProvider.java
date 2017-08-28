@@ -18,7 +18,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.field.addon.FieldCommands;
 import org.springframework.roo.addon.field.addon.FieldCreatorProvider;
+import org.springframework.roo.addon.jpa.addon.entity.factories.JpaEntityFactoryLocator;
 import org.springframework.roo.addon.plural.addon.PluralService;
+import org.springframework.roo.addon.test.providers.DataOnDemandCreatorProvider;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -29,6 +31,7 @@ import org.springframework.roo.classpath.details.FieldDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.comments.CommentFormatter;
@@ -116,6 +119,12 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
   @Reference
   private PluralService pluralService;
+
+  @Reference
+  private DataOnDemandCreatorProvider dataOnDemandCreatorProvider;
+
+  @Reference
+  private JpaEntityFactoryLocator jpaEntityFactoryLocator;
 
   private Converter<JavaType> javaTypeConverter;
 
@@ -1575,6 +1584,10 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
           throw new IllegalArgumentException(
               "Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field set command");
       }
+
+      // Add factory class for child entity if required
+      createChildEntityFactory(fieldType, typeName);
+
     }
   }
 
@@ -1734,6 +1747,43 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     insertField(childFieldDetails, permitReservedWords, false, true);
   }
 
+  /**
+   * Creates the Factory class of the child entity of relationship, only if parent entity has JPA unit tests.
+   *
+   * @param childType
+   * @param parentType
+   */
+  private void createChildEntityFactory(JavaType childType, JavaType parentType) {
+
+    // Find current JPA unit tests
+    Set<JavaType> unitTestTypes =
+        typeLocationService.findTypesWithAnnotation(RooJavaType.ROO_JPA_UNIT_TEST);
+
+    for (JavaType unitTestType : unitTestTypes) {
+      // Get the annotation @RooJpaUnitTest
+      ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(unitTestType);
+      AnnotationMetadata rooUnitTestAnnotation = cid.getAnnotation(RooJavaType.ROO_JPA_UNIT_TEST);
+
+      // Check if parent entity has JPA unit test class
+      AnnotationAttributeValue<Object> targetClass =
+          rooUnitTestAnnotation.getAttribute("targetClass");
+      Validate.notNull(targetClass, String.format(
+          "'targetClass' attribute can't be found for annotation @RooJpaUnitTest in class %s",
+          unitTestType.getSimpleTypeName()));
+
+      if (parentType.equals(targetClass.getValue())) {
+        // Check if child entity has not factory class
+        if (jpaEntityFactoryLocator.getFirstJpaEntityFactoryForEntity(childType) == null) {
+          // Create factory class for child entity
+          dataOnDemandCreatorProvider.createEntityFactory(childType);
+          break;
+        } else {
+          // Break the loop if factory class already exists
+          break;
+        }
+      }
+    }
+  }
 
   /**
    * Create parent field of a *ToMany relation
@@ -1765,7 +1815,7 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       if (aggregation) {
         cascadeType = Cascade.MERGE_PERSIST;
       } else {
-        // Compsition
+        // Composition
         cascadeType = Cascade.ALL_ARRAY;
       }
     }
