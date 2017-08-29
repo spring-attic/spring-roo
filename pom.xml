@@ -8,6 +8,10 @@
     <version>2.0.0.RC2</version>
     <name>Spring Roo</name>
     <url>http://projects.spring.io/spring-roo/</url>
+    <organization>
+		<name>Pivotal Software, Inc.</name>
+		<url>http://www.spring.io</url>
+	</organization>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
