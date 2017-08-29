@@ -559,7 +559,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
         this.collectionMethodLinkBuilderFactoryField = null;
         this.itemMethodLinkBuilderFactoryField = null;
-        this.conversionServiceField = null;
+        // ROO-3868: New entity visualization support needs a
+        // ConversionService field
+        this.conversionServiceField = getConversionServiceField();
+        ensureGovernorHasField(new FieldMetadataBuilder(this.conversionServiceField));
 
         // Build constructor
         String itemLinkBuilderLine = "";
@@ -891,7 +894,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // ROO-3868: New entity visualization support needs a ConversionService
     // field
-    if (this.type == ControllerType.COLLECTION || this.type == ControllerType.DETAIL) {
+    if (this.type == ControllerType.COLLECTION || this.type == ControllerType.DETAIL
+        || this.type == ControllerType.SEARCH) {
       String conversionServiceFieldName =
           this.conversionServiceField.getFieldName().getSymbolName();
       constructor.addParameter(conversionServiceFieldName,
@@ -1716,6 +1720,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     parameterTypes.add(annotatedFormBean);
 
     // Including GlobalSearch parameter and DatatablesPageable parameter
+    parameterTypes.add(DATATABLES_COLUMNS_PARAM);
     parameterTypes.add(GLOBAL_SEARCH_PARAM);
     parameterTypes.add(DATATABLES_PAGEABLE_PARAM);
 
@@ -1740,6 +1745,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     final List<String> parameterStrings = new ArrayList<String>();
     parameterNames.add(FORM_BEAN_PARAM_NAME);
     parameterStrings.add(FORM_BEAN_PARAM_NAME.getSymbolName());
+    parameterNames.add(DATATABLES_COLUMNS_PARAM_NAME);
     parameterNames.add(GLOBAL_SEARCH_PARAM_NAME);
     parameterStrings.add(GLOBAL_SEARCH_PARAM_NAME.getSymbolName());
     parameterNames.add(DATATABLES_PAGEABLE_PARAM_NAME);
@@ -1769,7 +1775,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
             : serviceReturnType.getParameters().get(0);
     JavaType returnType =
         JavaType.wrapperOf(RESPONSE_ENTITY, JavaType.wrapperOf(
-            SpringletsJavaType.SPRINGLETS_DATATABLES_DATA, datatablesDataReturnType));
+            SpringletsJavaType.SPRINGLETS_CONVERTED_DATATABLES_DATA, datatablesDataReturnType));
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -1822,13 +1828,15 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
 
-    // DatatablesData<Product> datatablesData = new
-    // DatatablesData<Product>(products, totalProductsCount, draw);
+    // ConvertedDatatablesData<Product> datatablesData = new
+    // ConvertedDatatablesData<Product>(products, totalProductsCount, draw, conversionService, datatablesColumns);
     bodyBuilder.appendFormalLine(String.format(
-        "%s<%s> datatablesData = new DatatablesData<%s>(%s, %s, %s);",
-        getNameOfJavaType(SpringletsJavaType.SPRINGLETS_DATATABLES_DATA),
+        "%s<%s> datatablesData = new ConvertedDatatablesData<%s>(%s, %s, %s, %s(), %s);",
+        getNameOfJavaType(SpringletsJavaType.SPRINGLETS_CONVERTED_DATATABLES_DATA),
         getNameOfJavaType(datatablesDataReturnType), getNameOfJavaType(datatablesDataReturnType),
-        itemNames, totalItemNamesCount, DRAW_PARAM_NAME));
+        itemNames, totalItemNamesCount, DRAW_PARAM_NAME,
+        getAccessorMethod(this.conversionServiceField).getMethodName(),
+        DATATABLES_COLUMNS_PARAM_NAME));
 
     // return ResponseEntity.ok(datatablesData);
     bodyBuilder.appendFormalLine(String.format("return %s.ok(datatablesData);",
