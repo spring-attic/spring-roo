@@ -18,7 +18,7 @@
   <packaging>TO_BE_CHANGED_BY_LISTENER</packaging>
 
   <properties>
-    <roo.version>2.0.0.BUILD-SNAPSHOT</roo.version>
+    <roo.version>2.0.0.RC2</roo.version>
     <java.product.version>JAVA_PRODUCT_VERSION</java.product.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <aspectj.plugin.version>ASPECTJ_PLUGIN_VERSION</aspectj.plugin.version>
