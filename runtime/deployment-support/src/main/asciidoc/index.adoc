@@ -38,7 +38,7 @@ DISID CORPORATION S.L.
 :toclevels: 2
 :toc-placement: left
 :toc-title: Table of Contents
-:version: 2.0.0.RC2
+:version: 2.0.0.BUILD-SNAPSHOT
 ifdef::backend-pdf[]
 :pdf-style: asciidoctor
 :pagenums:
@@ -153,7 +153,7 @@ Features of the Thymeleaf views:
 * View layer generation engine is based on Freemarker templates. Additionally Roo provides a command to install them in your project letting the ability to customize the view layer scaffold before executing it.
 * New amazing Spring Roo Responsive Theme!
 
-== Spring-Roo 2.0.0.RC2 New Features
+== Spring-Roo 2.0.0.BUILD-SNAPSHOT New Features
 
 The most important changes the new version of Spring Roo features regarding Roo 2.0.0.M3 are the following:
 
@@ -249,10 +249,10 @@ Because the release cycle of STS and Roo differ a version of Spring Roo may be i
 |Version
 |STS update site
 
-a|*2.0.0.RC2*
+a|*2.0.0.BUILD-SNAPSHOT*
 a|_Spring Roo 2.0 (Nightly)_
 
-a|*2.0.0.RC2*
+a|*2.0.0.BUILD-SNAPSHOT*
 a|_Spring Roo 2.0 (Nightly)_
 
 a|*2.0.0.RELEASE*
