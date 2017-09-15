@@ -13,6 +13,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.jpa.addon.entity.factories.JpaEntityFactoryLocator;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.layers.service.addon.ServiceLocator;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -21,6 +22,7 @@ import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
@@ -137,6 +139,11 @@ public class ThymeleafControllerIntegrationTestMetadataProviderImpl extends
     // First, add managed entity
     relatedEntities.add(managedEntity);
     for (RelationInfo relationInfo : relatioInfos) {
+      if (relationInfo.cardinality == Cardinality.ONE_TO_ONE
+          && relationInfo.type == JpaRelationType.COMPOSITION) {
+        // OneToOne composition is managed by owner's service
+        continue;
+      }
       JavaType entity = relationInfo.childType;
       if (!relatedEntities.contains(entity)) {
         relatedEntities.add(entity);
