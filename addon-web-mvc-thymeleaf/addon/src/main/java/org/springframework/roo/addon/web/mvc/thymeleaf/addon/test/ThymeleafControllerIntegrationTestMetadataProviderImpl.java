@@ -5,6 +5,9 @@ import static org.springframework.roo.model.RooJavaType.ROO_THYMELEAF_CONTROLLER
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -20,6 +23,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.operations.Cardinality;
@@ -28,10 +32,11 @@ import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTrack
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link ThymeleafControllerIntegrationTestMetadataProvider}.
- * 
+ *
  * @author Sergio Clares
  * @since 2.0
  */
@@ -41,13 +46,16 @@ public class ThymeleafControllerIntegrationTestMetadataProviderImpl extends
     AbstractMemberDiscoveringItdMetadataProvider implements
     ThymeleafControllerIntegrationTestMetadataProvider {
 
+  private static final Logger LOGGER = HandlerUtils.getLogger(AbstractItdMetadataProvider.class);
+
   protected MetadataDependencyRegistryTracker registryTracker = null;
+
 
   /**
    * This service is being activated so setup it:
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_THYMELEAF_CONTROLLER_INTEGRATION_TEST} as 
+   * <li>Registers {@link RooJavaType#ROO_THYMELEAF_CONTROLLER_INTEGRATION_TEST} as
    * additional JavaType that will trigger metadata registration.</li>
    * </ul>
    */
@@ -63,9 +71,9 @@ public class ThymeleafControllerIntegrationTestMetadataProviderImpl extends
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -135,7 +143,7 @@ public class ThymeleafControllerIntegrationTestMetadataProviderImpl extends
 
     // Get child related entities
     Collection<RelationInfo> relatioInfos = entityMetadata.getRelationInfos().values();
-    List<JavaType> relatedEntities = new ArrayList<JavaType>();
+    Set<JavaType> relatedEntities = new TreeSet<JavaType>();
     // First, add managed entity
     relatedEntities.add(managedEntity);
     for (RelationInfo relationInfo : relatioInfos) {
@@ -144,10 +152,7 @@ public class ThymeleafControllerIntegrationTestMetadataProviderImpl extends
         // OneToOne composition is managed by owner's service
         continue;
       }
-      JavaType entity = relationInfo.childType;
-      if (!relatedEntities.contains(entity)) {
-        relatedEntities.add(entity);
-      }
+      relatedEntities.add(relationInfo.childType);
     }
 
     // Get the entity factory of managed entity
@@ -159,10 +164,13 @@ public class ThymeleafControllerIntegrationTestMetadataProviderImpl extends
     for (JavaType entity : relatedEntities) {
       final ClassOrInterfaceTypeDetails serviceDetails =
           getServiceLocator().getFirstService(entity);
-      Validate.notNull(serviceDetails, "Couldn't find service of related entity %s in %s",
-          entity.getSimpleTypeName(), this.getClass().getName());
-      if (!relatedServices.contains(serviceDetails.getType())) {
-        relatedServices.add(serviceDetails.getType());
+      if (serviceDetails == null) {
+        LOGGER.warning(String.format("Couldn't find service of related entity %s in %s",
+            entity.getSimpleTypeName(), this.getClass().getName()));
+      } else {
+        if (!relatedServices.contains(serviceDetails.getType())) {
+          relatedServices.add(serviceDetails.getType());
+        }
       }
     }
 
