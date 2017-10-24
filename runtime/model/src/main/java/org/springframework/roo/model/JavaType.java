@@ -864,7 +864,11 @@ public class JavaType implements Comparable<JavaType> {
    */
   public boolean isNumber() {
     try {
-      return ClassUtils.getClass(getFullyQualifiedTypeName()).getSuperclass().equals(Number.class);
+      Class<?> superclass = ClassUtils.getClass(getFullyQualifiedTypeName()).getSuperclass();
+      if (superclass == null) {
+        return false;
+      }
+      return superclass.equals(Number.class);
     } catch (ClassNotFoundException e) {
       return false;
     }
