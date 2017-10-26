@@ -11,6 +11,7 @@ import org.springframework.roo.addon.layers.service.annotations.RooServiceImpl;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
@@ -170,8 +171,18 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     this.requiredServiceFieldByEntity =
         Collections.unmodifiableMap(requiredServiceFieldByEntityTemp);
 
+    // Check if there is an @Autowired constructor declared in type
+    List<? extends ConstructorMetadata> constructors =
+        governorTypeDetails.getDeclaredConstructors();
+    boolean foundAutowiredConstructor = false;
+    for (ConstructorMetadata constructorMetadata : constructors) {
+      if (constructorMetadata.getAnnotation(SpringJavaType.AUTOWIRED) != null) {
+        foundAutowiredConstructor = true;
+        break;
+      }
+    }
     // Add constructor
-    ensureGovernorHasConstructor(getConstructor());
+    ensureGovernorHasConstructor(getConstructor(!foundAutowiredConstructor));
 
     pendingTransactionalMethodToAdd =
         new ArrayList<MethodMetadata>(serviceMetadata.getTransactionalDefinedMethods());
@@ -265,7 +276,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
   /**
    * Builds a method which returns the class of entity JavaType.
-   * 
+   *
    * @return MethodMetadataBuilder
    */
   private MethodMetadata getEntityTypeGetterMethod() {
@@ -297,7 +308,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
   /**
    * Builds a method which returns the class of the entity identifier JavaType.
-   * 
+   *
    * @return MethodMetadataBuilder
    */
   private MethodMetadata getIdentifierTypeGetterMethod() {
@@ -490,9 +501,11 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
    * Method that generates Service implementation constructor. If exists a
    * repository, it will be included as constructor parameter
    *
+   * @param autowired add or not autowired annotation
+   *
    * @return
    */
-  private ConstructorMetadataBuilder getConstructor() {
+  private ConstructorMetadataBuilder getConstructor(boolean autowired) {
 
     ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -509,8 +522,10 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     constructorBuilder.setBodyBuilder(bodyBuilder);
     constructorBuilder.setModifier(Modifier.PUBLIC);
 
-    // Adding @Autowired annotation
-    constructorBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.AUTOWIRED));
+    if (autowired) {
+      // Adding @Autowired annotation
+      constructorBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.AUTOWIRED));
+    }
 
     return constructorBuilder;
   }
@@ -792,7 +807,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
   /**
    * Build "findOneForUpdate" method body which delegates on repository
-   * 
+   *
    * @param methodToBeImplemented
    * @return
    */
