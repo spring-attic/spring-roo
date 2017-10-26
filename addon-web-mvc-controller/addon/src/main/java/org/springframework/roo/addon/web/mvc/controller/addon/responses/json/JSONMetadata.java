@@ -200,8 +200,17 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Add @RequestMapping
     ensureGovernorIsAnnotated(getRequestMappingAnnotation());
 
-
-    this.constructor = getConstructor();
+    // Check if there is an @Autowired constructor declared in type
+    List<? extends ConstructorMetadata> constructors =
+        governorTypeDetails.getDeclaredConstructors();
+    boolean foundAutowiredConstructor = false;
+    for (ConstructorMetadata constructorMetadata : constructors) {
+      if (constructorMetadata.getAnnotation(SpringJavaType.AUTOWIRED) != null) {
+        foundAutowiredConstructor = true;
+        break;
+      }
+    }
+    this.constructor = getConstructor(!foundAutowiredConstructor);
     ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
 
     List<MethodMetadata> allMethods = new ArrayList<MethodMetadata>();
@@ -1056,13 +1065,16 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     return annotationBuilder;
   }
 
-  private ConstructorMetadata getConstructor() {
+  private ConstructorMetadata getConstructor(boolean autowired) {
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // Generating constructor
     ConstructorMetadataBuilder constructor = new ConstructorMetadataBuilder(getId());
     constructor.setModifier(Modifier.PUBLIC);
-    constructor.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.AUTOWIRED));
+
+    if (autowired) {
+      constructor.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.AUTOWIRED));
+    }
 
     // Getting serviceFieldName
     String serviceFieldName = controllerMetadata.getServiceField().getFieldName().getSymbolName();
@@ -1842,9 +1854,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   }
 
   /**
-   * Checks field type and creates a proper expression to check against null. 
+   * Checks field type and creates a proper expression to check against null.
    * Mainly differences will be between primitive and non primitive values.
-   * 
+   *
    * @return a String with the expression to check.
    */
   private String createNullExpression(FieldMetadata field) {
