@@ -184,7 +184,7 @@ public class JSONMixinMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     for (FieldMetadata field : entityMetadata.getRelationsAsChild().values()) {
       if (isAnyToOneRelation(field)) {
 
-        JavaType parentEntity = field.getFieldType();
+        JavaType parentEntity = field.getFieldType().withoutParameters();
         JavaType entityDeserializer = getEntityDeserializerFor(parentEntity);
         Validate.notNull(entityDeserializer,
             "Can't locate class with @%s.entity=%s required for %s entity Json Mixin (%s)",

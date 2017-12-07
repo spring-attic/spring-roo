@@ -901,4 +901,8 @@ public class JavaType implements Comparable<JavaType> {
     return getNameIncludingTypeParameters();
   }
 
+  public JavaType withoutParameters() {
+    return new JavaType(getFullyQualifiedTypeName(), getArray(), DataType.TYPE, getArgName(), null,
+        getModule());
+  }
 }
