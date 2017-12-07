@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  * Metadata for {@link RooToString}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -63,7 +63,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
   /**
    * Constructor
-   * 
+   *
    * @param identifier
    * @param aspectName
    * @param governorPhysicalTypeMetadata
@@ -92,7 +92,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
    * <p>
    * If the user provided a non-default name for "toString", that method will
    * be returned.
-   * 
+   *
    * @return the "toString" method declared on this type or that will be
    *         introduced (or null if undeclared and not introduced)
    */
@@ -121,6 +121,11 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
       if (!field.getFieldType().getFullyQualifiedTypeName().startsWith("java.math")
           && !field.getFieldType().getFullyQualifiedTypeName().startsWith("java.lang")
           && !field.getFieldType().getFullyQualifiedTypeName().startsWith("java.util")) {
+        continue;
+      }
+
+      // Exclude static fields
+      if (Modifier.isStatic(field.getModifier())) {
         continue;
       }
 
