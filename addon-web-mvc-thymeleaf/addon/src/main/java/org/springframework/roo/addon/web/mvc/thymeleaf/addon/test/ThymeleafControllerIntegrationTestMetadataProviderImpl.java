@@ -126,8 +126,13 @@ public class ThymeleafControllerIntegrationTestMetadataProviderImpl extends
         getTypeLocationService().getTypeDetails(jsonController);
     AnnotationMetadata rooControllerAnnotation =
         controllerCid.getAnnotation(RooJavaType.ROO_CONTROLLER);
-    Validate.notNull(rooControllerAnnotation,
-        "The target class must be annotated with @RooController.");
+    if (rooControllerAnnotation == null) {
+      LOGGER.warning(String.format("Ignoring %s of %s as missing %s annotation in %s",
+          ROO_THYMELEAF_CONTROLLER_INTEGRATION_TEST.getSimpleTypeName(),
+          governorPhysicalTypeMetadata.getType().getFullyQualifiedTypeName(),
+          RooJavaType.ROO_CONTROLLER.getSimpleTypeName(), jsonController.getSimpleTypeName()));
+      return null;
+    }
     Validate.notNull(rooControllerAnnotation.getAttribute("entity"),
         "The @RooController must have an 'entity' attribute, targeting managed entity.");
     final JavaType managedEntity =
