@@ -148,7 +148,7 @@
             if (init.stateSave !== undefined) {
                 opts.stateSave = init.stateSave;
             }
-            
+
             if (init.defaultButtons !== undefined) {
             	opts.defaultButtons = init.defaultButtons;
             }
@@ -389,7 +389,7 @@
                         // Populate the row-id data attribute in the modal
                         var ids = rows_selected.join(",");
                         $('#' + tableId + 'DeleteBatchRowId').data('row-id', ids);
-                        
+
                         // Populate DeleteBatchConfirm table which displays the item that
                         // will be removed
                     	$('#' + tableId + '-items-to-remove-batch').DataTable({
@@ -398,9 +398,9 @@
                     			dom: 'rtip',
                     		}
                     	});
-                        
+
                     });
-                    
+
                     // When the delete modal confirm is closed, is necessary to destroy
                     // the datatables that displays the information of the item to be removed
                     $deleteConfirm.on('hidden.bs.modal', function(e) {
@@ -557,7 +557,7 @@
             callback(emptyData(data.draw));
         }
     }
-    
+
     /**
      * Generates and executes an ajax request whose goal is to load data for a
      * DataTable element inside the Delete confirm Dialog.
@@ -579,7 +579,7 @@
             callback(emptyData(data.draw));
         }
     }
-    
+
     /**
      * Generates and executes an ajax request whose goal is to load data for a
      * DataTable element inside the Delete confirm Dialog.
@@ -903,7 +903,7 @@
         var url = getDataValue(datatables, 'load-url');
         return processUrl(datatables, url);
     }
-    
+
     /**
      * Returns the URL to create a new element for the Datatables.
      * The URL is processed to replace any parameters.
@@ -1214,7 +1214,7 @@
             var rowId = jQuery(e.relatedTarget).data('row-id');
             // Populate the row-id data attribute in the modal
             $('#' + tableId + 'DeleteRowId').data('row-id', rowId);
-            
+
             // Populate DeleteConfirm table which displays the item that
             // will be removed
         	$('#' + tableId + '-item-to-remove').DataTable({
@@ -1224,7 +1224,7 @@
         		}
         	});
         });
-        
+
         // When the delete modal confirm is closed, is necessary to destroy
         // the datatables that displays the information of the item to be removed
         $deleteConfirm.on('hidden.bs.modal', function(e) {
@@ -1279,7 +1279,7 @@
 
             $('#' + tableId + 'AddButton').on('click', function() {
                 var url = getCreateUrl(datatables);
-                $addForm = $('#' + tableId + 'AddForm');
+                var $addForm = $('#' + tableId + 'AddForm');
                 var params = $addForm.serialize();
                 $.ajax({
                     type: $addForm.attr('method'),
@@ -1329,8 +1329,8 @@
         buttons = buttons.concat('</div>');
         return buttons;
     }
-    
-    
+
+
     /**
      * This method tries to display the show view of the selected record
      * expanding the selected row.
@@ -1388,7 +1388,7 @@
     apiRegister('advanced.getExportCsvButton()', exportCsvButton);
     apiRegister('advanced.getExportExcelButton()', exportExcelButton);
     apiRegister('advanced.getExportPdfButton()', exportPdfButton);
-    
+
     apiRegister('advanced.showInline()', showInline);
 
 

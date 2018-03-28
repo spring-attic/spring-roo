@@ -52,7 +52,7 @@
 				try {
 					options.step = parseInt(value);
 				} catch (e) {
-					timeStep = 5;
+					// Nothing to do
 				}
 			}
 
