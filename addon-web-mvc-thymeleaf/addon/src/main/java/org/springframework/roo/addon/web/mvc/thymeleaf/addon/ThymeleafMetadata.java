@@ -2365,7 +2365,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
       // if (concurrencyProblem && StringUtils.isEmpty(concurrencyControl)){
       bodyBuilder.appendFormalLine("if (%s.isEmpty(concurrencyControl)){",
-          getNameOfJavaType(new JavaType("org.apache.commons.lang3.StringUtils")));
+          getNameOfJavaType(STRING_UTILS_APACHE));
       bodyBuilder.indent();
 
       // populateForm(model);
@@ -2566,13 +2566,19 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
           entityItemName, getAccessorMethod(this.entityMetadata.getCurrentIndentifierField())
               .getMethodName());
 
-      // if(pet.getVersion() != existingPet.getVersion() && StringUtils.isEmpty(concurrencyControl)){
-      bodyBuilder.appendFormalLine("if(%s.%s() != %s.%s() && %s.isEmpty(concurrencyControl)){",
-          entityItemName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
-              .getMethodName(), existingVarName,
+      // if (!Objects.equals(pet.getVersion() , existingPet.getVersion()) {
+      bodyBuilder.appendFormalLine("if (!%s.equals(%s.%s(), %s.%s())) {",
+          getNameOfJavaType(JavaType.OBJECTS), entityItemName,
           getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
-          getNameOfJavaType(new JavaType("org.apache.commons.lang3.StringUtils")));
+          existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
+              .getMethodName());
       bodyBuilder.indent();
+
+      // if (concurrencyProblem && StringUtils.isEmpty(concurrencyControl)){
+      bodyBuilder.appendFormalLine("if (%s.isEmpty(concurrencyControl)){",
+          getNameOfJavaType(STRING_UTILS_APACHE));
+      bodyBuilder.indent();
+
 
       // populateForm(model);
       bodyBuilder.appendFormalLine("populateForm(model);");
@@ -2586,12 +2592,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
       bodyBuilder.indentRemove();
 
-      // } else if(pet.getVersion() != existingPet.getVersion() && "discard".equals(concurrencyControl)){
-      bodyBuilder.appendFormalLine(
-          "} else if(%s.%s() != %s.%s() && \"discard\".equals(concurrencyControl)){",
-          entityItemName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
-              .getMethodName(), existingVarName,
-          getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName());
+      // } else if(concurrencyProblem && "discard".equals(concurrencyControl)){
+      bodyBuilder.appendFormalLine("} else if(\"discard\".equals(concurrencyControl)){");
       bodyBuilder.indent();
 
       // populateForm(model);
@@ -2610,12 +2612,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
       bodyBuilder.indentRemove();
 
-      // } else if(pet.getVersion() != existingPet.getVersion() && "apply".equals(concurrencyControl)){
-      bodyBuilder.appendFormalLine(
-          "} else if(%s.%s() != %s.%s() && \"apply\".equals(concurrencyControl)){", entityItemName,
-          getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
-          existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
-              .getMethodName());
+      // } else if(concurrencyProblem && "apply".equals(concurrencyControl)){
+      bodyBuilder.appendFormalLine("} else if(\"apply\".equals(concurrencyControl)){");
       bodyBuilder.indent();
 
       // // Update the version field to be able to override the existing values
@@ -2628,11 +2626,25 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
           existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
               .getMethodName());
 
+      // } else if(concurrencyProblem && "apply".equals(concurrencyControl)){
+      bodyBuilder.appendFormalLine("} else {");
+      bodyBuilder.indent();
+
+      // // Invalid concurrencyControlValue
+      bodyBuilder.appendFormalLine("// Invalid concurrencyControlValue");
+
+      // throw new IllegalArgumentException("Invalid concurrencyControlValue");
+      bodyBuilder
+          .appendFormalLine("throw new IllegalArgumentException(\"Invalid concurrencyControlValue\");");
+
+      bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine("}");
+
       bodyBuilder.indentRemove();
       bodyBuilder.appendFormalLine("}");
     }
 
-    // Customer savedCustomer = customerService.save(customer);
+    // customerService.save(customer);
     bodyBuilder.appendFormalLine("%s().%s(%s);",
         getAccessorMethod(controllerMetadata.getLastDetailServiceField()).getMethodName(),
         serviceMetadata.getCurrentSaveMethod().getMethodName(), entityItemName);
@@ -4381,8 +4393,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
       JavaSymbolName parentName = setMethod.getParameterNames().get(0);
       // if(version != pet.getVersion() && StringUtils.isEmpty(concurrencyControl)){
-      bodyBuilder.appendFormalLine("if(%s != %s.%s() && %s.isEmpty(concurrencyControl)){",
-          VERSION_PARAM_NAME, parentName,
+      bodyBuilder.appendFormalLine(
+          "if(!%s.equals(%s, %s.%s()) && %s.isEmpty(concurrencyControl)){",
+          getNameOfJavaType(JavaType.OBJECTS), VERSION_PARAM_NAME, parentName,
           getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
           getNameOfJavaType(new JavaType("org.apache.commons.lang3.StringUtils")));
       bodyBuilder.indent();
@@ -4441,9 +4454,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
       // }else if(version != pet.getVersion() && "discard".equals(concurrencyControl)){
       bodyBuilder.appendFormalLine(
-          "}else if(%s != %s.%s() && \"discard\".equals(concurrencyControl)){", VERSION_PARAM_NAME,
-          parentName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
-              .getMethodName());
+          "}else if(!%s.equals(%s, %s.%s()) && \"discard\".equals(concurrencyControl)){",
+          getNameOfJavaType(JavaType.OBJECTS), VERSION_PARAM_NAME, parentName,
+          getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName());
       bodyBuilder.indent();
 
       // populateForm(model);
