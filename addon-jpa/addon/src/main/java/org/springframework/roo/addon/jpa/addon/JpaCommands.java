@@ -342,14 +342,7 @@ public class JpaCommands implements CommandMarker {
     // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
     // on
     // project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
-
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
-      return true;
-    }
-
-    return false;
+    return projectSettings.getBooleanProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME, false);
   }
 
   /**
@@ -789,10 +782,10 @@ public class JpaCommands implements CommandMarker {
   }
 
   /**
-   * Returns a String with the JavaPackage name to show. It will return a full 
-   * name if provided package doesn't contain the module top level JavaPackage. 
+   * Returns a String with the JavaPackage name to show. It will return a full
+   * name if provided package doesn't contain the module top level JavaPackage.
    * Otherwise, the package name will be shortened using `~`.
-   * 
+   *
    * @param module the String with the module name.
    * @param javaPackage the JavaPackage to extract the String to return.
    * @return a String with the value to show for the java package.

@@ -12,7 +12,7 @@ import java.util.SortedSet;
  * Roo shell works for every project, by setting the value of roo configuration
  * properties.
  *
- * 
+ *
  * Due to the project configuration can be stored in several formats and stores
  * it is recommended that each implementation of this interface would be
  * specialized in each of the stores and formats provided by Roo: properties,
@@ -27,7 +27,7 @@ public interface ProjectSettingsService {
    * Sets a new project configuration property. If the property exists,
    * parameter force indicates if this property is updated or keeps its value.
    * Otherwise the new property is added into project settings.
-   * 
+   *
    * @param key
    *            string that identifies the property
    * @param value
@@ -76,6 +76,20 @@ public interface ProjectSettingsService {
    *         requested property does not exist)
    */
   String getProperty(String key);
+
+  /**
+   * Retrieves the specified boolean property, returning `defaultValue` if the property or file
+   * does not exist.
+   *
+   * @param key
+   *            the property key to retrieve (required)
+   * @param defaultValue
+   *            the default value to return if not set, file does not exist or not valid value
+   *
+   * @return the property value (may return null if the property file or
+   *         requested property does not exist)
+   */
+  Boolean getBooleanProperty(String key, Boolean defaultValue);
 
   /**
    * Method that returns current location of Project Settings file

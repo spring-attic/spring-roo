@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_THYMELEAF;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -58,7 +59,12 @@ import java.util.logging.Logger;
 public class ThymeleafMetadataProviderImpl extends
     AbstractViewGeneratorMetadataProvider<ThymeleafMetadata> implements ThymeleafMetadataProvider {
 
-  protected final static Logger LOGGER = HandlerUtils
+  public static final String SPRING_ROO_THYMELEAF_GENERATE_LABELS =
+      "spring.roo.thymeleaf.generate-labels";
+
+  public static final String SPRING_ROO_THYMELEAF_UPDATE_MENU = "spring.roo.thymeleaf.update-menu";
+
+  protected static final Logger LOGGER = HandlerUtils
       .getLogger(ThymeleafMetadataProviderImpl.class);
 
   private final Map<JavaType, String> domainTypeToServiceMidMap =
@@ -348,6 +354,19 @@ public class ThymeleafMetadataProviderImpl extends
       validFields.add(field);
     }
     return validFields;
+  }
+
+  @Override
+  protected boolean shouldGenerateI18nLabels() {
+    return super.shouldGenerateI18nLabels()
+        && getProjectSettingsService().getBooleanProperty(SPRING_ROO_THYMELEAF_GENERATE_LABELS,
+            true);
+  }
+
+  @Override
+  protected boolean shouldUpdateMenu() {
+    return super.shouldUpdateMenu()
+        && getProjectSettingsService().getBooleanProperty(SPRING_ROO_THYMELEAF_UPDATE_MENU, true);
   }
 
 }

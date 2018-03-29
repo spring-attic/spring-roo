@@ -1,11 +1,11 @@
 package org.springframework.roo.settings.project;
 
-import java.io.File;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -19,11 +19,9 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.propfiles.manager.PropFilesManagerService;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.osgi.OSGiUtils;
-import org.springframework.roo.support.util.FileUtils;
 
 /**
- * 
+ *
  * Project configuration manager implementation to manage the Spring Roo
  * configuration stored in the properties file ".roo/config/project.properties"
  *
@@ -38,7 +36,7 @@ public class ProjectSettingsServiceImpl implements ProjectSettingsService {
   private static final String PROJECT_CONFIG_FILE_FOLDER = "config/";
   private static final String PROJECT_CONFIG_FILE_NAME = "project.properties";
 
-  protected final static Logger LOGGER = HandlerUtils.getLogger(ProjectSettingsServiceImpl.class);
+  protected static final Logger LOGGER = HandlerUtils.getLogger(ProjectSettingsServiceImpl.class);
 
   @Reference
   private PathResolver pathResolver;
@@ -88,6 +86,15 @@ public class ProjectSettingsServiceImpl implements ProjectSettingsService {
   }
 
   @Override
+  public Boolean getBooleanProperty(String key, Boolean defaultValue) {
+    String value = getProperty(key);
+    if (value == null) {
+      return defaultValue;
+    }
+    return ObjectUtils.defaultIfNull(BooleanUtils.toBooleanObject(value), defaultValue);
+  }
+
+  @Override
   public String getProjectSettingsLocation() {
 
     return pathResolver.getFocusedIdentifier(PROJECT_CONFIG_FOLDER_LOCATION,
@@ -120,7 +127,7 @@ public class ProjectSettingsServiceImpl implements ProjectSettingsService {
 
   /**
    * Method that finds the propFilesManagerService.
-   * 
+   *
    * @return the propFilesManagerService. Null is returned if service is not
    *         found
    */
@@ -150,7 +157,7 @@ public class ProjectSettingsServiceImpl implements ProjectSettingsService {
 
   /**
    * Method that finds the filesManager.
-   * 
+   *
    * @return the filesManager. Null is returned if service is not found
    */
   public FileManager getFileManager() {
