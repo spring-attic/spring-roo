@@ -2267,10 +2267,11 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // UriComponents showURI = itemLink.to("show").with("category",
     // newCategory.getId()).toUri();
-    bodyBuilder.appendFormalLine("%s showURI = %s().to(%s.SHOW).with(\"%s\", %s.getId()).toUri();",
+    bodyBuilder.appendFormalLine("%s showURI = %s().to(%s.SHOW).with(\"%s\", %s.%s()).toUri();",
         getNameOfJavaType(SpringJavaType.URI_COMPONENTS),
         getAccessorMethod(this.itemMethodLinkBuilderFactoryField).getMethodName(),
-        getNameOfJavaType(relatedItemLinkFactory), this.entityItemName, newValueVar);
+        getNameOfJavaType(relatedItemLinkFactory), this.entityItemName, newValueVar,
+        getAccessorMethod(this.entityMetadata.getCurrentIndentifierField()).getMethodName());
 
     // return new ModelAndView("redirect:" + showURI.toUriString());
     bodyBuilder.appendFormalLine("return new %s(\"redirect:\" + showURI.toUriString());",
@@ -2469,10 +2470,11 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // UriComponents showURI =
     // itemLink.to(CategoryItemThymeleafLinkFactory.SHOW).with("category",
     // savedCategory.getId()).toUri();
-    bodyBuilder.appendFormalLine("%s showURI = %s().to(%s.SHOW).with(\"%s\", %s.getId()).toUri();",
+    bodyBuilder.appendFormalLine("%s showURI = %s().to(%s.SHOW).with(\"%s\", %s.%s()).toUri();",
         getNameOfJavaType(SpringJavaType.URI_COMPONENTS),
         getAccessorMethod(this.itemMethodLinkBuilderFactoryField).getMethodName(),
-        getNameOfJavaType(relatedItemLinkFactory), this.entityItemName, savedVarName);
+        getNameOfJavaType(relatedItemLinkFactory), this.entityItemName, savedVarName,
+        getAccessorMethod(this.entityMetadata.getCurrentIndentifierField()).getMethodName());
 
     // return new ModelAndView("redirect:" + showURI.toUriString());
     bodyBuilder.appendFormalLine("return new %s(\"redirect:\" + showURI.toUriString());",
