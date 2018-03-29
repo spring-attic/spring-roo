@@ -22,6 +22,13 @@
       allowClear : true,
     });
 
+    $('.dropdown-select-simple[data-ajax--url]').each(function (index, item){
+      var $item = $(item);
+      console.log(
+          "WARNING: Select2 with class 'dropdown-select-simple' which declares 'data-ajax--url' (should be 'dropdown-select-ajax'?): id="
+          + $item.attr('id') + " name=" + $item.attr('name'));
+    });
+
     // Init select with AJAX search
     $('.dropdown-select-ajax').select2({
       debug : false,

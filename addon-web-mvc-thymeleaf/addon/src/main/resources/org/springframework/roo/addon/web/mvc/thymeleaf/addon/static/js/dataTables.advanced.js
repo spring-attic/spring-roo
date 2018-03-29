@@ -125,6 +125,10 @@
                 opts.onInitComplete = init.onInitComplete;
             }
 
+            if (init.showInlineCallback !== undefined) {
+                opts.showInlineCallback = init.showInlineCallback;
+            }
+
             if (init.processing !== undefined) {
                 opts.processing = init.processing;
             }
@@ -150,9 +154,11 @@
             }
 
             if (init.defaultButtons !== undefined) {
-            	opts.defaultButtons = init.defaultButtons;
+                opts.defaultButtons = init.defaultButtons;
             }
-
+            if (init.deleteModalDefaults !== undefined) {
+                $.extend(opts.deleteModalDefaults, init.deleteModalDefaults);
+            }
         }
 
         // Configure this Datatables rendering
@@ -164,6 +170,11 @@
         // Configure the RenderTools
         $.extend(DataTable, {
             'renderTools': opts.renderTools
+        });
+
+        // Configure the showInlineCallback
+        $.extend(DataTable, {
+          'showInlineCallback': opts.showInlineCallback,
         });
 
         // Set datatables defaults
@@ -180,6 +191,7 @@
             },
             'columnDefs': [{
                 'targets': 'checkboxcol', // First column from the left
+                'className': 'select-checkbox', //add class
                 'checkboxes': {
                     'selectRow': true,
                     'selectAllPages': true
@@ -273,6 +285,7 @@
         "defaultButtons": [{
             'extend': 'colvis',
             'className': 'btn-action',
+            'columns' : ':not(.notShowInColvis)', // don't show columns with class 'notShowInColvis'
         },
         {
             'extend': 'pageLength',
@@ -285,10 +298,17 @@
         "onInitComplete": onInitComplete,
         "processing": true,
         "renderTools": renderTools,
+        "showInlineCallback": showInlineCallback,
         "responsive": true,
         "retrieve": true,
         "serverSide": true,
-        "stateSave": true
+        "stateSave": true,
+        "deleteModalDefaults": {
+            advanced: {
+                dom: '',
+            }
+        }
+
 
     }
 
@@ -392,18 +412,22 @@
 
                         // Populate DeleteBatchConfirm table which displays the item that
                         // will be removed
-                    	$('#' + tableId + '-items-to-remove-batch').DataTable({
-                    		advanced: {
-                    			loadData: loadDataForConfirmDeleteBatchDialog,
-                    			dom: 'rtip',
-                    		}
-                    	});
+                        var oSettings = $.extend({},
+                            DataTable.defaults.advanced.deleteModalDefaults,
+                            {
+                                advanced: {
+                                    dom: 'rtip',
+                                    loadData: loadDataForConfirmDeleteBatchDialog
+                                }
+                            }
+                        );
+                        $('#' + tableId + '-items-to-remove-batch').DataTable(oSettings);
 
                     });
 
                     // When the delete modal confirm is closed, is necessary to destroy
                     // the datatables that displays the information of the item to be removed
-                    $deleteConfirm.on('hidden.bs.modal', function(e) {
+                    $deleteConfirm.one('hidden.bs.modal', function () {
                         $('#' + tableId + '-items-to-remove-batch').DataTable().destroy();
                         // Remove previous events
                         $deleteConfirm.off("show.bs.modal");
@@ -411,7 +435,7 @@
                         $('#' + tableId + 'DeleteBatchButton').off("click");
                     });
 
-                    $('#' + tableId + 'DeleteBatchButton').on('click', function() {
+                    $deleteConfirm.find('#' + tableId + 'DeleteBatchButton').one('click', function () {
                         deleteBatchElement(datatables);
                     });
 
@@ -568,7 +592,7 @@
      * @param settings DataTable object options
      */
     function loadDataForConfirmDeleteBatchDialog(data, callback, settings) {
-        var datatables = this.DataTable();
+        var datatables = jQuery(settings.nTable).DataTable();
         var url = getLoadUrl(datatables);
         if (url) {
         	var parentTableId = settings.oInstance.attr("id").replace("-items-to-remove-batch", "");
@@ -709,15 +733,22 @@
     function getParentSelectedRowId(datatables) {
         var parentDatatables = getParentDatatables(datatables);
         if (parentDatatables) {
-            var selected = parentDatatables.row({
+            var selected = parentDatatables.rows({
                 selected: true
             });
 
-            if (selected.any()) {
-                return selected.data().id;
+            if(selected.data().length == 1){
+                return selected.data()[0].id;
+            }else if(selected.data().length > 1){
+                var ids = [];
+                var allSelectedItems = selected.data();
+                for(var i=0; i < allSelectedItems.length; i++){
+                    ids.push(allSelectedItems[i].id);
+                }
+                return ids.toString();
             }
-        }else{
-        	return getDataValue(datatables, "parent-id");
+        } else {
+            return getDataValue(datatables, "parent-id");
         }
     }
 
@@ -831,7 +862,7 @@
         // Build URL parameters
         var hasParameters = false;
         var params = "";
-        if (searchValue != null && searchValue != "" && searchValue != undefined) {
+        if (searchValue != null && searchValue !== "" && searchValue !== undefined) {
             if (hasParameters) {
                 params += "&";
             }
@@ -839,7 +870,7 @@
             hasParameters = true;
         }
 
-        if (sortParams != null && sortParams != "" && sortParams != undefined) {
+        if (sortParams != null && sortParams !== "" && sortParams !== undefined) {
             if (hasParameters) {
                 params += "&";
             }
@@ -847,7 +878,7 @@
             hasParameters = true;
         }
 
-        if (datatablesColumns != null && datatablesColumns != "" && datatablesColumns != undefined) {
+        if (datatablesColumns !== null && datatablesColumns !== "" && datatablesColumns !== undefined) {
             if (hasParameters) {
                 params += "&";
             }
@@ -1217,12 +1248,18 @@
 
             // Populate DeleteConfirm table which displays the item that
             // will be removed
-        	$('#' + tableId + '-item-to-remove').DataTable({
-        		advanced: {
-        			loadData: loadDataForConfirmDeleteDialog,
-        			dom: ''
-        		}
-        	});
+            var oSettings = $.extend({},
+                DataTable.defaults.advanced.deleteModalDefaults,
+                {
+                    advanced: {
+                        loadData: loadDataForConfirmDeleteDialog,
+                        dom: 'rt',
+                    }
+                }
+            );
+
+            $('#' + tableId + '-item-to-remove').DataTable(oSettings);
+
         });
 
         // When the delete modal confirm is closed, is necessary to destroy
@@ -1335,27 +1372,51 @@
      * This method tries to display the show view of the selected record
      * expanding the selected row.
      */
-    function showInline(showButton, datatables, showUrl){
-    	var tr = showButton.closest('tr');
-        var row = datatables.row( tr );
-        if ( row.child.isShown() ) {
+    function showInline(showButton, datatables, showUrl) {
+        var tr = jQuery(showButton).closest('tr');
+        var row = datatables.row(tr);
+        if (row.child.isShown()) {
             // This row is already open - close it
             $(showButton).attr("aria-expanded", "false");
+            $(showButton).removeClass('shown selected');
             row.child.hide();
         }
         else {
-           $(showButton).attr("aria-expanded", "true");
-           $.ajax({
-    		      url: showUrl + "/inline",
-    		      dataType: 'html'
-    		    }).done(function(data) {
-    			    // Open this row
-    			    row.child(data).show();
-    		    }).fail(function(data){
-    			    // Show error in new row
-    			    row.child("<div class='alert alert-danger'>ERROR: An error occurred while trying to obtain more info.</div>").show();
-    		    });
+            $(showButton).attr("aria-expanded", "true");
+            $(showButton).addClass('shown selected');
+            $.ajax({
+                url: showUrl + "/inline",
+                dataType: 'html'
+            }).done(function (data) {
+                // Open this row
+                row.child(data).show();
+                // Getting rows length
+                var allTableHeads = $(row.child().parent().parent().find("thead")[0]).find("th");
+                var hasCheckBoxColumn = $(row.child().parent().parent().find("thead")[0]).find(".dt-checkboxes-select-all").length > 0;
+                var currentLength = allTableHeads.length;
+                var colspan = currentLength - 1;
+                if (hasCheckBoxColumn) {
+                    colspan = currentLength - 2;
+                }
+                var toolsLength = 2;
+                $(row.child().find("td")[0]).attr("colspan", colspan);
+                row.child().append("<td colspan='" + toolsLength + "'></td>");
+                // Call to the showInline callback
+                DataTable.showInlineCallback(datatables, row.child());
+            }).fail(function () {
+                // Show error in new row
+                row.child("<div class='alert alert-danger'>ERROR: An error occurred while trying to obtain more info.</div>").show();
+            });
         }
+    }
+
+    /**
+    * Callback function called when a row is expanded with the showInline function.
+    *
+    * @param data the data added to the row when expanded.
+    */
+    function showInlineCallback(datatables, expandedData) {
+        // Nothing to do by default
     }
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

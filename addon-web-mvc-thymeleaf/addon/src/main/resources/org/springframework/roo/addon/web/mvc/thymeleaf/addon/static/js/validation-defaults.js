@@ -45,7 +45,7 @@
             };
 
             /**
-             * Replaces the standar min validation to support number with comma.
+             * Replaces the standard min validation to support number with comma.
              *
              * @name jQuery.validator.methods.number
              * @type Boolean
@@ -59,7 +59,7 @@
             };
 
             /**
-             * Replaces the standar max validation to support number with comma.
+             * Replaces the standard max validation to support number with comma.
              *
              * @name jQuery.validator.methods.number
              * @type Boolean
@@ -124,12 +124,22 @@
                       // see options at https://jqueryvalidation.org/documentation/
                       $form
                           .validate({
+                            ignore: ":hidden:not(.tagsinput), .ignoreValidation", // include hidden tagsinput to support required validation
+                            submitHandler: function () {
+                              // Disable all form buttons to prevent submit action one more time
+                              $form.find("button").each(
+                                  function(index) {
+                                    var $button = $(this);
+                                    $button.attr("disabled","disabled");
+                                   });
+                                return true;
+                              },
                             highlight : function(element) {
                               var $element = $(element);
                               // añadir marca error
                               $element.closest('.form-group').addClass('has-error has-feedback');
                               // añadir span con icono
-                              var iconSpan = $element.parent().find('span.form-control-feedback');
+                              var iconSpan = $element.parent().find('span.glyphicon-remove.form-control-feedback');
                               if (!iconSpan.length) {
                                 $element
                                     .after('<span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>');
@@ -137,45 +147,57 @@
                             },
                             unhighlight : function(element) {
                               var $element = $(element);
+                              var curId = $element.attr('id');
+                              if (!curId) {
+                                // if element hasn't id shouldn't be checked
+                                return;
+                              }
+                              var escapedId = curId.replace(/[.]/g,'\\.');
                               // añadir marca error
                               $element.closest('.form-group').removeClass('has-error has-feedback');
                               // quitar span con icono
-                              $element.parent().find('span.form-control-feedback.glyphicon-remove')
+                              $element.closest('.form-group').find('span.glyphicon-remove.form-control-feedback')
                                   .remove();
-                              // limpiar errores
+                              // Clear errors
                               if ($element.parent('.input-group').length) {
                                 $element.parent('.input-group').parent().find(
-                                    'span.help-block[id=' + $element.attr('id') + '-error]')
+                                    'span.help-block[id=' + escapedId + '-error]')
                                     .remove();
 
                               } else {
-                                $element.parent().find(
-                                    'span.help-block[id=' + $element.attr('id') + '-error]')
+                                $element.closest('.form-group').find(
+                                    'span.help-block[id=' + escapedId + '-error]')
                                     .remove();
+                              }
+                              // quitar marca error de grupo
+                              var $group = $element.closest('.form-group');
+                              if (!$group.find('span.form-control-feedback.glyphicon-remove')){
+                              	$group.removeClass('has-error has-feedback');
                               }
                             },
                             errorElement : 'span',
                             errorClass : 'help-block',
                             errorPlacement : function(error, element) {
                               var $element = $(element);
+                              var escapedId = $element.attr('id').replace(/[.]/g,'\\.');
 
                               var $previousErrors;
                               if ($element.parent('.input-group').length) {
                                  $previousErrors = $element.parent('.input-group').parent()
-                                    .find('span.help-block[id=' + $element.attr('id') + '-error]');
+                                    .find('span.help-block[id=' + escapedId + '-error]');
                               } else {
                                  $previousErrors = $element.parent().find(
-                                    'span.help-block[id=' + $element.attr('id') + '-error]');
+                                    'span.help-block[id=' + escapedId + '-error]');
                               }
 
                               if ($previousErrors.length === 1) {
                                 $previousErrors.replaceWith(error);
                               } else {
                                 if ($previousErrors.length > 1) {
-                                  // mas de un error limpiamos
+                                  // More than one error, clear
                                   $previousErrors.remove();
                                 }
-                                //  insertar error
+                                // Isert error
                                 if ($element.parent('.input-group').length) {
                                   error.insertAfter($element.parent());
                                 } else {
@@ -190,7 +212,11 @@
                       $form.find("input,textarea,select").each(function(index) {
                         var $input = $(this);
                         var data = $input.data();
-
+                        var curId = $input.attr('id');
+                        if (!curId) {
+                          // if element hasn't id shouldn't be checked
+                          return;
+                        }
                         // this input validation rules
                         var rules = {
                           required : data.required,

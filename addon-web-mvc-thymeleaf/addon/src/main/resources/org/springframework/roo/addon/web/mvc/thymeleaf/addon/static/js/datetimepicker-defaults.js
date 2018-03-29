@@ -55,6 +55,7 @@
 					// Nothing to do
 				}
 			}
+			$input.datetimepicker.defaults.dayOfWeekStart=moment.localeData().firstDayOfWeek();
 
 			// FormatDate YYYY/MM/DD
 			value = $input.attr("data-startdate");
