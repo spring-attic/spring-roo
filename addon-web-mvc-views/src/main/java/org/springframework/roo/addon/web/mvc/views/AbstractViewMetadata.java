@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.views;
 
+import java.util.Collection;
+
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
@@ -18,6 +20,11 @@ public abstract class AbstractViewMetadata extends AbstractItdTypeDetailsProvidi
   protected AbstractViewMetadata(String identifier, JavaType aspectName,
       PhysicalTypeMetadata governorPhysicalTypeMetadata) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
+  }
+
+  protected AbstractViewMetadata(String identifier, JavaType aspectName,
+      PhysicalTypeMetadata governorPhysicalTypeMetadata, Collection<String> excludeMethods) {
+    super(identifier, aspectName, governorPhysicalTypeMetadata, excludeMethods);
   }
 
 

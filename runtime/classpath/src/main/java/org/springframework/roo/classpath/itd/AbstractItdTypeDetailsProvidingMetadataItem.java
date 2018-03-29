@@ -6,9 +6,12 @@ import static java.lang.reflect.Modifier.PUBLIC;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -55,6 +58,8 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
   protected Map<FieldMetadata, MethodMetadataBuilder> accessorMethods;
   protected Map<FieldMetadata, MethodMetadataBuilder> mutatorMethods;
 
+  protected Set<String> excludeMethods;
+
   /**
    * Validates input and constructs a superclass that implements
    * {@link ItdTypeDetailsProvidingMetadataItem}.
@@ -74,6 +79,30 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
    */
   protected AbstractItdTypeDetailsProvidingMetadataItem(final String identifier,
       final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+    this(identifier, aspectName, governorPhysicalTypeMetadata, null);
+  }
+
+  /**
+   * Validates input and constructs a superclass that implements
+   * {@link ItdTypeDetailsProvidingMetadataItem}.
+   * <p>
+   * Exposes the {@link ClassOrInterfaceTypeDetails} of the governor, if
+   * available. If they are not available, ensures {@link #isValid()} returns
+   * false.
+   * <p>
+   * Subclasses should generally return immediately if {@link #isValid()} is
+   * false. Subclasses should also attempt to set the {@link #itdTypeDetails}
+   * to contain the output of their ITD where {@link #isValid()} is true.
+   *
+   * @param identifier the identifier for this item of metadata (required)
+   * @param aspectName the Java type of the ITD (required)
+   * @param governorPhysicalTypeMetadata the governor, which is expected to
+   *            contain a {@link ClassOrInterfaceTypeDetails} (required)
+   * @param excludeMethods list of method to exclude from generation (optional)
+   */
+  protected AbstractItdTypeDetailsProvidingMetadataItem(final String identifier,
+      final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+      final Collection<String> excludeMethods) {
     super(identifier);
     Validate.notNull(aspectName, "Aspect name required");
     Validate.notNull(governorPhysicalTypeMetadata, "Governor physical type metadata required");
@@ -97,6 +126,9 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 
     // Provide the subclass a builder, to make preparing an ITD even easier
     builder = new ItdTypeDetailsBuilder(getId(), governorTypeDetails, aspectName, true);
+
+    this.excludeMethods =
+        excludeMethods == null ? new HashSet<String>() : new HashSet<String>(excludeMethods);
   }
 
   private void addToImports(final List<JavaType> parameterTypes) {
@@ -159,9 +191,9 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
   }
 
   /**
-   * Ensures that the governor has provided field. If the provided field is private, 
-   * this method always includes the accessor method. The mutator method will not be 
-   * generated if the provided field is annotated with @Autowired annotation 
+   * Ensures that the governor has provided field. If the provided field is private,
+   * this method always includes the accessor method. The mutator method will not be
+   * generated if the provided field is annotated with @Autowired annotation
    *
    * @param FieldMetadataBuilder the field to include(required)
    * @since 2.0
@@ -212,6 +244,16 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 
   }
 
+  /**
+   * Checks if required method is declared to be exclude from generation
+   *
+   * @param methodMetadata
+   * @return true if method should be ignored
+   * @since 2.0.0RC3
+   */
+  protected boolean hasToExcludeMethod(final MethodMetadataBuilder methodMetadata) {
+    return excludeMethods.contains(methodMetadata.getMethodName().getSymbolName());
+  }
 
   /**
    * Ensures that the governor has provided method
@@ -220,8 +262,9 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
    * @since 2.0
    */
   protected final void ensureGovernorHasMethod(final MethodMetadataBuilder methodMetadata) {
-    if (governorTypeDetails.getMethod(methodMetadata.getMethodName(),
-        AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodMetadata.getParameterTypes())) == null
+    if (!hasToExcludeMethod(methodMetadata)
+        && governorTypeDetails.getMethod(methodMetadata.getMethodName(),
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodMetadata.getParameterTypes())) == null
         && methodMetadata.getDeclaredByMetadataId().equals(getId())
         && MemberFindingUtils.getDeclaredMethod(builder.build(), methodMetadata.getMethodName(),
             AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodMetadata.getParameterTypes())) == null) {

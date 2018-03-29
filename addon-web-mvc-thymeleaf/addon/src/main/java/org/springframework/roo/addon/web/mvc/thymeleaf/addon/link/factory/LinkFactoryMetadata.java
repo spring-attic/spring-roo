@@ -18,7 +18,6 @@ import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
@@ -32,7 +31,7 @@ import org.springframework.roo.project.LogicalPath;
 
 /**
  * = LinkFactoryMetadata
- * 
+ *
  * Metadata for {@link RooThymeleaf}.
  *
  * @author Sergio Clares
@@ -43,6 +42,11 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
   protected static final JavaSymbolName TO_URI_METHOD_NAME = new JavaSymbolName("toUri");
   protected static final JavaSymbolName GET_CONTROLLER_CLASS_METHOD_NAME = new JavaSymbolName(
       "getControllerClass");
+
+  private static final JavaSymbolName METHOD_NAME_ARGUMENT_NAME = new JavaSymbolName("methodName");
+  private static final JavaSymbolName PARAMETERS_ARGUMENT_NAME = new JavaSymbolName("parameters");
+  private static final JavaSymbolName PATH_VARIABLES_ARGUMENT_NAME = new JavaSymbolName(
+      "pathVariables");
 
   private final JavaType controller;
   private final List<MethodMetadata> controllerMethods;
@@ -59,9 +63,6 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
   private final AnnotatedJavaType mapStringObjectArgument = new AnnotatedJavaType(
       JavaType.wrapperOf(JdkJavaType.MAP, JavaType.STRING, JavaType.OBJECT));
 
-  private final JavaSymbolName METHOD_NAME_ARGUMENT_NAME = new JavaSymbolName("methodName");
-  private final JavaSymbolName PARAMETERS_ARGUMENT_NAME = new JavaSymbolName("parameters");
-  private final JavaSymbolName PATH_VARIABLES_ARGUMENT_NAME = new JavaSymbolName("pathVariables");
 
   private static final String PROVIDES_TYPE_STRING = LinkFactoryMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
@@ -143,7 +144,7 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
   }
 
   /**
-     * Generates a `toUri` method which generates URI's for the *Collection* 
+     * Generates a `toUri` method which generates URI's for the *Collection*
      * controller methods which are called from views.
      *
      * @param finderName
@@ -184,14 +185,25 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
       String methodName = method.getMethodName().getSymbolName();
 
       // Getting methodParams
-      String methodParamsToNull = "";
-      for (int i = 0; i < method.getParameterTypes().size(); i++) {
-        // Include a null declaration for every parameter
-        methodParamsToNull += "null, ";
-      }
-      // Remove empty space and comma
-      if (StringUtils.isNotEmpty(methodParamsToNull)) {
-        methodParamsToNull = methodParamsToNull.substring(0, methodParamsToNull.length() - 2);
+      List<String> methodParamsToNull = new ArrayList<String>();
+      for (AnnotatedJavaType paramType : method.getParameterTypes()) {
+        JavaType javaType = paramType.getJavaType();
+        if (javaType.isPrimitive() && !javaType.isArray()) {
+          if (JavaType.BOOLEAN_PRIMITIVE.equals(javaType)) {
+            methodParamsToNull.add("false");
+          } else if (JavaType.INT_PRIMITIVE.equals(javaType)) {
+            methodParamsToNull.add("0");
+          } else if (JavaType.LONG_PRIMITIVE.equals(javaType)) {
+            methodParamsToNull.add("0l");
+          } else if (JavaType.FLOAT_PRIMITIVE.equals(javaType)) {
+            methodParamsToNull.add("0.0f");
+          } else if (JavaType.DOUBLE_PRIMITIVE.equals(javaType)) {
+            methodParamsToNull.add("0.0");
+          }
+        } else {
+          // Include a null declaration for every parameter
+          methodParamsToNull.add("null");
+        }
       }
 
       // if (METHOD_NAME_ARGUMENT_NAME.equals(methodNameConstant)) {
@@ -204,8 +216,8 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
       bodyBuilder.appendFormalLine(
           "return %1$s.fromMethodCall(%1$s.on(%2$s()).%3$s(%4$s)).buildAndExpand(%5$s);",
           getNameOfJavaType(SpringletsJavaType.SPRINGLETS_MVC_URI_COMPONENTS_BUILDER),
-          this.getControllerClassMethod.getMethodName(), methodName, methodParamsToNull,
-          PATH_VARIABLES_ARGUMENT_NAME);
+          this.getControllerClassMethod.getMethodName(), methodName,
+          StringUtils.join(methodParamsToNull, ", "), PATH_VARIABLES_ARGUMENT_NAME);
       bodyBuilder.indentRemove();
       // }
       bodyBuilder.appendFormalLine("}");
@@ -257,7 +269,7 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
   /**
    * Add method to governor if needed and returns the MethodMetadata.
-   * 
+   *
    * @param method the MethodMetadata to add and return.
    * @return MethodMetadata
    */
@@ -268,7 +280,7 @@ public class LinkFactoryMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
   /**
    * Builds and returns a private static final field with provided field name and initializer
-   * 
+   *
    * @param methodName
    * @return
    */

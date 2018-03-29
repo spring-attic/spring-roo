@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 public class ThymeleafMainControllerMetadataProviderImpl extends
     AbstractMemberDiscoveringItdMetadataProvider implements ThymeleafMainControllerMetadataProvider {
 
-  protected final static Logger LOGGER = HandlerUtils
+  protected static final Logger LOGGER = HandlerUtils
       .getLogger(ThymeleafMainControllerMetadataProviderImpl.class);
 
   private final Map<JavaType, String> domainTypeToServiceMidMap =

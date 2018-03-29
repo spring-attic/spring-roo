@@ -11,11 +11,19 @@ import java.lang.annotation.Target;
  * This annotation will cause ROO to produce code that would typically appear in
  * MVC controllers with JSON methods. In the current release this code will be
  * emitted to an ITD.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface RooJSON {
+
+  /**
+   * Don't generate method with specified name
+   *
+   * @return
+   * @since 2.0.0RC3
+   */
+  String[] excludeMethods() default {};
 }

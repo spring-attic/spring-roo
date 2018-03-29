@@ -169,6 +169,8 @@ public class ThymeleafMetadataProviderImpl extends
       final Map<JavaType, List<FieldMetadata>> formBeansEnumFields,
       final JavaType detailsItemController, final JavaType detailsCollectionController) {
 
+    final ThymeleafAnnotationValues annotationValues =
+        new ThymeleafAnnotationValues(governorPhysicalTypeMetadata);
 
     // Get related controller for select2 request
     JavaType relatedCollectionController = null;
@@ -242,11 +244,12 @@ public class ThymeleafMetadataProviderImpl extends
     }
 
     for (ClassOrInterfaceTypeDetails linkFactory : linkFactories) {
-      LinkFactoryAnnotationValues annotationValues = new LinkFactoryAnnotationValues(linkFactory);
+      LinkFactoryAnnotationValues linkAnnotationValues =
+          new LinkFactoryAnnotationValues(linkFactory);
       // Getting link factory of the collection controller
-      if (annotationValues.getController().equals(collectionControllerToCheck)) {
+      if (linkAnnotationValues.getController().equals(collectionControllerToCheck)) {
         relatedCollectionLinkFactory = linkFactory.getType();
-      } else if (annotationValues.getController().equals(itemControllerToCheck)) {
+      } else if (linkAnnotationValues.getController().equals(itemControllerToCheck)) {
         relatedItemLinkFactory = linkFactory.getType();
       }
 
@@ -255,9 +258,9 @@ public class ThymeleafMetadataProviderImpl extends
 
     final ThymeleafMetadata metadata =
         new ThymeleafMetadata(metadataIdentificationString, aspectName,
-            governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
-            entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
-            collectionController, dateTimeFields, enumFields, findersToAdd,
+            governorPhysicalTypeMetadata, annotationValues, controllerMetadata, serviceMetadata,
+            entityMetadata, entityPlural, entityIdentifierPlural, compositionRelationOneToOne,
+            itemController, collectionController, dateTimeFields, enumFields, findersToAdd,
             formBeansDateTimeFields, formBeansEnumFields, detailsItemController,
             detailsCollectionController, relatedCollectionController, relatedItemController,
             entityFields, getJasperReportsMap(), relatedCollectionLinkFactory,
@@ -272,9 +275,9 @@ public class ThymeleafMetadataProviderImpl extends
 
   /**
    * Finds `JasperReportsExporter` for providing Metadata with its package.
-   * This method is temporal as `JasperReportsExporter` should be moved to 
+   * This method is temporal as `JasperReportsExporter` should be moved to
    * other support project.
-   * 
+   *
    */
   public Map<String, JavaType> getJasperReportsMap() {
     if (this.jasperReportsExporterMap == null) {
@@ -305,11 +308,11 @@ public class ThymeleafMetadataProviderImpl extends
   }
 
   /**
-   * Return the entity list of valid fields. Static and referenced fields 
+   * Return the entity list of valid fields. Static and referenced fields
    * are excluded.
-   * 
+   *
    * @return a List<FieldMetadata>
-   * 
+   *
    */
   private List<FieldMetadata> getReturnTypeValidFields(List<FieldMetadata> fields) {
 
@@ -317,22 +320,14 @@ public class ThymeleafMetadataProviderImpl extends
     List<FieldMetadata> validFields = new ArrayList<FieldMetadata>();
     for (FieldMetadata field : fields) {
 
-      // Exclude non-simple fields. This also exclude relation fields which 
+      // Exclude non-simple fields. This also exclude relation fields which
       // return a collection @OneToMany and @ManyToMany
       if (field.getFieldType().isMultiValued()) {
         continue;
       }
 
       // Exclude static fields
-      int staticFinal = Modifier.STATIC + Modifier.FINAL;
-      int publicStatic = Modifier.PUBLIC + Modifier.STATIC;
-      int publicStaticFinal = Modifier.PUBLIC + Modifier.STATIC + Modifier.FINAL;
-      int privateStatic = Modifier.PRIVATE + Modifier.STATIC;
-      int privateStaticFinal = Modifier.PRIVATE + Modifier.STATIC + Modifier.FINAL;
-
-      if (field.getModifier() == Modifier.STATIC || field.getModifier() == staticFinal
-          || field.getModifier() == publicStatic || field.getModifier() == publicStaticFinal
-          || field.getModifier() == privateStatic || field.getModifier() == privateStaticFinal) {
+      if (Modifier.isStatic(field.getModifier()) || Modifier.isFinal(field.getModifier())) {
         continue;
       }
 

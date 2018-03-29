@@ -43,6 +43,7 @@ import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +88,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private static final AnnotationMetadataBuilder RESPONSE_BODY_ANNOTATION =
       new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
 
+  private final JSONAnnotationValues annotationValues;
   private final boolean readOnly;
   private final ControllerMetadata controllerMetadata;
   private final Map<String, MethodMetadata> finderMethods;
@@ -163,6 +165,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    * @param governorPhysicalTypeMetadata
    *            the governor, which is expected to contain a
    *            {@link ClassOrInterfaceTypeDetails} (required)
+   * @param annotationValues
    * @param controllerMetadata
    * @param serviceMetadata
    * @param entityMetadata
@@ -175,12 +178,15 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    */
   public JSONMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      ControllerMetadata controllerMetadata, ServiceMetadata serviceMetadata,
-      JpaEntityMetadata entityMetadata, String entityPlural, String entityIdentifierPlural,
+      final JSONAnnotationValues annotationValues, ControllerMetadata controllerMetadata,
+      ServiceMetadata serviceMetadata, JpaEntityMetadata entityMetadata, String entityPlural,
+      String entityIdentifierPlural,
       final List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne,
       final JavaType itemController, final Map<String, MethodMetadata> findersToAdd) {
-    super(identifier, aspectName, governorPhysicalTypeMetadata);
+    super(identifier, aspectName, governorPhysicalTypeMetadata, annotationValues
+        .getExcludeMethods() == null ? null : Arrays.asList(annotationValues.getExcludeMethods()));
 
+    this.annotationValues = annotationValues;
     this.readOnly = entityMetadata.isReadOnly();
     this.controllerMetadata = controllerMetadata;
     this.type = this.controllerMetadata.getType();

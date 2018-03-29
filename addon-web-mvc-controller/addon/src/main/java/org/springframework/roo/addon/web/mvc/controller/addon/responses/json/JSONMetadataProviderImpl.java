@@ -156,13 +156,15 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
+    final JSONAnnotationValues annotationValues =
+        new JSONAnnotationValues(governorPhysicalTypeMetadata);
+
     ClassOrInterfaceTypeDetails controllerDetail =
         governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 
     // Getting controller metadata
     final String controllerMetadataKey = ControllerMetadata.createIdentifier(controllerDetail);
-    final ControllerMetadata controllerMetadata =
-        (ControllerMetadata) getMetadataService().get(controllerMetadataKey);
+    final ControllerMetadata controllerMetadata = getMetadataService().get(controllerMetadataKey);
 
     // This metadata is not available yet.
     if (controllerMetadata == null) {
@@ -289,8 +291,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     }
 
     return new JSONMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata,
-        controllerMetadata, serviceMetadata, entityMetadata, entityPlural, entityIdentifierPlural,
-        compositionRelationOneToOne, itemController, findersToAdd);
+        annotationValues, controllerMetadata, serviceMetadata, entityMetadata, entityPlural,
+        entityIdentifierPlural, compositionRelationOneToOne, itemController, findersToAdd);
 
   }
 

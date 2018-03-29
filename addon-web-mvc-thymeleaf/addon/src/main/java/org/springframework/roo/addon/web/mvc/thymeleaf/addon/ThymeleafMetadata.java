@@ -12,6 +12,7 @@ import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_NOT_FO
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -173,6 +174,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private static final JavaSymbolName DRAW_PARAM_NAME = new JavaSymbolName("draw");
   private static final String LINK_BUILDER_ARGUMENT_NAME = "linkBuilder";
 
+  private static final String ITEM_LINK = "itemLink";
+  private static final String COLLECTION_LINK = "collectionLink";
+
+  private final ThymeleafAnnotationValues annotationValues;
   private final boolean readOnly;
   private final ControllerMetadata controllerMetadata;
   private final ControllerType type;
@@ -259,8 +264,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private final MethodMetadata deleteDetailMethod;
   private final MethodMetadata showDetailMethod;
   private final MethodMetadata showDetailInlineMethod;
-  private final String ITEM_LINK = "itemLink";
-  private final String COLLECTION_LINK = "collectionLink";
   private final String entityPluralUncapitalized;
   private final List<FieldMetadata> entityValidFields;
   private final Map<String, JavaType> jasperReportsMap;
@@ -304,17 +307,34 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
    * @param governorPhysicalTypeMetadata
    *            the governor, which is expected to contain a
    *            {@link ClassOrInterfaceTypeDetails} (required)
+   * @param annotationValues
+   * @param controllerMetadata
+   * @param serviceMetadata
+   * @param entityMetadata
+   * @param entityPlural
+   * @param entityIdentifierPlural
+   * @param compositionRelationOneToOne
+   * @param itemController
    * @param collectionController
-   * @param formBeansEnumFields
+   * @param dateTimeFields
+   * @param enumFields
+   * @param findersToAdd
    * @param formBeansDateTimeFields
+   * @param formBeansEnumFields
+   * @param detailItemController
    * @param detailsCollectionController
    * @param relatedCollectionController
-   *
+   * @param relatedItemController
+   * @param validFields
+   * @param jasperReportsMap
+   * @param relatedCollectionLinkFactory
+   * @param relatedItemLinkFactory
    */
   public ThymeleafMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      ControllerMetadata controllerMetadata, ServiceMetadata serviceMetadata,
-      JpaEntityMetadata entityMetadata, String entityPlural, String entityIdentifierPlural,
+      final ThymeleafAnnotationValues annotationValues, ControllerMetadata controllerMetadata,
+      ServiceMetadata serviceMetadata, JpaEntityMetadata entityMetadata, String entityPlural,
+      String entityIdentifierPlural,
       final List<Pair<RelationInfo, JpaEntityMetadata>> compositionRelationOneToOne,
       final JavaType itemController, final JavaType collectionController,
       final List<FieldMetadata> dateTimeFields, final List<FieldMetadata> enumFields,
@@ -325,8 +345,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       final JavaType relatedCollectionController, final JavaType relatedItemController,
       final List<FieldMetadata> validFields, final Map<String, JavaType> jasperReportsMap,
       final JavaType relatedCollectionLinkFactory, final JavaType relatedItemLinkFactory) {
-    super(identifier, aspectName, governorPhysicalTypeMetadata);
+    super(identifier, aspectName, governorPhysicalTypeMetadata, annotationValues
+        .getExcludeMethods() == null ? null : Arrays.asList(annotationValues.getExcludeMethods()));
 
+    this.annotationValues = annotationValues;
     this.jasperReportsMap = jasperReportsMap;
     this.entityValidFields = validFields;
     this.readOnly = entityMetadata.isReadOnly();

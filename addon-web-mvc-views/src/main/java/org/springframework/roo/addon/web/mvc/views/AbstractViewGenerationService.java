@@ -1798,6 +1798,12 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
     }
 
     for (final FieldMetadata field : entityMemberDetails.getFields()) {
+
+      if (Modifier.isStatic(field.getModifier()) || Modifier.isFinal(field.getModifier())) {
+        // Don't generate label for static nor final fields
+        continue;
+      }
+
       final String fieldResourceId = buildLabel(entityName, field.getFieldName().getSymbolName());
 
       properties.put(fieldResourceId, field.getFieldName().getReadableSymbolName());
