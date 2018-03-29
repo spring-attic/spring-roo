@@ -181,9 +181,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // Add @EntityFormat annotation
     builder.addAnnotation(getEntityFormatAnnotation());
 
-    // Ensure there's a no-arg constructor (explicit or default)
-    builder.addConstructor(getNoArgConstructor());
-
     // Include necessary static fields
     if (!isReadOnly()) {
       ensureGovernorHasField(new FieldMetadataBuilder(getIterableToAddCantBeNullConstant()));
@@ -197,7 +194,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     Cardinality cardinality;
     RelationInfo info;
     JavaType childType;
-    JavaSymbolName addMethodName, removeMethodName;
+    JavaSymbolName addMethodName;
+    JavaSymbolName removeMethodName;
     AnnotationMetadata jpaAnnotation;
     String fieldName;
     JpaRelationType relationType;
@@ -212,7 +210,10 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
       fieldName = field.getFieldName().getSymbolName();
       // Get cardinality
-      jpaAnnotation = getJpaRelaationAnnotation(field);
+      jpaAnnotation = getJpaRelationAnnotation(field);
+      if (jpaAnnotation == null) {
+        continue;
+      }
       cardinality = getFieldCardinality(jpaAnnotation);
       Validate
           .notNull(
@@ -401,42 +402,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   }
 
   /**
-   * Locates the no-arg constructor for this class, if available.
-   * <p>
-   * If a class defines a no-arg constructor, it is returned (irrespective of
-   * access modifiers).
-   * <p>
-   * Otherwise, and if there is at least one other constructor declared in the
-   * source file, this method creates one with public access.
-   *
-   * @return <code>null</code> if no constructor is to be produced
-   */
-  private ConstructorMetadataBuilder getNoArgConstructor() {
-    // Search for an existing constructor
-    final ConstructorMetadata existingExplicitConstructor =
-        governorTypeDetails.getDeclaredConstructor(null);
-    if (existingExplicitConstructor != null) {
-      // Found an existing no-arg constructor on this class, so return it
-      return new ConstructorMetadataBuilder(existingExplicitConstructor);
-    }
-
-    // To get this far, the user did not define a no-arg constructor
-    if (governorTypeDetails.getDeclaredConstructors().isEmpty()) {
-      // Java creates the default constructor => no need to add one
-      return null;
-    }
-
-    // Create the constructor
-    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder.appendFormalLine("super();");
-
-    final ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
-    constructorBuilder.setBodyBuilder(bodyBuilder);
-    constructorBuilder.setModifier(Modifier.PUBLIC);
-    return constructorBuilder;
-  }
-
-  /**
    * Generates the JPA @Table annotation to be applied to the entity
    *
    * @param annotationValues
@@ -492,7 +457,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * @param field
    * @return ONE_TO_MANY, MANY_TO_MANY, ONE_TO_ONE or null
    */
-  private AnnotationMetadata getJpaRelaationAnnotation(final FieldMetadata field) {
+  private AnnotationMetadata getJpaRelationAnnotation(final FieldMetadata field) {
     AnnotationMetadata annotation = null;
     for (JavaType type : JPA_ANNOTATIONS_SUPPORTED) {
       annotation = field.getAnnotation(type);
@@ -1047,7 +1012,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * @return `@RooJpaEntity` `entityFormatMessage` value
    */
   public String getEntityFormatMessage() {
-    return (String) this.annotationValues.getEntityFormatMessage();
+    return this.annotationValues.getEntityFormatMessage();
   }
 
   /**
