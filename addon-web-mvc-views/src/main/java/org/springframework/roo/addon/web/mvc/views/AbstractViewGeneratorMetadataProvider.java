@@ -59,17 +59,17 @@ import org.springframework.roo.support.osgi.ServiceInstaceManager;
  * @since 2.0
  */
 @Component(componentAbstract = true)
-public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractViewMetadata>
-    extends AbstractMemberDiscoveringItdMetadataProvider {
+public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractViewMetadata> extends
+    AbstractMemberDiscoveringItdMetadataProvider {
 
   protected ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
 
-  private final List<JavaType> STANDAR_TYPES =
-      Arrays.asList(JavaType.BOOLEAN_OBJECT, JavaType.STRING, JavaType.LONG_OBJECT,
-          JavaType.INT_OBJECT, JavaType.FLOAT_OBJECT, JavaType.DOUBLE_OBJECT);
+  private final List<JavaType> STANDAR_TYPES = Arrays.asList(JavaType.BOOLEAN_OBJECT,
+      JavaType.STRING, JavaType.LONG_OBJECT, JavaType.INT_OBJECT, JavaType.FLOAT_OBJECT,
+      JavaType.DOUBLE_OBJECT);
 
-  private final List<JavaType> DATE_TIME_TYPES =
-      Arrays.asList(JdkJavaType.DATE, JdkJavaType.CALENDAR);
+  private final List<JavaType> DATE_TIME_TYPES = Arrays.asList(JdkJavaType.DATE,
+      JdkJavaType.CALENDAR);
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
@@ -158,8 +158,8 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
         itemController =
             filterControllerByPackageAndPrefix(itemControllers, controllerPackage, pathPrefix);
         Validate.notNull(itemControllers,
-            "ERROR: Can't find ITEM-type controller related to controller '%s'",
-            controllerDetail.getType().getFullyQualifiedTypeName());
+            "ERROR: Can't find ITEM-type controller related to controller '%s'", controllerDetail
+                .getType().getFullyQualifiedTypeName());
       }
     }
 
@@ -191,14 +191,17 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
             break;
           }
         }
-        Validate.notNull(detailItemController,
-            "ERROR: Can't find Item-type controller for details entity '%s' related to controller '%s'",
-            detailEntity.getFullyQualifiedTypeName(),
-            controllerDetail.getType().getFullyQualifiedTypeName());
+        Validate
+            .notNull(
+                detailItemController,
+                "ERROR: Can't find Item-type controller for details entity '%s' related to controller '%s'",
+                detailEntity.getFullyQualifiedTypeName(), controllerDetail.getType()
+                    .getFullyQualifiedTypeName());
 
         // Locate controller collection which handles details elements
-        detailsControllersToCheck = getControllerLocator().getControllers(detailEntity,
-            ControllerType.COLLECTION, viewType);
+        detailsControllersToCheck =
+            getControllerLocator()
+                .getControllers(detailEntity, ControllerType.COLLECTION, viewType);
 
         for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
           if (controllerPackage.equals(controller.getType().getPackage())) {
@@ -206,10 +209,12 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
             break;
           }
         }
-        Validate.notNull(detailItemController,
-            "ERROR: Can't find Collection-type controller for details entity '%s' related to controller '%s'",
-            detailEntity.getFullyQualifiedTypeName(),
-            controllerDetail.getType().getFullyQualifiedTypeName());
+        Validate
+            .notNull(
+                detailItemController,
+                "ERROR: Can't find Collection-type controller for details entity '%s' related to controller '%s'",
+                detailEntity.getFullyQualifiedTypeName(), controllerDetail.getType()
+                    .getFullyQualifiedTypeName());
 
       } else {
         // ** COMPOSITION **
@@ -221,18 +226,19 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
         for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
           if (controllerPackage.equals(controller.getType().getPackage())) {
             DetailAnnotationValues annotationValues = new DetailAnnotationValues(controller);
-            if (controllerMetadata.getDetailAnnotaionFieldValue()
-                .equals(annotationValues.getRelationField())) {
+            if (controllerMetadata.getDetailAnnotaionFieldValue().equals(
+                annotationValues.getRelationField())) {
               detailItemController = controller.getType();
             }
             break;
           }
         }
-        Validate.notNull(detailItemController,
-            "ERROR: Can't find Detail-Item-type controller for details entity '%s' related to controller '%s' (relation '%s')",
-            entity.getFullyQualifiedTypeName(),
-            controllerDetail.getType().getFullyQualifiedTypeName(),
-            controllerMetadata.getDetailAnnotaionFieldValue());
+        Validate
+            .notNull(
+                detailItemController,
+                "ERROR: Can't find Detail-Item-type controller for details entity '%s' related to controller '%s' (relation '%s')",
+                entity.getFullyQualifiedTypeName(), controllerDetail.getType()
+                    .getFullyQualifiedTypeName(), controllerMetadata.getDetailAnnotaionFieldValue());
 
       }
     }
@@ -244,18 +250,19 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
       for (ClassOrInterfaceTypeDetails controller : detailsControllersToCheck) {
         if (controllerPackage.equals(controller.getType().getPackage())) {
           DetailAnnotationValues annotationValues = new DetailAnnotationValues(controller);
-          if (controllerMetadata.getDetailAnnotaionFieldValue()
-              .equals(annotationValues.getRelationField())) {
+          if (controllerMetadata.getDetailAnnotaionFieldValue().equals(
+              annotationValues.getRelationField())) {
             detailCollectionController = controller.getType();
           }
           break;
         }
       }
-      Validate.notNull(detailCollectionController,
-          "ERROR: Can't find Detail-type controller for details entity '%s' related to controller '%s' (relation '%s')",
-          entity.getFullyQualifiedTypeName(),
-          controllerDetail.getType().getFullyQualifiedTypeName(),
-          controllerMetadata.getDetailAnnotaionFieldValue());
+      Validate
+          .notNull(
+              detailCollectionController,
+              "ERROR: Can't find Detail-type controller for details entity '%s' related to controller '%s' (relation '%s')",
+              entity.getFullyQualifiedTypeName(), controllerDetail.getType()
+                  .getFullyQualifiedTypeName(), controllerMetadata.getDetailAnnotaionFieldValue());
     }
 
     Validate.notNull(entity, "ERROR: You should provide a valid entity for controller '%s'",
@@ -382,8 +389,8 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
           }
 
           for (JavaType parameter : types) {
-            getTypeLocationService()
-                .addModuleDependency(governorPhysicalTypeMetadata.getType().getModule(), parameter);
+            getTypeLocationService().addModuleDependency(
+                governorPhysicalTypeMetadata.getType().getModule(), parameter);
           }
 
           finders.remove(finderName);
@@ -392,21 +399,24 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
 
       // Check all finders have its service method
       if (!finders.isEmpty()) {
-        throw new IllegalArgumentException(
-            String.format("ERROR: Service %s does not have these finder methods: %s ",
-                service.getFullyQualifiedTypeName(), StringUtils.join(finders, ", ")));
+        throw new IllegalArgumentException(String.format(
+            "ERROR: Service %s does not have these finder methods: %s ",
+            service.getFullyQualifiedTypeName(), StringUtils.join(finders, ", ")));
       }
     }
 
-    T viewMetadata = createMetadataInstance(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
-        entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
-        collectionController, dateTimeFields, enumFields, findersToAdd, formBeansDateTimeFields,
-        formBeansEnumFields, detailItemController, detailCollectionController);
+    T viewMetadata =
+        createMetadataInstance(metadataIdentificationString, aspectName,
+            governorPhysicalTypeMetadata, controllerMetadata, serviceMetadata, entityMetadata,
+            entityPlural, entityIdentifierPlural, compositionRelationOneToOne, itemController,
+            collectionController, dateTimeFields, enumFields, findersToAdd,
+            formBeansDateTimeFields, formBeansEnumFields, detailItemController,
+            detailCollectionController);
 
     // Fill view context
-    ViewContext ctx = viewGenerationService.createViewContext(controllerMetadata, entity,
-        entityMetadata, viewMetadata);
+    ViewContext ctx =
+        viewGenerationService.createViewContext(controllerMetadata, entity, entityMetadata,
+            viewMetadata);
 
     // Checking if Spring Security has been installed
     if (getProjectOperations().isFeatureInstalled(FeatureNames.SECURITY)) {
@@ -468,10 +478,10 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
             new ArrayList<ClassOrInterfaceTypeDetails>();
         parentControllers.addAll(getControllerLocator().getControllers(parentEntity,
             ControllerType.COLLECTION, viewType));
-        parentControllers.addAll(
-            getControllerLocator().getControllers(parentEntity, ControllerType.ITEM, viewType));
-        parentControllers.addAll(
-            getControllerLocator().getControllers(parentEntity, ControllerType.SEARCH, viewType));
+        parentControllers.addAll(getControllerLocator().getControllers(parentEntity,
+            ControllerType.ITEM, viewType));
+        parentControllers.addAll(getControllerLocator().getControllers(parentEntity,
+            ControllerType.SEARCH, viewType));
         for (ClassOrInterfaceTypeDetails parentController : parentControllers) {
           String viewMetadatIdentifier = createLocalIdentifier(parentController);
           registerDependency(metadataIdentificationString, viewMetadatIdentifier);
@@ -491,8 +501,9 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
 
         // Update i18n labels of detail entity
         if (shouldGenerateI18nLabels()) {
-          Map<String, String> labels = viewGenerationService.getI18nLabels(detailMemberDetails,
-              last.childType, last.childEntityMetadata, controllerMetadata, module, ctx);
+          Map<String, String> labels =
+              viewGenerationService.getI18nLabels(detailMemberDetails, last.childType,
+                  last.childEntityMetadata, controllerMetadata, module, ctx);
           getI18nOperations().addOrUpdateLabels(module, labels);
         }
         break;
@@ -519,12 +530,13 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
 
             // Obtain the details controllers to use only them that includes this finder value in the
             // views parameter of @RooDetail annotation.
-            List<T> detailsControllersForFinderListView = getDetailsControllers(controllerMetadata,
-                controllerPackage, entity, viewType, finderName);
+            List<T> detailsControllersForFinderListView =
+                getDetailsControllers(controllerMetadata, controllerPackage, entity, viewType,
+                    finderName);
 
             viewGenerationService.addFinderListView(module, entityMetadata, entityMemberDetails,
-                viewMetadata, formBean, returnType, finderName, detailsControllersForFinderListView,
-                ctx);
+                viewMetadata, formBean, returnType, finderName,
+                detailsControllersForFinderListView, ctx);
           }
         }
         break;
@@ -542,8 +554,9 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
 
     if (shouldGenerateI18nLabels()) {
       // Update i18n labels
-      Map<String, String> labels = viewGenerationService.getI18nLabels(entityMemberDetails, entity,
-          entityMetadata, controllerMetadata, module, ctx);
+      Map<String, String> labels =
+          viewGenerationService.getI18nLabels(entityMemberDetails, entity, entityMetadata,
+              controllerMetadata, module, ctx);
       getI18nOperations().addOrUpdateLabels(module, labels);
 
       // Add labels for child composite entity as well
@@ -551,9 +564,10 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
         MemberDetails childMemberDetails =
             getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
                 getTypeLocationService().getTypeDetails(compositionRelation.getKey().childType));
-        Map<String, String> i18nLabels = viewGenerationService.getI18nLabels(childMemberDetails,
-            compositionRelation.getKey().childType, compositionRelation.getValue(), null, module,
-            ctx);
+        Map<String, String> i18nLabels =
+            viewGenerationService.getI18nLabels(childMemberDetails,
+                compositionRelation.getKey().childType, compositionRelation.getValue(), null,
+                module, ctx);
         getI18nOperations().addOrUpdateLabels(module, i18nLabels);
       }
     }
@@ -627,8 +641,8 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
     for (ClassOrInterfaceTypeDetails controller : itemControllers) {
       ControllerAnnotationValues values = new ControllerAnnotationValues(controller);
       if (controllerPackage.equals(controller.getType().getPackage())
-          && (StringUtils.isBlank(pathPrefix) && StringUtils.isBlank(values.getPathPrefix())
-              || StringUtils.equals(pathPrefix, values.getPathPrefix()))) {
+          && (StringUtils.isBlank(pathPrefix) && StringUtils.isBlank(values.getPathPrefix()) || StringUtils
+              .equals(pathPrefix, values.getPathPrefix()))) {
         return controller.getType();
       }
     }
