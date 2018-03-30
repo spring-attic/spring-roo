@@ -1014,7 +1014,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     bodyBuilder.appendFormalLine("try {");
 
     for (int i = 0; i < this.entityValidFields.size(); i++) {
-      String fieldName = this.entityValidFields.get(i).getFieldName().getSymbolName();
+      FieldMetadata fieldMetadata = this.entityValidFields.get(i);
+      String fieldName = fieldMetadata.getFieldName().getSymbolName();
       if (i == 0) {
 
         // if (columnName.equals("FIELD")) {
@@ -1027,12 +1028,13 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
       bodyBuilder.indent();
 
-      if (this.entityValidFields.get(i).getFieldName()
-          .equals(this.entityMetadata.getCurrentIndentifierField().getFieldName())) {
+      JavaType fieldType = fieldMetadata.getFieldType();
+      if (fieldMetadata.getFieldName().equals(
+          this.entityMetadata.getCurrentIndentifierField().getFieldName())) {
 
         // builder.addColumn("FIELD-TITLE", "FIELD-NAME", FIELD-CLASS,
         // 50);
-        if (this.entityValidFields.get(i).getFieldType().isPrimitive()) {
+        if (fieldType.isPrimitive()) {
 
           // Print SimpleTypeName of JavaType when it is a primitive
           bodyBuilder
@@ -1040,36 +1042,38 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
                   "builder.addColumn(%s().getMessage(\"%s_%s\", null, \"%s\", locale), \"%s\", %s.class.getName(), 50);",
                   getAccessorMethod(this.messageSourceField).getMethodName(), this.entityLabel,
                   fieldName.toLowerCase(), getFieldDefaultLabelValue(fieldName), fieldName,
-                  this.entityValidFields.get(i).getFieldType().getSimpleTypeName());
-          getNameOfJavaType(this.entityValidFields.get(i).getFieldType());
+                  fieldType.getSimpleTypeName());
+          // assure import of fielType is in aj
+          getNameOfJavaType(fieldType);
         } else {
           bodyBuilder
               .appendFormalLine(
                   "builder.addColumn(%s().getMessage(\"%s_%s\", null, \"%s\", locale), \"%s\", %s.class.getName(), 50);",
                   getAccessorMethod(this.messageSourceField).getMethodName(), this.entityLabel,
                   fieldName.toLowerCase(), getFieldDefaultLabelValue(fieldName), fieldName,
-                  getNameOfJavaType(this.entityValidFields.get(i).getFieldType()));
+                  getNameOfJavaType(fieldType.withoutParameters()));
         }
       } else {
 
         // builder.addColumn("FIELD-TITLE", "FIELD-NAME", FIELD-CLASS,
         // 100);
-        if (this.entityValidFields.get(i).getFieldType().isPrimitive()) {
+        if (fieldType.isPrimitive()) {
 
           bodyBuilder
               .appendFormalLine(
                   "builder.addColumn(%s().getMessage(\"%s_%s\", null, \"%s\", locale), \"%s\", %s.class.getName(), 100);",
                   getAccessorMethod(this.messageSourceField).getMethodName(), this.entityLabel,
                   fieldName.toLowerCase(), getFieldDefaultLabelValue(fieldName), fieldName,
-                  this.entityValidFields.get(i).getFieldType().getSimpleTypeName());
-          getNameOfJavaType(this.entityValidFields.get(i).getFieldType());
+                  fieldType.getSimpleTypeName());
+          // assure import of fielType is in aj
+          getNameOfJavaType(fieldType);
         } else {
           bodyBuilder
               .appendFormalLine(
                   "builder.addColumn(%s().getMessage(\"%s_%s\", null, \"%s\", locale), \"%s\", %s.class.getName(), 100);",
                   getAccessorMethod(this.messageSourceField).getMethodName(), this.entityLabel,
                   fieldName.toLowerCase(), getFieldDefaultLabelValue(fieldName), fieldName,
-                  getNameOfJavaType(this.entityValidFields.get(i).getFieldType()));
+                  getNameOfJavaType(fieldType.withoutParameters()));
         }
       }
 
