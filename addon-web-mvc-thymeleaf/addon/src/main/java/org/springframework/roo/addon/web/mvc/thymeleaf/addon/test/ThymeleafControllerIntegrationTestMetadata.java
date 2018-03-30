@@ -27,7 +27,7 @@ import org.springframework.roo.project.LogicalPath;
 
 /**
  * Metadata for {@link RooThymeleafControllerIntegrationTest}.
- * 
+ *
  * @author Sergio Clares
  * @since 2.0
  */
@@ -74,14 +74,14 @@ public class ThymeleafControllerIntegrationTestMetadata extends
 
   /**
    * Constructor
-   * 
+   *
    * @param identifier
    * @param aspectName
    * @param governorPhysicalTypeMetadata
    * @param annotationValues
-   * @param controller 
+   * @param controller
    * @param managedEntity
-   * @param entityFactory 
+   * @param entityFactory
    * @param relatedServices
    */
   public ThymeleafControllerIntegrationTestMetadata(final String identifier,
@@ -124,7 +124,7 @@ public class ThymeleafControllerIntegrationTestMetadata extends
 
   /**
    * Builds and return a test example method.
-   * 
+   *
    * @return {@link MethodMetadata}
    */
   private MethodMetadata getTestExampleMethod() {
@@ -170,12 +170,12 @@ public class ThymeleafControllerIntegrationTestMetadata extends
 
   /**
    * Builds and returns the entity factory field.
-   * 
+   *
    * @return {@link FieldMetadataBuilder}
    */
   private FieldMetadataBuilder getEntityFactoryField() {
     FieldMetadataBuilder fieldBuilder =
-        new FieldMetadataBuilder(this.getId(), Modifier.PRIVATE, this.entityFactoryFieldName,
+        new FieldMetadataBuilder(this.getId(), Modifier.PUBLIC, this.entityFactoryFieldName,
             this.entityFactory, String.format("new %s()", getNameOfJavaType(this.entityFactory)));
 
     return fieldBuilder;
@@ -183,7 +183,7 @@ public class ThymeleafControllerIntegrationTestMetadata extends
 
   /**
    * Builds and returns the entity service field, annotated with @MockBean
-   * 
+   *
    * @param the service {@link JavaType}
    * @return {@link FieldMetadataBuilder}
    */
@@ -192,7 +192,7 @@ public class ThymeleafControllerIntegrationTestMetadata extends
         new JavaSymbolName(String.format("%sService",
             StringUtils.uncapitalize(service.getSimpleTypeName())));
     FieldMetadataBuilder fieldBuilder =
-        new FieldMetadataBuilder(this.getId(), Modifier.PRIVATE, fieldName, service, null);
+        new FieldMetadataBuilder(this.getId(), Modifier.PUBLIC, fieldName, service, null);
 
     // Add @Autowired
     fieldBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.MOCK_BEAN));
@@ -201,13 +201,13 @@ public class ThymeleafControllerIntegrationTestMetadata extends
   }
 
   /**
-   * Builds and returns a {@link MockMvc} field, annotated with @Autowired 
-   * 
+   * Builds and returns a {@link MockMvc} field, annotated with @Autowired
+   *
    * @return {@link FieldMetadataBuilder}
    */
   private FieldMetadataBuilder getMockMvcField() {
     FieldMetadataBuilder fieldBuilder =
-        new FieldMetadataBuilder(this.getId(), Modifier.PRIVATE, MOCK_MVC_FIELD_NAME,
+        new FieldMetadataBuilder(this.getId(), Modifier.PUBLIC, MOCK_MVC_FIELD_NAME,
             SpringJavaType.MOCK_MVC, null);
 
     // Add @Autowired
@@ -218,7 +218,7 @@ public class ThymeleafControllerIntegrationTestMetadata extends
 
   /**
    * Builds and returns `@RunWith` annotation
-   * 
+   *
    * @return {@link AnnotationMetadataBuilder}
    */
   private AnnotationMetadataBuilder getRunWithAnnotation() {
@@ -229,7 +229,7 @@ public class ThymeleafControllerIntegrationTestMetadata extends
 
   /**
    * Builds and returns @SpringletsWebMvcTest annotation
-   * 
+   *
    * @return {@link AnnotationMetadataBuilder}
    */
   private AnnotationMetadataBuilder getSpringletsWebMvcAnnotation() {
