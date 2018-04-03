@@ -15,9 +15,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.io.IOUtils;
@@ -267,6 +269,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private final String entityPluralUncapitalized;
   private final List<FieldMetadata> entityValidFields;
   private final Map<String, JavaType> jasperReportsMap;
+  private final Set<? extends Object> excludeViews;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -348,6 +351,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     super(identifier, aspectName, governorPhysicalTypeMetadata, annotationValues
         .getExcludeMethods() == null ? null : Arrays.asList(annotationValues.getExcludeMethods()));
 
+    this.excludeViews =
+        annotationValues.getExcludeViews() == null ? Collections.emptySet()
+            : Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(annotationValues
+                .getExcludeViews())));
     this.annotationValues = annotationValues;
     this.jasperReportsMap = jasperReportsMap;
     this.entityValidFields = validFields;
@@ -4789,10 +4796,16 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     return methodBuilder.build();
   }
 
+  @Override
+  public boolean shouldGenerateView(String viewName) {
+    return !excludeViews.contains(viewName);
+  }
+
   /*
    * =========================================================================
    * =====
    */
+
 
   /**
    * Method that returns list Datatables JSON method

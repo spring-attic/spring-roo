@@ -34,4 +34,12 @@ public abstract class AbstractViewMetadata extends AbstractItdTypeDetailsProvidi
 
   public abstract ControllerMetadata getControllerMetadata();
 
+  /**
+   * Informs if referenced view should be generated
+   *
+   * @param viewName
+   * @return
+   */
+  public abstract boolean shouldGenerateView(String viewName);
+
 }

@@ -26,4 +26,12 @@ public @interface RooThymeleaf {
    * @since 2.0.0RC3
    */
   String[] excludeMethods() default {};
+
+  /**
+   * Don't generate views with specified name
+   *
+   * @return
+   * @since 2.0.0RC3
+   */
+  String[] excludeViews() default {};
 }

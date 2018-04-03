@@ -435,16 +435,24 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
             getDetailsControllers(controllerMetadata, controllerPackage, entity, viewType, "list");
 
         // Add list view
-        viewGenerationService.addListView(module, entityMetadata, entityMemberDetails,
-            detailsControllersForListView, ctx);
+        if (viewMetadata.shouldGenerateView("list")) {
+          viewGenerationService.addListView(module, entityMetadata, entityMemberDetails,
+              detailsControllersForListView, ctx);
+        }
         if (!entityMetadata.isReadOnly()) {
           // If not readOnly, add create view
-          viewGenerationService.addCreateView(module, entityMetadata, entityMemberDetails, ctx);
-          // If not readOnly, add the modal dialogs for delete and delete batch
-          viewGenerationService.addListDeleteModalView(module, entityMetadata, entityMemberDetails,
-              ctx);
-          viewGenerationService.addListDeleteModalBatchView(module, entityMetadata,
-              entityMemberDetails, ctx);
+          if (viewMetadata.shouldGenerateView("create")) {
+            viewGenerationService.addCreateView(module, entityMetadata, entityMemberDetails, ctx);
+          }
+          if (viewMetadata.shouldGenerateView("listDeleteModal")) {
+            // If not readOnly, add the modal dialogs for delete and delete batch
+            viewGenerationService.addListDeleteModalView(module, entityMetadata,
+                entityMemberDetails, ctx);
+            if (viewMetadata.shouldGenerateView("listDeleteModalBatch")) {
+              viewGenerationService.addListDeleteModalBatchView(module, entityMetadata,
+                  entityMemberDetails, ctx);
+            }
+          }
         }
 
         break;
@@ -456,13 +464,17 @@ public abstract class AbstractViewGeneratorMetadataProvider<T extends AbstractVi
             getDetailsControllers(controllerMetadata, controllerPackage, entity, viewType, "show");
 
         // Add show view
-        viewGenerationService.addShowView(module, entityMetadata, entityMemberDetails,
-            detailsControllersForShowView, ctx);
+        if (viewMetadata.shouldGenerateView("show")) {
+          viewGenerationService.addShowView(module, entityMetadata, entityMemberDetails,
+              detailsControllersForShowView, ctx);
+        }
 
-        // Add showInline view
-        viewGenerationService.addShowInlineView(module, entityMetadata, entityMemberDetails, ctx);
+        if (viewMetadata.shouldGenerateView("showInLine")) {
+          // Add showInline view
+          viewGenerationService.addShowInlineView(module, entityMetadata, entityMemberDetails, ctx);
+        }
 
-        if (!entityMetadata.isReadOnly()) {
+        if (!entityMetadata.isReadOnly() && viewMetadata.shouldGenerateView("edit")) {
           // If not readOnly, add update view
           viewGenerationService.addUpdateView(module, entityMetadata, entityMemberDetails, ctx);
         }

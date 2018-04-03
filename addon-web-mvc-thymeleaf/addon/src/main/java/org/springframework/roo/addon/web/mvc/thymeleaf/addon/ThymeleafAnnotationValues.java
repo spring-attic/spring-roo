@@ -19,6 +19,9 @@ public class ThymeleafAnnotationValues extends AbstractAnnotationValues {
   @AutoPopulate
   private String[] excludeMethods;
 
+  @AutoPopulate
+  private String[] excludeViews;
+
   /**
    * Constructor
    *
@@ -32,6 +35,10 @@ public class ThymeleafAnnotationValues extends AbstractAnnotationValues {
 
   public String[] getExcludeMethods() {
     return excludeMethods;
+  }
+
+  public String[] getExcludeViews() {
+    return excludeViews;
   }
 
 }
