@@ -44,6 +44,7 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC, T extends Abs
   protected DOC process(String templateName, ViewContext<T> ctx) {
     String content = "";
 
+    Map<String, Object> input = null;
     try {
 
       Configuration cfg = new Configuration(new Version(2, 3, 23));
@@ -59,7 +60,7 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC, T extends Abs
       }
 
       // Prepare the template input:
-      Map<String, Object> input = new HashMap<String, Object>();
+      input = new HashMap<String, Object>();
 
       // Getting project information from ViewContext
       input.put("projectName", ctx.getProjectName());
@@ -107,8 +108,8 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC, T extends Abs
     } catch (Exception e) {
       throw new RuntimeException(
           String.format(
-              "ERROR: Error trying to generate final content from provided template '%s.ftl'. You should provide a valid .ftl file",
-              templateName), e);
+              "ERROR: Error trying to generate final content from provided template '%s.ftl'. You should provide a valid .ftl file.\nContext:\n%s",
+              templateName, input), e);
     }
 
   }

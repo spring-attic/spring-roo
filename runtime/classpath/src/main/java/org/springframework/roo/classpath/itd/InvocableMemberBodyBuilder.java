@@ -91,11 +91,12 @@ public class InvocableMemberBodyBuilder {
   public String getOutput() {
     if (reset) {
       Validate.isTrue(indentLevel == 0,
-          "Indent level must be 0 (not %d) to terminate following a reset", indentLevel);
+          "Indent level must be 0 (not %d) to terminate following a reset:\n%s", indentLevel,
+          stringBuilder);
     } else {
       Validate.isTrue(indentLevel == 2,
-          "Indent level must be 2 (not %d) to terminate (use reset to indent to level 0)",
-          indentLevel);
+          "Indent level must be 2 (not %d) to terminate (use reset to indent to level 0):\n%s",
+          indentLevel, stringBuilder);
     }
     return stringBuilder.toString();
   }

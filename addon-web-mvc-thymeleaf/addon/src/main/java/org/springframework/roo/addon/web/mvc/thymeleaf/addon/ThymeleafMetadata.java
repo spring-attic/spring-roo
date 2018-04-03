@@ -873,6 +873,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   }
 
   private MethodMetadata addAndGet(MethodMetadata method, List<MethodMetadata> allMethods) {
+    if (method == null) {
+      return null;
+    }
     if (allMethods != null) {
       allMethods.add(method);
     }
@@ -2653,8 +2656,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
           getMutatorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
           existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
               .getMethodName());
+      bodyBuilder.indentRemove();
 
-      // } else if(concurrencyProblem && "apply".equals(concurrencyControl)){
+      // } else {
       bodyBuilder.appendFormalLine("} else {");
       bodyBuilder.indent();
 
@@ -4118,6 +4122,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         controllerMetadata.getServiceMetadataForEntity(detailsInfo.childType);
     final MethodMetadata findAllByIdsInMethod =
         detailsServiceMetadata.getCurrentFindAllByIdsInWithGlobalSearchMethod();
+    if (findAllByIdsInMethod == null) {
+      return null;
+    }
     final FieldMetadata detailsServiceField =
         controllerMetadata.getDetailsServiceFields(detailsInfo.childType);
 

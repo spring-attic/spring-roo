@@ -530,6 +530,16 @@ public class ThymeleafViewGeneratorServiceImpl extends
     super
         .addDetailsViews(moduleName, entityMetadata, entity, controllerMetadata, viewMetadata, ctx);
 
+    // Get root entity metadata
+    EntityItem entityItem = createEntityItem(entityMetadata, ctx, TABLE_SUFFIX);
+
+    DetailEntityItem detail =
+        createDetailEntityItem(viewMetadata, entity, entityMetadata, ctx.getEntityName(), ctx,
+            DETAIL_SUFFIX, entityItem);
+
+
+    detail.addConfigurationElement("entityLabel",
+        StringUtils.uncapitalize(FieldItem.buildLabel(detail.getEntityName(), "")));
 
     if (controllerMetadata.getLastDetailsInfo().type == JpaRelationType.AGGREGATION) {
       addCreateDetailsView(moduleName, entityMetadata, entity, controllerMetadata, viewMetadata,
@@ -539,6 +549,8 @@ public class ThymeleafViewGeneratorServiceImpl extends
       addCreateDetailsCompositionView(moduleName, entityMetadata, entity, controllerMetadata,
           viewMetadata, ctx);
     }
+
+    ctx.addExtraParameter("detail", detail);
 
     addListDeleteModalDetailView(moduleName, entityMetadata, entity, controllerMetadata, ctx);
     addListDeleteModalDetailBatchView(moduleName, entityMetadata, entity, controllerMetadata, ctx);
@@ -573,8 +585,11 @@ public class ThymeleafViewGeneratorServiceImpl extends
     addUpdateDetailsCompositionView(moduleName, entityMetadata, viewMetadata, entityItem, detail,
         childCtx);
 
-    addListDeleteModalDetailView(moduleName, entityMetadata, entity, controllerMetadata, ctx);
-    addListDeleteModalDetailBatchView(moduleName, entityMetadata, entity, controllerMetadata, ctx);
+    childCtx.addExtraParameter("detail", detail);
+
+    addListDeleteModalDetailView(moduleName, entityMetadata, entity, controllerMetadata, childCtx);
+    addListDeleteModalDetailBatchView(moduleName, entityMetadata, entity, controllerMetadata,
+        childCtx);
   }
 
   @Override
