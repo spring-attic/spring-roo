@@ -916,7 +916,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
         fetchJoins.append(entityVariable);
         fetchJoins.append(".");
         fetchJoins.append(relationInfo.fieldName);
-        fetchJoins.append(").fetchJoin()");
+        fetchJoins.append(")");
       }
     }
 
