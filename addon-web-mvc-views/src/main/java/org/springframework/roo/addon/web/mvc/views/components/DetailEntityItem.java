@@ -28,6 +28,7 @@ public class DetailEntityItem extends EntityItem {
   private String pathString;
   private String pathStringFieldNames;
   private String controllerPath;
+  private String templatePath;
 
   /**
    * Constructs a DetailEntityItem using the fieldName and suffixId
@@ -51,6 +52,7 @@ public class DetailEntityItem extends EntityItem {
     this.pathString = controllerMetadata.getDetailsPathAsString("-");
     this.pathStringFieldNames = controllerMetadata.getDetailsPathAsString(".");
     this.controllerPath = controllerPath;
+    this.templatePath = StringUtils.removeStart(controllerPath, "/");
     this.z = calculateZ();
     buildDetailItemId(detailSuffix);
   }
@@ -155,5 +157,13 @@ public class DetailEntityItem extends EntityItem {
 
   public void setControllerPath(String controllerPath) {
     this.controllerPath = controllerPath;
+  }
+
+  public String getTemplatePath() {
+    return templatePath;
+  }
+
+  public void setTemplatePath(String templatePath) {
+    this.templatePath = templatePath;
   }
 }

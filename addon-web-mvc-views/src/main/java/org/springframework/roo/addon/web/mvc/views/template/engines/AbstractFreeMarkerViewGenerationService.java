@@ -70,6 +70,8 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC, T extends Abs
       // Getting controller information from ViewContext
       input.put("controllerPath", ctx.getControllerPath());
 
+      input.put("templatePath", StringUtils.removeStart(ctx.getControllerPath(), "/"));
+
       // Getting entity information from ViewContext
       input.put("entityName", ctx.getEntityName());
       if (ctx.getEntityName() != null) {

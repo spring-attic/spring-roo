@@ -90,10 +90,10 @@
               <#if entity.readOnly == false>
                 <!-- content replaced by modal-confirm fragment of modal-confirm.html -->
                 <div data-th-replace="~{fragments/modal-confirm-delete :: modalConfirmDelete(tableId='${entity.entityItemId}-table',
-                    title=${r"#{"}label_delete_entity(${r"#{"}${entityLabelPlural}})}, message=${r"#{"}info_delete_item_confirm}, content=~{${controllerPath}/listDeleteModal :: ${entity.entityItemId}ModalConfirmBody})}">
+                    title=${r"#{"}label_delete_entity(${r"#{"}${entityLabelPlural}})}, message=${r"#{"}info_delete_item_confirm}, content=~{${templatePath}/listDeleteModal :: ${entity.entityItemId}ModalConfirmBody})}">
                 </div>
                 <div data-th-replace="~{fragments/modal-confirm-delete-batch :: modalConfirmDeleteBatch(tableId='${entity.entityItemId}-table',
-                    title=${r"#{"}label_delete_entity(${r"#{"}${entityLabelPlural}})}, message=${r"#{"}info_delete_batch_confirm}, content=~{${controllerPath}/listDeleteModalBatch :: ${entity.entityItemId}ModalConfirmBody})}">
+                    title=${r"#{"}label_delete_entity(${r"#{"}${entityLabelPlural}})}, message=${r"#{"}info_delete_batch_confirm}, content=~{${templatePath}/listDeleteModalBatch :: ${entity.entityItemId}ModalConfirmBody})}">
                 </div>
               </#if>
               <div data-th-replace="~{fragments/modal-export-empty-error :: modalExportEmptyError(tableId='${entity.entityItemId}-table',

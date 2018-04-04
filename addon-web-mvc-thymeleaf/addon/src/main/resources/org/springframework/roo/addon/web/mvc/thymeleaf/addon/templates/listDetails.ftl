@@ -99,10 +99,10 @@
                   <#if entity.readOnly == false>
                     <!-- content replaced by modal-confirm fragment of modal-confirm.html -->
                     <div data-th-replace="~{fragments/modal-confirm-delete :: modalConfirmDelete(tableId='${detail.entityItemId}-table',
-                        title=${r"#{"}label_delete_entity(${r"#"}{${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_item_confirm}, content=~{${detail.controllerPath}/${detail.fieldName}/listDeleteModal :: ${detail.entityItemId}ModalConfirmBody})}">
+                        title=${r"#{"}label_delete_entity(${r"#"}{${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_item_confirm}, content=~{${detail.templatePath}/${detail.fieldName}/listDeleteModal :: ${detail.entityItemId}ModalConfirmBody})}">
                     </div>
                    <div data-th-replace="~{fragments/modal-confirm-delete-batch :: modalConfirmDeleteBatch(tableId='${detail.entityItemId}-table',
-                        title=${r"#{"}label_delete_entity(${r"#{"}${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_batch_confirm}, content=~{${detail.controllerPath}/${detail.fieldName}/listDeleteModalBatch :: ${detail.entityItemId}ModalConfirmBody})}">
+                        title=${r"#{"}label_delete_entity(${r"#{"}${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_batch_confirm}, content=~{${detail.templatePath}/${detail.fieldName}/listDeleteModalBatch :: ${detail.entityItemId}ModalConfirmBody})}">
                     </div>
                  </#if>
                     <div data-th-replace="~{fragments/modal-export-empty-error :: modalExportEmptyError(tableId='${detail.entityItemId}-table',
