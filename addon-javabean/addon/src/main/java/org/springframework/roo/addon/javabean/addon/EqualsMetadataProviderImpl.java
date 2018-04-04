@@ -1,9 +1,11 @@
 package org.springframework.roo.addon.javabean.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_EQUALS;
+import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.SortedSet;
@@ -16,6 +18,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -28,7 +31,7 @@ import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Implementation of {@link EqualsMetadataProvider}.
- * 
+ *
  * @author Alan Stewart
  * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.2.0
@@ -44,7 +47,7 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
    * This service is being activated so setup it:
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}</li>
-   * <li>Registers {@link RooJavaType#ROO_EQUALS} as additional JavaType 
+   * <li>Registers {@link RooJavaType#ROO_EQUALS} as additional JavaType
    * that will trigger metadata registration.</li>
    * </ul>
    */
@@ -59,9 +62,9 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -108,21 +111,33 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
     if (memberDetails == null) {
       return null;
     }
+    AnnotationMetadata javaBeanAnnotation = memberDetails.getAnnotation(ROO_JAVA_BEAN);
+    if (javaBeanAnnotation != null) {
+      // Return an empty metadata as @RooJavaBean do the work
+      return new EqualsMetadata(metadataIdentificationString, aspectName,
+          governorPhysicalTypeMetadata, annotationValues, new ArrayList<FieldMetadata>(), null,
+          true);
+    }
 
     final JavaType javaType = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName();
     final List<FieldMetadata> equalityFields =
-        locateFields(javaType, annotationValues.getExcludeFields(), memberDetails,
+        locateFields(javaType, annotationValues.getExcludeFields(), memberDetails.getFields(),
             metadataIdentificationString);
 
+    FieldMetadata identifierField = getIdentifier(governorPhysicalTypeMetadata);
+
+    return new EqualsMetadata(metadataIdentificationString, aspectName,
+        governorPhysicalTypeMetadata, annotationValues, equalityFields, identifierField, false);
+  }
+
+  public FieldMetadata getIdentifier(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
     List<FieldMetadata> identifierFields =
         getPersistenceMemberLocator().getIdentifierFields(governorPhysicalTypeMetadata.getType());
     FieldMetadata identifierField = null;
     if (!identifierFields.isEmpty()) {
       identifierField = identifierFields.get(0);
     }
-
-    return new EqualsMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, equalityFields, identifierField);
+    return identifierField;
   }
 
   public String getProvidesType() {
@@ -130,17 +145,17 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
   }
 
   /**
-   * Locates class fields needed to generate `equals` and `hashCode` methods. 
+   * Locates class fields needed to generate `equals` and `hashCode` methods.
    * Also fills id field info if class is an entity.
-   * 
+   *
    * @param javaType the {@link JavaType} of the governor class.
-   * @param excludeFields the {@link String[]} with field names to exclude. 
+   * @param excludeFields the {@link String[]} with field names to exclude.
    * @param memberDetails the {@link MemberDetails} of the class.
    * @param metadataIdentificationString
    * @return a {@link List<FieldMetadata>}
    */
-  private List<FieldMetadata> locateFields(final JavaType javaType, final String[] excludeFields,
-      final MemberDetails memberDetails, final String metadataIdentificationString) {
+  public List<FieldMetadata> locateFields(final JavaType javaType, final String[] excludeFields,
+      final List<FieldMetadata> fields, final String metadataIdentificationString) {
     final SortedSet<FieldMetadata> locatedFields =
         new TreeSet<FieldMetadata>(new Comparator<FieldMetadata>() {
           public int compare(final FieldMetadata l, final FieldMetadata r) {
@@ -151,7 +166,7 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
     final List<?> excludeFieldsList = CollectionUtils.arrayToList(excludeFields);
     final FieldMetadata versionField = getPersistenceMemberLocator().getVersionField(javaType);
 
-    for (final FieldMetadata field : memberDetails.getFields()) {
+    for (final FieldMetadata field : fields) {
       if (excludeFieldsList.contains(field.getFieldName().getSymbolName())) {
         continue;
       }

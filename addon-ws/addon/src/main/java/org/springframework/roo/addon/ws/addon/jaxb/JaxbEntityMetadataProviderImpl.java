@@ -160,13 +160,16 @@ public class JaxbEntityMetadataProviderImpl extends AbstractMemberDiscoveringItd
 
     // Getting JavaBean Metadata
     String javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails);
-    JavaBeanMetadata javaBeanMetadata =
-        (JavaBeanMetadata) getMetadataService().get(javaBeanMetadataKey);
+    JavaBeanMetadata javaBeanMetadata = getMetadataService().get(javaBeanMetadataKey);
 
     // Getting JpaEntity Metadata
     String jpaEntityMetadataKey = JpaEntityMetadata.createIdentifier(entityDetails);
-    JpaEntityMetadata jpaEntityMetadata =
-        (JpaEntityMetadata) getMetadataService().get(jpaEntityMetadataKey);
+    JpaEntityMetadata jpaEntityMetadata = getMetadataService().get(jpaEntityMetadataKey);
+
+    if (javaBeanMetadata == null) {
+      // Not ready for this metadata
+      return null;
+    }
 
     // Getting the @OneToMany and @ManyToOne getters
     Map<String, String> entityNames = new HashMap<String, String>();

@@ -14,7 +14,9 @@ import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
 import static org.springframework.roo.model.JpaJavaType.TRANSIENT;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +26,9 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.roo.addon.javabean.annotations.RooEquals;
 import org.springframework.roo.addon.javabean.annotations.RooJavaBean;
+import org.springframework.roo.addon.javabean.annotations.RooToString;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -102,40 +106,42 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
   private Map<JavaSymbolName, MethodMetadata> accesorMethods;
 
   private Map<JavaSymbolName, MethodMetadata> mutatorMethods;
+  private final EqualsAnnotationValues equalsAnnotationValues;
+  private final List<FieldMetadata> equalsFields;
+  private final FieldMetadata identifierField;
+  private final ToStringAnnotationValues toStringAnnotationValues;
+  private final Collection<FieldMetadata> toStringFields;
 
   /**
    * Constructor
    *
-   * @param identifier
-   *            the ID of the metadata to create (must be a valid ID)
-   * @param aspectName
-   *            the name of the ITD to be created (required)
-   * @param governorPhysicalTypeMetadata
-   *            the governor (required)
-   * @param annotationValues
-   *            the values of the {@link RooJavaBean} annotation (required)
-   * @param declaredFields
-   *            the fields declared in the governor (required, can be empty)
-   * @param memberDetailsScanner
-   * 			  the memberDetailsScanner used to get declared methods
+   * @param identifier the ID of the metadata to create (must be a valid ID)
+   * @param aspectName the name of the ITD to be created (required)
+   * @param governorPhysicalTypeMetadata the governor (required)
+   * @param annotationValues the values of the {@link RooJavaBean} annotation (required)
+   * @param declaredFields the fields declared in the governor (required, can be empty)
+   * @param interfaceMethods
+   * @param memberDetailsScanner the memberDetailsScanner used to get declared methods
+   * @param equalsAnnotationValues the values of the {@link RooEquals} annotation
+   * @param equalsFields the fields to use to generate equals method
+   * @param identifierField the identifier field (if any)
+   * @param toStringAnnotationValues the values of the {@link RooToString} annotation
+   * @param toStringFields the field to use to generate toString method
    */
   public JavaBeanMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final JavaBeanAnnotationValues annotationValues,
       final Map<FieldMetadata, JavaSymbolName> declaredFields,
-      List<? extends MethodMetadata> interfaceMethods, MemberDetailsScanner memberDetailsScanner) {
+      List<? extends MethodMetadata> interfaceMethods, MemberDetailsScanner memberDetailsScanner,
+      EqualsAnnotationValues equalsAnnotationValues, List<FieldMetadata> equalsFields,
+      FieldMetadata identifierField, ToStringAnnotationValues toStringAnnotationValues,
+      List<FieldMetadata> toStringFields) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.isTrue(isValid(identifier),
         "Metadata identification string '%s' does not appear to be a valid", identifier);
     Validate.notNull(annotationValues, "Annotation values required");
     Validate.notNull(declaredFields, "Declared fields required");
 
-    if (!isValid()) {
-      return;
-    }
-    if (declaredFields.isEmpty()) {
-      return; // N.B. the MD is still valid, just empty
-    }
 
     this.annotationValues = annotationValues;
     this.declaredFields = declaredFields;
@@ -143,7 +149,50 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     this.memberDetailsScanner = memberDetailsScanner;
     this.accesorMethods = new HashMap<JavaSymbolName, MethodMetadata>();
     this.mutatorMethods = new HashMap<JavaSymbolName, MethodMetadata>();
+    this.equalsAnnotationValues = equalsAnnotationValues;
+    this.equalsFields =
+        equalsFields == null ? new ArrayList<FieldMetadata>() : Collections
+            .unmodifiableList(equalsFields);
+    this.identifierField = identifierField;
+    this.toStringAnnotationValues = toStringAnnotationValues;
+    this.toStringFields =
+        toStringFields == null ? new ArrayList<FieldMetadata>() : Collections
+            .unmodifiableCollection(toStringFields);
 
+    if (!isValid()) {
+      return;
+    }
+
+    JavaType target = governorPhysicalTypeMetadata.getType();
+
+    if (!declaredFields.isEmpty()) {
+      generateGettersAndSetters(declaredFields, interfaceMethods);
+    }
+
+    // Generate equals methods
+    if (equalsAnnotationValues.isAnnotationFound()) {
+      ensureGovernorHasMethod(EqualsMetadata.generateEqualsMethod(identifier, target,
+          equalsAnnotationValues, identifierField == null ? null
+              : getAccesorMethod(identifierField).getMethodName(), equalsFields, builder));
+
+      ensureGovernorHasMethod(EqualsMetadata.generateHashCodeMethod(identifier,
+          equalsAnnotationValues, equalsFields, builder.getImportRegistrationResolver()));
+
+    }
+
+    // Generate toString methods
+    if (toStringAnnotationValues.isAnnotationFound()) {
+      ensureGovernorHasMethod(ToStringMetadata.generateToStringMethod(identifier, target,
+          toStringAnnotationValues, toStringFields));
+    }
+
+    // Create a representation of the desired output ITD
+    itdTypeDetails = builder.build();
+  }
+
+
+  protected void generateGettersAndSetters(final Map<FieldMetadata, JavaSymbolName> declaredFields,
+      List<? extends MethodMetadata> interfaceMethods) {
     // Add getters and setters
     for (final Entry<FieldMetadata, JavaSymbolName> entry : declaredFields.entrySet()) {
       final FieldMetadata field = entry.getKey();
@@ -166,8 +215,10 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
         processGaeAnnotations(field);
 
-        accessorMethod.setBodyBuilder(getGaeAccessorBody(field, hiddenIdFieldName));
-        mutatorMethod.setBodyBuilder(getGaeMutatorBody(field, hiddenIdFieldName));
+        InvocableMemberBodyBuilder gaeAccessorBody = getGaeAccessorBody(field, hiddenIdFieldName);
+        accessorMethod.setBodyBuilder(gaeAccessorBody);
+        InvocableMemberBodyBuilder gaeMutatorBody = getGaeMutatorBody(field, hiddenIdFieldName);
+        mutatorMethod.setBodyBuilder(gaeMutatorBody);
       }
 
       // Add to mutators and accesors list and build
@@ -182,6 +233,11 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     }
 
     // Implements interface methods if exists
+    implementsInterfaceMethods(interfaceMethods);
+  }
+
+
+  protected void implementsInterfaceMethods(List<? extends MethodMetadata> interfaceMethods) {
     if (interfaceMethods != null) {
       for (MethodMetadata interfaceMethod : interfaceMethods) {
         MethodMetadataBuilder methodBuilder = getInterfaceMethod(interfaceMethod);
@@ -193,9 +249,6 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
         }
       }
     }
-
-    // Create a representation of the desired output ITD
-    itdTypeDetails = builder.build();
   }
 
   /**
@@ -600,9 +653,10 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
   /**
    * Returns the mutator method related with the provided field
-   * 
+   *
    * @return MethodMetadata with the mutator method of the field
    */
+  @Override
   public MethodMetadata getMutatorMethod(FieldMetadata field) {
     return mutatorMethods.get(field.getFieldName());
   }
@@ -618,7 +672,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
   /**
    * Returns the accesor method related with the provided field
-   * 
+   *
    * @return MethodMetadata with the accesor method of the field
    */
   public MethodMetadata getAccesorMethod(FieldMetadata field) {

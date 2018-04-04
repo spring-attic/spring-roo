@@ -15,6 +15,7 @@ import org.springframework.roo.addon.javabean.annotations.RooEquals;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.ItdTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -24,6 +25,7 @@ import org.springframework.roo.classpath.details.comments.JavadocComment;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
@@ -31,7 +33,7 @@ import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Metadata for {@link RooEquals}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */
@@ -59,7 +61,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
   /**
    * Returns the class-level ID of this type of metadata
-   * 
+   *
    * @return a valid class-level MID
    */
   public static String getMetadataIdentiferType() {
@@ -83,7 +85,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
   /**
    * Constructor
-   * 
+   *
    * @param identifier the ID of this piece of metadata (required)
    * @param aspectName the name of the ITD to generate (required)
    * @param governorPhysicalTypeMetadata the details of the governor
@@ -92,19 +94,20 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
    *            (required)
    * @param equalityFields the fields to be compared by the
    *            `equals` method (can be `null` or empty)
-   * @param identifierField the identifier field, in case the destination 
+   * @param identifierField the identifier field, in case the destination
    *            was an entity
+   * @param hasJavaBeanAnnotation
    */
   public EqualsMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final EqualsAnnotationValues annotationValues, final List<FieldMetadata> equalityFields,
-      final FieldMetadata identifierField) {
+      final FieldMetadata identifierField, final boolean hasJavaBeanAnnotation) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.isTrue(isValid(identifier), "Metadata id '%s' is invalid", identifier);
     Validate.notNull(annotationValues, "Annotation values required");
 
     this.isJpaEntity = annotationValues.isJpaEntity();
-    if (this.isJpaEntity) {
+    if (this.isJpaEntity && !hasJavaBeanAnnotation) {
       Validate.notNull(identifierField, "Couldn't find any identifier field for %s",
           this.destination.getSimpleTypeName());
     }
@@ -113,7 +116,8 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
     this.locatedFields = equalityFields;
     this.identifierField = identifierField;
 
-    if (!CollectionUtils.isEmpty(equalityFields)) {
+
+    if (!hasJavaBeanAnnotation && !CollectionUtils.isEmpty(equalityFields)) {
       ensureGovernorHasMethod(new MethodMetadataBuilder(getEqualsMethod()));
       ensureGovernorHasMethod(new MethodMetadataBuilder(getHashCodeMethod()));
     }
@@ -124,11 +128,13 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
   /**
    * Returns the default `equals` method body. Used for not-entity classes.
-   * 
+   *
    * @return {@link InvocableMemberBodyBuilder}
    */
-  private InvocableMemberBodyBuilder getDefaultEqualsMethodBody() {
-    String typeName = this.destination.getSimpleTypeName();
+  private static InvocableMemberBodyBuilder generateDefaultEqualsMethodBody(JavaType target,
+      boolean appendSuper, List<FieldMetadata> fields,
+      ImportRegistrationResolver importRegistrationResolver) {
+    String typeName = target.getSimpleTypeName();
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
     bodyBuilder.appendFormalLine("if (!(" + OBJECT_NAME + " instanceof " + typeName + ")) {");
     bodyBuilder.indent();
@@ -143,11 +149,12 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
     bodyBuilder.appendFormalLine(typeName + " rhs = (" + typeName + ") " + OBJECT_NAME + ";");
 
     final StringBuilder builder =
-        new StringBuilder(String.format("return new %s()", getNameOfJavaType(EQUALS_BUILDER)));
-    if (annotationValues.isAppendSuper()) {
+        new StringBuilder(String.format("return new %s()",
+            EQUALS_BUILDER.getNameIncludingTypeParameters(false, importRegistrationResolver)));
+    if (appendSuper) {
       builder.append(".appendSuper(super.equals(" + OBJECT_NAME + "))");
     }
-    for (final FieldMetadata field : locatedFields) {
+    for (final FieldMetadata field : fields) {
       builder.append(".append(" + field.getFieldName() + ", rhs." + field.getFieldName() + ")");
     }
     builder.append(".isEquals();");
@@ -158,12 +165,15 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
   /**
    * Returns the default `hasCode` method return statement
-   * 
+   *
    * @return a {@link StringBuilder}
    */
-  private StringBuilder getDefaultHashCodeMethodReturnStatment() {
+  private static StringBuilder getDefaultHashCodeMethodReturnStatment(
+      EqualsAnnotationValues annotationValues, List<FieldMetadata> locatedFields,
+      ImportRegistrationResolver importRegistrationResolver) {
     final StringBuilder builder =
-        new StringBuilder(String.format("return new %s()", getNameOfJavaType(HASH_CODE_BUILDER)));
+        new StringBuilder(String.format("return new %s()",
+            HASH_CODE_BUILDER.getNameIncludingTypeParameters(false, importRegistrationResolver)));
     if (annotationValues.isAppendSuper()) {
       builder.append(".appendSuper(super.hashCode())");
     }
@@ -176,31 +186,54 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
   /**
    * Returns the `equals` method to be generated
-   * 
+   *
    * @return `null` if no generation is required
    */
   private MethodMetadata getEqualsMethod() {
-    final JavaType parameterType = OBJECT;
-    MethodMetadata method = getGovernorMethod(EQUALS_METHOD_NAME, parameterType);
+    MethodMetadata method = getGovernorMethod(EQUALS_METHOD_NAME, OBJECT);
     if (method != null) {
       return method;
     }
 
+    return generateEqualsMethod(getId(), destination, annotationValues,
+        identifierField == null ? null : getAccessorMethod(identifierField).getMethodName(),
+        locatedFields, builder).build();
+  }
+
+  /**
+   * Generate equals method
+   *
+   * @param metadataId
+   * @param target
+   * @param annotationValues
+   * @param identifierAccessor
+   * @param locatedFields
+   * @param builder
+   * @return
+   */
+  protected static MethodMetadataBuilder generateEqualsMethod(String metadataId, JavaType target,
+      EqualsAnnotationValues annotationValues, JavaSymbolName identifierAccessor,
+      List<FieldMetadata> locatedFields, ItdTypeDetailsBuilder builder) {
     final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName(OBJECT_NAME));
 
     // Create the method body depending on destination class properties
     InvocableMemberBodyBuilder bodyBuilder = null;
-    if (this.annotationValues.isJpaEntity()) {
-      bodyBuilder = getJpaEntityEqualsMethodBody();
+    if (annotationValues.isJpaEntity()) {
+      bodyBuilder =
+          getJpaEntityEqualsMethodBody(target, identifierAccessor,
+              builder.getImportRegistrationResolver());
     } else {
-      bodyBuilder = getDefaultEqualsMethodBody();
+      bodyBuilder =
+          generateDefaultEqualsMethodBody(target, annotationValues.isAppendSuper(), locatedFields,
+              builder.getImportRegistrationResolver());
     }
 
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, EQUALS_METHOD_NAME, BOOLEAN_PRIMITIVE,
-            AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
+        new MethodMetadataBuilder(metadataId, Modifier.PUBLIC, EQUALS_METHOD_NAME,
+            BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(OBJECT), parameterNames,
+            bodyBuilder);
 
-    if (this.isJpaEntity) {
+    if (annotationValues.isJpaEntity()) {
       CommentStructure commentStructure = new CommentStructure();
       commentStructure
           .addComment(
@@ -215,12 +248,12 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
       methodBuilder.setCommentStructure(commentStructure);
     }
 
-    return methodBuilder.build();
+    return methodBuilder;
   }
 
   /**
    * Returns the `hashCode` method to be generated
-   * 
+   *
    * @return `null` if no generation is required
    */
   private MethodMetadata getHashCodeMethod() {
@@ -229,24 +262,42 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
       return method;
     }
 
+    return generateHashCodeMethod(getId(), annotationValues, locatedFields,
+        builder.getImportRegistrationResolver()).build();
+  }
+
+  /**
+   * Generate hashCode method
+   *
+   * @param metadataId
+   * @param annotationValues
+   * @param locatedFields
+   * @param importRegistrationResolver
+   * @return
+   */
+  protected static MethodMetadataBuilder generateHashCodeMethod(String metadataId,
+      EqualsAnnotationValues annotationValues, List<FieldMetadata> locatedFields,
+      ImportRegistrationResolver importRegistrationResolver) {
     // Create the method
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     StringBuilder builder = null;
 
-    if (this.isJpaEntity) {
+    if (annotationValues.isJpaEntity()) {
       builder = getJpaEntityHashCodeMethodReturnStatment();
     } else {
-      builder = getDefaultHashCodeMethodReturnStatment();
+      builder =
+          getDefaultHashCodeMethodReturnStatment(annotationValues, locatedFields,
+              importRegistrationResolver);
     }
 
     bodyBuilder.appendFormalLine(builder.toString());
 
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, HASH_CODE_METHOD_NAME, INT_PRIMITIVE,
-            bodyBuilder);
+        new MethodMetadataBuilder(metadataId, Modifier.PUBLIC, HASH_CODE_METHOD_NAME,
+            INT_PRIMITIVE, bodyBuilder);
 
-    if (this.isJpaEntity) {
+    if (annotationValues.isJpaEntity()) {
       CommentStructure commentStructure = new CommentStructure();
       commentStructure
           .addComment(
@@ -262,16 +313,17 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
       methodBuilder.setCommentStructure(commentStructure);
     }
 
-    return methodBuilder.build();
+    return methodBuilder;
   }
 
   /**
    * Returns the specific `equals` method body defined for JPA entity classes.
-   * 
+   *
    * @return {@link InvocableMemberBodyBuilder}
    */
-  private InvocableMemberBodyBuilder getJpaEntityEqualsMethodBody() {
-    String typeName = this.destination.getSimpleTypeName();
+  private static InvocableMemberBodyBuilder getJpaEntityEqualsMethodBody(JavaType target,
+      JavaSymbolName identifierAccesor, ImportRegistrationResolver importRegistrationResolver) {
+    String typeName = target.getSimpleTypeName();
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // if (this == obj) {
@@ -296,21 +348,20 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
     // return getId() != null && Objects.equals(getId(), ((Pet) obj).getId());
     bodyBuilder.appendFormalLine(
-        "return %1$s() != null && %2$s.equals(%1$s(), ((%3$s) %4$s).%1$s());",
-        getAccessorMethod(this.identifierField).getMethodName(),
-        getNameOfJavaType(JavaType.OBJECTS), typeName, OBJECT_NAME);
+        "return %1$s() != null && %2$s.equals(%1$s(), ((%3$s) %4$s).%1$s());", identifierAccesor,
+        JavaType.OBJECTS.getNameIncludingTypeParameters(false, importRegistrationResolver),
+        typeName, OBJECT_NAME);
 
     return bodyBuilder;
   }
 
   /**
    * Returns the `hasCode` method return statement for Jpa entities
-   * 
+   *
    * @return a {@link StringBuilder}
    */
-  private StringBuilder getJpaEntityHashCodeMethodReturnStatment() {
-    final StringBuilder builder = new StringBuilder("return 31;");
-    return builder;
+  private static StringBuilder getJpaEntityHashCodeMethodReturnStatment() {
+    return new StringBuilder("return 31;");
   }
 
   @Override
