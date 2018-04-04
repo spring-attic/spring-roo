@@ -101,33 +101,22 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
   /**
    * Constructor
    *
-   * @param identifier
-   *            the identifier for this item of metadata (required)
-   * @param aspectName
-   *            the Java type of the ITD (required)
-   * @param controllerValues
-   * @param governorPhysicalTypeMetadata
-   *            the governor, which is expected to contain a
+   * @param identifier the identifier for this item of metadata (required)
+   * @param aspectName the Java type of the ITD (required)
+   * @param controllerValues values of {@link RooController} annotation
+   * @param governorPhysicalTypeMetadata the governor, which is expected to contain a
    *            {@link ClassOrInterfaceTypeDetails} (required)
-   * @param entity
-   *            Javatype with entity managed by controller
-   * @param service
-   *            JavaType with service used by controller
-   * @param detailsServices
-   *            List with all services of every field that will be used as
-   *            detail
-   * @param path
-   *            controllerPath
-   * @param type
-   *            Indicate the controller type
-   * @param identifierType
-   *            Indicates the identifier type of the entity which represents
-   *            this controller
-   * @param serviceMetadata
-   *            ServiceMetadata of the service used by controller
+   * @param entity JavaType with entity managed by controller
+   * @param entityMetadata metadata of managed entity
+   * @param service JavaType with service used by controller
+   * @param path controllerPath
+   * @param baseUrl
+   * @param type Indicate the controller type
+   * @param serviceMetadata ServiceMetadata of the service used by controller
+   * @param detailAnnotaionFieldValue
+   * @param detailsServiceMetadata
+   * @param detailsFieldInfo
    * @param relationInfos
-   * @param controllerDetailInfo
-   *            Contains information relative to detail controller
    */
   public ControllerMetadata(final String identifier, final JavaType aspectName,
       ControllerAnnotationValues controllerValues,
@@ -163,7 +152,6 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
     // Adding service field
     this.serviceField = getFieldFor(this.service);
-    ensureGovernorHasField(new FieldMetadataBuilder(serviceField));
 
     Map<JavaType, FieldMetadata> detailServiceFields = new TreeMap<JavaType, FieldMetadata>();
     FieldMetadata curServiceField;
@@ -171,7 +159,6 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
       // Adding service field
       for (Entry<JavaType, ServiceMetadata> entry : detailsServiceMetadata.entrySet()) {
         curServiceField = getFieldFor(entry.getValue().getDestination());
-        ensureGovernorHasField(new FieldMetadataBuilder(curServiceField));
         detailServiceFields.put(entry.getKey(), curServiceField);
       }
       this.detailsServiceField = Collections.unmodifiableMap(detailServiceFields);
@@ -189,6 +176,15 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
     // Build the ITD
     itdTypeDetails = builder.build();
+  }
+
+  public List<FieldMetadata> getAllFields() {
+    List<FieldMetadata> result = new ArrayList<FieldMetadata>();
+    result.add(serviceField);
+    if (detailsServiceField != null && !detailsServiceField.isEmpty()) {
+      result.addAll(detailsServiceField.values());
+    }
+    return result;
   }
 
   /**

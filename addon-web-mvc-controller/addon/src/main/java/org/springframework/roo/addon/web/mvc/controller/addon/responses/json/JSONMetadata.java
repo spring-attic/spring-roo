@@ -7,6 +7,15 @@ import static org.springframework.roo.model.SpringJavaType.PUT_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.RESPONSE_ENTITY;
 import static org.springframework.roo.model.SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,6 +34,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -40,15 +50,6 @@ import org.springframework.roo.model.SpringEnumDetails;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 
 /**
  * Metadata for {@link RooJSON}.
@@ -205,6 +206,11 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(SpringJavaType.REST_CONTROLLER));
     // Add @RequestMapping
     ensureGovernorIsAnnotated(getRequestMappingAnnotation());
+
+    // Add controller services fields
+    for (FieldMetadata field : controllerMetadata.getAllFields()) {
+      ensureGovernorHasField(new FieldMetadataBuilder(identifier, field));
+    }
 
     // Check if there is an @Autowired constructor declared in type
     List<? extends ConstructorMetadata> constructors =

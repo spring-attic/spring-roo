@@ -351,6 +351,12 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     super(identifier, aspectName, governorPhysicalTypeMetadata, annotationValues
         .getExcludeMethods() == null ? null : Arrays.asList(annotationValues.getExcludeMethods()));
 
+
+    // Add controller services fields
+    for (FieldMetadata field : controllerMetadata.getAllFields()) {
+      ensureGovernorHasField(new FieldMetadataBuilder(identifier, field));
+    }
+
     this.excludeViews =
         annotationValues.getExcludeViews() == null ? Collections.emptySet()
             : Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(annotationValues
