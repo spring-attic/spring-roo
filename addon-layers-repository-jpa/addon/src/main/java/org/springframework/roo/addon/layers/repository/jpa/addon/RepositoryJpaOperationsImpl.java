@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
 import static java.lang.reflect.Modifier.PUBLIC;
+import static org.springframework.roo.model.RooJavaType.ROO_READ_ONLY_REPOSITORY;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -10,6 +11,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.JpaOperations;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -30,6 +32,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
@@ -216,7 +219,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // By default, generate RepositoryCustom interface and its
     // implementation that allow developers to include its dynamic queries
     // using QueryDSL
-    addRepositoryCustom(domainType, interfaceType, interfaceType.getPackage());
+    addRepositoryCustom(domainType, interfaceType);
 
     // Add dependencies between modules
     getProjectOperations().addModuleDependency(interfaceType.getModule(), domainType.getModule());
@@ -286,14 +289,10 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
    *
    * @return JavaType with new RepositoryCustom interface.
    */
-  private JavaType addRepositoryCustom(JavaType domainType, JavaType repositoryType,
-      JavaPackage repositoryPackage) {
+  private JavaType addRepositoryCustom(JavaType domainType, JavaType repositoryType) {
 
-    // Getting RepositoryCustom interface JavaTYpe
-    JavaType interfaceType =
-        new JavaType(repositoryPackage.getFullyQualifiedPackageName().concat(".")
-            .concat(repositoryType.getSimpleTypeName()).concat("Custom"),
-            repositoryType.getModule());
+    // Getting RepositoryCustom interface JavaType
+    JavaType interfaceType = getCustomRepositoryJavaTypeFor(repositoryType);
 
     // Check if new interface exists yet
     final String interfaceIdentifier =
@@ -329,6 +328,13 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
   }
 
+  protected JavaType getCustomRepositoryJavaTypeFor(JavaType repositoryType) {
+    String javaTypeName =
+        repositoryType.getPackage().getFullyQualifiedPackageName().concat(".")
+            .concat(repositoryType.getSimpleTypeName()).concat("Custom");
+    return new JavaType(javaTypeName, repositoryType.getModule());
+  }
+
   /**
    * Method that generates the repository interface. This method takes in mind
    * if entity is defined as readOnly or not.
@@ -355,6 +361,15 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       getProjectOperations().addModuleDependency(interfaceType.getModule(),
           defaultReturnType.getModule());
     }
+
+    final String entityMetadataId = JpaEntityMetadata.createIdentifier(entityDetails);
+    final JpaEntityMetadata entityMetadata = getMetadataService().get(entityMetadataId);
+
+    if (entityMetadata == null) {
+      throw new IllegalArgumentException("Can't get information about entity "
+          + domainType.getSimpleTypeName());
+    }
+
     // Generating interface
     final String interfaceMdId =
         PhysicalTypeIdentifier.createIdentifier(interfaceType,
@@ -366,9 +381,39 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // Annotate repository interface
     cidBuilder.addAnnotation(interfaceAnnotationMetadata.build());
 
+    // Add parent Repository declarations
+    JavaType repositoryType = null;
+    if (entityMetadata.isReadOnly()) {
+      // If readOnly, extends ReadOnlyRepository
+      repositoryType = getReadOnlyRepositoryInteface();
+    } else {
+      // Extends JpaRepository
+      repositoryType = SpringletsJavaType.SPRINGLETS_DETACHABLE_JPA_REPOSITORY;
+    }
+    cidBuilder.addExtendsTypes(JavaType.wrapperOf(repositoryType, domainType, entityMetadata
+        .getCurrentIndentifierField().getFieldType()));
+
+    cidBuilder.addExtendsTypes(getCustomRepositoryJavaTypeFor(interfaceType));
+
     // Save new repository on disk
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
+  }
+
+  private JavaType getReadOnlyRepositoryInteface() {
+    // Getting ReadOnlyRepository interface annotated with
+    // @RooReadOnlyRepository
+    Set<ClassOrInterfaceTypeDetails> readOnlyRepositories =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            ROO_READ_ONLY_REPOSITORY);
+
+    Iterator<ClassOrInterfaceTypeDetails> it = readOnlyRepositories.iterator();
+    while (it.hasNext()) {
+      ClassOrInterfaceTypeDetails readOnlyRepositoryDetails = it.next();
+      return readOnlyRepositoryDetails.getType();
+    }
+    throw new IllegalArgumentException(
+        "ERROR: You should define a ReadOnlyRepository interface annotated with @RooReadOnlyRepository to be able to generate repositories of readOnly entities.");
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

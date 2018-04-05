@@ -5,6 +5,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
@@ -199,5 +200,24 @@ public class JSONMVCResponseService implements ControllerMVCResponseService {
   public boolean providesViews() {
     // JSON doesn't provide views
     return false;
+  }
+
+  @Override
+  public boolean generateLinkFactory() {
+    return false;
+  }
+
+  @Override
+  public void completeCollectionController(JavaType collectionController,
+      JpaEntityMetadata entityMetadata, ClassOrInterfaceTypeDetails serviceDetails,
+      ClassOrInterfaceTypeDetailsBuilder cidBuilder) {
+    // Nothing to do here
+  }
+
+  @Override
+  public void completeItemController(JavaType itemController, JpaEntityMetadata entityMetadata,
+      ClassOrInterfaceTypeDetails serviceDetails, ClassOrInterfaceTypeDetailsBuilder cidBuilder) {
+    // Nothing to do here
+
   }
 }

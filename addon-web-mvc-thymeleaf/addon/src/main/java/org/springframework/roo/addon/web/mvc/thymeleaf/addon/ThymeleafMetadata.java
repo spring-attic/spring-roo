@@ -5,7 +5,6 @@ import static org.springframework.roo.model.SpringJavaType.GET_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.INIT_BINDER;
 import static org.springframework.roo.model.SpringJavaType.MODEL;
 import static org.springframework.roo.model.SpringJavaType.MODEL_AND_VIEW;
-import static org.springframework.roo.model.SpringJavaType.MODEL_ATTRIBUTE;
 import static org.springframework.roo.model.SpringJavaType.POST_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.REQUEST_PARAM;
 import static org.springframework.roo.model.SpringJavaType.RESPONSE_ENTITY;
@@ -548,6 +547,13 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         break;
       }
       case ITEM: {
+        // Add implements ConcurrencyManager 
+        JavaType concurrencyManagerType =
+            new JavaType(
+                SpringletsJavaType.SPRINGLETS_CONCURRENCY_MANAGER.getFullyQualifiedTypeName(), 0,
+                DataType.TYPE, null, Arrays.asList(entityMetadata.getDestination()));
+        getNameOfJavaType(SpringletsJavaType.SPRINGLETS_CONCURRENCY_MANAGER);
+        ensureGovernorImplements(concurrencyManagerType);
 
         // Add MethodLinkBuilderFactory fields
         this.itemMethodLinkBuilderFactoryField =

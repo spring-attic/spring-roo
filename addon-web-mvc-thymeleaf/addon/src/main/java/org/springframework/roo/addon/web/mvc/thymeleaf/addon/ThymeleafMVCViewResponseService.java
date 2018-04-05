@@ -1,10 +1,20 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
 import org.springframework.roo.addon.web.mvc.i18n.languages.EnglishLanguage;
@@ -16,14 +26,10 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.MethodMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.AbstractOperations;
-import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
@@ -38,14 +44,6 @@ import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.FileUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Implementation of ControllerMVCResponseService that provides
@@ -376,7 +374,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
       if (mainControllerThymeleafAnnotation != null) {
         return;
       } else {
-        throw new RuntimeException(
+        throw new IllegalArgumentException(
             "ERROR: You are trying to generate more than one MainController.");
       }
     }
@@ -656,7 +654,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
             RooJavaType.ROO_WEB_MVC_CONFIGURATION);
     if (webMvcConfigurationSet == null || webMvcConfigurationSet.isEmpty()) {
-      throw new RuntimeException(String.format(
+      throw new IllegalStateException(String.format(
           "ERROR: Can't found configuration class annotated with @%s.",
           RooJavaType.ROO_WEB_MVC_CONFIGURATION));
     }
@@ -672,6 +670,8 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
           new ClassOrInterfaceTypeDetailsBuilder(webMvcConfiguration);;
 
       cidBuilder.addAnnotation(thymeleaftConfigurationAnnotation);
+
+      cidBuilder.addImplementsType(SpringJavaType.APPLICATION_CONTEXT_AWARE);
 
       getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
     }
@@ -843,4 +843,25 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     // Thymeleaf provider uses HTML to represent the information
     return true;
   }
+
+  @Override
+  public boolean generateLinkFactory() {
+    return true;
+  }
+
+  @Override
+  public void completeCollectionController(JavaType collectionController,
+      JpaEntityMetadata entityMetadata, ClassOrInterfaceTypeDetails serviceDetails,
+      ClassOrInterfaceTypeDetailsBuilder cidBuilder) {
+    // Nothing to do here
+  }
+
+  @Override
+  public void completeItemController(JavaType itemController, JpaEntityMetadata entityMetadata,
+      ClassOrInterfaceTypeDetails serviceDetails, ClassOrInterfaceTypeDetailsBuilder cidBuilder) {
+    JavaType concurrencyManagerType =
+        new JavaType(SpringletsJavaType.SPRINGLETS_CONCURRENCY_MANAGER.getFullyQualifiedTypeName(),
+            0, DataType.TYPE, null, Arrays.asList(entityMetadata.getDestination()));
+    cidBuilder.addImplementsType(concurrencyManagerType);
+  };
 }

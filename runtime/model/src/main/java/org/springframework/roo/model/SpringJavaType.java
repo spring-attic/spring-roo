@@ -16,6 +16,10 @@ public final class SpringJavaType {
   // org.springframework
   public static final JavaType ACTIVE_PROFILES = new JavaType(
       "org.springframework.test.context.ActiveProfiles");
+  public static final JavaType APPLICATION_CONTEXT = new JavaType(
+      "org.springframework.context.ApplicationContext");
+  public static final JavaType APPLICATION_CONTEXT_AWARE = new JavaType(
+      "org.springframework.context.ApplicationContextAware");
   public static final JavaType ANNOTATION_CONFIGURATION = new JavaType(
       "org.springframework.context.annotation.Configuration");
   public static final JavaType ANNOTATION_IMPORT = new JavaType(

@@ -57,7 +57,6 @@ import org.springframework.roo.classpath.details.annotations.StringAttributeValu
 import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
@@ -65,7 +64,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
-import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
@@ -91,6 +89,16 @@ import org.springframework.roo.support.osgi.ServiceInstaceManager;
 @Component
 @Service
 public class ControllerOperationsImpl implements ControllerOperations {
+
+  private static final String OPERATIONS_KEY = "operations";
+
+  private static final JavaSymbolName VIEWS_SYM = new JavaSymbolName("views");
+
+  private static final JavaSymbolName VALUE_SYM = new JavaSymbolName("value");
+
+  private static final String RELATION_FIELD_KEY = "relationField";
+
+  private static final String ENTITY_KEY = "entity";
 
   private static final Logger LOGGER = HandlerUtils.getLogger(ControllerOperationsImpl.class);
 
@@ -173,7 +181,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
         message = String.format("the provided module '%s'.", module.getModuleName());
       }
 
-      LOGGER.log(Level.INFO, String.format("INFO: Spring MVC is already installed in %s", message));
+      if (LOGGER.isLoggable(Level.INFO)) {
+        LOGGER.log(Level.INFO,
+            String.format("INFO: Spring MVC is already installed in %s", message));
+      }
       return;
     }
 
@@ -343,27 +354,31 @@ public class ControllerOperationsImpl implements ControllerOperations {
     ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
     AnnotationMetadata entityAnnotation = entityDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY);
     if (entityAnnotation == null) {
-      LOGGER
-          .log(
-              Level.INFO,
-              String
-                  .format(
-                      "ERROR: The provided class %s is not a valid entity. It should be annotated with @RooEntity",
-                      entity.getSimpleTypeName()));
+      if (LOGGER.isLoggable(Level.INFO)) {
+        LOGGER
+            .log(
+                Level.INFO,
+                String
+                    .format(
+                        "ERROR: The provided class %s is not a valid entity. It should be annotated with @RooEntity",
+                        entity.getSimpleTypeName()));
+      }
       return;
     }
 
     JpaEntityMetadata entityMetadata =
         getMetadataService().get(JpaEntityMetadata.createIdentifier(entityDetails));
     if (entityMetadata.isCompositionChild()) {
-      // Don't generate Controller for composition Child entities
-      LOGGER
-          .log(
-              Level.INFO,
-              String
-                  .format(
-                      "INFO: The provided class %s is composition child part of a relationship. No controller is needed as it's managed form parent controller",
-                      entity.getSimpleTypeName()));
+      if (LOGGER.isLoggable(Level.INFO)) {
+        // Don't generate Controller for composition Child entities
+        LOGGER
+            .log(
+                Level.INFO,
+                String
+                    .format(
+                        "INFO: The provided class %s is composition child part of a relationship. No controller is needed as it's managed form parent controller",
+                        entity.getSimpleTypeName()));
+      }
       return;
     }
 
@@ -372,10 +387,16 @@ public class ControllerOperationsImpl implements ControllerOperations {
     ClassOrInterfaceTypeDetails serviceDetails = getServiceLocator().getService(entity);
 
     if (serviceDetails == null) {
-      // Is necessary at least one service to generate controller
-      LOGGER.log(Level.INFO, String.format(
-          "ERROR: You must generate a service to '%s' entity before to generate a new controller.",
-          entity.getFullyQualifiedTypeName()));
+      if (LOGGER.isLoggable(Level.INFO)) {
+        // Is necessary at least one service to generate controller
+        LOGGER
+            .log(
+                Level.INFO,
+                String
+                    .format(
+                        "ERROR: You must generate a service to '%s' entity before to generate a new controller.",
+                        entity.getFullyQualifiedTypeName()));
+      }
       return;
     }
     service = serviceDetails.getName();
@@ -394,10 +415,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
     ControllerAnnotationValues values;
     for (ClassOrInterfaceTypeDetails existingController : controllers) {
       values = new ControllerAnnotationValues(existingController);
-      if ((values.getType() == ControllerType.COLLECTION || values.getType() == ControllerType.ITEM)) {
-        if (StringUtils.equals(values.getPathPrefix(), pathPrefix)
-            && existingController.getAnnotation(responseType.getAnnotation()) != null) {
+      if ((values.getType() == ControllerType.COLLECTION || values.getType() == ControllerType.ITEM)
+          && (StringUtils.equals(values.getPathPrefix(), pathPrefix) && existingController
+              .getAnnotation(responseType.getAnnotation()) != null)) {
 
+        if (LOGGER.isLoggable(Level.INFO)) {
           LOGGER.log(
               Level.INFO,
               String.format(
@@ -405,8 +427,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
                       + "pathPrefix '%s' for this responseType. Specify different one "
                       + "using --pathPrefix or --responseType parameter.",
                   entity.getSimpleTypeName(), pathPrefix));
-          return;
         }
+        return;
       }
     }
 
@@ -444,17 +466,23 @@ public class ControllerOperationsImpl implements ControllerOperations {
               collectionController, PhysicalTypeCategory.CLASS);
       cidBuilder.setAnnotations(annotations);
 
+      // Delegate on response type to complete (if it is needed) the controller
+      responseType.completeCollectionController(collectionController, entityMetadata,
+          serviceDetails, cidBuilder);
+
       getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
       // Create LinkFactory class
-      if (responseType.getName().equals("THYMELEAF")) {
+      if (responseType.generateLinkFactory()) {
         createLinkFactoryClass(cidBuilder.getName());
       }
     } else {
-      LOGGER.log(
-          Level.INFO,
-          String.format("ERROR: The controller %s already exists.",
-              collectionController.getFullyQualifiedTypeName()));
+      if (LOGGER.isLoggable(Level.INFO)) {
+        LOGGER.log(
+            Level.INFO,
+            String.format("ERROR: The controller %s already exists.",
+                collectionController.getFullyQualifiedTypeName()));
+      }
       return;
     }
 
@@ -470,7 +498,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
         getTypeLocationService().getTypeDetails(itemController);
     if (itemControllerDetails == null) {
       List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-      annotations = new ArrayList<AnnotationMetadataBuilder>();
       annotations.add(getRooControllerAnnotation(entity, pathPrefix, ControllerType.ITEM));
 
       // Add responseType annotation. Don't use responseTypeService
@@ -492,26 +519,23 @@ public class ControllerOperationsImpl implements ControllerOperations {
               itemController, PhysicalTypeCategory.CLASS);
       cidBuilder.setAnnotations(annotations);
 
-      // Include ConcurrencyManager implement type only for the thymeleaf item controllers
-      if (responseType.getName().equals("THYMELEAF")) {
-        JavaType concurrencyManagerType =
-            new JavaType(
-                SpringletsJavaType.SPRINGLETS_CONCURRENCY_MANAGER.getFullyQualifiedTypeName(), 1,
-                DataType.TYPE, null, Arrays.asList(entity));
-        cidBuilder.addImplementsType(concurrencyManagerType);
-      }
+      // Delegate on response type to complete (if it is needed) the controller
+      responseType.completeItemController(itemController, entityMetadata, serviceDetails,
+          cidBuilder);
 
       getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
       // Create LinkFactory class
-      if (responseType.getName().equals("THYMELEAF")) {
+      if (responseType.generateLinkFactory()) {
         createLinkFactoryClass(cidBuilder.getName());
       }
     } else {
-      LOGGER.log(
-          Level.INFO,
-          String.format("ERROR: The controller %s already exists.",
-              collectionController.getFullyQualifiedTypeName()));
+      if (LOGGER.isLoggable(Level.INFO)) {
+        LOGGER.log(
+            Level.INFO,
+            String.format("ERROR: The controller %s already exists.",
+                collectionController.getFullyQualifiedTypeName()));
+      }
       return;
     }
 
@@ -526,7 +550,9 @@ public class ControllerOperationsImpl implements ControllerOperations {
     }
 
     // Check multimodule project
-    if (getProjectOperations().isMultimoduleProject()) {
+    if (
+
+    getProjectOperations().isMultimoduleProject()) {
       getProjectOperations().addModuleDependency(collectionController.getModule(),
           service.getModule());
       getProjectOperations().addModuleDependency(itemController.getModule(), service.getModule());
@@ -575,10 +601,9 @@ public class ControllerOperationsImpl implements ControllerOperations {
     // Not found. Create class
     List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
-    annotations = new ArrayList<AnnotationMetadataBuilder>();
     AnnotationMetadataBuilder mixinAnnotation =
         new AnnotationMetadataBuilder(RooJavaType.ROO_JSON_MIXIN);
-    mixinAnnotation.addClassAttribute("entity", entity);
+    mixinAnnotation.addClassAttribute(ENTITY_KEY, entity);
     annotations.add(mixinAnnotation);
 
     JavaType mixinClass =
@@ -638,10 +663,9 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
         // Build @RooDeserializer
         List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-        annotations = new ArrayList<AnnotationMetadataBuilder>();
         AnnotationMetadataBuilder deserializerAnnotation =
             new AnnotationMetadataBuilder(RooJavaType.ROO_DESERIALIZER);
-        deserializerAnnotation.addClassAttribute("entity", entity);
+        deserializerAnnotation.addClassAttribute(ENTITY_KEY, entity);
         annotations.add(deserializerAnnotation);
 
         JavaType deserializerClass =
@@ -745,7 +769,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
       final String pathPrefix, final ControllerType controllerType) {
     final List<AnnotationAttributeValue<?>> rooControllerAttributes =
         new ArrayList<AnnotationAttributeValue<?>>();
-    rooControllerAttributes.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
+    rooControllerAttributes.add(new ClassAttributeValue(new JavaSymbolName(ENTITY_KEY), entity));
     if (StringUtils.isNotEmpty(pathPrefix)) {
       rooControllerAttributes.add(new StringAttributeValue(new JavaSymbolName("pathPrefix"),
           pathPrefix));
@@ -769,7 +793,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
       final String viewsList) {
     AnnotationMetadataBuilder annotationDetail =
         new AnnotationMetadataBuilder(RooJavaType.ROO_DETAIL);
-    annotationDetail.addStringAttribute("relationField", relationField);
+    annotationDetail.addStringAttribute(RELATION_FIELD_KEY, relationField);
 
     // Including views attribute if needed
     if (StringUtils.isNotEmpty(viewsList)) {
@@ -777,11 +801,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
       List<StringAttributeValue> viewsValues = new ArrayList<StringAttributeValue>();
 
       for (String view : views) {
-        viewsValues.add(new StringAttributeValue(new JavaSymbolName("value"), view));
+        viewsValues.add(new StringAttributeValue(VALUE_SYM, view));
       }
 
       ArrayAttributeValue<StringAttributeValue> viewsAttr =
-          new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("views"), viewsValues);
+          new ArrayAttributeValue<StringAttributeValue>(VIEWS_SYM, viewsValues);
       annotationDetail.addAttribute(viewsAttr);
     }
 
@@ -852,13 +876,15 @@ public class ControllerOperationsImpl implements ControllerOperations {
     ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
     AnnotationMetadata entityAnnotation = entityDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY);
     if (entityAnnotation == null) {
-      LOGGER
-          .log(
-              Level.INFO,
-              String
-                  .format(
-                      "ERROR: The provided class %s is not a valid entity. It should be annotated with @RooJpaEntity",
-                      entity.getSimpleTypeName()));
+      if (LOGGER.isLoggable(Level.INFO)) {
+        LOGGER
+            .log(
+                Level.INFO,
+                String
+                    .format(
+                        "ERROR: The provided class %s is not a valid entity. It should be annotated with @RooJpaEntity",
+                        entity.getSimpleTypeName()));
+      }
       return;
     }
 
@@ -890,13 +916,15 @@ public class ControllerOperationsImpl implements ControllerOperations {
     }
 
     if (!existsBasicControllers) {
-      LOGGER
-          .log(
-              Level.INFO,
-              String
-                  .format(
-                      "INFO: Doesn't exist parent controller in the package %s with the response type %s for the entity %s. Please, use 'web mvc controller' command to create them.",
-                      controllerPackage, responseType.getName(), entity.getSimpleTypeName()));
+      if (LOGGER.isLoggable(Level.INFO)) {
+        LOGGER
+            .log(
+                Level.INFO,
+                String
+                    .format(
+                        "INFO: Doesn't exist parent controller in the package %s with the response type %s for the entity %s. Please, use 'web mvc controller' command to create them.",
+                        controllerPackage, responseType.getName(), entity.getSimpleTypeName()));
+      }
       return;
     }
 
@@ -922,17 +950,19 @@ public class ControllerOperationsImpl implements ControllerOperations {
         RelationInfoExtended info = infos.get(i);
         sbuilder.append(info.fieldName);
         if (!(info.cardinality == Cardinality.ONE_TO_MANY || info.cardinality == Cardinality.MANY_TO_MANY)) {
-          LOGGER.log(Level.INFO, String.format(
-              "ERROR: %s.%s is not a one-to-many or many-to-many relationships.",
-              info.entityType.getFullyQualifiedTypeName(), info.fieldName));
-
+          if (LOGGER.isLoggable(Level.INFO)) {
+            LOGGER.log(Level.INFO, String.format(
+                "ERROR: %s.%s is not a one-to-many or many-to-many relationships.",
+                info.entityType.getFullyQualifiedTypeName(), info.fieldName));
+          }
           return;
         }
 
         // Check than previous level details has been created before
-        if (i < infos.size() - 2) {
-          if (!checkDetailControllerExists(entity, responseType, controllerPackage,
-              pathPrefixController, sbuilder.toString())) {
+        if (i < infos.size() - 2
+            && !checkDetailControllerExists(entity, responseType, controllerPackage,
+                pathPrefixController, sbuilder.toString())) {
+          if (LOGGER.isLoggable(Level.INFO)) {
             LOGGER
                 .log(
                     Level.INFO,
@@ -940,8 +970,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
                         .format(
                             "ERROR: Detail controller for entity %s and detail field %s must be created before generate %s controller.",
                             entity, sbuilder.toString(), relationField));
-            return;
           }
+          return;
         }
       }
       relationsToAdd.add(Pair.of(relationField, infos));
@@ -964,9 +994,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
     }
 
     if (relationsToAdd.isEmpty()) {
-      LOGGER.log(Level.INFO, String.format(
-          "INFO: none relation found to generate detail controllers for entity '%s'.",
-          entity.getSimpleTypeName()));
+      if (LOGGER.isLoggable(Level.INFO)) {
+        LOGGER.log(Level.INFO, String.format(
+            "INFO: none relation found to generate detail controllers for entity '%s'.",
+            entity.getSimpleTypeName()));
+      }
       return;
     }
 
@@ -986,8 +1018,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
   private boolean createDetailsItemClass(String field, JavaType entity,
       ControllerMVCResponseService responseType, JavaPackage controllerPackage,
       String pathPrefixController, String viewsList) {
-    final StringBuffer detailControllerName =
-        new StringBuffer(getPluralService().getPlural(entity));
+    final StringBuilder detailControllerName =
+        new StringBuilder(getPluralService().getPlural(entity));
     detailControllerName.append("Item");
     for (String name : StringUtils.split(field, ".")) {
       detailControllerName.append(StringUtils.capitalize(name));
@@ -1014,8 +1046,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
   private boolean createDetailClass(String field, JavaType entity,
       ControllerMVCResponseService responseType, JavaPackage controllerPackage,
       String pathPrefixController, String viewsList) {
-    final StringBuffer detailControllerName =
-        new StringBuffer(getPluralService().getPlural(entity));
+    final StringBuilder detailControllerName =
+        new StringBuilder(getPluralService().getPlural(entity));
     detailControllerName.append("Item");
     for (String name : StringUtils.split(field, ".")) {
       detailControllerName.append(StringUtils.capitalize(name));
@@ -1037,9 +1069,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
     ClassOrInterfaceTypeDetails detailControllerDetails =
         getTypeLocationService().getTypeDetails(detailController);
     if (detailControllerDetails != null) {
-      LOGGER.log(Level.INFO, String.format(
-          "ERROR: Class '%s' already exists inside your generated project.",
-          detailController.getFullyQualifiedTypeName()));
+      if (LOGGER.isLoggable(Level.INFO)) {
+        LOGGER.log(Level.INFO, String.format(
+            "ERROR: Class '%s' already exists inside your generated project.",
+            detailController.getFullyQualifiedTypeName()));
+      }
       return false;
     }
 
@@ -1071,7 +1105,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
     // Create LinkFactory class
-    if (responseType.getName().equals("THYMELEAF")) {
+    if (responseType.generateLinkFactory()) {
       createLinkFactoryClass(cidBuilder.getName());
     }
 
@@ -1142,8 +1176,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
         }
         infos.addAll(subPath);
       } else {
-        LOGGER.info(String.format("Details controller is required for %s befor can create %s",
-            currentPath, StringUtils.join(Arrays.asList(relationField), ',')));
+        if (LOGGER.isLoggable(Level.INFO)) {
+          LOGGER.info(String.format("Details controller is required for %s befor can create %s",
+              currentPath, StringUtils.join(Arrays.asList(relationField), ',')));
+        }
         return null;
       }
     }
@@ -1172,13 +1208,16 @@ public class ControllerOperationsImpl implements ControllerOperations {
       if (existingController.getType().getPackage().equals(controllerPackage)) {
         ControllerAnnotationValues values = new ControllerAnnotationValues(existingController);
         AnnotationAttributeValue<String> relationFieldAttr =
-            existingController.getAnnotation(RooJavaType.ROO_DETAIL).getAttribute("relationField");
+            existingController.getAnnotation(RooJavaType.ROO_DETAIL).getAttribute(
+                RELATION_FIELD_KEY);
         if (StringUtils.equals(pathPrefix, values.getPathPrefix())) {
           if (relationFieldAttr == null) {
-            LOGGER.warning(String.format(
-                "Controller %s is defined as @%.type = DETAIL but @%s is missing!",
-                existingController.getType().getFullyQualifiedTypeName(),
-                RooJavaType.ROO_CONTROLLER, RooJavaType.ROO_DETAIL));
+            if (LOGGER.isLoggable(Level.WARNING)) {
+              LOGGER.warning(String.format(
+                  "Controller %s is defined as @%s.type = DETAIL but @%s is missing!",
+                  existingController.getType().getFullyQualifiedTypeName(),
+                  RooJavaType.ROO_CONTROLLER, RooJavaType.ROO_DETAIL));
+            }
           } else if (relationField.equals(relationFieldAttr.getValue())) {
             return true;
           }
@@ -1266,11 +1305,13 @@ public class ControllerOperationsImpl implements ControllerOperations {
       if (controllersPackageNotSet) {
         // if exists more than one module, show error message
         if (applicationClasses.size() > 1) {
-          LOGGER
-              .log(
-                  Level.INFO,
-                  String
-                      .format("ERROR: Exists more than one module 'application'. Specify --package parameter to set the indicated"));
+          if (LOGGER.isLoggable(Level.INFO)) {
+            LOGGER
+                .log(
+                    Level.INFO,
+                    String
+                        .format("ERROR: Exists more than one module 'application'. Specify --package parameter to set the indicated"));
+          }
           return null;
         } else {
           ClassOrInterfaceTypeDetails applicationClass = applicationClasses.iterator().next();
@@ -1322,7 +1363,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
           // Get the entity associated
           AnnotationMetadata controllerAnnotation =
               controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
-          JavaType entity = (JavaType) controllerAnnotation.getAttribute("entity").getValue();
+          JavaType entity = (JavaType) controllerAnnotation.getAttribute(ENTITY_KEY).getValue();
 
           // Search the service related with the entity
           Set<ClassOrInterfaceTypeDetails> services =
@@ -1332,7 +1373,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
           while (itServices.hasNext()) {
             ClassOrInterfaceTypeDetails existingService = itServices.next();
             AnnotationAttributeValue<Object> entityAttr =
-                existingService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
+                existingService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute(ENTITY_KEY);
             if (entityAttr != null && entityAttr.getValue().equals(entity)) {
               servicesToPublish.add(existingService);
             }
@@ -1404,7 +1445,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
         // If is not generated by Roo add to list of the elements
         if (notGeneratedByRoo) {
-          StringBuffer methodNameBuffer = new StringBuffer("");
+          StringBuilder methodNameBuffer = new StringBuilder();
           if (StringUtils.isEmpty(currentService)) {
             methodNameBuffer.append(
                 getClasspathOperations().replaceTopLevelPackage(serviceToPublish)).append(".");
@@ -1476,11 +1517,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
       // set operations from command
       for (String operation : operations) {
-        operationsToAdd.add(new StringAttributeValue(new JavaSymbolName("value"), operation));
+        operationsToAdd.add(new StringAttributeValue(VALUE_SYM, operation));
       }
 
       opAnnotation.addAttribute(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName(
-          "operations"), operationsToAdd));
+          OPERATIONS_KEY), operationsToAdd));
 
       // Write changes on provided controller
       getTypeManagementService().createOrUpdateTypeOnDisk(controllerBuilder.build());
@@ -1489,7 +1530,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
       List<String> operationsNames = new ArrayList<String>();
       boolean operationsAdded = false;
       AnnotationAttributeValue<Object> attributeOperations =
-          operationsAnnotation.getAttribute("operations");
+          operationsAnnotation.getAttribute(OPERATIONS_KEY);
       if (attributeOperations != null) {
         List<StringAttributeValue> existingOperations =
             (List<StringAttributeValue>) attributeOperations.getValue();
@@ -1498,7 +1539,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
         // Add existent operations to new attributes array to merge with
         // new ones
         while (it.hasNext()) {
-          StringAttributeValue attributeValue = (StringAttributeValue) it.next();
+          StringAttributeValue attributeValue = it.next();
           operationsToAdd.add(attributeValue);
           operationsNames.add(attributeValue.getValue());
         }
@@ -1506,7 +1547,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
         // Add new finders to new attributes array
         for (String operation : operations) {
           if (!operationsNames.contains(operation)) {
-            operationsToAdd.add(new StringAttributeValue(new JavaSymbolName("value"), operation));
+            operationsToAdd.add(new StringAttributeValue(VALUE_SYM, operation));
             operationsAdded = true;
           }
         }
@@ -1515,7 +1556,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
           AnnotationMetadataBuilder opAnnotation =
               new AnnotationMetadataBuilder(operationsAnnotation);
           opAnnotation.addAttribute(new ArrayAttributeValue<StringAttributeValue>(
-              new JavaSymbolName("operations"), operationsToAdd));
+              new JavaSymbolName(OPERATIONS_KEY), operationsToAdd));
 
           controllerBuilder.updateTypeAnnotation(opAnnotation);
 
@@ -1588,7 +1629,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     // Getting the relationField from @RooDetail entity
     final AnnotationAttributeValue<Object> relationFieldAttr =
-        controller.getAnnotation(RooJavaType.ROO_DETAIL).getAttribute("relationField");
+        controller.getAnnotation(RooJavaType.ROO_DETAIL).getAttribute(RELATION_FIELD_KEY);
 
     final String detailAnnotaionFieldValue = (String) relationFieldAttr.getValue();
 
@@ -1598,7 +1639,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     List<RelationInfoExtended> detailsFieldInfo =
         getRelationInfoFor(entity, detailAnnotaionFieldValue);
-    Validate.isTrue(detailsFieldInfo != null & detailsFieldInfo.size() > 0,
+    Validate.isTrue(detailsFieldInfo != null && detailsFieldInfo.size() > 0,
         "Missing details information for %s", controller.getType());
     for (RelationInfo info : detailsFieldInfo) {
       sbuilder.append("/{").append(StringUtils.uncapitalize(info.entityType.getSimpleTypeName()))

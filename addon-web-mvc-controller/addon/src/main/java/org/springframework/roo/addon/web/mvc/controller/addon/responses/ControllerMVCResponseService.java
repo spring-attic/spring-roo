@@ -1,7 +1,10 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.responses;
 
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.web.mvc.controller.annotations.config.RooDeserializer;
 import org.springframework.roo.addon.web.mvc.controller.annotations.config.RooJsonMixin;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Feature;
 import org.springframework.roo.project.maven.Pom;
@@ -108,4 +111,33 @@ public interface ControllerMVCResponseService extends Feature {
    */
   boolean providesViews();
 
+  /**
+   * Informs if should generate link factory class for controllers
+   *
+   * @return
+   */
+  boolean generateLinkFactory();
+
+  /**
+   * complete the item-controller java class (if needed)
+   *
+   * @param itemController
+   * @param entityMetadata
+   * @param serviceDetails
+   * @param cidBuilder
+   */
+  void completeItemController(JavaType itemController, JpaEntityMetadata entityMetadata,
+      ClassOrInterfaceTypeDetails serviceDetails, ClassOrInterfaceTypeDetailsBuilder cidBuilder);
+
+  /**
+   * complete the collection-controller java class (if needed)
+   *
+   * @param itemController
+   * @param entityMetadata
+   * @param serviceDetails
+   * @param cidBuilder
+   */
+  void completeCollectionController(JavaType collectionController,
+      JpaEntityMetadata entityMetadata, ClassOrInterfaceTypeDetails serviceDetails,
+      ClassOrInterfaceTypeDetailsBuilder cidBuilder);
 }

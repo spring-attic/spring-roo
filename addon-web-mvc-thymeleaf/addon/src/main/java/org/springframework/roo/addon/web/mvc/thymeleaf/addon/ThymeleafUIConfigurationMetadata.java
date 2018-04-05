@@ -43,15 +43,11 @@ public class ThymeleafUIConfigurationMetadata extends AbstractItdTypeDetailsProv
       "org.thymeleaf.spring4.view.ThymeleafViewResolver");
   private static final JavaType SPRING_RESOURCE_TEMPLATE_RESOLVER = new JavaType(
       "org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver");
-  private static final JavaType APPLICATION_CONTEXT_AWARE = new JavaType(
-      "org.springframework.context.ApplicationContextAware");
   private static final JavaType TEMPLATE_ENGINE = new JavaType("org.thymeleaf.TemplateEngine");
   private static final JavaType THYMELEAF_PROPERTIES = new JavaType(
       "org.springframework.boot.autoconfigure.thymeleaf.ThymeleafProperties");
   private static final JavaType TEMPLATE_MODE = new JavaType(
       "org.thymeleaf.templatemode.TemplateMode");
-  private static final JavaType APPLICATION_CONTEXT = new JavaType(
-      "org.springframework.context.ApplicationContext");
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -96,7 +92,7 @@ public class ThymeleafUIConfigurationMetadata extends AbstractItdTypeDetailsProv
       final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
-    ensureGovernorImplements(APPLICATION_CONTEXT_AWARE);
+    ensureGovernorImplements(SpringJavaType.APPLICATION_CONTEXT_AWARE);
 
     this.thymeleafPropertiesField = getThymeleafPropertiesField();
     this.templateEngineField = getTemplateEngineField();
@@ -143,7 +139,7 @@ public class ThymeleafUIConfigurationMetadata extends AbstractItdTypeDetailsProv
   private FieldMetadata getApplicationContextField() {
     return new FieldMetadataBuilder(getId(), Modifier.PRIVATE,
         new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName("applicationContext"),
-        APPLICATION_CONTEXT).build();
+        SpringJavaType.APPLICATION_CONTEXT).build();
   }
 
   /**
