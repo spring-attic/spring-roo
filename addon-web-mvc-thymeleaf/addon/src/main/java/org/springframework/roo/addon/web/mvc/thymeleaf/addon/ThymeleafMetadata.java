@@ -580,16 +580,33 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
         this.showMethod = addAndGet(getShowMethod(), allMethods);
         this.showInlineMethod = addAndGet(getShowInlineMethod(), allMethods);
-
-        // Generating ConcurrencyManager methods and necessary fields
-        this.concurrencyTemplateField = getConcurrencyTemplateField();
-        ensureGovernorHasField(new FieldMetadataBuilder(this.concurrencyTemplateField));
         this.populateFormatsMethod = addAndGet(getPopulateFormatsMethod(), allMethods);
         this.populateFormMethod = addAndGet(getPopulateFormMethod(), allMethods);
-        this.getModelNameMethod = addAndGet(getModelNameMethod(), allMethods);
-        this.getEditViewPathMethod = addAndGet(getEditViewPathMethod(), allMethods);
-        this.getLastVersionMethod = addAndGet(getLastVersionMethod(), allMethods);
-        this.populateAndGetFormViewMethod = addAndGet(populateAndGetFormViewMethod(), allMethods);
+
+        // Generating ConcurrencyManager methods and necessary fields
+        boolean isConcurrencyManager = false;
+        List<JavaType> implementTypes =
+            governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getImplementsTypes();
+        for (JavaType type : implementTypes) {
+          if (type.getFullyQualifiedTypeName().equals(
+              SpringletsJavaType.SPRINGLETS_CONCURRENCY_MANAGER.getFullyQualifiedTypeName())) {
+            isConcurrencyManager = true;
+          }
+        }
+        if (isConcurrencyManager) {
+          this.concurrencyTemplateField = getConcurrencyTemplateField();
+          ensureGovernorHasField(new FieldMetadataBuilder(this.concurrencyTemplateField));
+          this.getModelNameMethod = addAndGet(getModelNameMethod(), allMethods);
+          this.getEditViewPathMethod = addAndGet(getEditViewPathMethod(), allMethods);
+          this.getLastVersionMethod = addAndGet(getLastVersionMethod(), allMethods);
+          this.populateAndGetFormViewMethod = addAndGet(populateAndGetFormViewMethod(), allMethods);
+        } else {
+          this.concurrencyTemplateField = null;
+          this.getModelNameMethod = null;
+          this.getEditViewPathMethod = null;
+          this.getLastVersionMethod = null;
+          this.populateAndGetFormViewMethod = null;
+        }
 
         if (readOnly) {
           this.editFormMethod = null;
@@ -599,7 +616,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         } else {
           this.initBinderMethod = addAndGet(getInitBinderMethod(entity), allMethods);
           this.editFormMethod = addAndGet(getEditFormMethod(), allMethods);
-          this.updateMethod = addAndGet(getUpdateMethod(), allMethods);
+          this.updateMethod = addAndGet(getUpdateMethod(isConcurrencyManager), allMethods);
           this.deleteMethod = addAndGet(getDeleteMethod(), allMethods);
         }
 
@@ -2563,7 +2580,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
    *
    * @return MethodMetadata
    */
-  private MethodMetadata getUpdateMethod() {
+  private MethodMetadata getUpdateMethod(boolean includeConcurrencyManagement) {
     // Define methodName
     final JavaSymbolName methodName = UPDATE_METHOD_NAME;
 
@@ -2633,8 +2650,14 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // populateFormats(model);
     bodyBuilder.appendFormalLine("%s(model);", populateFormMethod.getMethodName());
     // return new ModelAnView(getEditViewPath());
-    bodyBuilder.appendFormalLine("return new %s(" + getEditViewPathMethod.getMethodName() + "());",
-        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW));
+    if (includeConcurrencyManagement) {
+      bodyBuilder.appendFormalLine("return new %s(%s());",
+          getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), getEditViewPathMethod.getMethodName());
+    } else {
+      bodyBuilder.appendFormalLine("return new %s(\"%s/edit\");",
+          getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
+    }
+
     bodyBuilder.indentRemove();
 
     // }
@@ -2644,7 +2667,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     String savedVarName = "saved" + entity.getSimpleTypeName();
 
     // // Concurrency control
-    if (this.entityMetadata.getCurrentVersionField() != null) {
+    if (this.entityMetadata.getCurrentVersionField() != null && includeConcurrencyManagement) {
 
       // Include some description about the concurrency management
       bodyBuilder
@@ -2654,12 +2677,6 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       bodyBuilder
           .appendFormalLine("// If some concurrency exception appears the template will manage it.");
 
-      /*concurrencyTemplate.execute(entity, model, new ConcurrencyCallback<ENTITY>() {
-        @Override
-        public ENTITY doInConcurrency() throws Exception {
-          return getSERVICEMETHOD().save(entity);
-        }
-      });*/
       bodyBuilder.appendFormalLine("%s %s = %s.execute(%s, %s, new %s<%s>() {",
           getNameOfJavaType(entity), savedVarName, CONCURRENCY_TEMPLATE_FIELD_NAME, entityItemName,
           MODEL_PARAM_NAME, getNameOfJavaType(SpringletsJavaType.SPRINGLETS_CONCURRENCY_CALLBACK),
@@ -2677,9 +2694,12 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       bodyBuilder.indentRemove();
       bodyBuilder.appendFormalLine("});");
 
+    } else {
+      // No include concurrency management, but save the entity
+      bodyBuilder.appendFormalLine("%s %s = %s().%s(%s);", getNameOfJavaType(entity), savedVarName,
+          getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
+              .getCurrentSaveMethod().getMethodName(), entityItemName);
     }
-
-
 
     // UriComponents showURI =
     // itemLink.to(CategoryItemThymeleafLinkFactory.SHOW).with("category",
