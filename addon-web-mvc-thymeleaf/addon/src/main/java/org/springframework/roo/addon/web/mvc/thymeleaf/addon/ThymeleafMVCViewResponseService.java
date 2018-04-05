@@ -16,11 +16,18 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.AbstractOperations;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
@@ -208,6 +215,10 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     // Is necessary to generate the main controller
     addMainController(module);
 
+    // Is necessary to generate a new @ControllerAdvice to manage concurrency
+    // TODO: Remove this controller advice when https://github.com/DISID/springlets/issues/63 is solved
+    addConcurrencyExceptionManager(module);
+
     // Thymeleaf needs Datatables component to list
     // data, so is necessary to install Datatables resources
     addThymeleafDatatablesResources(module);
@@ -242,6 +253,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     getViewGenerationService().addModalExportEmptyError(module.getModuleName(), ctx);
     getViewGenerationService().addModalConfirmDeleteBatch(module.getModuleName(), ctx);
     getViewGenerationService().addSessionLinks(module.getModuleName(), ctx);
+    getViewGenerationService().addConcurrencyControl(module.getModuleName(), ctx);
     getViewGenerationService().addLanguages(module.getModuleName(), ctx);
     getViewGenerationService().addAccessibilityView(module.getModuleName(), ctx);
     getViewGenerationService().addDefaultLayoutNoMenu(module.getModuleName(), ctx);
@@ -387,6 +399,52 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     cidBuilder.setAnnotations(annotations);
 
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+  }
+
+  /**
+   * This method add new ConcurrencyExceptionManager.java class
+   *
+   * This controller advice will be used to manage concurrency
+   *
+   * @param module
+   */
+  private void addConcurrencyExceptionManager(Pom module) {
+    // Set package
+    String packageName =
+        getProjectOperations().getTopLevelPackage(module.getModuleName())
+            .getFullyQualifiedPackageName().concat(".web.advices");
+
+    // Include implementation of Validator from template
+    final JavaType type =
+        new JavaType(String.format("%s.%s", packageName, "ConcurrencyExceptionManager"),
+            module.getModuleName());
+    Validate.notNull(type.getModule(),
+        "ERROR: Module name is required to generate a valid JavaType");
+    final String identifier =
+        getPathResolver().getCanonicalPath(type.getModule(), Path.SRC_MAIN_JAVA, type);
+    InputStream inputStream = null;
+
+    // Check first if file exists
+    if (!this.fileManager.exists(identifier)) {
+      try {
+
+        // Use defined template
+        inputStream =
+            FileUtils.getInputStream(getClass(), "ConcurrencyExceptionManager-template._java");
+        String input = IOUtils.toString(inputStream);
+
+        // Replacing package
+        input = input.replace("__PACKAGE__", packageName);
+
+        // Creating CollectionValidator
+        this.fileManager.createOrUpdateTextFileIfRequired(identifier, input, true);
+      } catch (final IOException e) {
+        throw new IllegalStateException(String.format("Unable to create '%s'", identifier), e);
+      } finally {
+        IOUtils.closeQuietly(inputStream);
+      }
+    }
+
   }
 
   /**

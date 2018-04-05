@@ -372,6 +372,16 @@ public interface MVCViewGenerationService<T extends AbstractViewMetadata> {
   void addSessionLinks(String moduleName, ViewContext<T> ctx);
 
   /**
+   * This operation will add the concurrency-control fragment using
+   * the provided context
+   *
+   * @param moduleName module where concurrency-control fragment will be added
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addConcurrencyControl(String moduleName, ViewContext<T> ctx);
+
+  /**
    * This operation will add the languages fragment using
    * the provided context
    *

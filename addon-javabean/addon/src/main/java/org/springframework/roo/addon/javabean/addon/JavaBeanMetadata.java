@@ -171,9 +171,13 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
     // Generate equals methods
     if (equalsAnnotationValues.isAnnotationFound()) {
+
+      JavaSymbolName idField = null;
+      if (identifierField != null && getAccesorMethod(identifierField) != null) {
+        idField = getAccesorMethod(identifierField).getMethodName();
+      }
       ensureGovernorHasMethod(EqualsMetadata.generateEqualsMethod(identifier, target,
-          equalsAnnotationValues, identifierField == null ? null
-              : getAccesorMethod(identifierField).getMethodName(), equalsFields, builder));
+          equalsAnnotationValues, idField, equalsFields, builder));
 
       ensureGovernorHasMethod(EqualsMetadata.generateHashCodeMethod(identifier,
           equalsAnnotationValues, equalsFields, builder.getImportRegistrationResolver()));

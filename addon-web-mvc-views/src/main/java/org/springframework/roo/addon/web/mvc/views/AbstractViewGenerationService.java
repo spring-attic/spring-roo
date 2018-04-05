@@ -1349,6 +1349,30 @@ public abstract class AbstractViewGenerationService<DOC, T extends AbstractViewM
   }
 
   @Override
+  public void addConcurrencyControl(String moduleName, ViewContext<T> ctx) {
+    // Process elements to generate
+    DOC newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getFragmentsFolder(moduleName).concat("/concurrency-control").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      DOC existingDoc = loadExistingDoc(viewName);
+      if (!isUserManagedDocument(existingDoc)) {
+        newDoc = merge("fragments/concurrency-control", existingDoc, ctx);
+      }
+    } else {
+      newDoc = process("fragments/concurrency-control", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
   public void addLanguages(String moduleName, ViewContext<T> ctx) {
 
     // Add installed languages

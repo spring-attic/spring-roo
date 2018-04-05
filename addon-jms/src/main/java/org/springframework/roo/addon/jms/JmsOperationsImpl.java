@@ -79,7 +79,7 @@ public class JmsOperationsImpl implements JmsOperations {
 
   // Properties
   private static final Property PROPERTY_SPRINGLETS_VERSION = new Property("springlets.version",
-      "1.2.0.RC2");
+      "1.2.0.RC3");
 
   private BundleContext context;
 

@@ -46,6 +46,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -352,7 +353,7 @@ public class JpaEntityFactoryMetadata extends AbstractItdTypeDetailsProvidingMet
 
     // Entity obj = new Entity();
     bodyBuilder.appendFormalLine("%1$s %2$s = new %1$s();", getNameOfJavaType(this.entity),
-        OBJ_SYMBOL);
+            OBJ_SYMBOL);
 
     // Set values for transient object
     for (final Map.Entry<FieldMetadata, JpaEntityFactoryMetadata> entry : locatedFields.entrySet()) {

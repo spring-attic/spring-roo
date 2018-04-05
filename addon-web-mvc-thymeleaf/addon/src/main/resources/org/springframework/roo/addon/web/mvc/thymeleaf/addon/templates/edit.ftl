@@ -54,21 +54,7 @@
            	</#if>
 
             <!-- CONCURRENCY CONTROL -->
-            <div class="alert alert-warning" data-th-if="${r"${"}concurrency}">
-              <h2 data-th-text="${r"#{"}label_concurrency_title}">Warning! This record has been updated by an other user.</h2>
-              <div class="radio">
-                <label>
-                  <input type="radio" name="concurrency" value="apply"> <span data-th-text="${r"#{"}label_concurrency_apply}">Apply my changes anyway</span> <i><span data-th-text="${r"#{"}label_concurrency_apply_info}">(discard all the changes applied by the other users).</span></i>
-                </label>
-              </div>
-              <div class="radio">
-                <label>
-                  <input type="radio" name="concurrency" value="discard" checked=""> <span data-th-text="${r"#{"}label_concurrency_discard}">Discard all my changes and reload this record.</span>
-                </label>
-              </div>
-              <br>
-              <button type="submit" class="btn btn-primary">Accept</button>
-            </div>
+            <div data-th-replace="${r"~{fragments/concurrency-control :: concurrency-control(editFormUrl = ${itemLink.to('editForm').with('"}${modelAttributeName}${r"', "}${modelAttributeName}.${identifierField}${r")})}"}"/>
             <!-- /CONCURRENCY CONTROL -->
 
              <fieldset id="containerFields">
@@ -240,6 +226,8 @@
     <script src="../../static/public/js/validation-defaults.js"
       data-th-src="@{/public/js/validation-defaults.js}">
       </script>
+    <!-- Concurrency control management -->
+    <script data-th-src="@{/public/js/concurrency-control.js}" ></script>
     <script type="text/javascript" data-th-inline="javascript">
       (function(jQuery) {
          jQuery(document).ready(function() {

@@ -57,6 +57,7 @@ import org.springframework.roo.classpath.details.annotations.StringAttributeValu
 import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
@@ -64,6 +65,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
@@ -104,7 +106,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
       "org.springframework.boot.jackson.JsonObjectDeserializer");
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.2.0.RC2");
+      "1.2.0.RC3");
   private static final Dependency SPRINGLETS_WEB_STARTER = new Dependency("io.springlets",
       "springlets-boot-starter-web", "${springlets.version}");
   private static final Property TRACEE_PROPERTY = new Property("tracee.version", "1.1.2");
@@ -489,6 +491,15 @@ public class ControllerOperationsImpl implements ControllerOperations {
           new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataIdItem, Modifier.PUBLIC,
               itemController, PhysicalTypeCategory.CLASS);
       cidBuilder.setAnnotations(annotations);
+
+      // Include ConcurrencyManager implement type only for the thymeleaf item controllers
+      if (responseType.getName().equals("THYMELEAF")) {
+        JavaType concurrencyManagerType =
+            new JavaType(
+                SpringletsJavaType.SPRINGLETS_CONCURRENCY_MANAGER.getFullyQualifiedTypeName(), 1,
+                DataType.TYPE, null, Arrays.asList(entity));
+        cidBuilder.addImplementsType(concurrencyManagerType);
+      }
 
       getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 

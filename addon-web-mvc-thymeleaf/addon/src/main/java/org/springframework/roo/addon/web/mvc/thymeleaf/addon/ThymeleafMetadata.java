@@ -3,6 +3,9 @@ package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 import static org.springframework.roo.model.SpringJavaType.DELETE_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.GET_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.INIT_BINDER;
+import static org.springframework.roo.model.SpringJavaType.MODEL;
+import static org.springframework.roo.model.SpringJavaType.MODEL_AND_VIEW;
+import static org.springframework.roo.model.SpringJavaType.MODEL_ATTRIBUTE;
 import static org.springframework.roo.model.SpringJavaType.POST_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.REQUEST_PARAM;
 import static org.springframework.roo.model.SpringJavaType.RESPONSE_ENTITY;
@@ -55,6 +58,7 @@ import org.springframework.roo.classpath.details.comments.CommentStructure.Comme
 import org.springframework.roo.classpath.details.comments.JavadocComment;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
@@ -97,6 +101,14 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   protected static final JavaSymbolName CREATE_FORM_METHOD_NAME = new JavaSymbolName("createForm");
   protected static final JavaSymbolName EDIT_FORM_METHOD_NAME = new JavaSymbolName("editForm");
   protected static final JavaSymbolName UPDATE_METHOD_NAME = new JavaSymbolName("update");
+  protected static final JavaSymbolName GET_MODEL_NAME_METHOD_NAME = new JavaSymbolName(
+      "getModelName");
+  protected static final JavaSymbolName GET_EDIT_VIEW_PATH_METHOD_NAME = new JavaSymbolName(
+      "getEditViewPath");
+  protected static final JavaSymbolName GET_LAST_VERSION_METHOD_NAME = new JavaSymbolName(
+      "getLastVersion");
+  protected static final JavaSymbolName POPULATE_AND_GET_FORM_VIEW_METHOD_NAME =
+      new JavaSymbolName("populateAndGetFormView");
   protected static final JavaSymbolName EXPORT_METHOD_NAME = new JavaSymbolName("export");
   protected static final JavaSymbolName EXPORT_CSV_METHOD_NAME = new JavaSymbolName("exportCsv");
   protected static final JavaSymbolName EXPORT_PDF_METHOD_NAME = new JavaSymbolName("exportPdf");
@@ -128,6 +140,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private static final JavaSymbolName MESSAGE_SOURCE = new JavaSymbolName("messageSource");
   private static final JavaSymbolName CONVERSION_SERVICE_FIELD_NAME = new JavaSymbolName(
       "conversionService");
+  private static final JavaSymbolName CONCURRENCY_TEMPLATE_FIELD_NAME = new JavaSymbolName(
+      "concurrencyTemplate");
   private static final AnnotationMetadata ANN_METADATA_MODEL_ATTRIBUTE = AnnotationMetadataBuilder
       .getInstance(SpringJavaType.MODEL_ATTRIBUTE);
   private static final AnnotatedJavaType STRING_ARRAY_PARAM = new AnnotatedJavaType(
@@ -223,6 +237,11 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   private final MethodMetadata showInlineMethod;
   private final MethodMetadata populateFormMethod;
   private final MethodMetadata populateFormatsMethod;
+  private final MethodMetadata getModelNameMethod;
+  private final MethodMetadata getEditViewPathMethod;
+  private final MethodMetadata getLastVersionMethod;
+  private final MethodMetadata populateAndGetFormViewMethod;
+
 
   // Details Methods
   private final Map<RelationInfo, MethodMetadata> modelAttributeDetailsMethod;
@@ -251,6 +270,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   // ????
 
   private final List<MethodMetadata> allMethods;
+  private final FieldMetadata concurrencyTemplateField;
   private final FieldMetadata messageSourceField;
   private final FieldMetadata collectionMethodLinkBuilderFactoryField;
   private final FieldMetadata itemMethodLinkBuilderFactoryField;
@@ -488,6 +508,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.modelAttributeMethod = null;
         this.editFormMethod = null;
         this.updateMethod = null;
+        this.getModelNameMethod = null;
+        this.getEditViewPathMethod = null;
+        this.getLastVersionMethod = null;
+        this.populateAndGetFormViewMethod = null;
         this.deleteMethod = null;
         this.showMethod = null;
         this.showInlineMethod = null;
@@ -517,6 +541,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.addColumnToReportBuilderMethod =
             addAndGet(getAddColumnToReportBuilderMethod(), exportMethods);
         this.exportMethods = exportMethods;
+
+        // Concurrency template field is not valid here
+        this.concurrencyTemplateField = null;
 
         break;
       }
@@ -553,17 +580,24 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.modelAttributeMethod = addAndGet(getModelAttributeMethod(), allMethods);
         this.showMethod = addAndGet(getShowMethod(), allMethods);
         this.showInlineMethod = addAndGet(getShowInlineMethod(), allMethods);
+
+        // Generating ConcurrencyManager methods and necessary fields
+        this.concurrencyTemplateField = getConcurrencyTemplateField();
+        ensureGovernorHasField(new FieldMetadataBuilder(this.concurrencyTemplateField));
+        this.populateFormatsMethod = addAndGet(getPopulateFormatsMethod(), allMethods);
+        this.populateFormMethod = addAndGet(getPopulateFormMethod(), allMethods);
+        this.getModelNameMethod = addAndGet(getModelNameMethod(), allMethods);
+        this.getEditViewPathMethod = addAndGet(getEditViewPathMethod(), allMethods);
+        this.getLastVersionMethod = addAndGet(getLastVersionMethod(), allMethods);
+        this.populateAndGetFormViewMethod = addAndGet(populateAndGetFormViewMethod(), allMethods);
+
         if (readOnly) {
           this.editFormMethod = null;
           this.updateMethod = null;
           this.deleteMethod = null;
-          this.populateFormatsMethod = null;
-          this.populateFormMethod = null;
           this.initBinderMethod = null;
         } else {
           this.initBinderMethod = addAndGet(getInitBinderMethod(entity), allMethods);
-          this.populateFormatsMethod = addAndGet(getPopulateFormatsMethod(), allMethods);
-          this.populateFormMethod = addAndGet(getPopulateFormMethod(), allMethods);
           this.editFormMethod = addAndGet(getEditFormMethod(), allMethods);
           this.updateMethod = addAndGet(getUpdateMethod(), allMethods);
           this.deleteMethod = addAndGet(getDeleteMethod(), allMethods);
@@ -653,6 +687,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.modelAttributeMethod = null;
         this.editFormMethod = null;
         this.updateMethod = null;
+        this.getModelNameMethod = null;
+        this.getEditViewPathMethod = null;
+        this.getLastVersionMethod = null;
+        this.populateAndGetFormViewMethod = null;
         this.deleteMethod = null;
         this.showMethod = null;
         this.showInlineMethod = null;
@@ -680,6 +718,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.exportXlsMethod = null;
         this.addColumnToReportBuilderMethod = null;
         this.exportMethods = null;
+
+        // Concurrency template field is not valid here
+        this.concurrencyTemplateField = null;
 
         break;
       }
@@ -759,6 +800,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.deleteBatchMethod = null;
         this.editFormMethod = null;
         this.updateMethod = null;
+        this.getModelNameMethod = null;
+        this.getEditViewPathMethod = null;
+        this.getLastVersionMethod = null;
+        this.populateAndGetFormViewMethod = null;
         this.deleteMethod = null;
         this.showMethod = null;
         this.showInlineMethod = null;
@@ -780,6 +825,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.exportXlsMethod = null;
         this.addColumnToReportBuilderMethod = null;
         this.exportMethods = null;
+
+        // Concurrency template field is not valid here
+        this.concurrencyTemplateField = null;
 
         break;
       }
@@ -838,6 +886,10 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.deleteBatchMethod = null;
         this.editFormMethod = null;
         this.updateMethod = null;
+        this.getModelNameMethod = null;
+        this.getEditViewPathMethod = null;
+        this.getLastVersionMethod = null;
+        this.populateAndGetFormViewMethod = null;
         this.deleteMethod = null;
         this.showMethod = null;
         this.showInlineMethod = null;
@@ -860,6 +912,9 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         this.addColumnToReportBuilderMethod = null;
         this.exportMethods = null;
 
+        // Concurrency template field is not valid here
+        this.concurrencyTemplateField = null;
+
         break;
 
       }
@@ -877,6 +932,17 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     return new FieldMetadataBuilder(getId(), Modifier.PRIVATE,
         new ArrayList<AnnotationMetadataBuilder>(), CONVERSION_SERVICE_FIELD_NAME,
         SpringJavaType.CONVERSION_SERVICE).build();
+  }
+
+  private FieldMetadata getConcurrencyTemplateField() {
+    JavaType concurrencyTemplateType =
+        new JavaType(
+            SpringletsJavaType.SPRINGLETS_CONCURRENCY_TEMPLATE.getFullyQualifiedTypeName(), 0,
+            DataType.TYPE, null, Arrays.asList(entity));
+    return new FieldMetadataBuilder(getId(), Modifier.PRIVATE + Modifier.FINAL,
+        CONCURRENCY_TEMPLATE_FIELD_NAME, concurrencyTemplateType, String.format("new %s<%s>(this)",
+            getNameOfJavaType(SpringletsJavaType.SPRINGLETS_CONCURRENCY_TEMPLATE),
+            entity.getSimpleTypeName())).build();
   }
 
   private FieldMetadata getMessageSourceField() {
@@ -2306,6 +2372,192 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
   }
 
   /**
+   * This method provides the "getModelName" method
+   * @return
+   */
+  private MethodMetadata getModelNameMethod() {
+
+    // Define methodName
+    final JavaSymbolName methodName = GET_MODEL_NAME_METHOD_NAME;
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    // Check if already exists
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @Override annotation
+    /*AnnotationMetadataBuilder overrideAnnotation = new AnnotationMetadataBuilder(JavaType.OVERRIDE);
+    annotations.add(overrideAnnotation);*/
+    this.mvcMethodNames.put(methodName.getSymbolName(), methodName.getSymbolName());
+
+    // Generate body
+    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+    bodyBuilder.appendFormalLine("return \"%s\";", entityItemName);
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING,
+            parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+
+  }
+
+  /**
+   * This method provides the "getEditViewPath" method
+   * @return
+   */
+  private MethodMetadata getEditViewPathMethod() {
+    // Define methodName
+    final JavaSymbolName methodName = GET_EDIT_VIEW_PATH_METHOD_NAME;
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    // Check if already exists
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @Override annotation
+    /*AnnotationMetadataBuilder overrideAnnotation = new AnnotationMetadataBuilder(JavaType.OVERRIDE);
+    annotations.add(overrideAnnotation);*/
+    this.mvcMethodNames.put(methodName.getSymbolName(), methodName.getSymbolName());
+
+    // Generate body
+    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+    bodyBuilder.appendFormalLine("return \"%s/edit\";", viewsPath);
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING,
+            parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "getLastVersion" method
+   * @return
+   */
+  private MethodMetadata getLastVersionMethod() {
+    // Define methodName
+    final JavaSymbolName methodName = GET_LAST_VERSION_METHOD_NAME;
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(entity));
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("record"));
+
+    // Check if already exists
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @Override annotation
+    /*AnnotationMetadataBuilder overrideAnnotation = new AnnotationMetadataBuilder(JavaType.OVERRIDE);
+    annotations.add(overrideAnnotation);*/
+    this.mvcMethodNames.put(methodName.getSymbolName(), methodName.getSymbolName());
+
+    // Generate body
+    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+    if (entityMetadata.getCurrentIdentifierAccessor() != null
+        && entityMetadata.getCurrentVersionAccessor() != null) {
+      bodyBuilder.appendFormalLine("return %s().%s(record.%s()).%s();",
+          getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
+              .getCurrentFindOneMethod().getMethodName(), entityMetadata
+              .getCurrentIdentifierAccessor().getMethodName(), entityMetadata
+              .getCurrentVersionAccessor().getMethodName());
+    } else {
+      bodyBuilder.appendFormalLine("return %s().%s(record.getId()).getVersion();",
+          getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
+              .getCurrentFindOneMethod().getMethodName());
+    }
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.INT_OBJECT,
+            parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "populateAndGetFormView" method
+   * @return
+   */
+  private MethodMetadata populateAndGetFormViewMethod() {
+    // Define methodName
+    final JavaSymbolName methodName = POPULATE_AND_GET_FORM_VIEW_METHOD_NAME;
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(entity));
+    parameterTypes.add(new AnnotatedJavaType(MODEL));
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("entity"));
+    parameterNames.add(new JavaSymbolName("model"));
+
+    // Check if already exists
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @Override annotation
+    /*AnnotationMetadataBuilder overrideAnnotation = new AnnotationMetadataBuilder(JavaType.OVERRIDE);
+    annotations.add(overrideAnnotation);*/
+    this.mvcMethodNames.put(methodName.getSymbolName(), methodName.getSymbolName());
+
+    // Generate body
+    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+    bodyBuilder.appendFormalLine("// Populate the form with all the necessary elements");
+    bodyBuilder.appendFormalLine("%s(model);", this.populateFormMethod.getMethodName());
+    bodyBuilder
+        .appendFormalLine("// Add concurrency attribute to the model to show the concurrency form");
+    bodyBuilder.appendFormalLine("// in the current edit view");
+    bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", true);");
+    bodyBuilder.appendFormalLine("// Add the new version value to the model.");
+    bodyBuilder.appendFormalLine("model.addAttribute(\"newVersion\", %s(entity));",
+        getLastVersionMethod.getMethodName());
+    bodyBuilder
+        .appendFormalLine("// Add the current pet values to maintain the values introduced by the user");
+    bodyBuilder.appendFormalLine("model.addAttribute(%s(), entity);",
+        getModelNameMethod.getMethodName());
+    bodyBuilder.appendFormalLine("// Return the edit view path");
+    bodyBuilder.appendFormalLine("return new %s(%s(), model.asMap());", MODEL_AND_VIEW,
+        getEditViewPathMethod.getMethodName());
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            SpringJavaType.MODEL_AND_VIEW, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
    * This method provides the "update" method using Thymeleaf view response
    * type
    *
@@ -2329,6 +2581,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
           .getFieldType(), requestParamAnnotation.build()));
 
       // Concurrency control parameter
+      // TODO: THIS PARAMETER SHOULD BE REMOVED. IT WILL NOT BE USED ANYMORE
       AnnotationMetadataBuilder concurrencyControlRequestParam =
           new AnnotationMetadataBuilder(REQUEST_PARAM);
       concurrencyControlRequestParam.addStringAttribute("value", "concurrency");
@@ -2352,6 +2605,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     parameterNames.add(new JavaSymbolName("result"));
     if (this.entityMetadata.getCurrentVersionField() != null) {
       parameterNames.add(this.entityMetadata.getCurrentVersionField().getFieldName());
+
+      // TODO: THIS PARAMETER SHOULD BE REMOVED. IT WILL NOT BE USED ANYMORE
       parameterNames.add(new JavaSymbolName("concurrencyControl"));
     }
     parameterNames.add(MODEL_PARAM_NAME);
@@ -2377,115 +2632,54 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // populateFormats(model);
     bodyBuilder.appendFormalLine("%s(model);", populateFormMethod.getMethodName());
-    bodyBuilder.newLine();
-
-    // return "path/create";
-    bodyBuilder.appendFormalLine("return new %s(\"%s/edit\");",
-        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
+    // return new ModelAnView(getEditViewPath());
+    bodyBuilder.appendFormalLine("return new %s(" + getEditViewPathMethod.getMethodName() + "());",
+        getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW));
     bodyBuilder.indentRemove();
 
     // }
     bodyBuilder.appendFormalLine("}");
 
+    // Calculate the name of the saved variable
+    String savedVarName = "saved" + entity.getSimpleTypeName();
+
     // // Concurrency control
     if (this.entityMetadata.getCurrentVersionField() != null) {
-      bodyBuilder.appendFormalLine("// Concurrency control");
 
-      // Pet existingPet = getPetService().findOne(pet.getId());
-      String existingVarName = "existing".concat(entity.getSimpleTypeName());
-      bodyBuilder.appendFormalLine("%s %s = %s().%s(%s.%s());", getNameOfJavaType(entity),
-          existingVarName, getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(),
-          serviceMetadata.getCurrentFindOneMethod().getMethodName(), entityItemName,
-          getAccessorMethod(this.entityMetadata.getCurrentIndentifierField()).getMethodName());
-
-      // if (!Objects.equals(pet.getVersion() , existingPet.getVersion()) {
-      bodyBuilder.appendFormalLine("if (!%s.equals(%s.%s(), %s.%s())) {",
-          getNameOfJavaType(JavaType.OBJECTS), entityItemName,
-          getAccessorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
-          existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
-              .getMethodName());
-      bodyBuilder.indent();
-
-      // if (concurrencyProblem && StringUtils.isEmpty(concurrencyControl)){
-      bodyBuilder.appendFormalLine("if (%s.isEmpty(concurrencyControl)){",
-          getNameOfJavaType(STRING_UTILS_APACHE));
-      bodyBuilder.indent();
-
-      // populateForm(model);
-      bodyBuilder.appendFormalLine("populateForm(model);");
-
-      // model.addAttribute("entity", entityParam)
-      bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", entityItemName,
-          entityItemName);
-
-      // model.addAttribute("concurrency", true);
-      bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", true);");
-
-      // return new ModelAndView("pets/edit");
-      bodyBuilder.appendFormalLine("return new %s(\"%s/edit\");",
-          getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
-
-      bodyBuilder.indentRemove();
-
-      // } else if(concurrencyProblem && "discard".equals(concurrencyControl)){
-      bodyBuilder.appendFormalLine("} else if(\"discard\".equals(concurrencyControl)){");
-      bodyBuilder.indent();
-
-      // populateForm(model);
-      bodyBuilder.appendFormalLine("populateForm(model);");
-
-      // model.addAttribute("pet", existingPet);
-      bodyBuilder.appendFormalLine("model.addAttribute(\"%s\", %s);", entityItemName,
-          existingVarName);
-
-      // model.addAttribute("concurrency", false);
-      bodyBuilder.appendFormalLine("model.addAttribute(\"concurrency\", false);");
-
-      // return new ModelAndView("pets/edit");
-      bodyBuilder.appendFormalLine("return new %s(\"%s/edit\");",
-          getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
-
-      bodyBuilder.indentRemove();
-
-      // } else if(concurrencyProblem && "apply".equals(concurrencyControl)){
-      bodyBuilder.appendFormalLine("} else if(\"apply\".equals(concurrencyControl)){");
-      bodyBuilder.indent();
-
-      // // Update the version field to be able to override the existing values
+      // Include some description about the concurrency management
       bodyBuilder
-          .appendFormalLine("// Update the version field to be able to override the existing values");
-
-      // pet.setVersion(existingPet.getVersion());
-      bodyBuilder.appendFormalLine("%s.%s(%s.%s());", entityItemName,
-          getMutatorMethod(this.entityMetadata.getCurrentVersionField()).getMethodName(),
-          existingVarName, getAccessorMethod(this.entityMetadata.getCurrentVersionField())
-              .getMethodName());
-
-      bodyBuilder.indentRemove();
-
-      // } else if(concurrencyProblem && "apply".equals(concurrencyControl)){
-      bodyBuilder.appendFormalLine("} else {");
-      bodyBuilder.indent();
-
-      // // Invalid concurrencyControlValue
-      bodyBuilder.appendFormalLine("// Invalid concurrencyControlValue");
-
-      // throw new IllegalArgumentException("Invalid concurrencyControlValue");
+          .appendFormalLine("// Create Concurrency Spring Template to ensure that the following code will manage the");
       bodyBuilder
-          .appendFormalLine("throw new IllegalArgumentException(\"Invalid concurrencyControlValue\");");
+          .appendFormalLine("// possible concurrency exceptions that appears and execute the provided coded inside the Spring template.");
+      bodyBuilder
+          .appendFormalLine("// If some concurrency exception appears the template will manage it.");
 
+      /*concurrencyTemplate.execute(entity, model, new ConcurrencyCallback<ENTITY>() {
+        @Override
+        public ENTITY doInConcurrency() throws Exception {
+          return getSERVICEMETHOD().save(entity);
+        }
+      });*/
+      bodyBuilder.appendFormalLine("%s %s = %s.execute(%s, %s, new %s<%s>() {",
+          getNameOfJavaType(entity), savedVarName, CONCURRENCY_TEMPLATE_FIELD_NAME, entityItemName,
+          MODEL_PARAM_NAME, getNameOfJavaType(SpringletsJavaType.SPRINGLETS_CONCURRENCY_CALLBACK),
+          entity.getSimpleTypeName());
+      bodyBuilder.indent();
+      bodyBuilder.appendFormalLine("@Override");
+      bodyBuilder.appendFormalLine("public %s doInConcurrency(%s %s) throws Exception {",
+          entity.getSimpleTypeName(), entity.getSimpleTypeName(), entityItemName);
+      bodyBuilder.indent();
+      bodyBuilder.appendFormalLine("return %s().%s(%s);",
+          getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
+              .getCurrentSaveMethod().getMethodName(), entityItemName);
       bodyBuilder.indentRemove();
       bodyBuilder.appendFormalLine("}");
-
       bodyBuilder.indentRemove();
-      bodyBuilder.appendFormalLine("}");
+      bodyBuilder.appendFormalLine("});");
+
     }
 
-    String savedVarName = "saved" + entity.getSimpleTypeName();
-    // Customer savedCustomer = customerService.save(customer);;
-    bodyBuilder.appendFormalLine("%s %s = %s().%s(%s);", getNameOfJavaType(entity), savedVarName,
-        getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
-            .getCurrentSaveMethod().getMethodName(), entityItemName);
+
 
     // UriComponents showURI =
     // itemLink.to(CategoryItemThymeleafLinkFactory.SHOW).with("category",

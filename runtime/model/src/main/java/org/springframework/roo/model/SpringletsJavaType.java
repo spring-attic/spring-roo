@@ -13,6 +13,15 @@ package org.springframework.roo.model;
  */
 public class SpringletsJavaType {
 
+  public static final JavaType SPRINGLETS_CONCURRENCY_CALLBACK = new JavaType(
+      "io.springlets.web.mvc.util.concurrency.ConcurrencyCallback");
+  public static final JavaType SPRINGLETS_CONCURRENCY_EXCEPTION = new JavaType(
+      "io.springlets.web.mvc.util.concurrency.ConcurrencyException");
+  public static final JavaType SPRINGLETS_CONCURRENCY_MANAGER = new JavaType(
+      "io.springlets.web.mvc.util.concurrency.ConcurrencyManager");
+  public static final JavaType SPRINGLETS_CONCURRENCY_TEMPLATE = new JavaType(
+      "io.springlets.web.mvc.util.concurrency.ConcurrencyTemplate");
+
   public static final JavaType SPRINGLETS_CONTROLLER_METHOD_LINK_BUILDER_FACTORY = new JavaType(
       "io.springlets.web.mvc.util.ControllerMethodLinkBuilderFactory");
 
