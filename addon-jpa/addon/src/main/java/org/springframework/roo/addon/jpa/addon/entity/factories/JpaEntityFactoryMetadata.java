@@ -36,6 +36,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.roo.addon.jpa.addon.dod.EmbeddedHolder;
 import org.springframework.roo.addon.jpa.addon.dod.EmbeddedIdHolder;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.annotations.entity.factory.RooJpaEntityFactory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -43,6 +44,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -58,6 +60,7 @@ import org.springframework.roo.classpath.details.comments.JavadocComment;
 import org.springframework.roo.classpath.details.comments.CommentStructure.CommentLocation;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
@@ -127,6 +130,7 @@ public class JpaEntityFactoryMetadata extends AbstractItdTypeDetailsProvidingMet
   private EmbeddedIdHolder embeddedIdHolder;
   private List<EmbeddedHolder> embeddedHolders;
   private Map<FieldMetadata, JpaEntityFactoryMetadata> locatedFields;
+  private final MemberDetails entityMemberDetails;
 
   /**
    * Constructor
@@ -135,13 +139,15 @@ public class JpaEntityFactoryMetadata extends AbstractItdTypeDetailsProvidingMet
    * @param aspectName
    * @param governorPhysicalTypeMetadata
    * @param entity
-   * @param locatedFields 
+   * @param entityMemberDetails
+   * @param locatedFields
    * @param embeddedHolder
-   * @param entityFactoryClasses 
-   * @param embeddedIdHolder 
+   * @param entityFactoryClasses
+   * @param embeddedIdHolder
    */
   public JpaEntityFactoryMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType entity,
+      MemberDetails entityMemberDetails,
       final Map<FieldMetadata, JpaEntityFactoryMetadata> locatedFields,
       final List<EmbeddedHolder> embeddedHolders,
       Set<ClassOrInterfaceTypeDetails> entityFactoryClasses, final EmbeddedIdHolder embeddedIdHolder) {
@@ -150,6 +156,7 @@ public class JpaEntityFactoryMetadata extends AbstractItdTypeDetailsProvidingMet
     Validate.notNull(embeddedHolders, "Embedded holders list required");
 
     this.entity = entity;
+    this.entityMemberDetails = entityMemberDetails;
     this.embeddedIdHolder = embeddedIdHolder;
     this.embeddedHolders = embeddedHolders;
     this.locatedFields = locatedFields;
@@ -351,18 +358,19 @@ public class JpaEntityFactoryMetadata extends AbstractItdTypeDetailsProvidingMet
     // Add body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // Entity obj = new Entity();
-    bodyBuilder.appendFormalLine("%1$s %2$s = new %1$s();", getNameOfJavaType(this.entity),
-            OBJ_SYMBOL);
-
-    // Set values for transient object
-    for (final Map.Entry<FieldMetadata, JpaEntityFactoryMetadata> entry : locatedFields.entrySet()) {
-      bodyBuilder.appendFormalLine("%s(%s, %s);",
-          BeanInfoUtils.getMutatorMethodName(entry.getKey()), OBJ_SYMBOL, INDEX_SYMBOL);
+    List<ConstructorMetadata> constructors = entityMemberDetails.getConstructors();
+    boolean hasDefaultConstructor = false;
+    for (ConstructorMetadata constructor : constructors) {
+      if (constructor.getParameterTypes().isEmpty() && Modifier.isPublic(constructor.getModifier())) {
+        hasDefaultConstructor = true;
+        break;
+      }
     }
-
-    // return obj;
-    bodyBuilder.appendFormalLine("return %s;", OBJ_SYMBOL);
+    if (constructors.isEmpty() || hasDefaultConstructor) {
+      generateDefaultCreateMethodBody(bodyBuilder);
+    } else {
+      generateNoConstructorCreateMethodBody(bodyBuilder);
+    }
 
     // Create method
     MethodMetadataBuilder method =
@@ -381,6 +389,40 @@ public class JpaEntityFactoryMetadata extends AbstractItdTypeDetailsProvidingMet
     method.setCommentStructure(commentStructure);
 
     return method.build();
+  }
+
+  /**
+   * Generate default body for create method
+   *
+   * @param bodyBuilder
+   */
+  private void generateDefaultCreateMethodBody(InvocableMemberBodyBuilder bodyBuilder) {
+    // Entity obj = new Entity();
+    bodyBuilder.appendFormalLine("%1$s %2$s = new %1$s();", getNameOfJavaType(this.entity),
+        OBJ_SYMBOL);
+
+    // Set values for transient object
+    for (final Map.Entry<FieldMetadata, JpaEntityFactoryMetadata> entry : locatedFields.entrySet()) {
+      bodyBuilder.appendFormalLine("%s(%s, %s);",
+          BeanInfoUtils.getMutatorMethodName(entry.getKey()), OBJ_SYMBOL, INDEX_SYMBOL);
+    }
+
+    // return obj;
+    bodyBuilder.appendFormalLine("return %s;", OBJ_SYMBOL);
+  }
+
+  /**
+   * Generate body for create method when entity has not default constructor available
+   *
+   * @param bodyBuilder
+   */
+  private void generateNoConstructorCreateMethodBody(InvocableMemberBodyBuilder bodyBuilder) {
+
+    // throw new IllegalStateException("No no-argument constructor found for the entity "+ Pet.class.getName() +". This is required by the JPA especification. Please provide a default constructor for the related class and open the Spring Roo console again.");
+    bodyBuilder
+        .appendFormalLine(
+            "throw new IllegalStateException(\"No no-argument constructor found for the entity \"+ %s.class.getName() +\". This is required by the JPA especification. Please provide a default constructor for the related class and open the Spring Roo console again.\");",
+            getNameOfJavaType(this.entity));
   }
 
   private String getDecimalMinAndDecimalMaxBody(final FieldMetadata field,
@@ -1101,7 +1143,7 @@ public class JpaEntityFactoryMetadata extends AbstractItdTypeDetailsProvidingMet
 
   /**
    * Returns the {@link JavaType} representing the physical type of this ITD governor.
-   * 
+   *
    * @return the {@link JavaType} for the governor physical type.
    */
   public JavaType getGovernorType() {

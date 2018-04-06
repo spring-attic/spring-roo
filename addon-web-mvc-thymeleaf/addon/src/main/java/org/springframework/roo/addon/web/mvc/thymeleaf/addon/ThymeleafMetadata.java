@@ -2292,6 +2292,26 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
+    if (entityMetadata.hasValidDefaultConstructor()) {
+      generateDefaultCreateFormMethodBody(bodyBuilder);
+    } else {
+      generateNoConstructorCreateFormMethodBody(bodyBuilder);
+    }
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            SpringJavaType.MODEL_AND_VIEW, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * Generate the default method body for "createForm" method
+   *
+   * @param bodyBuilder
+   */
+  protected void generateDefaultCreateFormMethodBody(InvocableMemberBodyBuilder bodyBuilder) {
     // populateForm(model);
     bodyBuilder.appendFormalLine("%s(model);", populateFormMethod.getMethodName());
     bodyBuilder.newLine();
@@ -2303,13 +2323,19 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // return "path/create";
     bodyBuilder.appendFormalLine("return new %s(\"%s/create\");",
         getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath);
+  }
 
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            SpringJavaType.MODEL_AND_VIEW, parameterTypes, parameterNames, bodyBuilder);
-    methodBuilder.setAnnotations(annotations);
-
-    return methodBuilder.build();
+  /**
+   * Generate the method body for "createForm" method when entity hasn't a valid constructor
+   *
+   * @param bodyBuilder
+   */
+  protected void generateNoConstructorCreateFormMethodBody(InvocableMemberBodyBuilder bodyBuilder) {
+    // throw new IllegalStateException("No no-argument constructor found for the entity "+ Pet.class.getName() +". This is required by the JPA especification. Please provide a default constructor for the related class and the open Spring Roo console again.");
+    bodyBuilder
+        .appendFormalLine(
+            "throw new IllegalStateException(\"No no-argument constructor found for the entity \"+ %s.class.getName() +\". This is required by the JPA especification. Please provide a default constructor for the related class and open the Spring Roo console again.\");",
+            getNameOfJavaType(this.entity));
   }
 
   /**
@@ -4812,6 +4838,28 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
+    if (info.childEntityMetadata.hasValidDefaultConstructor()) {
+      generateDefaultCreateFormDetailsBody(entity, bodyBuilder);
+    } else {
+      generateNoValidConstructorCreateFormDetailsBody(entity, bodyBuilder);
+    }
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            SpringJavaType.MODEL_AND_VIEW, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * Generate default method body for "createForm" method of a details controller
+   *
+   * @param entity
+   * @param bodyBuilder
+   */
+  protected void generateDefaultCreateFormDetailsBody(final JavaType entity,
+      InvocableMemberBodyBuilder bodyBuilder) {
     // populateForm(model);
     bodyBuilder.appendFormalLine("%s(model);", populateFormMethod.getMethodName());
     // model.addAttribute("entity", new Entity());
@@ -4822,13 +4870,22 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     bodyBuilder.appendFormalLine("return new %s(\"%s/%s/create\");",
         getNameOfJavaType(SpringJavaType.MODEL_AND_VIEW), viewsPath,
         controllerMetadata.getDetailsPathAsString("/"));
+  }
 
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            SpringJavaType.MODEL_AND_VIEW, parameterTypes, parameterNames, bodyBuilder);
-    methodBuilder.setAnnotations(annotations);
-
-    return methodBuilder.build();
+  /**
+   * Generate method body for "createForm" method of a details controller when child entity
+   * has no valid constructor
+   *
+   * @param entity
+   * @param bodyBuilder
+   */
+  protected void generateNoValidConstructorCreateFormDetailsBody(final JavaType entity,
+      InvocableMemberBodyBuilder bodyBuilder) {
+    // throw new IllegalStateException("No no-argument constructor found for the entity "+ Pet.class.getName() +". This is required by the JPA especification. Please provide a default constructor for the related class and open the Spring Roo console again.");
+    bodyBuilder
+        .appendFormalLine(
+            "throw new IllegalStateException(\"No no-argument constructor found for the entity \"+ %s.class.getName() +\". This is required by the JPA especification. Please provide a default constructor for the related class and open the Spring Roo console again.\");",
+            getNameOfJavaType(entity));
   }
 
   private MethodMetadata getDeleteDetailMethod() {

@@ -76,10 +76,7 @@ public class JpaDataOnDemandCreator implements DataOnDemandCreatorProvider {
   @Override
   public boolean isValid(JavaType javaType) {
     ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(javaType);
-    if (cid.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
-      return true;
-    }
-    return false;
+    return cid.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null;
   }
 
   @Override

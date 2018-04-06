@@ -9,7 +9,9 @@ import static org.springframework.roo.model.JpaJavaType.TABLE;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -89,6 +91,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   private final JavaType annotatedEntity;
   private final JpaEntityAnnotationValues annotationValues;
   private final JpaEntityMetadata parent;
+  private final boolean hasValidDefaultConstructor;
   private FieldMetadata identifierField;
   private MethodMetadata identifierAccessor;
   private FieldMetadata versionField;
@@ -159,6 +162,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     this.annotatedEntity = entityPhysicalType.getType();
     this.annotationValues = annotationValues;
     this.parent = parent;
+    this.hasValidDefaultConstructor = checkHasValidDefaultConstructor(entityMemberDetails);
     this.identifierField = identifierField;
     this.identifierAccessor = identifierAccessor;
     this.versionField = versionField;
@@ -285,6 +289,18 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     // Build the ITD based on what we added to the builder above
     itdTypeDetails = builder.build();
+  }
+
+  private boolean checkHasValidDefaultConstructor(MemberDetails entityDetails) {
+    if (entityDetails.getConstructors().isEmpty()) {
+      return true;
+    }
+    for (ConstructorMetadata constructor : entityDetails.getConstructors()) {
+      if (constructor.getParameterTypes().isEmpty() && Modifier.isPublic(constructor.getModifier())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -1013,6 +1029,13 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    */
   public String getEntityFormatMessage() {
     return this.annotationValues.getEntityFormatMessage();
+  }
+
+  /**
+   * @return true if entity has a no-arguments constructor or has no constructor
+   */
+  public boolean hasValidDefaultConstructor() {
+    return hasValidDefaultConstructor;
   }
 
   /**

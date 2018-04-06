@@ -185,8 +185,8 @@ public class JpaEntityFactoryMetadataProviderImpl extends
             RooJavaType.ROO_JPA_ENTITY_FACTORY);
 
     return new JpaEntityFactoryMetadata(entityFactoryMetadata, aspectName,
-        governorPhysicalTypeMetadata, entity, locatedFields, embeddedHolders, entityFactoryClasses,
-        embeddedIdHolder);
+        governorPhysicalTypeMetadata, entity, memberDetails, locatedFields, embeddedHolders,
+        entityFactoryClasses, embeddedIdHolder);
   }
 
   public String getProvidesType() {
