@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.comments.CommentStructure;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;

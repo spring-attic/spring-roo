@@ -1,7 +1,10 @@
 package org.springframework.roo.classpath.details.comments;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.springframework.roo.support.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -10,7 +13,7 @@ import java.util.List;
  */
 public class CommentStructure {
 
-  public static enum CommentLocation {
+  public enum CommentLocation {
     BEGINNING, INTERNAL, END
   }
 
@@ -18,9 +21,18 @@ public class CommentStructure {
   private List<AbstractComment> endComments;
   private List<AbstractComment> internalComments;
 
+  public CommentStructure() {
+    super();
+  }
+
+  public CommentStructure(AbstractComment comment) {
+    this();
+    addComment(comment, CommentLocation.BEGINNING);
+  }
+
   /**
    * Helper method to assist in adding comments to structures.
-   * 
+   *
    * @param comment The comment to add (LineComment, BlockComment,
    *            JavadocComment)
    * @param commentLocation Where the comment should be added.
@@ -73,5 +85,55 @@ public class CommentStructure {
 
   public void setInternalComments(final List<AbstractComment> internalComments) {
     this.internalComments = internalComments;
+  }
+
+  public String asPlainText() {
+    StringBuilder sb = new StringBuilder();
+    if (!CollectionUtils.isEmpty(beginComments)) {
+      sb.append(StringUtils.join(beginComments, "\n"));
+    }
+    if (!CollectionUtils.isEmpty(internalComments)) {
+      if (sb.length() > 0) {
+        sb.append("/n");
+      }
+      sb.append(StringUtils.join(internalComments, "\n"));
+    }
+    if (!CollectionUtils.isEmpty(endComments)) {
+      if (sb.length() > 0) {
+        sb.append("/n");
+      }
+      sb.append(StringUtils.join(endComments, "\n"));
+    }
+    return sb.toString();
+  }
+
+  public List<AbstractComment> asList() {
+    List<AbstractComment> comments = new ArrayList<AbstractComment>();
+    if (!isEmpty(beginComments)) {
+      comments.addAll(beginComments);
+    }
+    if (!isEmpty(internalComments)) {
+      comments.addAll(internalComments);
+    }
+    if (!isEmpty(endComments)) {
+      comments.addAll(endComments);
+    }
+    return comments;
+  }
+
+  public boolean isEmpty() {
+    return isEmpty(beginComments) && isEmpty(internalComments) && isEmpty(endComments);
+  }
+
+  private boolean isEmpty(List<AbstractComment> comments) {
+    if (CollectionUtils.isEmpty(comments)) {
+      return true;
+    }
+    for (AbstractComment comment : comments) {
+      if (StringUtils.isNotBlank(comment.getComment())) {
+        return false;
+      }
+    }
+    return true;
   }
 }

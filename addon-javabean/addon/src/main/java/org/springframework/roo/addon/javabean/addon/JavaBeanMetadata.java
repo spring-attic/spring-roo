@@ -42,6 +42,8 @@ import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.comments.AbstractComment;
+import org.springframework.roo.classpath.details.comments.JavadocComment;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -57,10 +59,13 @@ import org.springframework.roo.project.LogicalPath;
  *
  * @author Ben Alex
  * @author Alan Stewart
+ * @author Jose Manuel Vivó
  * @since 1.0
  */
 public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
+  private static final String THIS_DOT = "this.";
+  private static final String RETURN_0 = "return 0;";
   private static final String PROVIDES_TYPE_STRING = JavaBeanMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
@@ -111,6 +116,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
   private final FieldMetadata identifierField;
   private final ToStringAnnotationValues toStringAnnotationValues;
   private final Collection<FieldMetadata> toStringFields;
+  private final JavaType target;
 
   /**
    * Constructor
@@ -143,6 +149,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     Validate.notNull(declaredFields, "Declared fields required");
 
 
+    this.target = governorPhysicalTypeMetadata.getType();
     this.annotationValues = annotationValues;
     this.declaredFields = declaredFields;
     this.interfaceMethods = interfaceMethods;
@@ -163,7 +170,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
       return;
     }
 
-    JavaType target = governorPhysicalTypeMetadata.getType();
+
 
     if (!declaredFields.isEmpty()) {
       generateGettersAndSetters(declaredFields, interfaceMethods);
@@ -282,10 +289,22 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     if (annotationValues.isGettersByDefault() && !Modifier.isTransient(field.getModifier())
         && !Modifier.isStatic(field.getModifier())) {
       final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-      bodyBuilder.appendFormalLine("return this." + field.getFieldName().getSymbolName() + ";");
+      String fieldName = field.getFieldName().getSymbolName();
+      bodyBuilder.appendFormalLine("return this." + fieldName + ";");
 
-      return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, field.getFieldType(),
-          bodyBuilder);
+      MethodMetadataBuilder methodMetadataBuilder =
+          new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, field.getFieldType(),
+              bodyBuilder);
+
+      String fieldJavaDoc = getFieldJavaDocDescription(field);
+      if (StringUtils.isNotBlank(fieldJavaDoc)) {
+        methodMetadataBuilder.setCommentStructure(JavadocComment.create("Gets %s value\n%s",
+            fieldName, fieldJavaDoc));
+      } else {
+        methodMetadataBuilder
+            .setCommentStructure(JavadocComment.create("Gets %s value", fieldName));
+      }
+      return methodMetadataBuilder;
     }
 
     return null;
@@ -324,15 +343,55 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     if (annotationValues.isSettersByDefault() && !Modifier.isTransient(field.getModifier())
         && !Modifier.isStatic(field.getModifier()) && !Modifier.isFinal(field.getModifier())) {
       final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-      bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = "
-          + field.getFieldName().getSymbolName() + ";");
+      String fieldName = field.getFieldName().getSymbolName();
+      bodyBuilder.appendFormalLine(String.format("this.%s = %s;", fieldName, fieldName));
+      bodyBuilder.appendFormalLine("return this;");
 
-      return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-          JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType),
-          parameterNames, bodyBuilder);
+      MethodMetadataBuilder methodMetadataBuilder =
+          new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, target,
+              AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
+
+      String fieldJavaDoc = getFieldJavaDocDescription(field);
+      if (hasFieldJavaDoc(fieldJavaDoc)) {
+        methodMetadataBuilder.setCommentStructure(JavadocComment.create(" Sets %s value\n%s",
+            fieldName, fieldJavaDoc));
+      } else {
+        methodMetadataBuilder
+            .setCommentStructure(JavadocComment.create("Sets %s value", fieldName));
+      }
+      return methodMetadataBuilder;
     }
 
     return null;
+  }
+
+  /**
+   * Returns Javadoc description of a field
+   *
+   * @param field
+   * @return
+   */
+  private String getFieldJavaDocDescription(FieldMetadata field) {
+    if (field.getCommentStructure() == null || field.getCommentStructure().isEmpty()) {
+      return "";
+    }
+    List<AbstractComment> comments = field.getCommentStructure().asList();
+    List<String> descriptions = new ArrayList<String>();
+    for (AbstractComment comment : comments) {
+      if (comment instanceof JavadocComment) {
+        JavadocComment javaDoc = (JavadocComment) comment;
+        descriptions.add(javaDoc.getDescription());
+      }
+    }
+    return StringUtils.join(descriptions, "\n");
+  }
+
+  private boolean hasFieldJavaDoc(String javaDoc) {
+    if (StringUtils.isBlank(javaDoc)) {
+      return false;
+    }
+    return !StringUtils.startsWith(StringUtils.replace(javaDoc, "\n", "").trim(),
+        "TODO Auto-generated");
   }
 
   /**
@@ -359,15 +418,15 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
       if (baseType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
         bodyBuilder.appendFormalLine("return false;");
       } else if (baseType.equals(JavaType.BYTE_PRIMITIVE)) {
-        bodyBuilder.appendFormalLine("return 0;");
+        bodyBuilder.appendFormalLine(RETURN_0);
       } else if (baseType.equals(JavaType.SHORT_PRIMITIVE)) {
-        bodyBuilder.appendFormalLine("return 0;");
+        bodyBuilder.appendFormalLine(RETURN_0);
       } else if (baseType.equals(JavaType.INT_PRIMITIVE)) {
-        bodyBuilder.appendFormalLine("return 0;");
+        bodyBuilder.appendFormalLine(RETURN_0);
       } else if (baseType.equals(JavaType.LONG_PRIMITIVE)) {
-        bodyBuilder.appendFormalLine("return 0;");
+        bodyBuilder.appendFormalLine("return 0l;");
       } else if (baseType.equals(JavaType.FLOAT_PRIMITIVE)) {
-        bodyBuilder.appendFormalLine("return 0;");
+        bodyBuilder.appendFormalLine("return 0.0f;");
       } else if (baseType.equals(JavaType.DOUBLE_PRIMITIVE)) {
         bodyBuilder.appendFormalLine("return 0.00;");
       } else if (baseType.equals(JavaType.CHAR_PRIMITIVE)) {
@@ -432,7 +491,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     bodyBuilder.appendFormalLine("}");
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
-    bodyBuilder.appendFormalLine("this." + entityCollectionName + " = " + localEnitiesName + ";");
+    bodyBuilder.appendFormalLine(THIS_DOT + entityCollectionName + " = " + localEnitiesName + ";");
     bodyBuilder.appendFormalLine("return " + localEnitiesName + ";");
 
     return bodyBuilder;
@@ -499,7 +558,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     bodyBuilder.appendFormalLine(localEnitiesName + ".add(entity);");
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
-    bodyBuilder.appendFormalLine("this." + entityCollectionName + " = " + localEnitiesName + ";");
+    bodyBuilder.appendFormalLine(THIS_DOT + entityCollectionName + " = " + localEnitiesName + ";");
 
     return bodyBuilder;
   }
@@ -519,7 +578,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
   private InvocableMemberBodyBuilder getInterfaceMethodBody(JavaType returnType) {
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
     bodyBuilder.appendFormalLine("// Interface Implementation");
-    bodyBuilder.appendFormalLine("return 0;");
+    bodyBuilder.appendFormalLine(RETURN_0);
     return bodyBuilder;
   }
 
@@ -550,14 +609,14 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     bodyBuilder.appendFormalLine("if (this." + entityName + " == null || this." + entityName + "."
         + identifierMethodName + "() != this." + entityIdName + ") {");
     bodyBuilder.indent();
-    bodyBuilder.appendFormalLine("this." + entityName + " = " + simpleFieldTypeName + ".find"
+    bodyBuilder.appendFormalLine(THIS_DOT + entityName + " = " + simpleFieldTypeName + ".find"
         + simpleFieldTypeName + "(this." + entityIdName + ");");
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("} else {");
     bodyBuilder.indent();
-    bodyBuilder.appendFormalLine("this." + entityName + " = null;");
+    bodyBuilder.appendFormalLine(THIS_DOT + entityName + " = null;");
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
     bodyBuilder.appendFormalLine("return this." + entityName + ";");
@@ -584,15 +643,15 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     bodyBuilder.appendFormalLine(entityName + ".persist();");
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
-    bodyBuilder.appendFormalLine("this." + entityIdName + " = " + entityName + "."
+    bodyBuilder.appendFormalLine(THIS_DOT + entityIdName + " = " + entityName + "."
         + identifierMethodName + "();");
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("} else {");
     bodyBuilder.indent();
-    bodyBuilder.appendFormalLine("this." + entityIdName + " = null;");
+    bodyBuilder.appendFormalLine(THIS_DOT + entityIdName + " = null;");
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
-    bodyBuilder.appendFormalLine("this." + entityName + " = " + entityName + ";");
+    bodyBuilder.appendFormalLine(THIS_DOT + entityName + " = " + entityName + ";");
 
     return bodyBuilder;
   }

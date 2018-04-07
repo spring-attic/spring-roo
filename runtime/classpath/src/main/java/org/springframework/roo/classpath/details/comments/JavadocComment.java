@@ -1,26 +1,81 @@
 package org.springframework.roo.classpath.details.comments;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-
-import java.util.List;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.comments.CommentStructure.CommentLocation;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
 
 /**
  * = JavadocComment
- * 
+ *
  * Holds a full JavaDoc comment which can be added to a {@link CommentStructure}
- * This class is responsible of adding the right JavaDoc syntax in its proper 
- * place inside the structure. Having this in mind, adding manually any syntax 
+ * This class is responsible of adding the right JavaDoc syntax in its proper
+ * place inside the structure. Having this in mind, adding manually any syntax
  * *is discouraged*.
- * 
- * Please, avoid using specific system line separators. Use 
+ *
+ * Please, avoid using specific system line separators. Use
  * `org.apache.commons.io.IOUtils.LINE_SEPARATOR` to specify line breaks.
- * 
+ *
  * @author Mike De Haan
  * @author Sergio Clares
+ * @author Jose Manuel Vivó
  */
 public class JavadocComment extends AbstractComment {
+
+  /**
+   * Create a {@link CommentStructure} with a JavaDoc with message
+   * using {@link String#format(String, Object...)} function
+   *
+   * @param message
+   */
+  public static CommentStructure create(String messageFormat, Object... args) {
+    CommentStructure comment = new CommentStructure();
+    comment.addComment(new JavadocComment(formatMessage(messageFormat, args)),
+        CommentLocation.BEGINNING);
+    return comment;
+  }
+
+  private static String formatMessage(String messageFormat, Object... args) {
+    if (args == null || args.length == 0) {
+      return messageFormat;
+    }
+    return String.format(messageFormat, args);
+  }
+
+  /**
+   * Create a {@link CommentStructure} with a JavaDoc for constructor with message
+   * using {@link String#format(String, Object...)} function
+   *
+   * @param message
+   */
+  public static CommentStructure create(ConstructorMetadata constructor, String messageFormat,
+      Object... args) {
+    CommentStructure comment = new CommentStructure();
+    comment.addComment(new JavadocComment(formatMessage(messageFormat, args), constructor),
+        CommentLocation.BEGINNING);
+    return comment;
+  }
+
+  /**
+   * Create a {@link CommentStructure} with a JavaDoc for method with message
+   * using {@link String#format(String, Object...)} function
+   *
+   * @param message
+   */
+  public static CommentStructure create(MethodMetadata metadata, String messageFormat,
+      Object... args) {
+    CommentStructure comment = new CommentStructure();
+    comment.addComment(new JavadocComment(formatMessage(messageFormat, args), metadata),
+        CommentLocation.BEGINNING);
+    return comment;
+  }
 
   /**
    * The JavaDoc comment main description
@@ -28,7 +83,7 @@ public class JavadocComment extends AbstractComment {
   private String description;
 
   /**
-   * The JavaDoc comment parameter info Each item is showed as ` * @param ...` 
+   * The JavaDoc comment parameter info Each item is showed as ` * @param ...`
    */
   private List<String> paramsInfo;
 
@@ -74,10 +129,10 @@ public class JavadocComment extends AbstractComment {
 
   /**
    * Used to add the full JavaDoc comment during the instantiation.
-   * The comment will be checked and formatted with the JavaDoc syntax before 
-   * setting it. Line breaks will be taken in count in order to form the 
+   * The comment will be checked and formatted with the JavaDoc syntax before
+   * setting it. Line breaks will be taken in count in order to form the
    * syntax.
-   * 
+   *
    * @param comment the String with the comment to add as JavaDoc syntax.
    */
   public JavadocComment(String comment) {
@@ -86,21 +141,59 @@ public class JavadocComment extends AbstractComment {
   }
 
   /**
-   * Constructor used to generate a full Javadoc with description, params, 
-   * return and throws. `null` arguments are accepted. JavaDoc comment block 
+   * Constructor used to generate full javadoc for a method
+   *
+   * @param description
+   * @param method
+   */
+  public JavadocComment(final String description, MethodMetadata method) {
+    this.description = description;
+    this.paramsInfo = new ArrayList<String>();
+    this.throwsInfo = new ArrayList<String>();
+    for (JavaSymbolName param : method.getParameterNames()) {
+      paramsInfo.add(param.getSymbolName());
+    }
+    for (JavaType exception : method.getThrowsTypes()) {
+      throwsInfo.add(exception.getSimpleTypeName());
+    }
+    JavaType returnType = method.getReturnType();
+    if (!returnType.equals(JavaType.VOID_OBJECT) && !returnType.equals(JavaType.VOID_PRIMITIVE)) {
+      returnInfo = returnType.getSimpleTypeName();
+    }
+    loadFromDefinitions();
+  }
+
+  /**
+   * Constructor used to generate full javadoc for a constructor
+   *
+   * @param description
+   * @param constructor
+   */
+  public JavadocComment(final String description, ConstructorMetadata constructor) {
+    this.description = description;
+    this.paramsInfo = new ArrayList<String>();
+    for (JavaSymbolName name : constructor.getParameterNames()) {
+      paramsInfo.add(name.getSymbolName());
+    }
+    loadFromDefinitions();
+  }
+
+  /**
+   * Constructor used to generate a full Javadoc with description, params,
+   * return and throws. `null` arguments are accepted. JavaDoc comment block
    * syntax will be auto-generated.
-   * 
+   *
    * ROO-3862: Improve JavaDoc generation for generated methods and constructors
-   * 
-   * @param description the `String` with the block description to add. Please, use 
+   *
+   * @param description the `String` with the block description to add. Please, use
    *            `org.apache.commons.io.IOUtils.LINE_SEPARATOR` for line breaks.
-   * @param paramsInfo the `List<String>` with the parameter info. One entry for 
-   *            each parameter. JavaDoc ` * @param` syntax will be automatically 
-   *            added. 
-   * @param returnInfo the `String` with the return info. JavaDoc ` * @return` 
+   * @param paramsInfo the `List<String>` with the parameter info. One entry for
+   *            each parameter. JavaDoc ` * @param` syntax will be automatically
+   *            added.
+   * @param returnInfo the `String` with the return info. JavaDoc ` * @return`
    *            syntax will be automatically added.
-   * @param throwsInfo the `List<String>` with the throws info. One entry for 
-   *            each throws type. JavaDoc ` * @throws` syntax will be automatically 
+   * @param throwsInfo the `List<String>` with the throws info. One entry for
+   *            each throws type. JavaDoc ` * @throws` syntax will be automatically
    *            added.
    */
   public JavadocComment(final String description, final List<String> paramsInfo,
@@ -110,6 +203,10 @@ public class JavadocComment extends AbstractComment {
     this.returnInfo = returnInfo;
     this.throwsInfo = throwsTypes;
 
+    loadFromDefinitions();
+  }
+
+  protected void loadFromDefinitions() {
     addDescription(this.description);
     addParamsInfo(this.paramsInfo);
     addReturnInfo(this.returnInfo);
@@ -118,7 +215,7 @@ public class JavadocComment extends AbstractComment {
 
   /**
    * Adds a new description or changes an existing in the JavadocComment.
-   * 
+   *
    * @param description the `String` to add as comment description.
    */
   private void addDescription(final String description) {
@@ -156,10 +253,10 @@ public class JavadocComment extends AbstractComment {
   }
 
   /**
-   * Adds or changes JavadocComment parameters info. Existing info will be 
+   * Adds or changes JavadocComment parameters info. Existing info will be
    * replaced by this one.
-   * 
-   * @param paramsInfo the `List<String>` to add as parameters info. One 
+   *
+   * @param paramsInfo the `List<String>` to add as parameters info. One
    *            entry for each parameter.
    */
   private void addParamsInfo(final List<String> paramsInfo) {
@@ -204,9 +301,9 @@ public class JavadocComment extends AbstractComment {
   }
 
   /**
-   * Adds or changes JavadocComment return info. Existing info will be 
+   * Adds or changes JavadocComment return info. Existing info will be
    * replaced by this one.
-   * 
+   *
    * @param returnInfo the `String` to add as return info.
    */
   private void addReturnInfo(final String returnInfo) {
@@ -247,10 +344,10 @@ public class JavadocComment extends AbstractComment {
   }
 
   /**
-   * Adds or changes JavadocComment throws info. Existing info will be 
+   * Adds or changes JavadocComment throws info. Existing info will be
    * replaced by this one.
-   * 
-   * @param throwsInfo the `List<String>` to add as throws info. One entry 
+   *
+   * @param throwsInfo the `List<String>` to add as throws info. One entry
    *            for each throws type.
    */
   private void addThrowsInfo(final List<String> throwsInfo) {
@@ -292,11 +389,11 @@ public class JavadocComment extends AbstractComment {
   }
 
   /**
-   * Checks if the provided String has the proper JavaDoc syntax and adds it 
+   * Checks if the provided String has the proper JavaDoc syntax and adds it
    * if its not present.
-   * 
+   *
    * @param comment the String to check
-   * @return a String with the original String or the formatted String if any 
+   * @return a String with the original String or the formatted String if any
    *            format was applied.
    */
   private String checkJavadocSyntax(String comment) {
@@ -319,7 +416,7 @@ public class JavadocComment extends AbstractComment {
   }
 
   /**
-   * Indexes the JavadocComment indexes to know each component location within 
+   * Indexes the JavadocComment indexes to know each component location within
    * the entire `String` (description, paramsInfo, returnInfo and throwsInfo).
    */
   private void initializeCommentIndexes() {
