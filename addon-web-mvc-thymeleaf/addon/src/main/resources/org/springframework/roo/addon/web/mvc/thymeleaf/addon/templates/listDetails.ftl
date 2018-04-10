@@ -50,7 +50,7 @@
                       data-order="[[ 0, &quot;asc&quot; ]]"
                       </#if>
                       data-data-load-url="${r"${"}detailCollectionLink.to('datatables').with('${modelAttributeName}', '_PARENTID_')}"
-                      <#if detail.fieldInfo.type == 'COMPOSITION'>	
+                      <#if detail.fieldInfo.type == 'COMPOSITION'>
                       	data-data-show-url="${r"${"}detailItemLink.to('show').with('${modelAttributeName}', '_PARENTID_').with('${detail.fieldName}', '_ID_')}"
                       	<#if entity.readOnly == false>
                       	 data-data-create-url="${r"${"}detailCollectionLink.to('createForm').with('${modelAttributeName}', '_PARENTID_')}"
@@ -98,12 +98,21 @@
                   </#if>
                   <#if entity.readOnly == false>
                     <!-- content replaced by modal-confirm fragment of modal-confirm.html -->
+                    <#if detail.fieldInfo.type != 'COMPOSITION'>
                     <div data-th-replace="~{fragments/modal-confirm-delete :: modalConfirmDelete(tableId='${detail.entityItemId}-table',
                         title=${r"#{"}label_delete_entity(${r"#"}{${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_item_confirm}, content=~{${detail.templatePath}/${detail.fieldName}/listDeleteModal :: ${detail.entityItemId}ModalConfirmBody})}">
                     </div>
-                   <div data-th-replace="~{fragments/modal-confirm-delete-batch :: modalConfirmDeleteBatch(tableId='${detail.entityItemId}-table',
+                    <div data-th-replace="~{fragments/modal-confirm-delete-batch :: modalConfirmDeleteBatch(tableId='${detail.entityItemId}-table',
                         title=${r"#{"}label_delete_entity(${r"#{"}${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_batch_confirm}, content=~{${detail.templatePath}/${detail.fieldName}/listDeleteModalBatch :: ${detail.entityItemId}ModalConfirmBody})}">
                     </div>
+                    <#else>
+                    <div data-th-replace="~{fragments/modal-confirm-delete :: modalConfirmDelete(tableId='${detail.entityItemId}-table',
+                        title=${r"#{"}label_delete_entity(${r"#"}{${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_item_confirm}, content=~{})}">
+                    </div>
+                    <div data-th-replace="~{fragments/modal-confirm-delete-batch :: modalConfirmDeleteBatch(tableId='${detail.entityItemId}-table',
+                        title=${r"#{"}label_delete_entity(${r"#{"}${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_delete_batch_confirm}, content=~{})}">
+                    </div>
+                    </#if>
                  </#if>
                     <div data-th-replace="~{fragments/modal-export-empty-error :: modalExportEmptyError(tableId='${detail.entityItemId}-table',
                         title=${r"#{"}label_export_empty_error(${r"#{"}${dconfig.referencedFieldLabel}})}, message=${r"#{"}info_export_empty_error})}">
