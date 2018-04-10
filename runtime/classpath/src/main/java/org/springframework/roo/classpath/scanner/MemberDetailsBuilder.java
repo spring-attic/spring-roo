@@ -115,6 +115,7 @@ public class MemberDetailsBuilder {
         itdBuilder.setExtendsTypes(getExtendsTypes());
         itdBuilder.setImplementsTypes(getImplementsTypes());
         itdBuilder.setModifier(getModifier());
+        itdBuilder.addImports(existing.getImports());
         return itdBuilder.build();
       } else if (existing instanceof ClassOrInterfaceTypeDetails) {
         final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
@@ -130,6 +131,7 @@ public class MemberDetailsBuilder {
         cidBuilder.setExtendsTypes(getExtendsTypes());
         cidBuilder.setImplementsTypes(getImplementsTypes());
         cidBuilder.setModifier(getModifier());
+        cidBuilder.addImports(existing.getImports());
         return cidBuilder.build();
       } else {
         throw new IllegalStateException("Unknown instance of MemberHoldingTypeDetails");

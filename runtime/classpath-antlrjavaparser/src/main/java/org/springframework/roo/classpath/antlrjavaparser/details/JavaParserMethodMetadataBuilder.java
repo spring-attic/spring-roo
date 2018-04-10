@@ -67,6 +67,13 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
     Type returnType = null;
     if (method.getReturnType().isPrimitive()) {
       returnType = JavaParserUtils.getType(method.getReturnType());
+      // Handle arrays
+      if (method.getReturnType().isArray()) {
+        final ReferenceType rt = new ReferenceType();
+        rt.setArrayCount(method.getReturnType().getArray());
+        rt.setType(returnType);
+        returnType = rt;
+      }
     } else {
       final NameExpr importedType =
           JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(),
@@ -133,6 +140,13 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
       Type parameterType = null;
       if (methodParameter.getJavaType().isPrimitive()) {
         parameterType = JavaParserUtils.getType(methodParameter.getJavaType());
+        // Handle arrays
+        if (methodParameter.getJavaType().isArray()) {
+          final ReferenceType rt = new ReferenceType();
+          rt.setArrayCount(methodParameter.getJavaType().getArray());
+          rt.setType(parameterType);
+          parameterType = rt;
+        }
       } else {
         final NameExpr type =
             JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(),

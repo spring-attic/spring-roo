@@ -655,23 +655,26 @@ public final class JavaParserUtils {
     Validate.notNull(javaType, "Java type required");
     Validate.isTrue(javaType.isPrimitive(),
         "Java type must be primitive to be presented to this method");
-    if (javaType.equals(JavaType.VOID_PRIMITIVE)) {
+    // Obtain the type fully qualified name to ensure that the base type is
+    // equals
+    String typeName = javaType.getFullyQualifiedTypeName();
+    if (typeName.equals(JavaType.VOID_PRIMITIVE.getFullyQualifiedTypeName())) {
       return new VoidType();
-    } else if (javaType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
+    } else if (typeName.equals(JavaType.BOOLEAN_PRIMITIVE.getFullyQualifiedTypeName())) {
       return new PrimitiveType(Primitive.Boolean);
-    } else if (javaType.equals(JavaType.BYTE_PRIMITIVE)) {
+    } else if (typeName.equals(JavaType.BYTE_PRIMITIVE.getFullyQualifiedTypeName())) {
       return new PrimitiveType(Primitive.Byte);
-    } else if (javaType.equals(JavaType.CHAR_PRIMITIVE)) {
+    } else if (typeName.equals(JavaType.CHAR_PRIMITIVE.getFullyQualifiedTypeName())) {
       return new PrimitiveType(Primitive.Char);
-    } else if (javaType.equals(JavaType.DOUBLE_PRIMITIVE)) {
+    } else if (typeName.equals(JavaType.DOUBLE_PRIMITIVE.getFullyQualifiedTypeName())) {
       return new PrimitiveType(Primitive.Double);
-    } else if (javaType.equals(JavaType.FLOAT_PRIMITIVE)) {
+    } else if (typeName.equals(JavaType.FLOAT_PRIMITIVE.getFullyQualifiedTypeName())) {
       return new PrimitiveType(Primitive.Float);
-    } else if (javaType.equals(JavaType.INT_PRIMITIVE)) {
+    } else if (typeName.equals(JavaType.INT_PRIMITIVE.getFullyQualifiedTypeName())) {
       return new PrimitiveType(Primitive.Int);
-    } else if (javaType.equals(JavaType.LONG_PRIMITIVE)) {
+    } else if (typeName.equals(JavaType.LONG_PRIMITIVE.getFullyQualifiedTypeName())) {
       return new PrimitiveType(Primitive.Long);
-    } else if (javaType.equals(JavaType.SHORT_PRIMITIVE)) {
+    } else if (typeName.equals(JavaType.SHORT_PRIMITIVE.getFullyQualifiedTypeName())) {
       return new PrimitiveType(Primitive.Short);
     }
     throw new IllegalStateException("Unknown primitive " + javaType);
