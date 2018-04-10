@@ -68,3 +68,44 @@ function isNotNull(obj) {
 function isNotEmpty(obj) {
   return !isEmpty(obj);
 }
+
+/**
+ * Adds a replaceAll function in JavaScript to replace multiple occurrences in a string
+ *
+ * @param search
+ * @param replacement
+ * @returns {string}
+ */
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    while(target.indexOf(search) !== -1) {
+        target = target.replace(search, replacement);
+    }
+    return target;
+};
+
+/**
+ * This method will log information by console.
+ *
+ * @param level the level of console info. The allowed values are: debug/info/warn/error
+ * @param msg the message
+ */
+function log(level, msg){
+    var date = new Date();
+    var dateFormat = date.getFullYear() + '-' + (date.getMonth() + 1)  + '-' +  date.getDate() + " " + date.getHours()+":"+date.getMinutes()+":"+date.getSeconds();
+    var consoleText = dateFormat + " " + level.toUpperCase() + ": " +  msg;
+    switch(level.toLowerCase()) {
+        case "debug":
+            console.debug(consoleText);
+            break;
+        case "info":
+            console.info(consoleText);
+            break;
+        case "warn":
+            console.warn(consoleText);
+            break;
+        case "error":
+            console.error(consoleText);
+            break;
+    }
+}
