@@ -2530,11 +2530,30 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
     if (entityMetadata.getCurrentIdentifierAccessor() != null
         && entityMetadata.getCurrentVersionAccessor() != null) {
-      bodyBuilder.appendFormalLine("return %s().%s(record.%s()).%s();",
-          getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
-              .getCurrentFindOneMethod().getMethodName(), entityMetadata
-              .getCurrentIdentifierAccessor().getMethodName(), entityMetadata
-              .getCurrentVersionAccessor().getMethodName());
+
+      // Obtain the version type. Depending of this, the generation will change
+      JavaType versionType = entityMetadata.getCurrentVersionField().getFieldType();
+      if(versionType.equals(JavaType.INT_OBJECT) || versionType.equals(JavaType.INT_PRIMITIVE)){
+        bodyBuilder.appendFormalLine("return %s().%s(record.%s()).%s();",
+                getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
+                        .getCurrentFindOneMethod().getMethodName(), entityMetadata
+                        .getCurrentIdentifierAccessor().getMethodName(), entityMetadata
+                        .getCurrentVersionAccessor().getMethodName());
+      }else if(versionType.equals(JavaType.LONG_OBJECT)){
+        bodyBuilder.appendFormalLine("Long versionValue = %s().%s(record.%s()).%s();",
+                getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
+                        .getCurrentFindOneMethod().getMethodName(), entityMetadata
+                        .getCurrentIdentifierAccessor().getMethodName(), entityMetadata
+                        .getCurrentVersionAccessor().getMethodName());
+        bodyBuilder.appendFormalLine("return versionValue != null ? versionValue.intValue() ? null;");
+      }else{
+        bodyBuilder.appendFormalLine("return Integer.valueOf(%s().%s(record.%s()).%s().toString());",
+                getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
+                        .getCurrentFindOneMethod().getMethodName(), entityMetadata
+                        .getCurrentIdentifierAccessor().getMethodName(), entityMetadata
+                        .getCurrentVersionAccessor().getMethodName());
+      }
+
     } else {
       bodyBuilder.appendFormalLine("return %s().%s(record.getId()).getVersion();",
           getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
