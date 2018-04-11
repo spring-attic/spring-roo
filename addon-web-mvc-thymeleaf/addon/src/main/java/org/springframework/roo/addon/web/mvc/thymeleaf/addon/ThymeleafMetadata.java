@@ -2528,39 +2528,35 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     // Generate body
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    if (entityMetadata.getCurrentIdentifierAccessor() != null
-        && entityMetadata.getCurrentVersionAccessor() != null) {
 
-      // Obtain the version type. Depending of this, the generation will change
-      JavaType versionType = entityMetadata.getCurrentVersionField().getFieldType();
-      if (versionType.equals(JavaType.INT_OBJECT) || versionType.equals(JavaType.INT_PRIMITIVE)) {
-        bodyBuilder.appendFormalLine("return %s().%s(record.%s()).%s();",
-            getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(),
-            serviceMetadata.getCurrentFindOneMethod().getMethodName(), entityMetadata
-                .getCurrentIdentifierAccessor().getMethodName(), entityMetadata
-                .getCurrentVersionAccessor().getMethodName());
-      } else if (versionType.equals(JavaType.LONG_OBJECT)) {
-        bodyBuilder.appendFormalLine("Long versionValue = %s().%s(record.%s()).%s();",
-            getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(),
-            serviceMetadata.getCurrentFindOneMethod().getMethodName(), entityMetadata
-                .getCurrentIdentifierAccessor().getMethodName(), entityMetadata
-                .getCurrentVersionAccessor().getMethodName());
-        bodyBuilder
-            .appendFormalLine("return versionValue != null ? versionValue.intValue() : null;");
-      } else {
-        bodyBuilder.appendFormalLine(
-            "return Integer.valueOf(%s().%s(record.%s()).%s().toString());",
-            getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(),
-            serviceMetadata.getCurrentFindOneMethod().getMethodName(), entityMetadata
-                .getCurrentIdentifierAccessor().getMethodName(), entityMetadata
-                .getCurrentVersionAccessor().getMethodName());
-      }
+    // Obtain the getId and getVersion method names
+    JavaSymbolName idAccessorMethodName =
+        entityMetadata.getCurrentIdentifierAccessor() != null ? entityMetadata
+            .getCurrentIdentifierAccessor().getMethodName() : new JavaSymbolName("getId");
+    JavaSymbolName versionAccessorMethodName =
+        entityMetadata.getCurrentVersionAccessor() != null ? entityMetadata
+            .getCurrentVersionAccessor().getMethodName() : new JavaSymbolName("getVersion");
 
-    } else {
-      bodyBuilder.appendFormalLine("return %s().%s(record.getId()).getVersion();",
+    // Obtain the version type. Depending of this, the generation will change
+    JavaType versionType = entityMetadata.getCurrentVersionField().getFieldType();
+    if (versionType.equals(JavaType.INT_OBJECT) || versionType.equals(JavaType.INT_PRIMITIVE)) {
+      bodyBuilder.appendFormalLine("return %s().%s(record.%s()).%s();",
           getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
-              .getCurrentFindOneMethod().getMethodName());
+              .getCurrentFindOneMethod().getMethodName(), idAccessorMethodName,
+          versionAccessorMethodName);
+    } else if (versionType.equals(JavaType.LONG_OBJECT)) {
+      bodyBuilder.appendFormalLine("Long versionValue = %s().%s(record.%s()).%s();",
+          getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
+              .getCurrentFindOneMethod().getMethodName(), idAccessorMethodName,
+          versionAccessorMethodName);
+      bodyBuilder.appendFormalLine("return versionValue != null ? versionValue.intValue() : null;");
+    } else {
+      bodyBuilder.appendFormalLine("return Integer.valueOf(%s().%s(record.%s()).%s().toString());",
+          getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
+              .getCurrentFindOneMethod().getMethodName(), idAccessorMethodName,
+          versionAccessorMethodName);
     }
+
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.INT_OBJECT,
