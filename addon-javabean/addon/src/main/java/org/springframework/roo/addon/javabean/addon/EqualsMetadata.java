@@ -346,6 +346,12 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
     bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine("}");
 
+    // Prevent nulls in identifier accessor. If null, force the getId accessor by
+    // default
+    if (identifierAccesor == null) {
+      identifierAccesor = new JavaSymbolName("getId");
+    }
+
     // return getId() != null && Objects.equals(getId(), ((Pet) obj).getId());
     bodyBuilder.appendFormalLine(
         "return %1$s() != null && %2$s.equals(%1$s(), ((%3$s) %4$s).%1$s());", identifierAccesor,

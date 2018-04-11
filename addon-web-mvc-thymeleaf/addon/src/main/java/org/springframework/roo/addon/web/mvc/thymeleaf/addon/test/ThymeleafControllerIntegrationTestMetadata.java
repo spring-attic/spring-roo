@@ -107,14 +107,19 @@ public class ThymeleafControllerIntegrationTestMetadata extends
 
     // Add MockMvc field
     ensureGovernorHasField(getMockMvcField());
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getAccessorMethod(getMockMvcField().build())));
 
     // Add entity service fields
     for (JavaType service : this.entityServices) {
       ensureGovernorHasField(getEntityServiceField(service));
+      ensureGovernorHasMethod(new MethodMetadataBuilder(getAccessorMethod(getEntityServiceField(
+          service).build())));
     }
 
     // Add entity factory field
     ensureGovernorHasField(getEntityFactoryField());
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getAccessorMethod(getEntityFactoryField()
+        .build())));
 
     // Add test method example
     ensureGovernorHasMethod(new MethodMetadataBuilder(getTestExampleMethod()));

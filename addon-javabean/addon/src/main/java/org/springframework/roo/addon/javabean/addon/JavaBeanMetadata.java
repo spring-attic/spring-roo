@@ -348,8 +348,9 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
       bodyBuilder.appendFormalLine("return this;");
 
       MethodMetadataBuilder methodMetadataBuilder =
-          new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, target,
-              AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
+          new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+              target.withoutParameters(), AnnotatedJavaType.convertFromJavaTypes(parameterType),
+              parameterNames, bodyBuilder);
 
       String fieldJavaDoc = getFieldJavaDocDescription(field);
       if (hasFieldJavaDoc(fieldJavaDoc)) {

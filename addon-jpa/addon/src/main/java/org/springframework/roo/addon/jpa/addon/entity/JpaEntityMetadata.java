@@ -977,6 +977,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * @return information about current identifier accessor
    */
   public MethodMetadata getCurrentIdentifierAccessor() {
+    if (identifierAccessor == null && identifierField != null) {
+      identifierAccessor = getAccessorMethod(identifierField);
+    }
     return identifierAccessor;
   }
 
@@ -991,6 +994,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * @return information about current version accessor
    */
   public MethodMetadata getCurrentVersionAccessor() {
+    if (versionAccessor == null && versionField != null) {
+      versionAccessor = getAccessorMethod(versionField);
+    }
     return versionAccessor;
   }
 
