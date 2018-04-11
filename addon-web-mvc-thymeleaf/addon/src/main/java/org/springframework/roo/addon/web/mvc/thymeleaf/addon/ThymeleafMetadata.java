@@ -602,6 +602,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
         if (isConcurrencyManager) {
           this.concurrencyTemplateField = getConcurrencyTemplateField();
           ensureGovernorHasField(new FieldMetadataBuilder(this.concurrencyTemplateField));
+          ensureGovernorHasMethod(new MethodMetadataBuilder(
+              getAccessorMethod(this.concurrencyTemplateField)));
           this.getModelNameMethod = addAndGet(getModelNameMethod(), allMethods);
           this.getEditViewPathMethod = addAndGet(getEditViewPathMethod(), allMethods);
           this.getLastVersionMethod = addAndGet(getLastVersionMethod(), allMethods);
@@ -2726,10 +2728,11 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
       bodyBuilder
           .appendFormalLine("// If some concurrency exception appears the template will manage it.");
 
-      bodyBuilder.appendFormalLine("%s %s = %s.execute(%s, %s, new %s<%s>() {",
-          getNameOfJavaType(entity), savedVarName, CONCURRENCY_TEMPLATE_FIELD_NAME, entityItemName,
-          MODEL_PARAM_NAME, getNameOfJavaType(SpringletsJavaType.SPRINGLETS_CONCURRENCY_CALLBACK),
-          entity.getSimpleTypeName());
+      bodyBuilder.appendFormalLine("%s %s = %s().execute(%s, %s, new %s<%s>() {",
+          getNameOfJavaType(entity), savedVarName, getAccessorMethod(this.concurrencyTemplateField)
+              .getMethodName(), entityItemName, MODEL_PARAM_NAME,
+          getNameOfJavaType(SpringletsJavaType.SPRINGLETS_CONCURRENCY_CALLBACK), entity
+              .getSimpleTypeName());
       bodyBuilder.indent();
       bodyBuilder.appendFormalLine("@Override");
       bodyBuilder.appendFormalLine("public %s doInConcurrency(%s %s) throws Exception {",
