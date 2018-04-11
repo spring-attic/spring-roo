@@ -33,7 +33,7 @@ DISID CORPORATION S.L.
 :lang: en
 :sectanchors:
 :sectnums:
-:sectnumlevels: 1 
+:sectnumlevels: 1
 :toc:
 :toclevels: 2
 :toc-placement: left
@@ -153,50 +153,44 @@ Features of the Thymeleaf views:
 * View layer generation engine is based on Freemarker templates. Additionally Roo provides a command to install them in your project letting the ability to customize the view layer scaffold before executing it.
 * New amazing Spring Roo Responsive Theme!
 
-== Spring-Roo 2.0.0.BUILD-SNAPSHOT New Features
+== Spring-Roo 2.0.0.BUILD-SNAPSHOT Improvements and Bugs fixed
 
-The most important changes the new version of Spring Roo features regarding Roo 2.0.0.M3 are the following:
+=== Bug fixed
 
-=== Changes in the Roo Shell
+* https://jira.spring.io/browse/ROO-3934[ROO-3934] - Error generating Thymeleaf integration test on entity with OneToOne Composition
+* https://jira.spring.io/browse/ROO-3935[ROO-3935] - northwind sample - mvn tomcat:run - java.lang.NoClassDefFoundError: org/apache/commons/logging/LogFactory
+* https://jira.spring.io/browse/ROO-3938[ROO-3938] - NPE on Map entity property
+* https://jira.spring.io/browse/ROO-3940[ROO-3940] - ServiceImpl generates @Autowired constructor when it's already one defined
+* https://jira.spring.io/browse/ROO-3941[ROO-3941] - Avoid creation of @Autowired constructors for JSON and THYMELEAF controllers when there is already one in .java
+* https://jira.spring.io/browse/ROO-3943[ROO-3943] - finder add command not working on 2.0.0.RC2, works ok on older version 1.3
+* https://jira.spring.io/browse/ROO-3944[ROO-3944] - petclinic example list pages throw error when using the mvn packaged jar
+* https://jira.spring.io/browse/ROO-3946[ROO-3946] - JsonMixin problems when entity is parametrized
+* https://jira.spring.io/browse/ROO-3948[ROO-3948] - Pom.xml properties not defined
+* https://jira.spring.io/browse/ROO-3949[ROO-3949] - ONE_TO_MANY relationship throws an error in drop downs in web ui
+* https://jira.spring.io/browse/ROO-3950[ROO-3950] - Optimistic concurrency control fails during Integer comparison
+* https://jira.spring.io/browse/ROO-3955[ROO-3955] - Entity default constructor in AJ files makes property initializers doen't executed
+* https://jira.spring.io/browse/ROO-3956[ROO-3956] - Datatables delete batch call multiple times
+* https://jira.spring.io/browse/ROO-3957[ROO-3957] - Compilation error on controllers for entities with custom identifier
+* https://jira.spring.io/browse/ROO-3958[ROO-3958] - Compilation error on controllers for parametrized entity attributes
+* https://jira.spring.io/browse/ROO-3960[ROO-3960] - Problems generating DeleteModalDetailView
+* https://jira.spring.io/browse/ROO-3961[ROO-3961] - Problems on list view for entities with one-to-one composition relation
+* https://jira.spring.io/browse/ROO-3963[ROO-3963] - command "push-in --all --force" fails when byte[] type is found
+* https://jira.spring.io/browse/ROO-3968[ROO-3968] - Compilation error due missing no-arguments constructor in entitties
+* https://jira.spring.io/browse/ROO-3971[ROO-3971] - Error in list view with master/detail view of a composition relation
 
-* New commands which allow:
-** Creating web flows in the generated applications.
-** Adding email senders and receivers.
-** Adding JMS senders and receivers.
-** Creating Web Services clients (WSDL) and endpoints (SEI).
-
-* Improvements on test commands using latest Spring Boot Test features:
-** Improved data-on-demand generation to use in test commands.
-** Improved `test unit` command which now creates fully functional tests for JPA entities.
-** Improved `test integration` command which now allows integration test creation for JPA repositories and JSON/Thymeleaf controllers.
-
-* Other command improvements:
-** Improved `field ...` commands readability, removing unnecessary options and make other dynamically visible.
-** Improved `push-in --method` command, allowing to distinguish between methods with same name but different arguments.
-** Bug fixes.
-
-=== Changes in generated applications
-
-* Generated code:
-** Improved read-only entities management.
-** Improved Deserializers generation.
-** Added default JavaDoc to all generated methods, constructors and fields.
-** Created DataTables Advanced extension to apply advanced configuration on DataTables elements.
-** Use Springlets URL generation.
-** Bug fixes.
-
-* View layer:
-** Added https://github.com/julmot/datatables.mark.js/[datatables.mark.js] to mark the filtered text in DataTables component.
-** Added concurrency control in view layer.
-** Improved forms in view layer.
-** Integrated http://community.jaspersoft.com/project/jasperreports-library[JasperReports] with DataTables to allow exporting data to CSV, PDF and XLS.
-** Migrated Thymeleaf views to Thymeleaf 3.
-** Added new entity visualization support using `--entityFormatExpression` and `--entityFormatMessage` in some commands.
-** Added support for selecting those views of a particular entity which should show details.
-** Added new visualization system for one-to-one composition related entities.
-** Added multi-language support for Java enumerated constants.
-** Added support for multi row selection and batch delete.
-** Bug fixes.
+=== Improvement
+* https://jira.spring.io/browse/ROO-3850[ROO-3850] - javax.sql.DataSource' that could not be found
+* https://jira.spring.io/browse/ROO-3937[ROO-3937] - Error Generating Thymeleaft IT test when missing entity services
+* https://jira.spring.io/browse/ROO-3947[ROO-3947] - Ignore static properties in toString() generation
+* https://jira.spring.io/browse/ROO-3953[ROO-3953] - Support to exclude arbitrary methods on Controllers
+* https://jira.spring.io/browse/ROO-3954[ROO-3954] - Support to disabe i18n label generation on thymeleaf views
+* https://jira.spring.io/browse/ROO-3959[ROO-3959] - Make mock fields in test public
+* https://jira.spring.io/browse/ROO-3962[ROO-3962] - Support to exclude arbitrary views on Controllers
+* https://jira.spring.io/browse/ROO-3964[ROO-3964] - Unify javaBens aj files
+* https://jira.spring.io/browse/ROO-3965[ROO-3965] - Unify controller aj files
+* https://jira.spring.io/browse/ROO-3966[ROO-3966] - Improve the concurrency management
+* https://jira.spring.io/browse/ROO-3967[ROO-3967] - Prefers define "implements" in java files than aj files
+* https://jira.spring.io/browse/ROO-3969[ROO-3969] - Improve JavaBean addon
 
 [[getting-started-requirements]]
 == Requirements
@@ -258,7 +252,7 @@ a|_Spring Roo 2.0 (Nightly)_
 a|*2.0.0.RELEASE*
 a|_Spring Roo 2.0 (Release)_
 |===
-.. Type the filter text _roo_ 
+.. Type the filter text _roo_
 .. Select the feature *Spring IDE Roo Support*.
 +
 [align="center"]
@@ -338,7 +332,7 @@ There are two ways to work with Spring Roo:
 
 Spring Roo includes some examples to see it in action instantly.
 
-If you are in a hurry to have an Spring Boot application up and running right away, execute one of the commands below: 
+If you are in a hurry to have an Spring Boot application up and running right away, execute one of the commands below:
 
 [source,subs="quotes"]
 .The Northwind application (Maven multimodule project)
@@ -451,14 +445,14 @@ Following the above class diagram, run the next commands to generate the Northwi
 *roo>* enum type --class ~.Period
      enum constant --name QUARTERLY --class ~.Period
      enum constant --name ANNUAL --class ~.Period
-    
+
      enum type --class ~.Status
      enum constant --name NEWLY --class ~.Status
      enum constant --name SEND_BILL --class ~.Status
      enum constant --name SENT --class ~.Status
      enum constant --name CLOSED --class ~.Status
      enum constant --name CANCELED --class ~.Status
-    
+
      enum type --class ~.Trimester
      enum constant --name FIRST_TRIM --class ~.Trimester
      enum constant --name SECOND_TRIM --class ~.Trimester
@@ -473,11 +467,11 @@ Following the above class diagram, run the next commands to generate the Northwi
 *roo>* entity jpa --class ~.City --readOnly
      entity jpa --class ~.Country --readOnly
      entity jpa --class ~.Region --readOnly
-     entity jpa --class ~.Category 
+     entity jpa --class ~.Category
      entity jpa --class ~.OrderDetail
-     entity jpa --class ~.Party 
-     entity jpa --class ~.PurchaseOrder 
-     entity jpa --class ~.Report 
+     entity jpa --class ~.Party
+     entity jpa --class ~.PurchaseOrder
+     entity jpa --class ~.Report
      entity jpa --class ~.Shipper
      entity jpa --class ~.SoldProduct
      entity jpa --class ~.Store
@@ -590,7 +584,7 @@ Following the above class diagram, run the next commands to generate the Northwi
      field set --fieldName customerOrders --type ~.CustomerOrder --mappedBy region
      field set --fieldName stores --type ~.Store --mappedBy region
      field set --fieldName suppliers --type ~.Supplier --mappedBy region
-    
+
      focus --class ~.Report
      field string --fieldName type
 
@@ -722,7 +716,7 @@ Optionally, you can tell Roo to copy the templates it uses to generate the view 
 *roo>* web mvc templates setup --type THYMELEAF
 ----
 
-Spring Roo uses http://freemarker.org/[Freemarker] templates for generating the Thymeleaf view templates, you will notice that the _.roo/templates/thymeleaf/_ contains the _.ftl_ files. 
+Spring Roo uses http://freemarker.org/[Freemarker] templates for generating the Thymeleaf view templates, you will notice that the _.roo/templates/thymeleaf/_ contains the _.ftl_ files.
 
 [[spring-mvc-contollers]]
 === Spring MVC Controllers
@@ -869,7 +863,7 @@ By _infraestructure layer_ we means the layer that contains those project artifa
 *roo>* test unit --class model:~.CustomerOrder
      test unit --class model:~.Category
      test unit --class model:~.Product
-     
+
      test integration --class repository:~.CategoryRepository
      test integration --class repository:~.CityRepository
      test integration --class repository:~.CountryRepository
@@ -930,7 +924,7 @@ In summary, you can easily modify the Roo-generated code by using the Eclipse/ST
 [NOTE]
 .Project without .aj files
 ====
-A simple way of stopping to use Roo is to simply never load it again. The *_Roo_*.aj files will still be on disk and your project will continue to work regardless of whether the Roo shell is never launched again. You can even uninstall the Roo system from your computer and your project will still work. The advantage of working in this way is that you have not lost the benefits of using Roo, and it is very easy to use Roo shell again in the future. 
+A simple way of stopping to use Roo is to simply never load it again. The *_Roo_*.aj files will still be on disk and your project will continue to work regardless of whether the Roo shell is never launched again. You can even uninstall the Roo system from your computer and your project will still work. The advantage of working in this way is that you have not lost the benefits of using Roo, and it is very easy to use Roo shell again in the future.
 
 Spring Roo needs that .aj files to maintain the generated code automatically. Is not possible to know which code has been generated by Spring Roo shell and which code has been modified by developers without the .aj files.
 
@@ -945,7 +939,7 @@ Anyway, if you don't want to have .aj files in your generated project, you could
 [[javadoc-asciidoc]]
 == Javadoc in AsciiDoc
 
-Spring Roo generated projects automatically include the "maven-javadoc-plugin" to generate project documentation following AsciiDoc syntax. This configuration it's done by using https://github.com/asciidoctor/asciidoclet["Asciidoclet"]. 
+Spring Roo generated projects automatically include the "maven-javadoc-plugin" to generate project documentation following AsciiDoc syntax. This configuration it's done by using https://github.com/asciidoctor/asciidoclet["Asciidoclet"].
 
 To generate the project's documentation you can follow the following steps:
 
@@ -1024,19 +1018,19 @@ Backups your project to a zip file located in root directory.
 ----
 
 This command does not accept any options.
-        
+
 === cache setup
-            
+
 Installs support for using intermediate memory in generated project by using Spring Cache abstraction. Users can specify different providers to use for managing it.
 
-[source,sh,subs=quotes]            
+[source,sh,subs=quotes]
 ----
 *roo>* cache setup [--provider --profile]
----- 
+----
 
 * _Optional:_
-        
---provider::                    
+
+--provider::
   Parameter that indicates the provider to use for managing intermediate memory. Possible values are: `GUAVA`.
 
 --profile::
@@ -1072,7 +1066,7 @@ Default if option not present: `java.lang.Object`.
   The interface to implement.
 
 --path::
-  Source directory to create the class in. 
+  Source directory to create the class in.
 +
 Default: _[FOCUSED-MODULE]/src/main/java_
 
@@ -1139,7 +1133,7 @@ Creates a new DTO (Data Transfer Object) class in the directory _src/main/java_ 
 Default if option present: `true`; default if option not present: `false`.
 
 --serializable::
-  Whether the DTO should implement `java.io.Serializable`. 
+  Whether the DTO should implement `java.io.Serializable`.
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -1165,28 +1159,28 @@ Installs a Spring JavaMailReceiver in your project.
 * _Conditional:_
 
 --module::
-  The application module where to install the mail configuration. 
+  The application module where to install the mail configuration.
 +
-This option is mandatory if the focus is not set in an 'application' module and there are more than one 'application' modules, that is, a module containing an `@SpringBootApplication` class. 
+This option is mandatory if the focus is not set in an 'application' module and there are more than one 'application' modules, that is, a module containing an `@SpringBootApplication` class.
 +
-This option is available only if there are more than one application module and none of them is focused. 
+This option is available only if there are more than one application module and none of them is focused.
 +
 Default if option not present: the unique 'application' module, or focused 'application' module.
-  
+
 * _Optional:_
 
 --host::
-  The host server. 
+  The host server.
 +
 This option is not available if `--jndiName` has already been specified.
 
 --jndiName::
-  The jndi name where the mail configuration has been defined. 
+  The jndi name where the mail configuration has been defined.
 +
 This option is not available if any of `--host`, `--port`, `--protocol`, `--username`, `--password` or `--starttls` has been specified before.
 
 --password::
-  The mail account password. 
+  The mail account password.
 +
 This option is not available if `--jndiName` has already been specified.
 
@@ -1199,7 +1193,7 @@ This option is not available if `--jndiName` has already been specified.
   The profile where the properties will be set.
 
 --protocol::
-  The protocol used by mail server. 
+  The protocol used by mail server.
 +
 This option is not available if `--jndiName` has already been specified.
 
@@ -1207,12 +1201,12 @@ This option is not available if `--jndiName` has already been specified.
   The service where include an instance of MailReceiverService, which is a service that have methods to receive emails.
 
 --starttls::
-  If true, enables the use of the STARTTLS command. 
+  If true, enables the use of the STARTTLS command.
 +
 This option is not available if `--jndiName` has already been specified.
 
 --username::
-  The mail account username. 
+  The mail account username.
 +
 This option is not available if `--jndiName` has already been specified.
 
@@ -1228,28 +1222,28 @@ Installs a Spring JavaMailSender in your project.
 * _Conditional:_
 
 --module::
-  The application module where to install the mail configuration. 
+  The application module where to install the mail configuration.
 +
-This option is mandatory if the focus is not set in an 'application' module and there are more than one 'application' modules, that is, a module containing an `@SpringBootApplication` class. 
+This option is mandatory if the focus is not set in an 'application' module and there are more than one 'application' modules, that is, a module containing an `@SpringBootApplication` class.
 +
-This option is available only if there are more than one application module and none of them is focused. 
+This option is available only if there are more than one application module and none of them is focused.
 +
 Default if option not present: the unique 'application' module, or focused 'application' module.
-  
+
 * _Optional:_
 
 --host::
-  The host server. 
+  The host server.
 +
 This option is not available if `--jndiName` has already been specified.
 
 --jndiName::
-  The jndi name where the mail configuration has been defined. 
+  The jndi name where the mail configuration has been defined.
 +
 This option is not available if any of `--host`, `--port`, `--protocol`, `--username`, `--password` or `--starttls` has been specified before.
 
 --password::
-  The mail account password. 
+  The mail account password.
 +
 This option is not available if `--jndiName` has already been specified.
 
@@ -1262,7 +1256,7 @@ This option is not available if `--jndiName` has already been specified.
   The profile where the properties will be set.
 
 --protocol::
-  The protocol used by mail server. 
+  The protocol used by mail server.
 +
 This option is not available if `--jndiName` has already been specified.
 
@@ -1270,12 +1264,12 @@ This option is not available if `--jndiName` has already been specified.
   The service where include an instance of JavaMailSender, which is a service that have methods to receive emails.
 
 --starttls::
-  If true, enables the use of the STARTTLS command. 
+  If true, enables the use of the STARTTLS command.
 +
 This option is not available if `--jndiName` has already been specified.
 
 --username::
-  The mail account username. 
+  The mail account username.
 +
 This option is not available if `--jndiName` has already been specified.
 
@@ -1325,7 +1319,7 @@ Creates a new JPA persistent entity in the directory _src/main/java_ of the sele
 All the following parameters are mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's value is `true`.
 +
 --identifierColumn::
-  The JPA identifier field column to use for this entity. 
+  The JPA identifier field column to use for this entity.
 +
 --identifierStrategy::
   The generation value strategy to be used.
@@ -1390,7 +1384,7 @@ Default: `java.lang.Long`.
   The JPA @Inheritance value (apply to base class).
 +
 --mappedSuperclass::
-  Apply @MappedSuperclass for this entity. 
+  Apply @MappedSuperclass for this entity.
 +
 Default if option present: `true`; default if option not present: `false`.
 +
@@ -1400,7 +1394,7 @@ Default if option present: `true`; default if option not present: `false`.
 Default if option present: `true`; default if option not present: `false`.
 +
 --permitReservedWords::
-  Indicates whether reserved words are ignored by Roo. 
+  Indicates whether reserved words are ignored by Roo.
 +
 Default if option present: `true`; default if option not present: `false`.
 +
@@ -1416,7 +1410,7 @@ Default if option present: `true`; default if option not present `false`.
   Specify the plural of this new entity. If not provided, a calculated plural will be used by default.
 +
 --force::
-  Force command execution. 
+  Force command execution.
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -1442,7 +1436,7 @@ This option is mandatory if `--class` is not specified. Otherwise, using `--clas
 +
 This option is mandatory if `--all` is not specified. Otherwise, using `--all` will cause the parameter `--class` won't be available.
 
---entity::                   
+--entity::
   Name of the entity which can be used to create the Projection from.
 +
 This option is mandatory if `--class` is specified. Otherwise, not specifying `--class` will cause the parameter `--entity` won't be available.
@@ -1457,7 +1451,7 @@ This option is mandatory if `--class` is specified. Otherwise, not specifying `-
 * _Optional:_
 
 --entityFormatExpression::
-  The SpEL expression used to format the entity when showing it in presentation layer e.g. {#fieldA} {#fieldB}. It adds the `value` attribute to `io.springlets.format.EntityFormat` annotation. 
+  The SpEL expression used to format the entity when showing it in presentation layer e.g. {#fieldA} {#fieldB}. It adds the `value` attribute to `io.springlets.format.EntityFormat` annotation.
 +
 This option is available only if `--entity` has been specified.
 
@@ -1467,8 +1461,8 @@ This option is available only if `--entity` has been specified.
 This option is available only if `--entity` has been specified.
 
 --suffix::
-  Suffix added to each Projection class name, built from each associated entity name. 
-+  
+  Suffix added to each Projection class name, built from each associated entity name.
++
 This option is only available if `--all` has been already specified.
 +
 Default if option not present: 'Projection'.
@@ -1498,7 +1492,7 @@ Inserts a new enum constant into an enum class.
   The name of the enum class to receive this constant. When working on a mono module project, simply specify the name of the class in which the new constant will be included. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyEnumClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyEnumClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
 +
 Default if option not present: the class focused by Roo shell.
-              
+
 --permitReservedWords::
   Indicates whether reserved words are ignored by Roo.
 +
@@ -1569,7 +1563,7 @@ Waits until all metadata and files are refreshed and updated, then exits the she
 *roo>* exit
 ----
 
-This command does not accept any options. 
+This command does not accept any options.
 
 === field boolean
 
@@ -1620,7 +1614,7 @@ Default if option present: `true`; default if option not present: `false`.
 --assertTrue::
   Whether the value of this field must be true. Adds `javax.validation.constraints.AssertTrue` annotation to the field.
 +
-This option is not available if `--asssertFalse` has already been specified. 
+This option is not available if `--asssertFalse` has already been specified.
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -1630,7 +1624,7 @@ Default if option present: `true`; default if option not present: `false`.
 Default if option present: `true`; default if option not present: `false`.
 
 --value::
-  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection. 
+  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection.
 
 --comment::
   An optional comment for JavaDocs.
@@ -1646,7 +1640,7 @@ Default if option present: `true`; default if option not present: `false`.
 Default if option present: `true`; default if option not present: `false`.
 
 --force::
-  Force command execution. 
+  Force command execution.
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -1728,25 +1722,25 @@ This option is not available if `--future` option has already been specified.
 Default if option present: `true`; default if option not present: `false`.
 
 --dateFormat::
-  Indicates the style of the date format, adding `style` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field, with date style (first character of the code). 
+  Indicates the style of the date format, adding `style` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field, with date style (first character of the code).
 +
-Possible values are: `MEDIUM` (style='M-'), `NONE` (style='--') and `SHORT` (style='S-'). 
+Possible values are: `MEDIUM` (style='M-'), `NONE` (style='--') and `SHORT` (style='S-').
 +
 This option is not available if `--dateTimeFormatPattern` has already been specified.
 +
 Default: `MEDIUM`.
 
 --timeFormat::
-  Indicates the style of the time format, adding `style` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field, with time style (second character of the code). 
+  Indicates the style of the time format, adding `style` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field, with time style (second character of the code).
 +
-Possible values are: `MEDIUM` (style='-M'), `NONE` (style='--') and `SHORT` (style='-S'). 
+Possible values are: `MEDIUM` (style='-M'), `NONE` (style='--') and `SHORT` (style='-S').
 +
 This option is not available if `--dateTimeFormatPattern` has already been specified.
 +
 Default: `NONE`.
 
 --dateTimeFormatPattern::
-  Indicates a 'custom' DateTime format pattern such as yyyy-MM-dd hh:mm:ss, adding `pattern` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field, with the provided value. 
+  Indicates a 'custom' DateTime format pattern such as yyyy-MM-dd hh:mm:ss, adding `pattern` attribute to `org.springframework.format.annotation.DateTimeFormat` annotation into the field, with the provided value.
 +
 This option is not available if `--timeFormat` or `--dateFormat` have already been specified.
 
@@ -1754,7 +1748,7 @@ This option is not available if `--timeFormat` or `--dateFormat` have already be
   An optional comment for JavaDocs.
 
 --value::
-  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection. 
+  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection.
 
 --permitReservedWords::
   Indicates whether reserved words are ignored by Roo.
@@ -1762,7 +1756,7 @@ This option is not available if `--timeFormat` or `--dateFormat` have already be
 Default if option present: `true`; default if option not present: `false`.
 
 --force::
-  Force command execution. 
+  Force command execution.
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -1802,7 +1796,7 @@ Default if option not present: the class focused by Roo Shell.
 Default if option present: `true`; default if option not present: `false`.
 
 --force::
-  Force command execution. 
+  Force command execution.
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -1849,10 +1843,10 @@ This option is only available for JPA entities and embeddable classes.
 Default if option present:`true`; default if option not present: `false`.
 
 --enumType::
-  Defines how the enumerated field should be persisted at a JPA level. Adds the `javax.persistence.Enumerated` annotation to the field, with `javax.persistence.EnumType` attribute. 
+  Defines how the enumerated field should be persisted at a JPA level. Adds the `javax.persistence.Enumerated` annotation to the field, with `javax.persistence.EnumType` attribute.
 +
 Possible values are: `ORDINAL` (persists as an integer) and `STRING` (persists as a String). If this option is not specified, the `Enumerated` annotation will be added without the `EnumType` attribute, using its default value (`ORDINAL`).
-+ 
++
 This option is only available for JPA entities and embeddable classes.
 
 * _Optional:_
@@ -1860,14 +1854,14 @@ This option is only available for JPA entities and embeddable classes.
 --notNull::
   Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
 +
-This option is not available if `--nullRequired` has already been specified. 
+This option is not available if `--nullRequired` has already been specified.
 +
 Default if option present: `true`; default if option not present: `false`.
 
 --nullRequired::
   Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
 +
-This option is not available if `--notNull` has already been specified. 
+This option is not available if `--notNull` has already been specified.
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -1982,7 +1976,7 @@ This option is mandatory for 'ONE_TO_MANY' relationships without join table, if 
 This option is only available when `--joinColumnName` option is set.
 
 --joinTable::
-  Join table name. Most usually used in `@ManyToMany` relations. 
+  Join table name. Most usually used in `@ManyToMany` relations.
 +
 This option is mandatory for this command if `--cardinality` is set to `MANY_TO_MANY` and `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 
@@ -2001,14 +1995,14 @@ This option is mandatory if `--joinTable` option has been specified and if `spri
 This option is only available when `--joinTable` option is set.
 
 --inverseJoinColumns::
-  Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation (current entity). 
+  Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation (current entity).
 +
 This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available when `--joinTable` option is set.
 
 --inverseReferencedColumns::
-  Comma separated list of foreign key referenced columns in the primary table of the entity that does not own the relation (current entity). 
+  Comma separated list of foreign key referenced columns in the primary table of the entity that does not own the relation (current entity).
 +
 This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
@@ -2033,21 +2027,21 @@ Possible values are `LAZY`and `EAGER`.
 +
 Default if option not present: `LAZY`.
 
---notNull:: 
-  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field. 
+--notNull::
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
 +
-This option is not available if `--nullRequired` has already been specified. 
+This option is not available if `--nullRequired` has already been specified.
 +
 Default if option present: `true`; default if option not present: `false`.
 
 --nullRequired::
-  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field. 
+  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
 +
-This option is not available if `--notNull` has already been specified. 
+This option is not available if `--notNull` has already been specified.
 +
 Default if option present: `true`; default if option not present: `false`.
 
---aggregation::                    
+--aggregation::
   Whether the relationship type is 'aggregation' or 'composition'. An aggregation relation means that children entities aren't dependent from parent entity (current entity) and they can exist without parent entity. In the other hand, in a composition relation the parent entity of the relationship also owns the life cycle of related entities. The parent entity is responsible for the creation and destruction of children entities, these being linked to a single parent entity. A child entity cannot be in two different composition relationships.
 +
 Default: `true`.
@@ -2064,7 +2058,7 @@ Default: `true`.
 Default if option present: `true`.
 
 --sizeMin::
-  The minimum number of elements in the collection. This option adds or updates `javax.validation.constraints.Size` with the provided value as `min` attribute value. 
+  The minimum number of elements in the collection. This option adds or updates `javax.validation.constraints.Size` with the provided value as `min` attribute value.
 
 --sizeMax::
   The maximum number of elements in the collection. This option adds or updates `javax.validation.constraints.Size` with the provided value as `max` attribute value.
@@ -2169,7 +2163,7 @@ Default if option present: `true`; default if option not present: `false`.
   An optional comment for JavaDocs.
 
 --value::
-  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection. 
+  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection.
 
 --primitive::
   Indicates to use a primitive type if possible.
@@ -2192,7 +2186,7 @@ Inserts a private field into the specified file. User can choose a custom type f
 
 [source,sh,subs=quotes]
 ----
-*roo>* field other {--fieldName --type} (--class --column [--transient]) [--notNull | --nullRequired] [--comment --value --permitReservedWords --force] 
+*roo>* field other {--fieldName --type} (--class --column [--transient]) [--notNull | --nullRequired] [--comment --value --permitReservedWords --force]
 ----
 
 * _Mandatory:_
@@ -2246,7 +2240,7 @@ Default if option present: `true`; default if option not present: `false`.
   An optional comment for JavaDocs.
 
 --value::
-  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection. 
+  Inserts an optional Spring `org.springframework.beans.factory.annotation.Value` annotation with the given content, typically used for expression-driven dependency injection.
 
 --permitReservedWords::
   Indicates whether reserved words are ignored by Roo.
@@ -2305,14 +2299,14 @@ This option is only available for JPA entities.
 +
 Possible values are `LAZY`and `EAGER`.
 +
-This option is only available for JPA entities and embeddable classes. 
+This option is only available for JPA entities and embeddable classes.
 
 --mappedBy::
   The field name on the referenced type which owns the relationship, which will be also created due to bidirectional relation. If not specified, it will take the lower camel case of the current entity (focused entity or specified in `--class` option). If the field already exists in the related entity, command won't be executed.
 +
 This option is only available for JPA entities.
 +
-Default if not present: current entity name in lower camel case.  
+Default if not present: current entity name in lower camel case.
 
 * _Optional:_
 
@@ -2326,11 +2320,11 @@ Default if option present: `true`; default if option not present: `false`.
 --nullRequired::
   Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
 +
-This option is not available if `--notNull` has already been specified. 
+This option is not available if `--notNull` has already been specified.
 +
 Default if option present: `true`; default if option not present: `false`.
 
---aggregation::                    
+--aggregation::
   Whether the relationship type is 'aggregation' or 'composition'. An aggregation relation means that children entities aren't dependent from parent entity (current entity) and they can exist without parent entity. In the other hand, in a composition relation the parent entity of the relationship also owns the life cycle of related entities. The parent entity is responsible for the creation and destruction of children entities, these being linked to a single parent entity. A child entity cannot be in two different composition relationships.
 +
 Default: `true`.
@@ -2400,7 +2394,7 @@ This option is mandatory for 'ONE_TO_MANY' relationships without join table, if 
 This option is only available when `--joinColumnName` option is set.
 
 --joinTable::
-  Join table name. Most usually used in `@ManyToMany` relations. 
+  Join table name. Most usually used in `@ManyToMany` relations.
 +
 This option is mandatory for this command if `--cardinality` is set to `MANY_TO_MANY` and `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 
@@ -2419,14 +2413,14 @@ This option is mandatory if `--joinTable` option has been specified and if `spri
 This option is only available when `--joinTable` option is set.
 
 --inverseJoinColumns::
-  Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation (current entity). 
+  Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation (current entity).
 +
 This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
 This option is only available when `--joinTable` option is set.
 
 --inverseReferencedColumns::
-  Comma separated list of foreign key referenced columns in the primary table of the entity that does not own the relation (current entity). 
+  Comma separated list of foreign key referenced columns in the primary table of the entity that does not own the relation (current entity).
 +
 This option is mandatory if `--joinTable` option has been specified and if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
 +
@@ -2451,22 +2445,22 @@ Possible values are `LAZY`and `EAGER`.
 +
 Default if option not present: `LAZY`.
 
---aggregation::                    
+--aggregation::
   Whether the relationship type is 'aggregation' or 'composition'. An aggregation relation means that children entities aren't dependent from parent entity (current entity) and they can exist without parent entity. In the other hand, in a composition relation the parent entity of the relationship also owns the life cycle of related entities. The parent entity is responsible for the creation and destruction of children entities, these being linked to a single parent entity. A child entity cannot be in two different composition relationships.
 +
 Default: `true`.
 
---notNull:: 
-  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field. 
+--notNull::
+  Whether this value cannot be null. Adds `javax.validation.constraints.NotNull` annotation to the field.
 +
-This option is not available if `--nullRequired` has already been specified. 
+This option is not available if `--nullRequired` has already been specified.
 +
 Default if option present: `true`; default if option not present: `false`.
 
 --nullRequired::
-  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field. 
+  Whether this value must be null. Adds `javax.validation.constraints.Null` annotation to the field.
 +
-This option is not available if `--notNull` has already been specified. 
+This option is not available if `--notNull` has already been specified.
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -2482,7 +2476,7 @@ Default if option present: `true`; default if option not present: `false`.
 Default if option present: `true`.
 
 --sizeMin::
-  The minimum number of elements in the collection. This option adds or updates `javax.validation.constraints.Size` with the provided value as `min` attribute value. 
+  The minimum number of elements in the collection. This option adds or updates `javax.validation.constraints.Size` with the provided value as `min` attribute value.
 
 --sizeMax::
   The maximum number of elements in the collection. This option adds or updates `javax.validation.constraints.Size` with the provided value as `max` attribute value.
@@ -2571,7 +2565,7 @@ Default if option present: `true`; default if option not present: `false`.
   The required regular expression pattern. This option adds `javax.validation.constraints.Pattern` with the provided value as `regexp` attribute.
 
 --sizeMin::
-  The minimum string length. This option adds or updates `javax.validation.constraints.Size` with the provided value as `min` attribute value. 
+  The minimum string length. This option adds or updates `javax.validation.constraints.Size` with the provided value as `min` attribute value.
 
 --sizeMax::
   The maximum string length. This option adds or updates `javax.validation.constraints.Size` with the provided value as `max` attribute value.
@@ -2623,14 +2617,14 @@ Possible values are: any of the DTO's in the project.
 +
 This option is mandatory if `--returnType` is specified and its a projection.
 +
-This option is not available if `--entity` parameter has not been specified before or if it does not exist any DTO in generated project. 
+This option is not available if `--entity` parameter has not been specified before or if it does not exist any DTO in generated project.
 +
 Default if option not present: the entity specified in `--entity` option.
 
 --returnType::
   The finder's results return type.
 +
-Possible values are: Projection classes annotated with `@RooEntityProjection` and related to the entity specified in `--entity` option (use `entity projection` command), or the same entity. 
+Possible values are: Projection classes annotated with `@RooEntityProjection` and related to the entity specified in `--entity` option (use `entity projection` command), or the same entity.
 +
 This option is not available if `--entity` parameter has not been specified before or if it does not exist any Projection class associated to the targeted entity.
 +
@@ -2773,7 +2767,7 @@ Creates an JMS sender.
 +
 Default if option present: `true`; default if option not present: `false`.
 
-[[jpa-audit-add-command]]     
+[[jpa-audit-add-command]]
 === jpa audit add
 
 Adds support for auditing a JPA entity. This will add JPA and Spring listeners to this entity to record the entity changes.
@@ -2784,7 +2778,7 @@ Adds support for auditing a JPA entity. This will add JPA and Spring listeners t
 ----
 
 * _Mandatory:_
-                
+
 --entity::
   The entity which should be audited. When working on a mono module project, simply specify the name of the entity. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not specified, it is assumed that the entity is in the module which has the focus.
 
@@ -2809,7 +2803,7 @@ This option is mandatory if `spring.roo.jpa.require.schema-object-name` configur
   The DB column used for storing information about who modifies each record.
 +
 This option is mandatory if `spring.roo.jpa.require.schema-object-name` configuration setting exists and it's `true`.
-        
+
 [[jpa-audit-setup-command]]
 === jpa audit setup
 
@@ -2854,7 +2848,7 @@ This option is mandatory if `--jndiDataSource` has not been specified.
 * _Conditional:_
 
 --database::
-  The database type to support.Possible values are: `DB2_400`, `DB2_EXPRESS_C`, `DERBY_CLIENT`, `DERBY_EMBEDDED`, `FIREBIRD`, `H2_IN_MEMORY`, `HYPERSONIC_IN_MEMORY`, `HYPERSONIC_PERSISTENT`, `MSSQL`, `MYSQL`, `ORACLE`, `POSTGRES` and `SYBASE`. 
+  The database type to support.Possible values are: `DB2_400`, `DB2_EXPRESS_C`, `DERBY_CLIENT`, `DERBY_EMBEDDED`, `FIREBIRD`, `H2_IN_MEMORY`, `HYPERSONIC_IN_MEMORY`, `HYPERSONIC_PERSISTENT`, `MSSQL`, `MYSQL`, `ORACLE`, `POSTGRES` and `SYBASE`.
 +
 This option is mandatory if `--jndiDataSource` has not been specified.
 +
@@ -2980,9 +2974,9 @@ Default if option present: `STANDARD`
 Default if option not present: Java 6 inherited from Spring Boot.
 
 --packaging::
-  The Maven packaging of this project. 
+  The Maven packaging of this project.
 +
-This option is not available if 'multimodule' is specified. 
+This option is not available if 'multimodule' is specified.
 +
 Default if option not present: 'jar'.
 
@@ -3101,12 +3095,12 @@ Allows to push-in elements declared in the ITDs to its .java files. You could sp
 * _Conditional:_
 
 --all::
-  Option that indicates if push-in process should be applied to entire project. 
+  Option that indicates if push-in process should be applied to entire project.
 +
 This option is mandatory if none of `--package`, `--class` or `--method` are specified. Otherwise, using `--package`, `--class` or `--method` will cause the parameter `--all` won't be available.
 
 --package::
-  JavaPackage with the specified package where developer wants to make push-in. In multi-module project you should specify the module name before the package name. Ex.: `--package model:org.springframework.roo` but, if module name is not present, the Roo Shell focused module will be used. 
+  JavaPackage with the specified package where developer wants to make push-in. In multi-module project you should specify the module name before the package name. Ex.: `--package model:org.springframework.roo` but, if module name is not present, the Roo Shell focused module will be used.
 +
 This option is not avalaible if `--all` parameter has been already specified.
 
@@ -3116,7 +3110,7 @@ This option is not avalaible if `--all` parameter has been already specified.
 This option is not avalaible if `--all` parameter has been already specified.
 
 --method::
-  String with the specified name of the method which developer wants to push-in. You could use a Regular Expression to make push-in of more than one method on the same execution. 
+  String with the specified name of the method which developer wants to push-in. You could use a Regular Expression to make push-in of more than one method on the same execution.
 +
 This option is not avalaible if `--all` parameter has been already specified.
 
@@ -3151,7 +3145,7 @@ Generates new Spring Data repository for specified entity or for all entities in
 * _Conditional:_
 
 --all::
-  Indicates if developer wants to generate repositories for every entity of current project. 
+  Indicates if developer wants to generate repositories for every entity of current project.
 +
 This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` will cause the parameter `--all` won't be available.
 +
@@ -3174,7 +3168,7 @@ This option is available only when `--entity` has been specified.
 * _Optional:_
 
 --defaultReturnType::
-  The default return type which this repository will have for all finders, including those created by default. The default return type should be a Projection class associated to the entity specified in `--entity` parameter. 
+  The default return type which this repository will have for all finders, including those created by default. The default return type should be a Projection class associated to the entity specified in `--entity` parameter.
 +
 Possible values are: any of the projections associated to the entity in `--entity` option.
 +
@@ -3183,7 +3177,7 @@ This option is not available if domain entity specified in `--entity` parameter 
 Default: the entity specified in the `entity` option.
 
 --package::
-  The package where repositories will be generated. In multi-module project you should specify the module name before the package name. Ex.: `--package model:org.springframework.roo` but, if module name is not present, the Roo Shell focused module will be used. 
+  The package where repositories will be generated. In multi-module project you should specify the module name before the package name. Ex.: `--package model:org.springframework.roo` but, if module name is not present, the Roo Shell focused module will be used.
 +
 This option is not available if `--all` option has not been specified.
 +
@@ -3224,7 +3218,7 @@ Includes `@PreAuthorize` annotation to an specific method for controlling access
 ----
 
 * _Mandatory:_
-                
+
 --class::
   The service class that contains the method to annotate with `@PreAuthorize`. When working on a single module project, simply specify the name of the class. If you consider it necessary, you can also specify the package. Ex.: `--class ~.service.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class service:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
 +
@@ -3243,10 +3237,10 @@ Possible values are: any of the existing methods of the class specified in `--cl
 This option is mandatory if `--usernames` is not specified.
 
 --usernames::
-  Comma separated list with all the usernames to add inside Spring Security annotation. 
+  Comma separated list with all the usernames to add inside Spring Security annotation.
 +
 This option is mandatory if `--roles` is not specified.
-        
+
 === security filtering
 
 Include `@PreFilter`/`@PostFilter` annotation to an specific method to filter results of a method invocation based on an expression.
@@ -3257,7 +3251,7 @@ Include `@PreFilter`/`@PostFilter` annotation to an specific method to filter re
 ----
 
 * _Mandatory:_
-     
+
 --class::
   The service class that contains the method to annotate. When working on a single module project, simply specify the name of the class. If you consider it necessary, you can also specify the package. Ex.: `--class ~.service.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class service:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
 +
@@ -3266,24 +3260,24 @@ Possible values are: any of the service classes in the project.
 --method::
   The service method name (including its params), that will be annotated with `@PreFilter`/`@PostFilter`. Is possible to specify a regular expression.
 +
-Possible values are: any of the existing methods of the class specified in `--class` option, or regular expression. 
+Possible values are: any of the existing methods of the class specified in `--class` option, or regular expression.
 
 * _Conditional:_
 
 --roles::
-  Comma separated list with all the roles to add inside 'hasAnyRole' instruction. 
+  Comma separated list with all the roles to add inside 'hasAnyRole' instruction.
 +
 This option is mandatory if `--usernames` is not specified.
 
 --usernames::
-  Comma separated list with all the usernames to add inside Spring Security annotation. 
+  Comma separated list with all the usernames to add inside Spring Security annotation.
 +
 This option is mandatory if `--roles` is not specified.
 
 * _Optional:_
 
 --when::
-  Indicates if filtering should be after or before to execute the operation. Depends of the specified value, `@PreFilter` annotation or `@PostFilter` annotation will be included. 
+  Indicates if filtering should be after or before to execute the operation. Depends of the specified value, `@PreFilter` annotation or `@PostFilter` annotation will be included.
 +
 Possible values are: `PRE` and `POST`.
 +
@@ -3301,9 +3295,9 @@ Install Spring Security into your project.
 * _Conditional:_
 
 --module::
-  The application module where to install the security support. 
+  The application module where to install the security support.
 +
-This option is mandatory if the focus is not set in an application module, that is, a module containing an `@SpringBootApplication` class. 
+This option is mandatory if the focus is not set in an application module, that is, a module containing an `@SpringBootApplication` class.
 +
 This option is available only if there are more than one application module and none of them is focused.
 +
@@ -3329,7 +3323,7 @@ Creates new service interface and its implementation related to an entity, or fo
 * _Conditional:_
 
 --all::
-  Indicates if developer wants to generate service interfaces and their implementations for every entity of current project. 
+  Indicates if developer wants to generate service interfaces and their implementations for every entity of current project.
 +
 This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` will cause the parameter `--all` won't be available.
 +
@@ -3356,7 +3350,7 @@ Default if option not present: first repository annotated with `@RooJpaRepositor
 --interface::
   The service interface to be generated. When working on a single module project, simply specify the name of the class. If you consider it necessary, you can also specify the package. Ex.: `--class ~.service.api.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class service-api:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
 +
-This option is mandatory if `--entity` has been already specified and the project is multi-module. 
+This option is mandatory if `--entity` has been already specified and the project is multi-module.
 +
 This option is available only when `--entity` has been specified.
 +
@@ -3367,7 +3361,7 @@ Default if option not present: concatenation of entity simple name with 'Service
 --class::
   The service implementation to be generated. When working on a single module project, simply specify the name of the class. If you consider it necessary, you can also specify the package. Ex.: `--class ~.service.impl.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class service-impl:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
 +
-This option is available only when `--entity` has been specified. 
+This option is available only when `--entity` has been specified.
 +
 Default if option not present: concatenation of entity simple name with 'ServiceImpl' in `~.service.impl` package, or 'service-impl:~.' if multi-module project.
 
@@ -3406,7 +3400,7 @@ Adds or updates a Roo project setting, which can modify the configuration of som
 * _Optional:_
 
 --force::
-  Force command execution. 
+  Force command execution.
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -3456,11 +3450,11 @@ Possible values are: any of the valid classes in the project which support autom
 --module::
   The application module where generate the integration test.
 +
-This option is mandatory if the focus is not set in an 'application' module and there are more than one 'application' modules, that is, a module containing an `@SpringBootApplication` class. 
+This option is mandatory if the focus is not set in an 'application' module and there are more than one 'application' modules, that is, a module containing an `@SpringBootApplication` class.
 +
-This option is available only if there are more than one application module and none of them is focused. 
+This option is available only if there are more than one application module and none of them is focused.
 +
-Default if option not present: the unique 'application' module, or focused 'application' module.   
+Default if option not present: the unique 'application' module, or focused 'application' module.
 
 * _Optional:_
 
@@ -3487,7 +3481,7 @@ Creates a unit test class with a basic structure and with the necessary testing 
 * _Optional:_
 
 --permitReservedWords::
-  Indicates whether reserved words are ignored by Roo. 
+  Indicates whether reserved words are ignored by Roo.
 +
 Default if option present: `true`; default if option not present: `false`.
 
@@ -3520,11 +3514,11 @@ Installs a Spring Web Flow into your project.
 * _Conditional:_
 
 --module::
-  The application module where create the web flow. 
+  The application module where create the web flow.
 +
-This option is mandatory if the focus is not set in an 'application' module and there are more than one 'application' modules, that is, a module containing an `@SpringBootApplication` class. 
+This option is mandatory if the focus is not set in an 'application' module and there are more than one 'application' modules, that is, a module containing an `@SpringBootApplication` class.
 +
-This option is available only if there are more than one application module and none of them is focused. 
+This option is available only if there are more than one application module and none of them is focused.
 +
 Default if option not present: the unique 'application' module, or focused 'application' module.
 
@@ -3545,23 +3539,23 @@ Generates new `@RooController's` in the directory _src/main/java_ of the selecte
 
 * _Conditional:_
 
---all::                    
+--all::
   Indicates if developer wants to generate controllers for every entity of current project.
 +
 This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` will cause the parameter `--all` won't be available.
 +
 Default if option present: `true`; default if option not present: `false`.
 
---entity::                    
+--entity::
   The domain entity this controller should manage. When working on a single module project, simply specify the name of the entity. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). When working with multiple modules, you should specify the name of the entity and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not specified, it is assumed that the entity is in the module which has the focus.
 +
 Possible values are: any of the entities in the project.
 +
-This option is mandatory if `--all` is not specified. Otherwise, using `--all` will cause the parameter `--entity` won't be available.                   
+This option is mandatory if `--all` is not specified. Otherwise, using `--all` will cause the parameter `--entity` won't be available.
 
 * _Optional:_
 
---responseType::                    
+--responseType::
   Indicates the responseType to be used by generated controller. Depending on the selected responseType, generated methods and views will vary.
 +
 Possible values are: `JSON` plus any response type installed with `web mvc view setup` command.
@@ -3570,14 +3564,14 @@ This option is available once `--all` or `--entity` parameters have been specifi
 +
 Default: `JSON`.
 
---package::                    
+--package::
   Indicates which package should be used to include generated controllers. In multi-module project you should specify the module name before the package name. Ex.: `--package application:org.springframework.roo.web` but, if module name is not present, the Roo Shell focused module will be used.
 +
 This option is available only if `--all` or `--entity` option has been specified.
 +
 Default value if not present: `~.web` package, or 'application:~.web' if multi-module project.
 
---pathPrefix::                    
+--pathPrefix::
   Indicates `@RequestMapping` prefix to be used on this controller. It is not necessary to specify '/' as Spring Roo shell will include it automatically.
 +
 This option is available only if `--all` or `--entity` option has been specified.
@@ -3591,17 +3585,17 @@ Generates new `@RooController` for relation fields which detail wants to be mana
 ----
 *roo>* web mvc detail (--all | --entity [--field]) [--package --responseType --views]
 ----
-                
+
 * _Conditional:_
 
---all::                    
-  Indicates if developer wants to generate detail controllers for each `@OneToMany` relation of field in each entity in the project. 
+--all::
+  Indicates if developer wants to generate detail controllers for each `@OneToMany` relation of field in each entity in the project.
 +
-This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` will cause the parameter `--all` won't be available. 
+This option is mandatory if `--entity` is not specified. Otherwise, using `--entity` will cause the parameter `--all` won't be available.
 +
 Default if option present: `true`; default if option not present: `false`.
-                           
---entity::                    
+
+--entity::
   Indicates the entity which this detail controller manages. When working on a single module project, simply specify the name of the entity. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). When working with multiple modules, you should specify the name of the entity and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not specified, it is assumed that the entity is in the module which has the focus.
 +
 Possible values are: any of the entities in the project.
@@ -3610,24 +3604,24 @@ This option is mandatory if `--all` is not specified. Otherwise, using `--all` w
 
 * _Optional:_
 
---field::                    
-  Indicates the entity's field on which the detail controller is generated. It must be a `@OneToMany` field. 
+--field::
+  Indicates the entity's field on which the detail controller is generated. It must be a `@OneToMany` field.
 +
-Possible values are: fields representing a `@OneToMany` relation of the entity specified in `--entity` parameter. 
+Possible values are: fields representing a `@OneToMany` relation of the entity specified in `--entity` parameter.
 +
 This param is only available if `--entity` parameter has been specified before.
-     
+
 --package::
-  Indicates the Java package where the detail controllers should be generated. In multi-module project you should specify the module name before the package name. Ex.: `--package application:org.springframework.roo.web` but, if module name is not present, the Roo Shell focused module will be used. 
+  Indicates the Java package where the detail controllers should be generated. In multi-module project you should specify the module name before the package name. Ex.: `--package application:org.springframework.roo.web` but, if module name is not present, the Roo Shell focused module will be used.
 +
-This option is available only if `--all` or `--entity` option has been specified. 
+This option is available only if `--all` or `--entity` option has been specified.
 +
 Default if option not present: `~.web` package, or 'application:~.web' if multi-module project.
 
---responseType::                    
-  Indicates the responseType to be used by generated detail controllers. Depending on the selected responseType, generated methods and views will vary. 
+--responseType::
+  Indicates the responseType to be used by generated detail controllers. Depending on the selected responseType, generated methods and views will vary.
 +
-Possible values are: `JSON` plus any response type installed with `web mvc view setup` command. 
+Possible values are: `JSON` plus any response type installed with `web mvc view setup` command.
 +
 This option is available once `--all` or `--entity` parameters have been specified.
 +
@@ -3636,7 +3630,7 @@ Default: `JSON`.
 --views::
   Separated comma list where developer could specify the different parent views where this new detail will be displayed.
 +
-This parameter is not available if the provided `--responseType` doesn't use views to display the data. 
+This parameter is not available if the provided `--responseType` doesn't use views to display the data.
 +
 Possible values are: 'list', 'show' or the different parent finder views (if exists).
 +
@@ -3650,20 +3644,20 @@ Adds methods to handle an application exception in a specified controller or a c
 ----
 *roo>* web mvc exception handler {--exception} [--class --controller --errorView]
 ----
-                
+
 * _Mandatory:_
 
---exception::                    
+--exception::
   The exception to handle. If you consider it necessary, you can also specify the package. Ex.: `--class ~.model.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
 
 * _Optional:_
 
---class::                    
+--class::
   Class annotated with `@ControllerAdvice` where include the handler methods. If you consider it necessary, you can also specify the package. Ex.: `--class ~.model.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
 
---controller::                    
+--controller::
   Controller where include the handler methods. If you consider it necessary, you can also specify the package. Ex.: `--class ~.model.MyClass` (where `~` is the base package). When working with multiple modules, you should specify the name of the class and the module where it is. Ex.: `--class model:~.MyClass`. If the module is not specified, it is assumed that the class is in the module which has the focus.
-     
+
 --errorView::
   View to be returned when specified exception is thrown.
 
@@ -3680,7 +3674,7 @@ Publishes existing finders to web layer, generating controllers and additional v
 * _Conditional:_
 
 --entity::
-  The entity owning the finders that should be published. When working on a single module project, simply specify the name of the entity. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). When working with multiple modules, you should specify the name of the entity and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not specified, it is assumed that the entity is in the module which has the focus. 
+  The entity owning the finders that should be published. When working on a single module project, simply specify the name of the entity. If you consider it necessary, you can also specify the package. Ex.: `--class ~.domain.MyEntity` (where `~` is the base package). When working with multiple modules, you should specify the name of the entity and the module where it is. Ex.: `--class model:~.domain.MyEntity`. If the module is not specified, it is assumed that the entity is in the module which has the focus.
 +
 Possible values are: any of the entities in the project.
 +
@@ -3694,7 +3688,7 @@ Default if option present: `true`; default if option not present: `false`.
 * _Optional:_
 
 --queryMethod::
-  Indicates the name of the finder to add to web layer. 
+  Indicates the name of the finder to add to web layer.
 +
 Possible values are: any of the finder names created for the entity, included in `@RooJpaRepository` of the `--entity` associated repository.
 +
@@ -3703,12 +3697,12 @@ This option is available only when `--entity` has been specified.
 --responseType::
   Indicates the responseType to be used by generated finder controllers. Depending on the selected responseType, generated methods and views will vary.
 +
-Possible values are: `JSON` plus any response type installed with `web mvc view setup` command. 
+Possible values are: `JSON` plus any response type installed with `web mvc view setup` command.
 +
 This option is only available if `--all` or `--entity` parameters have been specified.Default: `JSON`.
 
 --package::
-   Indicates the Java package where the finder controllers should be generated. In multi-module project you should specify the module name before the package name. Ex.: `--package application:org.springframework.roo.web` but, if module name is not present, the Roo Shell focused module will be used. 
+   Indicates the Java package where the finder controllers should be generated. In multi-module project you should specify the module name before the package name. Ex.: `--package application:org.springframework.roo.web` but, if module name is not present, the Roo Shell focused module will be used.
 +
 This option is available only if `--all` or `--entity` option has been specified.
 +
@@ -3741,9 +3735,9 @@ Possible values are: supported languages. Currently `en` (English, default) and 
 --module::
   The application module where to install the language support.
 +
-This option is mandatory if the focus is not set in an application module, that is, a module containing an `@SpringBootApplication` class. 
+This option is mandatory if the focus is not set in an application module, that is, a module containing an `@SpringBootApplication` class.
 +
-This option is available only if there are more than one application module and none of them is focused. 
+This option is available only if there are more than one application module and none of them is focused.
 +
 Default if option not present: the unique 'application' module, or focused 'application' module.
 
@@ -3805,11 +3799,11 @@ Includes all necessary resources of provided response type on generated project.
 * _Conditional:_
 
 --module::
-  The application module where to install views. 
+  The application module where to install views.
 +
-This option is mandatory if the focus is not set in an application module, that is, a module containing an `@SpringBootApplication` class. 
+This option is mandatory if the focus is not set in an application module, that is, a module containing an `@SpringBootApplication` class.
 +
-This option is available only if there are more than one application module and none of them is focused. 
+This option is available only if there are more than one application module and none of them is focused.
 +
 Default if option not present: the unique 'application' module, or focused 'application' module.
 
@@ -3856,7 +3850,7 @@ Generates a new Service Endpoint Interface (SEI) and its implementation.
 * _Mandatory:_
 
 --service::
-  Existing service annotated with `@RooService` that will be used to generate the new SEI. The new generated SEI will include all defined operations in the provided service interface. 
+  Existing service annotated with `@RooService` that will be used to generate the new SEI. The new generated SEI will include all defined operations in the provided service interface.
 +
 Possible values are: any of the project service classes, annotated with `@RooService`.
 
@@ -3875,7 +3869,7 @@ Possible values are: any of the project service classes, annotated with `@RooSer
   Parameter that indicates the name of the profile that will be applied.
 
 --force::
-  Force command execution. 
+  Force command execution.
 
 [appendix]
 [[addon-management-command-index]]
@@ -4004,7 +3998,7 @@ Removes an existing OBR Repository from Roo Shell.
 --url::
   URL file that defines repository. Ex: 'http://localhost/repo/index.xml'.
 
-[NOTE] 
+[NOTE]
 See that in Windows systems, you must use `file:\` protocol when you specify a local repository URL. However, in Unix systems the protocol for local repositories URL must be `file://`.
 
 === addon search
@@ -4340,7 +4334,7 @@ Shows the ProjectMetadata for the indicated project module.
 * _Optional:_
 
 --module::
-  The module for which to retrieve the metadata. 
+  The module for which to retrieve the metadata.
 +
 Default if option not present: the Roo Shell focused module.
 
@@ -4485,11 +4479,11 @@ $ sudo ln -s $ROO_HOME/bin/roo.sh /usr/bin/roo
 $ mkdir roo-test
 $ cd roo-test
 $ roo
-                _                               
- ___ _ __  _ __(_)_ __   __ _   _ __ ___   ___  
-/ __| '_ \| '__| | '_ \ / _` | | '__/ _ \ / _ \ 
+                _
+ ___ _ __  _ __(_)_ __   __ _   _ __ ___   ___
+/ __| '_ \| '__| | '_ \ / _` | | '__/ _ \ / _ \
 \__ \ |_) | |  | | | | | (_| | | | | (_) | (_) |
-|___/ .__/|_|  |_|_| |_|\__, | |_|  \___/ \___/ 
+|___/ .__/|_|  |_|_| |_|\__, | |_|  \___/ \___/
     |_|                 |___/           W.X.Y.ZZ
 
 Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
