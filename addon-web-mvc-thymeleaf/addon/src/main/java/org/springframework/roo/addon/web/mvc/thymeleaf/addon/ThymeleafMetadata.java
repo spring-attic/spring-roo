@@ -2533,25 +2533,27 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
       // Obtain the version type. Depending of this, the generation will change
       JavaType versionType = entityMetadata.getCurrentVersionField().getFieldType();
-      if(versionType.equals(JavaType.INT_OBJECT) || versionType.equals(JavaType.INT_PRIMITIVE)){
+      if (versionType.equals(JavaType.INT_OBJECT) || versionType.equals(JavaType.INT_PRIMITIVE)) {
         bodyBuilder.appendFormalLine("return %s().%s(record.%s()).%s();",
-                getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
-                        .getCurrentFindOneMethod().getMethodName(), entityMetadata
-                        .getCurrentIdentifierAccessor().getMethodName(), entityMetadata
-                        .getCurrentVersionAccessor().getMethodName());
-      }else if(versionType.equals(JavaType.LONG_OBJECT)){
+            getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(),
+            serviceMetadata.getCurrentFindOneMethod().getMethodName(), entityMetadata
+                .getCurrentIdentifierAccessor().getMethodName(), entityMetadata
+                .getCurrentVersionAccessor().getMethodName());
+      } else if (versionType.equals(JavaType.LONG_OBJECT)) {
         bodyBuilder.appendFormalLine("Long versionValue = %s().%s(record.%s()).%s();",
-                getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
-                        .getCurrentFindOneMethod().getMethodName(), entityMetadata
-                        .getCurrentIdentifierAccessor().getMethodName(), entityMetadata
-                        .getCurrentVersionAccessor().getMethodName());
-        bodyBuilder.appendFormalLine("return versionValue != null ? versionValue.intValue() ? null;");
-      }else{
-        bodyBuilder.appendFormalLine("return Integer.valueOf(%s().%s(record.%s()).%s().toString());",
-                getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(), serviceMetadata
-                        .getCurrentFindOneMethod().getMethodName(), entityMetadata
-                        .getCurrentIdentifierAccessor().getMethodName(), entityMetadata
-                        .getCurrentVersionAccessor().getMethodName());
+            getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(),
+            serviceMetadata.getCurrentFindOneMethod().getMethodName(), entityMetadata
+                .getCurrentIdentifierAccessor().getMethodName(), entityMetadata
+                .getCurrentVersionAccessor().getMethodName());
+        bodyBuilder
+            .appendFormalLine("return versionValue != null ? versionValue.intValue() : null;");
+      } else {
+        bodyBuilder.appendFormalLine(
+            "return Integer.valueOf(%s().%s(record.%s()).%s().toString());",
+            getAccessorMethod(controllerMetadata.getServiceField()).getMethodName(),
+            serviceMetadata.getCurrentFindOneMethod().getMethodName(), entityMetadata
+                .getCurrentIdentifierAccessor().getMethodName(), entityMetadata
+                .getCurrentVersionAccessor().getMethodName());
       }
 
     } else {
