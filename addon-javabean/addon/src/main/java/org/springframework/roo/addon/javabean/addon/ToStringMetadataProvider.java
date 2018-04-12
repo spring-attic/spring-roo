@@ -10,7 +10,6 @@ import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
  * Provides {@link ToStringMetadata}.
  *
  * @author Jose Manuel Vivó Arnal
- * @since 2.0.0.RC3
  */
 public interface ToStringMetadataProvider extends ItdTriggerBasedMetadataProvider {
 

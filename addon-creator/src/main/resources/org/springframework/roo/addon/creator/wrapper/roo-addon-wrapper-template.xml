@@ -14,7 +14,7 @@
         <pkgVendor>TO_BE_CHANGED_BY_ADDON</pkgVendor>
         <pkgDocUrl></pkgDocUrl>
         <pkgLicense>TO_BE_CHANGED_BY_ADDON</pkgLicense>
-        <roo.version>2.0.0.RC3</roo.version>
+        <roo.version>2.0.0.BUILD-SNAPSHOT</roo.version>
     </properties>
     <dependencies>
         <dependency>
