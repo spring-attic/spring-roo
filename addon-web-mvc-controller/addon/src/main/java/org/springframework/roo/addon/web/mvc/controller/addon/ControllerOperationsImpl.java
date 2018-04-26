@@ -142,7 +142,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
         break;
       }
     }
-    return getProjectOperations().isFocusedProjectAvailable() && notInstalledInSomeModule;
+    return getProjectOperations().isFocusedProjectAvailable()
+        && getProjectOperations().isFeatureInstalled(FeatureNames.JPA) && notInstalledInSomeModule;
   }
 
   /**
