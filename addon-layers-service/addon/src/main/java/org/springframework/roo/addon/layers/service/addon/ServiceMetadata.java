@@ -19,6 +19,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringletsJavaType;
@@ -26,6 +27,7 @@ import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -181,6 +183,11 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_ENTITY_RESOLVER, this.entity,
             this.identifierType);
     ensureGovernorExtends(extendsType);
+
+    // Including extend for the Validator Service
+    JavaType validatorServiceEntity =
+        JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_VALIDATOR_SERVICE, this.entity);
+    ensureGovernorExtends(validatorServiceEntity);
 
     // Generating persistent methods for modifiable entities
     // (not reandOnly an no composition child)

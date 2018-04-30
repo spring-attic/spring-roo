@@ -34,6 +34,13 @@ public class SpringletsJavaType {
       "io.springlets.data.domain.GlobalSearch");
   public static final JavaType SPRINGLETS_GLOBAL_SEARCH_ARGUMENT_RESOLVER = new JavaType(
       "io.springlets.data.web.GlobalSearchHandlerMethodArgumentResolver");
+  public static final JavaType SPRINGLETS_GENERIC_VALIDATOR = new JavaType(
+      "io.springlets.data.web.validation.GenericValidator");
+  public static final JavaType SPRINGLETS_MESSAGE_I18N = new JavaType(
+      "io.springlets.data.web.validation.MessageI18n");
+  public static final JavaType SPRINGLETS_VALIDATOR_SERVICE = new JavaType(
+      "io.springlets.data.web.validation.ValidatorService");
+
 
   public static final JavaType SPRINGLETS_DETACHABLE_JPA_REPOSITORY = new JavaType(
       "io.springlets.data.jpa.repository.DetachableJpaRepository");

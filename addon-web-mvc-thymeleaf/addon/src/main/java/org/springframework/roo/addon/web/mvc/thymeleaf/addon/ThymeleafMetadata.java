@@ -2011,7 +2011,7 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.WEB_DATA_BINDER));
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("dataBinder"));
+    parameterNames.add(new JavaSymbolName("binder"));
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -2022,13 +2022,20 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
 
     InvocableMemberBodyBuilder body = new InvocableMemberBodyBuilder();
 
-    // dataBinder.setDisallowedFields("id");
-    body.appendFormalLine("dataBinder.setDisallowedFields(\"%s\");", entityIdentifier);
+    // binder.setDisallowedFields("id");
+    body.appendFormalLine("binder.setDisallowedFields(\"%s\");", entityIdentifier);
 
     for (Pair<RelationInfo, JpaEntityMetadata> item : compositionRelationOneToOne) {
       body.appendFormalLine("dataBinder.setDisallowedFields(\"%s.%s\");", item.getKey().fieldName,
           item.getValue().getCurrentIndentifierField().getFieldName());
     }
+
+    body.appendFormalLine("// Register validators");
+    body.appendFormalLine("%s validator = new GenericValidator(%s.class, %s());",
+        SpringletsJavaType.SPRINGLETS_GENERIC_VALIDATOR.getNameIncludingTypeParameters(false,
+            builder.getImportRegistrationResolver()), entity.getBaseType().getSimpleTypeName(),
+        getAccessorMethod(controllerMetadata.getServiceField()).getMethodName());
+    body.appendFormalLine("binder.addValidators(validator);");
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =

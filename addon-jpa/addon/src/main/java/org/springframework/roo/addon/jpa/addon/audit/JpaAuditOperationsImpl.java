@@ -54,7 +54,7 @@ public class JpaAuditOperationsImpl implements JpaAuditOperations {
   private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.2.0.RC3");
+      "1.2.0.RELEASE");
   private static final Dependency SPRINGLETS_DATA_JPA_STARTER = new Dependency("io.springlets",
       "springlets-boot-starter-data-jpa", "${springlets.version}");
 

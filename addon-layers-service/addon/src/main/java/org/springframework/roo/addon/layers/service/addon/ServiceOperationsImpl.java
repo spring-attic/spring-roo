@@ -16,12 +16,17 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.DependencyScope;
@@ -31,6 +36,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -237,6 +243,26 @@ public class ServiceOperationsImpl implements ServiceOperations {
     final ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder =
         new ClassOrInterfaceTypeDetailsBuilder(interfaceMid, PUBLIC, interfaceType,
             PhysicalTypeCategory.INTERFACE);
+
+    // Getting the id field
+    JavaType idType = JavaType.LONG_OBJECT;
+    for (FieldMetadata field : entityDetails.getDeclaredFields()) {
+      if (field.getAnnotation(JpaJavaType.ID) != null) {
+        idType = field.getFieldType();
+        break;
+      }
+    }
+
+    // Including extend for the Entity Resolver
+    JavaType entityResolver =
+        JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_ENTITY_RESOLVER, domainType, idType);
+    interfaceTypeBuilder.addExtendsTypes(entityResolver);
+
+    // Including extend for the Validator Service
+    JavaType validatorServiceEntity =
+        JavaType.wrapperOf(SpringletsJavaType.SPRINGLETS_VALIDATOR_SERVICE, domainType);
+    interfaceTypeBuilder.addExtendsTypes(validatorServiceEntity);
+
     // Adding @RooService annotation to current interface
     interfaceTypeBuilder.addAnnotation(interfaceAnnotationMetadata.build());
 

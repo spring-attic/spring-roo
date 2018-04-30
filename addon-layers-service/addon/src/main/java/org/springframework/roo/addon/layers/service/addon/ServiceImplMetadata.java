@@ -29,6 +29,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
@@ -184,6 +185,9 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // Add constructor
     ensureGovernorHasConstructor(getConstructor(!foundAutowiredConstructor));
 
+    // Generating validate method with TO BE IMPLEMENTED BY DEVELOPER comment
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getMethodValidate()));
+
     pendingTransactionalMethodToAdd =
         new ArrayList<MethodMetadata>(serviceMetadata.getTransactionalDefinedMethods());
     pendingNonTransactionalMethodToAdd =
@@ -229,6 +233,55 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
     // Build the ITD
     itdTypeDetails = builder.build();
+  }
+
+  /**
+   * Generates the validate method
+   *
+   * @return
+   */
+  private MethodMetadata getMethodValidate() {
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("validate");
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(entity));
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName(entity.getSimpleTypeName().toLowerCase()));
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Create return type
+    JavaType returnType =
+        JavaType
+            .mapOf(JavaType.STRING, JavaType.listOf(SpringletsJavaType.SPRINGLETS_MESSAGE_I18N));
+
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Map<String, List<MessageI18n>> messages = new HashMap<>();
+    bodyBuilder.appendFormalLine(
+        "Map<String, List<MessageI18n>> messages = new %s<String, List<MessageI18n>>();",
+        JavaType.HASH_MAP);
+    bodyBuilder.appendFormalLine("");
+    bodyBuilder.appendFormalLine("// TODO: IMPLEMENT HERE THE VALIDATION OF YOUR ENTITY");
+    bodyBuilder.appendFormalLine("");
+    bodyBuilder.appendFormalLine("return messages;");
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, parameterTypes,
+            parameterNames, bodyBuilder);
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
   }
 
   private MethodMetadata getMethodRemoveFrom(MethodMetadata methodToBeImplemented,

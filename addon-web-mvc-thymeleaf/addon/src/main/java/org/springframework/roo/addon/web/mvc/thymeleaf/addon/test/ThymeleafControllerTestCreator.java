@@ -55,7 +55,7 @@ public class ThymeleafControllerTestCreator implements TestCreatorProvider {
       "io.springlets", "springlets-boot-starter-test", "${springlets.version}", DependencyType.JAR,
       DependencyScope.TEST);
   private final static Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
-      "1.2.0.RC3");
+      "1.2.0.RELEASE");
 
   private BundleContext context;
 
