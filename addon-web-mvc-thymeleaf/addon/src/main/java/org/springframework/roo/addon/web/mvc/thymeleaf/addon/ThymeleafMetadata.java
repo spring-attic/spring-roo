@@ -2026,14 +2026,15 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     body.appendFormalLine("binder.setDisallowedFields(\"%s\");", entityIdentifier);
 
     for (Pair<RelationInfo, JpaEntityMetadata> item : compositionRelationOneToOne) {
-      body.appendFormalLine("dataBinder.setDisallowedFields(\"%s.%s\");", item.getKey().fieldName,
+      body.appendFormalLine("binder.setDisallowedFields(\"%s.%s\");", item.getKey().fieldName,
           item.getValue().getCurrentIndentifierField().getFieldName());
     }
 
     body.appendFormalLine("// Register validators");
     body.appendFormalLine("%s validator = new GenericValidator(%s.class, %s());",
         SpringletsJavaType.SPRINGLETS_GENERIC_VALIDATOR.getNameIncludingTypeParameters(false,
-            builder.getImportRegistrationResolver()), entity.getBaseType().getSimpleTypeName(),
+            builder.getImportRegistrationResolver()), entity.getBaseType()
+            .getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()),
         getAccessorMethod(controllerMetadata.getServiceField()).getMethodName());
     body.appendFormalLine("binder.addValidators(validator);");
 
