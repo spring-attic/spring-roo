@@ -22,37 +22,17 @@
                               <div class="item--right-column">Download</div>
                           </div>
                           
+                                                        
                           <div class="item--body--version">
                               <div class="item--left-column">
-                                  <p>2.0.0.RC3</p>
-                                  <div class="spring-icon spring-icon-pre-release"></div>
-                              </div>
-                                  <div class="item--right-column">
-                                      <a href="http://spring-roo-repository.springsource.org.s3.amazonaws.com/milestone/ROO/spring-roo-2.0.0.RC3.zip" class="docs-link">Download</a>
-                                  </div>
-                              </div>
-                              
-                          <div class="item--body--version">
-                              <div class="item--left-column">
-                                  <p>1.3.2</p>
+                                  <p>2.0.0</p>
 
                                       <div class="spring-icon spring-icon-current-version"></div>
 
                                   <div class="spring-icon spring-icon-ga-release"></div>
                                   </div>
                                   <div class="item--right-column">
-                                      <a href="http://spring-roo-repository.springsource.org.s3.amazonaws.com/release/ROO/spring-roo-1.3.2.RELEASE.zip" class="docs-link">Download</a>
-                                  </div>
-                              </div>
-
-                              <div class="item--body--version">
-                                  <div class="item--left-column">
-                                      <p>1.2.5</p>
-
-                                      <div class="spring-icon spring-icon-ga-release"></div>
-                                  </div>
-                                  <div class="item--right-column">
-                                      <a href="http://spring-roo-repository.springsource.org/spring-roo-1.2.5.RELEASE.zip" class="docs-link">Download</a>
+                                      <a href="http://spring-roo-repository.springsource.org.s3.amazonaws.com/release/ROO/spring-roo-2.0.0.RELEASE.zip" class="docs-link">Download</a>
                                   </div>
                               </div>
 
