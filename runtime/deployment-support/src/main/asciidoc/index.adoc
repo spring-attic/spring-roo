@@ -38,7 +38,7 @@ DISID CORPORATION S.L.
 :toclevels: 2
 :toc-placement: left
 :toc-title: Table of Contents
-:version: 2.0.0.BUILD-SNAPSHOT
+:version: 2.0.0.RELEASE
 ifdef::backend-pdf[]
 :pdf-style: asciidoctor
 :pagenums:
@@ -153,45 +153,6 @@ Features of the Thymeleaf views:
 * View layer generation engine is based on Freemarker templates. Additionally Roo provides a command to install them in your project letting the ability to customize the view layer scaffold before executing it.
 * New amazing Spring Roo Responsive Theme!
 
-== Spring-Roo 2.0.0.BUILD-SNAPSHOT Improvements and Bugs fixed
-
-=== Bug fixed
-
-* https://jira.spring.io/browse/ROO-3934[ROO-3934] - Error generating Thymeleaf integration test on entity with OneToOne Composition
-* https://jira.spring.io/browse/ROO-3935[ROO-3935] - northwind sample - mvn tomcat:run - java.lang.NoClassDefFoundError: org/apache/commons/logging/LogFactory
-* https://jira.spring.io/browse/ROO-3938[ROO-3938] - NPE on Map entity property
-* https://jira.spring.io/browse/ROO-3940[ROO-3940] - ServiceImpl generates @Autowired constructor when it's already one defined
-* https://jira.spring.io/browse/ROO-3941[ROO-3941] - Avoid creation of @Autowired constructors for JSON and THYMELEAF controllers when there is already one in .java
-* https://jira.spring.io/browse/ROO-3943[ROO-3943] - finder add command not working on 2.0.0.RC2, works ok on older version 1.3
-* https://jira.spring.io/browse/ROO-3944[ROO-3944] - petclinic example list pages throw error when using the mvn packaged jar
-* https://jira.spring.io/browse/ROO-3946[ROO-3946] - JsonMixin problems when entity is parametrized
-* https://jira.spring.io/browse/ROO-3948[ROO-3948] - Pom.xml properties not defined
-* https://jira.spring.io/browse/ROO-3949[ROO-3949] - ONE_TO_MANY relationship throws an error in drop downs in web ui
-* https://jira.spring.io/browse/ROO-3950[ROO-3950] - Optimistic concurrency control fails during Integer comparison
-* https://jira.spring.io/browse/ROO-3955[ROO-3955] - Entity default constructor in AJ files makes property initializers doen't executed
-* https://jira.spring.io/browse/ROO-3956[ROO-3956] - Datatables delete batch call multiple times
-* https://jira.spring.io/browse/ROO-3957[ROO-3957] - Compilation error on controllers for entities with custom identifier
-* https://jira.spring.io/browse/ROO-3958[ROO-3958] - Compilation error on controllers for parametrized entity attributes
-* https://jira.spring.io/browse/ROO-3960[ROO-3960] - Problems generating DeleteModalDetailView
-* https://jira.spring.io/browse/ROO-3961[ROO-3961] - Problems on list view for entities with one-to-one composition relation
-* https://jira.spring.io/browse/ROO-3963[ROO-3963] - command "push-in --all --force" fails when byte[] type is found
-* https://jira.spring.io/browse/ROO-3968[ROO-3968] - Compilation error due missing no-arguments constructor in entitties
-* https://jira.spring.io/browse/ROO-3971[ROO-3971] - Error in list view with master/detail view of a composition relation
-
-=== Improvement
-* https://jira.spring.io/browse/ROO-3850[ROO-3850] - javax.sql.DataSource' that could not be found
-* https://jira.spring.io/browse/ROO-3937[ROO-3937] - Error Generating Thymeleaft IT test when missing entity services
-* https://jira.spring.io/browse/ROO-3947[ROO-3947] - Ignore static properties in toString() generation
-* https://jira.spring.io/browse/ROO-3953[ROO-3953] - Support to exclude arbitrary methods on Controllers
-* https://jira.spring.io/browse/ROO-3954[ROO-3954] - Support to disabe i18n label generation on thymeleaf views
-* https://jira.spring.io/browse/ROO-3959[ROO-3959] - Make mock fields in test public
-* https://jira.spring.io/browse/ROO-3962[ROO-3962] - Support to exclude arbitrary views on Controllers
-* https://jira.spring.io/browse/ROO-3964[ROO-3964] - Unify javaBens aj files
-* https://jira.spring.io/browse/ROO-3965[ROO-3965] - Unify controller aj files
-* https://jira.spring.io/browse/ROO-3966[ROO-3966] - Improve the concurrency management
-* https://jira.spring.io/browse/ROO-3967[ROO-3967] - Prefers define "implements" in java files than aj files
-* https://jira.spring.io/browse/ROO-3969[ROO-3969] - Improve JavaBean addon
-
 [[getting-started-requirements]]
 == Requirements
 
@@ -243,10 +204,7 @@ Because the release cycle of STS and Roo differ a version of Spring Roo may be i
 |Version
 |STS update site
 
-a|*2.0.0.BUILD-SNAPSHOT*
-a|_Spring Roo 2.0 (Nightly)_
-
-a|*2.0.0.BUILD-SNAPSHOT*
+a|*2.0.0.RCX*
 a|_Spring Roo 2.0 (Nightly)_
 
 a|*2.0.0.RELEASE*
