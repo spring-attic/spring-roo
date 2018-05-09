@@ -2026,8 +2026,8 @@ public class ThymeleafMetadata extends AbstractViewMetadata {
     body.appendFormalLine("binder.setDisallowedFields(\"%s\");", entityIdentifier);
 
     for (Pair<RelationInfo, JpaEntityMetadata> item : compositionRelationOneToOne) {
-      body.appendFormalLine("binder.setDisallowedFields(\"%s.%s\");", item.getKey().fieldName,
-          item.getValue().getCurrentIndentifierField().getFieldName());
+      body.appendFormalLine("binder.setDisallowedFields(\"%s.%s\");", item.getKey().fieldName, item
+          .getValue().getCurrentIndentifierField().getFieldName());
     }
 
     body.appendFormalLine("// Register validators");
