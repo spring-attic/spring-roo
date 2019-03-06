@@ -10,7 +10,7 @@
 	<artifactId>org.springframework.roo.deployment.support</artifactId>
 	<packaging>pom</packaging>
 	<name>Spring Roo - Runtime - Deployment Support</name>
-	<url>http://static.springframework.org/spring-roo/site/index.html</url>
+	<url>https://docs.spring.io/spring-roo/site/index.html</url>
     <distributionManagement>
         <site>
             <id>static.springsource.org</id>
