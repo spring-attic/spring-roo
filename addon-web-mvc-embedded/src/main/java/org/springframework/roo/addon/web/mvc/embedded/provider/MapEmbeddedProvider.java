@@ -26,7 +26,7 @@ public class MapEmbeddedProvider extends AbstractEmbeddedProvider {
   public boolean embed(final String url, final String viewName) {
     if (url.contains("maps.google")) {
       // Expected format
-      // http://maps.google.com/maps?q=sydney,+Australia&.. the q= param
+      // https://maps.google.com/maps?q=sydney,+Australia&.. the q= param
       // needs to be present
       final String qStart = url.substring(url.indexOf("q=") + 2);
 

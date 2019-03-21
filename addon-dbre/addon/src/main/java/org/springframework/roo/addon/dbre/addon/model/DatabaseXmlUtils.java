@@ -185,7 +185,7 @@ public abstract class DatabaseXmlUtils {
     document.appendChild(databaseElement);
 
     // ROO-2355: transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
-    // "http://db.apache.org/torque/dtd/database_3_3.dtd");
+    // "https://db.apache.org/torque/dtd/database_3_3.dtd");
 
     return document;
   }

@@ -76,7 +76,7 @@ public class JpaOperationsImplTest {
           + "</beans>\n";
   private static final String EXPECTED_PERSISTENCE_XML_FOR_H2_IN_MEMORY_AND_HIBERNATE =
       "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
-          + "<persistence xmlns=\"http://java.sun.com/xml/ns/persistence\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"2.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd\">\n"
+          + "<persistence xmlns=\"http://java.sun.com/xml/ns/persistence\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"2.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/persistence https://java.sun.com/xml/ns/persistence/persistence_2_0.xsd\">\n"
           + "<persistence-unit name=\"myPersistenceUnit\" transaction-type=\"RESOURCE_LOCAL\">\n"
           + "        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>\n"
           + "        <properties>\n"

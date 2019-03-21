@@ -58,7 +58,7 @@
                       <i class="fa fa-book"></i>
                     </div>
                     <div class="text">
-                      <h2><a href="http://docs.spring.io/spring-roo/docs/current/reference/html/" data-th-title="${r"#{"}label_spring_documentation}" title="Spring Roo reference documentation" target="_blank" data-th-text="${r"#{"}label_documentation}">Doc</a></h2>
+                      <h2><a href="https://docs.spring.io/spring-roo/docs/current/reference/html/" data-th-title="${r"#{"}label_spring_documentation}" title="Spring Roo reference documentation" target="_blank" data-th-text="${r"#{"}label_documentation}">Doc</a></h2>
                       <small data-th-text="${r"#{"}info_spring_documentation}">If you are looking for Reference Documentation you can get it here.</small>
                     </div>
                   </div>
@@ -73,7 +73,7 @@
                       <i class="fa fa-envira"></i>
                     </div>
                     <div class="text">
-                      <h2><a href="http://projects.spring.io/spring-roo/" data-th-title="${r"#{"}label_spring_site}" title="Spring Roo project site" target="_blank" data-th-text="${r"#{"}label_projectpage}">Project Page</a></h2>
+                      <h2><a href="https://projects.spring.io/spring-roo/" data-th-title="${r"#{"}label_spring_site}" title="Spring Roo project site" target="_blank" data-th-text="${r"#{"}label_projectpage}">Project Page</a></h2>
                       <small data-th-text="${r"#{"}info_spring_site}">All the info about Spring Roo development.</small>
                     </div>
                   </div>
@@ -88,7 +88,7 @@
                       <i class="fa fa-stack-overflow"></i>
                     </div>
                     <div class="text">
-                      <h2><a href="http://stackoverflow.com/questions/tagged/spring-roo" data-th-title="${r"#{"}label_spring_support}" title="Spring Roo Stackoverflow support" target="_blank" data-th-text="${r"#{"}label_support}">Support</a></h2>
+                      <h2><a href="https://stackoverflow.com/questions/tagged/spring-roo" data-th-title="${r"#{"}label_spring_support}" title="Spring Roo Stackoverflow support" target="_blank" data-th-text="${r"#{"}label_support}">Support</a></h2>
                       <small data-th-text="${r"#{"}label_spring_support}">If you have any question about the project,
                       you can check it.</small>
                     </div>
@@ -119,7 +119,7 @@
                 <ul class="pull-right list-inline social-links">
                   <li><small data-th-text="${r"#{"}info_twitter}">As always, you can find us also on </small></li>
                   <li>
-                    <a href="http://twitter.com/springroo" class="icon-twitter" target="_blank">
+                    <a href="https://twitter.com/springroo" class="icon-twitter" target="_blank">
                     <i class="fa fa-twitter"></i>
                     </a>
                   </li>

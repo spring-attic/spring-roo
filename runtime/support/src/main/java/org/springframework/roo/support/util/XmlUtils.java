@@ -138,7 +138,7 @@ public final class XmlUtils {
       throw new IllegalStateException(e);
     }
     transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+    transformer.setOutputProperty("{https://xml.apache.org/xslt}indent-amount", "4");
     return transformer;
   }
 

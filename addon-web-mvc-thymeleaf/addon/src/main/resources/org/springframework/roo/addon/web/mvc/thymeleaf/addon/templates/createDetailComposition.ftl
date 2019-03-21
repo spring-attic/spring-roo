@@ -174,15 +174,15 @@
 
     <!-- JQuery Validation -->
     <script
-      src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/jquery.validate.min.js"
+      src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/jquery.validate.min.js"
       data-th-src="@{/webjars/jquery-validation/dist/jquery.validate.min.js}">
       </script>
     <script
-      src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/additional-methods.min.js"
+      src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/additional-methods.min.js"
       data-th-src="@{/webjars/jquery-validation/dist/additional-methods.min.js}">
       </script>
     <script
-      src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/localization/messages_es.js"
+      src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/localization/messages_es.js"
       data-th-src="@{/webjars/jquery-validation/src/localization/messages_}+${r"${#"}locale.language}+'.js'"
       data-th-if="${r"${#"}locale.language} != 'en'">
       </script>

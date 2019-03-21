@@ -10,16 +10,16 @@
   
   <c:choose>
     <c:when test="${provider eq 'picasa'}">
-      <embed width="545" height="330" type="application/x-shockwave-flash" src="http://picasaweb.google.com/s/c/bin/slideshow.swf" flashvars="host=picasaweb.google.com&amp;hl=en_US&amp;feat=flashalbum&amp;RGB=0xffffff&amp;feed=http%3A%2F%2Fpicasaweb.google.com%2Fdata%2Ffeed%2Fapi%2Fuser%2F${fn:escapeXml(userId)}%2Falbumid%2F${fn:escapeXml(albumId)}%3Falt%3Drss%26kind%3Dphoto%26hl%3Den_US" pluginspage="http://www.macromedia.com/go/getflashplayer"></embed>
+      <embed width="545" height="330" type="application/x-shockwave-flash" src="https://picasaweb.google.com/s/c/bin/slideshow.swf" flashvars="host=picasaweb.google.com&amp;hl=en_US&amp;feat=flashalbum&amp;RGB=0xffffff&amp;feed=http%3A%2F%2Fpicasaweb.google.com%2Fdata%2Ffeed%2Fapi%2Fuser%2F${fn:escapeXml(userId)}%2Falbumid%2F${fn:escapeXml(albumId)}%3Falt%3Drss%26kind%3Dphoto%26hl%3Den_US" pluginspage="https://www.macromedia.com/go/getflashplayer"></embed>
     </c:when>
     
     <c:when test="${provider eq 'flikr'}">
       <c:set var="flashvars" value="offsite=true&amp;page_show_url=%2Fphotos%2F${fn:escapeXml(userId)}%2Fshow%2F&amp;page_show_back_url=%2Fphotos%2F${fn:escapeXml(albumId)}%2F&amp;user_id=${fn:escapeXml(userId)}" />
       <object width="545" height="400">
         <param name="flashvars" value="${flashvars}"></param>
-        <param name="movie" value="http://www.flickr.com/apps/slideshow/show.swf?v=71649"></param>
+        <param name="movie" value="https://www.flickr.com/apps/slideshow/show.swf?v=71649"></param>
         <param name="allowFullScreen" value="true"></param>
-        <embed type="application/x-shockwave-flash" src="http://www.flickr.com/apps/slideshow/show.swf?v=71649" allowFullScreen="true" flashvars="${flashvars}" width="545" height="400"></embed>
+        <embed type="application/x-shockwave-flash" src="https://www.flickr.com/apps/slideshow/show.swf?v=71649" allowFullScreen="true" flashvars="${flashvars}" width="545" height="400"></embed>
       </object>
     </c:when>
   </c:choose>

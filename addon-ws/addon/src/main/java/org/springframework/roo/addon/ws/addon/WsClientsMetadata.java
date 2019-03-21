@@ -277,7 +277,7 @@ public class WsClientsMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   /**
    * This method obtains a valid package name from the provided targetNamespace.
    * 
-   * Ex: Providing 'http://roo.springframework.org/' targetNameSpace, the obtained
+   * Ex: Providing 'https://roo.springframework.org/' targetNameSpace, the obtained
    * Package name will be 'org.springframework.roo'.
    * 
    * @param targetNameSpace

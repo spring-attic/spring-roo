@@ -23,7 +23,7 @@ import org.w3c.dom.NodeList;
  * According to the Maven docs, "the minimal set of information for matching a
  * dependency reference against a dependencyManagement section is actually
  * {groupId, artifactId, type, classifier}"; see
- * http://maven.apache.org/guides/introduction
+ * https://maven.apache.org/guides/introduction
  * /introduction-to-dependency-mechanism.html#Dependency_Scope
  * 
  * @author Ben Alex

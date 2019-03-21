@@ -7,18 +7,18 @@ All code in this project is original work, except as disclosed below.
 -----------------------------------------------------------------------
 
 Licensed Software: Apache Felix
-Software Web Site: http://felix.apache.org
+Software Web Site: https://felix.apache.org
 Effective License: Apache License, Version 2.0
 License Info Page: http://www.apache.org/licenses/LICENSE-2.0.html
 
 Statement as required by the license:
 
 "This product includes software developed at
-The Apache Software Foundation (http://www.apache.org/).
+The Apache Software Foundation (https://www.apache.org/).
 Licensed under the Apache License 2.0.
 
 This product includes software developed at
-The OSGi Alliance (http://www.osgi.org/).
+The OSGi Alliance (https://www.osgi.org/).
 Copyright (c) OSGi Alliance (2000, 2007).
 Licensed under the Apache License 2.0."
 

@@ -7,9 +7,9 @@ All code in this project is original work, except as disclosed below.
 -----------------------------------------------------------------------
 
 Licensed Software: Legion of the Bouncy Castle Java Cryptography APIs
-Software Web Site: http://www.bouncycastle.org/java.html
+Software Web Site: https://www.bouncycastle.org/java.html
 Effective License: Bouncy Castle License (MIT X11 License adaptation)
-License Info Page: http://www.bouncycastle.org/licence.html
+License Info Page: https://www.bouncycastle.org/licence.html
 
 Bouncy Castle is a runtime dependency of this module. It provides PGP
 key management and related signature verification features. Some of
@@ -19,7 +19,7 @@ from Bouncy Castle sample code and tests.
 License Text (from the above License Info Page):
 
 Copyright (c) 2000 - 2009 The Legion Of The Bouncy Castle
-(http://www.bouncycastle.org)
+(https://www.bouncycastle.org)
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the 

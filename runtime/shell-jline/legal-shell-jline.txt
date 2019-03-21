@@ -17,9 +17,9 @@ for handling console input.
 -----------------------------------------------------------------------
 
 Licensed Software: Jansi
-Software Web Site: http://jansi.fusesource.org/
+Software Web Site: https://jansi.fusesource.org/
 Effective License: Apache License V2.0
-License Info Page: http://jansi.fusesource.org/maven/1.1/license.html
+License Info Page: https://jansi.fusesource.org/maven/1.1/license.html
 
 Jansi is an optional dependency of this module. Jansi provides color
 support in the shell when running on Windows.

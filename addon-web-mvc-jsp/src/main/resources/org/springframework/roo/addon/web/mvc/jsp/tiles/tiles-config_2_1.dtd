@@ -23,7 +23,7 @@
 
 @hidden $Id$
 @title DTD for the Tiles Definition File, Version 2.1
-@doctype tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN" "http://tiles.apache.org/dtds/tiles-config_2_1.dtd"
+@doctype tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN" "https://tiles.apache.org/dtds/tiles-config_2_1.dtd"
 @root tiles-definitions
 -->
 

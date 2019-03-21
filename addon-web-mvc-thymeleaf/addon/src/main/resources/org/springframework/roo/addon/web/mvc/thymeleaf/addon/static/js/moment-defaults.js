@@ -5,9 +5,9 @@
 	/**
 	 * Convert Java's SimpleDateFormat to momentJS formatDate. Takes a Java
 	 * pattern
-	 * (http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html)
+	 * (https://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html)
 	 * and turns it into the expected momentJS formatDate
-	 * (http://momentjs.com/docs/#/parsing/string-format/).
+	 * (https://momentjs.com/docs/#/parsing/string-format/).
 	 *
 	 * @param pattern
 	 *            SimpleDateFormat pattern

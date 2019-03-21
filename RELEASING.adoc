@@ -77,7 +77,7 @@ git tag -a -m "ROO-XXXX: Release Spring Roo 4.5.6.RELEASE" 4.5.6.RELEASE
  cd $ROO_HOME
  mvn clean package
 
-. Build the reference guide and deploy to the static staging server. You must be connected to the VPN for deployment to work. Note that http://projects.spring.io/spring-roo/ is updated bi-hourly from staging:
+. Build the reference guide and deploy to the static staging server. You must be connected to the VPN for deployment to work. Note that https://projects.spring.io/spring-roo/ is updated bi-hourly from staging:
 +
 [source, shell]
 cd $ROO_HOME/deployment-support
@@ -130,7 +130,7 @@ NOTE: _If any problems are detected before step 8, *simply fix*, push and start 
 
 === Pre-notification testing
 
-* Visit http://projects.spring.io/spring-roo/, click "Download!"
+* Visit https://projects.spring.io/spring-roo/, click "Download!"
 * Ensure it unzips OK and the sha1sum matches the downloaded .sha
 * `rm -rf ~/.m2/repository/org/springframework/roo`
 * Use "roo script clinic.roo" to build a new Roo project
@@ -142,8 +142,8 @@ Once the release is completed (ie all steps above) you'll typically:
 
 * Mark the version as "released" in JIRA (_Admin > JIRA Admin_...)
 * Publish a https://spring.io/blog/ entry explaining what's new
-* Update http://en.wikipedia.org/wiki/Spring_Roo with the version
-* Edit project page http://projects.spring.io/spring-roo/
+* Update https://en.wikipedia.org/wiki/Spring_Roo with the version
+* Edit project page https://projects.spring.io/spring-roo/
 * Tweet from @SpringRoo (NB: ensure #SpringRoo is in the message)
 * Tweet from your personal account
 * Email dev list

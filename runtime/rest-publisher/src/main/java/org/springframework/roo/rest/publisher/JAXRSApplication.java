@@ -83,7 +83,7 @@ public class JAXRSApplication {
     Object resource = this.bc.getService(ref);
 
     // How to add Resources at runtime in Jersey
-    // http://stackoverflow.com/questions/27959594/can-we-add-resource-path-at-runtime-in-jersey#answer-28891762
+    // https://stackoverflow.com/questions/27959594/can-we-add-resource-path-at-runtime-in-jersey#answer-28891762
 
     ResourceConfig freshConfig = new ResourceConfig(this.resourceConfig);
     freshConfig.registerInstances(resource);

@@ -11,7 +11,7 @@
 
     <c:when test="${provider eq 'ustream'}">
       <c:set var="flashvars" value="autoplay=false&amp;brand=embed&amp;cid=${fn:escapeXml(streamId)}" />
-      <spring:url value="http://www.ustream.tv/flash/live/1/${streamId}" var="url" />
+      <spring:url value="https://www.ustream.tv/flash/live/1/${streamId}" var="url" />
       <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" width="545" height="380" id="utv784473">
         <param name="flashvars" value="${flashvars}" />
         <param name="allowfullscreen" value="true" />
@@ -24,7 +24,7 @@
     <c:when test="${provider eq 'livestream'}">
         <iframe width="560"
                 height="340"
-                src="http://cdn.livestream.com/embed/${streamId}?layout=4&amp;height=340&amp;width=560&amp;autoplay=false"
+                src="https://cdn.livestream.com/embed/${streamId}?layout=4&amp;height=340&amp;width=560&amp;autoplay=false"
                 style="border:0;outline:0"
                 frameborder="0"
                 scrolling="no">

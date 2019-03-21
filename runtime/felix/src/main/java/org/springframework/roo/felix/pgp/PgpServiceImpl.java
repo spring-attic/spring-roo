@@ -64,9 +64,9 @@ public class PgpServiceImpl implements PgpService {
 
   private static final int BUFFER_SIZE = 1024;
   private static String defaultKeyServerUrl =
-      "http://keyserver.ubuntu.com/pks/lookup?op=get&search=";
+      "https://keyserver.ubuntu.com/pks/lookup?op=get&search=";
   // private static String defaultKeyServerUrl =
-  // "http://pgp.mit.edu/pks/lookup?op=get&search=";
+  // "https://pgp.mit.edu/pks/lookup?op=get&search=";
 
   private static final File ROO_PGP_FILE = FileUtils.getFile(FileUtils.getUserDirectory(),
       ".spring_roo_pgp.bpg");
