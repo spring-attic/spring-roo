@@ -9,7 +9,7 @@ All code in this project is original work, except as disclosed below.
 Licensed Software: Apache Felix
 Software Web Site: http://felix.apache.org
 Effective License: Apache License, Version 2.0
-License Info Page: http://www.apache.org/licenses/LICENSE-2.0.html
+License Info Page: https://www.apache.org/licenses/LICENSE-2.0.html
 
 Statement as required by the license:
 
