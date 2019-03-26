@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<flow start-state="view-state-1" xmlns="http://www.springframework.org/schema/webflow"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.springframework.org/schema/webflow
-                          http://www.springframework.org/schema/webflow/spring-webflow-2.4.xsd">
+<flow start-state="view-state-1" xmlns="https://www.springframework.org/schema/webflow"
+    xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://www.springframework.org/schema/webflow
+                          https://www.springframework.org/schema/webflow/spring-webflow-2.4.xsd">
 
 	<!-- Is your flow persistent? -->
 	<!-- <persistence-context />  -->
