@@ -21,7 +21,7 @@ directory:
 
 For more specific information about Spring Roo project visit the project page at:
 
-  http://projects.spring.io/spring-roo/
+  https://projects.spring.io/spring-roo/
 
 If you use Twitter, you're encouraged to follow @SpringRoo. Also
 please use #SpringRoo in your tweets so everyone can easily see them.

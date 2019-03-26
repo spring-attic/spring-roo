@@ -123,7 +123,7 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     webServiceAnnotation.addStringAttribute("name", sei.getType().getSimpleTypeName());
     webServiceAnnotation.addStringAttribute(
         "targetNamespace",
-        String.format("http://ws.%s/", StringUtils.reverseDelimited(
+        String.format("https://ws.%s/", StringUtils.reverseDelimited(
             projectTopLevelPackage.getFullyQualifiedPackageName(), '.')));
     ensureGovernorIsAnnotated(webServiceAnnotation);
 
@@ -266,7 +266,7 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             .getSymbolNameCapitalisedFirstLetter()));
     requestWrapperAnnotation.addStringAttribute(
         "targetNamespace",
-        String.format("http://ws.%s/", StringUtils.reverseDelimited(
+        String.format("https://ws.%s/", StringUtils.reverseDelimited(
             projectTopLevelPackage.getFullyQualifiedPackageName(), '.')));
     seiMethod.addAnnotation(requestWrapperAnnotation);
 
@@ -279,7 +279,7 @@ public class SeiMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         .getMethodName().getSymbolNameCapitalisedFirstLetter()));
     responseWrapperAnnotation.addStringAttribute(
         "targetNamespace",
-        String.format("http://ws.%s/", StringUtils.reverseDelimited(
+        String.format("https://ws.%s/", StringUtils.reverseDelimited(
             projectTopLevelPackage.getFullyQualifiedPackageName(), '.')));
     seiMethod.addAnnotation(responseWrapperAnnotation);
 

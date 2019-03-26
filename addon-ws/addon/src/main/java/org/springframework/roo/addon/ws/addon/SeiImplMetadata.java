@@ -129,7 +129,7 @@ public class SeiImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     webServiceAnnotation.addStringAttribute("serviceName", sei.getSimpleTypeName());
     webServiceAnnotation.addStringAttribute(
         "targetNamespace",
-        String.format("http://ws.%s/", StringUtils.reverseDelimited(
+        String.format("https://ws.%s/", StringUtils.reverseDelimited(
             projectTopLevelPackage.getFullyQualifiedPackageName(), '.')));
     ensureGovernorIsAnnotated(webServiceAnnotation);
 

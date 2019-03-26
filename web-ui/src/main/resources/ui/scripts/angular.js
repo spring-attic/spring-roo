@@ -671,7 +671,7 @@
         if (t instanceof we) return t;
         var e;
         if (w(t) && (t = di(t), e = !0), !(this instanceof we)) {
-            if (e && "<" != t.charAt(0)) throw ji("nosel", "Looking up elements via selectors is not supported by jqLite! See: http://docs.angularjs.org/api/angular.element");
+            if (e && "<" != t.charAt(0)) throw ji("nosel", "Looking up elements via selectors is not supported by jqLite! See: https://docs.angularjs.org/api/angular.element");
             return new we(t)
         }
         e ? De(this, ye(t)) : De(this, t)
@@ -2186,7 +2186,7 @@
                     }
                     b !== v && k.push(p(o.substring(b, v))), w = o.substring(v + s, y), x.push(w), S.push(n(w, $)), b = y + u, A.push(k.length), k.push("")
                 }
-                if (h && k.length > 1) throw ro("noconcat", "Error while interpolating: {0}\nStrict Contextual Escaping disallows interpolations that concatenate multiple expressions when a trusted value is required.  See http://docs.angularjs.org/api/ng.$sce", o);
+                if (h && k.length > 1) throw ro("noconcat", "Error while interpolating: {0}\nStrict Contextual Escaping disallows interpolations that concatenate multiple expressions when a trusted value is required.  See https://docs.angularjs.org/api/ng.$sce", o);
                 if (!a || x.length) {
                     var T = function(t) {
                             for (var e = 0, n = x.length; n > e; e++) {
@@ -3358,7 +3358,7 @@
         this.enabled = function(e) {
             return arguments.length && (t = !!e), t
         }, this.$get = ["$parse", "$sceDelegate", function(e, n) {
-            if (t && 8 > ti) throw bo("iequirks", "Strict Contextual Escaping does not support Internet Explorer version < 11 in quirks mode.  You can fix this by adding the text <!doctype html> to the top of your HTML document.  See http://docs.angularjs.org/api/ng.$sce for more information.");
+            if (t && 8 > ti) throw bo("iequirks", "Strict Contextual Escaping does not support Internet Explorer version < 11 in quirks mode.  You can fix this by adding the text <!doctype html> to the top of your HTML document.  See https://docs.angularjs.org/api/ng.$sce for more information.");
             var r = R(xo);
             r.isEnabled = function() {
                 return t

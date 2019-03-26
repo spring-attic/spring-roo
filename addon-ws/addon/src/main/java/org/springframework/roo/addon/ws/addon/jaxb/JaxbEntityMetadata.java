@@ -122,7 +122,7 @@ public class JaxbEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     xmlRootElementAnnotation.addStringAttribute("name", entity.getSimpleTypeName().toLowerCase());
     xmlRootElementAnnotation.addStringAttribute(
         "namespace",
-        String.format("http://ws.%s/", StringUtils.reverseDelimited(
+        String.format("https://ws.%s/", StringUtils.reverseDelimited(
             projectTopLevelPackage.getFullyQualifiedPackageName(), '.')));
     ensureGovernorIsAnnotated(xmlRootElementAnnotation);
 

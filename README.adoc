@@ -45,34 +45,34 @@ This project adheres to the Contributor Covenant link:CODE_OF_CONDUCT.adoc[code 
 [[getting-started]]
 == Installation and Getting Started
 
-The http://docs.spring.io/spring-roo/docs/2.0.x/reference/html/[reference documentation] includes detailed descriptions of all the features, detailed http://docs.spring.io/spring-roo/docs/2.0.x/reference/html/#getting-started-install-roo[installation instructions] as well as an extensive http://docs.spring.io/spring-roo/docs/2.0.x/reference/html/#using-spring-roo[user guide] for main use cases.
+The https://docs.spring.io/spring-roo/docs/2.0.x/reference/html/[reference documentation] includes detailed descriptions of all the features, detailed https://docs.spring.io/spring-roo/docs/2.0.x/reference/html/#getting-started-install-roo[installation instructions] as well as an extensive https://docs.spring.io/spring-roo/docs/2.0.x/reference/html/#using-spring-roo[user guide] for main use cases.
 
 [[getting-support]]
 == Getting Support
 
 If you have any trouble using Spring Roo:
 
-* Check the http://docs.spring.io/spring-roo/docs/2.0.x/reference/html/[reference documentation].
-* Spring Roo creates web applications based on Spring projects, take a look at the related Spring project reference documentation. In the http://spring.io[Spring] web-site you will find a lot of excellent reference documentation and getting started guides of the Spring projects.
-* Ask a question in http://stackoverflow.com[stackoverflow] tagged with http://stackoverflow.com/questions/tagged/spring-roo[spring-roo].
+* Check the https://docs.spring.io/spring-roo/docs/2.0.x/reference/html/[reference documentation].
+* Spring Roo creates web applications based on Spring projects, take a look at the related Spring project reference documentation. In the https://spring.io[Spring] web-site you will find a lot of excellent reference documentation and getting started guides of the Spring projects.
+* Ask a question in https://stackoverflow.com[stackoverflow] tagged with https://stackoverflow.com/questions/tagged/spring-roo[spring-roo].
 
-http://www.disid.com/#contact[Commercial support] is available too.
+https://www.disid.com/#contact[Commercial support] is available too.
 
 [[contribute]]
 == Contribute
 
 Here are some ways for you to get involved in the community:
 
-* Get involved with the Spring community by helping out on http://stackoverflow.com/questions/tagged/spring-roo[stackoverflow]. Join to debates and respond to questions.
+* Get involved with the Spring community by helping out on https://stackoverflow.com/questions/tagged/spring-roo[stackoverflow]. Join to debates and respond to questions.
 * Report bugs and request new features via the https://jira.springsource.org/browse/ROO[Spring Roo JIRA]. Comment and vote on the ones that you are interested in.  
-* If you want to write code, you are welcome. Commit your pull requests from http://help.github.com/forking/[forks of this repository].
+* If you want to write code, you are welcome. Commit your pull requests from https://help.github.com/forking/[forks of this repository].
 
 See the link:CONTRIBUTING.adoc[contributor guidelines] for details.
 
 [[build-the-source]]
 == Building from Source
 
-The Spring Roo project uses a http://maven.apache.org/[Maven]-based build system. 
+The Spring Roo project uses a https://maven.apache.org/[Maven]-based build system. 
 
 Spring Roo can be easily built with the https://github.com/takari/maven-wrapper[maven wrapper] from the root of the source tree and serves as a cross-platform, self-contained bootstrap mechanism for the build:
 
@@ -86,7 +86,7 @@ See the link:CONTRIBUTING.adoc[contributor guidelines] for details.
 [[stay-in-touch]]
 == Staying in Touch
 
-Follow https://twitter.com/springroo[@SpringRoo] and its team members on Twitter. In-depth articles can be found at http://blog.disid.com/[The DISID Blog], and releases are announced via http://spring.io/blog/[The Spring Blog].
+Follow https://twitter.com/springroo[@SpringRoo] and its team members on Twitter. In-depth articles can be found at https://blog.disid.com/[The DISID Blog], and releases are announced via https://spring.io/blog/[The Spring Blog].
 
 [[acknowledgments]]
 == Acknowledgments

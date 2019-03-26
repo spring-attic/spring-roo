@@ -6,7 +6,7 @@
   <jsp:directive.attribute name="location" type="java.lang.String" required="true" rtexprvalue="true" description="The location for the map to be displayed" />
   <jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)" />
   
-  <spring:url value="http://maps.google.com/" var="map">
+  <spring:url value="https://maps.google.com/" var="map">
     <spring:param name="q" value="${location}" />
     <spring:param name="output" value="embed" />
   </spring:url>

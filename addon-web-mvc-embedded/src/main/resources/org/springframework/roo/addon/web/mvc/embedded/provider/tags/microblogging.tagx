@@ -9,7 +9,7 @@
   <c:set var="sec_searchTerm">
     <spring:escapeBody javaScriptEscape="true">${searchTerm}</spring:escapeBody>
   </c:set>
-  <script src="http://widgets.twimg.com/j/2/widget.js">;</script>
+  <script src="https://widgets.twimg.com/j/2/widget.js">;</script>
   <script>
         new TWTR.Widget({
           version: 2,

@@ -18,7 +18,7 @@
       	 <div class="col-sm-6 col-sm-offset-3">
            <small class="clearfix">
              Made with
-             <a href="http://projects.spring.io/spring-roo/"
+             <a href="https://projects.spring.io/spring-roo/"
                 data-th-title="${r"#{"}label_gotowebsite}" target="_blank">
                 Spring Roo</a>
              <span data-th-text="|© ${r"${#calendars.format(#dates.createNow(),'yyyy')}"}|">
@@ -44,9 +44,9 @@
          <a title="Explanation of WCAG 2.0 Level Double-A Conformance"
             data-th-title="${r"#{"}label_accessibility_title}"
             target="_blank"
-            href="http://www.w3.org/WAI/WCAG2AA-Conformance">
+            href="https://www.w3.org/WAI/WCAG2AA-Conformance">
             <img height="32" width="88"
-                 src="http://www.w3.org/WAI/wcag2AA"
+                 src="https://www.w3.org/WAI/wcag2AA"
                  data-th-alt="${r"#{"}label_accessibility_alt}"
                  alt="Level Double-A conformance, W3C WAI Web Content
                  Accessibility Guidelines 2.0"/>

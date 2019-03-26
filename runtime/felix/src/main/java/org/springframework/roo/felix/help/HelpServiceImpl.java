@@ -63,8 +63,8 @@ import freemarker.template.TemplateException;
 /**
  * Default implementation of {@link HelpService}.
  * 
- * @author Enrique Ruiz at http://www.disid.com[DISID Corporation S.L.]
- * @author Juan Carlos García at http://www.disid.com[DISID Corporation S.L.]
+ * @author Enrique Ruiz at https://www.disid.com[DISID Corporation S.L.]
+ * @author Juan Carlos García at https://www.disid.com[DISID Corporation S.L.]
  * @since 1.3
  */
 @Component
@@ -316,7 +316,7 @@ public class HelpServiceImpl implements HelpService {
       // transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,
       // "-//OASIS//DTD DocBook XML V4.5//EN");
       // transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
-      // "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd");
+      // "https://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd");
 
       XmlUtils.writeXml(transformer, byteArrayOutputStream, document);
       try {

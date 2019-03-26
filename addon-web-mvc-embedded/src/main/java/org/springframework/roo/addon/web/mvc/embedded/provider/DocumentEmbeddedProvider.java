@@ -37,14 +37,14 @@ public class DocumentEmbeddedProvider extends AbstractEmbeddedProvider {
   public boolean embed(final String url, final String viewName) {
     if (url.contains("slideshare.net")) {
       // Expected format
-      // http://www.slideshare.net/schmidtstefan/spring-one2-gx-slides-stefan-schmidt
+      // https://www.slideshare.net/schmidtstefan/spring-one2-gx-slides-stefan-schmidt
       final Map<String, String> options = new HashMap<String, String>();
       options.put("provider", DocumentProvider.SLIDESHARE.name());
       options.put("id", url);
       return install(viewName, options);
     } else if (url.contains("scribd.com")) {
       // Expected format
-      // http://www.scribd.com/doc/27766735/Introduction-to-SpringRoo
+      // https://www.scribd.com/doc/27766735/Introduction-to-SpringRoo
       final String[] split = url.split("/");
       if (split.length > 4) {
         final Map<String, String> options = new HashMap<String, String>();
@@ -55,7 +55,7 @@ public class DocumentEmbeddedProvider extends AbstractEmbeddedProvider {
       return false;
     } else if (url.contains("docs.google.") && url.contains("present")) {
       // Expected format
-      // http://docs.google.com/present/view?id=dd8rf8t9_31c9f2fcgd&revision=_latest&start=0&theme=blank&authkey=CLj5iZwJ&cwj=true
+      // https://docs.google.com/present/view?id=dd8rf8t9_31c9f2fcgd&revision=_latest&start=0&theme=blank&authkey=CLj5iZwJ&cwj=true
       final String qStart = url.substring(url.indexOf("id=") + 3);
       final Map<String, String> options = new HashMap<String, String>();
       options.put("provider", DocumentProvider.GOOGLE_PRESENTATION.name());
@@ -68,7 +68,7 @@ public class DocumentEmbeddedProvider extends AbstractEmbeddedProvider {
 
   private String getSlideShareId(final String url) {
     final String json =
-        sendHttpGetRequest("http://oohembed.com/oohembed/?url=" + url.replace(":", "%3A"));
+        sendHttpGetRequest("https://api.embed.ly/1/oembed?url=" + url.replace(":", "%3A"));
     if (json != null) {
       final String subDoc = json.substring(json.indexOf("doc=") + 4);
       return subDoc.substring(0, subDoc.indexOf("&") == -1 ? subDoc.length() : subDoc.indexOf("&"));

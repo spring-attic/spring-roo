@@ -10,7 +10,7 @@
     <spring:escapeBody javaScriptEscape="true">${waveId}</spring:escapeBody>
   </c:set>
   <div id="waveframe" style="width: 550px; height: 500px"></div>
-  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
   <script type="text/javascript">
         google.load("wave", "1");
 		google.setOnLoadCallback(initialize);

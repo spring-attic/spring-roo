@@ -35,7 +35,7 @@ public class PhotoEmbeddedProvider extends AbstractEmbeddedProvider {
   }
 
   public boolean embed(final String url, final String viewName) {
-    // Expected http://picasaweb.google.com.au/stsmedia/SydneyByNight
+    // Expected https://picasaweb.google.com.au/stsmedia/SydneyByNight
     if (url.contains("picasaweb.google.")) {
       final String[] split = url.split("/");
       if (split.length > 4) {
@@ -61,7 +61,7 @@ public class PhotoEmbeddedProvider extends AbstractEmbeddedProvider {
   }
 
   private String getPicasaId(final String url) {
-    final String json = sendHttpGetRequest("http://api.embed.ly/v1/api/oembed?url=" + url);
+    final String json = sendHttpGetRequest("https://api.embed.ly/v1/api/oembed?url=" + url);
     if (json != null) {
       final String subDoc = json.substring(json.indexOf("albumid%2F") + 10);
       return subDoc.substring(0, subDoc.indexOf("%") == 1 ? subDoc.length() : subDoc.indexOf("%"));
