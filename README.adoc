@@ -98,6 +98,6 @@ Also, this README.adoc file has been written based on the ones included in sever
 [[license]]
 == License
 
-Spring Roo is Open Source software released under the http://www.apache.org/licenses/LICENSE-2.0.html[Apache 2.0 license].
+Spring Roo is Open Source software released under the https://www.apache.org/licenses/LICENSE-2.0.html[Apache 2.0 license].
 
 
