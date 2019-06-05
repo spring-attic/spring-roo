@@ -29,10 +29,10 @@ name: Spring Roo
 project: spring-roo
 
 # Project github URL
-github_repo_url: http://github.com/spring-projects/spring-roo
+github_repo_url: https://github.com/spring-projects/spring-roo
 
 # Project forum URL
-#forum: http://forum.spring.io/forum/spring-projects/container
+#forum: https://forum.spring.io/forum/spring-projects/container
 
 # If you want to include a custom pom.xml or gradle template set these value to true and add _include files
 custom_pom_template: false
@@ -49,7 +49,7 @@ questions_url: https://spring.io/questions
 twitter: SpringRoo
 
 # Project Open Graph
-url: http://projects.spring.io/spring-roo
+url: https://projects.spring.io/spring-roo
 title: Spring Roo Project
 description: A next-generation rapid application development tool for Java developers. With Roo you can easily build full Java applications in minutes.
 default_bg: default_bg.png
