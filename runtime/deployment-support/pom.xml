@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.roo</groupId>
@@ -10,7 +10,7 @@
 	<artifactId>org.springframework.roo.deployment.support</artifactId>
 	<packaging>pom</packaging>
 	<name>Spring Roo - Runtime - Deployment Support</name>
-	<url>http://static.springframework.org/spring-roo/site/index.html</url>
+	<url>https://docs.spring.io/spring-roo/site/index.html</url>
     <distributionManagement>
         <site>
             <id>static.springsource.org</id>
