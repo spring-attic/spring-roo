@@ -9,11 +9,11 @@
   <c:set var="sec_stockSymbol">
     <spring:escapeBody javaScriptEscape="true">${stockSymbol}</spring:escapeBody>
   </c:set>
-  <script src="http://charts.wikinvest.com/wikinvest/wikichart/javascript/scripts.php" type="text/javascript"></script>
+  <script src="https://charts.wikinvest.com/wikinvest/wikichart/javascript/scripts.php" type="text/javascript"></script>
   <div id="wikichartContainer_${sec_stockSymbol}"></div>
   <script type="text/javascript">
     if (typeof(embedWikichart) != "undefined") {
-      embedWikichart("http://charts.wikinvest.com/WikiChartMini.swf","wikichartContainer_${sec_stockSymbol}","545","360", {
+      embedWikichart("https://charts.wikinvest.com/WikiChartMini.swf","wikichartContainer_${sec_stockSymbol}","545","360", {
         "rollingDate":"1 year","showAnnotations":"true","liveQuote":"true","ticker":"${sec_stockSymbol}","embedCodeDate":"2010-7-13"
       },{});
     }

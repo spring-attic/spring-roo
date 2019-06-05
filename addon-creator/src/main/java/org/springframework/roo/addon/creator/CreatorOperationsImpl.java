@@ -559,7 +559,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
     sb.append("Bnd-LastModified: 1427459113830\n");
     sb.append("Build-Jdk: 1.7.0_60\n");
     sb.append("Bundle-Description: " + description + "\n");
-    sb.append("Bundle-License: http://www.gnu.org/licenses/gpl-3.0.html\n");
+    sb.append("Bundle-License: https://www.gnu.org/licenses/gpl-3.0.html\n");
     sb.append("Bundle-ManifestVersion: 2\n");
     sb.append("Bundle-Name: " + projectName + " - Roo Addon Suite\n");
     sb.append("Bundle-SymbolicName: " + topLevelPackage.getFullyQualifiedPackageName()

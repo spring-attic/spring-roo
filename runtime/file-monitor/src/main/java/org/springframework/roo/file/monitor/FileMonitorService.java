@@ -17,11 +17,11 @@ import org.springframework.roo.file.monitor.event.FileEventListener;
  * unspecified.
  * <p>
  * This API is provided as an interim measure until <a
- * href="http://jcp.org/en/jsr/detail?id=203">JSR 203</a> (to be included in
+ * href="https://jcp.org/en/jsr/detail?id=203">JSR 203</a> (to be included in
  * Java Standard Edition, version 7 AKA "Dolphin") is widely available. Several
  * useful prior works in the area of file monitoring includes <a
  * href="http://jnotify.sourceforge.net/">JNotify</a> and <a
- * href="http://mark.heily.com/pnotify/">PNotify</a>.
+ * href="https://mark.heily.com/pnotify/">PNotify</a>.
  * 
  * @author Ben Alex
  * @since 1.0

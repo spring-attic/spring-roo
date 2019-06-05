@@ -10,12 +10,12 @@
   <c:choose>
 
     <c:when test="${provider eq 'youtube'}">
-      <spring:url value="http://www.youtube.com/v/${videoId}" var="video" />
+      <spring:url value="https://www.youtube.com/v/${videoId}" var="video" />
       <iframe title="YouTube video player" width="545" height="320" src="${video}" frameborder="0" allowfullscreen="true"><!-- content required --></iframe>
     </c:when>
 
     <c:when test="${provider eq 'vimeo'}">
-      <spring:url value="http://vimeo.com/moogaloop.swf" var="video">
+      <spring:url value="https://vimeo.com/moogaloop.swf" var="video">
         <spring:param name="clip_id" value="${videoId}" />
         <spring:param name="server" value="vimeo.com" />
         <spring:param name="show_title" value="1" />
@@ -32,7 +32,7 @@
     </c:when>
 
     <c:when test="${provider eq 'viddler'}">
-      <spring:url value="http://www.viddler.com/player/${videoId}" var="video"/>
+      <spring:url value="https://www.viddler.com/player/${videoId}" var="video"/>
       <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="545" height="320" id="viddler">
         <param name="movie" value="" />
         <param name="allowScriptAccess" value="always" />
@@ -43,7 +43,7 @@
     </c:when>
 
     <c:when test="${provider eq 'google_video'}">
-      <spring:url var="video" value="http://video.google.com/googleplayer.swf">
+      <spring:url var="video" value="https://video.google.com/googleplayer.swf">
         <spring:param name="docid" value="${videoId}" />
         <spring:param name="fs" value="true" />
       </spring:url>
@@ -52,7 +52,7 @@
     </c:when>
 
     <c:when test="${provider eq 'screenr'}">
-      <iframe src="http://www.screenr.com/embed/${videoId}" width="650" height="396" frameborder="0"><!-- Content required --></iframe>
+      <iframe src="https://www.screenr.com/embed/${videoId}" width="650" height="396" frameborder="0"><!-- Content required --></iframe>
     </c:when>
 
   </c:choose>

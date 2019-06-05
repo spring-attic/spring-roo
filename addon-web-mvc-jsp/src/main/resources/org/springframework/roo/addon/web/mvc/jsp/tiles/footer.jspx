@@ -28,7 +28,7 @@
   <spring:url var="logo" value="/resources/images/springsource-logo.png" />
   <spring:message code="global_sponsored" var="sponsored" htmlEscape="false" />
   <span>
-    <a href="http://springsource.com" title="${fn:escapeXml(sponsored)}">
+    <a href="https://springsource.com" title="${fn:escapeXml(sponsored)}">
       <img src="${logo}" alt="${fn:escapeXml(sponsored)}" align="right" />
     </a>
   </span>

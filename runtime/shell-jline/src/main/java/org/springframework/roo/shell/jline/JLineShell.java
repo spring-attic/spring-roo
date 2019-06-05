@@ -57,12 +57,12 @@ import jline.WindowsTerminal;
 
 /**
  * Uses the feature-rich <a
- * href="http://sourceforge.net/projects/jline/">JLine</a> library to provide an
+ * href="https://sourceforge.net/projects/jline/">JLine</a> library to provide an
  * interactive shell.
  * <p>
  * Due to Windows' lack of color ANSI services out-of-the-box, this
  * implementation automatically detects the classpath presence of <a
- * href="http://jansi.fusesource.org/">Jansi</a> and uses it if present. This
+ * href="https://jansi.fusesource.org/">Jansi</a> and uses it if present. This
  * library is not necessary for *nix machines, which support colour ANSI without
  * any special effort. This implementation has been written to use reflection in
  * order to avoid hard dependencies on Jansi.

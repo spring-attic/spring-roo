@@ -6,4 +6,4 @@ ${AnsiColor.GREEN}                _
     |_|                 |___/ 
 
 ${AnsiColor.BRIGHT_RED}Spring application made with Spring Roo 2.0
-Doubts? http://projects.spring.io/spring-roo/${AnsiColor.DEFAULT}
+Doubts? https://projects.spring.io/spring-roo/${AnsiColor.DEFAULT}

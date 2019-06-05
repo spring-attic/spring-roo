@@ -36,7 +36,7 @@ public class VideoStreamEmbeddedProvider extends AbstractEmbeddedProvider {
 
   public boolean embed(final String url, final String viewName) {
     if (url.contains("ustream.tv")) {
-      // Expected format http://www.ustream.tv/flash/live/1/4424524
+      // Expected format https://www.ustream.tv/flash/live/1/4424524
       final String[] split = url.split("/");
       if (split.length > 6) {
         final Map<String, String> options = new HashMap<String, String>();
@@ -46,7 +46,7 @@ public class VideoStreamEmbeddedProvider extends AbstractEmbeddedProvider {
       }
       return false;
     } else if (url.contains("livestream.com")) {
-      // Expected format http://www.livestream.com/wkrg_oil_spill
+      // Expected format https://www.livestream.com/wkrg_oil_spill
       final String[] split = url.split("/");
       if (split.length > 3) {
         final Map<String, String> options = new HashMap<String, String>();

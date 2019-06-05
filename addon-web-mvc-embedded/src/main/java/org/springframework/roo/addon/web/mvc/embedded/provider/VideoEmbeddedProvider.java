@@ -39,33 +39,33 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 
   public boolean embed(final String url, final String viewName) {
     if (url.contains("youtube.com")) {
-      // Expected format: http://www.youtube.com/watch?v=Gb1Z0lfl52I
+      // Expected format: https://www.youtube.com/watch?v=Gb1Z0lfl52I
       final Map<String, String> options = new HashMap<String, String>();
       options.put("provider", VideoProvider.YOUTUBE.name());
       options.put("id", url.substring(url.indexOf("v=") + 2));
       return install(viewName, options);
     } else if (url.contains("video.google.")) {
       // Expected format:
-      // http://video.google.com/videoplay?docid=1753096859715615067#
+      // https://video.google.com/videoplay?docid=1753096859715615067#
       final Map<String, String> options = new HashMap<String, String>();
       options.put("provider", VideoProvider.GOOGLE_VIDEO.name());
       options.put("id", url.substring(url.indexOf("docid=") + 6));
       return install(viewName, options);
     } else if (url.contains("vimeo.com")) {
-      // Expected format http://vimeo.com/11262623
+      // Expected format https://vimeo.com/11262623
       final Map<String, String> options = new HashMap<String, String>();
       options.put("provider", VideoProvider.VIMEO.name());
       options.put("id", url.substring(url.indexOf("vimeo.com/") + 10));
       return install(viewName, options);
     } else if (url.contains("viddler.com")) {
       // Expected format
-      // http://www.viddler.com/explore/failblog/videos/715/
+      // https://www.viddler.com/explore/failblog/videos/715/
       final Map<String, String> options = new HashMap<String, String>();
       options.put("provider", VideoProvider.VIDDLER.name());
       options.put("id", getViddlerId(url));
       return install(viewName, options);
     } else if (url.contains("screenr.com")) {
-      // Expected format http://screenr.com/GlR
+      // Expected format https://screenr.com/GlR
       final String[] split = url.split("/");
       if (split.length > 3) {
         final Map<String, String> options = new HashMap<String, String>();
@@ -80,7 +80,7 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 
   private String getViddlerId(final String url) {
     final String xml =
-        sendHttpGetRequest("http://lab.viddler.com/services/oembed/?url=" + url
+        sendHttpGetRequest("https://tools.viddler.com/services/oembed/?url=" + url
             + "&type=simple&format=xml");
     if (xml != null) {
       try {

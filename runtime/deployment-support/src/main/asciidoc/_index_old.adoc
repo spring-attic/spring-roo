@@ -77,7 +77,7 @@ To get started, please ensure you have the following system dependencies:
 
 * A Linux, Apple or Windows-based operating system (other operating
 systems may work but are not guaranteed).
-* A http://www.oracle.com/technetwork/java/javase/downloads/[Java JDK 6]
+* A https://www.oracle.com/technetwork/java/javase/downloads/[Java JDK 6]
 or newer installed. Java JDK 7 is recommended.
 * https://maven.apache.org/download.cgi[Apache Maven 3.0] or above installed and in the path.
 
@@ -86,7 +86,7 @@ Kit (JDK) and operating systems in the
 link:#upgrade-known-issues[known issues section] of this
 documentation. We always recommend you use the latest version of Java
 and Maven that are available for your platform. We also recommend that
-you use http://spring.io/tools/sts[Spring Tool Suite (STS) 3.7] which 
+you use https://spring.io/tools/sts[Spring Tool Suite (STS) 3.7] which 
 includes a number of features that make working with Roo even
 easier (you can of course use Roo with normal Eclipse or without an
 IDE at all if you prefer).
@@ -95,9 +95,9 @@ IDE at all if you prefer).
 === 3. Download Spring Roo
 
 You can download the current release from Spring Roo project page
-http://projects.spring.io/spring-roo/#download-widget[downloads section]
+https://projects.spring.io/spring-roo/#download-widget[downloads section]
 and the
-http://projects.spring.io/spring-roo/#instant-results---making-java-fun[related documentation].
+https://projects.spring.io/spring-roo/#instant-results---making-java-fun[related documentation].
 
 You can also build a distribution ZIP yourself from our
 link:#resources-source-repository[source control repository.]
@@ -212,7 +212,7 @@ actually a wonderful thing. It means you have no lock-in to worry about
 project in just a couple of minutes!). It probably also means you won't
 need to get approval to use Roo (what's to approve when it's more like a
 command line tool than a critical runtime library like
-http://projects.spring.io/spring-framework/[Spring Framework]?). It also
+https://projects.spring.io/spring-framework/[Spring Framework]?). It also
 means there is no technical way possible for Roo to slow your project
 down at runtime, waste memory or bloat your deployment artefacts with
 JARs. We're really proud of the fact that Roo imposes
@@ -262,9 +262,9 @@ alternatives on other platforms will be fully aware that enterprise Java
 suffers from productivity problems. It takes days to start a new project
 and incredibly long cycle times as you go about normal development.
 Still, we remain with Java because it's a highly attractive platform.
-It's the http://www.tiobe.com/content/paperinfo/tpci/index.html[most
+It's the https://www.tiobe.com/content/paperinfo/tpci/index.html[most
 widely used programming language] on the planet, with
-http://www.oreillynet.com/onjava/blog/2007/01/1_in_every_10_java_developer_i.html[millions]
+https://www.oreilly.com[millions]
 of competent developers. It has first-class tooling, excellent runtime
 performance, numerous mature libraries and widely-supported standards.
 Java is also open source, has multiple vendors and countless choice.
@@ -334,7 +334,7 @@ By using standard Java technologies, Roo avoids reinventing the wheel or
 providing a limited-value abstraction over them. The technologies are
 available to you in their normal form, and you can use them in the same
 way as you always have. What Roo brings to the table is automatic setup
-of those technologies into a http://spring.io/[Spring]-certified
+of those technologies into a https://spring.io/[Spring]-certified
 best-practice application architecture and, if you wish, automatic
 maintenance of all files required by those technologies (such as XML,
 JSP, Java etc). You'll see this in action when you complete the
@@ -358,7 +358,7 @@ trade-offs].
 
 There are many examples of promising technologies that are simply too
 hard for most people to learn and use. With Roo we were inspired by the
-late Jef Raskin's book, "link:http://en.wikipedia.org/wiki/The_Humane_Interface[The Humane
+late Jef Raskin's book, "link:https://en.wikipedia.org/wiki/The_Humane_Interface[The Humane
 Interface]". In the book Raskin argued we have a duty to make things so
 easy to use that people naturally "habituate" to the interface, that
 text-based interfaces are often more appropriate than GUIs, and that
@@ -559,7 +559,7 @@ much about it.
 //
 //Note that Roo frequently allows the use of TAB, so press TAB regularly.
 //Once your project is created, type 'hint' and ENTER for the next suggestion.
-//You're also welcome to visit http://stackoverflow.com/questions/tagged/spring-roo for Roo help.
+//You're also welcome to visit https://stackoverflow.com/questions/tagged/spring-roo for Roo help.
 //----
 //
 //Notice the output from the "hint" command guides you through what to do
@@ -766,7 +766,7 @@ will learn how to use the Roo shell for:
 //* Creating a WAR for deployment
 
 //You can find the wedding tutorial at
-//http://spring.io/blog/2009/05/27/getting-started-with-spring-roo
+//https://spring.io/blog/2009/05/27/getting-started-with-spring-roo
 
 [[beginning-tutorial-application-use-cases]]
 === Tutorial Application Details
@@ -834,7 +834,7 @@ Your new project will then be created in the current working directory.
 
 Note that Roo frequently allows the use of TAB, so press TAB regularly.
 Once your project is created, type 'hint' and ENTER for the next suggestion.
-You're also welcome to visit http://stackoverflow.com/questions/tagged/spring-roo
+You're also welcome to visit https://stackoverflow.com/questions/tagged/spring-roo
 for Roo help.
 roo>
 ----
@@ -873,7 +873,7 @@ The following folder structure now exists in your file system:
 
 image::projectfolders.png[projectfolders,center]
 
-For those familiar with http://maven.apache.org/[Maven] you will notice
+For those familiar with https://maven.apache.org/[Maven] you will notice
 that this folder structure follows standard Maven conventions by
 creating separate folders for your main project resources and tests. Roo
 also installs a default application context and a log4j configuration
@@ -1039,7 +1039,7 @@ As explained in the documentation by typing the
 *link:#command-index[hint]* command you can easily add
 constraints to your fields by using optional attributes such as
 `--notNull` and `--sizeMin 2`. These attributes result in
-standards-compliant http://jcp.org/en/jsr/detail?id=303[JSR-303]
+standards-compliant https://jcp.org/en/jsr/detail?id=303[JSR-303]
 annotations which Roo will add to your field definition in your Java
 sources. You will also notice that the Roo shell is aware of the current
 context within which you are using the
@@ -1147,7 +1147,7 @@ domain objects.
 === Step 4: Using Your IDE
 
 Of course Roo projects can be used in your favorite IDE. We recommend
-the use of http://www.springsource.com/products/sts[SpringSource Tool
+the use of https://www.springsource.com/products/sts[SpringSource Tool
 Suite] (STS), which is available at no charge from SpringSource. If
 you're not using SpringSource Tool Suite, please refer to the
 link:#usage-ide[IDE usage] section of this reference guide for a more
@@ -1193,7 +1193,7 @@ so Roo won't re-generate it whereas the declaration is in the Java file.
 To _push-in_ the Roo-generated code:
 
 . Edit Java source file.
-. Open the http://www.eclipse.org/ajdt/xref/[Cross References] view.
+. Open the https://www.eclipse.org/ajdt/xref/[Cross References] view.
 +
 TIP: If the Cross References view appears empty you must re-build the project
 by executing 'Project > Clean ...'. It occurs when the crosscutting 
@@ -1265,9 +1265,9 @@ you have several options available:
 * Deploy from your shell / command line (without the need to assemble a
 war archive):
 ** run 'mvn tomcat:run' in the root of your project (not inside the Roo
-shell) to deploy to a http://tomcat.apache.org/[Tomcat] container
+shell) to deploy to a https://tomcat.apache.org/[Tomcat] container
 ** run 'mvn jetty:run' in the root of your project (not inside the Roo
-shell) to deploy to a http://www.eclipse.org/jetty/[Jetty] container
+shell) to deploy to a https://www.eclipse.org/jetty/[Jetty] container
 * Deploy to a integrated Web container configured in STS:
 ** Drag your project to the desired Web container inside the STS server
 view
@@ -1405,7 +1405,7 @@ feel was created for the specific purpose of the Pizza Shop application:
 image::altui.png[alternative UI,align=center]
 
 Spring Roo also configures
-http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-themeresolver[theming
+https://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-themeresolver[theming
 support offered by Spring framework] so you can leverage this feature
 with ease.
 
@@ -1431,7 +1431,7 @@ installed by Roo with your customized tags.
 === Selenium Tests
 
 Roo offers a core addon which can generate
-http://seleniumhq.org/[Selenium] test scripts for you. You can create
+https://www.seleniumhq.org[Selenium] test scripts for you. You can create
 the Selenium scripts by using the
 *link:#command-index[selenium test]* command. Tests
 are generated for each controller and are integrated in a test suite:
@@ -1458,7 +1458,7 @@ generated seed data.
 
 Please note that the maven selenium plugin configured in the project
 `pom.xml` assumes that the
-http://www.mozilla.com/en-US/firefox/firefox.html[FireFox] Web browser
+https://www.mozilla.com/en-US/firefox/firefox.html[FireFox] Web browser
 is already installed in your environment. Running the maven selenium
 plugin also assumes that your application is already started as
 discussed in step 6. Finally, there are limitations with regards to
@@ -1561,14 +1561,14 @@ to):
 SMTP (Roo can easily link:#command-index[set up JMS] message
 producers, consumers and link:#command-index[SMTP])
 * Writing a services layer (perhaps annotated with Spring's @Service
-http://docs.spring.io/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/beans.html#beans-stereotype-annotations[stereotype
+https://docs.spring.io/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/beans.html#beans-stereotype-annotations[stereotype
 annotation]) and exposing it using a remoting protocol to a rich client
 (Spring's
-http://docs.spring.io/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/remoting.html[remoting
+https://docs.spring.io/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/remoting.html[remoting
 services] will help here)
 * Executing a series of predefined actions against the database, perhaps
 in conjunction with Spring's new @Scheduled or @Async
-http://docs.spring.io/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/scheduling.html#scheduling-annotation-support[timer
+https://docs.spring.io/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/scheduling.html#scheduling-annotation-support[timer
 annotations]
 * Experimentation with the latest
 link:#architecture-critical-technologies-spring[Spring] and
@@ -1828,7 +1828,7 @@ Spring features in the normal manner, we'll refrain from duplicating
 Spring's documentation in this section. Instead please refer to the
 excellent Spring documentation for guidance, which can be found in the
 downloadable distribution files and also on the
-http://spring.io/docs[Spring web site].
+https://spring.io/docs[Spring web site].
 
 [[architecture-entities]]
 === Entity Layer
@@ -2173,7 +2173,7 @@ completions for the "--packaging" option
 ==== Multi-Module Support
 
 Since version 1.2.0, Roo supports
-http://www.sonatype.com/books/mvnref-book/reference/pom-relationships-sect-pom-best-practice.html[multi-module
+https://www.sonatype.com/books/mvnref-book/reference/pom-relationships-sect-pom-best-practice.html[multi-module
 Maven projects], i.e. those containing multiple projects in a nested
 directory structure, each with their own POM. The non-leaf POMs have
 "pom" packaging and the leaf POMs usually have an artifact creation
@@ -2343,7 +2343,7 @@ this, link:#base[Part II] of our documentation.
 == Persistence Add-On
 
 The persistence add-on provides a convenient way to create
-http://java.sun.com/javaee/6/docs/tutorial/doc/bnbpz.html[Java
+https://java.sun.com/javaee/6/docs/tutorial/doc/bnbpz.html[Java
 Persistence API] (JPA v2) compliant entities. There are different
 commands available to configure JPA, create new JPA-compliant entities,
 and add fields to these entities. In the following a summary of the
@@ -2359,16 +2359,16 @@ Database Options:
 
 * http://hsqldb.org/[HSQL] (in memory)
 * http://hsqldb.org/[HSQL] (persistent)
-* http://www.h2database.com/html/main.html[H2] (in memory)
-* http://www.mysql.com/[MySQL]
-* http://www.postgresql.org/[Postgres]
-* http://www.microsoft.com/sqlserver[MS SQL Server]
-* http://www.sybase.com/[Sybase]
-* http://www.oracle.com/index.html[Oracle] *
-* http://www.ibm.com/db2[DB2] *
-* http://www.ibm.com/db2[DB2/400]
-* http://db.apache.org/derby/[Apache Derby] (Java DB)
-* http://www.firebirdsql.org/[Firebird]
+* https://www.h2database.com/html/main.html[H2] (in memory)
+* https://www.mysql.com/[MySQL]
+* https://www.postgresql.org/[Postgres]
+* https://www.microsoft.com/sqlserver[MS SQL Server]
+* https://www.sap.com[Sybase]
+* https://www.oracle.com/index.html[Oracle] *
+* https://www.ibm.com/db2[DB2] *
+* https://www.ibm.com/db2[DB2/400]
+* https://db.apache.org/derby/[Apache Derby] (Java DB)
+* https://www.firebirdsql.org/[Firebird]
 
 pass:[*] The JDBC driver dependencies for these databases are not available in
 public Maven repositories. As such, Roo configures a default dependency
@@ -2392,9 +2392,9 @@ oracle-xe web-server, you should use the following command: `mvn
 
 ORM Provider Options:
 
-* http://www.eclipse.org/eclipselink/[EclipseLink]
-* http://www.hibernate.org/[Hibernate]
-* http://openjpa.apache.org/[OpenJPA]
+* https://www.eclipse.org/eclipselink/[EclipseLink]
+* https://hibernate.org/[Hibernate]
+* https://openjpa.apache.org/[OpenJPA]
 * http://www.datanucleus.org/[DataNucleus 3.0]
 
 In addition, the link:#command-index[jpa setup] command
@@ -2427,7 +2427,7 @@ for the EclipseLink ORM provider and HSQL database:
 <persistence xmlns="http://java.sun.com/xml/ns/persistence"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0"
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
-                                 http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+                                 https://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 
     <persistence-unit name="persistenceUnit" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
@@ -2701,14 +2701,14 @@ privileged aspect Person_Roo_Jpa_ActiveRecord {
 The Person_Roo_Jpa_ActiveRecord.aj ITD introduces a number of methods
 such as __persist__(), __remove__(), __merge__(), __flush__() which
 allow the execution of
-http://en.wikipedia.org/wiki/Active_record_pattern[ActiveRecord]-style
+https://en.wikipedia.org/wiki/Active_record_pattern[ActiveRecord]-style
 persistence operations on each Roo-managed JPA entity. Furthermore, a
 number of persistence-related convenience methods are provided. These
 methods are __countPeople__(), __findAllPeople__(), __findPerson__(..),
 and __findPersonEntries__(..).
 +
 All persistence methods are configured with
-http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/transaction.html[Spring's
+https://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/transaction.html[Spring's
 Transaction] support (Propagation.REQUIRED, Isolation.DEFAULT).
 +
 Similar to the @RooToString annotation you can change the default method
@@ -2896,7 +2896,7 @@ number of optional (but very useful) attributes worth mentioning. For
 example, you can change the field / column name translations with the
 *--column* attribute. Furthermore there are a number of attributes which
 translate directly to their equivalents defined in
-http://jcp.org/en/jsr/detail?id=303[JSR 303 (Bean Validation)]. These
+https://jcp.org/en/jsr/detail?id=303[JSR 303 (Bean Validation)]. These
 attributes include **--notNull**, **--sizeMin**, *--sizeMax* and other
 related attributes. Please refer to the
 link:#command-index[field] command in the appendix to
@@ -2943,7 +2943,7 @@ The DBRE commands (see link:#dbre-commands[Section 9.3, “DBRE Add-On commands�
 make live connections to the database
 configured in your Roo project and obtain database metadata from the
 JDBC driver's implementation of the standard
-http://download.oracle.com/javase/6/docs/api/java/sql/DatabaseMetaData.html[java.sql.DatabaseMetadata]
+https://download.oracle.com/javase/6/docs/api/java/sql/DatabaseMetaData.html[java.sql.DatabaseMetadata]
 interface. When the database is reverse engineered, the metadata
 information is converted to XML and is stored and maintained in the
 dbre.xml file in the src/main/resources directory of your project. DBRE
@@ -2985,9 +2985,9 @@ some examples.
 === Installation
 
 DBRE supports most of the relational databases that can be configured
-for Roo-managed projects such as http://www.mysql.com/[MySQL],
-http://www.microsoft.com/sqlserver[MS SQL], and
-http://www.postgresql.org/[PostgreSQL]. These drivers are auto-detected
+for Roo-managed projects such as https://www.mysql.com/[MySQL],
+https://www.microsoft.com/sqlserver[MS SQL], and
+https://www.postgresql.org/[PostgreSQL]. These drivers are auto-detected
 by Roo and you will be prompted by the Roo shell to download your
 configured database's JDBC driver when you first issue the database
 introspect or database reverse engineer commands
@@ -3739,7 +3739,7 @@ link:#base-persistence[Persistence Add-on] chapter.
 
 Developers who require a repository / DAO layer instead of the default
 Roo entity-based persistence approach can do so by creating a
-http://projects.spring.io/spring-data-jpa/[Spring Data JPA] backed
+https://projects.spring.io/spring-data-jpa/[Spring Data JPA] backed
 repository for a given JPA domain type. The domain type backing the
 repository needs have a JPA @Entity annotation and also a ID field
 defined along with accessors and mutators. After configuring your
@@ -3813,9 +3813,9 @@ public interface PizzaRepository extends JpaRepository<Pizza, Long> {}
 ----
 
 Note, the
-http://docs.spring.io/spring-data/data-jpa/docs/current/api/org/springframework/data/jpa/repository/JpaRepository.html[JpaRepository]
+https://docs.spring.io/spring-data/data-jpa/docs/current/api/org/springframework/data/jpa/repository/JpaRepository.html[JpaRepository]
 interface is part of the
-http://projects.spring.io/spring-data-jpa/[Spring Data JPA] API and
+https://projects.spring.io/spring-data-jpa/[Spring Data JPA] API and
 provides all CRUD functionality out of the box.
 
 
@@ -3935,7 +3935,7 @@ __CSS considerations__: The Web UI has been tested successfully with
 FireFox, Opera, Safari, Chrome, and IE. Given that IE6 is not supported
 any more by most players in the market, it has a number of severe
 technical limitations and it has a
-http://en.wikipedia.org/wiki/Internet_Explorer_6#Criticism[fast
+https://en.wikipedia.org/wiki/Internet_Explorer_6#Criticism[fast
 declining user base] Spring Roo does not support IE6. Your mileage may
 vary - there will likely be issues with CSS support.
 ****
@@ -3953,11 +3953,11 @@ model. The following features are included:
 domain model
 * A fully customizable set JSP of tags is provided, all tags are XML
 only (no tag-backing Java source code is required)
-* Tags offer integration with the http://www.dojotoolkit.org/[Dojo] Ajax
+* Tags offer integration with the https://www.dojotoolkit.org/[Dojo] Ajax
 toolkit for client-side validation, date pickers, tool tips, filtering
 selects etc
 * Automatic URL rewriting to provide best-practice RESTful URIs
-* Integration of http://tiles.apache.org/[Apache Tiles] templating
+* Integration of https://tiles.apache.org/[Apache Tiles] templating
 framework to allow for structural customization of the Web user
 interface
 * Use of cascading stylesheets to allow for visual customization of the
@@ -4244,7 +4244,7 @@ exceptions.
 As mentioned in the previous section, Roo copies a number of static
 artifacts into the target project after issuing the controller command
 for the first time. These artifacts include Cascading Style Sheets,
-images, http://tiles.apache.org/[Tiles] layout definitions, JSP files,
+images, https://tiles.apache.org/[Tiles] layout definitions, JSP files,
 message property files, a complete tag library and a web.xml file. These
 artifacts are arranged in different folders which is best illustrated in
 the following picture:
@@ -4445,7 +4445,7 @@ link:#command-index[web mvc finder all] or
 link:#command-index[web mvc finder add] command.
 
 Due to file name length restrictions by many file systems (see
-http://en.wikipedia.org/wiki/Comparison_of_file_systems) Roo can only
+https://en.wikipedia.org/wiki/Comparison_of_file_systems) Roo can only
 generate JSP views for finders which have 244 characters or less
 (including folders). If the finder name is longer than 244 characters
 Roo will silently skip the generation of jsp view artifacts for the
@@ -4517,17 +4517,17 @@ in domain layer (discussed in this section)
 http://flexjson.sourceforge.net/[FlexJson] integration
 
 Option 2: Spring
-MVC detects the http://jackson.codehaus.org/[Jackson] library in the
+MVC detects the https://jackson.codehaus.org/[Jackson] library in the
 application classpath
 
 - simply use Spring's
-http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-requestbody[@RequestBody]
+https://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-requestbody[@RequestBody]
 and
-http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-responsebody[@ResponseBody]
+https://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-responsebody[@ResponseBody]
 annotations in the controllers, or
 
 - take advantage of Spring's
-http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-multiple-representations[ContentNegotiatingViewResolver]
+https://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-multiple-representations[ContentNegotiatingViewResolver]
 ****
 
 The JSON add-on offers JSON support in the domain layer as well as the
@@ -4669,7 +4669,7 @@ public ResponseEntity<String> ToppingController.showJson(@PathVariable("id") Lon
 ----
 +
 This method accepts an HTTP GET request with a
-http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-requestparam[@PathVariable]
+https://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-requestparam[@PathVariable]
 for the requested Topping ID. The entity is serialized and returned as a
 JSON document if found, otherwise an HTTP 404 (NOT FOUND) status code is
 returned. The accompanying curl command is as follows:
@@ -4890,7 +4890,7 @@ OSGi or bundles to work with the Roo add-on installation system. An OBR
 file is usually named `index.xml` and it is available over HTTP. If
 you're curious what these OBR files look like, you can view the Spring
 Roo OBR repository at
-http://repo.spring.io/spring-roo/index.xml. Within an
+https://repo.spring.io/spring-roo/index.xml. Within an
 OBR file each available Roo-related add-on is listed, along with the URL
 where it is published. The URLs look similar to normal URLs.
 
@@ -4908,7 +4908,7 @@ The OSGi repositories provides to Roo the capability to search, retrieve and
 install addons from remote servers.
 
 Spring Roo includes a default OSGi repository
-(http://repo.spring.io/spring-roo/index.xml) that contains external components 
+(https://repo.spring.io/spring-roo/index.xml) that contains external components 
 that could be used by developers during development.
 
 To show all installed OSGi repositories in your Spring Roo distribution, execute:
@@ -4918,7 +4918,7 @@ To show all installed OSGi repositories in your Spring Roo distribution, execute
 roo> addon repository list
 Getting current installed repositories...
 
-   http://repo.spring.io/spring-roo/index.xml
+   https://repo.spring.io/spring-roo/index.xml
 
 1 installed repositories on Spring Roo were found
 ----
@@ -4993,7 +4993,7 @@ Name.........: Spring Roo - Wrapping - derbyclient
 BSN..........: org.springframework.roo.wrapping.derbyclient
 Version......: 10.8.2.2_0002
 JAR Size.....: 547922 bytes
-JAR URL......: http://repo.spring.io/spring-roo/org/springframework/roo/wrapping
+JAR URL......: https://repo.spring.io/spring-roo/org/springframework/roo/wrapping
                /org.springframework.roo.wrapping.derbyclient/10.8.2.2.0002/org.s
                pringframework.roo.wrapping.derbyclient-10.8.2.2.0002.jar
 ----
@@ -5242,15 +5242,15 @@ release it and register it on link:#roo-marketplace[Spring Roo Marketplace]
 
 .OSGi in Spring Roo
 ****
-Spring Roo runs in an http://en.wikipedia.org/wiki/OSGi[OSGi] container
+Spring Roo runs in an https://en.wikipedia.org/wiki/OSGi[OSGi] container
 since version 1.1. This internal change is ideal for Roo’s add-on model
 because it allows Roo users to install, uninstall, start, and stop
 diferent add-ons dynamically without restarting the Roo shell.
-Furthermore, http://en.wikipedia.org/wiki/OSGi[OSGi] allows automatic
+Furthermore, https://en.wikipedia.org/wiki/OSGi[OSGi] allows automatic
 provisioning of external add-on repositories and provides very good
 infrastructure for developing modular, as well as embedded, and
 service-oriented applications. Under the hood, Spring Roo uses the
-http://felix.apache.org/[Apache Felix] OSGi
+https://felix.apache.org/[Apache Felix] OSGi
 implementation.
 
 Spring Roo runs in an OSGi R5 container since version 2.0. This improvement allows 
@@ -5631,7 +5631,7 @@ you to test your generated Roo Add-On Suite using an Spring Roo 2.0+.
 [[roo-marketplace]]
 == Spring Roo Marketplace
 
-The http://projects.spring.io/spring-roo/marketplace/[Spring Roo Marketplace] 
+The https://projects.spring.io/spring-roo/marketplace/[Spring Roo Marketplace] 
 is the alternative to Roobot, easier to maintain and available for everyone, a 
 place to find and keep track on third party addons and Roo Addon Suites.
 
@@ -9213,7 +9213,7 @@ __To Install the IDE as a distribution itself follow
 next steps:__
 
 * Download the latest version from SpringSource Tool Suite
-link:#[http://spring.io/tools]
+link:#[https://spring.io/tools]
 * Unzip the downloaded file and move it to a folder,
 such as $HOME/software.
 * Run STS
@@ -9227,7 +9227,7 @@ __To Install STS plugin into an existing Eclipse IDE follow these
 steps:__
 
 * If you still do not have it, download Eclipse IDE for Java EE
-Developers of link:#[http://www.eclipse.org/downloads/]
+Developers of link:#[https://www.eclipse.org/downloads/]
 * Create the Eclipse classpath variable M2_REPO, then:
 1. *__Window > Preferences > Java> Build Path > Classpath variables__*, "New ..." button.
 2. Define the following:
@@ -9240,7 +9240,7 @@ preferences and save changes.
 (Http://m2eclipse.sonatype.org/installing-m2eclipse.html)
 +
 In the *__Help > Install New Software__* menu, in the text field "Work
-with:" insert link:#[http://m2eclipse.sonatype.org/sites/m2e]. 
+with:" insert link:#[https://m2eclipse.sonatype.org/sites/m2e]. 
 Select "Maven Integration for Eclipse". Press Next and after
 accept the license to install the plugin.
 * Enables __`Enable Window> Preferences> General> option
@@ -9265,7 +9265,7 @@ STS Roo Support for Spring Roo 2.0.0 is available in STS 3.7.0 and later
 only. Go to https://spring.io/tools/sts/all[Spring Tool Suite™ Downloads] and 
 follow the instructions.
 
-Now download Spring Roo 2.0.0 from http://projects.spring.io/spring-roo/#running-from-shell[Spring Roo project] page and unzip the distribution.
+Now download Spring Roo 2.0.0 from https://projects.spring.io/spring-roo/#running-from-shell[Spring Roo project] page and unzip the distribution.
 
 To include Roo on your STS follow the instructions below:
 
@@ -9502,7 +9502,7 @@ with writing Java code and let Roo take care of writing and maintaining
 the code you don't want to bother writing.
 
 The other aspect of how Roo avoids lock-in is using annotations with
-http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/RetentionPolicy.html#SOURCE[source-level
+https://docs.oracle.com/javase/7/docs/api/java/lang/annotation/RetentionPolicy.html#SOURCE[source-level
 retention]. What this means is the annotations are not preserved in your
 `.class` files by the time they are compiled. This in turn means you do
 not need the Roo annotation library in your runtime classpath. If you
@@ -9759,13 +9759,13 @@ JRockit and Apache Harmony JVMs for Java 5 and Java 6. We do not
 formally support other JVMs or other versions of JVMs. We have also had
 an https://jira.springsource.org/browse/ROO-347[issue] reported with
 versions of Java 6 before 1.6.0_17 due to Java bug
-http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6506304[6506304] and
+https://bugs.java.com/bugdatabase/view_bug.do?bug_id=6506304[6506304] and
 therefore recommend you always use the latest released version of Java 6
 for your platform. There is also a known issue with OpenJDK. You can
 read about our testing of different JDKs in issue
 https://jira.springsource.org/browse/ROO-106[ROO-106].
 * __Human language support__: Pluralisation within Roo delegates to the
-http://mvnrepository.com/artifact/net.java.dev.inflector/inflector/0.7.0[Inflector]
+https://mvnrepository.com/artifact/net.java.dev.inflector/inflector/0.7.0[Inflector]
 library. Due to some issues
 with Inflector, only English pluralisation is supported. If you wish to
 override the plural selected by Inflector (and in turn used by Roo), you
@@ -9807,7 +9807,7 @@ makes extensive use of the JSP 2.1 API in the scaffolded Web UI
 API does not support JDK 5 enums (a feature that Roo would need). See
 https://jira.springsource.org/browse/ROO-680[ROO-680] for more details.
 The following
-http://forum.springsource.org/showpost.php?s=10e2df3cc266c9a85f8d473716d9b0c3&p=287652&postcount=15[forum
+https://forum.spring.io/showpost.php?s=10e2df3cc266c9a85f8d473716d9b0c3&p=287652&postcount=15[forum
 post] offers a workaround for the JSP 2.1 incompatibility issue. Please
 be aware that this has not been tested by the Roo team and Tomcat 5.5
 does officially support the JSP 2.0 API.
@@ -9828,8 +9828,8 @@ required when using Spring Framework 3.0.5+):
 === Version Numbering Approach
 
 Spring Roo observes version number standards based on the
-http://apr.apache.org/versioning.html[Apache Portable Runtime (APR)
-versioning guidelines] as well as the http://www.osgi.org[OSGi]
+https://apr.apache.org/versioning.html[Apache Portable Runtime (APR)
+versioning guidelines] as well as the https://www.osgi.org[OSGi]
 specifications. In summary this means all Roo releases adopt the format
 of MAJOR.MINOR.PATCH.TYPE. Each segment is separated by a period without
 any spaces. The MAJOR.MINOR.PATCH are always integer numbers, and TYPE
@@ -9913,7 +9913,7 @@ applications and had noticed he was repeating the same steps time and
 time again. Back in 2005 it was common to use a traditional layering
 involving DAOs, services layer and web tier. A good deal of attention
 was also focused around that time on avoiding anaemic domain objects and
-instead pursuing http://domaindrivendesign.org/[Domain Driven Design]
+instead pursuing https://dddcommunity.org[Domain Driven Design]
 principles.
 
 Pursuing a rich domain model led to domain objects that reflected proper
@@ -9941,10 +9941,10 @@ Enterprise Java Association of Australia. The audiences were
 enthusiastic about the highly productive solution, with remarks like
 "link:http://blog.zepag.org/2007/06/spring-one-day3-roo.html[it is the really
 neatest and newest stuff I've seen in this conference]" and
-"link:http://raibledesigns.com/rd/entry/tse_hop_into_real_object[if ROO ever
+"link:https://raibledesigns.com/rd/entry/tse_hop_into_real_object[if ROO ever
 becomes an open source project, I'm guessing it will be very polished
 and well-received]". Nonetheless, other priorities (like the existing
-http://projects.spring.io/spring-security/[Spring Security] project)
+https://projects.spring.io/spring-security/[Spring Security] project)
 prevented the code from becoming release-ready. More than twelve months
 later Ben was still regularly being asked by people, "whatever happened
 to the ROO framework?" and as such he set out about resuming the project
@@ -9985,7 +9985,7 @@ name "ROO" was preserved as a temporary codename, given that we planned
 to select a final name closer to official release. The "ROO" project was
 then publicly presented on 27 April 2009 during Rod Johnson's SpringOne
 Europe keynote,
-"link:http://www.infoq.com/presentations/SpringOne-Keynote-Rod-Johnson[The
+"link:https://www.infoq.com/presentations/SpringOne-Keynote-Rod-Johnson[The
 Future of Java Innovation]". As part of the keynote the ROO system was
 used to build a voting application that would allow the community to
 select a final name for the new project. The "ROO" name was left as an
@@ -9997,15 +9997,15 @@ community-selected name for the project.
 
 Roo 1.0.0.A1 was released during the SpringOne Europe 2009 conference,
 along with initial tooling for
-http://www.springsource.com/products/sts[SpringSource Tool Suite]. The
+https://www.springsource.com/products/sts[SpringSource Tool Suite]. The
 Roo talk at the SpringOne Europe 2009 conference was the most highly
 attended session and there was enormous enthusiasm for the solution. Roo
 1.0.0.A2 was published a few weeks later, followed by several
 milestones. By SpringOne/2GX North America in October 2009, Roo 1.0.0
 had reached Release Candidate 2 stage, and again the Roo session was the
 most highly attended session of the entire conference.
-http://www.springsource.com[SpringSource] also started hosting the
-highly popular http://www.springsource.com/training/dd001[Spring
+https://www.springsource.com[SpringSource] also started hosting the
+highly popular https://www.springsource.com/training/dd001[Spring
 Discovery Days] and showing people around the world what they could do
 with the exciting new Roo tool. Coupled with
 link:#resources-twitter[Twitter], by this stage many members of the Java
@@ -10020,7 +10020,7 @@ dependency-resolvable classpath management model. Modern IDEs such as Eclipse
 are also built on OSGi, so this approach for tooling modularity and
 extensibility is well established.
 
-On 24 April 2014 http://www.disid.com/en/[DISID Corporation] got the
+On 24 April 2014 https://www.disid.com/en/[DISID Corporation] got the
 leadership of the Spring Roo project and it continued the goal of providing a
 code-generation style of RAD tools, focused on helping developers get Java
 projects done on time.
@@ -10111,7 +10111,7 @@ official project resources.
 === Spring Roo Project Home Page
 
 The definitive source of information about Spring Roo is the
-http://projects.spring.io/spring-roo/[Spring Roo Home] at http://spring.io[http://spring.io].
+https://projects.spring.io/spring-roo/[Spring Roo Home] at https://spring.io[https://spring.io].
 
 That site provides a brief summary of Roo's main features and links to most of
 the other project resources. The project home page serves as a hub of
@@ -10125,7 +10125,7 @@ as it is the main landing point for the project.
 === Downloads and Maven Repositories
 
 You can always access the latest Spring Roo release ZIP by visiting Downloads section at
-http://projects.spring.io/spring-roo/#running-from-shell[Spring Roo Home Page].
+https://projects.spring.io/spring-roo/#running-from-shell[Spring Roo Home Page].
 
 We publish all Roo modules to Maven Central, the default repository from which
 Maven will download the Spring Roo artifacts automatically.
@@ -10139,10 +10139,10 @@ and experiences.
 
 If you have any question about Spring Roo project and its functionalities,
 you can check and ask a questions at
-http://stackoverflow.com/questions/tagged/spring-roo[Spring Roo tagged questions at Stack Overflow].
+https://stackoverflow.com/questions/tagged/spring-roo[Spring Roo tagged questions at Stack Overflow].
 We monitor stackoverflow.com for questions tagged with spring-roo.
 
-http://forum.springsource.org is now a read-only archive.
+https://forum.spring.io/ is now a read-only archive.
 All commenting, posting, registration services have been turned off.
 
 The Roo project does not have a "mailing list" or "newsgroup" as you
@@ -10202,8 +10202,8 @@ tweet about it and help spread the word!
 Follow the core Roo development team for interesting Roo news and
 progress (higher volume than just following @SpringRoo, but only a few
 Tweets per week):
-http://twitter.com/disid_corp[@disid_corp],
-http://twitter.com/juanCaFX[@juanCaFX],
+https://twitter.com/disid_corp[@disid_corp],
+https://twitter.com/juanCaFX[@juanCaFX],
 https://twitter.com/enrique_ruiz_[@enrique_ruiz_].
 
 Many people who use Roo also use Twitter, including the core Roo
@@ -10279,7 +10279,7 @@ chapter.
 [[resources-commercial]]
 === Commercial Products and Services
 
-Web: http://www.disid.com/en/
+Web: https://www.disid.com/en/
 
 DISID Corporation employs the Roo development team and offers a wide range of
 products and professional services around Roo and the technologies which Roo
@@ -10288,7 +10288,7 @@ information systems, web application development, mobile application
 development, training, consulting and mentoring. Please visit the above URI
 to learn more about DISID products and services.
 
-Web: http://spring.io/
+Web: https://spring.io/
 
 Pivotal Software offers a wide range of products and professional services
 around Roo and the technologies which Roo enables. Available professional

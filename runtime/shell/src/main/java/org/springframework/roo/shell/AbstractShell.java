@@ -283,7 +283,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
       }
       // We also support inline comments (but only at start of line,
       // otherwise valid
-      // command options like http://www.helloworld.com will fail as per
+      // command options like https://www.helloworld.com will fail as per
       // ROO-517)
       if (!inBlockComment && (line.trim().startsWith("//") || line.trim().startsWith("#"))) { // # support in ROO-1116
         line = "";
@@ -685,14 +685,14 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
       sb.append("   _    Y      Y.~~~ /'        Platform:   OSGi R6 - Java").append(LINE_SEPARATOR);
       sb.append("  Y^|   |      | Roo 7         Created By: DISID Corporation S.L.").append(
           LINE_SEPARATOR);
-      sb.append("  | |   |      |     |                     Visit http://www.disid.com").append(
+      sb.append("  | |   |      |     |                     Visit https://www.disid.com").append(
           LINE_SEPARATOR);
       sb.append("  | l   |     / .   /'").append(LINE_SEPARATOR);
       sb.append("  | `L  | Y .^/   ~T           Copyright (c) 2016 the original author or authors")
           .append(LINE_SEPARATOR);
       sb.append("  |  l  ! | |/  | |            All rights reserved.").append(LINE_SEPARATOR);
       sb.append("  | .`\\/' | Y   | !").append(LINE_SEPARATOR);
-      sb.append("  l  \"~   j l   j L______      Visit http://projects.spring.io/spring-roo")
+      sb.append("  l  \"~   j l   j L______      Visit https://projects.spring.io/spring-roo")
           .append(LINE_SEPARATOR);
       sb.append("   \\,____{ __\"\" ~ __ ,\\_,\\_").append(LINE_SEPARATOR);
       sb.append(" ~~~~~~~~~~~~~~~~~~~~~~~~~~    Licensed under the Apache License, v2.0").append(

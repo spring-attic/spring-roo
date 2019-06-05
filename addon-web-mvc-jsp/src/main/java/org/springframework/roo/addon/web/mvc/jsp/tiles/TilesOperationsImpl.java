@@ -39,7 +39,7 @@ public class TilesOperationsImpl implements TilesOperations {
 
   private static class TilesDtdResolver implements EntityResolver {
     public InputSource resolveEntity(final String publicId, final String systemId) {
-      if (systemId.equals("http://tiles.apache.org/dtds/tiles-config_2_1.dtd")) {
+      if (systemId.equals("https://tiles.apache.org/dtds/tiles-config_2_1.dtd")) {
         return new InputSource(FileUtils.getInputStream(TilesOperationsImpl.class,
             "tiles-config_2_1.dtd"));
       }
@@ -158,7 +158,7 @@ public class TilesOperationsImpl implements TilesOperations {
     final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     final Transformer transformer = XmlUtils.createIndentingTransformer();
     transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
-        "http://tiles.apache.org/dtds/tiles-config_2_1.dtd");
+        "https://tiles.apache.org/dtds/tiles-config_2_1.dtd");
     transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,
         "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN");
     XmlUtils.writeXml(transformer, byteArrayOutputStream, body.getOwnerDocument());

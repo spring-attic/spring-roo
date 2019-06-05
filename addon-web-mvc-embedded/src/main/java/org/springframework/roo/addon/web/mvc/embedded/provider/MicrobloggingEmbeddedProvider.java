@@ -24,7 +24,7 @@ import org.w3c.dom.Element;
 public class MicrobloggingEmbeddedProvider extends AbstractEmbeddedProvider {
 
   public boolean embed(final String url, final String viewName) {
-    // Expected format http://twitter.com/#search?q=@SpringRoo
+    // Expected format https://twitter.com/#search?q=@SpringRoo
     if (url.contains("twitter.com")) {
       final Map<String, String> options = new HashMap<String, String>();
       options.put("provider", "TWITTER");

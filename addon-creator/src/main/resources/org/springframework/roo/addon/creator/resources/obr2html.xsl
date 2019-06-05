@@ -84,7 +84,7 @@
 	  
 			<div class="inner">
 			    <div class="container">
-			    	<a class="brand light" href="http://projects.spring.io/spring-roo" role="banner" itemprop="url">
+			    	<a class="brand light" href="https://projects.spring.io/spring-roo" role="banner" itemprop="url">
 			    		<img itemprop="logo" src="https://projects.spring.io/spring-roo/img/project-icon-large.png" alt="Spring Roo Logo" />
 			    	</a>
 			    	<h2 class="light" itemprop="description">
@@ -115,8 +115,8 @@
 	                  Spring Roo © 2015 
 	                </p>
 	                <p class="rss-subscribe text-center">
-	                 <a data-original-title="Spring Roo Project Page" href="http://projects.spring.io/spring-roo/" target="_blank" data-toggle="tooltip" title="">Spring Roo</a> |
-	                  <a data-original-title="Spring Roo MarketPlace" href="http://projects.spring.io/spring-roo/marketplace" target="_blank" data-toggle="tooltip" title="">Marketplace</a>
+	                 <a data-original-title="Spring Roo Project Page" href="https://projects.spring.io/spring-roo/" target="_blank" data-toggle="tooltip" title="">Spring Roo</a> |
+	                  <a data-original-title="Spring Roo MarketPlace" href="https://projects.spring.io/spring-roo/marketplace" target="_blank" data-toggle="tooltip" title="">Marketplace</a>
 	                </p>
 	            </div>
 	        </div>
