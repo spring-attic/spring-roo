@@ -1,3 +1,5 @@
+# VMware has ended active development of this project, this repository will no longer be updated.
+
 // Prerequisites:
 //
 //   ruby 2.0.0+
@@ -16,7 +18,7 @@
 //   $ asciidoctor -b html5 -a data-uri README.adoc
 //
 
-= Spring Roo image:https://build.spring.io/plugins/servlet/buildStatusImage/ROO-BUILD["Build Status", link="https://build.spring.io/browse/ROO-BUILD"]
+= Spring Roo 
 Getting started with Spring Roo development
 :page-layout: base
 :toc-placement: manual
@@ -40,7 +42,7 @@ This is particularly important given the long-term maintenance costs of a projec
 [[code-of-conduct]]
 == Code of Conduct
 
-This project adheres to the Contributor Covenant link:CODE_OF_CONDUCT.adoc[code of conduct]. By participating, you  are expected to uphold this code. Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
+This project adheres to the Contributor Covenant link:CODE_OF_CONDUCT.adoc[code of conduct]. By participating, you  are expected to uphold this code. Please report unacceptable behavior to code-of-conduct@spring.io.
 
 [[getting-started]]
 == Installation and Getting Started
@@ -64,7 +66,7 @@ https://www.disid.com/#contact[Commercial support] is available too.
 Here are some ways for you to get involved in the community:
 
 * Get involved with the Spring community by helping out on https://stackoverflow.com/questions/tagged/spring-roo[stackoverflow]. Join to debates and respond to questions.
-* Report bugs and request new features via the https://jira.springsource.org/browse/ROO[Spring Roo JIRA]. Comment and vote on the ones that you are interested in.  
+* Report bugs and request new features via the https://jira.spring.io/browse/ROO[Spring Roo JIRA]. Comment and vote on the ones that you are interested in.  
 * If you want to write code, you are welcome. Commit your pull requests from https://help.github.com/forking/[forks of this repository].
 
 See the link:CONTRIBUTING.adoc[contributor guidelines] for details.
