@@ -140,7 +140,7 @@
     <properties>
         <freemarker.version>2.3.23_1</freemarker.version>
         <java.version>1.7</java.version>
-        <junit.version>4.11</junit.version>
+        <junit.version>4.13.1</junit.version>
         <main.basedir>${basedir}</main.basedir>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
